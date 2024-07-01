@@ -2,18 +2,15 @@
 
 #include "core/profiler.h"
 #include "graphics/image.h"
+#include "graphics/animkeys.h"
 
 #include "js/js_game.h"
 
-struct explosion_model : public figures::model_t<FIGURE_EXPLOSION, figure_explosion> {};
-explosion_model explosion_m;
+figures::model_t<figure_explosion> explosion_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_explosion);
 void config_load_figure_explosion() {
-    g_config_arch.r_section("figure_explosion", [] (archive arch) {
-        explosion_m.anim.load(arch);
-        explosion_m.sounds.load(arch);
-    });
+    explosion_m.load();
 }
 
 static const int CLOUD_TILE_OFFSETS[] = {0, 0, 0, 1, 1, 2};
@@ -49,10 +46,14 @@ void figure_explosion::figure_action() {
     }
 
     base.move_ticks_cross_country(base.speed_multiplier);
+}
+
+void figure_explosion::update_animation() {
+    int img_id = anim(animkeys().poof).first_img();
     if (base.progress_on_tile < 48) {
-        base.sprite_image_id = image_group(IMG_EXPLOSION) + std::clamp(base.progress_on_tile / 2, 0, MAX_CLOUD_IMAGE_OFFSETS);
+        base.sprite_image_id = img_id + std::clamp(base.progress_on_tile / 2, 0, MAX_CLOUD_IMAGE_OFFSETS);
     } else {
-        base.sprite_image_id = image_group(IMG_EXPLOSION) + MAX_CLOUD_IMAGE_OFFSETS;
+        base.sprite_image_id = img_id + MAX_CLOUD_IMAGE_OFFSETS;
     }
-    base.anim_base = 0;
+    base.anim.base = 0;
 }

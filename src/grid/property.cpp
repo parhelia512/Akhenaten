@@ -3,12 +3,7 @@
 
 #include "grid/random.h"
 
-enum E_BIT {
-    //    BIT_SIZE1 = 0x00,
-    //    BIT_SIZE2 = 0x01,
-    //    BIT_SIZE3 = 0x02,
-    //    BIT_SIZE4 = 0x04,
-    //    BIT_SIZE5 = 0x08,
+enum e_tile_prop {
     BIT_SIZES = 0x0f,
     BIT_NO_SIZES = 0xf0,
     BIT_CONSTRUCTION = 0x10,
@@ -119,6 +114,10 @@ void map_property_set_alternate_terrain(int grid_offset) {
 }
 int map_property_is_plaza_or_earthquake(int grid_offset) {
     return map_grid_get(&bitfields_grid, grid_offset) & BIT_PLAZA_OR_EARTHQUAKE;
+}
+
+int map_property_get(int grid_offset) {
+    return map_grid_get(&bitfields_grid, grid_offset);
 }
 
 void map_property_mark_plaza_or_earthquake(int grid_offset) {

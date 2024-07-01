@@ -1,12 +1,12 @@
 #include "file_editor.h"
 
 #include "building/construction/build_planner.h"
-#include "building/menu.h"
+#include "building/building_menu.h"
 #include "building/storage.h"
-#include "city/city_data.h"
+#include "city/city.h"
 #include "city/message.h"
 #include "city/victory.h"
-#include "empire/empire.h"
+#include "empire/empire_map.h"
 #include "empire/empire_object.h"
 #include "figure/enemy_army.h"
 #include "figure/figure.h"
@@ -15,7 +15,6 @@
 #include "figure/route.h"
 #include "figure/trader.h"
 #include "figuretype/editor.h"
-#include "figuretype/water.h"
 #include "game/state.h"
 #include "game/time.h"
 #include "graphics/image.h"
@@ -42,21 +41,21 @@
 #include "scenario/empire.h"
 #include "scenario/invasion.h"
 #include "scenario/map.h"
-#include "scenario/property.h"
-#include "sound/city.h"
+#include "scenario/scenario.h"
+#include "sound/sound_city.h"
 #include "sound/music.h"
 #include "game/game.h"
 
 void game_file_editor_clear_data(void) {
-    city_victory_reset();
+    g_city.victory_state.reset();
     Planner.reset();
-    city_data_init();
-    city_data_init_custom_map();
+    g_city.init();
+    g_city.init_custom_map();
     city_message_init_scenario();
     game_state_init();
     game.animation_timers_init();
     sound_city_init();
-    building_menu_enable_all();
+    building_menu_set_all(true);
     building_clear_all();
     building_storage_clear_all();
     figure_init_scenario();
@@ -78,7 +77,7 @@ static void clear_map_data(void) {
     map_property_clear();
     map_sprite_clear();
     map_random_clear();
-    map_desirability_clear();
+    g_desirability.clear();
     map_elevation_clear();
     map_soldier_strength_clear();
     map_road_network_clear();
@@ -115,7 +114,7 @@ static void prepare_map_for_editing(void) {
     map_tiles_update_all_roads();
     map_tiles_update_all_plazas();
     map_tiles_update_all_walls();
-    map_tiles_update_all_aqueducts(0);
+    map_tiles_update_all_canals(0);
     map_natives_init_editor();
     map_routing_update_all();
 

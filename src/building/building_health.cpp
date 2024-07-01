@@ -2,6 +2,7 @@
 
 #include "building/building.h"
 #include "building/figure.h"
+#include "building/count.h"
 #include "city/object_info.h"
 #include "game/resource.h"
 #include "graphics/elements/panel.h"
@@ -13,20 +14,25 @@
 #include "window/building/figures.h"
 #include "sound/sound_building.h"
 #include "widget/city/ornaments.h"
-#include "city/labor.h"
-#include "city/health.h"
+#include "city/city.h"
 
 #include "dev/debug.h"
+
 #include <iostream>
 
 buildings::model_t<building_apothecary> apothercary_m;
+buildings::model_t<building_mortuary> mortuary_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_building_health);
 void config_load_building_health() {
     apothercary_m.load();
+    mortuary_m.load();
 }
 
-static void game_cheat_noplague(std::istream &is, std::ostream &os) {
+declare_console_command_p(plague_start, game_cheat_start_plague);
+declare_console_command_p(plague_no, game_cheat_noplague);
+
+void game_cheat_noplague(std::istream &is, std::ostream &os) {
     buildings_valid_do([&] (building &b) {
         if (!b.house_size || !b.house_population) {
             return;
@@ -37,7 +43,7 @@ static void game_cheat_noplague(std::istream &is, std::ostream &os) {
     });
 }
 
-static void game_cheat_start_plague(std::istream &is, std::ostream &os) {
+void game_cheat_start_plague(std::istream &is, std::ostream &os) {
     std::string args; is >> args;
     int plague_people = atoi(args.empty() ? "100" : args.c_str());
 
@@ -48,13 +54,10 @@ static void game_cheat_start_plague(std::istream &is, std::ostream &os) {
         }
         total_population += b.house_population;
     });
-    city_health_start_disease(total_population, true, plague_people);
+    g_city.health.start_disease(total_population, true, plague_people);
 }
 
-declare_console_command(plague_start, game_cheat_start_plague);
-declare_console_command(plague_no, game_cheat_noplague);
-
-static void building_health_draw_info(object_info& c, int help_id, const char* type, int group_id, e_figure_type ftype) {
+void building_health_draw_info(object_info& c, int help_id, const char* type, int group_id, e_figure_type ftype) {
     c.help_id = help_id;
     window_building_play_sound(&c, snd::get_building_info_sound(type));
     outer_panel_draw(c.offset, c.bgsize.x, c.bgsize.y);
@@ -78,14 +81,6 @@ static void building_health_draw_info(object_info& c, int help_id, const char* t
 
 void building_apothecary::window_info_background(object_info& c) {
     building_health_draw_info(c, 63, "apothecary", e_text_building_apothecary, FIGURE_HERBALIST);
-}
-
-void building_dentist_draw_info(object_info& c) {
-    building_health_draw_info(c, 65, "dentist", e_text_building_dentist, FIGURE_DENTIST);
-}
-
-void building_mortuary_draw_info(object_info& c) {
-    building_health_draw_info(c, 66, "mortuary", e_text_building_mortuary, FIGURE_EMBALMER);
 }
 
 void building_apothecary::spawn_figure() {
@@ -112,4 +107,32 @@ bool building_apothecary::draw_ornaments_and_animations_height(painter &ctx, vec
     building_draw_normal_anim(ctx, point, &base, tile, anim, color_mask);
 
     return true;
+}
+
+
+void building_mortuary::window_info_background(object_info& c) {
+    building_health_draw_info(c, 66, "mortuary", e_text_building_mortuary, FIGURE_EMBALMER);
+}
+
+void building_mortuary::spawn_figure() {
+    common_spawn_roamer(FIGURE_EMBALMER, 50, FIGURE_ACTION_125_ROAMING);
+    //    check_labor_problem();
+    //    if (has_figure_of_type(FIGURE_BARBER))
+    //        return;
+    //    map_point road;
+    //    if (map_has_road_access(x, y, size, &road)) {
+    //        spawn_labor_seeker(50);
+    //        int spawn_delay = figure_spawn_timer();
+    //        if (spawn_delay == -1)
+    //            return;
+    //        figure_spawn_delay++;
+    //        if (figure_spawn_delay > spawn_delay) {
+    //            figure_spawn_delay = 0;
+    //            create_roaming_figure(road.x, road.y, FIGURE_BARBER);
+    //        }
+    //    }
+}
+
+void building_mortuary::update_count() const {
+    g_city.health.add_mortuary_workers(num_workers());
 }

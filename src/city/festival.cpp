@@ -2,9 +2,10 @@
 
 #include "building/building_type.h"
 #include "building/building_storage_yard.h"
+#include "building/count.h"
 #include "buildings.h"
 #include "city/constants.h"
-#include "city/data_private.h"
+#include "city/city.h"
 #include "city/finance.h"
 #include "city/message.h"
 #include "city/sentiment.h"
@@ -13,6 +14,7 @@
 #include "config/config.h"
 #include "graphics/image_groups.h"
 
+static auto &city_data = g_city;
 bool city_festival_is_planned(void) {
     return city_data.festival.planned.size != FESTIVAL_NONE;
 }
@@ -188,78 +190,5 @@ void city_festival_calculate_costs(void) {
         if (city_data.festival.selected.size == FESTIVAL_GRAND) {
             city_data.festival.selected.size = FESTIVAL_LARGE;
         }
-    }
-}
-
-void figure::festival_guy_action() {
-    building* b = home();
-    switch (b->type) {
-    case BUILDING_TEMPLE_OSIRIS:
-    case BUILDING_TEMPLE_COMPLEX_OSIRIS:
-        image_set_animation(IMG_PRIEST_OSIRIS);
-        break;
-    case BUILDING_TEMPLE_RA:
-    case BUILDING_TEMPLE_COMPLEX_RA:
-        image_set_animation(IMG_PRIEST_RA);
-        break;
-    case BUILDING_TEMPLE_PTAH:
-    case BUILDING_TEMPLE_COMPLEX_PTAH:
-        image_set_animation(IMG_PRIEST_PTAH);
-        break;
-    case BUILDING_TEMPLE_SETH:
-    case BUILDING_TEMPLE_COMPLEX_SETH:
-        image_set_animation(IMG_PRIEST_SETH);
-        break;
-    case BUILDING_TEMPLE_BAST:
-    case BUILDING_TEMPLE_COMPLEX_BAST:
-        image_set_animation(IMG_PRIEST_BAST);
-        break;
-    case BUILDING_JUGGLER_SCHOOL:
-        image_set_animation(ANIM_JUGGLER_WALK);
-        break;
-    case BUILDING_CONSERVATORY:
-        image_set_animation(ANIM_MUSICIAN_WALK);
-        break;
-    case BUILDING_DANCE_SCHOOL:
-        image_set_animation(ANIM_DANCER_WALK);
-        break;
-    }
-    switch (action_state) {
-    case 9: // is "dancing" on tile
-        festival_remaining_dances--;
-        advance_action(10);
-        break;
-    case 10: // goes to random spot on the square
-
-        // still going to the square center, first
-        if (terrain_usage == TERRAIN_USAGE_ROADS) {
-            if (do_goto(destination_tile, TERRAIN_USAGE_ROADS, 10))
-                terrain_usage = TERRAIN_USAGE_ANY;
-        } else {
-            //                use_cross_country = true; // todo?
-            if (routing_path_id)
-                do_goto(destination_tile, TERRAIN_USAGE_ANY, 11);
-            else {
-                if (festival_remaining_dances == 0 || !city_building_has_festival_square())
-                    return poof();
-
-                // choose a random tile on the festival square
-                tile2i festival = city_building_get_festival_square_position();
-                int rand_x, rand_y;
-                int rand_seed = random_short();
-                do {
-                    int random_tile = rand_seed % 25;
-                    rand_x = festival.x() + random_tile % 5;
-                    rand_y = festival.y() + random_tile / 5;
-                    rand_seed++;
-                } while (rand_x == tile.x() && rand_y == tile.y());
-
-                do_goto(map_point(rand_x, rand_y), TERRAIN_USAGE_ANY, 11);
-            }
-        }
-        break;
-    case 11: // reached a random spot on the square, now what?
-        advance_action(9);
-        break;
     }
 }

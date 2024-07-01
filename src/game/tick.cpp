@@ -16,7 +16,7 @@
 #include "building/maintenance.h"
 #include "building/building_storage_yard.h"
 #include "city/coverage.h"
-#include "city/emperor.h"
+#include "city/city.h"
 #include "city/festival.h"
 #include "city/buildings.h"
 #include "city/finance.h"
@@ -29,28 +29,28 @@
 #include "city/ratings.h"
 #include "city/resource.h"
 #include "city/sentiment.h"
-#include "city/education.h"
 #include "city/trade.h"
 #include "city/victory.h"
 #include "core/random.h"
 #include "core/profiler.h"
 #include "core/bstring.h"
 #include "editor/editor.h"
-#include "empire/empire_city.h"
+#include "empire/empire.h"
 #include "figure/formation.h"
 #include "figuretype/crime.h"
-#include "figuretype/water.h"
 #include "figure/formation_herd.h"
 #include "game/settings.h"
 #include "game/time.h"
 #include "game/tutorial.h"
 #include "game/undo.h"
+#include "game/game.h"
 #include "grid/desirability.h"
 #include "grid/natives.h"
 #include "grid/religion_supply.h"
 #include "grid/road_network.h"
 #include "grid/routing/routing_terrain.h"
 #include "grid/tiles.h"
+#include "grid/building.h"
 #include "grid/water_supply.h"
 #include "io/gamestate/boilerplate.h"
 #include "scenario/demand_change.h"
@@ -73,25 +73,24 @@ static void advance_year(void) {
     game_time_advance_year();
     city_population_request_yearly_update();
     city_finance_handle_year_change();
-    city_migration_advance_year();
-    empire_city_reset_yearly_trade_amounts();
+    g_city.migration_advance_year();
+    g_empire.reset_yearly_trade_amounts();
     building_maintenance_update_fire_direction();
-    city_ratings_update(1);
+    g_city.ratings_update(/*yearly_update*/true);
     //    city_gods_reset_yearly_blessings();
 }
 
 static void advance_month() {
-    city_migration_reset_newcomers();
-    city_health_update();
+    g_city.migration_reset_newcomers();
+    g_city.health.update();
     scenario_random_event_process();
     city_finance_handle_month_change();
     city_resource_consume_food();
     scenario_distant_battle_process();
-    city_education_handle_month_change();
     random_generate_next();                  // TODO: find out the source / reason for this
     scenario_event_process();
     
-    city_victory_update_months_to_govern();
+    g_city.victory_state.update_months_to_govern();
     formation_update_monthly_morale_at_rest();
     city_message_decrease_delays();
 
@@ -103,13 +102,16 @@ static void advance_month() {
     if (game_time_advance_month()) {
         advance_year();
     } else {
-        city_ratings_update(0);
+        g_city.ratings_update(/*yearly_update*/false);
     }
 
     city_population_record_monthly();
     city_festival_update();
     city_buildings_update_month();
-    formation_fish_update();
+
+    if (g_city.can_produce_resource(RESOURCE_FISH)) {
+        g_city.fishing_points.update(0);
+    }
 
     if (g_settings.monthly_autosave) {
         bstring256 autosave_file("autosave_month.", saved_game_data_expanded.extension);
@@ -128,18 +130,26 @@ static void advance_day() {
     city_sentiment_update_day();
     city_criminals_update_day();
     city_plague_update_day();
-    city_river_update_flotsam();
+    g_city.environment.river_update_flotsam();
     city_buildings_update_day();
+    g_city.figures_update_day();
 
     tutorial_on_day_tick();
+}
+
+static void update_building_tick(bool refresh_only) {
+    for (auto it = building_begin(), end = building_end(); it != end; ++it) {
+        if (it->is_valid()) {
+            it->update_tick(refresh_only);
+        }
+    }
 }
 
 static void advance_tick(void) {
     tutorial_starting_message();
     floodplains_tick_update(false);
 
-    // NB: these ticks are noop:
-    // 0, 9, 11, 13, 14, 15, 26, 41, 42, 47
+    update_building_tick(game.paused);
 
     switch (game_time_tick()) {
     case 1:
@@ -152,7 +162,7 @@ static void advance_tick(void) {
         widget_minimap_invalidate();
         break;
     case 4:
-        city_emperor_update();
+        g_city.kingdome.update();
         break;
     case 5:
         formation_update_all(false);
@@ -202,7 +212,7 @@ static void advance_tick(void) {
         house_population_evict_overcrowded();
         break;
     case 25:
-        city_labor_update();
+        g_city.labor.update();
         break;
     case 27:
         map_update_wells_range();
@@ -226,7 +236,6 @@ static void advance_tick(void) {
         break;
     case 33:
         building_count_update();
-        building_entertainment_update();
         city_culture_update_coverage();
         city_health_update_coverage();
         building_industry_update_farms();
@@ -242,7 +251,7 @@ static void advance_tick(void) {
         house_service_calculate_culture_aggregates();
         break;
     case 37:
-        map_desirability_update();
+        g_desirability.update();
         break;
     case 38:
         building_update_desirability();
@@ -293,8 +302,8 @@ void game_tick_run(void) {
     figure_action_handle();
     scenario_earthquake_process();
     //scenario_gladiator_revolt_process();
-    scenario_emperor_change_process();
-    city_victory_check();
+    scenario_kingdome_change_process();
+    g_city.victory_check();
 }
 
 void game_tick_cheat_year(void) {

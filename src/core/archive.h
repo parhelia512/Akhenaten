@@ -8,6 +8,7 @@
 #include <string>
 
 enum e_image_id : uint16_t;
+struct animation_t;
 
 struct archive {
     void *state = nullptr;
@@ -16,11 +17,13 @@ struct archive {
     pcstr r_string(pcstr name);
     std::vector<std::string> r_array_str(pcstr name);
     int r_int(pcstr name, int def = 0);
+    float r_float(pcstr name, float def = 0.f);
     uint32_t r_uint(pcstr name, uint32_t def = 0);
     e_image_id r_image(pcstr name);
     bool r_bool(pcstr name, bool def = false);
     vec2i r_size2i(pcstr name, pcstr w = "w", pcstr h = "h");
     vec2i r_vec2i(pcstr name, pcstr x = "x", pcstr y = "y");
+    bool r_anim(pcstr name, animation_t &anim);
 
     std::vector<vec2i> r_array_vec2i(pcstr name);
 
@@ -45,6 +48,22 @@ struct archive {
         return result;
     }
 
+    template<typename T = int>
+    static inline std::vector<T> r_array_num(archive arch) {
+        std::vector<T> result;
+        if (arch.isarray(-1)) {
+            int length = arch.getlength(-1);
+
+            for (int i = 0; i < length; ++i) {
+                arch.getindex(-1, i);
+                float v = arch.isnumber(-1) ? (float)arch.tonumber(-1) : 0.f;
+                result.push_back((T)v);
+                arch.pop(1);
+            }
+        }
+        return result;
+    }
+
     template<typename T>
     inline void r_section(pcstr name, T read_func) {
         getproperty(-1, name);
@@ -58,6 +77,13 @@ struct archive {
     inline void r_array(pcstr name, T read_func) {
         getproperty(-1, name);
         r_array_impl(read_func);
+        pop(1);
+    }
+
+    template<typename T, typename F>
+    inline void r_array(pcstr name, T &arr, F read_func) {
+        getproperty(-1, name);
+        r_array_impl(arr, read_func);
         pop(1);
     }
 
@@ -104,6 +130,27 @@ protected:
         return true;
     }
 
+    template<typename T, typename F>
+    inline bool r_array_impl(T &arr, F read_func) {
+        if (!isarray(-1)) {
+            return false;
+        }
+
+        arr.clear();
+        int length = getlength(-1);
+        for (int i = 0; i < length; ++i) {
+            getindex(-1, i);
+
+            if (isobject(-1)) {
+                arr.push_back({});
+                read_func(state, arr.back());
+            }
+
+            pop(1);
+        }
+        return true;
+    }
+
     void getproperty(int idx, pcstr name);
     static void getproperty(archive arch, int idx, pcstr name);
     bool isarray(int idx);
@@ -125,6 +172,13 @@ struct g_archive : public archive {
     inline void r_array(pcstr name, T read_func) {
         getglobal(name);
         r_array_impl(read_func);
+        pop(1);
+    }
+
+    template<typename T, typename F>
+    inline void r_array(pcstr name, T &arr, F read_func) {
+        getglobal(name);
+        r_array_impl(arr, read_func);
         pop(1);
     }
 

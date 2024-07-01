@@ -2,7 +2,7 @@
 
 #include "core/calc.h"
 #include "grid/grid.h"
-#include "scenario/scenario_data.h"
+#include "scenario/scenario.h"
 
 const map_data_t* scenario_map_data() {
     return &g_scenario_data.map;
@@ -31,33 +31,37 @@ tile2i scenario_map_exit(void) {
     return g_scenario_data.exit_point;
 }
 
-int scenario_map_has_river_entry(void) {
-    return g_scenario_data.river_entry_point.x() != -1 && g_scenario_data.river_entry_point.y() != -1;
+bool scenario_map_has_river_entry() {
+    return g_scenario_data.river_entry_point.valid();
 }
 
 tile2i scenario_map_river_entry() {
     return g_scenario_data.river_entry_point;
 }
 
-int scenario_map_has_river_exit() {
-    return g_scenario_data.river_exit_point.x() != -1 && g_scenario_data.river_exit_point.y() != -1;
+bool scenario_map_has_river_exit() {
+    return g_scenario_data.river_exit_point.valid();
 }
 
 tile2i scenario_map_river_exit() {
     return g_scenario_data.river_exit_point;
 }
 
-void scenario_map_foreach_herd_point(void (*callback)(int x, int y)) {
+void scenario_map_foreach_herd_point(void (*callback)(tile2i)) {
     for (int i = 0; i < MAX_PREDATOR_HERD_POINTS; i++) {
-        if (g_scenario_data.herd_points_predator[i].x() > 0)
-            callback(g_scenario_data.herd_points_predator[i].x(), g_scenario_data.herd_points_predator[i].y());
+        tile2i tile = g_scenario_data.herd_points_predator[i];
+        if (tile.valid()) {
+            callback(g_scenario_data.herd_points_predator[i]);
+        }
     }
 }
 
 void scenario_map_foreach_fishing_point(void (*callback)(tile2i)) {
     for (int i = 0; i < MAX_FISH_POINTS; i++) {
-        if (g_scenario_data.fishing_points[i].x() > 0)
+        tile2i fish_tile = g_scenario_data.fishing_points[i];
+        if (fish_tile.valid()) {
             callback(g_scenario_data.fishing_points[i]);
+        }
     }
 }
 

@@ -3,6 +3,7 @@
 #include "game/tutorial.h"
 #include "city/gods.h"
 #include "city/labor.h"
+#include "city/city.h"
 #include "city/sentiment.h"
 #include "city/houses.h"
 #include "city/health.h"
@@ -14,15 +15,11 @@
 
 #include "js/js_game.h"
 
-struct priest_model : public figures::model_t<FIGURE_PRIEST,figure_priest> {};
-priest_model priest_m;
+figures::model_t<figure_priest> priest_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_priest);
 void config_load_figure_priest() {
-    g_config_arch.r_section("figure_priest", [] (archive arch) {
-        priest_m.anim.load(arch);
-        priest_m.sounds.load(arch);
-    });
+    priest_m.load();
 }
 
 void figure_priest::figure_before_action() {
@@ -33,33 +30,7 @@ void figure_priest::figure_before_action() {
 }
 
 void figure_priest::figure_action() {
-    building* temple = home();
-    switch (temple->type) {
-    case BUILDING_TEMPLE_OSIRIS:
-    case BUILDING_TEMPLE_COMPLEX_OSIRIS:
-        image_set_animation(priest_m.anim["osiris_walk"]);
-        break;
 
-    case BUILDING_TEMPLE_RA:
-    case BUILDING_TEMPLE_COMPLEX_RA:
-        image_set_animation(priest_m.anim["ra_walk"]);
-        break;
-
-    case BUILDING_TEMPLE_PTAH:
-    case BUILDING_TEMPLE_COMPLEX_PTAH:
-        image_set_animation(priest_m.anim["ptah_walk"]);
-        break;
-
-    case BUILDING_TEMPLE_SETH:
-    case BUILDING_TEMPLE_COMPLEX_SETH:
-        image_set_animation(priest_m.anim["seth_walk"]);
-        break;
-
-    case BUILDING_TEMPLE_BAST:
-    case BUILDING_TEMPLE_COMPLEX_BAST:
-        image_set_animation(priest_m.anim["bast_walk"]);
-        break;
-    }
 }
 
 sound_key figure_priest::phrase_key() const {
@@ -84,7 +55,7 @@ sound_key figure_priest::phrase_key() const {
         keys.push_back(create_key("god_love_festival"));
     }
 
-    if (city_labor_workers_needed() >= 10) {
+    if (g_city.labor.workers_needed >= 10) {
         keys.push_back(create_key("need_workers"));
     }
 
@@ -92,8 +63,8 @@ sound_key figure_priest::phrase_key() const {
         keys.push_back(create_key("city_low_mood"));
     }
 
-    const house_demands *demands = city_houses_demands();
-    if (demands->missing.more_entertainment > 1) {  // low entertainment
+    const house_demands &demands = g_city.houses;
+    if (demands.missing.more_entertainment > 1) {  // low entertainment
         keys.push_back(create_key("low_entertainment"));
     } else {
         keys.push_back(create_key("need_entertainment"));
@@ -111,7 +82,7 @@ sound_key figure_priest::phrase_key() const {
         keys.push_back(create_key("disease_in_city"));
     }
 
-    if (city_health() < 30) {
+    if (g_city.health.value < 30) {
         keys.push_back(create_key("city_low_health"));
     }
 
@@ -123,7 +94,7 @@ sound_key figure_priest::phrase_key() const {
         keys.push_back(create_key("gods_are_angry"));
     }
 
-    if (city_rating_kingdom() < 30) {
+    if (g_city.ratings.kingdom < 30) {
         keys.push_back(create_key("low_sentiment"));
     }
 
@@ -207,6 +178,40 @@ e_overlay figure_priest::get_overlay() const {
     }
 
     return OVERLAY_NONE;
+}
+
+const animations_t &figure_priest::anim() const {
+    return priest_m.anim;
+}
+
+void figure_priest::update_animation() {
+    building* temple = home();
+    switch (temple->type) {
+    case BUILDING_TEMPLE_OSIRIS:
+    case BUILDING_TEMPLE_COMPLEX_OSIRIS:
+        image_set_animation(priest_m.anim["osiris_walk"]);
+        break;
+
+    case BUILDING_TEMPLE_RA:
+    case BUILDING_TEMPLE_COMPLEX_RA:
+        image_set_animation(priest_m.anim["ra_walk"]);
+        break;
+
+    case BUILDING_TEMPLE_PTAH:
+    case BUILDING_TEMPLE_COMPLEX_PTAH:
+        image_set_animation(priest_m.anim["ptah_walk"]);
+        break;
+
+    case BUILDING_TEMPLE_SETH:
+    case BUILDING_TEMPLE_COMPLEX_SETH:
+        image_set_animation(priest_m.anim["seth_walk"]);
+        break;
+
+    case BUILDING_TEMPLE_BAST:
+    case BUILDING_TEMPLE_COMPLEX_BAST:
+        image_set_animation(priest_m.anim["bast_walk"]);
+        break;
+    }
 }
 
 figure_sound_t figure_priest::get_sound_reaction(pcstr key) const {

@@ -10,10 +10,10 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
-#include "sound/city.h"
+#include "sound/sound_city.h"
 #include "sound/effect.h"
 #include "sound/music.h"
-#include "sound/speech.h"
+#include "sound/sound.h"
 
 static void button_toggle(int type, int param2);
 static void button_ok(int param1, int param2);
@@ -107,7 +107,7 @@ static void draw_foreground(void) {
     lang_text_draw_centered(46, city->enabled ? 8 : 7, 64, 256, 224, FONT_NORMAL_BLACK_ON_DARK);
     text_draw_percentage(city->volume, 374, 256, FONT_SMALL_PLAIN);
 
-    arrow_buttons_draw(208, 60, arrow_buttons, 8);
+    arrow_buttons_draw({208, 60}, arrow_buttons, 8);
 
     graphics_reset_dialog();
 }
@@ -115,8 +115,8 @@ static void draw_foreground(void) {
 static void handle_input(const mouse* m, const hotkeys* h) {
     auto &data = g_sound_options;
     const mouse* m_dialog = mouse_in_dialog(m);
-    if (generic_buttons_handle_mouse(m_dialog, 0, 0, buttons, 6, &data.focus_button_id)
-        || arrow_buttons_handle_mouse(m_dialog, 208, 60, arrow_buttons, 8, 0))
+    if (generic_buttons_handle_mouse(m_dialog, {0, 0}, buttons, 6, &data.focus_button_id)
+        || arrow_buttons_handle_mouse(m_dialog, {208, 60}, arrow_buttons, 8, 0))
         return;
     if (input_go_back_requested(m, h))
         data.close_callback();
@@ -133,7 +133,7 @@ static void button_toggle(int type, int param2) {
         }
     } else if (type == SOUND_SPEECH) {
         if (!g_settings.get_sound(SOUND_SPEECH)->enabled)
-            sound_speech_stop();
+            g_sound.speech_stop();
     }
 }
 
@@ -155,10 +155,11 @@ static void button_cancel(int param1, int param2) {
     } else {
         sound_music_stop();
     }
-    sound_music_set_volume(data.original_music.volume);
-    sound_speech_set_volume(data.original_speech.volume);
-    sound_effect_set_volume(data.original_effects.volume);
-    sound_city_set_volume(data.original_city.volume);
+
+    g_sound.music_set_volume(data.original_music.volume);
+    g_sound.speech_set_volume(data.original_speech.volume);
+    g_sound.set_volume(SOUND_CHANNEL_EFFECTS_MIN, SOUND_CHANNEL_EFFECTS_MAX, data.original_effects.volume);
+    g_sound.set_volume(SOUND_CHANNEL_CITY_MIN, SOUND_CHANNEL_CITY_MAX, data.original_city.volume);
 
     data.close_callback();
 }
@@ -173,22 +174,22 @@ static void update_volume(int type, int is_decrease) {
 
 static void arrow_button_music(int is_down, int param2) {
     update_volume(SOUND_MUSIC, is_down);
-    sound_music_set_volume(g_settings.get_sound(SOUND_MUSIC)->volume);
+    g_sound.music_set_volume(g_settings.get_sound(SOUND_MUSIC)->volume);
 }
 
 static void arrow_button_speech(int is_down, int param2) {
     update_volume(SOUND_SPEECH, is_down);
-    sound_speech_set_volume(g_settings.get_sound(SOUND_SPEECH)->volume);
+    g_sound.speech_set_volume(g_settings.get_sound(SOUND_SPEECH)->volume);
 }
 
 static void arrow_button_effects(int is_down, int param2) {
     update_volume(SOUND_EFFECTS, is_down);
-    sound_effect_set_volume(g_settings.get_sound(SOUND_EFFECTS)->volume);
+    g_sound.set_volume(SOUND_CHANNEL_EFFECTS_MIN, SOUND_CHANNEL_EFFECTS_MAX, g_settings.get_sound(SOUND_EFFECTS)->volume);
 }
 
 static void arrow_button_city(int is_down, int param2) {
     update_volume(SOUND_CITY, is_down);
-    sound_city_set_volume(g_settings.get_sound(SOUND_CITY)->volume);
+    g_sound.set_volume(SOUND_CHANNEL_CITY_MIN, SOUND_CHANNEL_CITY_MAX, g_settings.get_sound(SOUND_CITY)->volume);
 }
 
 void window_sound_options_show(void (*close_callback)(void)) {

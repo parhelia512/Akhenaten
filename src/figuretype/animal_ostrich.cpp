@@ -1,34 +1,27 @@
 #include "animal_ostrich.h"
 
 #include "figure/figure.h"
-#include "city/figures.h"
+#include "city/city.h"
 #include "grid/terrain.h"
 #include "grid/figure.h"
 #include "core/random.h"
 #include "graphics/image_groups.h"
 #include "graphics/image.h"
-#include "sound/effect.h"
+#include "sound/sound.h"
 #include "graphics/animation.h"
 
 #include "js/js_game.h"
 
-struct ostrich_model :
-            public figures::model_t<FIGURE_OSTRICH,
-                                    figure_ostrich> {};
-
-ostrich_model ostrich_m;
+figures::model_t<figure_ostrich> ostrich_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_ostrich);
 void config_load_figure_ostrich() {
-    g_config_arch.r_section("figure_ostrich", [] (archive arch) {
-        ostrich_m.anim.load(arch);
-        ostrich_m.sounds.load(arch);
-    });
+    ostrich_m.load();
 }
 
 void figure_ostrich::figure_action() {
     const formation* m = formation_get(base.formation_id);
-    city_figures_add_animal();
+    g_city.figures_add_animal();
 
     switch (base.action_state) {
     case ACTION_24_ANIMAL_SPAWNED:     // spawning
@@ -69,8 +62,14 @@ void figure_ostrich::figure_action() {
         }
         break;
     }
+}
 
-    switch (base.action_state) {
+const animations_t &figure_ostrich::anim() const {
+    return ostrich_m.anim;
+}
+
+void figure_ostrich::update_animation() {
+    switch (action_state()) {
     case ACTION_8_RECALCULATE:
     case FIGURE_ACTION_19_ANIMAL_IDLE: // idle
         image_set_animation(ostrich_m.anim["idle"]);
@@ -88,11 +87,11 @@ void figure_ostrich::figure_action() {
     case ACTION_15_ANIMAL_TERRIFIED: // terrified
     case 14:                         // scared
         image_set_animation(ostrich_m.anim["idle"]);
-        base.anim_frame = 0;
+        base.anim.frame = 0;
         break;
 
     case FIGURE_ACTION_149_CORPSE:
-        image_set_die_animation(ostrich_m.anim["death"]);
+        image_set_animation(ostrich_m.anim["death"]);
         break;
 
     case FIGURE_ACTION_150_ATTACK:
@@ -108,7 +107,11 @@ void figure_ostrich::figure_action() {
     }
 }
 
+void figure_ostrich::before_poof() {
+
+}
+
 bool figure_ostrich::play_die_sound() {
-    sound_effect_play(SOUND_EFFECT_OSTRICH_DIE);
+    g_sound.play_effect(SOUND_EFFECT_OSTRICH_DIE);
     return true;
 }

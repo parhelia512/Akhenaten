@@ -11,12 +11,17 @@
 #include "input/input.h"
 #include "scenario/criteria.h"
 #include "scenario/editor.h"
-#include "scenario/property.h"
+#include "scenario/scenario.h"
 #include "window/editor/attributes.h"
 #include "window/editor/map.h"
 #include "window/numeric_input.h"
 
-enum E_RATING { RATING_CULTURE, RATING_PROSPERITY, RATING_MONUMENT, RATING_KINGDOM };
+enum E_RATING {
+    RATING_CULTURE,
+    RATING_PROSPERITY,
+    RATING_MONUMENT,
+    RATING_KINGDOM
+};
 
 static void button_rating_toggle(int rating, int param2);
 static void button_rating_value(int rating, int param2);
@@ -116,7 +121,7 @@ static void draw_foreground(void) {
 }
 
 static void handle_input(const mouse* m, const hotkeys* h) {
-    if (generic_buttons_handle_mouse(mouse_in_dialog(m), 0, 0, buttons, 15, &focus_button_id))
+    if (generic_buttons_handle_mouse(mouse_in_dialog(m), {0, 0}, buttons, 15, &focus_button_id))
         return;
     if (input_go_back_requested(m, h))
         window_editor_attributes_show();

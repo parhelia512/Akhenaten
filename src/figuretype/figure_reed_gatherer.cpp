@@ -8,15 +8,11 @@
 #include "grid/routing/routing.h"
 #include "js/js_game.h"
 
-struct reed_gatherer_model : public figures::model_t<FIGURE_REED_GATHERER, figure_reed_gatherer> {};
-reed_gatherer_model reed_gatherer_m;
+figures::model_t<figure_reed_gatherer> reed_gatherer_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_reed_gatherer);
 void config_load_figure_reed_gatherer() {
-    g_config_arch.r_section("figure_reed_gatherer", [] (archive arch) {
-        reed_gatherer_m.anim.load(arch);
-        reed_gatherer_m.sounds.load(arch);
-    });
+     reed_gatherer_m.load();
 }
 
 void figure_reed_gatherer::figure_before_action() {
@@ -30,13 +26,13 @@ void figure_reed_gatherer::figure_action() {
     switch (action_state()) {
     case ACTION_8_RECALCULATE:
     case ACTION_14_GATHERER_CREATED: // spawning
-        base.anim_frame = 0;
+        base.anim.frame = 0;
         if (wait_ticks++ >= 10) {
             tile2i dest(-1, -1);
             bool found_resource = map_routing_citizen_found_reeds(tile(), dest);
 
             if (found_resource) {
-                base.anim_offset = 0;
+                base.anim.offset = 0;
                 do_goto(dest, TERRAIN_USAGE_PREFER_ROADS);
                 advance_action(ACTION_9_REED_GATHERER_GOTO_RESOURCE);
             } else {
@@ -82,7 +78,9 @@ void figure_reed_gatherer::figure_action() {
         }
         break;
     }
+}
 
+void figure_reed_gatherer::update_animation() {
     switch (action_state()) {
     default: // normal walk
     case ACTION_8_RECALCULATE:

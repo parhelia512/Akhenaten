@@ -2,10 +2,12 @@
 
 #include "building/building_granary.h"
 #include "building/distribution.h"
+#include "building/count.h"
 #include "building/storage.h"
-#include "city/object_info.h"
+#include "city/city.h"
+#include "city/warnings.h"
 #include "window/building/common.h"
-#include "scenario/property.h"
+#include "scenario/scenario.h"
 
 #include "graphics/image.h"
 #include "graphics/graphics.h"
@@ -15,9 +17,7 @@
 
 struct granary_info_window : ui::widget {
     int resource_text_group;
-};
-
-granary_info_window g_granary_info_window;
+} g_granary_info_window;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_granary_info_window);
 void config_load_granary_info_window() {
@@ -55,8 +55,8 @@ void building_granary::draw_orders_foreground(object_info &c) {
         // arrows
         int state = storage->resource_state[resource];
         if (state == STORAGE_STATE_PHARAOH_ACCEPT || state == STORAGE_STATE_PHARAOH_GET) {
-            image_buttons_draw(c.offset.x + 165, y_offset + 49, data.orders_decrease_arrows.data(), 1, i);
-            image_buttons_draw(c.offset.x + 165 + 18, y_offset + 49, data.orders_increase_arrows.data(), 1, i);
+            image_buttons_draw(vec2i{c.offset.x + 165, y_offset + 49}, data.orders_decrease_arrows.data(), 1, i);
+            image_buttons_draw(vec2i{c.offset.x + 165 + 18, y_offset + 49}, data.orders_increase_arrows.data(), 1, i);
         }
     }
 
@@ -81,6 +81,12 @@ int building_granary::window_info_handle_mouse(const mouse *m, object_info &c) {
     }
 }
 
+void building_granary::on_place_checks() {
+    if (building_count_active(BUILDING_BAZAAR) <= 0) {
+        building_construction_warning_show(WARNING_BUILD_MARKET);
+    }
+}
+
 void building_granary::window_info_foreground(object_info &ctx) {
     if (ctx.storage_show_special_orders) {
         draw_orders_foreground(ctx);
@@ -96,7 +102,8 @@ void building_granary::window_info_foreground(object_info &ctx) {
 }
 
 void building_granary::window_info_background(object_info &ctx) {
-    ui::begin_frame();
+    auto &ui = g_granary_info_window;
+    ui.begin_frame();
 
     if (ctx.storage_show_special_orders) {
         ctx.help_id = 3;
@@ -108,18 +115,14 @@ void building_granary::window_info_background(object_info &ctx) {
     }
 
     auto &data = g_window_building_distribution;
-    auto &ui = g_granary_info_window;
 
     ctx.help_id = 3;
     ctx.go_to_advisor.left_a = ADVISOR_LABOR;
     ctx.go_to_advisor.left_b = ADVISOR_POPULATION;
     ctx.bgsize = ui["background"].size;
     data.building_id = ctx.building_id;
-    window_building_play_sound(&ctx, "wavs/granary.wav");
+    window_building_play_sound(&ctx, "Wavs/granary.wav");
     
-    //outer_panel_draw(ctx.offset, ctx.width_blocks, ctx.height_blocks);
-    ui["title"].text("#granary_info_title");
-
     pcstr warning_text = !ctx.has_road_access ? "#granary_no_road_access"
                          : scenario_property_kingdom_supplies_grain() ? "#granary_kingdom_supplies_grain"
                          : nullptr;
@@ -130,21 +133,26 @@ void building_granary::window_info_background(object_info &ctx) {
     ui["storing"].text_var("#granary_storing %u #granary_units", granary->total_stored());
     ui["free_space"].text_var("#granary_space_for %u #granary_units", granary->space_for());
 
-    int food1 = city_allowed_foods(0);
+    int food1 = g_city.allowed_foods(0);
     ui["food0_icon"].image(food1); // grain
     ui["food0_text"].text_var(food1 ? "%u %s" : "", granary->data.granary.resource_stored[food1], (pcstr)lang_get_string(ui.resource_text_group, food1));
 
-    int food2 = city_allowed_foods(1);
+    int food2 = g_city.allowed_foods(1);
     ui["food1_icon"].image(food2); // vegetables
     ui["food1_text"].text_var(food2 ? "%u %s" : "", granary->data.granary.resource_stored[food2], (pcstr)lang_get_string(ui.resource_text_group, food2));
 
-    int food3 = city_allowed_foods(2);
+    int food3 = g_city.allowed_foods(2);
     ui["food2_icon"].image(food3); // vegetables
     ui["food2_text"].text_var(food3 ? "%u %s" : "", granary->data.granary.resource_stored[food3], (pcstr)lang_get_string(ui.resource_text_group, food3));
 
-    int food4 = city_allowed_foods(3);
+    int food4 = g_city.allowed_foods(3);
     ui["food3_icon"].image(food4); // meat/fish
     ui["food3_text"].text_var(food4 ? "%u %s" : "", granary->data.granary.resource_stored[food4], (pcstr)lang_get_string(ui.resource_text_group, food4));
 
-    window_building_draw_employment(&ctx, 142);
+    int text_id = get_employment_info_text_id(&ctx, &base, 1);
+    int laborers = model_get_building(BUILDING_GRANARY)->laborers;
+    ui["workers_text"].text_var("%u %s (%d %s", num_workers(), ui::str(8, 12), laborers, ui::str(69, 0));
+    if (text_id) {
+        ui["workers_desc"].text(ui::str(69, text_id));
+    }
 }

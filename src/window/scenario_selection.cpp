@@ -17,7 +17,7 @@
 #include "scenario/criteria.h"
 #include "scenario/invasion.h"
 #include "scenario/map.h"
-#include "scenario/property.h"
+#include "scenario/scenario.h"
 #include "game/game.h"
 
 #include "dev/debug.h"
@@ -457,13 +457,14 @@ static void draw_foreground(void) {
     debug_text(ctx, txt, INFO_X, -120, 0, "", FILEIO.get_file_version(), COLOR_FONT_YELLOW);
     //    draw_debug_line(txt, INFO_X + 100, -120, 0, "", get_junk2(), COLOR_FONT_YELLOW);
 
-    image_buttons_draw(0, 0, &start_button, 1);
+    image_buttons_draw({0, 0}, &start_button, 1);
     graphics_reset_dialog();
 }
 
 static void button_select_campaign(int index, int param2) {
     init(MAP_SELECTION_CAMPAIGN_SINGLE_LIST, index);
 }
+
 static void button_select_item(int index, int param2) {
     auto &data = g_window_scenario_selection;
     if (index >= data.panel->get_total_entries())
@@ -478,11 +479,13 @@ static void button_select_item(int index, int param2) {
     }
     window_invalidate();
 }
+
 static void button_start_scenario(int param1, int param2) {
     if (scenario_campaign_scenario_id() == -1)
         return;
     GamestateIO::start_loaded_file();
 }
+
 static void button_scores_or_goals(int param1, int param2) {
     auto &data = g_window_scenario_selection;
     data.scores_or_goals = param1;
@@ -492,6 +495,7 @@ static void button_scores_or_goals(int param1, int param2) {
 static void on_scroll(void) {
     window_invalidate();
 }
+
 static void handle_input(const mouse* m, const hotkeys* h) {
     auto &data = g_window_scenario_selection;
     if (input_go_back_requested(m, h)) {
@@ -516,28 +520,34 @@ static void handle_input(const mouse* m, const hotkeys* h) {
 
         if (data.dialog == MAP_SELECTION_CAMPAIGN_SINGLE_LIST && data.panel->get_selected_entry_idx() != -1) {
             if (!data.scores_or_goals) {
-                if (generic_buttons_handle_mouse(m_dialog, 0, 0, &button_scores_goals[0], 1, &data.focus_button_id))
+                if (generic_buttons_handle_mouse(m_dialog, {0, 0}, &button_scores_goals[0], 1, &data.focus_button_id))
                     return;
-            } else if (generic_buttons_handle_mouse(m_dialog, 0, 0, &button_scores_goals[1], 1, &data.focus_button_id))
+            } else if (generic_buttons_handle_mouse(m_dialog, {0, 0}, &button_scores_goals[1], 1, &data.focus_button_id))
                 return;
         }
         break;
     case MAP_SELECTION_CAMPAIGN:
         int last_focus = data.focus_button_id;
-        if (generic_buttons_handle_mouse(m_dialog, 0, 0, buttons_campaigns, 9, &data.focus_button_id))
+        if (generic_buttons_handle_mouse(m_dialog, {0, 0}, buttons_campaigns, 9, &data.focus_button_id)) {
             return;
-        if (last_focus != data.focus_button_id)
+        }
+
+        if (last_focus != data.focus_button_id) {
             window_invalidate();
+        }
         break;
     }
 
-    if (image_buttons_handle_mouse(m_dialog, 0, 0, &start_button, 1, 0))
+    if (image_buttons_handle_mouse(m_dialog, {0, 0}, &start_button, 1, 0)) {
         return;
+    }
+
     if (h->enter_pressed) {
         button_start_scenario(0, 0);
         return;
     }
 }
+
 void window_scenario_selection_show(e_map_selection_dialog_type dialog_type) {
     // city construction kit
     window_type window = {WINDOW_CCK_SELECTION, draw_background, draw_foreground, handle_input};

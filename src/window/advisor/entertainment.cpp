@@ -1,10 +1,11 @@
 #include "entertainment.h"
-#include "building/menu.h"
-#include "scenario/building.h"
+
+#include "building/building_menu.h"
+#include "scenario/scenario.h"
 
 #include "building/count.h"
 #include "city/coverage.h"
-#include "city/entertainment.h"
+#include "city/city.h"
 #include "city/festival.h"
 #include "city/gods.h"
 #include "city/houses.h"
@@ -25,6 +26,8 @@
 #define COVERAGE_OFFSET 470
 #define COVERAGE_WIDTH 130
 
+ui::advisor_entertainment_window g_advisor_entertainment_window;
+
 static void button_hold_festival(int param1, int param2);
 
 static generic_button hold_festival_button[] = {
@@ -34,13 +37,13 @@ static generic_button hold_festival_button[] = {
 static int focus_button_id;
 
 static int get_entertainment_advice(void) {
-    const house_demands* demands = city_houses_demands();
-    if (demands->missing.entertainment > demands->missing.more_entertainment) {
+    const house_demands &demands = g_city.houses;
+    if (demands.missing.entertainment > demands.missing.more_entertainment) {
         return 3;
-    } else if (!demands->missing.more_entertainment) {
+    } else if (!demands.missing.more_entertainment) {
         return city_culture_average_entertainment() ? 1 : 0;
-    } else if (city_entertainment_venue_needing_shows()) {
-        return 3 + city_entertainment_venue_needing_shows();
+    } else if (g_city.entertainment.venue_needing_shows) {
+        return 3 + g_city.entertainment.venue_needing_shows;
     } else {
         return 2;
     }
@@ -109,7 +112,7 @@ static void draw_festival_info() {
     lang_text_draw_multiline(58, 18 + get_festival_advice(), vec2i{56, 305}, 400, FONT_NORMAL_WHITE_ON_DARK);
 }
 
-static int draw_background() {
+int ui::advisor_entertainment_window::draw_background() {
     painter ctx = game.painter();
     city_gods_update(true);
     city_culture_calculate();
@@ -131,23 +134,24 @@ static int draw_background() {
     // theaters, jugglers
     int y_offset = 77;
     int y_dist = 23;
-    draw_entertainer(0, y_offset, BUILDING_BOOTH, city_entertainment_theater_shows(), city_culture_coverage_booth(), 400);
-    draw_entertainer(1, y_offset + y_dist, BUILDING_BANDSTAND, city_entertainment_amphitheater_shows(), city_culture_coverage_amphitheater(), 700);
-    draw_entertainer(2, y_offset + y_dist * 2, BUILDING_PAVILLION, city_entertainment_colosseum_shows(), city_culture_coverage_colosseum(), 1200);
-    draw_entertainer(3, y_offset + y_dist * 3, BUILDING_SENET_HOUSE, city_entertainment_hippodrome_shows(), city_culture_coverage_hippodrome(), 0);
+    draw_entertainer(0, y_offset, BUILDING_BOOTH, g_city.entertainment.booth_shows, city_culture_coverage_booth(), 400);
+    draw_entertainer(1, y_offset + y_dist, BUILDING_BANDSTAND, g_city.entertainment.bandstand_shows, city_culture_coverage_bandstand(), 700);
+    draw_entertainer(2, y_offset + y_dist * 2, BUILDING_PAVILLION, g_city.entertainment.pavilion_shows, city_culture_coverage_colosseum(), 1200);
+    draw_entertainer(3, y_offset + y_dist * 3, BUILDING_SENET_HOUSE, g_city.entertainment.senet_house_plays, city_culture_coverage_hippodrome(), 0);
     draw_entertainer(9, y_offset + y_dist * 4, BUILDING_ZOO, 0, 0, 0);
 
     lang_text_draw_multiline(58, 7 + get_entertainment_advice(), vec2i{60, 208}, 512, FONT_NORMAL_BLACK_ON_LIGHT);
 
     return ADVISOR_HEIGHT;
 }
-static void draw_foreground(void) {
+
+void ui::advisor_entertainment_window::draw_foreground() {
     //    if (!city_festival_is_planned())
     //        button_border_draw(102, 280, 300, 20, focus_button_id == 1);
 }
 
-static bool handle_mouse(const mouse* m) {
-    return generic_buttons_handle_mouse(m, 0, 0, hold_festival_button, 1, &focus_button_id);
+int ui::advisor_entertainment_window::handle_mouse(const mouse* m) {
+    return generic_buttons_handle_mouse(m, {0, 0}, hold_festival_button, 1, &focus_button_id);
 }
 
 static void button_hold_festival(int param1, int param2) {
@@ -155,7 +159,7 @@ static void button_hold_festival(int param1, int param2) {
     //        window_hold_festival_show();
 }
 
-static int get_tooltip_text(void) {
+int ui::advisor_entertainment_window::get_tooltip_text() {
     if (focus_button_id) {
         return 112;
     }else {
@@ -163,13 +167,10 @@ static int get_tooltip_text(void) {
     }
 }
 
-const advisor_window* window_advisor_entertainment(void) {
-    static const advisor_window window = {
-        draw_background,
-        draw_foreground,
-        nullptr,
-        get_tooltip_text
-    };
+void ui::advisor_entertainment_window::init() {
     focus_button_id = 0;
-    return &window;
+}
+
+advisor_window* ui::advisor_entertainment_window::instance() {
+    return &g_advisor_entertainment_window;
 }

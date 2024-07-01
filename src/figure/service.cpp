@@ -1,8 +1,7 @@
 #include "service.h"
 
 #include "figuretype/figure_market_buyer.h"
-#include "building/building.h"
-#include "building/house.h"
+#include "building/building_house.h"
 #include "building/model.h"
 #include "figuretype/crime.h"
 #include "game/resource.h"
@@ -29,33 +28,8 @@ static void hippodrome_coverage(building* b, figure *f, int&) {
     b->data.house.hippodrome = MAX_COVERAGE;
 }
 
-static void magistrate_coverage(building* b, figure *f, int&) {
-    b->data.house.magistrate = MAX_COVERAGE;
-}
-
-static void academy_coverage(building* b, figure *f, int&) {
-    b->data.house.academy = MAX_COVERAGE;
-}
-
-static void library_coverage(building* b, figure *f, int&) {
-    b->data.house.library = MAX_COVERAGE;
-}
-
-static void dentist_coverage(building* b, figure *f, int&) {
-    b->data.house.dentist = MAX_COVERAGE;
-}
-
 static void mortuary_coverage(building* b, figure *f, int&) {
     b->data.house.mortuary = MAX_COVERAGE;
-}
-
-static void policeman_coverage(building* b, figure *f, int &max_anger_seen) {
-    b->house_criminal_active -= 1;
-    b->house_criminal_active = std::max<int>(0, b->house_criminal_active);
-
-    if (b->house_criminal_active > max_anger_seen) {
-        max_anger_seen = b->house_criminal_active;
-    }
 }
 
 int figure::figure_service_provide_coverage() {
@@ -65,18 +39,6 @@ int figure::figure_service_provide_coverage() {
     switch (type) {
     case FIGURE_NOBLES:
         return 0;
-
-    case FIGURE_SCRIBER:
-        houses_serviced = figure_provide_culture(tile, this, academy_coverage);
-        break;
-
-    case FIGURE_LIBRARIAN:
-        houses_serviced = figure_provide_culture(tile, this, library_coverage);
-        break;
-
-    case FIGURE_DENTIST:
-        houses_serviced = figure_provide_culture(tile, this, dentist_coverage);
-        break;
 
     case FIGURE_EMBALMER:
         houses_serviced = figure_provide_culture(tile, this, mortuary_coverage);
@@ -94,30 +56,6 @@ int figure::figure_service_provide_coverage() {
     case FIGURE_TOMB_ROBER:
         if (figure_rioter_collapse_building() == 1) {
             return 1;
-        }
-        break;
-
-    case FIGURE_CONSTABLE: {
-            int max_criminal_active = 0;
-            houses_serviced = figure_provide_service(tile, this, max_criminal_active, policeman_coverage);
-            if (max_criminal_active > min_max_seen)
-                min_max_seen = max_criminal_active;
-            else if (min_max_seen <= 10)
-                min_max_seen = 0;
-            else
-                min_max_seen -= 10;
-        }
-        break;
-
-    case FIGURE_MAGISTRATE: {
-            int max_criminal_active = 0;
-            houses_serviced = figure_provide_service(tile, this, max_criminal_active, magistrate_coverage);
-            if (max_criminal_active > min_max_seen)
-                min_max_seen = max_criminal_active;
-            else if (min_max_seen <= 10)
-                min_max_seen = 0;
-            else
-                min_max_seen -= 10;
         }
         break;
 

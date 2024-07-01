@@ -2,7 +2,7 @@
 
 #include "building/count.h"
 #include "city/coverage.h"
-#include "city/houses.h"
+#include "city/city.h"
 #include "city/population.h"
 #include "graphics/image.h"
 #include "graphics/graphics.h"
@@ -13,22 +13,24 @@
 
 #define ADVISOR_HEIGHT 16
 
+ui::advisor_education_window g_advisor_education_window;
+
 static int get_education_advice() {
-    const house_demands* demands = city_houses_demands();
-    if (demands->education == 1)
-        return demands->requiring.school ? 1 : 0;
-    else if (demands->education == 2)
-        return demands->requiring.library ? 3 : 2;
-    else if (demands->education == 3)
+    const house_demands &demands = g_city.houses;
+    if (demands.education == 1)
+        return demands.requiring.school ? 1 : 0;
+    else if (demands.education == 2)
+        return demands.requiring.library ? 3 : 2;
+    else if (demands.education == 3)
         return 4;
 
     int advice_id;
     int coverage_school = city_culture_coverage_school();
     int coverage_academy = city_culture_coverage_academy();
     int coverage_library = city_culture_coverage_library();
-    if (!demands->requiring.school)
+    if (!demands.requiring.school)
         advice_id = 5; // no demands yet
-    else if (!demands->requiring.library) {
+    else if (!demands.requiring.library) {
         if (coverage_school >= 100 && coverage_academy >= 100)
             advice_id = 6; // education is perfect
         else if (coverage_school <= coverage_academy)
@@ -53,7 +55,7 @@ static int get_education_advice() {
     return advice_id;
 }
 
-static int draw_background() {
+int ui::advisor_education_window::draw_background() {
     painter ctx = game.painter();
     outer_panel_draw(vec2i{0, 0}, 40, ADVISOR_HEIGHT);
     ImageDraw::img_generic(ctx, image_id_from_group(GROUP_ADVISOR_ICONS) + 7, vec2i{10, 10});
@@ -110,8 +112,7 @@ static int draw_background() {
     lang_text_draw_amount(8, 22, building_count_total(BUILDING_LIBRARY), 40, 145, FONT_NORMAL_WHITE_ON_DARK);
     text_draw_number_centered(building_count_active(BUILDING_LIBRARY), 150, 145, 100, FONT_NORMAL_WHITE_ON_DARK);
 
-    width
-      = text_draw_number(800 * building_count_active(BUILDING_LIBRARY), '@', " ", 280, 145, FONT_NORMAL_WHITE_ON_DARK);
+    width = text_draw_number(800 * building_count_active(BUILDING_LIBRARY), '@', " ", 280, 145, FONT_NORMAL_WHITE_ON_DARK);
     lang_text_draw(57, 9, 280 + width, 145, FONT_NORMAL_WHITE_ON_DARK);
 
     int pct_library = city_culture_coverage_library();
@@ -128,12 +129,6 @@ static int draw_background() {
     return ADVISOR_HEIGHT;
 }
 
-const advisor_window* window_advisor_education(void) {
-    static const advisor_window window = {
-        draw_background,
-        nullptr,
-        nullptr,
-        nullptr
-    };
-    return &window;
+advisor_window* ui::advisor_education_window::instance() {
+    return &g_advisor_education_window;
 }

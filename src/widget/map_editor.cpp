@@ -14,8 +14,8 @@
 #include "grid/property.h"
 #include "input/scroll.h"
 #include "config/config.h"
-#include "sound/city.h"
-#include "sound/effect.h"
+#include "sound/sound_city.h"
+#include "sound/sound.h"
 #include "widget/city/tile_draw.h"
 #include "widget/map_editor_tool.h"
 #include "game/game.h"
@@ -58,9 +58,7 @@ static void draw_flags(vec2i pixel, map_point point) {
     int figure_id = map_figure_id_get(point);
     while (figure_id) {
         figure* f = figure_get(figure_id);
-        if (!f->is_ghost) {
-            f->city_draw_figure(ctx, 0);
-        }
+        f->city_draw_figure(ctx, 0);
 
         if (figure_id != f->next_figure) {
             figure_id = f->next_figure;
@@ -78,7 +76,7 @@ static void draw_flags(vec2i pixel, map_point point) {
 
 static void update_zoom_level() {
     vec2i offset = camera_get_position();
-    if (zoom_update_value(&offset)) {
+    if (g_zoom.update_value(&offset)) {
         city_view_refresh_viewport();
         painter ctx = game.painter();
         camera_go_to_pixel(ctx, offset, true);
@@ -163,10 +161,10 @@ static void handle_touch_scroll(const touch* t) {
 
 static void handle_touch_zoom(const touch* first, const touch* last) {
     if (touch_not_click(first))
-        zoom_update_touch(first, last, zoom_get_percentage());
+        g_zoom.handle_touch(first, last, g_zoom.get_percentage());
 
     if (first->has_ended || last->has_ended)
-        zoom_end_touch();
+        g_zoom.end_touch();
 }
 
 static void handle_last_touch(void) {
@@ -297,7 +295,7 @@ void widget_map_editor_handle_input(const mouse* m, const hotkeys* h) {
     scroll_map(m);
 
     if (m->is_touch) {
-        zoom_map(m);
+        g_zoom.handle_mouse(m);
         handle_touch();
     } else {
         if (m->right.went_down && input_coords_in_map(m->x, m->y) && !editor_tool_is_active())
@@ -339,7 +337,7 @@ void widget_map_editor_handle_input(const mouse* m, const hotkeys* h) {
 
     if (m->left.went_up) {
         editor_tool_end_use(data.current_tile);
-        sound_effect_play(SOUND_EFFECT_BUILD);
+        g_sound.play_effect(SOUND_EFFECT_BUILD);
     }
 }
 

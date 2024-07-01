@@ -1,7 +1,11 @@
 #include "building_plaza.h"
 
 #include "building/building.h"
+#include "building/count.h"
 #include "city/object_info.h"
+#include "city/labor.h"
+#include "city/warnings.h"
+#include "grid/road_access.h"
 #include "game/resource.h"
 #include "graphics/elements/panel.h"
 #include "graphics/elements/lang_text.h"
@@ -16,6 +20,21 @@
 #include "game/game.h"
 #include "building_shrine.h"
 
+buildings::model_t<building_shrine_osiris> shrine_osiris_m;
+buildings::model_t<building_shrine_ra>   shrine_ra_m;
+buildings::model_t<building_shrine_ptah> shrine_ptah_m;
+buildings::model_t<building_shrine_seth> shrine_seth_m;
+buildings::model_t<building_shrine_bast> shrine_bast_m;
+
+ANK_REGISTER_CONFIG_ITERATOR(config_load_building_shrines);
+void config_load_building_shrines() {
+    shrine_osiris_m.load();
+    shrine_ra_m.load();
+    shrine_ptah_m.load();
+    shrine_seth_m.load();
+    shrine_bast_m.load();
+}
+
 static void building_shrine_draw_info(object_info& c, const char* type, int text_id, int image_offset) {
     painter ctx = game.painter();
     c.help_id = 67;
@@ -27,6 +46,12 @@ static void building_shrine_draw_info(object_info& c, const char* type, int text
         ImageDraw::img_generic(ctx, image_offset + image_id_from_group(GROUP_PANEL_WINDOWS), c.offset.x + 190, c.offset.y + 16 * c.bgsize.y - 148);
     } else {
         window_building_draw_description_at(c, 16 * c.bgsize.y - 128, 69, 25);
+    }
+}
+
+void building_shrine::on_place_checks() {
+    if (!map_has_road_access(tile(), 2)) {
+        building_construction_warning_show(WARNING_ROAD_ACCESS_NEEDED);
     }
 }
 

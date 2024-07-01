@@ -3,6 +3,30 @@
 #include "core/buffer.h"
 #include "city/constants.h"
 #include "building/building_type.h"
+#include "core/bstring.h"
+
+struct tutorial_stage_t {
+#define _RR(a) const bstring64 a{#a};
+    _RR(disable_all)
+    _RR(tutorial_food)
+    _RR(tutorial_fire)
+    _RR(tutorial_water)
+    _RR(tutorial_collapse)
+    _RR(tutorial_gods)
+    _RR(tutorial_entertainment)
+    _RR(tutorial_industry)
+    _RR(tutorial_health)
+    _RR(tutorial_gardens)
+    _RR(tutorial_crime)
+    _RR(tutorial_finance)
+    _RR(tutorial_trading)
+    _RR(tutorial_monuments)
+    _RR(tutorial_education)
+    _RR(tutorial_start)
+#undef _RR
+};
+
+extern const tutorial_stage_t tutorial_stage;
 
 struct tutorial_flags_t {
     struct {
@@ -61,7 +85,7 @@ struct tutorial_flags_t {
 
 const tutorial_flags_t* tutorial_flags_struct();
 
-void tutorial_init();
+void tutorial_init(bool clear_all_flags, bool custom);
 
 e_availability mission_advisor_availability(e_advisor advisor, int mission);
 e_availability mission_empire_availability(int mission);
@@ -93,4 +117,4 @@ void tutorial_starting_message();
 void tutorial_on_day_tick();
 void tutorial_on_month_tick();
 
-void tutorial_update_step(int step);
+void tutorial_update_step(pcstr step);

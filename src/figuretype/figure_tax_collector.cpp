@@ -11,20 +11,16 @@
 #include "city/labor.h"
 #include "city/gods.h"
 #include "city/ratings.h"
-#include "city/data_private.h"
+#include "city/city.h"
 #include "figure/service.h"
 
 #include "js/js_game.h"
 
-struct tax_collector_model : figures::model_t<FIGURE_TAX_COLLECTOR, figure_tax_collector> {};
-tax_collector_model tax_collector_m;
+figures::model_t<figure_tax_collector> tax_collector_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_tax_collector);
 void config_load_figure_tax_collector() {
-    g_config_arch.r_section("figure_tax_collector", [] (archive arch) {
-        tax_collector_m.anim.load(arch);
-        tax_collector_m.sounds.load(arch);
-    });
+    tax_collector_m.load();
 }
 
 void figure_tax_collector::figure_action() {
@@ -32,13 +28,13 @@ void figure_tax_collector::figure_action() {
     building* b = home();
     switch (action_state()) {
     case FIGURE_ACTION_40_TAX_COLLECTOR_CREATED:
-        base.anim_frame = 0;
+        base.anim.frame = 0;
         wait_ticks--;
         if (wait_ticks <= 0) {
-            tile2i road_tile;
-            if (map_closest_road_within_radius(b->tile, b->size, 2, road_tile)) {
+            tile2i road_tile = map_closest_road_within_radius(b->tile, b->size, 2);
+            if (road_tile.valid()) {
                 base.action_state = FIGURE_ACTION_41_TAX_COLLECTOR_ENTERING_EXITING;
-                base.set_cross_country_destination(road_tile.x(), road_tile.y());
+                base.set_cross_country_destination(road_tile);
                 base.roam_length = 0;
             } else {
                 poof();
@@ -64,8 +60,8 @@ void figure_tax_collector::figure_action() {
     case FIGURE_ACTION_42_TAX_COLLECTOR_ROAMING:
         base.roam_length++;
         if (base.roam_length >= base.max_roam_length) {
-            tile2i road_tile;
-            if (map_closest_road_within_radius(b->tile, b->size, 2, road_tile)) {
+            tile2i road_tile = map_closest_road_within_radius(b->tile, b->size, 2);
+            if (road_tile.valid()) {
                 base.action_state = FIGURE_ACTION_43_TAX_COLLECTOR_RETURNING;
                 destination_tile = road_tile;
             } else {
@@ -80,7 +76,7 @@ void figure_tax_collector::figure_action() {
         base.move_ticks(1);
             if (direction() == DIR_FIGURE_NONE) {
                 base.action_state = FIGURE_ACTION_41_TAX_COLLECTOR_ENTERING_EXITING;
-                base.set_cross_country_destination(b->tile.x(), b->tile.y());
+                base.set_cross_country_destination(b->tile);
                 base.roam_length = 0;
             } else if (direction() == DIR_FIGURE_REROUTE || direction() == DIR_FIGURE_CAN_NOT_REACH) {
                 poof();
@@ -100,14 +96,14 @@ sound_key figure_tax_collector::phrase_key() const {
         {"need_more_tax_collectors", city_finance_percentage_taxed_people() < 80},
         {"high_taxes", city_sentiment_low_mood_cause() == LOW_MOOD_HIGH_TAXES},
         {"much_pooh_houses", poor_taxed > 50},
-        {"desease_can_start_at_any_moment", city_health() < 30},
+        {"desease_can_start_at_any_moment", g_city.health.value < 30},
         {"no_food_in_city", city_sentiment_low_mood_cause() == LOW_MOOD_NO_FOOD},
         {"buyer_city_have_no_army", formation_get_num_forts() < 1},
-        {"need_workers", city_labor_workers_needed() >= 10},
+        {"need_workers", g_city.labor.workers_needed >= 10},
         {"gods_are_angry", city_gods_least_mood() <= GOD_MOOD_INDIFIRENT},
-        {"city_is_bad", city_rating_kingdom() < 30},
+        {"city_is_bad", g_city.ratings.kingdom < 30},
         {"much_unemployments", city_sentiment_low_mood_cause() == LOW_MOOD_NO_JOBS},
-        {"low_entertainment", city_data_struct()->festival.months_since_festival > 6},
+        {"low_entertainment", g_city.festival.months_since_festival > 6},
         {"city_is_good", city_sentiment() > 50},
         {"city_is_amazing", city_sentiment() > 90}
     };
@@ -154,4 +150,8 @@ int figure_tax_collector::provide_service() {
 
 figure_sound_t figure_tax_collector::get_sound_reaction(pcstr key) const {
     return tax_collector_m.sounds[key];
+}
+
+const animations_t &figure_tax_collector::anim() const {
+    return tax_collector_m.anim;
 }

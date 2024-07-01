@@ -4,49 +4,49 @@
 #include "core/random.h"
 #include "city/map.h"
 #include "grid/road_access.h"
+#include "grid/terrain.h"
 #include "city/population.h"
-#include "building/house.h"
+#include "building/building_house.h"
 #include "city/migration.h"
 #include "city/sentiment.h"
+#include "city/city.h"
 
 #include "js/js_game.h"
 
-struct emigrant_model : public figures::model_t<FIGURE_EMIGRANT, figure_emigrant> {};
-emigrant_model emigrant_m;
+figures::model_t<figure_emigrant> emigrant_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_emigrant);
 void config_load_figure_emigrant() {
-    g_config_arch.r_section("figure_emigrant", [] (archive arch) {
-        emigrant_m.anim.load(arch);
-        emigrant_m.sounds.load(arch);
-    });
+    emigrant_m.load();
 }
 
-void figure_create_emigrant(building* house, int num_people) {
+figure *figure_emigrant::create(building* b, int num_people) {
+    building_house *house = b->dcast_house();
     city_population_remove(num_people);
-    if (num_people < house->house_population) {
-        house->house_population -= num_people;
+    if (num_people < house->house_population()) {
+        house->change_population(-num_people);
     } else {
-        house->house_population = 0;
-        building_house_change_to_vacant_lot(house);
+        house->change_to_vacant_lot();
     }
 
-    figure* f = figure_create(FIGURE_EMIGRANT, house->tile, DIR_0_TOP_RIGHT);
-    if (house->subtype.house_level >= HOUSE_COMMON_MANOR) {
-        city_migration_nobles_leave_city(num_people);
+    figure* f = figure_create(FIGURE_EMIGRANT, house->tile(), DIR_0_TOP_RIGHT);
+    if (house->house_level() >= HOUSE_COMMON_MANOR) {
+        g_city.migration_nobles_leave_city(num_people);
     }
 
     f->action_state = FIGURE_ACTION_4_EMIGRANT_CREATED;
     f->wait_ticks = 0;
     f->migrant_num_people = num_people;
+
+    return f;
 }
 
 void figure_emigrant::figure_action() {
     OZZY_PROFILER_SECTION("Game/Run/Tick/Figure/Emigrant");
-    tile2i exit = city_map_exit_point();
+    tile2i exit = g_city.map.exit_point;
     switch (action_state()) {
     case FIGURE_ACTION_4_EMIGRANT_CREATED:
-        base.anim_frame = 0;
+        base.anim.frame = 0;
         wait_ticks++;
         if (wait_ticks >= 5) {
             advance_action(FIGURE_ACTION_5_EMIGRANT_EXITING_HOUSE);
@@ -72,7 +72,7 @@ void figure_emigrant::figure_action() {
     case 10:
         wait_ticks--;
         if (wait_ticks > 0) {
-            base.anim_frame = 0;
+            base.anim.frame = 0;
             break;
         }
 
@@ -89,18 +89,25 @@ void figure_emigrant::figure_action() {
             wait_ticks = 20;
             route_remove();
             base.state = FIGURE_STATE_ALIVE;
-            tile2i road_tile;
-            map_closest_road_within_radius(exit, 1, 2, road_tile);
+            tile2i road_tile = map_closest_road_within_radius(exit, 1, 2);
             destination_tile = road_tile;
             base.direction = DIR_0_TOP_RIGHT;
             advance_action(ACTION_16_EMIGRANT_RANDOM);
         }
         break;
     }
+}
 
-    {
-        OZZY_PROFILER_SECTION("Game/Run/Tick/Figure/Emigrant/Update Image");
-        update_direction_and_image();
+void figure_emigrant::update_animation() {
+    figure_impl::update_animation();
+
+    int dir = base.figure_image_direction();
+    switch (action_state()) {
+    case FIGURE_ACTION_2_IMMIGRANT_ARRIVING:
+    case FIGURE_ACTION_6_EMIGRANT_LEAVING:
+        base.cart_image_id = emigrant_m.anim["cart"].first_img() + dir;
+        base.figure_image_set_cart_offset((dir + 4) % 8);
+        break;
     }
 }
 
@@ -122,4 +129,8 @@ sound_key figure_emigrant::phrase_key() const {
     }
 
     return  "all_good_in_city";
+}
+
+const animations_t &figure_emigrant::anim() const {
+    return emigrant_m.anim;
 }

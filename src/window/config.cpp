@@ -1,11 +1,11 @@
 #include "config.h"
 
-#include "building/menu.h"
+#include "building/building_menu.h"
 #include "core/game_environment.h"
 #include "core/string.h"
 #include "core/log.h"
 #include "city/gods.h"
-#include "city/data_private.h"
+#include "city/city.h"
 #include "game/settings.h"
 #include "game/game.h"
 #include "game/system.h"
@@ -27,7 +27,7 @@
 #include "translation/translation.h"
 #include "window/hotkey_config.h"
 #include "window/plain_message_dialog.h"
-#include "scenario/scenario_data.h"
+#include "scenario/scenario.h"
 #include "window/select_list.h"
 #include "empire/empire_city.h"
 
@@ -163,6 +163,8 @@ static generic_button checkbox_buttons[] = {
     {20, 264, 20, 20, toggle_building, button_none, CONFIG_GP_CH_BUILDING_RECRUTER, TR_CONFIG_BUILDING_RECRUTER},
     {20, 288, 20, 20, toggle_building, button_none, CONFIG_GP_CH_BUILDING_SMALL_MASTABA, TR_CONFIG_BUILDING_SMALL_MASTABA},
     {20, 312, 20, 20, toggle_building, button_none, CONFIG_GP_CH_BUILDING_BRICKLAYERS, TR_CONFIG_BUILDING_BRICKLAYERS},
+    {20, 336, 20, 20, toggle_building, button_none, CONFIG_GP_CH_BUILDING_BOOTH, TR_CONFIG_BUILDING_BOOTH},
+    {20, 360, 20, 20, toggle_building, button_none, CONFIG_GP_CH_BUILDING_BANDSTAND, TR_CONFIG_BUILDING_BANDSTAND},
 
     //
     {20, 72, 20, 20, toggle_resource, button_none, CONFIG_GP_CH_RESOURCE_TIMBER, TR_CONFIG_RESOURCE_TIMBER},
@@ -180,7 +182,7 @@ static generic_button checkbox_buttons[] = {
     {20, 360, 20, 20, toggle_resource, button_none, CONFIG_GP_CH_RESOURCE_CLAY, TR_CONFIG_RESOURCE_CLAY},
 };
 
-static int options_per_page[] = {14, 14, 14, 14, 4, 5, 14, 11, 13};
+static int options_per_page[] = {14, 14, 14, 14, 4, 5, 14, 13, 13};
 
 static generic_button language_button = {120, 50, 200, 24, button_language_select, button_none, 0, TR_CONFIG_LANGUAGE_LABEL};
 
@@ -279,11 +281,7 @@ static int config_change_string_basic(int key) {
             CONFIG_STRING_VALUE_MAX - 1);
     return 1;
 }
-// static int config_change_zoom(int key) {
-//     config_change_basic(key);
-////    system_reload_textures();
-//    return 1;
-//}
+
 static int config_change_string_language(int key) {
     auto& data = g_window_config_ext_data;
     config_set_string(CONFIG_STRING_UI_LANGUAGE_DIR, data.config_string_values[key].new_value);
@@ -386,10 +384,10 @@ static void handle_input(const mouse* m, const hotkeys* h) {
     const mouse* m_dialog = mouse_in_dialog(m);
     bool mouse_button = false;
 
-    mouse_button |= !!generic_buttons_min_handle_mouse(m_dialog, 0, 0, checkbox_buttons, data.starting_option + options_per_page[data.page], &data.focus_button, data.starting_option);
-    mouse_button |= !!generic_buttons_handle_mouse(m_dialog, 0, 0, bottom_buttons, (int)std::size(bottom_buttons), &data.bottom_focus_button);
-    mouse_button |= !!generic_buttons_handle_mouse(m_dialog, 0, 0, page_buttons, (int)std::size(page_buttons), &data.page_focus_button);
-    mouse_button |= !!generic_buttons_handle_mouse(m_dialog, 0, 0, &language_button, 1, &data.language_focus_button);
+    mouse_button |= !!generic_buttons_min_handle_mouse(m_dialog, {0, 0}, checkbox_buttons, data.starting_option + options_per_page[data.page], &data.focus_button, data.starting_option);
+    mouse_button |= !!generic_buttons_handle_mouse(m_dialog, {0, 0}, bottom_buttons, (int)std::size(bottom_buttons), &data.bottom_focus_button);
+    mouse_button |= !!generic_buttons_handle_mouse(m_dialog, {0, 0}, page_buttons, (int)std::size(page_buttons), &data.page_focus_button);
+    mouse_button |= !!generic_buttons_handle_mouse(m_dialog, {0, 0}, &language_button, 1, &data.language_focus_button);
 
     if (!mouse_button && (m->right.went_up || h->escape_pressed)) {
         if (data.close_callback) {
@@ -444,6 +442,8 @@ static void toggle_building(int id, int param2) {
     case CONFIG_GP_CH_BUILDING_QUARRY_STONE: type = BUILDING_STONE_QUARRY; break;
     case CONFIG_GP_CH_BUILDING_QUARRY_LIMESTONE: type = BUILDING_LIMESTONE_QUARRY; break;
     case CONFIG_GP_CH_BUILDING_CLAY_PIT: type = BUILDING_CLAY_PIT; break;
+    case CONFIG_GP_CH_BUILDING_BOOTH: type = BUILDING_BOOTH; break;
+    case CONFIG_GP_CH_BUILDING_BANDSTAND: type = BUILDING_BANDSTAND; break;
     case CONFIG_GP_CH_BUILDING_WEAPONSMITH: type = BUILDING_WEAPONSMITH; break;
     case CONFIG_GP_CH_BUILDING_RECRUTER: type = BUILDING_RECRUITER; break;
     case CONFIG_GP_CH_BUILDING_SMALL_MASTABA: type = BUILDING_SMALL_MASTABA; break;
@@ -478,14 +478,14 @@ static void toggle_resource(int id, int param2) {
         return;
     }
 
-    bool can_produce = !can_city_produce_resource(resource);
-    set_city_produce_resource(resource, can_produce);
+    bool can_produce = !g_city.can_produce_resource(resource);
+    g_city.set_produce_resource(resource, can_produce);
 
     if (resource == RESOURCE_FISH) {
         if (can_produce) {
-            figure_reset_fishing_points();
+            g_city.fishing_points.reset();
         } else {
-            figure_clear_fishing_points();
+            g_city.fishing_points.clear();
         }
     }
     window_invalidate();
@@ -546,18 +546,18 @@ static bool is_config_option_enabled(int option) {
     switch (option) {
     case CONFIG_GP_CH_CITY_HAS_ANIMALS: return g_scenario_data.env.has_animals;
     case CONFIG_GP_CH_FLOTSAM_ENABLED: return g_scenario_data.env.flotsam_enabled;
-    case CONFIG_GP_CH_RESOURCE_TIMBER: return can_city_produce_resource(RESOURCE_TIMBER);
-    case CONFIG_GP_CH_RESOURCE_COPPER: return can_city_produce_resource(RESOURCE_COPPER);
-    case CONFIG_GP_CH_RESOURCE_REED: return can_city_produce_resource(RESOURCE_REEDS);
-    case CONFIG_GP_CH_RESOURCE_FISH: return can_city_produce_resource(RESOURCE_FISH);
-    case CONFIG_GP_CH_RESOURCE_CHICKPEAS: return can_city_produce_resource(RESOURCE_CHICKPEAS);
-    case CONFIG_GP_CH_RESOURCE_POMEGRANADES: return can_city_produce_resource(RESOURCE_POMEGRANATES);
-    case CONFIG_GP_CH_RESOURCE_LETTUCE: return can_city_produce_resource(RESOURCE_LETTUCE);
-    case CONFIG_GP_CH_RESOURCE_FIGS: return can_city_produce_resource(RESOURCE_FIGS);
-    case CONFIG_GP_CH_RESOURCE_GRAIN: return can_city_produce_resource(RESOURCE_GRAIN);
-    case CONFIG_GP_CH_RESOURCE_MEAT: return can_city_produce_resource(RESOURCE_MEAT);
-    case CONFIG_GP_CH_RESOURCE_PAPYRUS: return can_city_produce_resource(RESOURCE_PAPYRUS);
-    case CONFIG_GP_CH_RESOURCE_BRICKS: return can_city_produce_resource(RESOURCE_BRICKS);
+    case CONFIG_GP_CH_RESOURCE_TIMBER: return g_city.can_produce_resource(RESOURCE_TIMBER);
+    case CONFIG_GP_CH_RESOURCE_COPPER: return g_city.can_produce_resource(RESOURCE_COPPER);
+    case CONFIG_GP_CH_RESOURCE_REED: return g_city.can_produce_resource(RESOURCE_REEDS);
+    case CONFIG_GP_CH_RESOURCE_FISH: return g_city.can_produce_resource(RESOURCE_FISH);
+    case CONFIG_GP_CH_RESOURCE_CHICKPEAS: return g_city.can_produce_resource(RESOURCE_CHICKPEAS);
+    case CONFIG_GP_CH_RESOURCE_POMEGRANADES: return g_city.can_produce_resource(RESOURCE_POMEGRANATES);
+    case CONFIG_GP_CH_RESOURCE_LETTUCE: return g_city.can_produce_resource(RESOURCE_LETTUCE);
+    case CONFIG_GP_CH_RESOURCE_FIGS: return g_city.can_produce_resource(RESOURCE_FIGS);
+    case CONFIG_GP_CH_RESOURCE_GRAIN: return g_city.can_produce_resource(RESOURCE_GRAIN);
+    case CONFIG_GP_CH_RESOURCE_MEAT: return g_city.can_produce_resource(RESOURCE_MEAT);
+    case CONFIG_GP_CH_RESOURCE_PAPYRUS: return g_city.can_produce_resource(RESOURCE_PAPYRUS);
+    case CONFIG_GP_CH_RESOURCE_BRICKS: return g_city.can_produce_resource(RESOURCE_BRICKS);
 
     case CONFIG_GP_CH_BUILDING_WOOD_CUTTER: return building_menu_is_building_enabled(BUILDING_WOOD_CUTTERS);
     case CONFIG_GP_CH_BUILDING_COPPER_MINE: return building_menu_is_building_enabled(BUILDING_COPPER_MINE);
@@ -580,6 +580,8 @@ static bool is_config_option_enabled(int option) {
     case CONFIG_GP_CH_BUILDING_QUARRY_STONE: return building_menu_is_building_enabled(BUILDING_STONE_QUARRY);
     case CONFIG_GP_CH_BUILDING_QUARRY_LIMESTONE: return building_menu_is_building_enabled(BUILDING_LIMESTONE_QUARRY);
     case CONFIG_GP_CH_BUILDING_CLAY_PIT: return building_menu_is_building_enabled(BUILDING_CLAY_PIT);
+    case CONFIG_GP_CH_BUILDING_BOOTH: return building_menu_is_building_enabled(BUILDING_BOOTH);
+    case CONFIG_GP_CH_BUILDING_BANDSTAND: return building_menu_is_building_enabled(BUILDING_BANDSTAND);
     case CONFIG_GP_CH_BUILDING_WEAPONSMITH: return building_menu_is_building_enabled(BUILDING_WEAPONSMITH);
     case CONFIG_GP_CH_BUILDING_RECRUTER: return building_menu_is_building_enabled(BUILDING_RECRUITER);
     case CONFIG_GP_CH_BUILDING_SMALL_MASTABA: return building_menu_is_building_enabled(BUILDING_SMALL_MASTABA);

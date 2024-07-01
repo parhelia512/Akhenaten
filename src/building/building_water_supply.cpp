@@ -8,6 +8,7 @@
 #include "widget/city/ornaments.h"
 #include "graphics/elements/ui.h"
 #include "city/labor.h"
+#include "city/warnings.h"
 
 buildings::model_t<building_water_supply> water_supply_m;
 
@@ -17,12 +18,11 @@ void config_load_building_water_supply() {
 }
 
 void building_water_supply::update_month() {
-    int avg_desirability = map_desirabilty_avg(tile(), 4);
-    if (avg_desirability > 30) {
-        map_building_tiles_add(id(), tile(), 2, IMG_WATER_SUPPLY_FANCY, TERRAIN_BUILDING);
-    } else {
-        map_building_tiles_add(id(), tile(), 2, IMG_WATER_SUPPLY, TERRAIN_BUILDING);
-    }
+    int avg_desirability = g_desirability.get_avg(tile(), 4);
+    base.fancy_state = (avg_desirability > 30) ? efancy_good : efancy_normal;
+    pcstr anim_name = (base.fancy_state == efancy_good) ? "fancy" : "base";
+    const animation_t &anim = water_supply_m.anim[anim_name];
+    map_building_tiles_add(id(), tile(), 2, anim.first_img(), TERRAIN_BUILDING);
 }
 
 void building_water_supply::spawn_figure() {
@@ -65,7 +65,8 @@ void building_water_supply::spawn_figure() {
 }
 
 bool building_water_supply::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
-    const auto &anim = water_supply_m.anim["work"];
+    pcstr anim_name = (base.fancy_state == efancy_good) ? "fancy_work" : "base_work";
+    const auto &anim = water_supply_m.anim[anim_name];
     building_draw_normal_anim(ctx, point, &base, tile, anim, color_mask);
 
     return true;
@@ -74,15 +75,15 @@ bool building_water_supply::draw_ornaments_and_animations_height(painter &ctx, v
 void building_water_supply::window_info_background(object_info &c) {
     c.help_id = 61;
 
-    window_building_play_sound(&c, "wavs/fountain.wav");
+    window_building_play_sound(&c, "Wavs/fountain.wav");
     
     outer_panel_draw(c.offset, c.bgsize.x, c.bgsize.y);
     lang_text_draw_centered(108, 0, c.offset.x, c.offset.y + 10, 16 * c.bgsize.x, FONT_LARGE_BLACK_ON_LIGHT);
 
     building* b = building_get(c.building_id);
-    if (!c.has_road_access)
+    if (!c.has_road_access) {
         window_building_draw_description(c, 69, 25);
-    else {
+    } else {
         if (!b->num_workers)
             window_building_draw_description(c, 108, 7);
         else {
@@ -103,4 +104,16 @@ void building_water_supply::window_info_background(object_info &c) {
     }
     inner_panel_draw(c.offset.x + 16, c.offset.y + 144, c.bgsize.x - 2, 4);
     window_building_draw_employment(&c, 150);
+}
+
+void building_water_supply::on_place_checks() {
+    if (building_construction_has_warning()) {
+        return;
+    }
+
+    int has_water = map_terrain_is(tile(), TERRAIN_GROUNDWATER);
+
+    if (!has_water) {
+        building_construction_warning_show(WARNING_WATER_PIPE_ACCESS_NEEDED);
+    }
 }

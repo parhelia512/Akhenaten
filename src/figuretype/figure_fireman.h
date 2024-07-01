@@ -4,6 +4,7 @@
 
 class figure_fireman : public figure_impl {
 public:
+    FIGURE_METAINFO(FIGURE_FIREMAN, figure_fireman)
     figure_fireman(figure *f) : figure_impl(f) {}
 
     virtual void on_create() override;
@@ -14,6 +15,8 @@ public:
     virtual sound_key phrase_key() const override;
     virtual int provide_service() override;
     virtual figure_sound_t get_sound_reaction(pcstr key) const override;
+    virtual const animations_t &anim() const override;
+    virtual void update_animation() override;
 
     void extinguish_fire();
     bool fight_fire();

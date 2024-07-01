@@ -1,6 +1,5 @@
 #include "distant_battle.h"
 
-#include "building/menu.h"
 #include "city/buildings.h"
 #include "city/map.h"
 #include "city/message.h"
@@ -12,7 +11,7 @@
 #include "empire/type.h"
 #include "figure/formation_legion.h"
 #include "game/time.h"
-#include "scenario/scenario_data.h"
+#include "scenario/scenario.h"
 
 int scenario_distant_battle_kingdome_travel_months(void) {
     return g_scenario_data.empire.distant_battle_kingdome_travel_months;

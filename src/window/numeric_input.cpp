@@ -9,7 +9,7 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "input/keyboard.h"
-#include "sound/effect.h"
+#include "sound/sound.h"
 
 static void button_number(int number, int param2);
 static void button_accept(int param1, int param2);
@@ -32,8 +32,6 @@ static generic_button buttons[] = {{21, 51, 25, 25, button_number, button_none, 
                                    {21, 171, 85, 25, button_cancel, button_none, 1, 0}};
 
 struct numeric_input_t : public vec2i {
-    int x;
-    int y;
     int max_digits;
     int max_value;
     void (*callback)(int);
@@ -100,7 +98,7 @@ static void draw_foreground() {
 
 static void handle_input(const mouse* m, const hotkeys* h) {
     auto &data = g_numeric_input;
-    if (generic_buttons_handle_mouse(m, data.x, data.y, buttons, 12, &data.focus_button_id))
+    if (generic_buttons_handle_mouse(m, data, buttons, 12, &data.focus_button_id))
         return;
 
     if (input_go_back_requested(m, h))
@@ -127,7 +125,7 @@ static void input_number(int number) {
     if (data.num_digits < data.max_digits) {
         data.value = data.value * 10 + number;
         data.num_digits++;
-        sound_effect_play(SOUND_EFFECT_BUILD);
+        g_sound.play_effect(SOUND_EFFECT_BUILD);
     }
 }
 

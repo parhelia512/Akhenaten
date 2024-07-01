@@ -5,11 +5,11 @@
 #include "building/building_type.h"
 #include "building/building_storage_yard.h"
 #include "graphics/elements/ui.h"
-#include "city/resource.h"
+#include "city/city.h"
 #include "city/labor.h"
 #include "core/calc.h"
 #include "game/resource.h"
-#include "scenario/property.h"
+#include "scenario/scenario.h"
 #include "grid/desirability.h"
 #include "grid/building_tiles.h"
 #include "grid/terrain.h"
@@ -19,11 +19,9 @@
 #include "graphics/graphics.h"
 #include "game/game.h"
 #include "widget/city/ornaments.h"
+#include "building/count.h"
 
 #include <numeric>
-
-constexpr int Y_FOODS = 90;           // 234
-constexpr int Y_GOODS = Y_FOODS + 20; // 174 //274
 
 buildings::model_t<building_bazaar> bazaar_m;
 
@@ -36,6 +34,48 @@ struct resource_data {
     int building_id;
     int distance;
     int num_buildings;
+
+    void update_food(int resource, building &b, int distance) {
+        if (!resource) {
+            return;
+        }
+
+        building_granary *granary = b.dcast_granary();
+        if (!granary) {
+            return;
+        }
+
+        if (b.data.granary.resource_stored[resource] < 100) {
+            return;
+        }
+
+        num_buildings++;
+        if (distance < distance) {
+            distance = distance;
+            building_id = b.id;
+        }
+    }
+
+    void update_good(e_resource resource, building &b, int distance) {
+        if (city_resource_is_stockpiled(resource)) {
+            return;
+        }
+
+        building_storage_yard *warehouse = b.dcast_storage_yard();
+        if (!warehouse) {
+            return;
+        }
+
+        if (warehouse->amount(resource) <= 0) {
+            return;
+        }
+
+        num_buildings++;
+        if (distance < distance) {
+            distance = distance;
+            building_id = b.id;
+        }
+    }
 };
 
 int building_bazaar::max_food_stock() {
@@ -46,33 +86,6 @@ int building_bazaar::max_food_stock() {
 int building_bazaar::max_goods_stock() {
     auto it = std::max_element(data.market.inventory + INVENTORY_MIN_GOOD, data.market.inventory + INVENTORY_MAX_GOOD);
     return *it;
-}
-
-static void update_food_resource(resource_data &data, int resource, const building &b, int distance) {
-    if (!resource) {
-        return;
-    }
-
-    if (b.data.granary.resource_stored[resource] > 100) {
-        data.num_buildings++;
-        if (distance < data.distance) {
-            data.distance = distance;
-            data.building_id = b.id;
-        }
-    }
-}
-
-static void update_good_resource(resource_data &data, e_resource resource, building &b, int distance) {
-    building_storage_yard *warehouse = b.dcast_storage_yard();
-
-    if (!city_resource_is_stockpiled(resource) && warehouse->amount(resource) > 0) {
-        data.num_buildings++;
-
-        if (distance < data.distance) {
-            data.distance = distance;
-            data.building_id = b.id;
-        }
-    }
 }
 
 bool building_bazaar::is_good_accepted(int index) {
@@ -86,7 +99,7 @@ void building_bazaar::toggle_good_accepted(int index) {
 }
 
 void building_bazaar::unaccept_all_goods() {
-    base.subtype.market_goods = 0xFFFF;
+    base.subtype.market_goods = (short)0xFFFF;
 }
 
 building *building_bazaar::get_storage_destination() {
@@ -118,17 +131,17 @@ building *building_bazaar::get_storage_destination() {
             }
 
             // todo: fetch map available foods?
-            update_food_resource(resources[0], city_allowed_foods(0), b, distance);
-            update_food_resource(resources[1], city_allowed_foods(1), b, distance);
-            update_food_resource(resources[2], city_allowed_foods(2), b, distance);
-            update_food_resource(resources[3], city_allowed_foods(3), b, distance);
+            resources[0].update_food(g_city.allowed_foods(0), b, distance);
+            resources[1].update_food(g_city.allowed_foods(1), b, distance);
+            resources[2].update_food(g_city.allowed_foods(2), b, distance);
+            resources[3].update_food(g_city.allowed_foods(3), b, distance);
 
         } else if (b.type == BUILDING_STORAGE_YARD) {
             // goods
-            update_good_resource(resources[INVENTORY_GOOD1], RESOURCE_POTTERY, b, distance);
-            update_good_resource(resources[INVENTORY_GOOD2], RESOURCE_LUXURY_GOODS, b, distance);
-            update_good_resource(resources[INVENTORY_GOOD3], RESOURCE_LINEN, b, distance);
-            update_good_resource(resources[INVENTORY_GOOD4], RESOURCE_BEER, b, distance);
+            resources[INVENTORY_GOOD1].update_good(RESOURCE_POTTERY, b, distance);
+            resources[INVENTORY_GOOD2].update_good(RESOURCE_LUXURY_GOODS, b, distance);
+            resources[INVENTORY_GOOD3].update_good(RESOURCE_LINEN, b, distance);
+            resources[INVENTORY_GOOD4].update_good(RESOURCE_BEER, b, distance);
         }
     }, BUILDING_GRANARY, BUILDING_STORAGE_YARD);
 
@@ -272,8 +285,15 @@ void building_bazaar::update_graphic() {
         return;
     }
 
-    base.internal_state = (map_desirability_get(base.tile.grid_offset()) <= 30) ? IMG_BAZAAR : IMG_BAZAAR_FANCY;
-    map_building_tiles_add(base.id, base.tile, base.size, image_group(e_image_id(base.internal_state)), TERRAIN_BUILDING);
+    base.fancy_state = (g_desirability.get(base.tile) <= 30) ? efancy_normal : efancy_good;
+    pcstr animkey = (base.fancy_state == efancy_normal) ? "base" : "fancy";
+    const animation_t &anim = bazaar_m.anim[animkey];
+    map_building_tiles_add(base.id, base.tile, base.size, anim.first_img(), TERRAIN_BUILDING);
+}
+
+void building_bazaar::on_create(int orientation) {
+    base.subtype.market_goods = 0;
+    base.fancy_state = efancy_normal;
 }
 
 void building_bazaar::spawn_figure() {
@@ -309,12 +329,12 @@ void building_bazaar::spawn_figure() {
     }
 }
 
-int window_building_handle_mouse_market(const mouse* m, object_info &c) {
+int building_bazaar::handle_mouse_simple(const mouse* m, object_info &c) {
     auto &data = g_window_building_distribution;
-    return generic_buttons_handle_mouse(m, c.offset.x + 80, c.offset.y + 16 * c.bgsize.x - 34, data.go_to_orders_button.data(), 1, &data.focus_button_id);
+    return generic_buttons_handle_mouse(m, {c.offset.x + 80, c.offset.y + 16 * c.bgsize.x - 34}, data.go_to_orders_button.data(), 1, &data.focus_button_id);
 }
 
-int window_building_handle_mouse_market_orders(const mouse* m, object_info &c) {
+int building_bazaar::handle_mouse_orders(const mouse* m, object_info &c) {
     auto &data = g_window_building_distribution;
     int y_offset = window_building_get_vertical_offset(&c, 28 - 11);
     data.resource_focus_button_id = 0;
@@ -322,174 +342,21 @@ int window_building_handle_mouse_market_orders(const mouse* m, object_info &c) {
     // resources
     int num_resources = city_resource_get_available_market_goods()->size;
     data.building_id = c.building_id;
-    return generic_buttons_handle_mouse(m, c.offset.x + 205, y_offset + 46, data.orders_resource_buttons.data(), num_resources, &data.resource_focus_button_id);
+    return generic_buttons_handle_mouse(m, {c.offset.x + 205, y_offset + 46}, data.orders_resource_buttons.data(), num_resources, &data.resource_focus_button_id);
 }
 
 int building_bazaar::window_info_handle_mouse(const mouse *m, object_info &c) {
     if (c.storage_show_special_orders) {
-        return window_building_handle_mouse_market_orders(m, c);
+        return handle_mouse_orders(m, c);
     }
 
-    return window_building_handle_mouse_market(m, c);
-}
-
-void building_bazaar::draw_simple_background(object_info &c) {
-    c.help_id = 2;
-    window_building_play_sound(&c, "wavs/market.wav");
-    {
-        ui::begin_widget(c.offset);
-
-        ui::panel({0, 0}, {c.bgsize.x, c.bgsize.y}, UiFlags_PanelOuter);
-        ui::label(97, 0, vec2i{0, 10}, FONT_LARGE_BLACK_ON_LIGHT, UiFlags_LabelCentered, 16 * c.bgsize.x);
-
-        ui::panel({16, 136}, {c.bgsize.x - 2, 4}, UiFlags_PanelInner);
-
-        int text_id = get_employment_info_text_id(&c, &base, 142, 1);
-        draw_employment_details(&c, &base, 142, text_id);
-    }
-    painter ctx = game.painter();
-    e_font font;
-
-    std::pair<int, int> reason = {0, 0};
-    if (!c.has_road_access) {
-        reason = {69, 25};
-    }
-
-    if (base.num_workers <= 0) {
-        reason = {97, 2};
-    }
-
-    if (reason.first) {
-        ui::label(reason.first, reason.second, vec2i{32, 56}, FONT_NORMAL_BLACK_ON_LIGHT, UiFlags_LabelMultiline, 16 * (c.bgsize.x - 4));
-        return;
-    }
-
-    int image_id = image_id_resource_icon(0);
-    if (data.market.inventory[0] || data.market.inventory[1] || data.market.inventory[2]
-        || data.market.inventory[3]) {
-            {
-                //
-            }
-    } else {
-        window_building_draw_description_at(c, 48, 97, 4);
-    }
-
-    // food stocks
-    // todo: fetch map available foods?
-    int food1 = city_allowed_foods(0);
-    int food2 = city_allowed_foods(1);
-    int food3 = city_allowed_foods(2);
-    int food4 = city_allowed_foods(3);
-
-    if (food1) {
-        font = is_good_accepted(0) ? FONT_NORMAL_BLACK_ON_LIGHT : FONT_NORMAL_YELLOW;
-        ImageDraw::img_generic(ctx, image_id + food1, c.offset + vec2i{32, Y_FOODS});
-        text_draw_number(data.market.inventory[0], '@', " ", c.offset.x + 64, c.offset.y + Y_FOODS + 4, font);
-    }
-
-    if (food2) {
-        font = is_good_accepted(1) ? FONT_NORMAL_BLACK_ON_LIGHT : FONT_NORMAL_YELLOW;
-        ImageDraw::img_generic(ctx, image_id + food2, c.offset + vec2i{142, Y_FOODS});
-        text_draw_number(data.market.inventory[1], '@', " ", c.offset.x + 174, c.offset.y + Y_FOODS + 4, font);
-    }
-
-    if (food3) {
-        font = is_good_accepted(2) ? FONT_NORMAL_BLACK_ON_LIGHT : FONT_NORMAL_YELLOW;
-        ImageDraw::img_generic(ctx, image_id + food3, c.offset + vec2i{252, Y_FOODS});
-        text_draw_number(data.market.inventory[2], '@', " ", c.offset.x + 284, c.offset.y + Y_FOODS + 4, font);
-    }
-
-    if (food4) {
-        font = is_good_accepted(3) ? FONT_NORMAL_BLACK_ON_LIGHT : FONT_NORMAL_YELLOW;
-        ImageDraw::img_generic(ctx, image_id + food4, c.offset + vec2i{362, Y_FOODS});
-        text_draw_number(data.market.inventory[3], '@', " ", c.offset.x + 394, c.offset.y + Y_FOODS + 4, font);
-    }
-
-    // good stocks
-    font = is_good_accepted(INVENTORY_GOOD1) ? FONT_NORMAL_BLACK_ON_LIGHT : FONT_NORMAL_YELLOW;
-    ImageDraw::img_generic(ctx, image_id + INV_RESOURCES[0], c.offset.x + 32, c.offset.y + Y_GOODS);
-    text_draw_number(data.market.inventory[INVENTORY_GOOD1], '@', " ", c.offset.x + 64, c.offset.y + Y_GOODS + 4, font);
-
-    font = is_good_accepted(INVENTORY_GOOD2) ? FONT_NORMAL_BLACK_ON_LIGHT : FONT_NORMAL_YELLOW;
-    ImageDraw::img_generic(ctx, image_id + INV_RESOURCES[1], c.offset.x + 142, c.offset.y + Y_GOODS);
-    text_draw_number(data.market.inventory[INVENTORY_GOOD2], '@', " ", c.offset.x + 174, c.offset.y + Y_GOODS + 4, font);
-
-    font = is_good_accepted(INVENTORY_GOOD3) ? FONT_NORMAL_BLACK_ON_LIGHT : FONT_NORMAL_YELLOW;
-    ImageDraw::img_generic(ctx, image_id + INV_RESOURCES[2], c.offset.x + 252, c.offset.y + Y_GOODS);
-    text_draw_number(data.market.inventory[INVENTORY_GOOD3], '@', " ", c.offset.x + 284, c.offset.y + Y_GOODS + 4, font);
-
-    font = is_good_accepted(INVENTORY_GOOD4) ? FONT_NORMAL_BLACK_ON_LIGHT : FONT_NORMAL_YELLOW;
-    ImageDraw::img_generic(ctx, image_id + INV_RESOURCES[3], c.offset.x + 362, c.offset.y + Y_GOODS);
-    text_draw_number(data.market.inventory[INVENTORY_GOOD4], '@', " ", c.offset.x + 394, c.offset.y + Y_GOODS + 4, font);
-}
-
-void building_bazaar::draw_orders_background(object_info &c) {
-    c.help_id = 2;
-    int y_offset = window_building_get_vertical_offset(&c, 28 - 11);
-    outer_panel_draw(vec2i{c.offset.x, y_offset}, 29, 28 - 11);
-    lang_text_draw_centered(97, 7, c.offset.x, y_offset + 10, 16 * c.bgsize.x, FONT_LARGE_BLACK_ON_LIGHT);
-    inner_panel_draw(c.offset.x + 16, y_offset + 42, c.bgsize.x - 2, 21 - 10);
-}
-
-void building_bazaar::window_info_background(object_info &c) {
-    if (c.storage_show_special_orders)
-        draw_orders_background(c);
-    else
-        draw_simple_background(c);
-}
-
-void building_bazaar::draw_orders_foreground(object_info &c) {
-    auto &data = g_window_building_distribution;
-    draw_orders_background(c);
-    int line_x = c.offset.x + 215;
-    int y_offset = window_building_get_vertical_offset(&c, 28 - 11);
-    painter ctx = game.painter();
-
-    building_bazaar* bazaar = building_get(c.building_id)->dcast_bazaar();
-    //    backup_storage_settings(storage_id); // TODO: market state backup
-    const resources_list* list = city_resource_get_available_market_goods();
-    for (int i = 0; i < list->size; i++) {
-        int line_y = 20 * i;
-        int resource = list->items[i];
-        int image_id = image_id_resource_icon(resource) + resource_image_offset(resource, RESOURCE_IMAGE_ICON);
-
-        ImageDraw::img_generic(ctx, image_id, c.offset.x + 25, y_offset + 48 + line_y);
-        lang_text_draw(23, resource, c.offset.x + 52, y_offset + 50 + line_y, FONT_NORMAL_WHITE_ON_DARK);
-        if (data.resource_focus_button_id - 1 == i)
-            button_border_draw(line_x - 10, y_offset + 46 + line_y, data.orders_resource_buttons[i].width, data.orders_resource_buttons[i].height, true);
-
-        // order status
-        window_building_draw_order_instruction(INSTR_STORAGE_YARD, nullptr, resource, line_x, y_offset + 51 + line_y, bazaar->is_good_accepted(i));
-    }
-
-    // accept none button
-    //if (GAME_ENV == ENGINE_ENV_C3) {
-    //    draw_accept_none_button(c->offset.x + 394, y_offset + 404, data.orders_focus_button_id == 1);
-    //}
-    //    else if (GAME_ENV == ENGINE_ENV_PHARAOH) {
-    //        button_border_draw(c->offset.x + 80, y_offset + 382 - 10 * 16, 16 * (c->width_blocks - 10), 20,
-    //                           data.orders_focus_button_id == 2 ? 1 : 0);
-    //        lang_text_draw_centered(99, 7, c->offset.x + 80, y_offset + 386 - 10 * 16,
-    //                                16 * (c->width_blocks - 10), FONT_NORMAL_BLACK);
-    //    }
-}
-
-void building_bazaar::draw_simple_foreground(object_info &c) {
-    auto &data = g_window_building_distribution;
-    button_border_draw(c.offset.x + 80, c.offset.y + 16 * c.bgsize.y - 34, 16 * (c.bgsize.x - 10), 20, data.focus_button_id == 1 ? 1 : 0);
-    lang_text_draw_centered(98, 5, c.offset.x + 80, c.offset.y + 16 * c.bgsize.y - 30, 16 * (c.bgsize.x - 10), FONT_NORMAL_BLACK_ON_LIGHT);
-}
-
-void building_bazaar::window_info_foreground(object_info &ctx) {
-    if (ctx.storage_show_special_orders)
-        draw_orders_foreground(ctx);
-    else
-        draw_simple_foreground(ctx);
+    return handle_mouse_simple(m, c);
 }
 
 bool building_bazaar::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
-    pcstr anim_name = base.internal_state == IMG_BAZAAR_FANCY ? "work_fancy" : "work";
-    building_draw_normal_anim(ctx, point, &base, tile, bazaar_m.anim[anim_name], color_mask);
+    pcstr animkey = (base.fancy_state == efancy_normal) ? "base_work" : "fancy_work";
+    const animation_t &anim = bazaar_m.anim[animkey];
+    building_draw_normal_anim(ctx, point, &base, tile, anim, color_mask);
 
     return true;
 }

@@ -1,7 +1,7 @@
 #include "invasion.h"
 
 #include "building/destruction.h"
-#include "city/emperor.h"
+#include "city/city.h"
 #include "city/message.h"
 #include "core/calc.h"
 #include "core/random.h"
@@ -14,8 +14,7 @@
 #include "grid/grid.h"
 #include "grid/terrain.h"
 #include "scenario/map.h"
-#include "scenario/property.h"
-#include "scenario/scenario_data.h"
+#include "scenario/scenario.h"
 
 #include <string.h>
 
@@ -276,8 +275,7 @@ static int start_invasion(int enemy_type, int amount, int invasion_point, int at
         e_figure_type figure_type = ENEMY_PROPERTIES[enemy_type].figure_types[type];
         for (int i = 0; i < formations_per_type[type]; i++) {
             int formation_id = formation_create_enemy(figure_type,
-                                                      x,
-                                                      y,
+                                                      tile2i{x, y},
                                                       ENEMY_PROPERTIES[enemy_type].formation_layout,
                                                       orientation,
                                                       enemy_type,
@@ -295,7 +293,6 @@ static int start_invasion(int enemy_type, int amount, int invasion_point, int at
                 f->wait_ticks = 200 * seq + 10 * fig + 10;
                 f->formation_id = formation_id;
                 f->name = figure_name_get(figure_type, enemy_type);
-                //                f->is_ghost = true;
             }
             seq++;
         }
@@ -435,7 +432,7 @@ void scenario_invasion_start_from_console(int attack_type, int size, int invasio
         break;
     }
     case ATTACK_TYPE_CAESAR: {
-        city_emperor_force_attack(size);
+        g_city.kingdome.force_attack(size);
         break;
     }
     case ATTACK_TYPE_NATIVES: {

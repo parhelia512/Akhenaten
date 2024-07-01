@@ -4,12 +4,10 @@
 #include "building/building_granary.h"
 #include "building/maintenance.h"
 #include "building/monuments.h"
-#include "building/menu.h"
-#include "building/properties.h"
+#include "building/building_menu.h"
 #include "building/storage.h"
 #include "config/config.h"
-#include "city/city_data.h"
-#include "city/emperor.h"
+#include "city/city.h"
 #include "city/map.h"
 #include "city/message.h"
 #include "city/military.h"
@@ -18,14 +16,13 @@
 #include "city/victory.h"
 #include "core/bstring.h"
 #include "content/vfs.h"
-#include "empire/empire.h"
+#include "empire/empire_map.h"
 #include "empire/trade_prices.h"
 #include "figure/enemy_army.h"
 #include "figure/figure_names.h"
 #include "figure/route.h"
 #include "figure/trader.h"
 #include "figuretype/animal.h"
-#include "figuretype/water.h"
 #include "game/mission.h"
 #include "game/settings.h"
 #include "game/state.h"
@@ -61,12 +58,11 @@
 #include "scenario/gladiator_revolt.h"
 #include "scenario/invasion.h"
 #include "scenario/price_change.h"
-#include "scenario/property.h"
 #include "scenario/request.h"
-#include "sound/city.h"
+#include "sound/sound_city.h"
 #include "sound/music.h"
-#include "widget/top_menu.h"
-#include "window/city.h"
+#include "widget/top_menu_game.h"
+#include "window/window_city.h"
 #include "window/file_dialog.h"
 #include "window/mission_briefing.h"
 
@@ -124,22 +120,20 @@ const int GamestateIO::read_file_version(const char* filename, int offset) {
     return small_buffer->read_i32();
 }
 
-enum E_LOADED { LOADED_NULL = -1, LOADED_MISSION = 0, LOADED_SAVE = 1, LOADED_CUSTOM_MAP = 2 };
-
-static int last_loaded = LOADED_NULL;
+static e_loaded_type last_loaded = e_loaded_none;
 static void pre_load() { // do we NEED this...?
     scenario_set_campaign_scenario(-1);
     map_bookmarks_clear();
 
     // clear data
-    city_victory_reset();
+    g_city.victory_state.reset();
     Planner.reset();
-    city_data_init();
+    g_city.init();
     city_message_init_scenario();
     game_state_init();
     game.animation_timers_init();
     sound_city_init();
-    building_menu_enable_all();
+    building_menu_set_all(true);
     building_clear_all();
     building_storage_clear_all();
     figure_init_scenario();
@@ -160,7 +154,7 @@ static void pre_load() { // do we NEED this...?
     map_property_clear();
     map_sprite_clear();
     map_random_clear();
-    map_desirability_clear();
+    g_desirability.clear();
     map_elevation_clear();
     map_soldier_strength_clear();
     map_road_network_clear();
@@ -176,6 +170,7 @@ static void post_load() {
     int scenario_id = scenario_campaign_scenario_id();
     int mission_rank = get_scenario_mission_rank(scenario_id);
     scenario_set_campaign_rank(mission_rank);
+    scenario_load_meta_data(scenario_id);
 
     // camera
     //    city_view_camera_position_refresh();
@@ -198,7 +193,6 @@ static void post_load() {
     map_image_fix_icorrect_tiles();
 
     // building counts / storage
-    // TODO: can't find cache in Pharaoh's save file format?
     building_count_update();
     city_granaries_calculate_stocks();
     city_resource_calculate_storageyard_stocks();
@@ -206,22 +200,30 @@ static void post_load() {
     building_storage_reset_building_ids();
     city_culture_update_coverage();
 
+    g_city.update_allowed_resources();
+
     // traders / empire
     trade_prices_reset();
-    city_emperor_init_scenario(scenario_campaign_rank());
 
     // city data special cases
     switch (last_loaded) {
-    case LOADED_MISSION:
-        city_data_init_campaign_mission();
+    case e_loaded_mission:
+        g_city.init_campaign_mission();
+        g_city.kingdome.init_scenario(scenario_campaign_rank(), last_loaded);
+        tutorial_init(/*clear_all*/true, false);
         break;
-    case LOADED_CUSTOM_MAP:
-        city_data_init_custom_map();
+    case e_loaded_save:
+        tutorial_init(/*clear_all*/false, false);
+        break;
+    case e_loaded_custom_map:
+        g_city.init_custom_map();
+        g_city.kingdome.init_scenario(scenario_campaign_rank(), last_loaded);
+        tutorial_init(/*clear_all*/true, true);
         break;
     }
 
     // building menu
-    building_menu_update(BUILDSET_NORMAL);
+    //building_menu_update(BUILDSET_NORMAL);
 
     // city messages
     city_message_clear_scroll();
@@ -589,7 +591,7 @@ bool GamestateIO::load_mission(const int scenario_id, bool start_immediately) {
         return false;
     }
 
-    last_loaded = LOADED_MISSION;
+    last_loaded = e_loaded_mission;
     scenario_set_campaign_scenario(scenario_id);
     post_load();
 
@@ -617,7 +619,7 @@ bool GamestateIO::load_savegame(const char* filename_short, bool start_immediate
         return false;
     }
 
-    last_loaded = LOADED_SAVE;
+    last_loaded = e_loaded_save;
     post_load();
 
     // finish loading and start
@@ -638,7 +640,7 @@ bool GamestateIO::load_map(const char* filename_short, bool start_immediately) {
         return false;
     }
 
-    last_loaded = LOADED_CUSTOM_MAP;
+    last_loaded = e_loaded_custom_map;
     post_load();
 
     // finish loading and start
@@ -653,7 +655,7 @@ bool GamestateIO::load_map(const char* filename_short, bool start_immediately) {
 
 void GamestateIO::start_loaded_file() {
     // build the map grids when loading MAP files
-    if (last_loaded != LOADED_SAVE) {
+    if (last_loaded != e_loaded_save) {
         // initialize grids
         map_tiles_update_all_elevation();
         map_tiles_river_refresh_entire();
@@ -666,41 +668,33 @@ void GamestateIO::start_loaded_file() {
         map_tiles_update_all_roads();
         map_tiles_update_all_plazas();
         map_tiles_update_all_walls();
-        map_tiles_update_all_aqueducts(0);
+        map_tiles_update_all_canals(0);
 
         //        map_natives_init();
-        figure_create_fishing_points();
+        g_city.fishing_points.create();
         figure_create_herds();
 
-        map_point entry = scenario_map_entry();
-        map_point exit = scenario_map_exit();
-        city_map_set_entry_point(entry);
-        city_map_set_exit_point(exit);
+        g_city.map.entry_point = scenario_map_entry();
+        g_city.map.exit_point = scenario_map_exit();
 
         // game time
         game_time_init(scenario_property_start_year());
 
         // traders / empire
-        empire_init_scenario();
+        g_empire_map.init_scenario();
         traders_clear();
 
         // set up events
         scenario_earthquake_init();
         scenario_gladiator_revolt_init();
-        scenario_emperor_change_init();
+        scenario_kingdome_change_init();
         scenario_criteria_init_max_year();
         scenario_invasion_init();
         city_military_determine_distant_battle_city();
         scenario_request_init();
         scenario_demand_change_init();
         scenario_price_change_init();
-
-        // tutorial flags
-        tutorial_init();
     }
-
-    scenario_load_meta_data(g_scenario_data.settings.campaign_scenario_id);
-    building_properties_init();
 
     // city view / orientation
     city_view_init();
@@ -725,14 +719,14 @@ void GamestateIO::start_loaded_file() {
     map_tiles_update_all_vegetation_tiles();
     map_building_update_all_tiles();
 
-    if (last_loaded == LOADED_MISSION) {
+    if (last_loaded == e_loaded_mission) {
         window_mission_briefing_show();
     } else {
         game.paused = false;
         window_city_show();
     }
     sound_music_update(true);
-    last_loaded = LOADED_NULL;
+    last_loaded = e_loaded_none;
 }
 
 bool GamestateIO::delete_mission(const int scenario_id) {

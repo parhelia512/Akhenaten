@@ -8,7 +8,7 @@
 #include "grid/random.h"
 #include "grid/terrain.h"
 #include "input/scroll.h"
-#include "scenario/property.h"
+#include "scenario/scenario.h"
 #include "game/game.h"
 
 #include "dev/debug.h"
@@ -26,9 +26,23 @@ struct minimap_data_t {
     vec2i rel_mouse;
     vec2i mouse_last_coords;
     int refresh_requested;
+    animation_t terrain_canal;
+    animation_t terrain_water;
+
+    void load(archive arch) {
+        arch.r_anim("terrain_canal", terrain_canal);
+        arch.r_anim("terrain_water", terrain_water);
+    }
 };
 
 minimap_data_t g_minimap_data;
+
+ANK_REGISTER_CONFIG_ITERATOR(config_load_minimap);
+void config_load_minimap() {
+    g_config_arch.r_section("minimap_window", [] (archive arch) {
+        g_minimap_data.load(arch);
+    });
+}
 
 void widget_minimap_invalidate(void) {
     auto& data = g_minimap_data;
@@ -95,9 +109,11 @@ static int draw_figure(screen_tile screen, map_point point) {
     case FIGURE_COLOR_SOLDIER:
         color = COLOR_MINIMAP_SOLDIER;
         break;
+
     case FIGURE_COLOR_ENEMY:
         color = data.enemy_color;
         break;
+
     case FIGURE_COLOR_ANIMAL:
         color = COLOR_MINIMAP_ANIMAL;
         break;
@@ -117,8 +133,9 @@ static void draw_minimap_tile(vec2i screen, tile2i point) {
         return;
     }
 
-    if (draw_figure(screen, point))
+    if (draw_figure(screen, point)) {
         return;
+    }
 
     int terrain = map_terrain_get(grid_offset);
     // exception for fort ground: display as empty land
@@ -131,25 +148,17 @@ static void draw_minimap_tile(vec2i screen, tile2i point) {
         if (map_property_is_draw_tile(grid_offset)) {
             int image_id;
             building* b = building_at(grid_offset);
-            if (b->house_size)
-                image_id = image_id_from_group(GROUP_MINIMAP_HOUSE);
-            else if (b->type == BUILDING_WATER_LIFT || b->type == BUILDING_WELL)
-                image_id = image_id_from_group(GROUP_MINIMAP_AQUEDUCT);
-            else if (terrain & TERRAIN_ROAD) {
-                if (b->type == BUILDING_ROADBLOCK) {
-                    image_id = image_group(IMG_MINIMAP_BLACK); // black
-                } else if (building_is_entertainment(b->type)) {
-                    image_id = image_group(IMG_MINIMAP_BRIGHT_TEAL); // bright teal
-                } else if (b->type == BUILDING_FESTIVAL_SQUARE) {
-                    image_id = image_group(IMG_MINIMAP_BRIGHT_TEAL); // bright teal
-                } else if (b->type == BUILDING_FERRY) {
-                    image_id = image_group(IMG_MINIMAP_DARK_GREY); // dark grey
-                } else {
-                    image_id = image_group(IMG_MINIMAP_DARK_GREY); // dark grey
-                }
-            } else if (building_is_food_category(b->type)) {
-                image_id = image_group(IMG_MINIMAP_GREEN); // green
-            } else if (building_is_industry(b->type)) {
+            //if (terrain & TERRAIN_ROAD) {
+            //    if (building_is_entertainment(b->type)) {
+            //        image_id = image_group(IMG_MINIMAP_BRIGHT_TEAL); // bright teal
+            //    } else if (b->type == BUILDING_FESTIVAL_SQUARE) {
+            //        image_id = image_group(IMG_MINIMAP_BRIGHT_TEAL); // bright teal
+            //} else 
+            if (building_is_extractor(b->type)) {
+                image_id = image_group(IMG_MINIMAP_DARK_RED); // dark red
+            } else if (building_is_harvester(b->type)) {
+                image_id = image_group(IMG_MINIMAP_DARK_RED); // dark red
+            } else if(building_is_workshop(b->type)) {
                 image_id = image_group(IMG_MINIMAP_DARK_RED); // dark red
             } else if (building_is_entertainment(b->type)) {
                 image_id = image_group(IMG_MINIMAP_BRIGHT_TEAL); // bright teal
@@ -166,9 +175,9 @@ static void draw_minimap_tile(vec2i screen, tile2i point) {
             } else if (building_is_beautification(b->type)) {
                 image_id = image_group(IMG_MINIMAP_SPENT_TEAL); // spent teal
             } else if (building_is_monument(b->type)) {
-                image_id = image_group(IMG_MINIMAP_DARK_GREY); // dark grey
+                image_id = image_id_from_group(PACK_GENERAL, 149, 210); // dark grey
             } else {
-                image_id = image_group(IMG_MINIMAP_COLOR) + g_debug_tile;
+                image_id = b->minimap_anim.first_img();
             }
 
             auto multi_tile_size = map_property_multi_tile_size(grid_offset);
@@ -191,9 +200,9 @@ static void draw_minimap_tile(vec2i screen, tile2i point) {
     } else {
         int rand = map_random_get(grid_offset);
         int image_id;
-        if (terrain & TERRAIN_WATER)
-            image_id = image_id_from_group(GROUP_MINIMAP_WATER) + (rand & 3);
-        else if (terrain & TERRAIN_SHRUB)
+        if (terrain & TERRAIN_WATER) {
+            image_id = g_minimap_data.terrain_water.first_img() + (rand & 3);
+        } else if (terrain & TERRAIN_SHRUB)
             image_id = image_id_from_group(GROUP_MINIMAP_TREE) + (rand & 3);
         else if (terrain & TERRAIN_TREE)
             image_id = image_id_from_group(GROUP_MINIMAP_TREE) + (rand & 3);
@@ -204,7 +213,7 @@ static void draw_minimap_tile(vec2i screen, tile2i point) {
         else if (terrain & TERRAIN_ROAD)
             image_id = image_id_from_group(GROUP_MINIMAP_ROAD);
         else if (terrain & TERRAIN_CANAL)
-            image_id = image_id_from_group(GROUP_MINIMAP_AQUEDUCT);
+            image_id = g_minimap_data.terrain_canal.first_img();
         else if (terrain & TERRAIN_WALL)
             image_id = image_id_from_group(GROUP_MINIMAP_WALL);
         else if (terrain & TERRAIN_MEADOW)

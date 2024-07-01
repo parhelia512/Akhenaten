@@ -1,74 +1,63 @@
 #include "military.h"
 
-#include "building/menu.h"
 #include "city/buildings.h"
-#include "city/data_private.h"
+#include "city/city.h"
 #include "city/message.h"
 #include "city/ratings.h"
 #include "core/calc.h"
-#include "empire/empire_city.h"
+#include "empire/empire.h"
 #include "figure/formation.h"
 #include "figure/formation_legion.h"
 #include "scenario/distant_battle.h"
 
-void city_military_clear_legionary_legions() {
-    city_data.military.legionary_legions = 0;
+void city_military_t::clear_infantry_batalions() {
+    infantry_batalions = 0;
 }
 
-void city_military_add_legionary_legion() {
-    city_data.military.legionary_legions++;
+void city_military_t::add_infantry_batalion() {
+    infantry_batalions++;
 }
 
-int city_military_has_legionary_legions() {
-    return city_data.military.legionary_legions > 0;
+bool city_military_t::has_infantry_batalions() {
+    return infantry_batalions > 0;
 }
 
-int city_military_total_legions() {
-    return city_data.military.total_legions;
+void city_military_t::clear_kingdome_service_batalions() {
+    kingdome_service_batalions = 0;
 }
 
-int city_military_total_soldiers() {
-    return city_data.military.total_soldiers;
-}
-
-int city_military_empire_service_legions() {
-    return city_data.military.empire_service_legions;
-}
-
-void city_military_clear_empire_service_legions() {
-    city_data.military.empire_service_legions = 0;
-}
-
-void city_military_update_totals() {
-    city_data.military.empire_service_legions = 0;
-    city_data.military.total_soldiers = 0;
-    city_data.military.total_legions = 0;
+void city_military_t::update_totals() {
+    kingdome_service_batalions = 0;
+    total_soldiers = 0;
+    infantry_batalions = 0;
     for (int i = 1; i < MAX_FORMATIONS; i++) {
         const formation* m = formation_get(i);
         if (m->in_use && m->is_legion) {
-            city_data.military.total_legions++;
-            city_data.military.total_soldiers += m->num_figures;
-            if (m->empire_service && m->num_figures > 0)
-                city_data.military.empire_service_legions++;
+            infantry_batalions++;
+            total_soldiers += m->num_figures;
+            if (m->empire_service && m->num_figures > 0) {
+                kingdome_service_batalions++;
+            }
         }
     }
 }
 
-int city_military_is_native_attack_active() {
-    return city_data.military.native_attack_duration > 0;
+bool city_military_t::is_native_attack_active() {
+    return native_attack_duration > 0;
 }
 
-void city_military_start_native_attack() {
-    city_data.military.native_attack_duration = 2;
+void city_military_t::start_native_attack() {
+    native_attack_duration = 2;
 }
 
-void city_military_decrease_native_attack_duration() {
-    if (city_data.military.native_attack_duration)
-        city_data.military.native_attack_duration--;
+void city_military_t::decrease_native_attack_duration() {
+    if (native_attack_duration > 0)
+        native_attack_duration--;
 }
 
+static auto &city_data = g_city;
 void city_military_determine_distant_battle_city() {
-    city_data.distant_battle.city = empire_city_get_vulnerable_roman();
+    city_data.distant_battle.city = g_empire.get_city_vulnerable();
 }
 
 int city_military_distant_battle_city() {
@@ -160,12 +149,12 @@ static void update_time_traveled() {
 
 static void set_city_vulnerable() {
     if (city_data.distant_battle.city)
-        empire_city_set_vulnerable(city_data.distant_battle.city);
+        g_empire.city(city_data.distant_battle.city)->set_vulnerable();
 }
 
 static void set_city_foreign() {
     if (city_data.distant_battle.city)
-        empire_city_set_foreign(city_data.distant_battle.city);
+        g_empire.city(city_data.distant_battle.city)->set_foreign();
 
     city_data.distant_battle.city_foreign_months_left = 24;
 }
@@ -203,24 +192,24 @@ static int player_has_won() {
 static void fight_distant_battle() {
     if (city_data.distant_battle.roman_months_to_travel_forth <= 0) {
         city_message_post(true, MESSAGE_DISTANT_BATTLE_LOST_NO_TROOPS, 0, 0);
-        city_ratings_change_kingdom(-50);
+        g_city.ratings.change_kingdom(-50);
         set_city_foreign();
     } else if (city_data.distant_battle.roman_months_to_travel_forth > 2) {
         city_message_post(true, MESSAGE_DISTANT_BATTLE_LOST_TOO_LATE, 0, 0);
-        city_ratings_change_kingdom(-25);
+        g_city.ratings.change_kingdom(-25);
         set_city_foreign();
         city_data.distant_battle.roman_months_to_travel_back = city_data.distant_battle.roman_months_traveled;
     } else if (!player_has_won()) {
         city_message_post(true, MESSAGE_DISTANT_BATTLE_LOST_TOO_WEAK, 0, 0);
-        city_ratings_change_kingdom(-10);
+        g_city.ratings.change_kingdom(-10);
         set_city_foreign();
         city_data.distant_battle.roman_months_traveled = 0;
         // no return: all soldiers killed
     } else {
         city_message_post(true, MESSAGE_DISTANT_BATTLE_WON, 0, 0);
-        city_ratings_change_kingdom(25);
+        g_city.ratings.change_kingdom(25);
         city_buildings_earn_triumphal_arch();
-        building_menu_update(BUILDSET_NORMAL);
+        //building_menu_update(BUILDSET_NORMAL);
         city_data.distant_battle.won_count++;
         city_data.distant_battle.city_foreign_months_left = 0;
         city_data.distant_battle.roman_months_to_travel_back = city_data.distant_battle.roman_months_traveled;

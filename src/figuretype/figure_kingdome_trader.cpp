@@ -7,13 +7,13 @@
 #include "building/building_storage_room.h"
 #include "city/buildings.h"
 #include "city/finance.h"
-#include "city/map.h"
+#include "city/city.h"
 #include "city/message.h"
 #include "city/resource.h"
 #include "city/trade.h"
 #include "core/calc.h"
-#include "empire/empire_city.h"
 #include "empire/empire.h"
+#include "empire/empire_map.h"
 #include "empire/trade_prices.h"
 #include "empire/trade_route.h"
 #include "figure/combat.h"
@@ -21,24 +21,22 @@
 #include "figure/movement.h"
 #include "figure/route.h"
 #include "figure/trader.h"
+#include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/image_desc.h"
 #include "graphics/image_groups.h"
 #include "grid/figure.h"
 #include "grid/road_access.h"
 #include "scenario/map.h"
+#include "game/game.h"
 
 #include "js/js_game.h"
 
-struct trade_caravan_model : public figures::model_t<FIGURE_TRADE_CARAVAN, figure_trade_caravan> {};
-trade_caravan_model trade_caravan_m;
+figures::model_t<figure_trade_caravan> trade_caravan_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_trade_caravan);
 void config_load_figure_trade_caravan() {
-    g_config_arch.r_section("figure_trade_caravan", [] (archive arch) {
-        trade_caravan_m.anim.load(arch);
-        trade_caravan_m.sounds.load(arch);
-    });
+    trade_caravan_m.load();
 }
 
 int figure::trader_total_bought() {
@@ -73,15 +71,17 @@ void figure_trade_caravan::go_to_next_storageyard(tile2i src_tile, int distance_
         base.action_state = FIGURE_ACTION_101_TRADE_CARAVAN_ARRIVING;
         destination_tile = dst;
     } else {
-        tile2i exit = city_map_exit_point();
-        tile2i road_tile;
+        tile2i exit = g_city.map.exit_point;
         base.state = FIGURE_STATE_ALIVE;
-        map_closest_road_within_radius(exit, 1, 2, road_tile);
-        destination_tile = road_tile;
+        destination_tile = map_closest_road_within_radius(exit, 1, 2);
         base.direction = DIR_0_TOP_RIGHT;
         advance_action(ACTION_16_EMIGRANT_RANDOM);
         base.action_state = FIGURE_ACTION_103_TRADE_CARAVAN_LEAVING;
     }
+}
+
+void figure_trade_caravan::on_create() {
+    base.trader_id = trader_create();
 }
 
 void figure_trade_caravan::figure_action() {
@@ -103,7 +103,7 @@ void figure_trade_caravan::figure_action() {
             }
             go_to_next_storageyard(base_tile, 0);
         }
-        base.anim_frame = 0;
+        base.anim.frame = 0;
         break;
 
     case FIGURE_ACTION_101_TRADE_CARAVAN_ARRIVING:
@@ -124,7 +124,8 @@ void figure_trade_caravan::figure_action() {
             if (can_buy(destination(), base.empire_city_id)) {
                 e_resource resource = trader_get_buy_resource(destination(), base.empire_city_id, one_operation_amount);
                 if (resource) {
-                    trade_route_increase_traded(empire_city_get_route_id(base.empire_city_id), resource, one_operation_amount);
+                    int route_id = g_empire.city(base.empire_city_id)->route_id;
+                    trade_route_increase_traded(route_id, resource, one_operation_amount);
                     trader_record_bought_resource(base.trader_id, resource);
                     trader_buy(one_operation_amount);
                 } else {
@@ -137,7 +138,8 @@ void figure_trade_caravan::figure_action() {
             if (move_on > 0 && can_sell(destination(), base.empire_city_id)) {
                 e_resource resource = trader_get_sell_resource(destination(), base.empire_city_id);
                 if (resource) {
-                    trade_route_increase_traded(empire_city_get_route_id(base.empire_city_id), resource, one_operation_amount);
+                    int route_id = g_empire.city(base.empire_city_id)->route_id;
+                    trade_route_increase_traded(route_id, resource, one_operation_amount);
                     trader_record_sold_resource(base.trader_id, resource);
                     trader_sell(one_operation_amount);
                 } else {
@@ -151,7 +153,7 @@ void figure_trade_caravan::figure_action() {
                 go_to_next_storageyard(tile(), -1);
             }
         }
-        base.anim_frame = 0;
+        base.anim.frame = 0;
         break;
 
     case FIGURE_ACTION_103_TRADE_CARAVAN_LEAVING:
@@ -161,9 +163,6 @@ void figure_trade_caravan::figure_action() {
         }
         break;
     }
-
-    int dir = figure_image_normalize_direction(direction() < 8 ? direction() : base.previous_tile_direction);
-    base.sprite_image_id = image_group(IMG_TRADER_CARAVAN) + dir + 8 * base.anim_frame;
 }
 
 sound_key figure_trade_caravan::phrase_key() const {
@@ -185,8 +184,88 @@ sound_key figure_trade_caravan::phrase_key() const {
     return 0;
 }
 
-bool figure_trade_caravan::window_info_background(object_info &ctx) {
-    draw_trader(&ctx);
+bool figure_trade_caravan::window_info_background(object_info &c) {
+    painter ctx = game.painter();
+    figure* f = &base;
+    const empire_city* city = g_empire.city(f->empire_city_id);
+    int width = lang_text_draw(64, f->type, c.offset.x + 40, c.offset.y + 110, FONT_NORMAL_BLACK_ON_DARK);
+    lang_text_draw(21, city->name_id, c.offset.x + 40 + width, c.offset.y + 110, FONT_NORMAL_BLACK_ON_DARK);
+
+    width = lang_text_draw(129, 1, c.offset.x + 40, c.offset.y + 132, FONT_NORMAL_BLACK_ON_DARK);
+    lang_text_draw_amount(8, 10, 800, c.offset.x + 40 + width, c.offset.y + 132, FONT_NORMAL_BLACK_ON_DARK);
+
+    int trader_id = f->trader_id;
+   
+    int text_id;
+    switch (f->action_state) {
+    case FIGURE_ACTION_101_TRADE_CARAVAN_ARRIVING: text_id = 12; break;
+    case FIGURE_ACTION_102_TRADE_CARAVAN_TRADING: text_id = 10; break;
+    case FIGURE_ACTION_103_TRADE_CARAVAN_LEAVING:
+        if (trader_has_traded(trader_id))
+            text_id = 11;
+        else
+            text_id = 13;
+        break;
+    default:
+        text_id = 11;
+    break;
+    }
+    lang_text_draw(129, text_id, c.offset.x + 40, c.offset.y + 154, FONT_NORMAL_BLACK_ON_DARK);
+
+    if (trader_has_traded(trader_id)) {
+        // bought
+        int y_base = c.offset.y + 180;
+        width = lang_text_draw(129, 4, c.offset.x + 40, y_base, FONT_NORMAL_BLACK_ON_DARK);
+        for (e_resource r = RESOURCE_MIN; r < RESOURCES_MAX; ++r) {
+            if (trader_bought_resources(trader_id, r)) {
+                width += text_draw_number(trader_bought_resources(trader_id, r), '@'," ", c.offset.x + 40 + width, y_base, FONT_NORMAL_BLACK_ON_DARK);
+                int image_id = image_id_resource_icon(r) + resource_image_offset(r, RESOURCE_IMAGE_ICON);
+                ImageDraw::img_generic(ctx, image_id, vec2i{c.offset.x + 40 + width, y_base - 3});
+                width += 25;
+            }
+        }
+        // sold
+        y_base = c.offset.y + 210;
+        width = lang_text_draw(129, 5, c.offset.x + 40, y_base, FONT_NORMAL_BLACK_ON_DARK);
+        for (e_resource r = RESOURCE_MIN; r < RESOURCES_MAX; ++r) {
+            if (trader_sold_resources(trader_id, r)) {
+                width += text_draw_number(trader_sold_resources(trader_id, r), '@', " ", c.offset.x + 40 + width, y_base, FONT_NORMAL_BLACK_ON_DARK);
+                int image_id = image_id_resource_icon(r) + resource_image_offset(r, RESOURCE_IMAGE_ICON);
+                ImageDraw::img_generic(ctx, image_id, vec2i{c.offset.x + 40 + width, y_base - 3});
+                width += 25;
+            }
+        }
+    } else { // nothing sold/bought (yet)
+             // buying
+        int y_base = c.offset.y + 180;
+        width = lang_text_draw(129, 2, c.offset.x + 40, y_base, FONT_NORMAL_BLACK_ON_DARK);
+        for (e_resource r = RESOURCE_MIN; r < RESOURCES_MAX; ++r) {
+            if (city->buys_resource[r]) {
+                int image_id = image_id_resource_icon(r) + resource_image_offset(r, RESOURCE_IMAGE_ICON);
+                ImageDraw::img_generic(ctx, image_id, vec2i{c.offset.x + 40 + width, y_base - 3});
+                width += 25;
+            }
+        }
+        // selling
+        y_base = c.offset.y + 210;
+        width = lang_text_draw(129, 3, c.offset.x + 40, y_base, FONT_NORMAL_BLACK_ON_DARK);
+        for (int r = RESOURCE_MIN; r < RESOURCES_MAX; r++) {
+            if (city->sells_resource[r]) {
+                int image_id = image_id_resource_icon(r) + resource_image_offset(r, RESOURCE_IMAGE_ICON);
+                ImageDraw::img_generic(ctx, image_id, vec2i{c.offset.x + 40 + width, y_base - 3});
+                width += 25;
+            }
+        }
+    }
 
     return true;
+}
+
+const animations_t &figure_trade_caravan::anim() const {
+    return trade_caravan_m.anim;
+}
+
+void figure_trade_caravan::update_animation() {
+    int dir = figure_image_normalize_direction(direction() < 8 ? direction() : base.previous_tile_direction);
+    base.sprite_image_id = trade_caravan_m.anim["walk"].first_img() + dir + 8 * base.anim.frame;
 }

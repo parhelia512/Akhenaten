@@ -3,6 +3,7 @@
 #include "building/building.h"
 #include "building/rotation.h"
 #include "city/object_info.h"
+#include "city/labor.h"
 #include "game/resource.h"
 #include "graphics/elements/panel.h"
 #include "graphics/elements/lang_text.h"
@@ -13,43 +14,51 @@
 #include "window/building/common.h"
 #include "sound/sound_building.h"
 #include "core/svector.h"
+#include "grid/terrain.h"
+#include "grid/building_tiles.h"
 
 #include "js/js_game.h"
 
-namespace model {
-    struct small_statue_t {
-        std::vector<image_desc> var;
-    };
-    small_statue_t small_statue;
+template<class T>
+struct building_statue_model : public buildings::model_t<T> {
+    using inherited = buildings::model_t<T>;
+    std::vector<image_desc> var;
 
-    struct medium_statue_t {
-        std::vector<image_desc> var;
-    };
-    medium_statue_t medium_statue;
-
-    struct big_statue_t {
-        std::vector<image_desc> var;
-    };
-    big_statue_t big_statue;
-
-    template<typename T>
-    void config_load_statue(pcstr key, T& model) {
-        model.var.clear();
-        g_config_arch.r_section(key, [&model] (archive model_arch) {
-            model_arch.r_array("variants", [&model] (archive arch) {
-                int pack = arch.r_int("pack");
-                int id = arch.r_int("id");
-                int offset = arch.r_int("offset");
-                model.var.push_back({pack, id, offset});
-            });
+    using inherited::load;
+    virtual void load(archive arch) override {
+        arch.r_array("variants", var, [] (archive arch, auto &item) {
+            item.pack = arch.r_int("pack");
+            item.id = arch.r_int("id");
+            item.offset = arch.r_int("offset");
         });
     }
+};
+
+building_statue_model<building_small_statue> small_statue_m;
+building_statue_model<building_medium_statue> medium_statue_m;
+building_statue_model<building_large_statue> large_statue_m;
+
+ANK_REGISTER_CONFIG_ITERATOR(config_load_statue_models);
+void config_load_statue_models() {
+    small_statue_m.load();
+    medium_statue_m.load();
+    large_statue_m.load();
 }
 
 void building_statue::on_create(int o) {
     int orientation = (4 + building_rotation_global_rotation() + city_view_orientation() / 2) % 4;
     data.monuments.variant = building_rotation_get_building_variant();
     data.monuments.statue_offset = rand() % 4;
+}
+
+void building_statue::on_place_update_tiles(int orientation, int variant) {
+    int orientation_rel = city_view_relative_orientation(orientation);
+    int image_id = get_image(type(), orientation_rel, variant);
+    map_building_tiles_add(id(), tile(), size(), image_id, TERRAIN_BUILDING);
+}
+
+void building_statue::on_place_checks() {
+    /*nothing*/
 }
 
 void building_statue::window_info_background(object_info &c) {
@@ -60,19 +69,16 @@ void building_statue::window_info_background(object_info &c) {
     window_building_draw_description_at(c, 16 * c.bgsize.y - 158, 80, 1);
 }
 
-ANK_REGISTER_CONFIG_ITERATOR(config_load_statue_models);
-
-void config_load_statue_models() {
-    model::config_load_statue("building_small_statue", model::small_statue);
-    model::config_load_statue("building_medium_statue", model::medium_statue);
-    model::config_load_statue("building_big_statue", model::big_statue);
+void building_statue::update_map_orientation(int map_orientation) {
+    int image_id = get_image_from_value(type(), 0, data.monuments.variant, map_orientation);
+    map_building_tiles_add(id(), tile(), base.size, image_id, TERRAIN_BUILDING);
 }
 
 int building_statue_get_variant_size(int type) {
     switch (type) {
-    case BUILDING_SMALL_STATUE: return model::small_statue.var.size(); break;
-    case BUILDING_MEDIUM_STATUE: return model::medium_statue.var.size(); break;
-    case BUILDING_LARGE_STATUE: return model::big_statue.var.size(); break;
+    case BUILDING_SMALL_STATUE: return (int)small_statue_m.var.size(); break;
+    case BUILDING_MEDIUM_STATUE: return (int)medium_statue_m.var.size(); break;
+    case BUILDING_LARGE_STATUE: return (int)large_statue_m.var.size(); break;
     }
 
     return 0;
@@ -97,10 +103,14 @@ int building_statue_next_variant(int type, int variant) {
     return variant;
 }
 
-int building_statue_get_image(int type, int orientation, int variant) {
+int building_statue::get_image(int type, int orientation, int variant) {
     int image_id = 0;
 
     int size = building_statue_get_variant_size(type);
+
+    if (!size) {
+        return 0;
+    }
     //
     while (orientation < 0) { orientation += 4; }
     //
@@ -113,21 +123,21 @@ int building_statue_get_image(int type, int orientation, int variant) {
     switch (type) {
     case BUILDING_SMALL_STATUE:
         variant %= size;
-        return image_group(model::small_statue.var[variant]);
+        return image_group(small_statue_m.var[variant]);
 
     case BUILDING_MEDIUM_STATUE:
         variant %= size;
-        return image_group(model::medium_statue.var[variant]);
+        return image_group(medium_statue_m.var[variant]);
 
     case BUILDING_LARGE_STATUE:
         variant %= size;
-        return image_group(model::big_statue.var[variant]);
+        return image_group(large_statue_m.var[variant]);
     }
 
     return image_id;
 }
 
-int building_statue_get_image_from_value(int type, int combined, int variant, int map_orientation) {
+int building_statue::get_image_from_value(int type, int combined, int variant, int map_orientation) {
     int orientation = combined % 4 - (map_orientation / 2);
-    return building_statue_get_image(type, orientation - 1, variant);
+    return get_image(type, orientation - 1, variant);
 }

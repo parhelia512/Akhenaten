@@ -1,12 +1,12 @@
 #include "figure/figure.h"
 
 #include "building/building.h"
-#include "city/emperor.h"
+#include "city/city.h"
 #include "city/warning.h"
 #include "core/random.h"
 #include "core/calc.h"
 #include "core/svector.h"
-#include "empire/empire_city.h"
+#include "empire/empire.h"
 #include "figure/figure_names.h"
 #include "figure/route.h"
 #include "figure/trader.h"
@@ -14,35 +14,38 @@
 #include "grid/grid.h"
 #include "grid/terrain.h"
 #include "io/io_buffer.h"
+#include "graphics/animkeys.h"
 #include "sound/sound_walker.h"
 
 #include <string.h>
+#include <map>
 #include "dev/debug.h"
-
-declare_console_command_p(killall, console_command_killall);
 
 struct figure_data_t {
     int created_sequence;
     bool initialized;
-    svector<figure*, 5000> figures;
+    std::array<figure*, MAX_FIGURES> figures;
 };
 
 figure_data_t g_figure_data = {0, false};
+
+declare_console_command_p(killall, console_command_killall);
+void console_command_killall(std::istream &, std::ostream &) {
+    for (auto &f: map_figures()) {
+        if (f->is_valid()) {
+            f->poof();
+        }
+    }
+
+    city_warning_show_console("Killed all walkers");
+}
 
 figure *figure_get(int id) {
     return g_figure_data.figures[id];
 }
 
 std::span<figure *> map_figures() {
-    return make_span(g_figure_data.figures.begin(), g_figure_data.figures.size());
-}
-
-void console_command_killall(std::istream &, std::ostream &) {
-    for (auto &f: map_figures()) {
-        f->poof();
-    }
-
-    city_warning_show_console("Killed all walkers");
+    return make_span(g_figure_data.figures.data(), g_figure_data.figures.size());
 }
 
 figure *figure_take_from_pool () {
@@ -64,22 +67,14 @@ figure* figure_create(e_figure_type type, tile2i tile, int dir) {
     f->is_friendly = true;
     f->created_sequence = g_figure_data.created_sequence++;
     f->direction = dir;
-    //    f->direction = DIR_FIGURE_NONE;
     f->roam_length = 0;
     f->source_tile = tile;
     f->destination_tile = tile;
     f->previous_tile = tile;
     f->tile = tile;
     f->destination_tile.set(0, 0);
-    //    f->source_x = f->destination_x = f->previous_tile_x = f->tile_x = x;
-    //    f->source_y = f->destination_y = f->previous_tile_y = f->tile_y = y;
-    //    f->destination_x = 0;
-    //    f->destination_y = 0;
-    //    f->grid_offset_figure = MAP_OFFSET(x, y);
     f->cc_coords.x = 15 * tile.x();
     f->cc_coords.y = 15 * tile.y();
-    //    f->cross_country_x = 15 * x;
-    //    f->cross_country_y = 15 * y;
     f->progress_on_tile = 8;
     f->progress_inside = 0;
     f->progress_inside_speed = 0;
@@ -87,23 +82,31 @@ figure* figure_create(e_figure_type type, tile2i tile, int dir) {
     f->name = figure_name_get(type, 0);
     f->map_figure_add();
 
-    if (type == FIGURE_TRADE_CARAVAN || type == FIGURE_TRADE_SHIP) {
-        f->trader_id = trader_create();
-    }
-
     f->dcast()->on_create();
 
     return f;
 }
+
+void figure_clear_all() {
+    if (!g_figure_data.initialized) {
+        return;
+    }
+
+    for (auto *f : g_figure_data.figures) {
+        int figure_id = f->id;
+        f->clear_impl();
+        memset(f, 0, sizeof(figure));
+        f->state = FIGURE_STATE_NONE;
+        f->id = figure_id;
+    }
+}
+
 void figure::figure_delete_UNSAFE() {
     dcast()->on_destroy();
 
     if (has_home()) {
         building* b = home();
-        if (b->has_figure(0, id))
-            b->remove_figure(0);
-        if (b->has_figure(1, id))
-            b->remove_figure(1);
+        b->remove_figure_by_id(id);
     }
 
     switch (type) {
@@ -111,16 +114,14 @@ void figure::figure_delete_UNSAFE() {
         if (has_home())
             home()->remove_figure(3);
         break;
+
     case FIGURE_ENEMY_CAESAR_LEGIONARY:
-        city_emperor_mark_soldier_killed();
+        g_city.kingdome.mark_soldier_killed();
         break;
     }
-    if (empire_city_id)
-        empire_city_remove_trader(empire_city_id, id);
 
-    if (has_immigrant_home()) {
-        auto bhome = building_get(immigrant_home_building_id);
-        bhome->remove_figure(2);
+    if (empire_city_id) {
+        g_empire.city(empire_city_id)->remove_trader(id);
     }
 
     route_remove();
@@ -150,6 +151,9 @@ figure_musician *figure::dcast_musician() { return dcast()->dcast_musician(); }
 figure_dancer *figure::dcast_dancer() { return dcast()->dcast_dancer(); }
 figure_labor_seeker *figure::dcast_labor_seeker() { return dcast()->dcast_labor_seeker(); }
 figure_worker *figure::dcast_worker() { return dcast()->dcast_worker(); }
+figure_soldier *figure::dcast_soldier() { return dcast()->dcast_soldier(); }
+figure_fishing_boat *figure::dcast_fishing_boat() { return dcast()->dcast_fishing_boat(); }
+figure_fishing_point *figure::dcast_fishing_point() { return dcast()->dcast_fishing_point(); }
 
 bool figure::in_roam_history(int goffset) {
     auto it = std::find_if(std::begin(roam_history), std::end(roam_history), [goffset] (auto &v) { return (v == 0 || v == goffset); });
@@ -162,21 +166,15 @@ void figure::add_roam_history(int goffset) {
 }
 
 bool figure::is_dead() {
-    return state != FIGURE_STATE_ALIVE || action_state == FIGURE_ACTION_149_CORPSE;
+    return (state != FIGURE_STATE_ALIVE) 
+                || (action_state == FIGURE_ACTION_149_CORPSE);
 }
 
 bool figure::is_boat() {
-    return  (allow_move_type == EMOVE_BOAT || allow_move_type == EMOVE_FLOTSAM);
+    return  (allow_move_type == EMOVE_WATER || allow_move_type == EMOVE_DEEPWATER);
 }
 
 bool figure::can_move_by_water() {
-    switch (type) {   
-    case FIGURE_HIPPO:
-        return !map_terrain_is(tile.grid_offset(), TERRAIN_DEEPWATER);
-
-    case FIGURE_FISHING_POINT:
-        return map_terrain_is(tile.grid_offset(), TERRAIN_DEEPWATER);
-    }
     return dcast()->can_move_by_water();
 }
 
@@ -188,15 +186,18 @@ void figure::set_direction_to(building *b) {
     direction = calc_general_direction(tile, b->tile);
 }
 
+void figure::clear_impl() {
+    delete _ptr;
+    _ptr = nullptr;
+}
+
 void figure::poof() {
+    dcast()->before_poof();
     set_state(FIGURE_STATE_DEAD);
 }
 
 bool figure::is_enemy() {
     return type >= FIGURE_ENEMY43_SPEAR && type <= FIGURE_ENEMY_CAESAR_LEGIONARY;
-}
-bool figure::is_legion() {
-    return type >= FIGURE_ARCHER && type <= FIGURE_INFANTRY;
 }
 
 bool figure::is_herd() {
@@ -206,6 +207,7 @@ bool figure::is_herd() {
 building* figure::home() {
     return building_get(home_building_id);
 };
+
 building* figure::destination() {
     return building_get(destination_building_id);
 };
@@ -231,17 +233,37 @@ bool figure::has_home(int _id) {
     return (home_building_id == _id);
 }
 
+bool figure::is_citizen() {
+    if (action_state != FIGURE_ACTION_149_CORPSE) {
+        if ((type && type != FIGURE_EXPLOSION && type != FIGURE_STANDARD_BEARER && type != FIGURE_MAP_FLAG
+            && type != FIGURE_FLOTSAM && type < FIGURE_INDIGENOUS_NATIVE)
+            || type == FIGURE_TOWER_SENTRY) {
+            return id;
+        }
+    }
+
+    return 0;
+}
+
+bool figure::is_non_citizen() {
+    if (action_state == FIGURE_ACTION_149_CORPSE)
+        return 0;
+
+    if (is_enemy()) {
+        return id;
+    }
+
+    if (type == FIGURE_INDIGENOUS_NATIVE && action_state == FIGURE_ACTION_159_NATIVE_ATTACKING)
+        return id;
+
+    if (/*type == FIGURE_WOLF*/ type == FIGURE_OSTRICH || type == FIGURE_BIRDS || type == FIGURE_ANTELOPE)
+        return id;
+
+    return 0;
+}
+
 bool figure::has_home(building* b) {
     return (b == home());
-}
-bool figure::has_immigrant_home(int _id) {
-    if (_id == -1)
-        return (immigrant_home_building_id != 0);
-    return (immigrant_home_building_id == _id);
-}
-bool figure::has_immigrant_home(building* b) {
-    auto bhome = building_get(immigrant_home_building_id);
-    return (b == bhome);
 }
 
 bool figure::has_destination(int _id) {
@@ -261,10 +283,6 @@ void figure::noble_action() {
 }
 
 e_minimap_figure_color figure::get_figure_color() {
-    if (is_legion()) {
-        return FIGURE_COLOR_SOLDIER;
-    }
-
     if (is_enemy()) {
         return FIGURE_COLOR_ENEMY;
     }
@@ -274,6 +292,41 @@ e_minimap_figure_color figure::get_figure_color() {
     }
 
     return dcast()->minimap_color();
+}
+
+void figure::kill() {
+    if (state != FIGURE_STATE_ALIVE) {
+        return;
+    }
+
+    advance_action(FIGURE_ACTION_149_CORPSE);
+    set_state(FIGURE_STATE_DYING);
+}
+
+void figure_impl::on_create() {
+    assert(base.tile.x() < GRID_LENGTH && base.tile.y() < GRID_LENGTH);
+}
+
+void figure_impl::figure_roaming_action() {
+    switch (action_state()) {
+    case FIGURE_ACTION_150_ATTACK:
+        base.figure_combat_handle_attack();
+        break;
+
+    case FIGURE_ACTION_149_CORPSE:
+        base.figure_combat_handle_corpse();
+        break;
+
+    case FIGURE_ACTION_125_ROAMING:
+    case ACTION_1_ROAMING:
+        base.do_roam();
+        break;
+
+    case FIGURE_ACTION_126_ROAMER_RETURNING:
+    case ACTION_2_ROAMERS_RETURNING:
+        base.do_returnhome();
+        break;
+    }
 }
 
 void figure_impl::figure_draw(painter &ctx, vec2i pixel, int highlight, vec2i* coord_out) {
@@ -286,7 +339,69 @@ figure_sound_t figure_impl::get_sound_reaction(pcstr key) const {
 }
 
 bool figure_impl::can_move_by_water() const {
-    return (base.allow_move_type == EMOVE_BOAT || base.allow_move_type == EMOVE_FLOTSAM || base.allow_move_type == EMOVE_HIPPO);
+    return (base.allow_move_type == EMOVE_WATER || base.allow_move_type == EMOVE_DEEPWATER || base.allow_move_type == EMOVE_HIPPO);
+}
+
+void figure_impl::main_update_image() {
+    if (base.state == FIGURE_STATE_DYING) {
+        base.sprite_image_id = base.anim.start() + base.anim.current_frame();
+    } else {
+        base.sprite_image_id = base.anim.start() + base.figure_image_direction() + 8 * base.anim.current_frame();
+    }
+}
+
+static std::map<e_figure_type, const figure_impl::static_params *> *figure_impl_params = nullptr;
+
+void figure_impl::kill() {
+    base.kill();
+}
+
+void figure_impl::params(e_figure_type e, const static_params &p) {
+    if (!figure_impl_params) {
+        figure_impl_params = new std::map<e_figure_type, const figure_impl::static_params *>();
+    }
+    figure_impl_params->insert(std::make_pair(e, &p));
+}
+
+const figure_impl::static_params &figure_impl::params(e_figure_type e) {
+    auto it = figure_impl_params->find(e);
+    return (it == figure_impl_params->end()) ? figure_impl::static_params::dummy : *it->second;
+}
+
+void figure_impl::advance_action(int action, tile2i t) {
+    advance_action(action);
+    base.destination_tile = t;
+}
+
+void figure_impl::set_destination(building *b, tile2i t) {
+    base.set_destination(b);
+    base.destination_tile = t;
+}
+
+figure_impl::static_params figure_impl::static_params::dummy;
+void figure_impl::static_params::load(archive arch) {
+    anim.load(arch);
+    sounds.load(arch);
+    terrain_usage = arch.r_int("terrain_usage");
+    max_roam_length = arch.r_int("max_roam_length");
+    speed_mult = arch.r_int("speed_mult", 1);
+}
+
+void figure_impl::update_animation() {
+    xstring animkey;
+    if (!base.anim.id) {
+        animkey = animkeys().walk;
+    }
+
+    if (action_state() == FIGURE_ACTION_149_CORPSE) {
+        animkey = animkeys().death;
+    } else if (!!(base.terrain_type & TERRAIN_WATER)) {
+        animkey = animkeys().swim;
+    }
+
+    if (!!animkey) {
+        image_set_animation(animkey);
+    }
 }
 
 figure_impl *figures::create(e_figure_type e, figure *data) {
@@ -297,6 +412,7 @@ figure_impl *figures::create(e_figure_type e, figure *data) {
         }
     }
 
+    assert(false);
     return new figure_impl(data);
 }
 
@@ -315,12 +431,16 @@ figure_impl *figures::create(e_figure_type e, figure *data) {
 // }
 
 void init_figures() {
-    if (!g_figure_data.initialized) {
-        for (int i = 0; i < MAX_FIGURES[GAME_ENV]; i++) {
-            g_figure_data.figures.push_back(new figure(i));
-        }
-        g_figure_data.initialized = true;
+    if (g_figure_data.initialized) {
+        return;
     }
+
+    for (int i = 0; i < MAX_FIGURES; i++) {
+        g_figure_data.figures[i] = new figure(i);
+
+    }
+
+    g_figure_data.initialized = true;
 }
 
 void figure_init_scenario(void) {
@@ -331,7 +451,7 @@ void figure_init_scenario(void) {
 void figure::bind(io_buffer* iob) {
     figure* f = this;
     iob->bind(BIND_SIGNATURE_UINT8, &f->alternative_location_index);
-    iob->bind(BIND_SIGNATURE_UINT8, &f->anim_frame);
+    iob->bind(BIND_SIGNATURE_UINT8, &f->anim.frame);
     iob->bind(BIND_SIGNATURE_UINT8, &f->is_enemy_image);
     iob->bind(BIND_SIGNATURE_UINT8, &f->flotsam_visible);
 
@@ -352,18 +472,14 @@ void figure::bind(io_buffer* iob) {
     iob->bind(BIND_SIGNATURE_INT8, &f->direction);
     iob->bind(BIND_SIGNATURE_INT8, &f->previous_tile_direction);
     iob->bind(BIND_SIGNATURE_INT8, &f->attack_direction);
-    iob->bind(BIND_SIGNATURE_UINT16, f->tile.private_access(_X));
-    iob->bind(BIND_SIGNATURE_UINT16, f->tile.private_access(_Y));
-    iob->bind(BIND_SIGNATURE_UINT16, f->previous_tile.private_access(_X));
-    iob->bind(BIND_SIGNATURE_UINT16, f->previous_tile.private_access(_Y));
+    iob->bind(BIND_SIGNATURE_UINT32, f->tile);
+    iob->bind(BIND_SIGNATURE_UINT32, f->previous_tile);
     iob->bind(BIND_SIGNATURE_UINT16, &f->missile_damage);
     iob->bind(BIND_SIGNATURE_UINT16, &f->damage);
-    iob->bind(BIND_SIGNATURE_INT32, f->tile.private_access(_GRID_OFFSET));
-    iob->bind(BIND_SIGNATURE_UINT16, f->destination_tile.private_access(_X));
-    iob->bind(BIND_SIGNATURE_UINT16, f->destination_tile.private_access(_Y));
-    iob->bind(BIND_SIGNATURE_INT32, f->destination_tile.private_access(_GRID_OFFSET));
-    iob->bind(BIND_SIGNATURE_UINT16, f->source_tile.private_access(_X));
-    iob->bind(BIND_SIGNATURE_UINT16, f->source_tile.private_access(_Y));
+    iob->bind____skip(4);
+    iob->bind(BIND_SIGNATURE_UINT32, f->destination_tile);
+    iob->bind____skip(4);
+    iob->bind(BIND_SIGNATURE_UINT32, f->source_tile);
     iob->bind(BIND_SIGNATURE_UINT16, &f->formation_position_x.soldier);
     iob->bind(BIND_SIGNATURE_UINT16, &f->formation_position_y.soldier);
     iob->bind(BIND_SIGNATURE_INT8, &f->terrain_type);               // 0
@@ -398,7 +514,7 @@ void figure::bind(io_buffer* iob) {
     iob->bind(BIND_SIGNATURE_UINT8, &f->index_in_formation); // 3
     iob->bind(BIND_SIGNATURE_UINT8, &f->formation_at_rest);
     iob->bind(BIND_SIGNATURE_UINT8, &f->migrant_num_people);
-    iob->bind(BIND_SIGNATURE_UINT8, &f->is_ghost);
+    iob->bind____skip(1);
     iob->bind(BIND_SIGNATURE_UINT8, &f->min_max_seen);
     iob->bind(BIND_SIGNATURE_UINT8, &f->movement_ticks_watchdog);
     iob->bind(BIND_SIGNATURE_INT16, &f->leading_figure_id);
@@ -464,7 +580,7 @@ void figure::bind(io_buffer* iob) {
 
 io_buffer* iob_figures = new io_buffer([](io_buffer* iob, size_t version) {
     init_figures();
-    for (int i = 0; i < MAX_FIGURES[GAME_ENV]; i++) {
+    for (int i = 0; i < MAX_FIGURES; i++) {
         figure_get(i)->bind(iob); // doing this because some members are PRIVATE.
         figure_get(i)->id = i;
     }

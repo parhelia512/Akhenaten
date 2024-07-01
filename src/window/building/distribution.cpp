@@ -19,7 +19,7 @@
 #include "graphics/elements/panel.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
-#include "scenario/property.h"
+#include "scenario/scenario.h"
 #include "window/window_building_info.h"
 #include "game/game.h"
 
@@ -231,8 +231,8 @@ void draw_permissions_buttons(int x, int y, int buttons) {
 int window_building_handle_mouse_granary(const mouse* m, object_info* c) {
     auto &data = g_window_building_distribution;
     data.building_id = c->building_id;
-    generic_buttons_handle_mouse(m, c->offset.x + 58, c->offset.y + 19 * c->bgsize.y - 82, warehouse_distribution_permissions_buttons, 1, &data.permission_focus_button_id);
-    generic_buttons_handle_mouse(m, c->offset.x + 80, c->offset.y + 16 * c->bgsize.y - 34, data.go_to_orders_button.data(), 1, &data.focus_button_id);
+    generic_buttons_handle_mouse(m, {c->offset.x + 58, c->offset.y + 19 * c->bgsize.y - 82}, warehouse_distribution_permissions_buttons, 1, &data.permission_focus_button_id);
+    generic_buttons_handle_mouse(m, {c->offset.x + 80, c->offset.y + 16 * c->bgsize.y - 34}, data.go_to_orders_button.data(), 1, &data.focus_button_id);
     return 0;
 }
 
@@ -243,11 +243,11 @@ int window_building_handle_mouse_granary_orders(const mouse* m, object_info* c) 
 
     // arrows
     bool handled = false;
-    if (image_buttons_handle_mouse(m, c->offset.x + 165, y_offset + 49, data.orders_decrease_arrows.data(), 20, &data.decr_arrow_focus_button_id)) {
+    if (image_buttons_handle_mouse(m, {c->offset.x + 165, y_offset + 49}, data.orders_decrease_arrows.data(), 20, &data.decr_arrow_focus_button_id)) {
         handled = true;
     }
 
-    if (image_buttons_handle_mouse(m, c->offset.x + 165 + 18, y_offset + 49, data.orders_increase_arrows.data(), 20, &data.decr_arrow_focus_button_id)) {
+    if (image_buttons_handle_mouse(m, {c->offset.x + 165 + 18, y_offset + 49}, data.orders_increase_arrows.data(), 20, &data.decr_arrow_focus_button_id)) {
         handled = true;
     }
 
@@ -258,12 +258,12 @@ int window_building_handle_mouse_granary_orders(const mouse* m, object_info* c) 
     // resources
     int num_resources = city_resource_get_available_foods().size;
     data.building_id = c->building_id;
-    if (generic_buttons_handle_mouse(m, c->offset.x + 205, y_offset + 46, data.orders_resource_buttons.data(), num_resources, &data.resource_focus_button_id)) {
+    if (generic_buttons_handle_mouse(m, {c->offset.x + 205, y_offset + 46}, data.orders_resource_buttons.data(), num_resources, &data.resource_focus_button_id)) {
         return 1;
     }
 
     // extra instructions
-    return generic_buttons_handle_mouse(m, c->offset.x + 80, y_offset + 404, granary_order_buttons, 2, &data.orders_focus_button_id);
+    return generic_buttons_handle_mouse(m, {c->offset.x + 80, y_offset + 404}, granary_order_buttons, 2, &data.orders_focus_button_id);
 }
 
 std::pair<int, int> window_building_get_tooltip_granary_orders() {
@@ -278,12 +278,12 @@ std::pair<int, int> window_building_get_tooltip_granary_orders() {
 static void on_scroll(void) {
     //    window_invalidate();
 }
-static scrollbar_type scrollbar = {590, 52, 336, on_scroll};
+static scrollbar_t g_distribution_scrollbar = {{590, 52}, 336, on_scroll};
 
 int window_building_handle_mouse_warehouse(const mouse* m, object_info* c) {
     auto &data = g_window_building_distribution;
     data.building_id = c->building_id;
-    if (generic_buttons_handle_mouse(m, c->offset.x + 80, c->offset.y + 16 * c->bgsize.y - 34, data.go_to_orders_button.data(), 1, &data.focus_button_id)) {
+    if (generic_buttons_handle_mouse(m, {c->offset.x + 80, c->offset.y + 16 * c->bgsize.y - 34}, data.go_to_orders_button.data(), 1, &data.focus_button_id)) {
     }
     // temp - todo: fix buttons
     //    if (generic_buttons_handle_mouse(m, c->offset.x + 64, c->offset.y + 16 * c->height_blocks - 75,
@@ -304,11 +304,11 @@ int window_building_handle_mouse_warehouse_orders(const mouse* m, object_info* c
     //        return handled;
 
     // arrows
-    if (image_buttons_handle_mouse(m, c->offset.x + 165, y_offset + 49, data.orders_decrease_arrows.data(), 20, &data.decr_arrow_focus_button_id)) {
+    if (image_buttons_handle_mouse(m, {c->offset.x + 165, y_offset + 49}, data.orders_decrease_arrows.data(), 20, &data.decr_arrow_focus_button_id)) {
         handled = true;
     }
 
-    if (image_buttons_handle_mouse(m, c->offset.x + 165 + 18, y_offset + 49, data.orders_increase_arrows.data(), 20, &data.decr_arrow_focus_button_id)) {
+    if (image_buttons_handle_mouse(m, {c->offset.x + 165 + 18, y_offset + 49}, data.orders_increase_arrows.data(), 20, &data.decr_arrow_focus_button_id)) {
         handled = true;
     }
 
@@ -322,12 +322,12 @@ int window_building_handle_mouse_warehouse_orders(const mouse* m, object_info* c
     }
     data.building_id = c->building_id;
 
-    if (generic_buttons_handle_mouse(m, c->offset.x + 205, y_offset + 46, data.orders_resource_buttons.data(), num_resources, &data.resource_focus_button_id)) {
+    if (generic_buttons_handle_mouse(m, {c->offset.x + 205, y_offset + 46}, data.orders_resource_buttons.data(), num_resources, &data.resource_focus_button_id)) {
         return 1;
     }
 
     // extra instructions
-    return generic_buttons_handle_mouse(m, c->offset.x + 80, y_offset + 404, warehouse_order_buttons, 2, &data.orders_focus_button_id);
+    return generic_buttons_handle_mouse(m, {c->offset.x + 80, y_offset + 404}, warehouse_order_buttons, 2, &data.orders_focus_button_id);
 }
 
 void window_building_get_tooltip_warehouse_orders(int* group_id, int* text_id) {
@@ -371,10 +371,11 @@ static void toggle_resource_state(int index, int param2) {
         return;
     }
 
-    if (b->type == BUILDING_STORAGE_YARD)
+    if (b->type == BUILDING_STORAGE_YARD) {
         resource = city_resource_get_available()->items[index - 1];
-    else
+    } else {
         resource = city_resource_get_available_food(index - 1);
+    }
 
     building_storage_cycle_resource_state(b->storage_id, resource, false);
 }
@@ -395,10 +396,11 @@ static void toggle_resource_state_backwards(int index, int param2) {
         return;
     } 
 
-    if (b->type == BUILDING_STORAGE_YARD)
+    if (b->type == BUILDING_STORAGE_YARD) {
         resource = city_resource_get_available()->items[index - 1];
-    else
+    } else {
         resource = city_resource_get_available_food(index - 1);
+    }
 
     building_storage_cycle_resource_state(b->storage_id, resource, true);
 }
@@ -418,10 +420,11 @@ static void order_quantity_increase_decrease(int index, int param2) {
         return;
     }
 
-    if (b->type == BUILDING_STORAGE_YARD)
+    if (b->type == BUILDING_STORAGE_YARD) {
         resource = city_resource_get_available()->items[index - 1];
-    else
+    } else {
         resource = city_resource_get_available_food(index - 1);
+    }
 
     building_storage_increase_decrease_resource_state(b->storage_id, resource, param2);
 }

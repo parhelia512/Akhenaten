@@ -1,7 +1,6 @@
 #include "mission_end.h"
 
-#include "city/city_data.h"
-#include "city/emperor.h"
+#include "city/city.h"
 #include "city/finance.h"
 #include "city/population.h"
 #include "city/ratings.h"
@@ -17,10 +16,9 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
-#include "scenario/property.h"
 #include "scenario/scenario.h"
 #include "sound/music.h"
-#include "sound/speech.h"
+#include "sound/sound.h"
 #include "window/intermezzo.h"
 #include "window/main_menu.h"
 #include "window/mission_next.h"
@@ -71,16 +69,16 @@ static void draw_won(void) {
     int left_offset = 68;
     int right_offset = left_offset + 10 + 512 * left_width / (left_width + right_width);
     int width = lang_text_draw(148, 0, left_offset, 308, FONT_NORMAL_BLACK_ON_LIGHT);
-    text_draw_number(city_rating_culture(), '@', " ", left_offset + width, 308, FONT_NORMAL_BLACK_ON_LIGHT);
+    text_draw_number(g_city.ratings.culture, '@', " ", left_offset + width, 308, FONT_NORMAL_BLACK_ON_LIGHT);
 
     width = lang_text_draw(148, 1, right_offset, 308, FONT_NORMAL_BLACK_ON_LIGHT);
-    text_draw_number(city_rating_prosperity(), '@', " ", right_offset + width, 308, FONT_NORMAL_BLACK_ON_LIGHT);
+    text_draw_number(g_city.ratings.prosperity, '@', " ", right_offset + width, 308, FONT_NORMAL_BLACK_ON_LIGHT);
 
     width = lang_text_draw(148, 2, left_offset, 328, FONT_NORMAL_BLACK_ON_LIGHT);
-    text_draw_number(city_rating_monument(), '@', " ", left_offset + width, 328, FONT_NORMAL_BLACK_ON_LIGHT);
+    text_draw_number(g_city.ratings.monument, '@', " ", left_offset + width, 328, FONT_NORMAL_BLACK_ON_LIGHT);
 
     width = lang_text_draw(148, 3, right_offset, 328, FONT_NORMAL_BLACK_ON_LIGHT);
-    text_draw_number(city_rating_kingdom(), '@', " ", right_offset + width, 328, FONT_NORMAL_BLACK_ON_LIGHT);
+    text_draw_number(g_city.ratings.kingdom, '@', " ", right_offset + width, 328, FONT_NORMAL_BLACK_ON_LIGHT);
 
     width = lang_text_draw(148, 4, left_offset, 348, FONT_NORMAL_BLACK_ON_LIGHT);
     text_draw_number(city_population(), '@', " ", left_offset + width, 348, FONT_NORMAL_BLACK_ON_LIGHT);
@@ -93,7 +91,7 @@ static void draw_won(void) {
 static void draw_background(void) {
     window_draw_underlying_window();
     graphics_set_to_dialog();
-    if (city_victory_state() == VICTORY_STATE_WON)
+    if (g_city.victory_state.state == e_victory_state_won)
         draw_won();
     else {
         draw_lost();
@@ -101,7 +99,7 @@ static void draw_background(void) {
     graphics_reset_dialog();
 }
 static void draw_foreground(void) {
-    if (city_victory_state() != VICTORY_STATE_WON) {
+    if (g_city.victory_state.state != e_victory_state_won) {
         graphics_set_to_dialog();
         large_label_draw(80, 224, 30, focus_button_id == 1);
         lang_text_draw_centered(62, 6, 80, 230, 480, FONT_NORMAL_BLACK_ON_DARK);
@@ -110,11 +108,11 @@ static void draw_foreground(void) {
 }
 
 static void advance_to_next_mission(void) {
-    g_settings.set_personal_savings_for_mission(scenario_campaign_rank() + 1, city_emperor_personal_savings());
+    g_settings.set_personal_savings_for_mission(scenario_campaign_rank() + 1, g_city.kingdome.personal_savings);
     scenario_set_campaign_rank(scenario_campaign_rank() + 1);
     city_save_campaign_player_name();
 
-    city_victory_stop_governing();
+    g_city.victory_state.stop_governing();
 
     game_undo_disable();
     game_state_reset_overlay();
@@ -133,20 +131,21 @@ static void advance_to_next_mission(void) {
 }
 
 static void handle_input(const mouse* m, const hotkeys* h) {
-    if (city_victory_state() == VICTORY_STATE_WON) {
+    if (g_city.victory_state.state == e_victory_state_won) {
         if (input_go_back_requested(m, h)) {
             sound_music_stop();
-            sound_speech_stop();
+            g_sound.speech_stop();
             advance_to_next_mission();
         }
     } else {
-        generic_buttons_handle_mouse(mouse_in_dialog(m), 0, 0, fired_buttons, 1, &focus_button_id);
+        generic_buttons_handle_mouse(mouse_in_dialog(m), {0, 0}, fired_buttons, 1, &focus_button_id);
     }
 }
+
 static void button_fired(int param1, int param2) {
     sound_music_stop();
-    sound_speech_stop();
-    city_victory_stop_governing();
+    g_sound.speech_stop();
+    g_city.victory_state.stop_governing();
     game_undo_disable();
     if (scenario_is_custom())
         window_main_menu_show(1);

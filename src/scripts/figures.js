@@ -2,9 +2,9 @@ log_info("akhenaten: figures info started")
 
 figure_fireman = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: IMG_FIREMAN },
-		death : { pos : [0, 0], anim_id: IMG_FIREMAN_DEATH },
-    fight_fire : { pos : [0, 0], anim_id: IMG_FIREMAN_FIGHT_FIRE, max_frames: 36 }
+		walk : { pos : [0, 0], pack:PACK_SPR_MAIN, id:6, max_frames:12 },
+		death : { pos : [0, 0], pack:PACK_SPR_MAIN, id:7, max_frames:8, loop:false },
+    fight_fire : { pos : [0, 0], pack:PACK_SPR_MAIN, id:8, max_frames:36 }
   },
   sounds : {
   	fighting_fire : {sound:"fireman_e01.wav", group: 242, text:0},
@@ -20,13 +20,15 @@ figure_fireman = {
  		low_entertainment : {sound:"fireman_g08.WAV", group: 242, text:10},
  		gods_are_pleasures : {sound:"fireman_g09.WAV", group: 242, text:11},
  		city_is_amazing : {sound:"fireman_g10.wav", group: 242, text:12},
-  }
+  },
+	terrain_usage : TERRAIN_USAGE_ANIMAL,
+	max_roam_length : 640,
 }
 
 figure_water_carrier = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: IMG_WATER_CARRIER },
-		death : { pos : [0, 0], anim_id: IMG_WATER_CARRIER_DEATH },
+		walk : { pos : [0, 0], pack:PACK_SPR_MAIN, id:59, max_frames:12 },
+		death : { pos : [0, 0], pack:PACK_SPR_MAIN, id:60, max_frames:8, loop:false },
   },
   sounds : {
   	desease_can_start_at_any_moment : {sound: "water_g01.wav", group:237, text:0},
@@ -39,21 +41,23 @@ figure_water_carrier = {
     low_entertainment : {sound: "water_g08.wav", group:237, text:7},
     city_is_good : {sound: "water_g09.wav", group:237, text:8},
     city_is_amazing : {sound: "water_g10.wav", group:237, text:9},
-  }
+  },
+  terrain_usage : TERRAIN_USAGE_ROADS,
+  max_roam_length : 640,
 }
 
 figure_priest = {
 	animations : {
 		osiris_walk : { pos : [0, 0], anim_id: IMG_PRIEST_OSIRIS, max_frames:12},
-		osiris_death : { pos : [0, 0], anim_id: IMG_PRIEST_OSIRIS_DEATH },
+		osiris_death : { pos : [0, 0], anim_id: IMG_PRIEST_OSIRIS_DEATH, loop:false },
 		ra_walk : { pos : [0, 0], anim_id: IMG_PRIEST_RA, max_frames:12 },
-		ra_death : { pos : [0, 0], anim_id: IMG_PRIEST_RA_DEATH },
+		ra_death : { pos : [0, 0], anim_id: IMG_PRIEST_RA_DEATH, loop:false },
 		ptah_walk : { pos : [0, 0], anim_id: IMG_PRIEST_PTAH, max_frames:12 },
-		ptah_death : { pos : [0, 0], anim_id: IMG_PRIEST_PTAH_DEATH },
+		ptah_death : { pos : [0, 0], anim_id: IMG_PRIEST_PTAH_DEATH, loop:false },
 		seth_walk : { pos : [0, 0], anim_id: IMG_PRIEST_SETH, max_frames:12 },
-		seth_death : { pos : [0, 0], anim_id: IMG_PRIEST_SETH_DEATH },
+		seth_death : { pos : [0, 0], anim_id: IMG_PRIEST_SETH_DEATH, loop:false },
 		bast_walk : { pos : [0, 0], anim_id: IMG_PRIEST_BAST, max_frames:12 },
-		bast_death : { pos : [0, 0], anim_id: IMG_PRIEST_BAST_DEATH },
+		bast_death : { pos : [0, 0], anim_id: IMG_PRIEST_BAST_DEATH, loop:false },
   },
   sounds : {
   	osiris_god_love_festival : {sound:"priest_osiris_e01.wav", group:230, text: 0},
@@ -130,32 +134,190 @@ figure_priest = {
     bast_need_entertainment: {sound:"bast_g08.wav", groud:234, text:11},
     bast_city_is_good: {sound:"bast_g09.wav", groud:234, text:12},
     bast_city_is_amazing: {sound:"bast_g10.wav", groud:234, text:13},
-  }
+  },
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 384,
 }
 
 figure_ostrich = {
 	animations : {
-		idle : { pos : [0, 0], anim_id: ANIM_OSTRICH_IDLE, max_frames:8 },
-		eating : { pos : [0, 0], anim_id: ANIM_OSTRICH_EATING, max_frames:7 },
-		walk : { pos : [0, 0], anim_id: ANIM_OSTRICH_WALK, max_frames:12 },
-		death : { pos : [0, 0], anim_id: ANIM_OSTRICH_DEATH, max_frames:8 },
-	}
+		walk : { pack:PACK_SPR_MAIN, id:156, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:157, max_frames:8, duration:3, loop:false },
+		eating : { pack:PACK_SPR_MAIN, id:159, max_frames:7 },
+		idle : { pack:PACK_SPR_MAIN, id:160, max_frames:8 },
+	},
+	terrain_usage : TERRAIN_USAGE_ANIMAL,
+}
+
+figure_hippo = {
+  animations : {
+		walk : { pack:PACK_SPR_MAIN, id:22, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:23, max_frames:8, duration:3, loop:false },
+		attack : { pack:PACK_SPR_MAIN, id:24, max_frames:7 },
+		sweem : { pack:PACK_SPR_AMBIENT, id:25, max_frames:8 },
+		sweem_attack : { pack:PACK_SPR_AMBIENT, id:26, max_frames:8 },
+		sweem_idle : { pack:PACK_SPR_AMBIENT, id:27, max_frames:8 },
+		eating : { pack:PACK_SPR_AMBIENT, id:28, max_frames:8 },
+		dance : { pack:PACK_SPR_AMBIENT, id:29, max_frames:8 },
+	},
+	terrain_usage : TERRAIN_USAGE_ANIMAL,
 }
 
 figure_immigrant = {
 	animations : {
-		swim : { pos : [0, 0], anim_id: ANIM_FERRY_BOAT, max_frames:4, duration:4 },
+		walk : { pack: PACK_SPR_MAIN, id: 14, max_frames:12 },
+		death : { pack: PACK_SPR_MAIN, id: 15, max_frames:8, loop:false },
+		swim : { pack:PACK_SPR_MAIN, id:138, max_frames:4, duration:4 },
+   	cart: { pack:PACK_SPR_MAIN, id:52, max_frames:1 },
 	},
 	sounds : {
 		i_need_here: {sound:"immigrant_e01.wav", group: 202, text:0},
  		work_for_all : {sound:"immigrant_e02.wav", group: 202, text:1},
  		cheap_food : {sound:"immigrant_e03.wav", group: 202, text:2},
-	}
+	},
+	terrain_usage : TERRAIN_USAGE_ANIMAL,
+}
+
+figure_ostrich_hunter = {
+	animations : {
+		walk : { pack:PACK_SPR_MAIN, id:45, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:46, max_frames:8, loop:false },
+		hunt : { pack:PACK_SPR_MAIN, id:47, max_frames:12 },
+		figth : { pack:PACK_SPR_MAIN, id:48, max_frames:12 },
+		//work_in_field : { pack:PACK_SPR_MAIN, id:49, max_frames:12, loop:false },
+		pack : { pack:PACK_SPR_MAIN, id:50, max_frames:12, loop:false },
+		unpack : { pack:PACK_SPR_MAIN, id:50, max_frames:12, loop:false, start_frame:11, reverse:true },
+		move_pack : { pack:PACK_SPR_MAIN, id:51, max_frames:12 },
+	},
+	sounds : {
+		hunting : {sound:"hunt_ostrich_e01.wav", group:209, text:0 },
+    back : {sound:"hunt_ostrich_e02.wav", group:209, text:1 },
+    city_is_good : {sound: "hunt_ostrich_e10.wav", phrase: "#hunter_ostrich_good_city"}
+	},
+	terrain_usage : TERRAIN_USAGE_ANIMAL,
+	max_hunting_distance : 30,
+}
+
+figure_hunter_arrow = {
+	animations : {
+		walk : { pack:PACK_SPR_MAIN, id:0, max_frames:12 },
+		shadow : { pack:PACK_SPR_MAIN, id:1, max_frames:12 },
+	},
+  terrain_usage : TERRAIN_USAGE_ANY,
+}
+
+figure_arrow = {
+	animations : {
+		walk : { pack:PACK_SPR_MAIN, id:0, max_frames:12 },
+		shadow : { pack:PACK_SPR_MAIN, id:1, max_frames:12 },
+	},
+  terrain_usage : TERRAIN_USAGE_ANY,
+}
+
+figure_spear = {
+	animations : {
+		walk : { pack:PACK_SPR_MAIN, id:198, max_frames:12 },
+	},
+  terrain_usage : TERRAIN_USAGE_ANY,
+}
+
+figure_javelin = {
+	animations : {
+		walk : { pack:PACK_SPR_MAIN, id:198, max_frames:4 },
+	},
+  terrain_usage : TERRAIN_USAGE_ANY,
+}
+
+figure_bolt = {
+	animations : {
+		walk : { pack:PACK_SPR_MAIN, id:198, max_frames:12 },
+	},
+  terrain_usage : TERRAIN_USAGE_ANY,
+}
+
+figure_standard_bearer = {
+	animations : {
+		walk : { pack:PACK_SPR_MAIN, id:45, max_frames:12 },
+	},
+	terrain_usage : TERRAIN_USAGE_ANY,
+}
+
+figure_native_trader = {
+	animations : {
+		walk : { pack:PACK_SPR_MAIN, id:45, max_frames:12 },
+		cart: { pack:PACK_SPR_MAIN, id:52, max_frames:1 },
+	},
+}
+
+figure_magistrate = {
+	animations : {
+		walk : { pack: PACK_SPR_MAIN, id: 212, max_frames:12 },
+		death : { pack: PACK_SPR_MAIN, id: 213, max_frames:8, loop:false },
+	},
+	sound : {
+    i_hope_we_are_ready : {sound: "magistrate_e02.wav", group:210, text:0 },
+    no_criminals_in_city : {sound: "magistrate_e03.wav", group:210, text:0 },
+    all_good_in_city : {sound: "magistrate_e04.wav", group:210, text:0 },
+    streets_still_arent_safety : {sound: "magistrate_e05.wav", group:210, text:0 },
+    disease_in_city : {sound: "magistrate_g01.wav", group:210, text:0 },
+    no_food_in_city : {sound: "magistrate_g02.wav", group:210, text:0 },
+    city_not_safety : {sound: "magistrate_g03.wav", group:210, text:0 },
+    need_workers : {sound: "magistrate_g04.wav", group:210, text:0 },
+    gods_are_angry : {sound: "magistrate_g05.wav", group:210, text:0 },
+    city_bad_reputation : {sound: "magistrate_g06.wav", group:210, text:0 },
+    much_unemployments : {sound: "magistrate_g07.wav", group:210, text:0 },
+    no_entertainment_need : {sound: "magistrate_g08.wav", group:210, text:0 },
+    city_not_bad : {sound: "magistrate_g09.wav", group:210, text:0 },
+    city_is_amazing : {sound: "magistrate_g10.wav", group:210, text:0 },
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 800,
+}
+
+figure_lumberjack = {
+	animations : {
+		walk : { pack:PACK_SPR_MAIN, id:73, max_frames:12 },
+		death: { pack:PACK_SPR_MAIN, id:74, max_frames:8, loop:false  },
+		work : { pack:PACK_SPR_MAIN, id:75, max_frames:12 },
+		back : { pack:PACK_SPR_MAIN, id:76, max_frames:12 },
+	},
+	sounds : {
+		hunting : {sound:"woodcutter_e01.wav", group:209, text:0 },
+    back : {sound:"woodcutter_e02.wav", group:209, text:1 },
+	},
+	terrain_usage : TERRAIN_USAGE_ANY,
+}
+
+figure_flotsam = {
+	animations : {
+		walk : {pack:PACK_SPR_AMBIENT, id:0, max_frames: 12}
+	},
+	terrain_usage : TERRAIN_USAGE_ANY,
+}
+
+figure_scriber = {
+	animations : {
+		walk : { pack:PACK_SPR_MAIN, id:199, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:200, max_frames:8, loop:false },
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 384,
+}
+
+figure_dentist = {
+	animations : {
+		walk : { pack:PACK_SPR_MAIN, id:182, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:183, max_frames:8, loop:false },
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 384,
 }
 
 figure_worker = {
 	animations : {
-		work : { pos : [0, 0], anim_id: IMG_WORKER_AKNH_WORK, max_frames:12 },
+		walk : { pack:PACK_SPR_MAIN, id:116, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:117, max_frames:8, loop:false },
+		work : { pack:PACK_SPR_MAIN, id:118, max_frames:12 },
 	},
 	sounds : {
 		going_to_workplace : {sound:"worker_e02.wav", group:212, text:0},
@@ -175,8 +337,8 @@ figure_worker = {
 
 figure_physician = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_DOCTOR_WALK, max_frames:12 },
-		death : { pos : [0, 0], anim_id: ANIM_DOCTOR_DEATH, max_frames:8 },
+		walk : { pos : [0, 0], pack:PACK_SPR_MAIN, id:71, max_frames:12 },
+		death : { pos : [0, 0], pack:PACK_SPR_MAIN, id:72, max_frames:8, loop:false },
 	},
 	sounds : {
 		desease_can_start_at_any_moment : {sound:"doctor_e01.wav", group: 239, text:1},
@@ -190,13 +352,15 @@ figure_physician = {
     low_entertainment : {sound:"doctor_g08.wav", group: 239, text:8},
     all_good_in_city : {sound:"doctor_g09.wav", group: 239, text:9},
     city_very_healthy : {sound:"doctor_g10.wav", group: 239, text:10},
-	}
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 384,
 }
 
-figure_architect = {
+figure_architector = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_ARCHITECT_WALK, max_frames:12 },
-		death : { pos : [0, 0], anim_id: ANIM_ARCHITECT_DEATH, max_frames:8 },
+		walk : { pos : [0, 0], pack:PACK_SPR_MAIN, id:4, max_frames:12 },
+		death : { pos : [0, 0], pack:PACK_SPR_MAIN, id:5, max_frames:8, loop:false },
 	},
 	sounds : {
 		extreme_damage_level: {sound:"engineer_e01.wav", group: 243, text:0},
@@ -211,12 +375,15 @@ figure_architect = {
     low_entertainment: {sound:"engineer_g08.wav", group: 243, text:8},
     city_is_bad: {sound:"engineer_g09.wav", group: 243, text:9},
     city_is_amazing: {sound:"engineer_g10.wav", group: 243, text:10},
-	}
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 640,
 }
 
 figure_market_buyer = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_MARKET_BUYER_WALK, max_frames:12 },
+		walk : { pack:PACK_SPR_MAIN, id:16, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:17, max_frames:8, loop:false },
 	},
 	sounds : {
 		goto_store : {sound:"mkt_buyer_e01.wav", group:244, text:0 },
@@ -231,24 +398,28 @@ figure_market_buyer = {
     low_entertainment : {sound:"mkt_buyer_g08.wav", group:244, text:0 },
     city_is_good : {sound:"mkt_buyer_g09.wav", group:244, text:0 },
     city_is_amazing : {sound:"mkt_buyer_g10.wav", group:244, text:0 },
-	}
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
 }
 
 figure_delivery_boy = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_DELIVERY_BOY_WALK, max_frames:12 },
-		death : { pos : [0, 0], anim_id: ANIM_DELIVERY_BOY_DEATH, max_frames:8 },
+		walk : { pack:PACK_SPR_MAIN, id:9, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:10, max_frames:8, loop:false },
 	},
 	sounds : {
 		those_baskets_too_heavy : {sound: "marketboy_e01.wav", group:221, text: 0},
     i_works_all_day : {sound: "marketboy_e02.wav", group:221, text: 1},
     upon_ill_be_market_owner : {sound: "marketboy_e03.wav", group:221, text: 2},
-	}
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
 }
 
 figure_cartpusher = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_CARTPUSHER_WALK, max_frames:12 },
+		walk : { pack:PACK_SPR_MAIN, id:43, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:44, max_frames:8, loop:false },
+		swim : { pack:PACK_SPR_MAIN, id:138, max_frames:4, duration:4 },
 	},
 	sounds  : {
 	  have_no_place_for_goods : { sound:"cartpusher_e01.wav", group:222, text:0},
@@ -257,13 +428,16 @@ figure_cartpusher = {
     i_have_no_destination : { sound:"cartpusher_e01.wav", group:223, text:0},
     back_to_home : { sound:"cartpusher_e02.wav", group:223, text:1},
     delivering_items : { sound:"cartpusher_e03.wav", group:223, text:2},
-	}
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
 }
 
 figure_docker = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_DOCKER_WALK, max_frames:12 },
-	}
+		walk : { pos : [0, 0], pack:PACK_SPR_MAIN, id:43, max_frames:12 },
+		death : { pos : [0, 0], pack:PACK_SPR_MAIN, id:44, max_frames:8, loop:false },
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
 }
 
 figure_bricklayer = {
@@ -273,26 +447,55 @@ figure_bricklayer = {
 	sounds : {
 		time_to_put_bricks : {sound:"brick_e01.wav", group:222, text: 0},
  		with_my_bricks_monuments_will_be_fine : {sound:"brick_e02.wav", group:222, text: 1},
-	}
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
 }
 
 figure_storageyard_cart = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_CARTPUSHER_WALK, max_frames:12 },
-	}
+		walk : { pack: PACK_SPR_MAIN, id:43, max_frames:12 },
+		death : { pack: PACK_SPR_MAIN, id:44, max_frames:8, loop:false },
+		swim : { pack:PACK_SPR_MAIN, id:138, max_frames:4, duration:4 },
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+}
+
+figure_governor = {
+	animations : {
+		walk : { pack: PACK_SPR_MAIN, id:189, max_frames:12 },
+		death : { pack: PACK_SPR_MAIN, id:190, max_frames:8, loop:false },
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
 }
 
 figure_trade_ship = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_TRADER_SHIP_WALK, max_frames:3 },
-		idle : { pos : [0, 0], anim_id: ANIM_TRADER_SHIP_IDLE, max_frames:1 },
-	}
+		walk : { pack:PACK_SPR_MAIN, id:123, max_frames:4, duration:4 },
+		death : { pack:PACK_SPR_MAIN, id:124, max_frames:8 },
+		idle : { pack:PACK_SPR_MAIN, id:125, max_frames:1, offset:0 },
+	},
+	sounds : {
+		looking_for_unload : {sound:"barge_e01.wav", group: 224, text:0},
+		waiting_for_cargo : {sound:"barge_e02.wav", group: 224, text:1},
+		no_trade : {sound:"barge_e03.wav", group: 224, text:2},
+		good_trade : {sound:"barge_e04.wav", group: 224, text:3},
+		beatiful_journey : {sound:"barge_e05.wav", group: 224, text:4},
+	},
+	terrain_usage : TERRAIN_USAGE_ANY,
+}
+
+figure_shipwreck = {
+	animations : {
+		walk : { pack:PACK_SPR_MAIN, id:226, max_frames:12 }
+	},
+	terrain_usage : TERRAIN_USAGE_ANY,
 }
 
 figure_emigrant = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_EMIGRANT_WALK, max_frames:12 },
-		death : { pos : [0, 0], anim_id: ANIM_EMIGRANT_DEATH, max_frames:8 },
+		walk : { pack:PACK_SPR_MAIN, id:2, max_frames:12 },
+		death : { pack: PACK_SPR_MAIN, id:3, max_frames:8, loop:false },
+		cart : { pack:PACK_SPR_MAIN, id:52, max_frames:1 },
 	},
 	sounds : {
 		no_job_in_city : {sound:"emigrant_e01.wav", group: 203, text:0},
@@ -300,58 +503,85 @@ figure_emigrant = {
     tax_too_high : {sound:"emigrant_e03.wav", group: 203, text:2},
     salary_too_low : {sound:"emigrant_e04.wav", group: 203, text:3},
     no_house_for_me : {sound:"emigrant_e05.wav", group: 203, text:4},
-	}
+	},
+	terrain_usage : TERRAIN_USAGE_ANIMAL,
 }
 
 figure_sled = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: IMG_BIGSLED_EMPTY, max_frames:1 },
+		walk : { anim_id: IMG_BIGSLED_EMPTY, max_frames:1 },
 	}
 }
 
 figure_trade_caravan = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: IMG_TRADER_CARAVAN },
-		death : { pos : [0, 0], anim_id: IMG_TRADER_CARAVAN_DEATH },
-	}
+		walk : { pack:PACK_SPR_AMBIENT, id:20, max_frames:12 },
+		death : { pack:PACK_SPR_AMBIENT, id:21, max_frames:8, loop:false },
+	},
+	terrain_usage : TERRAIN_USAGE_PREFER_ROADS,
 }
 
 figure_caravan_donkey = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: IMG_TRADER_CARAVAN_DONKEY },
-		death : { pos : [0, 0], anim_id: IMG_TRADER_CARAVAN_DONKEY_DEATH },
-	}
+		walk : { pack:PACK_SPR_MAIN, id:52, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:53, max_frames:8, loop:false },
+	},
+	terrain_usage : TERRAIN_USAGE_PREFER_ROADS,
 }
 
 figure_homeless = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: IMG_HOMELESS },
-		death : { pos : [0, 0], anim_id: IMG_HOMELESS_DEATH },
-	}
+		walk : { pack: PACK_SPR_MAIN, id: 12, max_frames:12 },
+		death : { pack: PACK_SPR_MAIN, id: 13, max_frames:8, loop:false },
+	},
+	terrain_usage : TERRAIN_USAGE_PREFER_ROADS,
 }
 
 figure_teacher = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: IMG_TEACHER_WALK },
-		death : { pos : [0, 0], anim_id: IMG_TEACHER_DEATH },
-	}
+		walk : { pack:PACK_SPR_MAIN, id:201, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:202, max_frames:8, loop:false },
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 384,
+}
+
+figure_librarian = {
+	animations : {
+		walk : { pack:PACK_SPR_MAIN, id:57, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:58, max_frames:8, loop:false },
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 384,
+}
+
+figure_constable = {
+	animations : {
+		walk : { pack:PACK_SPR_MAIN, id:20, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:21, max_frames:8, loop:false },
+		attack : { pack:PACK_SPR_MAIN, id:21, max_frames:8, loop:false },
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 640,
 }
 
 figure_herbalist = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_HERBALIST_WALK, max_frames:12 },
-		death : { pos : [0, 0], anim_id: ANIM_HERBALIST_DEATH, max_frames:8 },
+		walk : { pack:PACK_SPR_MAIN, id:180, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:181, max_frames:8, loop:false },
 	},
 	sounds : {
 		no_threat_malaria_here : {sound:"apothecary_e02.wav", group: 241, text:1},
     have_malaria_risk_here : {sound:"apothecary_e03.wav", group: 241, text:2},
-	}
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 384,
 }
 
 figure_dancer = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_DANCER_WALK, max_frames:12 },
-		death : { pos : [0, 0], anim_id: ANIM_DANCER_DEATH, max_frames:8 },
+		walk : { pack:PACK_SPR_MAIN, id:128, max_frames:12 },
+		death : { pospack:PACK_SPR_MAIN, id:129, max_frames:8, loop:false },
 	},
 	sounds : {
 		i_like_festivals : {sound:"dancer_e01.wav", group:228, text:0},
@@ -365,13 +595,25 @@ figure_dancer = {
     salary_too_low : {sound:"dancer_g08.wav", group:228, text:8},
     city_is_good : {sound:"dancer_g09.wav", group:228, text:9},
     city_is_amazing : {sound:"dancer_g10.wav", group:228, text:10},
-	}
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 512,
+}
+
+figure_festival_guy = {
+	animations : {
+		juggler : { pack:PACK_SPR_MAIN, id:130, max_frames:12 },
+		musician : { pack:PACK_SPR_MAIN, id:191, max_frames:12 },
+		dancer : {pack:PACK_SPR_MAIN, id:128, max_frames:12},
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 512,
 }
 
 figure_musician = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_MUSICIAN_WALK, max_frames:12 },
-		death : { pos : [0, 0], anim_id: ANIM_MUSICIAN_DEATH, max_frames:8 },
+		walk : { pack:PACK_SPR_MAIN, id:191, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:192, max_frames:8, loop:false },
 	},
 	sounds : {
 		i_like_festivals : { sound:"musician_e01.wav", group:229, text:0 },
@@ -385,13 +627,60 @@ figure_musician = {
  		no_entertainment_need : { sound:"musician_g08.wav", group:229, text:0 },
  		city_not_bad : { sound:"musician_g09.wav", group:229, text:0 },
  		city_is_good : { sound:"musician_g10.wav", group:229, text:0 },
-	}
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 512,
+}
+
+figure_soldier_infantry = {
+	animations : {
+		walk : { pos : [0, 0], pack:PACK_SPR_MAIN, id:64, max_frames:12 },
+		death : { pos : [0, 0], pack:PACK_SPR_MAIN, id:65, max_frames:8, loop:false },
+		attack : { pos : [0, 0], pack:PACK_SPR_MAIN, id:66, max_frames:12 },
+	},
+	terrain_usage : TERRAIN_USAGE_ANY,
+}
+
+figure_fishing_point = {
+	animations : {
+		point : { pack:PACK_SPR_AMBIENT, id:8, max_frames:22, duration:4 },
+		bubbles : { pack:PACK_SPR_AMBIENT, id:11, max_frames: 22, duration:4},
+	},
+	terrain_usage : TERRAIN_USAGE_ANY,
+}
+
+figure_fishing_boat = {
+	animations : {
+		walk : { pos : [0, 0], pack:PACK_SPR_MAIN, id:134, max_frames:4, duration:3 },
+		death : { pos : [0, 0], pack:PACK_SPR_MAIN, id:135, max_frames:8, loop:false },
+		work : { pos : [0, 0], pack:PACK_SPR_MAIN, id:135, max_frames:6, duration:5 },
+		idle : { pos : [0, 0], pack:PACK_SPR_MAIN, id:136, offset:3, max_frames:1 },
+	},
+	terrain_usage : TERRAIN_USAGE_ANY,
+}
+
+figure_soldier_archer = {
+	animations : {
+		walk : { pos : [0, 0], pack:PACK_SPR_MAIN, id:61, max_frames:12 },
+		death : { pos : [0, 0], pack:PACK_SPR_MAIN, id:62, max_frames:8, loop:false },
+		attack : { pos : [0, 0], pack:PACK_SPR_MAIN, id:63, max_frames:12 },
+	},
+	terrain_usage : TERRAIN_USAGE_ANY,
+}
+
+figure_soldier_charioteer = {
+	animations : {
+		walk : { pos : [0, 0], pack:PACK_SPR_MAIN, id:67, max_frames:12 },
+		death : { pos : [0, 0], pack:PACK_SPR_MAIN, id:68, max_frames:8, loop:false },
+		attack : { pos : [0, 0], pack:PACK_SPR_MAIN, id:69, max_frames:12 },
+	},
+	terrain_usage : TERRAIN_USAGE_ANY,
 }
 
 figure_juggler = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_JUGGLER_WALK, max_frames:12 },
-		death : { pos : [0, 0], anim_id: ANIM_JUGGLER_DEATH, max_frames:8 },
+		walk : { pack:PACK_SPR_MAIN, id:130, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:131, max_frames:8, loop:false },
 	},
 	sounds : {
 		i_like_festivals : {sound:"juggler_e01.wav", group: 230, text:0 },
@@ -405,24 +694,27 @@ figure_juggler = {
     low_entertainment : {sound:"juggler_g08.wav", group: 230, text:0 },
     city_is_good : {sound:"juggler_g09.wav", group: 230, text:0 },
     city_is_amazing : {sound:"juggler_g10.wav", group: 230, text:0 },
-	}
+	},
+	max_roam_length: 640,
 }
 
 figure_market_trader = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_HERBALIST_WALK, max_frames:12 },
-		death : { pos : [0, 0], anim_id: ANIM_HERBALIST_DEATH, max_frames:8 },
+		walk : { pos : [0, 0], pack:PACK_SPR_MAIN, id:18, max_frames:12 },
+		death : { pos : [0, 0], pack:PACK_SPR_MAIN, id:19, max_frames:8, loop:false },
 	},
 	sounds : {
 		goods_are_finished : {sound:"mkt_seller_e01.wav", group:245, text:0},
  	  we_are_selling_goods : {sound:"mkt_seller_e02.wav", group:245, text:0},
-	}
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 384,
 }
 
 figure_labor_seeker = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_LABOR_SEEKER_WALK, max_frames:12 },
-		death : { pos : [0, 0], anim_id: ANIM_LABOR_SEEKER_DEATH, max_frames:8 },
+		walk : { pack:PACK_SPR_MAIN, id:206, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:207, max_frames:8, loop:false },
 	},
 	sounds : {
 		no_jobs : { sound:"Labor_e01.wav", group:213, text:0},
@@ -437,27 +729,32 @@ figure_labor_seeker = {
     no_some_workers : { sound:"Labor_g08.WAV", group:213, text:9},
     i_want_to_leave_city : { sound:"Labor_g09.WAV", group:213, text:10},
     city_is_amazing : { sound:"Labor_g10.WAV", group:213, text:11},
-	}
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 384,
 }
 
 figure_reed_gatherer = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: ANIM_REED_GATHERER_WALK, max_frames:12 },
-		work : { pos : [0, 0], anim_id: ANIM_REED_GATHERER_WORK, max_frames:15 },
-		return : { pos : [0, 0], anim_id: ANIM_REED_GATHERER_RETURN, max_frames:12 },
-		death : { pos : [0, 0], anim_id: ANIM_REED_GATHERER_DEATH, max_frames:8 },
+		walk : { pack:PACK_SPR_MAIN, id:37, max_frames:12 },
+		death : { pack:PACK_SPR_MAIN, id:38, max_frames:8, loop:false },
+		work : { pack:PACK_SPR_MAIN, id:39, max_frames:15 },
+		return : { pack:PACK_SPR_MAIN, id:40, max_frames:12 },
 	},
+	terrain_usage : TERRAIN_USAGE_ANY,
 }
 
 figure_explosion = {
 	animations : {
-		poof : { pos : [0, 0], anim_id: IMG_EXPLOSION, max_frames:12 },
-	}
+		poof : { pack:PACK_SPR_AMBIENT, id:12, max_frames:12 },
+	},
+	terrain_usage : TERRAIN_USAGE_ANY,
 }
 
 figure_tax_collector = {
 	animations : {
-		walk : { pos : [0, 0], anim_id: IMG_BIGSLED_EMPTY, max_frames:1 },
+		walk : { pos : [0, 0], pack:PACK_SPR_MAIN, id:41, max_frames:12 },
+		death : { pos : [0, 0], pack:PACK_SPR_MAIN, id:42, max_frames:8, loop:false },
 	},
 	sounds : {
 		need_more_tax_collectors: {sound: "taxman_e01.wav", group: 245, text:0},
@@ -473,5 +770,7 @@ figure_tax_collector = {
     low_entertainment: {sound: "taxman_g08.wav", group: 245, text:10},
     city_is_good: {sound: "taxman_g09.wav", group: 245, text:11},
     city_is_amazing: {sound: "taxman_g10.wav", group: 245, text:12},
-	}
+	},
+	terrain_usage : TERRAIN_USAGE_ROADS,
+	max_roam_length : 512,
 }

@@ -1,13 +1,13 @@
 #include "music.h"
 
-#include "city/figures.h"
+#include "city/city.h"
 #include "city/population.h"
 #include "core/game_environment.h"
 #include "content/vfs.h"
 #include "core/profiler.h"
 #include "game/settings.h"
 #include "content/dir.h"
-#include "sound/device.h"
+#include "sound/sound.h"
 
 struct music_data_t {
     int current_track;
@@ -17,14 +17,14 @@ struct music_data_t {
 music_data_t g_music_data = {TRACK_NONE, 0};
 
 static const char c3_wav[][32] = {"",
-                                  "wavs/setup.wav",
-                                  "wavs/Combat_Short.wav",
-                                  "wavs/Combat_Long.wav",
-                                  "wavs/ROME1.WAV",
-                                  "wavs/ROME2.WAV",
-                                  "wavs/ROME3.WAV",
-                                  "wavs/ROME4.WAV",
-                                  "wavs/ROME5.WAV"};
+                                  "Wavs/setup.wav",
+                                  "Wavs/Combat_Short.wav",
+                                  "Wavs/Combat_Long.wav",
+                                  "Wavs/ROME1.WAV",
+                                  "Wavs/ROME2.WAV",
+                                  "Wavs/ROME3.WAV",
+                                  "Wavs/ROME4.WAV",
+                                  "Wavs/ROME5.WAV"};
 
 static const char c3_mp3[][32] = {"",
                                   "mp3/setup.mp3",
@@ -91,7 +91,7 @@ static const char ph_mp3[][32] = {
 };
 
 void sound_music_play_track(int track) {
-    sound_device_stop_music();
+    g_sound.stop_music();
 
     if (track <= TRACK_NONE || track >= TRACK_MAX) {
         return;
@@ -106,13 +106,9 @@ void sound_music_play_track(int track) {
     }
 
     corrected_filename = vfs::content_file(corrected_filename);
-    sound_device_play_music(corrected_filename, volume);
+    g_sound.play_music(corrected_filename, volume);
 
     g_music_data.current_track = track;
-}
-
-void sound_music_set_volume(int percentage) {
-    sound_device_set_music_volume(percentage);
 }
 
 void sound_music_play_intro() {
@@ -140,7 +136,7 @@ void sound_music_update(bool force) {
 
     int track;
     int population = city_population();
-    int total_enemies = city_figures_total_invading_enemies();
+    int total_enemies = g_city.figures_total_invading_enemies();
 
     if (total_enemies >= 32) {
         track = TRACK_COMBAT_LONG;
@@ -167,7 +163,7 @@ void sound_music_update(bool force) {
 }
 
 void sound_music_stop(void) {
-    sound_device_stop_music();
+    g_sound.stop_music();
     g_music_data.current_track = TRACK_NONE;
     g_music_data.next_check = 0;
 }

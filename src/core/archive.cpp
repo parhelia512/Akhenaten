@@ -1,5 +1,7 @@
 #include "core/archive.h"
 
+#include "graphics/animation.h"
+
 #include "mujs/mujs.h"
 
 void archive::getproperty(int idx, pcstr name) {
@@ -62,7 +64,7 @@ const uint8_t *lang_get_string(int group, int index);
 pcstr archive::r_string(pcstr name) {
     auto vm = (js_State *)state;
     js_getproperty(vm, -1, name);
-    const char *result = "";
+    pcstr result = "";
     if (js_isundefined(vm, -1)) {
         ;
     } else if (js_isstring(vm, -1)) {
@@ -120,6 +122,14 @@ int archive::r_int(pcstr name, int def) {
     return result;
 }
 
+float archive::r_float(pcstr name, float def) {
+    auto vm = (js_State *)state;
+    js_getproperty(vm, -1, name);
+    float result = js_isundefined(vm, -1) ? def : (float)js_tonumber(vm, -1);
+    js_pop(vm, 1);
+    return result;
+}
+
 uint32_t archive::r_uint(pcstr name, uint32_t def) {
     auto vm = (js_State *)state;
     js_getproperty(vm, -1, name);
@@ -172,4 +182,22 @@ vec2i archive::r_vec2i(pcstr name, pcstr x, pcstr y) {
     js_pop(vm, 1);
 
     return result;
+}
+
+bool archive::r_anim(pcstr name, animation_t &anim) {
+    auto vm = (js_State *)state;
+    js_getproperty(vm, -1, name);
+    bool ok = false;
+    if (js_isundefined(vm, -1)) {
+        ;
+    } else if (js_isobject(vm, -1)) {
+        js_getproperty(vm, -1, "pack"); anim.pack = js_isundefined(vm, -1) ? 0 : js_tointeger(vm, -1); js_pop(vm, 1);
+        js_getproperty(vm, -1, "id"); anim.iid = js_isundefined(vm, -1) ? 0 : js_tointeger(vm, -1); js_pop(vm, 1);
+        js_getproperty(vm, -1, "offset"); anim.offset = js_isundefined(vm, -1) ? 0 : js_tointeger(vm, -1); js_pop(vm, 1);
+        js_getproperty(vm, -1, "duration"); anim.duration = js_isundefined(vm, -1) ? 0 : js_tointeger(vm, -1); js_pop(vm, 1);
+        js_getproperty(vm, -1, "max_frames"); anim.max_frames = js_isundefined(vm, -1) ? 0 : js_tointeger(vm, -1); js_pop(vm, 1);
+        ok = true;
+    }
+    js_pop(vm, 1);
+    return ok;
 }

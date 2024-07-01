@@ -1,11 +1,11 @@
 #include "message_dialog.h"
 
 #include "city/message.h"
-#include "city/city_data.h"
+#include "city/city.h"
 #include "city/constants.h"
 #include "city/gods.h"
 #include "city/sentiment.h"
-#include "empire/empire_city.h"
+#include "empire/empire.h"
 #include "figure/formation.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -21,11 +21,11 @@
 #include "input/input.h"
 #include "input/scroll.h"
 #include "io/gamefiles/lang.h"
-#include "scenario/property.h"
+#include "scenario/scenario.h"
 #include "scenario/events.h"
 #include "scenario/request.h"
 #include "window/advisors.h"
-#include "window/city.h"
+#include "window/window_city.h"
 #include "game/game.h"
 
 #define MAX_HISTORY 200
@@ -140,13 +140,13 @@ static void eventmsg_template_combine(uint8_t* template_ptr, uint8_t* out_ptr, b
     string_from_int(time, msg->req_months_left, false);
     int city_name_id = 0;
     if (phrase_modifier) {
-        empire_city* city = empire_city_get(msg->req_city_past);
+        empire_city* city = g_empire.city(msg->req_city_past);
         if (city != nullptr) {
             city_name_id = city->name_id;
         }
         string_from_int(amount, stack_proper_quantity(msg->req_amount_past, msg->req_resource_past), false);
     } else {
-        empire_city *city = empire_city_get(msg->req_city);
+        empire_city *city = g_empire.city(msg->req_city);
         if (city != nullptr) {
             city_name_id = city->name_id;
         }
@@ -307,7 +307,7 @@ static void draw_city_message_text(const lang_message* msg) {
 
         case MESSAGE_TYPE_TRADE_CHANGE:
             ImageDraw::img_generic(ctx, resource_image(g_player_message_data.param2), data.x + 64, data.y_text + 40);
-            lang_text_draw(21, empire_city_get(g_player_message_data.param1)->name_id, data.x + 100, data.y_text + 44, FONT_NORMAL_WHITE_ON_DARK);
+            lang_text_draw(21, g_empire.city(g_player_message_data.param1)->name_id, data.x + 100, data.y_text + 44, FONT_NORMAL_WHITE_ON_DARK);
             rich_text_draw(text, data.x_text + 8, data.y_text + 86, 16 * data.text_width_blocks - 16, data.text_height_blocks - 1, 0);
             break;
 
@@ -633,38 +633,38 @@ static void draw_foreground_normal() {
     const lang_message* msg = lang_get_message(data.text_id);
 
     if (msg->type == TYPE_MANUAL && data.num_history > 0) {
-        image_buttons_draw(data.x + 16, data.y + 16 * msg->height_blocks - 36, &image_button_back, 1);
+        image_buttons_draw({data.x + 16, data.y + 16 * msg->height_blocks - 36}, &image_button_back, 1);
         lang_text_draw(12, 0, data.x + 52, data.y + 16 * msg->height_blocks - 31, FONT_NORMAL_BLACK_ON_LIGHT);
     }
 
     if (msg->type == TYPE_MESSAGE) {
-        image_buttons_draw(data.x + 16, data.y + 16 * msg->height_blocks - 40, get_advisor_button(), 1);
+        image_buttons_draw({data.x + 16, data.y + 16 * msg->height_blocks - 40}, get_advisor_button(), 1);
         if (msg->message_type == MESSAGE_TYPE_DISASTER || msg->message_type == MESSAGE_TYPE_INVASION)
-            image_buttons_draw(data.x + 64, data.y_text + 36, &image_button_go_to_problem, 1);
+            image_buttons_draw({data.x + 64, data.y_text + 36}, &image_button_go_to_problem, 1);
     }
-    image_buttons_draw(data.x + 16 * msg->width_blocks - 38, data.y + 16 * msg->height_blocks - 36, &image_button_close, 1);
+    image_buttons_draw({data.x + 16 * msg->width_blocks - 38, data.y + 16 * msg->height_blocks - 36}, &image_button_close, 1);
     rich_text_draw_scrollbar();
 }
 
 static void draw_foreground_image() {
     auto &data = g_message_dialog_data;
 
-    image_buttons_draw(data.x + 16, data.y + 408, get_advisor_button(), 1);
-    image_buttons_draw(data.x + 372, data.y + 410, &image_button_close, 1);
+    image_buttons_draw({data.x + 16, data.y + 408}, get_advisor_button(), 1);
+    image_buttons_draw({data.x + 372, data.y + 410}, &image_button_close, 1);
     const lang_message* msg = lang_get_message(data.text_id);
     if (is_problem_message(msg)) {
-        image_buttons_draw(data.x + 48, data.y + 407, &image_button_go_to_problem, 1);
+        image_buttons_draw({data.x + 48, data.y + 407}, &image_button_go_to_problem, 1);
     }
 }
 
 static void draw_foreground_video() {
     auto &data = g_message_dialog_data;
     video_draw(data.x + 8, data.y + 8);
-    image_buttons_draw(data.x + 16, data.y + 408, get_advisor_button(), 1);
-    image_buttons_draw(data.x + 372, data.y + 410, &image_button_close, 1);
+    image_buttons_draw({data.x + 16, data.y + 408}, get_advisor_button(), 1);
+    image_buttons_draw({data.x + 372, data.y + 410}, &image_button_close, 1);
     const lang_message* msg = lang_get_message(data.text_id);
     if (is_problem_message(msg)) {
-        image_buttons_draw(data.x + 48, data.y + 407, &image_button_go_to_problem, 1);
+        image_buttons_draw({data.x + 48, data.y + 407}, &image_button_go_to_problem, 1);
     }
 }
 
@@ -684,16 +684,16 @@ static void draw_foreground() {
 
 static bool handle_input_video(const mouse* m_dialog, const lang_message* msg) {
     auto &data = g_message_dialog_data;
-    if (image_buttons_handle_mouse(m_dialog, data.x + 16, data.y + 408, get_advisor_button(), 1, 0)) {
+    if (image_buttons_handle_mouse(m_dialog, {data.x + 16, data.y + 408}, get_advisor_button(), 1, 0)) {
         return true;
     }
 
-    if (image_buttons_handle_mouse(m_dialog, data.x + 372, data.y + 410, &image_button_close, 1, 0)) {
+    if (image_buttons_handle_mouse(m_dialog, {data.x + 372, data.y + 410}, &image_button_close, 1, 0)) {
         return true;
     }
 
     if (is_problem_message(msg)) {
-        if (image_buttons_handle_mouse(m_dialog, data.x + 48, data.y + 407, &image_button_go_to_problem, 1, &data.focus_button_id)) {
+        if (image_buttons_handle_mouse(m_dialog, {data.x + 48, data.y + 407}, &image_button_go_to_problem, 1, &data.focus_button_id)) {
             return true;
         }
     }
@@ -702,16 +702,16 @@ static bool handle_input_video(const mouse* m_dialog, const lang_message* msg) {
 
 static bool handle_input_godmsg(const mouse* m_dialog, const lang_message* msg) {
     auto &data = g_message_dialog_data;
-    if (image_buttons_handle_mouse(m_dialog, data.x + 16, data.y + 408, get_advisor_button(), 1, 0)) {
+    if (image_buttons_handle_mouse(m_dialog, {data.x + 16, data.y + 408}, get_advisor_button(), 1, 0)) {
         return true;
     }
 
-    if (image_buttons_handle_mouse(m_dialog, data.x + 372, data.y + 410, &image_button_close, 1, 0)) {
+    if (image_buttons_handle_mouse(m_dialog, {data.x + 372, data.y + 410}, &image_button_close, 1, 0)) {
         return true;
     }
 
     if (is_problem_message(msg)) {
-        if (image_buttons_handle_mouse(m_dialog, data.x + 48, data.y + 407, &image_button_go_to_problem, 1, &data.focus_button_id)) {
+        if (image_buttons_handle_mouse(m_dialog, {data.x + 48, data.y + 407}, &image_button_go_to_problem, 1, &data.focus_button_id)) {
             return true;
         }
     }
@@ -720,22 +720,22 @@ static bool handle_input_godmsg(const mouse* m_dialog, const lang_message* msg) 
 
 static bool handle_input_normal(const mouse* m_dialog, const lang_message* msg) {
     auto &data = g_message_dialog_data;
-    if (msg->type == TYPE_MANUAL && image_buttons_handle_mouse(m_dialog, data.x + 16, data.y + 16 * msg->height_blocks - 36, &image_button_back, 1, 0)) {
+    if (msg->type == TYPE_MANUAL && image_buttons_handle_mouse(m_dialog, {data.x + 16, data.y + 16 * msg->height_blocks - 36}, &image_button_back, 1, 0)) {
         return true;
     }
 
     if (msg->type == TYPE_MESSAGE) {
-        if (image_buttons_handle_mouse(m_dialog, data.x + 16, data.y + 16 * msg->height_blocks - 40, get_advisor_button(), 1, 0)) {
+        if (image_buttons_handle_mouse(m_dialog, {data.x + 16, data.y + 16 * msg->height_blocks - 40}, get_advisor_button(), 1, 0)) {
             return true;
         }
 
         if (msg->message_type == MESSAGE_TYPE_DISASTER || msg->message_type == MESSAGE_TYPE_INVASION) {
-            if (image_buttons_handle_mouse(m_dialog, data.x + 64, data.y_text + 36, &image_button_go_to_problem, 1, 0))
+            if (image_buttons_handle_mouse(m_dialog, {data.x + 64, data.y_text + 36}, &image_button_go_to_problem, 1, 0))
                 return true;
         }
     }
 
-    if (image_buttons_handle_mouse(m_dialog, data.x + 16 * msg->width_blocks - 38, data.y + 16 * msg->height_blocks - 36, &image_button_close, 1, 0)) {
+    if (image_buttons_handle_mouse(m_dialog, {data.x + 16 * msg->width_blocks - 38, data.y + 16 * msg->height_blocks - 36}, &image_button_close, 1, 0)) {
         return true;
     }
 

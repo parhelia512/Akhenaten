@@ -1,8 +1,8 @@
 #include "empire.h"
 
 #include "core/game_environment.h"
-#include "empire/empire_city.h"
 #include "empire/empire.h"
+#include "empire/empire_map.h"
 #include "empire/empire_object.h"
 #include "empire/trade_route.h"
 #include "empire/type.h"
@@ -51,9 +51,9 @@ static struct {
 
 static void init(void) {
     data.selected_button = 0;
-    int selected_object = empire_selected_object();
+    int selected_object = g_empire_map.selected_object();
     if (selected_object)
-        data.selected_city = empire_city_get_for_object(selected_object - 1);
+        data.selected_city = g_empire.get_city_for_object(selected_object - 1);
     else {
         data.selected_city = 0;
     }
@@ -134,7 +134,8 @@ static void draw_empire_object(const empire_object* obj) {
     }
 
     if (obj->type == EMPIRE_OBJECT_CITY) {
-        const empire_city* city = empire_city_get(empire_city_get_for_object(obj->id));
+        int city_id = g_empire.get_city_for_object(obj->id);
+        const empire_city* city = g_empire.city(city_id);
         if (city->type == EMPIRE_CITY_EGYPTIAN || city->type == EMPIRE_CITY_FOREIGN) {
             image_id = image_id_from_group(GROUP_EDITOR_EMPIRE_FOREIGN_CITY);
         }
@@ -152,18 +153,18 @@ static void draw_empire_object(const empire_object* obj) {
     }
 }
 
-static void draw_map() {
+static void window_editor_draw_map() {
     painter ctx = game.painter();
     int viewport_width = map_viewport_width();
     int viewport_height = map_viewport_height();
     graphics_set_clip_rectangle(data.x_min + 16, data.y_min + 16, viewport_width, viewport_height);
 
-    empire_set_viewport(viewport_width, viewport_height);
+    g_empire_map.set_viewport(vec2i(viewport_width, viewport_height));
 
     data.draw_offset.x = data.x_min + 16;
     data.draw_offset.y = data.y_min + 16;
-    empire_adjust_scroll(&data.draw_offset.x, &data.draw_offset.y);
-    ImageDraw::img_generic(ctx, image_id_from_group(GROUP_EDITOR_EMPIRE_MAP), vec2i{data.draw_offset.x, data.draw_offset.y});
+    data.draw_offset = g_empire_map.adjust_scroll(data.draw_offset);
+    ImageDraw::img_generic(ctx, image_id_from_group(GROUP_EDITOR_EMPIRE_MAP), data.draw_offset);
 
     empire_object_foreach(draw_empire_object);
 
@@ -240,7 +241,7 @@ static void draw_city_info(const empire_city* city) {
 }
 
 static void draw_panel_buttons(const empire_city* city) {
-    arrow_buttons_draw(data.x_min + 20, data.y_max - 100, arrow_buttons_empire, 2);
+    arrow_buttons_draw({data.x_min + 20, data.y_max - 100}, arrow_buttons_empire, 2);
 
     if (city)
         draw_city_info(city);
@@ -254,15 +255,15 @@ static void draw_panel_buttons(const empire_city* city) {
 }
 
 static void draw_foreground(void) {
-    draw_map();
+    window_editor_draw_map();
 
     const empire_city* city = 0;
-    int selected_object = empire_selected_object();
+    int selected_object = g_empire_map.selected_object();
     if (selected_object) {
         const empire_object* object = empire_object_get(selected_object - 1);
         if (object->type == EMPIRE_OBJECT_CITY) {
-            data.selected_city = empire_city_get_for_object(object->id);
-            city = empire_city_get(data.selected_city);
+            data.selected_city = g_empire.get_city_for_object(object->id);
+            city = g_empire.city(data.selected_city);
         }
     }
     draw_panel_buttons(city);
@@ -277,14 +278,15 @@ static void determine_selected_object(const mouse* m) {
         data.finished_scroll = 0;
         return;
     }
-    empire_select_object(m->x - data.x_min - 16, m->y - data.y_min - 16);
+    g_empire_map.select_object(vec2i{m->x - data.x_min - 16, m->y - data.y_min - 16});
     window_invalidate();
 }
 
 static void handle_input(const mouse* m, const hotkeys* h) {
     vec2i position;
-    if (scroll_get_delta(m, &position, SCROLL_TYPE_EMPIRE))
-        empire_scroll_map(position.x, position.y);
+    if (scroll_get_delta(m, &position, SCROLL_TYPE_EMPIRE)) {
+        g_empire_map.scroll_map(position);
+    }
 
     if (h->toggle_editor_battle_info)
         data.show_battle_objects = !data.show_battle_objects;
@@ -304,14 +306,13 @@ static void handle_input(const mouse* m, const hotkeys* h) {
         }
     }
     data.focus_button_id = 0;
-    if (!arrow_buttons_handle_mouse(m, data.x_min + 20, data.y_max - 100, arrow_buttons_empire, 2, 0)) {
-        if (!generic_buttons_handle_mouse(
-              m, data.x_min + 20, data.y_max - 100, generic_button_ok, 1, &data.focus_button_id)) {
+    if (!arrow_buttons_handle_mouse(m, {data.x_min + 20, data.y_max - 100}, arrow_buttons_empire, 2, 0)) {
+        if (!generic_buttons_handle_mouse(m, {data.x_min + 20, data.y_max - 100}, generic_button_ok, 1, &data.focus_button_id)) {
             determine_selected_object(m);
-            int selected_object = empire_selected_object();
+            int selected_object = g_empire_map.selected_object();
             if (selected_object) {
                 if (empire_object_get(selected_object - 1)->type == EMPIRE_OBJECT_CITY)
-                    data.selected_city = empire_city_get_for_object(selected_object - 1);
+                    data.selected_city = g_empire.get_city_for_object(selected_object - 1);
 
             } else if (input_go_back_requested(m, h))
                 window_editor_map_show();

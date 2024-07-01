@@ -2,6 +2,7 @@
 
 #include "building/building.h"
 #include "city/object_info.h"
+#include "building/count.h"
 #include "city/resource.h"
 #include "core/calc.h"
 #include "core/random.h"
@@ -41,8 +42,8 @@ void config_load_building_raw_materials() {
     gatherer_m.load();
 }
 
-static void building_raw_material_draw_info(object_info& c, const char* type, e_resource resource) {
-    auto &meta = building::get_info(type);
+void building_raw_material_draw_info(object_info& c, const char* type, e_resource resource) {
+    const auto &meta = building_get(c.building_id)->dcast()->get_info();
     painter ctx = game.painter();
     c.help_id = meta.help_id;
     window_building_play_sound(&c, snd::get_building_info_sound(type));
@@ -84,20 +85,6 @@ static void building_raw_material_draw_info(object_info& c, const char* type, e_
 void building_marble_quarry_draw_info(object_info& c) {
     building_raw_material_draw_info(c, "marble_quarry", RESOURCE_MARBLE);
 }
-void building_limestone_quarry_draw_info(object_info& c) {
-    building_raw_material_draw_info(c, "limestone_quarry", RESOURCE_LIMESTONE);
-}
-
-void building_timber_yard_draw_info(object_info& c) {
-    building_raw_material_draw_info(c, "timber_yard", RESOURCE_TIMBER);
-}
-
-void building_sandstone_quarry_draw_info(object_info& c) {
-    building_raw_material_draw_info(c, "sandstone_quarry", RESOURCE_SANDSTONE);
-}
-void building_granite_quarry_draw_info(object_info& c) {
-    building_raw_material_draw_info(c, "granite_quarry", RESOURCE_SANDSTONE);
-}
 
 void building_mine::on_create(int orientation) {
     base.output_resource_first_id = params().output_resource;
@@ -120,14 +107,26 @@ int building_mine_gold::get_produce_uptick_per_day() const {
     }
 }
 
+void building_mine_gold::update_count() const {
+    building_increase_industry_count(RESOURCE_GOLD, num_workers() > 0);
+}
+
 const building_impl::static_params &building_mine_gold::params() const { return gold_mine_m; }
 const animation_t &building_mine_gold::anim(pcstr key) const { return gold_mine_m.anim[key]; }
 
 const building_impl::static_params &building_mine_copper::params() const { return copper_mine_m; }
 const animation_t &building_mine_copper::anim(pcstr key) const { return copper_mine_m.anim[key]; }
 
+void building_mine_copper::update_count() const {
+    building_increase_industry_count(RESOURCE_COPPER, num_workers() > 0);
+}
+
 const building_impl::static_params &building_mine_gems::params() const { return gems_mine_m; }
 const animation_t &building_mine_gems::anim(pcstr key) const { return gems_mine_m.anim[key]; }
+
+void building_mine_gems::update_count() const {
+    building_increase_industry_count(RESOURCE_GEMS, num_workers() > 0);
+}
 
 void building_quarry_stone::on_create(int orientation) {
     base.output_resource_first_id = RESOURCE_STONE;
@@ -158,6 +157,10 @@ bool building_clay_pit::draw_ornaments_and_animations_height(painter &ctx, vec2i
     building_draw_normal_anim(ctx, point, &base, tile, anim, color_mask);
 
     return true;
+}
+
+void building_clay_pit::update_count() const {
+    building_increase_industry_count(RESOURCE_CLAY, num_workers() > 0);
 }
 
 void building_reed_gatherer::on_create(int orientation) {
@@ -194,6 +197,10 @@ bool building_reed_gatherer::draw_ornaments_and_animations_height(painter &ctx, 
     building_draw_normal_anim(ctx, point, &base, tile, anim, color_mask);
 
     return true;
+}
+
+void building_reed_gatherer::update_count() const {
+    building_increase_industry_count(RESOURCE_REEDS, num_workers() > 0);
 }
 
 void building_reed_gatherer::spawn_figure() {

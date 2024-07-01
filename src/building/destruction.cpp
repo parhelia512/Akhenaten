@@ -1,10 +1,9 @@
 #include "destruction.h"
 
-#include "building/house.h"
+#include "building/building_house.h"
 #include "city/message.h"
 #include "city/population.h"
-#include "city/ratings.h"
-#include "figuretype/missile.h"
+#include "city/city.h"
 #include "figuretype/wall.h"
 #include "game/undo.h"
 #include "graphics/image.h"
@@ -16,16 +15,17 @@
 #include "grid/routing/routing_terrain.h"
 #include "grid/terrain.h"
 #include "grid/tiles.h"
-#include "sound/effect.h"
+#include "sound/sound.h"
 
 #include <core/random.h>
 #include <string.h>
 
-const vec2i destroy_on_fire_tiles[] = {{0, 0}, {1, 0}, {1, 1}, {0, 1}, 
-                       {2, 0}, {2, 1}, {2, 2}, {1, 2}, {0, 2}, 
-                       {3, 0}, {3, 1}, {3, 2}, {3, 3}, {2, 3}, {1, 3}, {0, 3}, 
-                       {4, 0}, {4, 1}, {4, 2}, {4, 3}, {4, 4}, {3, 4}, {2, 4}, {1, 4}, {0, 4}, 
-                       {5, 0}, {5, 1}, {5, 2}, {5, 3}, {5, 4}, {5, 5}, {4, 5}, {3, 5}, {2, 5}, {1, 5}, {0, 5}};
+const vec2i destroy_on_fire_tiles[] = {         {0, 0},
+                                        {1, 0}, {1, 1}, {0, 1}, 
+                                {2, 0}, {2, 1}, {2, 2}, {1, 2}, {0, 2}, 
+                        {3, 0}, {3, 1}, {3, 2}, {3, 3}, {2, 3}, {1, 3}, {0, 3}, 
+                {4, 0}, {4, 1}, {4, 2}, {4, 3}, {4, 4}, {3, 4}, {2, 4}, {1, 4}, {0, 4}, 
+        {5, 0}, {5, 1}, {5, 2}, {5, 3}, {5, 4}, {5, 5}, {4, 5}, {3, 5}, {2, 5}, {1, 5}, {0, 5}};
 
 static void destroy_on_fire(building* b, bool plagued) {
     game_undo_disable();
@@ -61,7 +61,7 @@ static void destroy_on_fire(building* b, bool plagued) {
 
     map_building_tiles_remove(b->id, b->tile);
     unsigned int rand_int = random_short();
-    if (map_terrain_is(b->tile.grid_offset(), TERRAIN_WATER)) {
+    if (map_terrain_is(b->tile, TERRAIN_WATER)) {
         b->state = BUILDING_STATE_DELETED_BY_GAME;
     } else {
         b->type = BUILDING_BURNING_RUIN;
@@ -82,7 +82,7 @@ static void destroy_on_fire(building* b, bool plagued) {
 
     for (int tile = 1; tile < num_tiles; tile++) {
         tile2i shifted = b->tile.shifted(destroy_on_fire_tiles[tile].x, destroy_on_fire_tiles[tile].y);
-        if (map_terrain_is(shifted.grid_offset(), TERRAIN_WATER)) {
+        if (map_terrain_is(shifted, TERRAIN_WATER)) {
             continue;
         }
 
@@ -142,7 +142,7 @@ void building_destroy_by_collapse(building* b) {
     map_building_tiles_set_rubble(b->id, b->tile, b->size);
     figure_create_explosion_cloud(b->tile, b->size);
     destroy_linked_parts(b, false);
-    sound_effect_play(SOUND_EFFECT_EXPLOSION);
+    g_sound.play_effect(SOUND_EFFECT_EXPLOSION);
 }
 
 void building_destroy_by_poof(building* b, bool clouds) {
@@ -151,7 +151,7 @@ void building_destroy_by_poof(building* b, bool clouds) {
         figure_create_explosion_cloud(b->tile, b->size);
     }
 
-    sound_effect_play(SOUND_EFFECT_EXPLOSION);
+    g_sound.play_effect(SOUND_EFFECT_EXPLOSION);
 
     do {
         b->state = BUILDING_STATE_UNUSED;
@@ -168,7 +168,7 @@ void building_destroy_by_fire(building* b) {
     b = b->main();
     destroy_on_fire(b, false);
     destroy_linked_parts(b, true);
-    sound_effect_play(SOUND_EFFECT_EXPLOSION);
+    g_sound.play_effect(SOUND_EFFECT_EXPLOSION);
 }
 
 void building_mark_plague(building* b) {
@@ -191,7 +191,7 @@ int building_destroy_first_of_type(e_building_type type) {
         game_undo_disable();
         b->state = BUILDING_STATE_RUBBLE;
         map_building_tiles_set_rubble(i, b->tile, b->size);
-        sound_effect_play(SOUND_EFFECT_EXPLOSION);
+        g_sound.play_effect(SOUND_EFFECT_EXPLOSION);
         map_routing_update_land();
         return grid_offset;
     }
@@ -232,7 +232,7 @@ void building_destroy_by_enemy(tile2i tile) {
     if (building_id > 0) {
         building* b = building_get(building_id);
         if (b->state == BUILDING_STATE_VALID) {
-            city_ratings_monument_building_destroyed(b->type);
+            g_city.ratings.monument_building_destroyed(b->type);
             building_destroy_by_collapse(b);
         }
     } else {
@@ -243,8 +243,8 @@ void building_destroy_by_enemy(tile2i tile) {
         map_building_tiles_set_rubble(0, tile, 1);
     }
     figure_tower_sentry_reroute();
-    map_tiles_update_area_walls(x, y, 3);
-    map_tiles_update_region_aqueducts(x - 3, y - 3, x + 3, y + 3);
+    map_tiles_update_area_walls(tile, 3);
+    map_tiles_update_region_canals(x - 3, y - 3, x + 3, y + 3);
     map_routing_update_land();
     map_routing_update_walls();
 }

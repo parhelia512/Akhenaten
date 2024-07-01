@@ -1,46 +1,18 @@
 #include "entertainment.h"
 
 #include "building/building.h"
-#include "city/data_private.h"
+#include "city/city.h"
 
-int city_entertainment_theater_shows(void) {
-    return city_data.entertainment.theater_shows;
-}
-
-int city_entertainment_amphitheater_shows(void) {
-    return city_data.entertainment.amphitheater_shows;
-}
-
-int city_entertainment_colosseum_shows(void) {
-    return city_data.entertainment.colosseum_shows;
-}
-
-int city_entertainment_hippodrome_shows(void) {
-    return city_data.entertainment.hippodrome_shows;
-}
-
-void city_entertainment_set_hippodrome_has_race(int has_race) {
-    city_data.entertainment.hippodrome_has_race = has_race;
-}
-
-int city_entertainment_hippodrome_has_race(void) {
-    return city_data.entertainment.hippodrome_has_race;
-}
-
-int city_entertainment_venue_needing_shows(void) {
-    return city_data.entertainment.venue_needing_shows;
-}
-
-void city_entertainment_calculate_shows(void) {
-    city_data.entertainment.theater_shows = 0;
-    city_data.entertainment.theater_no_shows_weighted = 0;
-    city_data.entertainment.amphitheater_shows = 0;
-    city_data.entertainment.amphitheater_no_shows_weighted = 0;
-    city_data.entertainment.colosseum_shows = 0;
-    city_data.entertainment.colosseum_no_shows_weighted = 0;
-    city_data.entertainment.hippodrome_shows = 0;
-    city_data.entertainment.hippodrome_no_shows_weighted = 0;
-    city_data.entertainment.venue_needing_shows = 0;
+void city_entertainment_t::calculate_shows() {
+    booth_shows = 0;
+    booth_no_shows_weighted = 0;
+    bandstand_shows = 0;
+    bandstand_no_shows_weighted = 0;
+    pavilion_shows = 0;
+    pavilion_no_shows_weighted = 0;
+    senet_house_plays = 0;
+    senet_house_no_shows_weighted = 0;
+    venue_needing_shows = 0;
 
     for (int i = 1; i < MAX_BUILDINGS; i++) {
         building* b = building_get(i);
@@ -50,71 +22,72 @@ void city_entertainment_calculate_shows(void) {
         switch (b->type) {
         case BUILDING_BOOTH: // booth
             if (b->data.entertainment.days1)
-                city_data.entertainment.theater_shows++;
+                booth_shows++;
             else
-                city_data.entertainment.theater_no_shows_weighted++;
+                booth_no_shows_weighted++;
             break;
         case BUILDING_BANDSTAND: // bandstand
             if (b->data.entertainment.days1)
-                city_data.entertainment.theater_shows++;
+                booth_shows++;
             else
-                city_data.entertainment.theater_no_shows_weighted++;
+                booth_no_shows_weighted++;
+
             if (b->data.entertainment.days2)
-                city_data.entertainment.amphitheater_shows++;
+                bandstand_shows++;
             else
-                city_data.entertainment.amphitheater_no_shows_weighted++;
+                bandstand_no_shows_weighted++;
             break;
         case BUILDING_PAVILLION: // pavillion
             if (b->data.entertainment.days1)
-                city_data.entertainment.theater_shows++;
+                booth_shows++;
             else
-                city_data.entertainment.theater_no_shows_weighted++;
+                booth_no_shows_weighted++;
             if (b->data.entertainment.days2)
-                city_data.entertainment.amphitheater_shows++;
+                bandstand_shows++;
             else
-                city_data.entertainment.amphitheater_no_shows_weighted++;
+                bandstand_no_shows_weighted++;
             if (b->data.entertainment.days3_or_play)
-                city_data.entertainment.colosseum_shows++;
+                pavilion_shows++;
             else
-                city_data.entertainment.colosseum_no_shows_weighted++;
+                pavilion_no_shows_weighted++;
             break;
         case BUILDING_SENET_HOUSE:
             if (b->data.entertainment.days1)
-                city_data.entertainment.hippodrome_shows++;
+                senet_house_plays++;
             else
-                city_data.entertainment.hippodrome_no_shows_weighted += 100;
+                senet_house_no_shows_weighted += 100;
             break;
         }
     }
     int worst_shows = 0;
-    if (city_data.entertainment.theater_no_shows_weighted > worst_shows) {
-        worst_shows = city_data.entertainment.theater_no_shows_weighted;
-        city_data.entertainment.venue_needing_shows = 1;
+    if (booth_no_shows_weighted > worst_shows) {
+        worst_shows = booth_no_shows_weighted;
+        venue_needing_shows = 1;
     }
-    if (city_data.entertainment.amphitheater_no_shows_weighted > worst_shows) {
-        worst_shows = city_data.entertainment.amphitheater_no_shows_weighted;
-        city_data.entertainment.venue_needing_shows = 2;
+    if (bandstand_no_shows_weighted > worst_shows) {
+        worst_shows = bandstand_no_shows_weighted;
+        venue_needing_shows = 2;
     }
-    if (city_data.entertainment.colosseum_no_shows_weighted > worst_shows) {
-        worst_shows = city_data.entertainment.colosseum_no_shows_weighted;
-        city_data.entertainment.venue_needing_shows = 3;
+    if (pavilion_no_shows_weighted > worst_shows) {
+        worst_shows = pavilion_no_shows_weighted;
+        venue_needing_shows = 3;
     }
-    if (city_data.entertainment.hippodrome_no_shows_weighted > worst_shows)
-        city_data.entertainment.venue_needing_shows = 4;
+    if (senet_house_no_shows_weighted > worst_shows)
+        venue_needing_shows = 4;
 }
 
-int city_entertainment_show_message_colosseum(void) {
-    if (!city_data.entertainment.colosseum_message_shown) {
-        city_data.entertainment.colosseum_message_shown = 1;
+int city_entertainment_t::show_message_pavilion() {
+    if (!pavilion_message_shown) {
+        pavilion_message_shown = 1;
         return 1;
     } else {
         return 0;
     }
 }
 
-int city_entertainment_show_message_hippodrome(void) {
-    if (!city_data.entertainment.hippodrome_message_shown) {
-        city_data.entertainment.hippodrome_message_shown = 1;
+int city_entertainment_t::show_message_senet_house() {
+    if (!senet_house_message_shown) {
+        senet_house_message_shown = 1;
         return 1;
     } else {
         return 0;

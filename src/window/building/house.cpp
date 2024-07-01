@@ -2,7 +2,7 @@
 
 #include "building/building.h"
 #include "building/model.h"
-#include "city/finance.h"
+#include "city/city.h"
 #include "common.h"
 #include "core/calc.h"
 #include "core/game_environment.h"
@@ -25,8 +25,8 @@ static void draw_vacant_lot(object_info* c) {
 
     int text_id = 2;
     building* b = building_get(c->building_id);
-    map_point road_tile;
-    if (map_closest_road_within_radius(b->tile, 1, 2, road_tile)) {
+    map_point road_tile = map_closest_road_within_radius(b->tile, 1, 2);
+    if (road_tile.valid()) {
         text_id = 1;
     }
 
@@ -87,7 +87,7 @@ static void draw_happiness_info(object_info* c, int y_offset) {
 void window_building_draw_house(object_info* c) {
     painter ctx = game.painter();
     c->help_id = 56;
-    window_building_play_sound(c, "wavs/housing.wav");
+    window_building_play_sound(c, "Wavs/housing.wav");
     building* b = building_get(c->building_id);
     if (b->house_population <= 0) {
         draw_vacant_lot(c);
@@ -111,10 +111,10 @@ void window_building_draw_house(object_info* c) {
     int resource_image = image_id_resource_icon(0);
     // food inventory
     // todo: fetch map available foods?
-    int food1 = city_allowed_foods(0);
-    int food2 = city_allowed_foods(1);
-    int food3 = city_allowed_foods(2);
-    int food4 = city_allowed_foods(3);
+    int food1 = g_city.allowed_foods(0);
+    int food2 = g_city.allowed_foods(1);
+    int food3 = g_city.allowed_foods(2);
+    int food4 = g_city.allowed_foods(3);
 
     if (food1) { // wheat
         ImageDraw::img_generic(ctx, resource_image + food1, c->offset + vec2i{32, Y_FOODS});

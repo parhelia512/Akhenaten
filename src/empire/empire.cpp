@@ -1,176 +1,163 @@
 #include "empire.h"
 
-#include "building/count.h"
-#include "city/constants.h"
-#include "city/population.h"
-#include "city/resource.h"
+#include "core/profiler.h"
+#include "city/buildings.h"
+#include "city/message.h"
 #include "city/trade.h"
-#include "core/calc.h"
-#include "core/log.h"
-#include "empire/empire_city.h"
-#include "empire/empire_object.h"
-#include "empire/trade_route.h"
-#include "io/io.h"
-#include "type.h"
+#include "city/city.h"
+#include "city/population.h"
+#include "building/count.h"
+#include "scenario/map.h"
+#include "trade_route.h"
+#include "empire_object.h"
 
 #include "io/io_buffer.h"
-#include <string.h>
+#include "dev/debug.h"
+#include <iostream>
+#include <algorithm>
 
-const static vec2i EMPIRE_SIZE{1200, 1600};
+empire_t g_empire;
 
-enum E_EMPIRE {
-    //    EMPIRE_WIDTH = 2000,
-    //    EMPIRE_HEIGHT = 1000,
-    EMPIRE_HEADER_SIZE = 1280,
-    //    EMPIRE_DATA_SIZE = 12800
-};
-
-const static int EMPIRE_DATA_SIZE[2] = {12800, 15200};
-
-struct empire_map_data_t {
-    int initial_scroll_x;
-    int initial_scroll_y;
-    int scroll_x;
-    int scroll_y;
-    int selected_object;
-    int viewport_width;
-    int viewport_height;
-};
-
-empire_map_data_t g_empire_map_data;
-
-const char SCENARIO_FILE[2][2][100] = {{"c32.emp", "c3.emp"}, {"", "Pharaoh2.emp"}};
-
-bool empire_city_type_can_trade(int type) {
-    switch (type) {
-    case EMPIRE_CITY_PHARAOH_TRADING:
-    case EMPIRE_CITY_EGYPTIAN_TRADING:
-    case EMPIRE_CITY_FOREIGN_TRADING:
-        return true;
-    }
-    
-    return false;
-}
-
-static void check_scroll_boundaries(void) {
-    auto& data = g_empire_map_data;
-    int max_x = EMPIRE_SIZE.x - data.viewport_width;
-    int max_y = EMPIRE_SIZE.y - data.viewport_height + 20;
-
-    data.scroll_x = calc_bound(data.scroll_x, 0, max_x);
-    data.scroll_y = calc_bound(data.scroll_y, 0, max_y);
-}
-
-void empire_load_editor(int empire_id, int viewport_width, int viewport_height) {
-    //    empire_load_external_c3(1, empire_id);
-    //    empire_object_init_cities();
-    //
-    //    const empire_object *our_city = empire_object_get_our_city();
-    //
-    //    data.viewport_width = viewport_width;
-    //    data.viewport_height = viewport_height;
-    //    if (our_city) {
-    //        data.scroll_x = our_city->x - data.viewport_width / 2;
-    //        data.scroll_y = our_city->y - data.viewport_height / 2;
-    //    } else {
-    //        data.scroll_x = data.initial_scroll_x;
-    //        data.scroll_y = data.initial_scroll_y;
-    //    }
-    //    check_scroll_boundaries();
-}
-void empire_init_scenario(void) {
-    auto& data = g_empire_map_data;
-    data.scroll_x = data.initial_scroll_x;
-    data.scroll_y = data.initial_scroll_y;
-    data.viewport_width = EMPIRE_SIZE.x;
-    data.viewport_height = EMPIRE_SIZE.y;
-
-    empire_object_init_cities();
-}
-
-void empire_set_viewport(int width, int height) {
-    auto& data = g_empire_map_data;
-    data.viewport_width = width;
-    data.viewport_height = height;
-    check_scroll_boundaries();
-}
-void empire_get_scroll(int* x_scroll, int* y_scroll) {
-    auto& data = g_empire_map_data;
-    *x_scroll = data.scroll_x;
-    *y_scroll = data.scroll_y;
-}
-void empire_adjust_scroll(int* x_offset, int* y_offset) {
-    auto& data = g_empire_map_data;
-    *x_offset = *x_offset - data.scroll_x;
-    *y_offset = *y_offset - data.scroll_y;
-}
-void empire_set_scroll(int x, int y) {
-    auto& data = g_empire_map_data;
-    data.scroll_x = x;
-    data.scroll_y = y;
-    check_scroll_boundaries();
-}
-void empire_scroll_map(int x, int y) {
-    auto& data = g_empire_map_data;
-    data.scroll_x += x;
-    data.scroll_y += y;
-    check_scroll_boundaries();
-}
-
-int empire_selected_object(void) {
-    auto& data = g_empire_map_data;
-    return data.selected_object;
-}
-void empire_clear_selected_object(void) {
-    auto& data = g_empire_map_data;
-    data.selected_object = 0;
-}
-void empire_select_object(int x, int y) {
-    auto& data = g_empire_map_data;
-    int map_x = x + data.scroll_x;
-    int map_y = y + data.scroll_y;
-
-    data.selected_object = empire_object_get_closest(vec2i(map_x, map_y));
-}
-
-bool empire_can_export_resource_to_city(int city_id, e_resource resource) {
-    empire_city* city = empire_city_get(city_id);
-    if (city_id && trade_route_limit_reached(city->route_id, resource)) {
-        // quota reached
-        return false;
-    }
-    if (city_resource_count(resource) <= city_resource_trading_amount(resource)) {
-        // stocks too low
-        return false;
-    }
-    if (city_id == 0 || city->buys_resource[resource]) {
-        int status = city_resource_trade_status(resource);
-        switch (status) {
-        case TRADE_STATUS_EXPORT: return true;
-        case TRADE_STATUS_EXPORT_SURPLUS: return city_resource_trade_surplus(resource);
+declare_console_command_p(makeseatraders, game_cheat_make_sea_traders)
+void game_cheat_make_sea_traders(std::istream &is, std::ostream &os) {
+    for (auto &city : g_empire.get_cities()) {
+        if (city.in_use) {
+            city.is_sea_trade = true;
         }
     }
-    
+};
+
+void empire_t::clear_cities_data() {
+    memset(cities, 0, sizeof(cities));
+}
+
+empire_city* empire_t::city(int city_id) {
+    if (city_id >= 0 && city_id < MAX_CITIES)
+        return &cities[city_id];
+    else
+        return nullptr;
+}
+
+bool empire_t::can_import_resource(e_resource resource, bool check_if_open) {
+    for (const auto &city: cities) {
+        if (city.in_use && city.can_trade()
+            && (city.is_open || !check_if_open) && city.sells_resource[resource]) {
+            return true;
+        }
+    }
     return false;
 }
 
-static int get_max_food_stock_for_population(e_resource resource) {
-    switch (resource) {
-    case RESOURCE_GRAIN:
-    case RESOURCE_MEAT:
-    case RESOURCE_LETTUCE:
-    case RESOURCE_GAMEMEAT:
-    case RESOURCE_POTTERY:
-    case RESOURCE_LUXURY_GOODS:
-    case RESOURCE_OIL:
-    case RESOURCE_BEER:
-        return std::max(100, (city_population() / 100) * 100);
+bool empire_t::can_export_resource(e_resource resource, bool check_if_open) {
+    for (const auto &city: cities) {
+        if (city.in_use && city.can_trade()
+            && (city.is_open || !check_if_open) && city.buys_resource[resource]) {
+            return true;
+        }
     }
+    return false;
+}
 
+int empire_t::get_city_for_object(int empire_object_id) {
+    for (auto &city: cities) {
+        if (city.in_use && city.empire_object_id == empire_object_id) {
+            return std::distance(cities, &city);
+        }
+    }
     return 0;
 }
 
-static int get_max_raw_stock_for_population(e_resource resource) {
+void empire_t::expand() {
+    for (auto &city: cities) {
+        if (!city.in_use)
+            continue;
+
+        if (city.type == EMPIRE_CITY_EGYPTIAN_TRADING) {
+            city.type = EMPIRE_CITY_PHARAOH;
+        } else if (city.type == EMPIRE_CITY_FOREIGN) {
+            city.type = EMPIRE_CITY_OURS;
+        } else {
+            continue;
+        }
+        empire_object_set_expanded(city.empire_object_id, city.type);
+    }
+}
+
+int empire_t::count_wine_sources() {
+    int sources = 0;
+    for (const auto &city: cities) {
+        if (city.in_use && city.is_open && city.sells_resource[RESOURCE_BEER]) {
+            sources++;
+        }
+    }
+    return sources;
+}
+
+void empire_t::reset_yearly_trade_amounts() {
+    for (const auto &city: cities) {
+        if (city.in_use && city.is_open)
+            trade_route_reset_traded(city.route_id);
+    }
+}
+
+bool empire_t::is_trade_route_open(int route_id) {
+    for (const auto &city: cities) {
+        if (city.in_use && city.route_id == route_id)
+            return city.is_open; // ? true : false;
+    }
+    return false;
+}
+
+int empire_t::get_city_for_trade_route(int route_id) {
+    for (auto &city: cities) {
+        if (city.in_use && city.route_id == route_id) {
+            return std::distance(cities, &city);
+        }
+    }
+    return -1;
+}
+
+int empire_t::get_city_vulnerable() {
+    int index = 0;
+    for (auto &city: cities) {
+        if (city.in_use) {
+            if (city.type == EMPIRE_CITY_FOREIGN_TRADING) {
+                index = std::distance(cities, &city);
+            }
+        }
+    }
+    return index;
+}
+
+void empire_t::generate_traders() {
+    OZZY_PROFILER_SECTION("Game/Run/Tick/Trade Update/Genereate trader");
+    for (auto &city: cities) {
+        if (!city.in_use || !city.is_open) {
+            continue;
+        }
+
+        if (city.is_sea_trade) {
+            if (!city_buildings_has_working_dock()) {
+                city_message_post_with_message_delay(MESSAGE_CAT_NO_WORKING_DOCK, 1, MESSAGE_NO_WORKING_DOCK_PH, 384);
+                continue;
+            }
+
+            if (!scenario_map_has_river_entry()) {
+                continue;
+            }
+
+            city_trade_add_sea_trade_route();
+        } else {
+            city_trade_add_land_trade_route();
+        }
+
+        if (g_city.generate_trader_from(std::distance(cities, &city), city)) {
+            break;
+        }
+    }
+}
+
+int get_max_raw_stock_for_population(e_resource resource) {
     int finished_good = RESOURCE_NONE;
     switch (resource) {
     case RESOURCE_CLAY: finished_good = RESOURCE_POTTERY; break;
@@ -188,8 +175,24 @@ static int get_max_raw_stock_for_population(e_resource resource) {
     return max_in_stock;
 }
 
-int empire_can_import_resource_from_city(int city_id, e_resource resource) {
-    empire_city* city = empire_city_get(city_id);
+int get_max_food_stock_for_population(e_resource resource) {
+    switch (resource) {
+    case RESOURCE_GRAIN:
+    case RESOURCE_MEAT:
+    case RESOURCE_LETTUCE:
+    case RESOURCE_GAMEMEAT:
+    case RESOURCE_POTTERY:
+    case RESOURCE_LUXURY_GOODS:
+    case RESOURCE_OIL:
+    case RESOURCE_BEER:
+        return std::max(100, (city_population() / 100) * 100);
+    }
+
+    return 0;
+}
+
+bool empire_t::can_import_resource_from_city(int city_id, e_resource resource) {
+    empire_city* city = this->city(city_id);
     if (!city->sells_resource[resource])
         return 0;
 
@@ -205,7 +208,7 @@ int empire_can_import_resource_from_city(int city_id, e_resource resource) {
     }
 
     if (trade_route_limit_reached(city->route_id, resource)) {
-        return 0;
+        return false;
     }
 
     int in_stock = city_resource_count(resource);
@@ -213,45 +216,45 @@ int empire_can_import_resource_from_city(int city_id, e_resource resource) {
 
     if (status == TRADE_STATUS_IMPORT_AS_NEEDED) {
         switch (resource) {
-        // food and finished materials
+            // food and finished materials
         case RESOURCE_GRAIN:
         case RESOURCE_MEAT:
         case RESOURCE_LETTUCE:
         case RESOURCE_GAMEMEAT:
         case RESOURCE_OIL:
         case RESOURCE_BEER:
-            max_in_stock = get_max_food_stock_for_population(resource);
-            break;
+        max_in_stock = get_max_food_stock_for_population(resource);
+        break;
 
         case RESOURCE_MARBLE:
         case RESOURCE_WEAPONS:
-            max_in_stock = 10;
-            break;
+        max_in_stock = 10;
+        break;
 
         case RESOURCE_CLAY:
         case RESOURCE_TIMBER:
         case RESOURCE_STRAW: 
         case RESOURCE_BARLEY:
         case RESOURCE_COPPER:
-            max_in_stock = get_max_raw_stock_for_population(resource);
-            break;
+        max_in_stock = get_max_raw_stock_for_population(resource);
+        break;
 
         case RESOURCE_BRICKS:
-            max_in_stock = std::max(100, (city_population() / 100) * 100);
-            break;
+        max_in_stock = std::max(100, (city_population() / 100) * 100);
+        break;
 
         case RESOURCE_POTTERY:
         case RESOURCE_LUXURY_GOODS:
-            max_in_stock = std::max(100, (city_population() / 100) * 50);
-            break;
+        max_in_stock = std::max(100, (city_population() / 100) * 50);
+        break;
 
         case RESOURCE_PAPYRUS:
-            max_in_stock = std::max(100, (building_count_active(BUILDING_SCRIBAL_SCHOOL) + building_count_active(BUILDING_LIBRARY)) * 100);
-            break;
+        max_in_stock = std::max(100, (building_count_active(BUILDING_SCRIBAL_SCHOOL) + building_count_active(BUILDING_LIBRARY)) * 100);
+        break;
 
         default:
-            max_in_stock = 100;
-            break;
+        max_in_stock = 100;
+        break;
         }
     } else {
         max_in_stock = city_resource_trading_amount(resource);
@@ -260,9 +263,30 @@ int empire_can_import_resource_from_city(int city_id, e_resource resource) {
     return in_stock < max_in_stock ? 1 : 0;
 }
 
-io_buffer* iob_empire_map_params = new io_buffer([](io_buffer* iob, size_t version) {
-    auto& data = g_empire_map_data;
-    iob->bind(BIND_SIGNATURE_INT32, &data.scroll_x);
-    iob->bind(BIND_SIGNATURE_INT32, &data.scroll_y);
-    iob->bind(BIND_SIGNATURE_INT32, &data.selected_object);
+
+io_buffer* iob_empire_cities = new io_buffer([](io_buffer* iob, size_t version) {
+    for (int i = 0; i < g_empire.get_cities().size(); i++) {
+        empire_city* city = &g_empire.get_cities()[i];
+        iob->bind(BIND_SIGNATURE_UINT8, &city->in_use);
+        iob->bind____skip(1);
+        iob->bind(BIND_SIGNATURE_UINT8, &city->type);
+        iob->bind(BIND_SIGNATURE_UINT8, &city->name_id);
+        iob->bind(BIND_SIGNATURE_UINT8, &city->route_id);
+        iob->bind(BIND_SIGNATURE_UINT8, &city->is_open);
+        for (int r = 0; r < RESOURCES_MAX; r++)
+            iob->bind(BIND_SIGNATURE_UINT8, &city->buys_resource[r]);
+        for (int r = 0; r < RESOURCES_MAX; r++) {
+            iob->bind(BIND_SIGNATURE_UINT8, &city->sells_resource[r]);
+        }
+        iob->bind(BIND_SIGNATURE_INT16, &city->cost_to_open);
+        iob->bind(BIND_SIGNATURE_INT16, &city->ph_unk01);
+        iob->bind(BIND_SIGNATURE_INT16, &city->trader_entry_delay);
+        iob->bind(BIND_SIGNATURE_INT16, &city->ph_unk02);
+        iob->bind(BIND_SIGNATURE_INT16, &city->empire_object_id);
+        iob->bind(BIND_SIGNATURE_UINT8, &city->is_sea_trade);
+        iob->bind____skip(1);
+        for (int f = 0; f < 3; f++)
+            iob->bind(BIND_SIGNATURE_INT16, &city->trader_figure_ids[f]);
+        iob->bind____skip(10);
+    }
 });

@@ -7,6 +7,7 @@
 #include "core/log.h"
 #include "figure/figure.h"
 #include "js/js.h"
+#include "js/js_game.h"
 #include "core/profiler.h"
 #include "game/game.h"
 #include "game/system.h"
@@ -113,20 +114,21 @@ static int init_sdl() {
     return 1;
 }
 
-int pre_init_dir_attempt(const char* data_dir, const char* lmsg) {
+bool pre_init_dir_attempt(pcstr data_dir, pcstr lmsg) {
     logs::info(lmsg, data_dir); // TODO: get rid of data ???
-    if (!vfs::platform_file_manager_set_base_path(data_dir)) {
+    const bool ok = vfs::platform_file_manager_set_base_path(data_dir);
+    if (!ok) {
         logs::info("%s: directory not found", data_dir);
     }
 
     if (game_pre_init()) {
-        return 1;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
-static bool pre_init(const char* custom_data_dir) {
+static bool pre_init(pcstr custom_data_dir) {
     if (pre_init_dir_attempt(custom_data_dir, "Attempting to load game from %s")) {
         return true;
     }
@@ -412,8 +414,9 @@ static void setup(Arguments& args) {
         exit(2);
     }
 
-    figure::check_action_properties_lookup();
+    config::refresh(g_config_arch);
 }
+
 static void teardown(void) {
     logs::info("Exiting game");
     game_exit();

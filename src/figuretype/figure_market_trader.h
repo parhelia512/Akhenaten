@@ -4,6 +4,7 @@
 
 class figure_market_trader : public figure_impl {
 public:
+    FIGURE_METAINFO(FIGURE_MARKET_TRADER, figure_market_trader)
     figure_market_trader(figure *f) : figure_impl(f) {}
 
     virtual void on_create() override {}
@@ -13,4 +14,5 @@ public:
     virtual e_overlay get_overlay() const override { return OVERLAY_BAZAAR_ACCESS; }
     virtual sound_key phrase_key() const override;
     virtual int provide_service() override;
+    virtual const animations_t &anim() const override;
 };

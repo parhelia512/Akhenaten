@@ -1,9 +1,10 @@
 #include "set_salary.h"
 
-#include "city/emperor.h"
+#include "city/kingdome.h"
 #include "city/finance.h"
 #include "city/ratings.h"
 #include "city/victory.h"
+#include "city/city.h"
 #include "game/resource.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -66,11 +67,11 @@ static void draw_foreground() {
     for (int rank = 0; rank < 11; rank++) {
         e_font font = focus_button_id == rank + 2 ? FONT_NORMAL_YELLOW : FONT_NORMAL_WHITE_ON_DARK;
         int width = lang_text_draw(52, rank + 4, 176, 90 + 20 * rank, font);
-        text_draw_money(city_emperor_salary_for_rank(rank), 176 + width, 90 + 20 * rank, font);
+        text_draw_money(g_city.kingdome.salary_for_rank(rank), 176 + width, 90 + 20 * rank, font);
     }
 
-    if (!city_victory_has_won()) {
-        if (city_emperor_salary_rank() <= city_emperor_rank())
+    if (!g_city.victory_state.has_won()) {
+        if (g_city.kingdome.salary_rank <= g_city.kingdome.player_rank)
             lang_text_draw_multiline(52, 76, vec2i{152, 336}, 336, FONT_NORMAL_BLACK_ON_LIGHT);
         else
             lang_text_draw_multiline(52, 71, vec2i{152, 336}, 336, FONT_NORMAL_BLACK_ON_LIGHT);
@@ -84,7 +85,7 @@ static void draw_foreground() {
 }
 
 static void handle_input(const mouse* m, const hotkeys* h) {
-    if (generic_buttons_handle_mouse(mouse_in_dialog(m), 0, 0, buttons, 12, &focus_button_id))
+    if (generic_buttons_handle_mouse(mouse_in_dialog(m), {0, 0}, buttons, 12, &focus_button_id))
         return;
     if (input_go_back_requested(m, h))
         window_advisors_show();
@@ -95,10 +96,10 @@ static void button_cancel(int param1, int param2) {
 }
 
 static void button_set_salary(int rank, int param2) {
-    if (!city_victory_has_won()) {
-        city_emperor_set_salary_rank(rank);
+    if (!g_city.victory_state.has_won()) {
+        g_city.kingdome.set_salary_rank(rank);
         city_finance_update_salary();
-        city_ratings_update_kingdom_explanation();
+        g_city.ratings.update_kingdom_explanation();
         window_advisors_show();
     }
 }

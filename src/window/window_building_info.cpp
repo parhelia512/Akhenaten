@@ -6,25 +6,21 @@
 #include "building/building_palace.h"
 #include "building/building_statue.h"
 #include "building/house_evolution.h"
-#include "building/building_bandstand.h"
 #include "building/building_farm.h"
-#include "building/building_hunting_lodge.h"
 #include "building/building_raw_material.h"
 #include "building/building_workshop.h"
-#include "building/building_wharf.h"
 #include "building/building_shipyard.h"
-#include "building/building_architect_post.h"
 #include "building/building_shrine.h"
 #include "building/building_temple.h"
 #include "building/building_booth.h"
-#include "building/building_entertainment.h"
+#include "building/building_dance_school.h"
 #include "building/building_health.h"
 #include "building/building_education.h"
 #include "building/building_bricklayers_guild.h"
 #include "building/model.h"
 #include "building/storage.h"
 #include "building/building_storage_yard.h"
-#include "city/map.h"
+#include "city/city.h"
 #include "city/resource.h"
 #include "overlays/city_overlay.h"
 #include "core/calc.h"
@@ -61,7 +57,7 @@
 #include "window/building/military.h"
 #include "window/building/terrain.h"
 #include "window/building/utility.h"
-#include "window/city.h"
+#include "window/window_city.h"
 #include "window/message_dialog.h"
 
 #include <functional>
@@ -83,97 +79,38 @@ static int get_height_id() {
             return 5;
         }
     } else if (context.type == BUILDING_INFO_BUILDING) {
-        const building* b = building_get(context.building_id);
+        building* b = building_get(context.building_id);
         if (building_is_house(b->type) && b->house_population <= 0)
             return 5;
 
         switch (b->type) {
-        case BUILDING_TEMPLE_OSIRIS:
-        case BUILDING_TEMPLE_RA:
-        case BUILDING_TEMPLE_PTAH:
-        case BUILDING_TEMPLE_SETH:
-        case BUILDING_TEMPLE_BAST:
         case BUILDING_TEMPLE_COMPLEX_OSIRIS:
         case BUILDING_TEMPLE_COMPLEX_RA:
         case BUILDING_TEMPLE_COMPLEX_PTAH:
         case BUILDING_TEMPLE_COMPLEX_SETH:
         case BUILDING_TEMPLE_COMPLEX_BAST:
         case BUILDING_ORACLE:
-        case BUILDING_SMALL_STATUE:
-        case BUILDING_MEDIUM_STATUE:
-        case BUILDING_LARGE_STATUE:
-        case BUILDING_CONSERVATORY:
-        case BUILDING_DANCE_SCHOOL:
-        case BUILDING_JUGGLER_SCHOOL:
-        case BUILDING_SENET_MASTER:
-        case BUILDING_APOTHECARY:
-        case BUILDING_MORTUARY:
         case BUILDING_MENU_MONUMENTS:
-        case BUILDING_DENTIST:
         case BUILDING_BURNING_RUIN:
-        case BUILDING_WATER_LIFT:
         case BUILDING_UNUSED_NATIVE_HUT_88:
         case BUILDING_UNUSED_NATIVE_MEETING_89:
         case BUILDING_UNUSED_NATIVE_CROPS_93:
         case BUILDING_RESERVER_MISSION_POST_80:
-        case BUILDING_POLICE_STATION:
-        case BUILDING_ARCHITECT_POST:
-        case BUILDING_FIREHOUSE:
-        case BUILDING_SCRIBAL_SCHOOL:
-        case BUILDING_ACADEMY:
-        case BUILDING_LIBRARY:
-        case BUILDING_MUD_GATEHOUSE:
-        case BUILDING_MUD_TOWER:
-        case BUILDING_FORT_CHARIOTEERS:
-        case BUILDING_FORT_INFANTRY:
-        case BUILDING_FORT_ARCHERS:
-        case BUILDING_MILITARY_ACADEMY:
-        case BUILDING_BAZAAR:
-        case BUILDING_GRANARY:
-        case BUILDING_SHIPWRIGHT:
-        case BUILDING_DOCK:
-        case BUILDING_FISHING_WHARF:
-        case BUILDING_PERSONAL_MANSION:
-        case BUILDING_FAMILY_MANSION:
-        case BUILDING_DYNASTY_MANSION:
-        case BUILDING_TAX_COLLECTOR:
-        case BUILDING_ROADBLOCK:
-        case BUILDING_TAX_COLLECTOR_UPGRADED:
-        case BUILDING_BREWERY_WORKSHOP:
-        case BUILDING_WEAVER_WORKSHOP:
-        case BUILDING_WEAPONSMITH:
-        case BUILDING_JEWELS_WORKSHOP:
-        case BUILDING_POTTERY_WORKSHOP:
             return 1;
 
-        case BUILDING_BOOTH:
-        case BUILDING_SENET_HOUSE:
-        case BUILDING_PAVILLION:
         case BUILDING_VILLAGE_PALACE:
         case BUILDING_TOWN_PALACE:
         case BUILDING_MENU_BEAUTIFICATION:
             return 2;
 
-        case BUILDING_RECRUITER:
-        case BUILDING_BANDSTAND:
-            return 3;
-
-        case BUILDING_WELL:
-        case BUILDING_SHRINE_OSIRIS:
-        case BUILDING_SHRINE_RA:
-        case BUILDING_SHRINE_PTAH:
-        case BUILDING_SHRINE_SETH:
-        case BUILDING_SHRINE_BAST:
-            return 4;
-
         default:
-            return 0;
+            return b->dcast()->params().window_info_height_id;
         }
     }
     return 0;
 }
 
-static void get_tooltip(tooltip_context* c) {
+static void buiding_info_get_tooltip(tooltip_context* c) {
     auto &context = g_building_info_context;
     std::pair<int, int> tooltip{-1, -1};
     
@@ -216,52 +153,11 @@ static int center_in_city(int element_width_pixels) {
     return view_pos.x + margin;
 }
 
-void highlight_waypoints(building* b) { // highlight the 4 routing tiles for roams from this building
-    map_clear_highlights();
-    if (b->has_road_access) {
-        map_highlight_set(b->road_access.grid_offset(), 2);
-    }
-    if (building_is_fort(b->type) || b->house_size) { // building doesn't send roamers
-        return;
-    }
-    int hx, hy;
-    map_point road_tile;
-    hx = b->tile.x();
-    hy = b->tile.y() - 8;
-    map_grid_bound(&hx, &hy);
-    if (map_closest_road_within_radius(tile2i(hx, hy), 1, 6, road_tile)) {
-        map_highlight_set(road_tile.grid_offset(), 1);
-    }
-
-    hx = b->tile.x() + 8;
-    hy = b->tile.y();
-    map_grid_bound(&hx, &hy);
-    if (map_closest_road_within_radius(tile2i(hx, hy), 1, 6, road_tile)) {
-        map_highlight_set(road_tile.grid_offset(), 1);
-    }
-
-    hx = b->tile.x();
-    hy = b->tile.y() + 8;
-    map_grid_bound(&hx, &hy);
-    if (map_closest_road_within_radius(tile2i(hx, hy), 1, 6, road_tile)) {
-        map_highlight_set(road_tile.grid_offset(), 1);
-    }
-
-    hx = b->tile.x() - 8;
-    hy = b->tile.y();
-    map_grid_bound(&hx, &hy);
-    if (map_closest_road_within_radius(tile2i(hx, hy), 1, 6, road_tile)) {
-        map_highlight_set(road_tile.grid_offset(), 1);
-    }
-
-    window_invalidate();
-}
-
 int OFFSET(int x, int y) {
     return GRID_OFFSET(x, y);
 }
 
-static void init(map_point tile) {
+static void buiding_info_init(map_point tile) {
     auto &context = g_building_info_context;
     const int grid_offset = tile.grid_offset();
     context.can_play_sound = true;
@@ -313,9 +209,9 @@ static void init(map_point tile) {
         context.terrain_type = TERRAIN_INFO_DUNES;
 
     } else if (map_terrain_is(grid_offset, TERRAIN_ROCK)) {
-        if (grid_offset == city_map_entry_flag().grid_offset()) {
+        if (grid_offset == g_city.map.entry_flag.grid_offset()) {
             context.terrain_type = TERRAIN_INFO_ENTRY_FLAG;
-        } else if (grid_offset == city_map_exit_flag().grid_offset()) {
+        } else if (grid_offset == g_city.map.exit_flag.grid_offset()) {
             context.terrain_type = TERRAIN_INFO_EXIT_FLAG;
         } else {
             if (map_terrain_is(grid_offset, TERRAIN_ORE)) {
@@ -352,7 +248,9 @@ static void init(map_point tile) {
         building* b = building_get(context.building_id);
         context.type = BUILDING_INFO_BUILDING;
         context.worker_percentage = calc_percentage<int>(b->num_workers, model_get_building(b->type)->laborers);
-        highlight_waypoints(b);
+
+        b->dcast()->highlight_waypoints();
+        window_invalidate();
 
         switch (b->type) {
         case BUILDING_FORT_GROUND:
@@ -442,7 +340,6 @@ static void init(map_point tile) {
                 case FIGURE_NONE:
                 case FIGURE_EXPLOSION:
                 case FIGURE_MAP_FLAG:
-                case FIGURE_FLOTSAM:
                 case FIGURE_ARROW:
                 case FIGURE_JAVELIN:
                 case FIGURE_BOLT:
@@ -472,7 +369,7 @@ static void init(map_point tile) {
             continue;
 
         figure* f = figure_get(figure_id);
-        if (f->type == FIGURE_STANDARD_BEARER || f->is_legion()) {
+        if (f->type == FIGURE_STANDARD_BEARER || f->dcast_soldier()) {
             context.type = BUILDING_INFO_LEGION;
             context.formation_id = f->formation_id;
             const formation* m = formation_get(context.formation_id);
@@ -523,7 +420,7 @@ static void init(map_point tile) {
     }
 }
 
-static void draw_refresh_background() {
+static void buiding_info_draw_refresh_background() {
     auto &context = g_building_info_context;
     if (context.type == BUILDING_INFO_NONE) {
         window_building_draw_no_people(&context);
@@ -534,55 +431,15 @@ static void draw_refresh_background() {
             window_building_draw_house(&context);
         } else {
             switch (building_get(context.building_id)->type) {
-            case BUILDING_LIMESTONE_QUARRY: building_limestone_quarry_draw_info(context); break;
-            case BUILDING_WOOD_CUTTERS: building_timber_yard_draw_info(context); break;
-            case BUILDING_SANDSTONE_QUARRY: building_sandstone_quarry_draw_info(context); break;
-            case BUILDING_GRANITE_QUARRY: building_granite_quarry_draw_info(context); break;;
-            case BUILDING_WEAVER_WORKSHOP: building_flax_workshop_draw_info(context); break;
-            case BUILDING_JEWELS_WORKSHOP: building_luxury_workshop_draw_info(context); break;
-            case BUILDING_BRICKS_WORKSHOP: building_brick_maker_workshop_draw_info(context); break;
-            case BUILDING_SENET_HOUSE: window_building_draw_senet_house(&context); break;
-            case BUILDING_PAVILLION: window_building_draw_pavilion(&context); break;
-            case BUILDING_DANCE_SCHOOL: building_dancer_school_draw_info(context); break;
-            case BUILDING_SENET_MASTER: building_bullfight_school_draw_info(context); break;
-            case BUILDING_MORTUARY: building_mortuary_draw_info(context); break;
-            case BUILDING_DENTIST: building_dentist_draw_info(context); break;
-            case BUILDING_SCRIBAL_SCHOOL: building_scribal_school_draw_info(context); break;
-            case BUILDING_ACADEMY: building_academy_draw_info(context); break;
-            case BUILDING_LIBRARY: building_library_draw_info(context); break;
             case BUILDING_ORACLE: window_building_draw_oracle(&context); break;
-            case BUILDING_SHIPWRIGHT: building_shipyard_draw_info(context); break;
-            case BUILDING_FISHING_WHARF: building_wharf_draw_info(context); break;
-            case BUILDING_WATER_LIFT: window_building_draw_water_lift(&context); break;
-            case BUILDING_MENU_BEAUTIFICATION: window_building_draw_fountain(&context); break;
             case BUILDING_RESERVED_TRIUMPHAL_ARCH_56: window_building_draw_triumphal_arch(&context); break;
-            case BUILDING_POLICE_STATION: window_building_draw_prefect(&context); break;
-            
-            case BUILDING_ROADBLOCK:
-                if (context.storage_show_special_orders)
-                    window_building_draw_roadblock_orders(&context);
-                else
-                    window_building_draw_roadblock(&context);
-                break;
-
-            case BUILDING_FERRY: window_building_draw_ferry(&context); break;
-            case BUILDING_MUD_GATEHOUSE: window_building_draw_gatehouse(&context); break;
-            case BUILDING_MUD_TOWER: window_building_draw_tower(&context); break;
-            case BUILDING_MILITARY_ACADEMY: window_building_draw_military_academy(&context); break;
-            
-            case BUILDING_FORT_ARCHERS:
-            case BUILDING_FORT_CHARIOTEERS:
-            case BUILDING_FORT_INFANTRY:
-                window_building_draw_fort(&context);
-                break;
-            
+                        
             case BUILDING_BURNING_RUIN: window_building_draw_burning_ruin(&context); break;
             case BUILDING_UNUSED_NATIVE_HUT_88: window_building_draw_native_hut(&context); break;
             case BUILDING_UNUSED_NATIVE_MEETING_89: window_building_draw_native_meeting(&context); break;
             case BUILDING_UNUSED_NATIVE_CROPS_93: window_building_draw_native_crops(&context); break;
             case BUILDING_RESERVER_MISSION_POST_80: window_building_draw_mission_post(&context); break;
-            case BUILDING_FESTIVAL_SQUARE: window_building_draw_festival_square(&context); break;
-
+            
             default:
                 {
                     building *b = building_get(context.building_id);
@@ -596,14 +453,14 @@ static void draw_refresh_background() {
     }
 }
 
-static void draw_background() {
+static void buiding_info_draw_background() {
     game.animation = false;
     window_city_draw_panels();
     window_city_draw();
-    draw_refresh_background();
+    buiding_info_draw_refresh_background();
 }
 
-static void draw_foreground() {
+static void buiding_info_draw_foreground() {
     ui::begin_widget(g_building_info_context.offset);
     auto &context = g_building_info_context;
 
@@ -611,18 +468,7 @@ static void draw_foreground() {
     building *b = nullptr;
     if (context.type == BUILDING_INFO_BUILDING) {
         b = building_get(context.building_id);
-        switch (b->type) {
-        case BUILDING_ROADBLOCK:
-            if (context.storage_show_special_orders)
-                window_building_draw_roadblock_orders_foreground(&context);
-            else
-                window_building_draw_roadblock_foreground(&context);
-            break;
-
-        default:
-            b->dcast()->window_info_foreground(context);
-            break;
-        }
+        b->dcast()->window_info_foreground(context);
     } else if (context.type == BUILDING_INFO_LEGION) {
         window_building_draw_legion_info_foreground(&context);
     }
@@ -716,7 +562,7 @@ static void draw_foreground() {
     }
 }
 
-static int handle_specific_building_info_mouse(const mouse *m) {
+static int buiding_info_handle_specific_building_info_mouse(const mouse *m) {
     auto &context = g_building_info_context;
     // building-specific buttons
     if (context.type == BUILDING_INFO_NONE) {
@@ -730,13 +576,6 @@ static int handle_specific_building_info_mouse(const mouse *m) {
     } else if (context.type == BUILDING_INFO_BUILDING) {
         building *b = building_get(context.building_id);
         switch (building_get(context.building_id)->type) {
-        case BUILDING_ROADBLOCK:
-            if (context.storage_show_special_orders)
-                return window_building_handle_mouse_roadblock_orders(m, &context);
-            else
-                return window_building_handle_mouse_roadblock(m, &context);
-            break;
-
         case BUILDING_STORAGE_YARD:
             if (context.storage_show_special_orders)
                 return window_building_handle_mouse_warehouse_orders(m, &context);
@@ -752,13 +591,13 @@ static int handle_specific_building_info_mouse(const mouse *m) {
     return 0;
 }
 
-static void handle_input(const mouse* m, const hotkeys* h) {
+static void buiding_info_handle_input(const mouse* m, const hotkeys* h) {
     auto &context = g_building_info_context;
 
     bool button_id = ui::handle_mouse(m);
   
     if (!button_id) {
-        button_id |= !!handle_specific_building_info_mouse(m);
+        button_id |= !!buiding_info_handle_specific_building_info_mouse(m);
     }
 
     if (!button_id && input_go_back_requested(m, h)) {
@@ -773,18 +612,18 @@ static void handle_input(const mouse* m, const hotkeys* h) {
 void window_building_info_show(const tile2i& point) {
     window_type window = {
         WINDOW_BUILDING_INFO,
-        draw_background,
-        draw_foreground,
-        handle_input,
-        get_tooltip,
-        draw_refresh_background
+        buiding_info_draw_background,
+        buiding_info_draw_foreground,
+        buiding_info_handle_input,
+        buiding_info_get_tooltip,
+        buiding_info_draw_refresh_background
     };
 
-    init(point);
+    buiding_info_init(point);
     window_show(&window);
 }
 
-int window_building_info_get_int(void) {
+int window_building_info_get_type() {
     auto &context = g_building_info_context;
     if (context.type == BUILDING_INFO_BUILDING) {
         return building_get(context.building_id)->type;
@@ -793,7 +632,7 @@ int window_building_info_get_int(void) {
     return BUILDING_NONE;
 }
 
-void window_building_info_show_storage_orders(void) {
+void window_building_info_show_storage_orders() {
     auto &context = g_building_info_context;
     context.storage_show_special_orders = 1;
     window_invalidate();

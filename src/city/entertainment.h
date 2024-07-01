@@ -1,20 +1,22 @@
-#ifndef CITY_ENTERTAINMENT_H
-#define CITY_ENTERTAINMENT_H
+#pragma once
 
-int city_entertainment_theater_shows(void);
-int city_entertainment_amphitheater_shows(void);
-int city_entertainment_colosseum_shows(void);
-int city_entertainment_hippodrome_shows(void);
+#include <cstdint>
 
-void city_entertainment_set_hippodrome_has_race(int has_race);
-int city_entertainment_hippodrome_has_race(void);
+struct city_entertainment_t {
+    int32_t booth_shows;
+    int32_t booth_no_shows_weighted;
+    int32_t bandstand_shows;
+    int32_t bandstand_no_shows_weighted;
+    int32_t pavilion_shows;
+    int32_t pavilion_no_shows_weighted;
+    int32_t senet_house_plays;
+    int32_t senet_house_no_shows_weighted;
+    int32_t venue_needing_shows;
+    int32_t senet_house_has_plays;
+    int32_t senet_house_message_shown;
+    int32_t pavilion_message_shown;
 
-int city_entertainment_venue_needing_shows(void);
-
-void city_entertainment_calculate_shows(void);
-
-int city_entertainment_show_message_colosseum(void);
-
-int city_entertainment_show_message_hippodrome(void);
-
-#endif // CITY_ENTERTAINMENT_H
+    void calculate_shows();
+    int show_message_pavilion();
+    int show_message_senet_house();
+};

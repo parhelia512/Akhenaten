@@ -14,7 +14,7 @@
 #include "city/floods.h"
 #include "grid/building.h"
 #include "core/calc.h"
-#include "city/data_private.h"
+#include "city/city.h"
 #include "building/industry.h"
 
 #include <cstdint>
@@ -117,10 +117,10 @@ static void map_floodplain_update_inundation_row(int grid_offset, int order) {
 
         // hide / destroy farm
         if (farm && farm->is_valid() && map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-            if (city_data.religion.osiris_flood_will_destroy_active > 0) { // destroy farm
+            if (g_city.religion.osiris_flood_will_destroy_active > 0) { // destroy farm
                 farm->deplete_soil();
                 farm->destroy_by_poof(true);
-                city_data.religion.osiris_flood_will_destroy_active = 2;
+                g_city.religion.osiris_flood_will_destroy_active = 2;
                 for (int _y = farm->tiley(); _y < farm->tiley() + farm->size(); _y++) {
                     for (int _x = farm->tilex(); _x < farm->tilex() + farm->size(); _x++) {
                         int _offset = MAP_OFFSET(_x, _y);
@@ -167,7 +167,7 @@ static void map_floodplain_update_inundation_row(int grid_offset, int order) {
             }
 
             if (!still_flooded) {
-                map_building_tiles_add_farm(b_id, farm->tile(), 0, 0);
+                map_building_tiles_add_farm(farm->type(), b_id, farm->tile(), 0, 0);
             }
         }
 
@@ -408,7 +408,8 @@ void map_image_set_road_floodplain(int grid_offset) {
     } else if (map_terrain_is(grid_offset + GRID_OFFSET(-1, 0), TERRAIN_FLOODPLAIN)) {
         map_image_set(grid_offset, image_group(IMG_TERRAIN_FLOODPLAIN) + 87);
     } else {
-        map_image_set(grid_offset, image_id_from_group(GROUP_TERRAIN_ROAD) + img->group_offset + img->item_offset + 49);
+        int base_img = building_impl::params(BUILDING_ROAD).anim["base"].first_img();
+        map_image_set(grid_offset, base_img + img->group_offset + img->item_offset + 49);
     }
 }
 
@@ -488,10 +489,10 @@ int map_get_fertility(int grid_offset, int tally_type) { // actual percentage in
     return 0;
 }
 
-static uint8_t map_get_fertility_average(int x, int y, int size) {
+static uint8_t map_get_fertility_average(tile2i tile, int size) {
     // returns average of fertility in square starting on the top-left corner
-    tile2i tmin(x, y);
-    tile2i tmax(x + size - 1, y + size - 1);
+    tile2i tmin = tile;
+    tile2i tmax = tile.shifted(size - 1, size - 1);
 
     int fert_total = 0;
     map_grid_bound_area(tmin, tmax);
@@ -520,7 +521,7 @@ uint8_t map_get_fertility_for_farm(int grid_offset) {
 
     bool is_irrigated = false;
     if (config_get(CONFIG_GP_FIX_IRRIGATION_RANGE)) {
-        is_irrigated = map_terrain_exists_tile_in_area_with_type(tile.x(), tile.y(), 3, TERRAIN_IRRIGATION_RANGE);
+        is_irrigated = map_terrain_exists_tile_in_area_with_type(tile, 3, TERRAIN_IRRIGATION_RANGE);
     } else {
         is_irrigated = map_terrain_exists_tile_in_radius_with_type(tile, 1, 2, TERRAIN_IRRIGATION_RANGE);
     }
@@ -530,7 +531,7 @@ uint8_t map_get_fertility_for_farm(int grid_offset) {
         irrigation_bonus = 20;
     }
 
-    return std::min(2 + map_get_fertility_average(tile.x(), tile.y(), 3) + is_irrigated * irrigation_bonus, 99);
+    return std::min(2 + map_get_fertility_average(tile, 3) + is_irrigated * irrigation_bonus, 99);
 }
 
 void map_set_floodplain_growth(int grid_offset, int growth) {

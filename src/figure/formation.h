@@ -76,13 +76,10 @@ struct formation {
     int max_total_damage;               /**< Maximum total damage of all figures added */
 
     /* Position */
-    int x;
-    int y;
-    int x_home;
-    int y_home;
+    tile2i tile;
+    tile2i home;
     int building_id;
-    int standard_x;
-    int standard_y;
+    tile2i standard_tile;
     int standard_figure_id;
     int destination_x;
     int destination_y;
@@ -129,8 +126,8 @@ void formations_clear(void);
 void formation_clear(int formation_id);
 
 formation* formation_create_legion(int building_id, int x, int y, e_figure_type type);
-int formation_create_herd(e_figure_type figure_type, int x, int y, int num_animals);
-int formation_create_enemy(e_figure_type figure_type, int x, int y, int layout, int orientation, int enemy_type, int attack_type, int invasion_id, int invasion_sequence);
+int formation_create_herd(e_figure_type figure_type, tile2i tile, int num_animals);
+int formation_create_enemy(e_figure_type figure_type, tile2i tile, int layout, int orientation, int enemy_type, int attack_type, int invasion_id, int invasion_sequence);
 
 formation* formation_get(int formation_id);
 
@@ -163,14 +160,14 @@ void formation_update_monthly_morale_at_rest(void);
 void formation_decrease_monthly_counters(formation* m);
 void formation_clear_monthly_counters(formation* m);
 
-void formation_set_destination(formation* m, int x, int y);
+void formation_set_destination(formation* m, tile2i tile);
 void formation_set_destination_building(formation* m, int x, int y, int building_id);
-void formation_set_home(formation* m, int x, int y);
+void formation_set_home(formation* m, tile2i tile);
 
 void formation_clear_figures(void);
 int formation_add_figure(int formation_id, int figure_id, int deployed, int damage, int max_damage);
 
-void formation_move_herds_away(map_point tile);
+void formation_move_herds_away(tile2i tile);
 
 void formation_calculate_figures(void);
 

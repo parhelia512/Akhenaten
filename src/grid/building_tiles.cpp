@@ -6,6 +6,7 @@
 #include "graphics/image.h"
 
 #include "building/industry.h"
+#include "building/building_farm.h"
 #include "grid/aqueduct.h"
 #include "grid/bridge.h"
 #include "grid/building.h"
@@ -103,7 +104,7 @@ void map_building_tiles_add(int building_id, tile2i tile, int size, int image_id
     map_property_mark_draw_tile(draw_tile.grid_offset());
 }
 
-void map_building_tiles_add_farm(int building_id, tile2i tile, int crop_image_offset, int progress) {
+void map_building_tiles_add_farm(e_building_type type, int building_id, tile2i tile, int crop_image_offset, int progress) {
     //if (GAME_ENV == ENGINE_ENV_C3) {
     //    crop_image_offset += image_id_from_group(GROUP_BUILDING_FARMLAND);
     //    if (!map_grid_is_inside(x, y, 3))
@@ -147,9 +148,8 @@ void map_building_tiles_add_farm(int building_id, tile2i tile, int crop_image_of
         //        if (map_terrain_is(map_grid_offset(x, y), TERRAIN_FLOODPLAIN))
         //            image_id = image_id_from_group(GROUP_BUILDING_FARMLAND);
     painter ctx = game.painter();
-    map_building_tiles_add(building_id, tile, 3, get_farm_image(tile.grid_offset()), TERRAIN_BUILDING);
-        //        crop_image_offset += image_id_from_group(GROUP_BUILDING_FARM_CROPS_PH);
-        return;
+    map_building_tiles_add(building_id, tile, 3, building_farm::get_farm_image(type, tile), TERRAIN_BUILDING);
+    return;
     //}
     // crop tile 1
     int growth = progress / 10;
@@ -254,8 +254,9 @@ void map_add_bandstand_tiles(building* b) {
     int offset = map_bandstand_main_img_offset(b->data.entertainment.orientation);
     int offset_add = map_bandstand_add_img_offset(b->data.entertainment.orientation);
 
-    map_image_set(b->data.entertainment.latched_venue_main_grid_offset, image_group(IMG_BANDSTAND_SN_S) + offset);
-    map_image_set(b->data.entertainment.latched_venue_add_grid_offset, image_group(IMG_BANDSTAND_SN_S) + offset_add);
+    int stand_sn_s = building_impl::params(BUILDING_BANDSTAND).anim["stand_sn_s"].first_img();
+    map_image_set(b->data.entertainment.latched_venue_main_grid_offset, stand_sn_s + offset);
+    map_image_set(b->data.entertainment.latched_venue_add_grid_offset, stand_sn_s + offset_add);
 }
 
 static void set_underlying_venue_plaza_tile(int grid_offset, int building_id, int image_id, bool update_only) {
@@ -270,7 +271,10 @@ static void set_underlying_venue_plaza_tile(int grid_offset, int building_id, in
         }
     }
 }
-void map_add_venue_plaza_tiles(int building_id, int size, int x, int y, int image_id, bool update_only) {
+
+void map_add_venue_plaza_tiles(int building_id, int size, tile2i tile, int image_id, bool update_only) {
+    int x = tile.x();
+    int y = tile.y();
     switch (city_view_orientation()) {
     case 0: // north
         for (int dy = 0; dy < size; dy++) {
@@ -492,20 +496,14 @@ void map_building_tiles_remove(int building_id, tile2i tile) {
         return;
 
     building* b = building_get(building_id);
-    if (building_id && building_is_farm(b->type))
+    if (building_id && building_is_farm(b->type)) {
         size = 3;
+    }
 
     switch (b->type) {
     case BUILDING_BOOTH:
-        size = 2;
-        base_grid_offset = b->data.entertainment.booth_corner_grid_offset;
-        break;
     case BUILDING_BANDSTAND:
-        size = 3;
-        base_grid_offset = b->data.entertainment.booth_corner_grid_offset;
-        break;
-    case BUILDING_PAVILLION:
-        size = 4;
+        size = b->size;
         base_grid_offset = b->data.entertainment.booth_corner_grid_offset;
         break;
     case BUILDING_FESTIVAL_SQUARE:
@@ -536,8 +534,7 @@ void map_building_tiles_remove(int building_id, tile2i tile) {
                 map_terrain_set(grid_offset, TERRAIN_WATER); // clear other flags
                 map_tiles_set_water(MAP_OFFSET(x + dx, y + dy));
             } else {
-                map_image_set(grid_offset,
-                              image_id_from_group(GROUP_TERRAIN_UGLY_GRASS) + (map_random_get(grid_offset) & 7));
+                map_image_set(grid_offset, image_id_from_group(GROUP_TERRAIN_UGLY_GRASS) + (map_random_get(grid_offset) & 7));
                 map_terrain_remove(grid_offset, TERRAIN_CLEARABLE - TERRAIN_ROAD);
             }
         }

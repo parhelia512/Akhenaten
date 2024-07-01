@@ -1,6 +1,6 @@
 #include "military.h"
 
-#include "city/figures.h"
+#include "city/city.h"
 #include "city/military.h"
 #include "figure/formation_legion.h"
 #include "graphics/image.h"
@@ -14,17 +14,19 @@
 #include "graphics/window.h"
 #include "grid/grid.h"
 #include "scenario/invasion.h"
-#include "window/city.h"
+#include "window/window_city.h"
 #include "game/game.h"
 
 #define ADVISOR_HEIGHT 26
+
+ui::advisor_miliary_window g_advisor_military_window;
 
 static void button_go_to_legion(int legion_id, int param2);
 static void button_return_to_fort(int legion_id, int param2);
 static void button_empire_service(int legion_id, int param2);
 static void on_scroll();
 
-static scrollbar_type scrollbar = {592, 70, 272, on_scroll};
+static scrollbar_t g_advisor_mil_scrollbar = {{592, 70}, 272, on_scroll};
 
 static generic_button fort_buttons[] = {
   {384, 83, 30, 30, button_go_to_legion, button_none, 1, 0},
@@ -50,12 +52,12 @@ static generic_button fort_buttons[] = {
 static int focus_button_id;
 static int num_legions;
 
-static void init() {
+void ui::advisor_miliary_window::init() {
     num_legions = formation_get_num_forts();
-    scrollbar_init(&scrollbar, 0, num_legions - 6);
+    g_advisor_mil_scrollbar.init(0, num_legions - 6);
 }
 
-static int draw_background() {
+int ui::advisor_miliary_window::draw_background() {
     painter ctx = game.painter();
     outer_panel_draw(vec2i{0, 0}, 40, ADVISOR_HEIGHT);
     ImageDraw::img_generic(ctx, image_id_from_group(GROUP_ADVISOR_ICONS) + 1, vec2i{10, 10});
@@ -70,9 +72,9 @@ static int draw_background() {
     lang_text_draw(138, 36, 274, 58, FONT_SMALL_PLAIN);
 
     int enemy_text_id;
-    if (city_figures_enemies())
+    if (g_city.figures.enemies)
         enemy_text_id = 10;
-    else if (city_figures_imperial_soldiers())
+    else if (g_city.figures.kingdome_soldiers)
         enemy_text_id = 11;
     else if (scenario_invasion_exists_upcoming())
         enemy_text_id = 9;
@@ -91,23 +93,24 @@ static int draw_background() {
     }
     int bullet_x = 60;
     int text_x = 80;
+    image_desc group_bullet{PACK_GENERAL, 158};
     if (num_legions <= 0) {
-        ImageDraw::img_generic(ctx, image_id_from_group(GROUP_BULLET), vec2i{bullet_x, 359});
+        ImageDraw::img_generic(ctx, image_group(group_bullet), vec2i{bullet_x, 359});
         lang_text_draw(51, enemy_text_id, text_x, 358, FONT_NORMAL_BLACK_ON_LIGHT);
 
-        ImageDraw::img_generic(ctx, image_id_from_group(GROUP_BULLET), vec2i{bullet_x, 379});
+        ImageDraw::img_generic(ctx, image_group(group_bullet), vec2i{bullet_x, 379});
         lang_text_draw(51, distant_battle_text_id, text_x, 378, FONT_NORMAL_BLACK_ON_LIGHT);
     } else {
         // has forts
-        ImageDraw::img_generic(ctx, image_id_from_group(GROUP_BULLET), vec2i{bullet_x, 349});
-        int width = lang_text_draw_amount(8, 46, city_military_total_soldiers(), text_x, 348, FONT_NORMAL_BLACK_ON_LIGHT);
+        ImageDraw::img_generic(ctx, image_group(group_bullet), vec2i{bullet_x, 349});
+        int width = lang_text_draw_amount(8, 46, g_city.military.total_soldiers, text_x, 348, FONT_NORMAL_BLACK_ON_LIGHT);
         width += lang_text_draw(51, 7, text_x + width, 348, FONT_NORMAL_BLACK_ON_LIGHT);
-        lang_text_draw_amount(8, 48, city_military_total_legions(), text_x + width, 348, FONT_NORMAL_BLACK_ON_LIGHT);
+        lang_text_draw_amount(8, 48, g_city.military.total_batalions, text_x + width, 348, FONT_NORMAL_BLACK_ON_LIGHT);
 
-        ImageDraw::img_generic(ctx, image_id_from_group(GROUP_BULLET), vec2i{bullet_x, 369});
+        ImageDraw::img_generic(ctx, image_group(group_bullet), vec2i{bullet_x, 369});
         lang_text_draw(51, enemy_text_id, text_x, 368, FONT_NORMAL_BLACK_ON_LIGHT);
 
-        ImageDraw::img_generic(ctx, image_id_from_group(GROUP_BULLET), vec2i{bullet_x, 389});
+        ImageDraw::img_generic(ctx, image_group(group_bullet), vec2i{bullet_x, 389});
         lang_text_draw(51, distant_battle_text_id, text_x, 388, FONT_NORMAL_BLACK_ON_LIGHT);
     }
 
@@ -117,7 +120,7 @@ static int draw_background() {
         return ADVISOR_HEIGHT;
     }
     for (int i = 0; i < 6 && i < num_legions; i++) {
-        const formation* m = formation_get(formation_for_legion(i + 1 + scrollbar.scroll_position));
+        const formation* m = formation_get(formation_for_legion(i + 1 + g_advisor_mil_scrollbar.scroll_position));
         button_border_draw(22, 77 + 44 * i, 560, 40, 0);
         ImageDraw::img_generic(ctx, image_id_from_group(GROUP_FIGURE_FORT_STANDARD_ICONS) + m->legion_id, vec2i{32, 82 + 44 * i});
         lang_text_draw(138, m->legion_id, 84, 83 + 44 * i, FONT_NORMAL_WHITE_ON_DARK);
@@ -157,8 +160,8 @@ static int draw_background() {
     return ADVISOR_HEIGHT;
 }
 
-static void draw_foreground() {
-    scrollbar_draw(&scrollbar);
+void ui::advisor_miliary_window::draw_foreground() {
+    scrollbar_draw(&g_advisor_mil_scrollbar);
     num_legions = formation_get_num_forts();
     for (int i = 0; i < 6 && i < num_legions; i++) {
         button_border_draw(384, 83 + 44 * i, 30, 30, focus_button_id == 3 * i + 1);
@@ -167,21 +170,21 @@ static void draw_foreground() {
     }
 }
 
-static int handle_mouse(const mouse* m) {
-    if (scrollbar_handle_mouse(&scrollbar, m))
+int ui::advisor_miliary_window::handle_mouse(const mouse* m) {
+    if (scrollbar_handle_mouse(&g_advisor_mil_scrollbar, m))
         return 1;
 
-    return generic_buttons_handle_mouse(m, 0, 0, fort_buttons, 3 * num_legions, &focus_button_id);
+    return generic_buttons_handle_mouse(m, {0, 0}, fort_buttons, 3 * num_legions, &focus_button_id);
 }
 
 static void button_go_to_legion(int legion_id, int param2) {
-    const formation* m = formation_get(formation_for_legion(legion_id + scrollbar.scroll_position));
-    camera_go_to_mappoint(map_point(MAP_OFFSET(m->x_home, m->y_home)));
+    const formation* m = formation_get(formation_for_legion(legion_id + g_advisor_mil_scrollbar.scroll_position));
+    camera_go_to_mappoint(m->home);
     window_city_show();
 }
 
 static void button_return_to_fort(int legion_id, int param2) {
-    formation* m = formation_get(formation_for_legion(legion_id + scrollbar.scroll_position));
+    formation* m = formation_get(formation_for_legion(legion_id + g_advisor_mil_scrollbar.scroll_position));
     if (!m->in_distant_battle) {
         formation_legion_return_home(m);
         window_invalidate();
@@ -189,7 +192,7 @@ static void button_return_to_fort(int legion_id, int param2) {
 }
 
 static void button_empire_service(int legion_id, int param2) {
-    int formation_id = formation_for_legion(legion_id + scrollbar.scroll_position);
+    int formation_id = formation_for_legion(legion_id + g_advisor_mil_scrollbar.scroll_position);
     formation_toggle_empire_service(formation_id);
     formation_calculate_figures();
     window_invalidate();
@@ -199,13 +202,6 @@ static void on_scroll(void) {
     window_invalidate();
 }
 
-const advisor_window* window_advisor_military(void) {
-    static const advisor_window window = {
-        draw_background,
-        draw_foreground,
-        handle_mouse,
-        nullptr
-    };
-    init();
-    return &window;
+advisor_window* ui::advisor_miliary_window::instance() {
+    return &g_advisor_military_window;
 }

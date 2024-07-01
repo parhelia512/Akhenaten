@@ -96,10 +96,6 @@ int js_vm_load_file_and_exec(const char *path) {
     return 1;
 }
 
-void js_vm_reload_configs() {
-    config::refresh(vm.J);
-}
-
 js_State *js_vm_state() {
     return vm.J;
 }
@@ -124,7 +120,7 @@ void js_vm_sync() {
         vm.files2load[i].clear();
     }
 
-    js_vm_reload_configs();
+    config::refresh(vm.J);
 
     vm.files2load_num = 0;
     vm.have_error = 0;
@@ -243,6 +239,9 @@ void js_reset_vm_state() {
     js_register_collection_images(vm.J);
     js_register_ui_fonts(vm.J);
     js_register_city_resources(vm.J);
+    js_register_city_advisors(vm.J);
+    js_register_terrain(vm.J);
+    js_register_menu(vm.J);
 
     int ok = js_vm_load_file_and_exec(":modules.js");
     if (ok) {

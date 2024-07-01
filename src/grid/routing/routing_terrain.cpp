@@ -122,14 +122,17 @@ static int get_land_type_noncitizen(int grid_offset) {
     switch (building_at(grid_offset)->type) {
     default:
         return NONCITIZEN_1_BUILDING;
+
     case BUILDING_STORAGE_YARD:
     case BUILDING_FORT_GROUND:
         return NONCITIZEN_0_PASSABLE;
+
     case BUILDING_BURNING_RUIN:
     case BUILDING_UNUSED_NATIVE_HUT_88:
     case BUILDING_UNUSED_NATIVE_MEETING_89:
     case BUILDING_UNUSED_NATIVE_CROPS_93:
         return NONCITIZEN_N1_BLOCKED;
+
     case BUILDING_FORT_CHARIOTEERS:
     case BUILDING_FORT_INFANTRY:
     case BUILDING_FORT_ARCHERS:
@@ -196,12 +199,10 @@ int map_routing_tile_check(int routing_type, int grid_offset) {
     int y = MAP_Y(grid_offset);
     switch (routing_type) {
     case ROUTING_TYPE_CITIZEN:
-        //            if (!map_tile_inside_map_area(x, y))
-        //                return CITIZEN_N1_BLOCKED;
         if (!!(terrain & TERRAIN_ROAD) && !(terrain & TERRAIN_WATER)) {
             return CITIZEN_0_ROAD;
         } else if (!!(terrain & TERRAIN_FERRY_ROUTE) && !!(terrain & TERRAIN_WATER)) {
-            return CITIZEN_2_PASSABLE_TERRAIN;
+            return CITIZEN_0_ROAD;
         } else if (terrain & (TERRAIN_RUBBLE | TERRAIN_ACCESS_RAMP | TERRAIN_GARDEN | TERRAIN_MARSHLAND | TERRAIN_FLOODPLAIN | TERRAIN_TREE)) {// TODO?
             return CITIZEN_2_PASSABLE_TERRAIN;
         } else if (terrain & (TERRAIN_BUILDING | TERRAIN_GATEHOUSE)) {
@@ -337,6 +338,7 @@ static void map_routing_update_land_noncitizen(void) {
         }
     }
 }
+
 void map_routing_update_land() {
     OZZY_PROFILER_SECTION("Game/Run/Routing/Update land");
     map_routing_update_land_citizen();
@@ -367,7 +369,7 @@ void map_routing_update_ferry_routes() {
             auto path = make_span(path_data.data(), path_length);
 
             int grid_offset = ppoints.first.grid_offset();
-            int image_id = image_id_from_group(GROUP_BUILDING_HOUSE_VACANT_LOT);
+            //int image_id = image_id_from_group(GROUP_BUILDING_HOUSE_VACANT_LOT);
             for (const auto &dir : path) {
                 map_terrain_add(grid_offset, TERRAIN_FERRY_ROUTE);
                 map_routing_adjust_tile_in_direction(dir, ppoints.first, grid_offset);
@@ -377,8 +379,8 @@ void map_routing_update_ferry_routes() {
 
     for (auto f1 = ferries.begin(); f1 != ferries.end(); ++f1) {
         for (auto f2 = f1 + 1; f2 != ferries.end(); ++f2) {
-            ferry_points fpoints_begin = map_water_docking_points(*f1);
-            ferry_points fpoints_end = map_water_docking_points(*f2);
+            ferry_tiles fpoints_begin = map_water_docking_points(**f1);
+            ferry_tiles fpoints_end = map_water_docking_points(**f2);
 
             svector<path_points, 4> possible_paths = {
                 {fpoints_begin.point_a, fpoints_end.point_a},

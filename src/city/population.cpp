@@ -1,10 +1,9 @@
 #include "population.h"
 
-#include "building/building.h"
-#include "building/house.h"
+#include "building/building_house.h"
 #include "building/house_population.h"
 #include "building/model.h"
-#include "city/data_private.h"
+#include "city/city.h"
 #include "core/calc.h"
 #include "core/random.h"
 #include "config/config.h"
@@ -23,6 +22,7 @@ static const int DEATHS_PER_HEALTH_PER_AGE_DECENNIUM[11][10] = {{20, 10, 5, 10, 
                                                                 {0, 0, 0, 0, 0, 0, 4, 5, 10, 20},
                                                                 {0, 0, 0, 0, 0, 0, 0, 2, 5, 10}};
 
+static auto &city_data = g_city;
 int city_population(void) {
     return city_data.population.population;
 }

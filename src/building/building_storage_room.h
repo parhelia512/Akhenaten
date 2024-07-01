@@ -8,13 +8,16 @@ class building_storage_room : public building_impl {
 public:
     BUILDING_METAINFO(BUILDING_STORAGE_ROOM, building_storage_room)
 
-    building_storage_room(building &b) : building_impl(b), stored_full_amount(b.stored_full_amount) {}
+    building_storage_room(building &b);
 
     virtual void on_create(int orientation) override;
+    virtual void spawn_figure() override { /*nothing*/ }
     virtual building_storage_room *dcast_storage_room() { return this; }
     virtual void window_info_background(object_info &ctx) override;
     virtual void window_info_foreground(object_info &ctx) override;
     virtual e_sound_channel_city sound_channel() const { return SOUND_CHANNEL_CITY_STORAGE_YARD; }
+    virtual bool can_play_animation() const { return false; }
+    virtual int get_fire_risk(int value) const override { return 0; }
 
     const building_storage *storage();
     building_storage_yard *yard() { return main()->dcast_storage_yard(); }

@@ -13,7 +13,7 @@
 #include "graphics/elements/ui.h"
 #include "grid/road_access.h"
 #include "config/config.h"
-#include "scenario/property.h"
+#include "scenario/scenario.h"
 #include "sound/effect.h"
 #include "graphics/image_desc.h"
 #include "graphics/color.h"
@@ -57,11 +57,11 @@ struct non_getting_granaries_t {
 
 non_getting_granaries_t g_non_getting_granaries;
 
-const building_storage *building_granary::storage() {
+const building_storage *building_granary::storage() const {
     return building_storage_get(base.storage_id);
 }
 
-int building_granary::amount(e_resource resource) {
+int building_granary::amount(e_resource resource) const {
     if (!resource_is_food(resource)) {
         return 0;
     }
@@ -129,8 +129,8 @@ int building_granary::add_resource(e_resource resource, int is_produced, int amo
 
 int building_granary::total_stored() const {
     int result = 0;
-    for (int i = RESOURCE_FOOD_MIN; i < RESOURCES_FOODS_MAX; i++) {
-        result += data.granary.resource_stored[i];
+    for (e_resource r = RESOURCE_FOOD_MIN; r < RESOURCES_FOODS_MAX; ++r) {
+        result += amount(r);
     }
 
     return result;
@@ -138,6 +138,10 @@ int building_granary::total_stored() const {
 
 int building_granary::space_for() const {
     return data.granary.resource_stored[RESOURCE_NONE];
+}
+
+bool building_granary::is_empty_all() const {
+    return storage()->empty_all;
 }
 
 int building_granary::remove_resource(e_resource resource, int amount) {
@@ -514,14 +518,10 @@ void building_granary_storageyard_curse(int big) {
         int total_stored = 0;
         if (b->type == BUILDING_STORAGE_YARD) {
             building_storage_yard *warehouse = b->dcast_storage_yard();
-            for (e_resource r = RESOURCE_MIN; r < RESOURCES_MAX; ++r) {
-                total_stored += warehouse->amount(r);
-            }
+            total_stored = warehouse->total_stored();
         } else if (b->type == BUILDING_GRANARY) {
             building_granary *granary = b->dcast_granary();
-            for (e_resource r = RESOURCE_FOOD_MIN; r < RESOURCES_FOODS_MAX; ++r) {
-                total_stored += granary->amount(r);
-            }
+            total_stored = granary->total_stored();
             total_stored /= UNITS_PER_LOAD;
         } else {
             continue;
@@ -568,25 +568,6 @@ void set_granary_res_offset(int i, vec2i v) {
     granary_offsets_ph[i] = v;
 }
 
-void draw_granary_stores(const building &b, vec2i point, color color_mask, painter &ctx) {
-    int last_spot_filled = 0;
-    for (int r = 1; r < 9; r++) {
-        if (b.data.granary.resource_stored[r] > 0) {
-            int spots_filled = ceil((float)(b.data.granary.resource_stored[r] - 199) / (float)400); // number of "spots" occupied by food
-            if (spots_filled == 0 && b.data.granary.resource_stored[r] > 0)
-                spots_filled = 1;
-
-            for (int spot = last_spot_filled; spot < last_spot_filled + spots_filled; spot++) {
-                // draw sprite on each granary "spot"
-                vec2i spot_pos = granary_offsets_ph[spot];
-                ImageDraw::img_generic(ctx, image_group(IMG_GRANARY_RESOURCES) + r, point + spot_pos + vec2i{110, -74}, color_mask);
-            }
-
-            last_spot_filled += spots_filled;
-        }
-    }
-}
-
 void building_granary_draw_anim(building &b, vec2i point, tile2i tile, color mask, painter &ctx) {
 
 }
@@ -623,7 +604,7 @@ void building_granary::spawn_figure() {
 }
 
 bool building_granary::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) {
-    draw_granary_stores(base, point, mask, ctx);
+    draw_stores(point, mask, ctx);
     int max_workers = model_get_building(BUILDING_GRANARY)->laborers;
     building_draw_normal_anim(ctx, point + vec2i{114, 2}, &base, tile, granary_m.anim["work"], mask);
     if (num_workers() > max_workers / 2) {
@@ -635,4 +616,24 @@ bool building_granary::draw_ornaments_and_animations_height(painter &ctx, vec2i 
 
 std::pair<int, int> building_granary::get_tooltip() const {
     return window_building_get_tooltip_granary_orders();
+}
+
+void building_granary::draw_stores(vec2i point, color color_mask, painter &ctx) {
+    int last_spot_filled = 0;
+    int resources_id = granary_m.anim["resources"].first_img();
+    for (int r = 1; r < 9; r++) {
+        if (data.granary.resource_stored[r] > 0) {
+            int spots_filled = ceil((float)(data.granary.resource_stored[r] - 199) / (float)400); // number of "spots" occupied by food
+            if (spots_filled == 0 && data.granary.resource_stored[r] > 0)
+                spots_filled = 1;
+
+            for (int spot = last_spot_filled; spot < last_spot_filled + spots_filled; spot++) {
+                // draw sprite on each granary "spot"
+                vec2i spot_pos = granary_offsets_ph[spot];
+                ImageDraw::img_generic(ctx, resources_id + r, point + spot_pos + vec2i{110, -74}, color_mask);
+            }
+
+            last_spot_filled += spots_filled;
+        }
+    }
 }

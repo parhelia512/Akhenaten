@@ -4,6 +4,7 @@
 
 class figure_market_buyer : public figure_impl {
 public:
+    FIGURE_METAINFO(FIGURE_MARKET_BUYER, figure_market_buyer)
     figure_market_buyer(figure *f) : figure_impl(f) {}
 
     virtual void on_create() override {}
@@ -15,6 +16,7 @@ public:
     virtual int provide_service() override;
     virtual figure_sound_t get_sound_reaction(pcstr key) const override;
     virtual bool window_info_background(object_info &ctx) override;
+    virtual const animations_t &anim() const override;
 
     bool take_resource_from_storageyard(building *warehouse);
     int take_food_from_granary(building *market, building *granary);

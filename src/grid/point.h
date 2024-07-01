@@ -1,11 +1,13 @@
 #pragma once
 
-#define _INVALID_COORD -1
 
-enum { _X = 0, _Y = 1, _GRID_OFFSET = 2, _ABS_X = 3, _ABS_Y = 4 };
 
 #include <cmath>
 #include <cstdint>
+
+#define _INVALID_COORD -1
+enum { _X = 0, _Y = 1, _GRID_OFFSET = 2, _ABS_X = 3, _ABS_Y = 4 };
+constexpr uint32_t MAX_TILE_I = 228;
 
 class map_point {
 private:
@@ -17,20 +19,20 @@ private:
     int p_ABS_Y = -1;
 
 public:
-    typedef map_point self;
+    using self = map_point;
     // SETTERS / GETTERS
-    const int x(int v);
-    const int y(int v);
+    int x(int v);
+    int y(int v);
+    int x();
+    int y();
 
     int grid_offset(int v);
     int grid_offset();
-    const int ABS_X(int v);
-    const int ABS_Y(int v);
+    int abs_x(int v);
+    int abs_y(int v);
 
-    int x();
-    int y();
-    const int ABS_X(void);
-    const int ABS_Y(void);
+    const int abs_x(void);
+    const int abs_y(void);
 
     inline float dist(self o) { return ::sqrtf(::powf(x() - o.x(), 2) + ::powf(y() - o.y(), 2)); }
 
@@ -45,7 +47,7 @@ public:
     inline self mod(int x, int y) { return self(this->x() % x, this->y() % y); }
     inline self add(self o) { return self(this->x() + o.x(), this->y() + o.y()); }
     inline self div(float d) { return self(this->x() / d, this->y() / d); }
-    inline bool valid() const { return (self(-1, -1) != *this); }
+    inline bool valid() const { return (p_X >= 0 && p_Y >= 0 && p_X < MAX_TILE_I && p_Y < MAX_TILE_I); }
 
     // SET BY CONSTRUCTION
     void set(int _x, int _y);
@@ -58,6 +60,7 @@ public:
 
     // CORRECT BROKEN FIELDS
     bool self_correct();
+    void invalidate_offset() { p_GRID_OFFSET = -1; p_ABS_X = -1; p_ABS_Y = -1; }
 
     // CONSTRUCTORS / DESTRUCTOR
     explicit map_point(); // default constructor
@@ -67,10 +70,10 @@ public:
     // COMPARISON
     inline bool operator==(self rhs) { return p_GRID_OFFSET == rhs.p_GRID_OFFSET; }
     inline bool operator!=(self rhs) { return p_GRID_OFFSET != rhs.p_GRID_OFFSET; }
+    static const self invalid;
 };
 
 using tile2i = map_point;
-extern const map_point map_point_invalid;
 
 /**
  * Stores the X and Y to the passed point.
@@ -83,4 +86,4 @@ extern const map_point map_point_invalid;
  * @param point Point structure to store X and Y in
  */
 void map_point_store_result(tile2i tile, tile2i& point);
-void map_point_get_last_result(tile2i* point);
+void map_point_get_last_result(tile2i &point);

@@ -16,8 +16,8 @@
 #include "graphics/view/view.h"
 #include "graphics/window.h"
 #include "config/config.h"
-#include "scenario/property.h"
-#include "widget/city.h"
+#include "scenario/scenario.h"
+#include "widget/widget_city.h"
 #include "game/game.h"
 
 static void window_info_select_figure(int index, int param2);
@@ -169,54 +169,6 @@ void figure::draw_animal(object_info* c) {
     lang_text_draw(64, type, c->offset.x + 92, c->offset.y + 139, FONT_NORMAL_BLACK_ON_DARK);
 }
 
-void figure::draw_cartpusher(object_info* c) {
-    painter ctx = game.painter();
-    ImageDraw::img_generic(ctx, big_people_image(type), c->offset + vec2i{28, 112});
-
-    lang_text_draw(name_group_id(), name, c->offset.x + 90, c->offset.y + 108, FONT_LARGE_BLACK_ON_DARK);
-    int width = 0;
-    if (has_home())
-        width += lang_text_draw(41, home()->type, c->offset.x + 92, c->offset.y + 139, FONT_NORMAL_BLACK_ON_DARK);
-    width += lang_text_draw(64, type, c->offset.x + 92 + width, c->offset.y + 139, FONT_NORMAL_BLACK_ON_DARK);
-
-    if (action_state != FIGURE_ACTION_132_DOCKER_IDLING && resource_id) {
-        int resource = resource_id;
-        ImageDraw::img_generic(ctx, image_id_resource_icon(resource) + resource_image_offset(resource, RESOURCE_IMAGE_ICON), c->offset + vec2i{92, 154});
-
-        width = text_draw_number(resource_amount_full, ' ', " ", c->offset.x + 108, c->offset.y + 154, FONT_NORMAL_BLACK_ON_DARK);
-        width += lang_text_draw(129, 20, c->offset.x + 108 + width, c->offset.y + 154, FONT_NORMAL_BLACK_ON_DARK);
-        width += lang_text_draw(23, resource_id, c->offset.x + 108 + width, c->offset.y + 154, FONT_NORMAL_BLACK_ON_DARK);
-    }
-
-    //    int phrase_height = lang_text_draw_multiline(130, 21 * c->figure.sound_id + c->figure.phrase_id + 1,
-    //                                                 c->offset.x + 90, c->offset.y + 160, 16 * (c->width_blocks - 8),
-    //                                                 FONT_NORMAL_GREEN);
-
-    if (!has_home()) {
-        return;
-    }
-
-    building* source_building = home();
-    building* target_building = destination();
-    bool is_returning = false;
-    switch (action_state) {
-    case ACTION_11_RETURNING_EMPTY:
-    case FIGURE_ACTION_27_CARTPUSHER_RETURNING:
-    case FIGURE_ACTION_53_WAREHOUSEMAN_RETURNING_EMPTY:
-    case FIGURE_ACTION_56_WAREHOUSEMAN_RETURNING_WITH_FOOD:
-    case FIGURE_ACTION_59_WAREHOUSEMAN_RETURNING_WITH_RESOURCE:
-    case FIGURE_ACTION_134_DOCKER_EXPORT_QUEUE:
-    case FIGURE_ACTION_137_DOCKER_EXPORT_RETURNING:
-    case FIGURE_ACTION_138_DOCKER_IMPORT_RETURNING:
-        is_returning = true;
-        break;
-    }
-
-    if (c->figure.phrase_group > 0 && c->figure.phrase_id >= 0) {
-        lang_text_draw_multiline(c->figure.phrase_group, c->figure.phrase_id, c->offset + vec2i{90, 180}, 16 * (c->bgsize.x - 8), FONT_NORMAL_BLACK_ON_DARK);
-    }
-}
-
 void figure::draw_normal_figure(object_info* c) {
     painter ctx = game.painter();
     int image_id = big_people_image(type);
@@ -244,16 +196,13 @@ static void draw_figure_info(object_info* c, int figure_id) {
         return;
     }
 
-    if (type == FIGURE_TRADE_SHIP) {
-        //f->draw_trader(c); //TODO: need fixes
-    } else if (type >= FIGURE_ENEMY43_SPEAR && type <= FIGURE_ENEMY53_AXE)
+    if (type >= FIGURE_ENEMY43_SPEAR && type <= FIGURE_ENEMY53_AXE) {
         f->draw_enemy(c);
-    else if (type == FIGURE_FISHING_BOAT || type == FIGURE_SHIPWRECK || f->is_herd())
+    } else if (f->is_herd()) {
         f->draw_animal(c);
-    else if (type == FIGURE_STORAGEYARD_CART)
-        f->draw_cartpusher(c);
-    else
+    } else {
         f->draw_normal_figure(c);
+    }
 }
 
 void window_building_draw_figure_list(object_info* c) {
@@ -310,7 +259,7 @@ void window_building_prepare_figure_list(object_info* c) {
 int window_building_handle_mouse_figure_list(const mouse* m, object_info* c) {
     auto& data = g_building_figures_data;
     data.context_for_callback = c;
-    int button_id = generic_buttons_handle_mouse(m, c->offset.x, c->offset.y, figure_buttons, c->figure.count, &data.focus_button_id);
+    int button_id = generic_buttons_handle_mouse(m, c->offset, figure_buttons, c->figure.count, &data.focus_button_id);
     data.context_for_callback = 0;
     return button_id;
 }
@@ -322,22 +271,11 @@ static void window_info_select_figure(int index, int param2) {
     window_invalidate();
 }
 
-static int window_info_show_overlay(figure *f) {
-    switch (f->type) {
-    case FIGURE_CONSTABLE: return OVERLAY_CRIME;
-    case FIGURE_MAGISTRATE: return OVERLAY_COUTHOUSE;
-    default:
-        return f->dcast()->get_overlay();
-    }
-
-    return OVERLAY_NONE;
-}
-
 void window_building_play_figure_phrase(object_info* c) {
     int figure_id = c->figure.figure_ids[c->figure.selected_index];
     figure* f = figure_get(figure_id);
     f->figure_phrase_play();
-    c->show_overlay = window_info_show_overlay(f);
+    c->show_overlay = f->dcast()->get_overlay();
     c->figure.phrase_group = f->phrase_group;
     c->figure.phrase_id = f->phrase_id;
     c->figure.phrase_key = f->phrase_key;

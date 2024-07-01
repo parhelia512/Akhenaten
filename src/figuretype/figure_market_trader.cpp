@@ -6,15 +6,11 @@
 
 #include "js/js_game.h"
 
-struct market_trader_model : public figures::model_t<FIGURE_MARKET_TRADER, figure_market_trader> {};
-market_trader_model market_trader_m;
+figures::model_t<figure_market_trader> market_trader_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_market_trader);
 void config_load_figure_market_trader() {
-    g_config_arch.r_section("figure_market_trader", [] (archive arch) {
-        market_trader_m.anim.load(arch);
-        market_trader_m.sounds.load(arch);
-    });
+    market_trader_m.load();
 }
 
 void figure_market_trader::figure_action() {
@@ -23,7 +19,6 @@ void figure_market_trader::figure_action() {
     }
 
     building_bazaar* bazaar = home()->dcast_bazaar();
-    assert(bazaar);
     if (!bazaar) {
         return;
     }
@@ -55,4 +50,8 @@ int figure_market_trader::provide_service() {
     int houses_serviced = provide_market_goods(home(), tile());
     figure_provide_service(tile(), &base, none_service, bazaar_coverage);
     return houses_serviced;
+}
+
+const animations_t &figure_market_trader::anim() const {
+    return market_trader_m.anim;
 }

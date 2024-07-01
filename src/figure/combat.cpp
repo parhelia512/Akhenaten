@@ -8,7 +8,7 @@
 #include "game/difficulty.h"
 #include "grid/figure.h"
 #include "grid/point.h"
-#include "sound/effect.h"
+#include "sound/sound.h"
 
 int attack_is_same_direction(int dir1, int dir2) {
     if (dir1 == dir2)
@@ -28,20 +28,25 @@ int attack_is_same_direction(int dir1, int dir2) {
 int figure_combat_get_target_for_soldier(tile2i tile, int max_distance) {
     int figure_id = 0;
     int min_distance = 10000;
-    for (int i = 1; i < MAX_FIGURES[GAME_ENV]; i++) {
-        figure* f = figure_get(i);
-        if (f->is_dead())
+    for (figure *f: map_figures()) {
+        if (!f->is_valid()) {
             continue;
+        }
+
+        if (f->is_dead()) {
+            continue;
+        }
 
         if (f->is_enemy() || f->type == FIGURE_TOMB_ROBER || f->is_attacking_native()) {
             int distance = calc_maximum_distance(tile, f->tile);
             if (distance <= max_distance) {
-                if (f->targeted_by_figure_id)
+                if (f->targeted_by_figure_id) {
                     distance *= 2; // penalty
+                }
 
                 if (distance < min_distance) {
                     min_distance = distance;
-                    figure_id = i;
+                    figure_id = f->id;
                 }
             }
         }
@@ -49,24 +54,29 @@ int figure_combat_get_target_for_soldier(tile2i tile, int max_distance) {
     if (figure_id)
         return figure_id;
 
-    for (int i = 1; i < MAX_FIGURES[GAME_ENV]; i++) {
-        figure* f = figure_get(i);
-        if (f->is_dead())
+    for (figure *f: map_figures()) {
+        if (!f->is_valid()) {
             continue;
+        }
+
+        if (f->is_dead()) {
+            continue;
+        }
 
         if (f->is_enemy() || f->type == FIGURE_TOMB_ROBER || f->is_attacking_native())
-            return i;
+            return f->id;
     }
     return 0;
 }
+
 int figure_combat_get_target_for_wolf(tile2i tile, int max_distance) {
     int min_figure_id = 0;
     int min_distance = 10000;
-    for (int i = 1; i < MAX_FIGURES[GAME_ENV]; i++) {
-        figure* f = figure_get(i);
-        if (f->is_dead() || !f->type) {
+    for (figure* f: map_figures()) {
+        if (!f->is_valid() || f->is_dead() || !f->type) {
             continue;
         }
+
         switch (f->type) {
         case FIGURE_EXPLOSION:
         case FIGURE_STANDARD_BEARER:
@@ -88,7 +98,7 @@ int figure_combat_get_target_for_wolf(tile2i tile, int max_distance) {
         if (f->is_enemy() || f->is_herd()) {
             continue;
         }
-        if (f->is_legion() && f->action_state == FIGURE_ACTION_80_SOLDIER_AT_REST) {
+        if (f->dcast_soldier() && f->action_state == FIGURE_ACTION_80_SOLDIER_AT_REST) {
             continue;
         }
         int distance = calc_maximum_distance(tile, f->tile);
@@ -97,7 +107,7 @@ int figure_combat_get_target_for_wolf(tile2i tile, int max_distance) {
         }
         if (distance < min_distance) {
             min_distance = distance;
-            min_figure_id = i;
+            min_figure_id = f->id;
         }
     }
     if (min_distance <= max_distance && min_figure_id) {
@@ -109,40 +119,43 @@ int figure_combat_get_target_for_wolf(tile2i tile, int max_distance) {
 int figure_combat_get_target_for_enemy(tile2i tile) {
     int min_figure_id = 0;
     int min_distance = 10000;
-    for (int i = 1; i < MAX_FIGURES[GAME_ENV]; i++) {
-        figure* f = figure_get(i);
-        if (f->is_dead())
+    for (figure* f: map_figures()) {
+        if (!f->is_valid() || f->is_dead()) {
             continue;
+        }
 
-        if (!f->targeted_by_figure_id && f->is_legion()) {
+        if (!f->targeted_by_figure_id && f->dcast_soldier()) {
             int distance = calc_maximum_distance(tile, f->tile);
             if (distance < min_distance) {
                 min_distance = distance;
-                min_figure_id = i;
+                min_figure_id = f->id;
             }
         }
     }
-    if (min_figure_id)
+
+    if (min_figure_id) {
         return min_figure_id;
+    }
 
     // no 'free' soldier found, take first one
-    for (int i = 1; i < MAX_FIGURES[GAME_ENV]; i++) {
-        figure* f = figure_get(i);
-        if (f->is_dead())
+    for (figure* f: map_figures()) {
+        if (!f->is_valid() || f->is_dead()) {
             continue;
+        }
 
-        if (f->is_legion())
-            return i;
+        if (f->dcast_soldier())
+            return f->id;
     }
     return 0;
 }
+
 int figure_combat_get_missile_target_for_soldier(figure* shooter, int max_distance, tile2i* tile) {
     int min_distance = max_distance;
     figure* min_figure = 0;
-    for (int i = 1; i < MAX_FIGURES[GAME_ENV]; i++) {
-        figure* f = figure_get(i);
-        if (f->is_dead())
+    for (figure* f: map_figures()) {
+        if (!f->is_valid() || f->is_dead()) {
             continue;
+        }
 
         if (f->is_enemy() || f->is_herd() || f->is_attacking_native()) {
             int distance = calc_maximum_distance(shooter->tile, f->tile);
@@ -152,19 +165,21 @@ int figure_combat_get_missile_target_for_soldier(figure* shooter, int max_distan
             }
         }
     }
+
     if (min_figure) {
         map_point_store_result(min_figure->tile, *tile);
         return min_figure->id;
     }
+
     return 0;
 }
 int figure_combat_get_missile_target_for_enemy(figure* enemy, int max_distance, int attack_citizens, tile2i* tile) {
     figure* min_figure = 0;
     int min_distance = max_distance;
-    for (int i = 1; i < MAX_FIGURES[GAME_ENV]; i++) {
-        figure* f = figure_get(i);
-        if (f->is_dead() || !f->type)
+    for (figure* f: map_figures()) {
+        if (!f->is_valid() || f->is_dead()) {
             continue;
+        }
 
         switch (f->type) {
         case FIGURE_EXPLOSION:
@@ -188,7 +203,7 @@ int figure_combat_get_missile_target_for_enemy(figure* enemy, int max_distance, 
             continue;
         }
         int distance;
-        if (f->is_legion())
+        if (f->dcast_soldier())
             distance = calc_maximum_distance(enemy->tile, f->tile);
         else if (attack_citizens && f->is_friendly)
             distance = calc_maximum_distance(enemy->tile, f->tile) + 5;
@@ -253,10 +268,9 @@ void figure::hit_opponent() {
     if (opponent->opponent_id != id && m->figure_type != FIGURE_STANDARD_BEARER
         && attack_is_same_direction(attack_direction, opponent->attack_direction)) {
         figure_attack += 4; // attack opponent on the (exposed) back
-        sound_effect_play(SOUND_EFFECT_SWORD_SWING);
+        g_sound.play_effect(SOUND_EFFECT_SWORD_SWING);
     }
-    if (m->is_halted && m->figure_type == FIGURE_STANDARD_BEARER
-        && attack_is_same_direction(attack_direction, m->direction)) {
+    if (m->is_halted && m->figure_type == FIGURE_STANDARD_BEARER && attack_is_same_direction(attack_direction, m->direction)) {
         figure_attack += 4; // coordinated formation attack bonus
     }
     // defense modifiers
@@ -333,7 +347,7 @@ void figure::figure_combat_attack_figure_at(int grid_offset) {
     int guard = 0;
     int opponent_id = map_figure_id_get(grid_offset);
     for (;;) {
-        if (++guard >= MAX_FIGURES[GAME_ENV] || opponent_id <= 0)
+        if (++guard >= MAX_FIGURES || opponent_id <= 0)
             break;
 
         figure* opponent = figure_get(opponent_id);

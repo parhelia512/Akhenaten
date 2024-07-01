@@ -10,15 +10,11 @@
 
 #include "js/js_game.h"
 
-struct native_trader_model : public figures::model_t<FIGURE_NATIVE_TRADER, figure_native_trader> {};
-native_trader_model native_trader_m;
+figures::model_t<figure_native_trader> native_trader_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_native_trader);
 void config_load_figure_native_trader() {
-    g_config_arch.r_section("figure_native_trader", [] (archive arch) {
-        native_trader_m.anim.load(arch);
-        native_trader_m.sounds.load(arch);
-    });
+    native_trader_m.load();
 }
 
 void figure_native_trader::figure_action() {
@@ -65,7 +61,7 @@ void figure_native_trader::figure_action() {
                 poof();
             }
         }
-        base.anim_frame = 0;
+        base.anim.frame = 0;
         break;
 
     case FIGURE_ACTION_163_NATIVE_TRADER_AT_WAREHOUSE:
@@ -89,25 +85,35 @@ void figure_native_trader::figure_action() {
                 }
             }
         }
-        base.anim_frame = 0;
+        base.anim.frame = 0;
         break;
     }
-    int dir = figure_image_normalize_direction(direction() < 8 ? direction() : base.previous_tile_direction);
 
-    if (action_state() == FIGURE_ACTION_149_CORPSE) {
-        base.sprite_image_id = image_group(ANIM_CARTPUSHER_DEATH);
-        base.cart_image_id = 0;
-    } else {
-        base.sprite_image_id = image_group(ANIM_CARTPUSHER_WALK) + dir + 8 * base.anim_frame;
-    }
-
-    base.cart_image_id = image_id_from_group(GROUP_FIGURE_IMMIGRANT_CART) + 8 + 8 * base.resource_id; // BUGFIX should be within else statement?
-    if (base.cart_image_id) {
-        base.cart_image_id += dir;
-        base.figure_image_set_cart_offset(dir);
-    }
 }
 
 void figure_native_trader::figure_draw(painter &ctx, vec2i pixel, int highlight, vec2i *coord_out) {
     base.draw_figure_with_cart(ctx, pixel, highlight, coord_out);
+}
+
+const animations_t &figure_native_trader::anim() const {
+    return native_trader_m.anim;
+}
+
+void figure_native_trader::update_animation() {
+    figure_impl::update_animation();
+
+    int dir = figure_image_normalize_direction(direction() < 8 ? direction() : base.previous_tile_direction);
+    if (action_state() == FIGURE_ACTION_149_CORPSE) {
+        base.sprite_image_id = image_id_from_group(PACK_SPR_MAIN, 44);
+        base.cart_image_id = 0;
+    } else {
+        base.sprite_image_id = image_id_from_group(PACK_SPR_MAIN, 43) + dir + 8 * base.anim.frame;
+    }
+
+    int cart_img = native_trader_m.anim["cart"].first_img();
+    base.cart_image_id = cart_img + 8 + 8 * base.resource_id; // BUGFIX should be within else statement?
+    if (base.cart_image_id) {
+        base.cart_image_id += dir;
+        base.figure_image_set_cart_offset(dir);
+    }
 }

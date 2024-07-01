@@ -27,6 +27,9 @@ enum e_debug_show_opt {
     e_debug_show_migration,
     e_debug_show_sentiment,
     e_debug_show_sound_channels,
+    e_debug_show_console,
+    e_debug_show_screenshot,
+    e_debug_show_full_screenshot,
 
     e_debug_opt_size,
 };
@@ -59,6 +62,8 @@ enum e_debug_render {
     e_debug_render_figures = 24,
     e_debug_render_height = 25,
     e_debug_render_marshland_depl = 26,
+    e_debug_render_damage_fire = 27,
+    e_debug_render_desirability = 28,
 
     e_debug_render_size
 };
@@ -98,9 +103,17 @@ struct console_command {
 struct console_var_int {
     int value;
     console_var_int(pcstr name, int init);
+    int operator()() const { return value; }
+};
+
+struct console_var_bool {
+    bool value;
+    console_var_bool(pcstr name, bool init);
+    bool operator()() const { return value; }
 };
 
 #define declare_console_command(a, ...) namespace console { bool cmd_##a; }; console_command a(#a, __VA_ARGS__);
 #define declare_console_command_p(a, f) namespace console { bool cmd_##a; }; void f(std::istream &, std::ostream &); console_command a(#a, f);
 #define declare_console_var_int(a, v) namespace console { bool var_##a; }; console_var_int a(#a, v);
+#define declare_console_var_bool(a, v) namespace console { bool var_##a; }; console_var_bool a(#a, v);
 

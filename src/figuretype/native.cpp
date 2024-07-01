@@ -1,7 +1,7 @@
 #include "native.h"
 
 #include "building/building.h"
-#include "city/figures.h"
+#include "city/city.h"
 #include "city/military.h"
 #include "figure/combat.h"
 #include "figure/formation.h"
@@ -38,11 +38,11 @@ void figure::indigenous_native_action() {
         }
         break;
     case FIGURE_ACTION_158_NATIVE_CREATED:
-        anim_frame = 0;
+        anim.frame = 0;
         wait_ticks++;
         if (wait_ticks > 10 + (id & 3)) {
             wait_ticks = 0;
-            if (!city_military_is_native_attack_active()) {
+            if (!g_city.military.is_native_attack_active()) {
                 int x_tile, y_tile;
                 building* meeting = building_get(b->subtype.native_meeting_center_id);
                 if (map_terrain_get_adjacent_road_or_clear_land(
@@ -64,7 +64,7 @@ void figure::indigenous_native_action() {
         }
         break;
     case FIGURE_ACTION_159_NATIVE_ATTACKING:
-        city_figures_add_attacking_native();
+        g_city.figures_add_attacking_native();
         terrain_usage = TERRAIN_USAGE_ENEMY;
         move_ticks(1);
         if (direction == DIR_FIGURE_NONE || direction == DIR_FIGURE_REROUTE || direction == DIR_FIGURE_CAN_NOT_REACH) {
@@ -92,10 +92,10 @@ void figure::indigenous_native_action() {
     } else if (action_state == FIGURE_ACTION_149_CORPSE)
         sprite_image_id = 441 + figure_image_corpse_offset();
     else if (direction == DIR_FIGURE_ATTACK)
-        sprite_image_id = 393 + dir + 8 * (anim_frame / 2);
+        sprite_image_id = 393 + dir + 8 * (anim.frame / 2);
     else if (action_state == FIGURE_ACTION_159_NATIVE_ATTACKING)
-        sprite_image_id = 297 + dir + 8 * anim_frame;
+        sprite_image_id = 297 + dir + 8 * anim.frame;
     else {
-        sprite_image_id = 201 + dir + 8 * anim_frame;
+        sprite_image_id = 201 + dir + 8 * anim.frame;
     }
 }

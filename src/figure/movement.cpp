@@ -3,7 +3,7 @@
 #include "grid/road_network.h"
 #include "building/building.h"
 #include "building/destruction.h"
-#include "building/roadblock.h"
+#include "building/building_roadblock.h"
 #include "core/calc.h"
 #include "figure/combat.h"
 #include "figure/route.h"
@@ -178,11 +178,7 @@ void figure::move_to_next_tile() {
     //    }
     figure_combat_attack_figure_at(tile.grid_offset());
 
-    switch (type) {
-    case FIGURE_IMMIGRANT: 
-        terrain_type = map_terrain_is(tile, TERRAIN_WATER) ? TERRAIN_WATER : TERRAIN_NONE;
-        break;
-    }
+    terrain_type = map_terrain_get(tile);
 
     previous_tile = old;
 }
@@ -207,20 +203,22 @@ void figure::set_next_tile_and_direction() {
         }
     }
 }
+
 void figure::advance_route_tile(int roaming_enabled) {
-    if (direction >= 8)
+    if (direction >= 8) {
         return;
+    }
 
     int target_grid_offset = tile.grid_offset() + map_grid_direction_delta(direction);
 
-    const bool is_boat = (allow_move_type == EMOVE_BOAT);
-    const bool is_hippo = (allow_move_type == EMOVE_HIPPO);
-    const bool is_floatsam = (allow_move_type == EMOVE_FLOTSAM);
+    const bool is_water_move = (allow_move_type == EMOVE_WATER);
+    const bool is_hippo_move = (allow_move_type == EMOVE_HIPPO);
+    const bool is_deepwater_move = (allow_move_type == EMOVE_DEEPWATER);
     const bool is_ferry_route = map_terrain_is(target_grid_offset, TERRAIN_FERRY_ROUTE);
-    const bool is_water = map_terrain_is(target_grid_offset, TERRAIN_WATER);
-    if (!is_floatsam && !is_boat && !is_hippo && !is_ferry_route && is_water) {
+    const bool is_water_tile = map_terrain_is(target_grid_offset, TERRAIN_WATER);
+    if (!is_deepwater_move && !is_water_move && !is_hippo_move && !is_ferry_route && is_water_tile) {
         direction = DIR_FIGURE_REROUTE;
-    } else if (is_boat && !is_water) { // boats can not travel on land
+    } else if (is_water_move && !is_water_tile) { // boats can not travel on land
         direction = DIR_FIGURE_REROUTE;
     } else if (!map_routing_passable_by_usage(terrain_usage, target_grid_offset)) {
         direction = DIR_FIGURE_REROUTE;
@@ -368,8 +366,8 @@ void figure::init_roaming_from_building(int roam_dir) {
 
     // look for a road within the search area
     map_grid_bound(&offset_search_x, &offset_search_y);
-    tile2i road_tile;
-    int found_road = map_closest_road_within_radius(tile2i(offset_search_x, offset_search_y), 1, 6, road_tile);
+    tile2i road_tile = map_closest_road_within_radius(tile2i(offset_search_x, offset_search_y), 1, 6);
+    int found_road = road_tile.valid();
     int road_network_original = map_road_network_get(tile);
     int road_network_found = map_road_network_get(road_tile);
 
@@ -445,9 +443,6 @@ void figure::move_ticks_tower_sentry(int num_ticks) {
 
 void figure::follow_ticks(int num_ticks) {
     figure *leader = figure_get(leading_figure_id);
-    if (tile == source_tile) {
-        is_ghost = true;
-    }
 
     while (num_ticks > 0) {
         num_ticks--;
@@ -460,7 +455,7 @@ void figure::follow_ticks(int num_ticks) {
             figure_service_provide_coverage();
             int found_dir = calc_general_direction(tile, leader->previous_tile);
             if (found_dir >= 8) {
-                anim_frame = 0;
+                anim.frame = 0;
                 progress_on_tile--;
                 continue;
             }
@@ -475,6 +470,7 @@ void figure::follow_ticks(int num_ticks) {
         advance_figure_tick();
     }
 }
+
 void figure::roam_ticks(int num_ticks) {
     route_remove(); // refresh path to check if road network is disconnected
     // no destination: walk to end of tile and pick a direction
@@ -483,6 +479,7 @@ void figure::roam_ticks(int num_ticks) {
         else if (direction < 0) direction = 6;
         return direction;
     };
+
     while (num_ticks > 0) {
         num_ticks--;
         progress_on_tile++;
@@ -656,11 +653,9 @@ void figure::set_cross_country_direction(int x_src, int y_src, int x_dst, int y_
         cc_direction = 2;
 }
 
-void figure::set_cross_country_destination(int x_dst, int y_dst) {
-    destination_tile.set(x_dst, y_dst);
-    //    destination_tile.x() = x_dst;
-    //    destination_tile.y() = y_dst;
-    set_cross_country_direction(cc_coords.x, cc_coords.y, 15 * x_dst, 15 * y_dst, 0);
+void figure::set_cross_country_destination(tile2i dst) {
+    destination_tile = dst, dst;
+    set_cross_country_direction(cc_coords.x, cc_coords.y, 15 * dst.x(), 15 * dst.y(), 0);
 }
 
 void figure::cross_country_update_delta() {

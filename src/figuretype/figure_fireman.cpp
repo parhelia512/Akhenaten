@@ -4,7 +4,7 @@
 #include "grid/road_access.h"
 #include "core/calc.h"
 #include "figure_fireman.h"
-#include "sound/effect.h"
+#include "sound/sound.h"
 #include "config/config.h"
 #include "building/list.h"
 #include "building/maintenance.h"
@@ -13,21 +13,17 @@
 #include "city/sentiment.h"
 #include "city/labor.h"
 #include "city/gods.h"
-#include "city/data_private.h"
+#include "city/city.h"
 #include "figure/service.h"
 #include "grid/building.h"
 
 #include "js/js_game.h"
 
-struct fireman_model : figures::model_t<FIGURE_FIREMAN, figure_fireman> {};
-fireman_model fireman_m;
+figures::model_t<figure_fireman> fireman_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_fireman);
 void config_load_figure_fireman() {
-    g_config_arch.r_section("figure_fireman", [] (archive arch) {
-        fireman_m.anim.load(arch);
-        fireman_m.sounds.load(arch);
-    });
+    fireman_m.load();
 }
 
 void figure_fireman::on_create() {
@@ -55,7 +51,7 @@ sound_key figure_fireman::phrase_key() const {
         return keys[index];
     }
 
-    if (city_health() < 20) {
+    if (g_city.health.value < 20) {
         keys.push_back("desease_can_start_at_any_moment");
     }
 
@@ -67,11 +63,11 @@ sound_key figure_fireman::phrase_key() const {
         keys.push_back("city_not_safety_workers_leaving");
     }
 
-    if (city_labor_workers_needed() >= 10) {
+    if (g_city.labor.workers_needed >= 10) {
         keys.push_back("need_workers");
     }
 
-    if (city_labor_workers_needed() >= 20) {
+    if (g_city.labor.workers_needed >= 20) {
         keys.push_back("need_more_workers");
     }
 
@@ -90,7 +86,7 @@ sound_key figure_fireman::phrase_key() const {
         keys.push_back("gods_are_pleasures");
     }
 
-    if (city_data_struct()->festival.months_since_festival > 6) {  // low entertainment
+    if (g_city.festival.months_since_festival > 6) {  // low entertainment
         keys.push_back("low_entertainment");
     }
 
@@ -191,19 +187,6 @@ void figure_fireman::figure_action() { // doubles as fireman! not as policeman!!
         advance_action(ACTION_11_RETURNING_FROM_PATROL);
         break;
     }
-
-    constexpr int DEATH_FRAMES = 8;
-    switch (base.action_state) {
-        default:
-        break;
-    
-    case FIGURE_ACTION_75_FIREMAN_AT_FIRE:
-    case 13:
-        base.direction = base.attack_direction;
-        //
-        base.image_set_animation(fireman_m.anim["fight_fire"]);
-        break;
-    }
 }
 
 void figure_fireman::extinguish_fire() {
@@ -212,7 +195,7 @@ void figure_fireman::extinguish_fire() {
     if ((burn->state == BUILDING_STATE_VALID || burn->state == BUILDING_STATE_MOTHBALLED)
         && burn->type == BUILDING_BURNING_RUIN && distance < 2) {
         burn->fire_duration = 32;
-        sound_effect_play(SOUND_EFFECT_FIRE_SPLASH);
+        g_sound.play_effect(SOUND_EFFECT_FIRE_SPLASH);
     } else {
         base.wait_ticks = 1;
     }
@@ -233,7 +216,8 @@ void figure_fireman::extinguish_fire() {
 }
 
 bool figure_fireman::fight_fire() {
-    if (building_list_burning_items().size() <= 0) {
+    const auto &burnings = building_list_burning_items();
+    if (burnings.size() <= 0) {
         return false;
     }
 
@@ -266,13 +250,12 @@ bool figure_fireman::fight_fire() {
 }
 
 void prefect_coverage(building* b, figure *f, int &min_happiness_seen) {
-    if (b->type == BUILDING_SENET_HOUSE || b->type == BUILDING_STORAGE_ROOM)
+    if (b->type == BUILDING_SENET_HOUSE || b->type == BUILDING_STORAGE_ROOM) {
         b = b->main();
+    }
 
     b->fire_risk = 0;
-    if (b->sentiment.house_happiness < min_happiness_seen) {
-        min_happiness_seen = b->sentiment.house_happiness;
-    }
+    min_happiness_seen = std::max<short>(b->sentiment.house_happiness, min_happiness_seen);
 }
 
 int figure_fireman::provide_service() {
@@ -284,4 +267,20 @@ int figure_fireman::provide_service() {
 
 figure_sound_t figure_fireman::get_sound_reaction(pcstr key) const {
     return fireman_m.sounds[key];
+}
+
+const animations_t &figure_fireman::anim() const {
+    return fireman_m.anim;
+}
+
+void figure_fireman::update_animation() {
+    figure_impl::update_animation();
+
+    switch (action_state()) {  
+    case FIGURE_ACTION_75_FIREMAN_AT_FIRE:
+    case 13:
+        base.direction = base.attack_direction;
+        image_set_animation("fight_fire");
+        break;
+    }
 }

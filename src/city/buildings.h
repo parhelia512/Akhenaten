@@ -26,9 +26,9 @@ void city_buildings_remove_distribution_center(building* center);
 int city_buildings_get_trade_center();
 void city_buildings_set_trade_center(int building_id);
 
-bool city_buildings_has_hippodrome();
-void city_buildings_add_hippodrome();
-void city_buildings_remove_hippodrome();
+bool city_buildings_has_senet_house();
+void city_buildings_add_senet_house();
+void city_buildings_remove_senet_house();
 
 int city_buildings_triumphal_arch_available();
 void city_buildings_earn_triumphal_arch();
@@ -53,7 +53,6 @@ void city_buildings_set_main_native_meeting_center(int x, int y);
 int city_buildings_is_mission_post_operational();
 void city_buildings_set_mission_post_operational();
 
-bool city_building_has_festival_square();
 map_point city_building_get_festival_square_position();
 void city_buildings_add_festival_square(building* square);
 void city_buildings_remove_festival_square();

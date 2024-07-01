@@ -4,14 +4,18 @@
 #include <memory>
 
 #include "core/vec2i.h"
+#include "core/svector.h"
 #include "city/resource.h"
 
+#include "input/hotkey.h"
 #include "graphics/elements/generic_button.h"
 #include "graphics/elements/image_button.h"
 #include "graphics/elements/arrow_button.h"
+#include "graphics/elements/scrollbar.h"
 #include "graphics/elements/lang_text.h"
 #include "graphics/elements/button.h"
 #include "graphics/elements/panel.h"
+#include "graphics/elements/menu.h"
 #include "graphics/image_groups.h"
 
 #include "js/js_game.h"
@@ -25,6 +29,8 @@ enum UiFlags_ {
     UiFlags_PanelOuter = 1 << 2,
     UiFlags_PanelInner = 1 << 3,
     UiFlags_LabelMultiline = 1 << 4,
+    UiFlags_LabelYCentered = 1 << 5,
+    UiFlags_NoBody = 1 << 6,
 };
 using UiFlags = int;
 
@@ -40,19 +46,27 @@ int label(pcstr, vec2i pos, e_font font = FONT_NORMAL_BLACK_ON_LIGHT, UiFlags fl
 int label_amount(int group, int number, int amount, vec2i pos, e_font font = FONT_NORMAL_BLACK_ON_LIGHT, pcstr postfix = "");
 int label_percent(int amount, vec2i pos, e_font font = FONT_NORMAL_BLACK_ON_LIGHT);
 void eimage(e_image_id img, vec2i pos, int offset = 0);
+void eimage(image_desc img, vec2i pos);
 void panel(vec2i pos, vec2i size, UiFlags flags);
 void icon(vec2i pos, e_resource img);
 void icon(vec2i pos, e_advisor advisor);
 int button_hover(const mouse *m);
-generic_button &button(pcstr label, vec2i pos, vec2i size, e_font font = FONT_NORMAL_BLACK_ON_LIGHT);
+generic_button &button(pcstr label, vec2i pos, vec2i size, e_font font = FONT_NORMAL_BLACK_ON_LIGHT, UiFlags flags = UiFlags_None, std::function<void(int, int)> cb = {});
+generic_button &button(const svector<pcstr,4> &labels, vec2i pos, vec2i size, e_font font = FONT_NORMAL_BLACK_ON_LIGHT, UiFlags flags = UiFlags_None, std::function<void(int, int)> cb = {});
+generic_button &link(pcstr label, vec2i pos, vec2i size, e_font font = FONT_NORMAL_WHITE_ON_DARK, UiFlags flags = UiFlags_None, std::function<void(int, int)> cb = {});
 generic_button &large_button(pcstr label, vec2i pos, vec2i size, e_font font = FONT_NORMAL_BLACK_ON_LIGHT);
 generic_button &button(uint32_t id);
 image_button &img_button(uint32_t group, uint32_t id, vec2i pos, vec2i size, int offset = 0);
+image_button &imgok_button(vec2i pos, std::function<void(int, int)> cb);
+image_button &imgcancel_button(vec2i pos, std::function<void(int, int)> cb);
 image_button &img_button(e_image_id img, vec2i pos, vec2i size, int offset = 0);
 arrow_button &arw_button(vec2i pos, bool up, bool tiny = false);
-
+scrollbar_t &scrollbar(scrollbar_t &scrollbar, vec2i pos, int &value, vec2i size = {-1, -1});
 
 pcstr str(int group, int id);
+inline pcstr str(std::pair<int, int> r) { return str(r.first, r.second); }
+
+struct emenu_header;
 
 struct element {
     bstring64 id;
@@ -63,8 +77,19 @@ struct element {
     virtual void draw() {}
     virtual void load(archive);
     virtual void text(pcstr) {}
+    virtual int text_width() { return 0; }
+    inline void text(int font, pcstr v) { this->font(font); this->text(v); }
+    virtual void color(int) {}
     virtual void image(int) {}
+    virtual image_desc image() const { return {}; }
+    virtual void font(int) {}
+    virtual void width(int) {}
+    virtual int value() const { return 0; }
+    virtual void max_value(int v) {}
     virtual void onclick(std::function<void(int, int)>) {}
+            void onclick(std::function<void()> f) { onclick([f] (int, int) { f(); }); }
+    virtual void onevent(std::function<void()>) {}
+    virtual emenu_header *dcast_menu_header() { return nullptr; }
 
     pcstr text_from_key(pcstr key);
 
@@ -117,10 +142,22 @@ struct element {
 
 struct eimg : public element {
     e_image_id img;
+    image_desc img_desc;
 
     virtual void draw() override;
     virtual void load(archive elem) override;
+    virtual image_desc image() const override { return img_desc; }
 };
+
+struct ebackground : public element {
+    image_desc img_desc;
+    float scale = 1.f;
+
+    virtual void draw() override;
+    virtual void load(archive elem) override;
+    virtual image_desc image() const override { return img_desc; }
+};
+
 
 struct eresource_icon : public element {
     e_resource res;
@@ -146,15 +183,45 @@ struct elabel : public element {
     vec2i _body;
     uint32_t _color;
     UiFlags _flags;
+    int _wrap;
 
     virtual void draw() override;
     virtual void load(archive elem) override;
     virtual void text(pcstr) override;
+    virtual void color(int) override;
+    virtual void font(int) override;
+    virtual void width(int) override;
 };
 
 struct etext : public elabel {
     virtual void draw() override;
     virtual void load(archive elem) override;
+};
+
+struct escrollbar : public element {
+    scrollbar_t scrollbar;
+
+    virtual int value() const override { return scrollbar.scroll_position; }
+    virtual void max_value(int v) override { scrollbar.max_scroll_position = v; }
+    virtual void onevent(std::function<void()> func) override { scrollbar.onscroll(func); }
+    virtual void draw() override;
+    virtual void load(archive elem) override;
+};
+
+struct emenu_header : public element {
+    menu_header impl;
+    e_font _font;
+
+    virtual void load(archive elem) override;
+            void load_items(archive elem, pcstr section);
+    virtual void draw() override;
+    virtual void font(int v) { _font = (e_font)v; }
+    virtual void text(pcstr text) override { impl.text = text; }
+    virtual int text_width() override;
+            menu_item &item(int i) { static menu_item dummy; return i < impl.items.size() ? impl.items[i] : dummy; }
+            menu_item &item(pcstr key);
+            void onclick(std::function<void(menu_item&)> f) { impl._onclick = f; }
+    virtual emenu_header *dcast_menu_header() override { return this; }
 };
 
 struct egeneric_button : public elabel {
@@ -171,6 +238,9 @@ struct egeneric_button : public elabel {
 struct eimage_button : public element {
     e_image_id img;
     int offset;
+    float scale = 1.f;
+    void *icon_texture = nullptr;
+
     std::function<void(int, int)> _func;
 
     virtual void load(archive elem) override;
@@ -182,9 +252,27 @@ struct widget {
     std::vector<element::ptr> elements;
 
     virtual void draw();
-    virtual void load(archive arch);
+    virtual void load(archive arch, pcstr section = "ui");
 
     element& operator[](pcstr id);
+    inline element &operator[](const bstring32 &id) { return (*this)[id.c_str()]; }
+
+    template<typename ... Args>
+    int label(const Args ... args) { return ui::label(args...); }
+    template<typename ... Args>
+    generic_button &button(const Args ... args) { return ui::button(args...); }
+    inline void image(image_desc img, vec2i pos) { ui::eimage(img, pos); }
+    inline void begin_widget(vec2i offset, bool relative = false) { ui::begin_widget(offset, relative); }
+    inline void icon(vec2i pos, e_resource img) { ui::icon(pos, img); }
+    virtual void begin_frame() { ui::begin_frame(); }
+};
+
+struct info_window : public widget {
+    pcstr section;
+    int resource_text_group;
+
+    inline info_window(pcstr s) : section(s) {}
+    void load();
 };
 
 } // ui

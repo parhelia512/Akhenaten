@@ -6,6 +6,7 @@
 #include "building/destruction.h"
 #include "building/monuments.h"
 #include "city/finance.h"
+#include "city/city.h"
 #include "city/gods.h"
 #include "city/victory.h"
 #include "city/warning.h"
@@ -21,7 +22,7 @@
 #include "graphics/window.h"
 #include "scenario/invasion.h"
 #include "window/window_building_info.h"
-#include "window/city.h"
+#include "window/window_city.h"
 #include "window/console.h"
 #include "figure/formation_herd.h"
 #include "dev/debug.h"
@@ -37,19 +38,12 @@ static void game_cheat_start_invasion(pcstr);
 static void game_cheat_advance_year(pcstr);
 static void game_cheat_cast_blessing(pcstr);
 static void game_cheat_show_tooltip(pcstr);
-static void game_cheat_victory(pcstr);
 static void game_cheat_cast_upset(pcstr);
 static void game_cheat_pop_milestone(pcstr);
 static void game_cheat_fire(pcstr);
-static void game_cheat_nodamage(pcstr);
 static void game_cheat_spacious_apartment(pcstr);
 static void game_cheat_spawn_nobles(pcstr);
-static void game_cheat_kill_fish_boats(pcstr);
-static void game_cheat_update_fish_points(pcstr);
-static void game_cheat_tutorial_step(pcstr);
-static void game_cheat_finish_phase(pcstr);
 static void game_cheat_clear_progress(pcstr);
-static void game_cheat_add_bricks(pcstr);
 static void game_cheat_add_clay(pcstr);
 
 using cheat_command = void(pcstr);
@@ -60,22 +54,15 @@ struct cheat_command_handle {
 };
 
 static cheat_command_handle g_cheat_commands[] = {{"startinvasion", game_cheat_start_invasion},
-                                                  {"addbricks", game_cheat_add_bricks},
                                                   {"addclay", game_cheat_add_clay},
                                                   {"nextyear", game_cheat_advance_year},
                                                   {"blessing", game_cheat_cast_blessing},
                                                   {"godupset", game_cheat_cast_upset},
                                                   {"showtooltip", game_cheat_show_tooltip},
-                                                  {"victory", game_cheat_victory},
                                                   {"popmilestone", game_cheat_pop_milestone},
                                                   {"fire", game_cheat_fire},
-                                                  {"nodamage", game_cheat_nodamage},
                                                   {"spawnnobles", game_cheat_spawn_nobles},
                                                   {"tutspaciousapt", game_cheat_spacious_apartment},
-                                                  {"killfishboats", game_cheat_kill_fish_boats},
-                                                  {"upfishpoints", game_cheat_update_fish_points},
-                                                  {"tutorialstep", game_cheat_tutorial_step},
-                                                  {"finishphase", game_cheat_finish_phase},
                                                   {"clearprogress", game_cheat_clear_progress}
 };
 
@@ -114,7 +101,7 @@ int parse_integer(pcstr string, int &value) {
 
 void game_cheat_activate() {
     if (window_is(WINDOW_BUILDING_INFO)) {
-        g_cheats_data.is_cheating = window_building_info_get_int() == BUILDING_WELL;
+        g_cheats_data.is_cheating = (window_building_info_get_type() == BUILDING_WELL);
     } else if (g_cheats_data.is_cheating && window_is(WINDOW_MESSAGE_DIALOG)) {
         g_cheats_data.is_cheating = true;
         scenario_invasion_start_from_cheat();
@@ -134,12 +121,6 @@ void game_cheat_money(void) {
     }
 }
 
-void game_cheat_victory(pcstr) {
-    if (g_cheats_data.is_cheating) {
-        city_victory_force_win();
-    }
-}
-
 void game_cheat_breakpoint() {
     if (g_cheats_data.is_cheating) {
         //
@@ -155,28 +136,6 @@ void game_cheat_console(bool force) {
     }
 }
 
-static void game_cheat_finish_phase(pcstr args) {
-    buildings_valid_do([&] (building &b) {
-        if (!b.is_monument()) {
-            return;
-        }
-
-        if (!building_monument_is_unfinished(&b)) {
-            return;
-        }
-
-        building *part = &b;
-        while (part) {
-            grid_area area = map_grid_get_area(part->tile, part->size, 0);
-            map_grid_area_foreach(area.tmin, area.tmax, [] (tile2i tile) {
-                map_monuments_set_progress(tile, 200);
-            });
-
-            part = (part->next_part_building_id > 0) ? building_get(part->next_part_building_id) : nullptr;
-        };
-    });
-}
-
 static void game_cheat_clear_progress(pcstr args) {
     map_monuments_clear();
 }
@@ -188,15 +147,6 @@ static void game_cheat_add_clay(pcstr args) {
     window_invalidate();
 
     city_warning_show_console("Added clay");
-}
-
-static void game_cheat_add_bricks(pcstr args) {
-    int bricks = 0;
-    parse_integer(args ? args : (pcstr )"100", bricks);
-    city_resource_add_items(RESOURCE_BRICKS, bricks);
-    window_invalidate();
-
-    city_warning_show_console("Added bricks");
 }
 
 static void game_cheat_pop_milestone(pcstr args) {
@@ -232,43 +182,6 @@ static void game_cheat_fire(pcstr args) {
 
 static void game_cheat_spacious_apartment(pcstr args) {
     tutorial_on_house_evolve(HOUSE_SPACIOUS_APARTMENT);
-}
-
-static void game_cheat_nodamage(pcstr args) {
-    buildings_valid_do([&] (building &b) {
-        b.damage_risk = 0;
-    });
-}
-
-static void game_cheat_update_fish_points(pcstr args) {
-    int count = 0;
-    parse_integer(args ? args : "10", count);
-
-    formation_fish_update(count);
-}
-
-static void game_cheat_tutorial_step(pcstr args) {
-    int step = 0;
-    parse_integer(args ? args : "0", step);
-
-    tutorial_update_step(step);
-}
-
-static void game_cheat_kill_fish_boats(pcstr ) {
-    buildings_valid_do([&] (building &b) {
-        if (b.type != BUILDING_FISHING_WHARF) {
-            return;
-        }
-
-        b.data.industry.fishing_boat_id = 0;
-    });
-
-    for (int i = 0; i < MAX_FIGURES[GAME_ENV]; i++) {
-        figure* f = figure_get(i);
-        if (f->has_type(FIGURE_FISHING_BOAT)) {
-            f->advance_action(FIGURE_ACTION_149_CORPSE);
-        }
-    }
 }
 
 static void game_cheat_spawn_nobles(pcstr args) {

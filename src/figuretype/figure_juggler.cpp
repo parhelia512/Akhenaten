@@ -2,23 +2,18 @@
 
 #include "city/labor.h"
 #include "figure/service.h"
-#include "city/figures.h"
+#include "city/city.h"
 #include "city/gods.h"
 #include "city/sentiment.h"
-#include "city/data_private.h"
 #include "figure/service.h"
 
 #include "js/js_game.h"
 
-struct juggler_model : public figures::model_t<FIGURE_JUGGLER, figure_juggler> {};
-juggler_model juggler_m;
+figures::model_t<figure_juggler> juggler_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_juggler);
 void config_load_figure_juggler() {
-    g_config_arch.r_section("figure_juggler", [] (archive arch) {
-        juggler_m.anim.load(arch);
-        juggler_m.sounds.load(arch);
-    });
+    juggler_m.load();
 }
 
 void figure_juggler::update_shows() {
@@ -38,7 +33,7 @@ svector<e_building_type, 4> figure_juggler::allow_venue_types() const {
 }
 
 sound_key figure_juggler::phrase_key() const {
-    int enemies = city_figures_enemies();
+    int enemies = g_city.figures.enemies;
     if (enemies > 0) {
         return "city_not_safety_workers_leaving";
     }
@@ -82,7 +77,7 @@ sound_key figure_juggler::phrase_key() const {
         keys.push_back("gods_are_pleasures");
     }
 
-    if (city_data_struct()->festival.months_since_festival > 6) {  // low entertainment
+    if (g_city.festival.months_since_festival > 6) {  // low entertainment
         keys.push_back("low_entertainment");
     }
 
@@ -104,7 +99,7 @@ void juggler_coverage(building* b, figure *f, int&) {
 
 int figure_juggler::provide_service() {
     int houses_serviced = 0;
-    building* b = current_destination();
+    building* b = home();
     if (b->type == BUILDING_BOOTH) {
         houses_serviced = figure_provide_culture(tile(), &base, juggler_coverage);
     } else if (b->type == BUILDING_BANDSTAND) {
@@ -115,4 +110,8 @@ int figure_juggler::provide_service() {
 
 figure_sound_t figure_juggler::get_sound_reaction(pcstr key) const {
     return juggler_m.sounds[key];
+}
+
+const animations_t &figure_juggler::anim() const {
+    return juggler_m.anim;
 }

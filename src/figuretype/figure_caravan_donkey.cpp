@@ -8,6 +8,7 @@
 #include "building/building_storage_room.h"
 
 #include "empire/empire.h"
+#include "empire/empire_map.h"
 #include "empire/trade_prices.h"
 
 #include "city/trade.h"
@@ -18,19 +19,14 @@
 #include "graphics/graphics.h"
 #include "game/game.h"
 #include "graphics/elements/lang_text.h"
-#include "empire/empire_city.h"
 
 #include "core/profiler.h"
 
-struct caravan_donkey_model : public figures::model_t<FIGURE_TRADE_CARAVAN_DONKEY, figure_caravan_donkey> {};
-caravan_donkey_model caravan_donkey_m;
+figures::model_t<figure_caravan_donkey> caravan_donkey_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_caravan_donkey);
 void config_load_figure_caravan_donkey() {
-    g_config_arch.r_section("figure_caravan_donkey", [] (archive arch) {
-        caravan_donkey_m.anim.load(arch);
-        caravan_donkey_m.sounds.load(arch);
-    });
+    caravan_donkey_m.load();
 }
 
 void figure_caravan_donkey::figure_action() {
@@ -46,7 +42,8 @@ void figure_caravan_donkey::figure_action() {
         follow_ticks(1);
 
     int dir = figure_image_normalize_direction(direction() < 8 ? direction() : base.previous_tile_direction);
-    base.sprite_image_id = image_group(IMG_TRADER_CARAVAN) + dir + 8 * base.anim_frame;
+    int image_id = caravan_donkey_m.anim["walk"].first_img();
+    base.sprite_image_id = image_id + dir + 8 * base.anim.frame;
 }
 
 void figure_caravan_donkey::figure_before_action() {
@@ -58,10 +55,10 @@ void figure_caravan_donkey::figure_before_action() {
     if (leader->action_state == FIGURE_ACTION_149_CORPSE) {  
         poof(); // TODO make runaway from this tile
     }
+}
 
-    if (leader->is_ghost) {
-        base.is_ghost = true;
-    }
+void figure_caravan_donkey::update_animation() {
+    /*nothing*/
 }
 
 figure* figure_caravan_donkey::get_head_of_caravan() {
@@ -75,12 +72,12 @@ figure* figure_caravan_donkey::get_head_of_caravan() {
 bool figure_caravan_donkey::window_info_background(object_info &c) {
     painter ctx = game.painter();
     figure* f = get_head_of_caravan();
-    const empire_city* city = empire_city_get(f->empire_city_id);
+    const empire_city* city = g_empire.city(f->empire_city_id);
     int width = lang_text_draw(64, f->type, c.offset.x + 40, c.offset.y + 110, FONT_NORMAL_BLACK_ON_DARK);
     lang_text_draw(21, city->name_id, c.offset.x + 40 + width, c.offset.y + 110, FONT_NORMAL_BLACK_ON_DARK);
 
     width = lang_text_draw(129, 1, c.offset.x + 40, c.offset.y + 132, FONT_NORMAL_BLACK_ON_DARK);
-    lang_text_draw_amount(8, 10, f->type == FIGURE_TRADE_SHIP ? 1200 : 800, c.offset.x + 40 + width, c.offset.y + 132, FONT_NORMAL_BLACK_ON_DARK);
+    lang_text_draw_amount(8, 10, 800, c.offset.x + 40 + width, c.offset.y + 132, FONT_NORMAL_BLACK_ON_DARK);
 
     int trader_id = f->trader_id;
     
@@ -89,15 +86,15 @@ bool figure_caravan_donkey::window_info_background(object_info &c) {
     case FIGURE_ACTION_101_TRADE_CARAVAN_ARRIVING:
         text_id = 12;
         break;
+
     case FIGURE_ACTION_102_TRADE_CARAVAN_TRADING:
         text_id = 10;
         break;
+
     case FIGURE_ACTION_103_TRADE_CARAVAN_LEAVING:
-        if (trader_has_traded(trader_id))
-            text_id = 11;
-        else
-            text_id = 13;
+        text_id = trader_has_traded(trader_id) ? 11 : 13;
         break;
+
     default:
         text_id = 11;
         break;

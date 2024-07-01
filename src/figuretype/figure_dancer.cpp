@@ -4,20 +4,17 @@
 #include "city/gods.h"
 #include "city/health.h"
 #include "city/sentiment.h"
-#include "city/labor.h"
+#include "city/city.h"
 #include "city/ratings.h"
+#include "sound/sound.h"
 
 #include "js/js_game.h"
 
-struct dancer_model : public figures::model_t<FIGURE_DANCER, figure_dancer> {};
-dancer_model dancer_m;
+figures::model_t<figure_dancer> dancer_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_dancer);
 void config_load_figure_dancer() {
-    g_config_arch.r_section("figure_dancer", [] (archive arch) {
-        dancer_m.anim.load(arch);
-        dancer_m.sounds.load(arch);
-    });
+    dancer_m.load();
 }
 
 void figure_dancer::update_shows() {
@@ -32,7 +29,7 @@ sound_key figure_dancer::phrase_key() const {
         keys.push_back("i_like_festivals");
     }
 
-    if (city_health() < 20) {
+    if (g_city.health.value < 20) {
         keys.push_back("desease_can_start_at_any_moment");
     }
 
@@ -44,7 +41,7 @@ sound_key figure_dancer::phrase_key() const {
         keys.push_back("no_food_in_city");
     }
 
-    if (city_labor_workers_needed() >= 10) {
+    if (g_city.labor.workers_needed >= 10) {
         keys.push_back("need_workers");
     }
 
@@ -54,7 +51,7 @@ sound_key figure_dancer::phrase_key() const {
         keys.push_back("gods_are_pleasures");
     }
 
-    if (city_rating_kingdom() < 30) {
+    if (g_city.ratings.kingdom < 30) {
         keys.push_back("city_is_bad");
     }
 
@@ -78,10 +75,19 @@ sound_key figure_dancer::phrase_key() const {
     return keys[index];
 }
 
+bool figure_dancer::play_die_sound() {
+    g_sound.play_effect(SOUND_EFFECT_DANCER_DIE);
+    return true;
+}
+
 int figure_dancer::provide_service() {
     building *b = current_destination();
     int houses_serviced = provide_entertainment(b->data.entertainment.days2 ? 2 : 1, senet_coverage);
     return houses_serviced;
+}
+
+const animations_t &figure_dancer::anim() const {
+    return dancer_m.anim;
 }
 
 figure_sound_t figure_dancer::get_sound_reaction(pcstr key) const {

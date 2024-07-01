@@ -4,74 +4,37 @@
 #include "grid/terrain.h"
 
 #include "city/entertainment.h"
-#include "city/figures.h"
+#include "city/city.h"
+#include "city/city.h"
 #include "core/profiler.h"
 #include "figure/figure.h"
-#include "graphics/image_groups.h"
+#include "graphics/animkeys.h"
 #include "graphics/image_desc.h"
 #include "grid/road_access.h"
 
 #include <algorithm>
 
-struct figure_action_property {
-    unsigned char ftype;
-    char speed_mult;
-    char terrain_usage;
-    short max_roam_length;
-    int _image_collection;
-    int _image_group;
-    e_image_id _img = IMG_NONE;
-
-    image_desc img() {
-        return (_img == IMG_NONE)
-                    ? image_desc{_image_collection, _image_group}
-                    : get_image_desc(_img);
-    }
-};
-
+/*
 static figure_action_property action_properties_lookup[] = {
-  {FIGURE_NONE,     0, 0, 0, 0, 0},
-  {FIGURE_IMMIGRANT,1, TERRAIN_USAGE_ANIMAL, 0, 0, 0, IMG_IMMIGRANT},
-  {FIGURE_EMIGRANT, 1, TERRAIN_USAGE_ANIMAL, 0, 0, 0, ANIM_EMIGRANT_WALK},
-  {FIGURE_HOMELESS, 1, TERRAIN_USAGE_PREFER_ROADS, 0, 0, 0, IMG_HOMELESS},
-  {FIGURE_CART_PUSHER, 1, TERRAIN_USAGE_ROADS, 0, 0, 0,  ANIM_CARTPUSHER_WALK},
-  {FIGURE_LABOR_SEEKER, 1, TERRAIN_USAGE_ROADS, 384, 0, 0, ANIM_LABOR_SEEKER_WALK},
-  {FIGURE_EXPLOSION, 1, TERRAIN_USAGE_ANY, 0, 0, 0, IMG_EXPLOSION},
-  {FIGURE_TAX_COLLECTOR, 1, TERRAIN_USAGE_ROADS, 512, 0, 0, ANIM_TAX_COLLECTOR_WALK},
-  {FIGURE_ARCHITECT, 1, TERRAIN_USAGE_ROADS, 640, 0, 0, ANIM_ARCHITECT_WALK},
-  {FIGURE_STORAGEYARD_CART, 1, TERRAIN_USAGE_ROADS, 0, 0, 0, ANIM_CARTPUSHER_WALK},
-  {FIGURE_FIREMAN, 1, TERRAIN_USAGE_ROADS, 640, 0, 0, IMG_FIREMAN},
-  {FIGURE_ARCHER, 1, TERRAIN_USAGE_ANY, 0, GROUP_FIGURE_ARCHER_PH},
-  {FIGURE_FCHARIOTEER, 1, TERRAIN_USAGE_ANY, 0, GROUP_FIGURE_CHARIOTEER_PH},
-  {FIGURE_INFANTRY, 1, TERRAIN_USAGE_ANY, 0, GROUP_FIGURE_INFANTRY_PH},
-  {FIGURE_STANDARD_BEARER, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
-  {FIGURE_JUGGLER, 1, TERRAIN_USAGE_ROADS, 512, 0, 0, ANIM_JUGGLER_WALK},
-  {FIGURE_MUSICIAN, 1, TERRAIN_USAGE_ROADS, 512, 0, 0, ANIM_MUSICIAN_WALK},
-  {FIGURE_DANCER, 1, TERRAIN_USAGE_ROADS, 512, 0, 0, ANIM_DANCER_WALK},
-  {FIGURE_SENET_PLAYER, 1, TERRAIN_USAGE_ROADS, 512, GROUP_FIGURE_CHARIOTEER},
-  {FIGURE_TRADE_CARAVAN, 1, TERRAIN_USAGE_PREFER_ROADS, 0, 0, 0, IMG_TRADER_CARAVAN},
-  {FIGURE_TRADE_SHIP, 1, TERRAIN_USAGE_ANY, 0, 0, 0, ANIM_TRADER_SHIP_WALK},
-  {FIGURE_TRADE_CARAVAN_DONKEY, 1, TERRAIN_USAGE_PREFER_ROADS, 0, 0, 0, IMG_TRADER_CARAVAN_DONKEY},
-  {FIGURE_PROTESTER, 1, TERRAIN_USAGE_ROADS, 0, GROUP_FIGURE_THIEF_WALK},
-  {FIGURE_CRIMINAL, 1, TERRAIN_USAGE_ROADS, 0, GROUP_FIGURE_THIEF_WALK},
+  {FIGURE_FCHARIOTEER, 1, 0, GROUP_FIGURE_CHARIOTEER_PH},
+  {FIGURE_STANDARD_BEARER, 1, 0, 0, 0},
+  {FIGURE_SENET_PLAYER, 1, 0, GROUP_FIGURE_CHARIOTEER},
+  {FIGURE_PROTESTER, 1, 0, GROUP_FIGURE_THIEF_WALK},
+  {FIGURE_CRIMINAL, 1, 0, GROUP_FIGURE_THIEF_WALK},
   {FIGURE_TOMB_ROBER, 1, TERRAIN_USAGE_ENEMY, 480, GROUP_FIGURE_RIOTER_WALK},
-  {FIGURE_FISHING_BOAT, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
-  {FIGURE_MARKET_TRADER, 1, TERRAIN_USAGE_ROADS, 384, 0, 0, ANIM_MARKET_LADY_WALK},
-  {FIGURE_PRIEST, 1, TERRAIN_USAGE_ROADS, 384, 0, 0, IMG_PRIEST_OSIRIS},
-  {FIGURE_TEACHER, 1, TERRAIN_USAGE_ROADS, 384, 0, 0, IMG_TEACHER_WALK},
-  {FIGURE_SCRIBER, 1, TERRAIN_USAGE_ROADS, 384, 0, 0, IMG_SCRIBER_WALK},
-  {FIGURE_LIBRARIAN, 1, TERRAIN_USAGE_ROADS, 384, GROUP_FIGURE_LIBRARIAN},
-  {FIGURE_DENTIST, 1, TERRAIN_USAGE_ROADS, 384, GROUP_FIGURE_DENTIST},
-  {FIGURE_PHYSICIAN, 1, TERRAIN_USAGE_ROADS, 384, 0, 0, ANIM_DOCTOR_WALK},
-  {FIGURE_HERBALIST, 1, TERRAIN_USAGE_ROADS, 384, 0, 0, ANIM_HERBALIST_WALK},
-  {FIGURE_EMBALMER, 1, TERRAIN_USAGE_ROADS, 384, GROUP_FIGURE_EMBALMER},
-  {FIGURE_WORKER, 1, TERRAIN_USAGE_ROADS, 384, 0, 0},
-  {FIGURE_MAP_FLAG, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
-  {FIGURE_FLOTSAM, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
-  {FIGURE_DOCKER, 1, TERRAIN_USAGE_ROADS, 0, 0, 0, ANIM_DOCKER_WALK},
-  {FIGURE_MARKET_BUYER, 1, TERRAIN_USAGE_ROADS, 800, 0, 0, ANIM_MARKET_BUYER_WALK},
-  {FIGURE_NOBLES, 1, TERRAIN_USAGE_ROADS, 128, GROUP_FIGURE_NOBLE},
-  {FIGURE_INDIGENOUS_NATIVE, 1, TERRAIN_USAGE_ANY, 800, 0, 0},
+  {FIGURE_MARKET_TRADER, 1, 0, 0, 0, IMG_NONE},
+  {FIGURE_PRIEST, 1, 0, 0, 0, IMG_PRIEST_OSIRIS},
+  {FIGURE_TEACHER, 1, 0, 0, 0, IMG_NONE},
+  {FIGURE_SCRIBER, 1, 0, 0, 0, IMG_NONE},
+  {FIGURE_LIBRARIAN, 1, 384, GROUP_FIGURE_LIBRARIAN},
+  {FIGURE_DENTIST, 1, 0, 0, 0},
+  {FIGURE_PHYSICIAN, 1, 0, 0, 0, IMG_NONE},
+  {FIGURE_HERBALIST, 1, 0, 0, 0, IMG_NONE},
+  {FIGURE_EMBALMER, 1, 384, GROUP_FIGURE_EMBALMER},
+  {FIGURE_MAP_FLAG, 1, 0, 0, 0},
+  {FIGURE_DOCKER, 1, 0, 0, 0, ANIM_DOCKER_WALK},
+  {FIGURE_NOBLES, 1, 128, GROUP_FIGURE_NOBLE},
+  {FIGURE_INDIGENOUS_NATIVE, 1, 800, 0, 0},
   {FIGURE_TOWER_SENTRY, 1, TERRAIN_USAGE_WALLS, 800, 0, 0},
   {FIGURE_ENEMY43_SPEAR, 1, TERRAIN_USAGE_ENEMY, 0, 0, 0},
   {FIGURE_ENEMY44_SWORD, 1, TERRAIN_USAGE_ENEMY, 0, 0, 0},
@@ -89,40 +52,30 @@ static figure_action_property action_properties_lookup[] = {
   {FIGURE_ENEMY_CAESAR_MOUNTED, 1, TERRAIN_USAGE_ENEMY, 0, 0, 0},
   {FIGURE_ENEMY_CAESAR_LEGIONARY, 1, TERRAIN_USAGE_ENEMY, 0, 0, 0},
   {FIGURE_NATIVE_TRADER, 1, TERRAIN_USAGE_ROADS, 0, 0, 0},
-  {FIGURE_ARROW, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
+  {FIGURE_ARROW, 1, 0, 0, 0},
   {FIGURE_JAVELIN, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
   {FIGURE_BOLT, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
   {FIGURE_BALLISTA, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
   {FIGURE_CREATURE, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
   {FIGURE_MISSIONARY, 1, TERRAIN_USAGE_ROADS, 192, GROUP_FIGURE_MISSIONARY},
-  {FIGURE_FISHING_POINT, 1, TERRAIN_USAGE_ANY, 0, 0, 0, IMG_FISHING_POINT},
-  {FIGURE_DELIVERY_BOY, 1, TERRAIN_USAGE_ROADS, 0, 0, 0, ANIM_DELIVERY_BOY_WALK},
-  {FIGURE_SHIPWRECK, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
+  {FIGURE_FISHING_POINT, 1, 0, 0, 0, IMG_NONE},
+  {FIGURE_DELIVERY_BOY, 1, 0, 0, 0, ANIM_DELIVERY_BOY_WALK},
   {FIGURE_BIRDS, 2, TERRAIN_USAGE_ANIMAL, 0, GROUP_FIGURE_SHEEP},
-  {FIGURE_OSTRICH, 2, TERRAIN_USAGE_ANIMAL, 0, 0, 0, ANIM_OSTRICH_WALK},
-  {FIGURE_ANTELOPE, 2, TERRAIN_USAGE_ANIMAL, 0, GROUP_FIGURE_CROCODILE},
-  {FIGURE_SPEAR, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
-  {FIGURE_CHARIOR_RACER, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
+  {FIGURE_ANTELOPE, 2, 0, GROUP_FIGURE_CROCODILE},
+  {FIGURE_CHARIOR_RACER, 1, 0, 0, 0},
 
-
-  {FIGURE_OSTRICH_HUNTER, 1, TERRAIN_USAGE_ANIMAL, 0, GROUP_FIGURE_HUNTER_OSTRICH_MOVE},
-  {FIGURE_HUNTER_ARROW, 1, TERRAIN_USAGE_ANY, 0, GROUP_FIGURE_HUNTER_ARROW},
-  {FIGURE_LUMBERJACK, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
   {FIGURE_PHARAOH, 1, TERRAIN_USAGE_ANY, 0, GROUP_FIGURE_PHARAOH_WALK},
   {FIGURE_GOVERNOR, 1, TERRAIN_USAGE_ROADS, 0, GROUP_FIGURE_GOVERNOR},
   {FIGURE_WARSHIP, 1, TERRAIN_USAGE_ROADS, 0, 0, 0},
   {FIGURE_CARPENTER, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
-  {FIGURE_BRICKLAYER, 1, TERRAIN_USAGE_ROADS, 0, 0, 0, IMG_BRICKLAYER_WALK},
-  {FIGURE_STONEMASON, 1, TERRAIN_USAGE_ROADS, 0, 0, 0},
+  {FIGURE_BRICKLAYER, 1, 0, 0, 0, IMG_BRICKLAYER_WALK},
+  {FIGURE_STONEMASON, 1, 0, 0, 0},
   {FIGURE_CROCODILE, TERRAIN_USAGE_ROADS, 0, 0, 0},
   {FIGURE_HYENA, 1, TERRAIN_USAGE_ANIMAL, 0, GROUP_FIGURE_HYENA_WALK},
-  {FIGURE_HIPPO, 1, TERRAIN_USAGE_ANIMAL, 0, GROUP_FIGURE_HIPPO_WALK},
-  {FIGURE_LABORER, 1, TERRAIN_USAGE_ANY, 0, 0, 0, IMG_WORKER_AKNH},
+  {FIGURE_LABORER, 1, TERRAIN_USAGE_ANY, 0, 0, 0, IMG_NONE},
   {FIGURE_SLED, 1, TERRAIN_USAGE_ANY, 0, 0, 0, IMG_NONE},
-  {FIGURE_WATER_CARRIER, 1, TERRAIN_USAGE_ROADS, 640, 0, 0, IMG_WATER_CARRIER},
   {FIGURE_CONSTABLE, 1, TERRAIN_USAGE_ROADS, 640, GROUP_FIGURE_POLICEMAN},
-  {FIGURE_MAGISTRATE, 1, TERRAIN_USAGE_ROADS, 800, GROUP_FIGURE_MAGISTRATE},
-  {FIGURE_REED_GATHERER, 1, TERRAIN_USAGE_ANY, 0, 0, 0, ANIM_REED_GATHERER_WALK},
+  {FIGURE_MAGISTRATE, 1, 0, 0, 0, IMG_NONE},
   {FIGURE_FESTIVAL_PRIEST, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
   {FIGURE_ENEMY_TRANSPORT, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
   {FIGURE_ENEMY_WARSHIP, 1, TERRAIN_USAGE_ANY, 0, 0, 0},
@@ -135,13 +88,7 @@ static figure_action_property action_properties_lookup[] = {
   {FIGURE_EGYPTIAN_WARSHIP, 1, TERRAIN_USAGE_ROADS, 0, 0, 0},
   {FIGURE_EGYPTIAN_TRANSPORT, 1, TERRAIN_USAGE_ROADS, 0, 0, 0},
   {FIGURE_ASP, 1, TERRAIN_USAGE_ROADS, 0, 0, 0},
-};
-
-void figure::check_action_properties_lookup() {
-    for (auto &t : action_properties_lookup) {
-        assert(t.ftype == ptrdiff_t(&t - action_properties_lookup));
-    }
-}
+}; */
 
 bool is_coords_within_range(int x, int y, int b_x, int b_y, int size, int radius) {
     int min_x = b_x - radius;
@@ -156,11 +103,11 @@ bool is_coords_within_range(int x, int y, int b_x, int b_y, int size, int radius
     return false;
 }
 
-void figure::advance_action(short NEXT_ACTION) {
-    //    if (NEXT_ACTION == 0)
-    //        poof();
-    //    else
-    action_state = NEXT_ACTION;
+void figure::advance_action(short next_action) {
+    if (state == FIGURE_STATE_DYING && next_action != FIGURE_ACTION_149_CORPSE) {
+        return;
+    }
+    action_state = next_action;
 }
 bool figure::do_roam(int terrainchoice, short NEXT_ACTION) {
     terrain_usage = terrainchoice;
@@ -194,7 +141,7 @@ bool figure::do_goto(tile2i dest, int terrainchoice, short NEXT_ACTION, short FA
     // set up destination and move!!!
     if (use_cross_country) {
         OZZY_PROFILER_SECTION("Figure/Goto/CrossCountry");
-        set_cross_country_destination(dest.x(), dest.y());
+        set_cross_country_destination(dest);
         if (move_ticks_cross_country(1) == 1) {
             advance_action(NEXT_ACTION);
             return true;
@@ -243,7 +190,8 @@ bool figure::do_gotobuilding(building* dest, bool stop_at_road, e_terrain_usage 
             }
 
             if (!found_road) {
-                found_road = map_closest_road_within_radius(main->tile, 3, 1, finish_tile);
+                finish_tile = map_closest_road_within_radius(main->tile, 3, 1);
+                found_road = finish_tile.valid();
             }
 
             if (found_road && is_coords_within_range(tile.x(), tile.y(), main->tile.x(), main->tile.y(), 3, 1)) {
@@ -267,9 +215,11 @@ bool figure::do_gotobuilding(building* dest, bool stop_at_road, e_terrain_usage 
 
                 if (!found_road) {
                     if (building_is_house(dest->type) || dest->type == BUILDING_BURNING_RUIN) {
-                        found_road = map_closest_road_within_radius(dest->tile, dest->size, 2, finish_tile);
+                        finish_tile = map_closest_road_within_radius(dest->tile, dest->size, 2);
+                        found_road = finish_tile.valid();
                     } else {
-                        found_road = map_closest_road_within_radius(dest->tile, dest->size, 1, finish_tile);
+                        finish_tile = map_closest_road_within_radius(dest->tile, dest->size, 1);
+                        found_road = finish_tile.valid();
                     }
                 }
 
@@ -301,16 +251,12 @@ bool figure::do_returnhome(e_terrain_usage terrainchoice, short NEXT_ACTION) {
 
 bool figure::do_exitbuilding(bool invisible, short NEXT_ACTION, short FAIL_ACTION) {
     use_cross_country = true;
-    if (invisible)
-        is_ghost = true;
     // "go to" home, but stop at road = go to entrance
     return do_gotobuilding(home(), true, TERRAIN_USAGE_ANY, NEXT_ACTION, FAIL_ACTION);
 }
 
 bool figure::do_enterbuilding(bool invisible, building* b, short NEXT_ACTION, short FAIL_ACTION) {
     use_cross_country = true;
-    if (invisible)
-        is_ghost = true;
     return do_gotobuilding(b, false, TERRAIN_USAGE_ANY, NEXT_ACTION, FAIL_ACTION);
 }
 
@@ -337,44 +283,28 @@ void figure::action_perform() {
         cart_image_id = 0;
         max_roam_length = 0;
         use_cross_country = false;
-        is_ghost = false;
 
         // base lookup data
-        figure_action_property action_properties = action_properties_lookup[type];
-        if (action_properties.terrain_usage != -1 && terrain_usage == -1) {
-            terrain_usage = action_properties.terrain_usage;
+        const auto &params = figure_impl::params(type);
+        if (params.terrain_usage != 0xff && terrain_usage == 0xff) {
+            terrain_usage = params.terrain_usage;
         }
-        max_roam_length = action_properties.max_roam_length;
-        speed_multiplier = action_properties.speed_mult;
-        image_desc img = action_properties.img();
-        image_set_animation(img.pack, img.id);
+        max_roam_length = params.max_roam_length;
+        speed_multiplier = params.speed_mult;
+        if (!this->anim.id) {
+            const animation_t &def_anim = params.anim[animkeys().walk];
+            image_set_animation(def_anim);
+        }
 
         // check for building being alive (at the start of the action)
         building* b = home();
         figure* leader = figure_get(leading_figure_id);
         switch (type) {
-        case FIGURE_CONSTABLE:
-        case FIGURE_MAGISTRATE:
-        case FIGURE_WORKER:
         case FIGURE_NATIVE_TRADER:
         case FIGURE_TOWER_SENTRY:
         case FIGURE_MISSIONARY:
-        case FIGURE_HERBALIST:
-        case FIGURE_DENTIST:
         case FIGURE_EMBALMER:
             if (b->state != BUILDING_STATE_VALID || !b->has_figure(0, id)) {
-                poof();
-            }
-            break;
-
-        case FIGURE_OSTRICH_HUNTER:
-            if (b->state != BUILDING_STATE_VALID) {
-                poof();
-            }
-            break;
-
-        case FIGURE_LUMBERJACK:
-            if (b->state != BUILDING_STATE_VALID) {
                 poof();
             }
             break;
@@ -391,40 +321,13 @@ void figure::action_perform() {
         }
 
         // common action states handling
-        const bool common_roaming = dcast()->is_common_roaming();
-        if (common_roaming) {
-            switch (action_state) {
-            case FIGURE_ACTION_150_ATTACK:
-                figure_combat_handle_attack();
-                break;
-
-            case FIGURE_ACTION_149_CORPSE:
-                figure_combat_handle_corpse();
-                break;
-
-            case FIGURE_ACTION_125_ROAMING:
-            case ACTION_1_ROAMING:
-                if (type == FIGURE_IMMIGRANT || type == FIGURE_EMIGRANT) {
-                    break;
-                }
-                do_roam();
-                break;
-
-            case FIGURE_ACTION_126_ROAMER_RETURNING:
-            case ACTION_2_ROAMERS_RETURNING:
-                if (type == FIGURE_IMMIGRANT || type == FIGURE_EMIGRANT) {
-                    break;
-                }
-                do_returnhome();
-                break;
-            }
-        }
+        dcast()->figure_roaming_action();
 
         if (state == FIGURE_STATE_DYING) { // update corpses / dying animation
             figure_combat_handle_corpse();
         }
 
-        if (map_terrain_is(tile.grid_offset(), TERRAIN_ROAD)) { // update road flag
+        if (map_terrain_is(tile, TERRAIN_ROAD|TERRAIN_FERRY_ROUTE)) { // update road flag
             outside_road_ticks = 0;
             if (map_terrain_is(tile.grid_offset(), TERRAIN_WATER)) { // bridge
                 set_target_height_bridge();
@@ -460,27 +363,12 @@ void figure::action_perform() {
         }
 
         switch (type) {
-        case 11:   // soldier_action();                  break;
-        case 12:   // soldier_action();                  break;
-        case 13:
-            soldier_action();
-            break;
-
-        case 14:
-            military_standard_action();
-            break;
-
         case FIGURE_PROTESTER: protestor_action(); break;
         case FIGURE_CRIMINAL: mugger_action(); break;
         case FIGURE_TOMB_ROBER: rioter_action(); break;
-        case FIGURE_FISHING_BOAT: fishing_boat_action(); break;
-
-            //            case 29: common_action(12, GROUP_FIGURE_TEACHER_LIBRARIAN); break;
             //            case 30: common_action(12, GROUP_FIGURE_TEACHER_LIBRARIAN); break; //30
-            //            case 31: common_action(12, GROUP_FIGURE_BARBER); break;
             //            case 32: common_action(12, GROUP_FIGURE_BATHHOUSE_WORKER); break;
         case 36: editor_flag_action(); break;
-        case FIGURE_FLOTSAM: flotsam_action(); break;
         case FIGURE_NOBLES: noble_action(); break; 
         case 41: indigenous_native_action(); break;
         case 42: tower_sentry_action(); break;
@@ -496,30 +384,20 @@ void figure::action_perform() {
         case 52: enemy52_mounted_archer_action(); break;
         case 53: enemy53_axe_action(); break;
         case 54: enemy_gladiator_action(); break;
-        case 57: enemy_caesar_legionary_action(); break;
-        case 59: arrow_action(); break;
-        case FIGURE_JAVELIN: javelin_action(); break; // 60
-        case FIGURE_BOLT: bolt_action(); break;
+        case 57: enemy_kingdome_soldier_action(); break;
         case FIGURE_BALLISTA: ballista_action(); break;
-        case FIGURE_FISHING_POINT: fishing_point_action(); break;
-        case FIGURE_SHIPWRECK: shipwreck_action(); break;
         case FIGURE_BIRDS: sheep_action(); break;
         case FIGURE_ANTELOPE: zebra_action(); break; // 70
-        case FIGURE_SPEAR: spear_action(); break;
         case FIGURE_CHARIOR_RACER: hippodrome_horse_action(); break;
-        case FIGURE_OSTRICH_HUNTER: ostrich_hunter_action(); break;
-        case FIGURE_HUNTER_ARROW: arrow_action(); break;
-        case FIGURE_LUMBERJACK: lumberjack_action(); break; // wood cutters
-        case FIGURE_GOVERNOR: governor_action(); break;
-        case FIGURE_HIPPO: hippo_action(); break;
-        case FIGURE_CONSTABLE: policeman_action(); break;
-        case FIGURE_MAGISTRATE: magistrate_action(); break;
-        case FIGURE_FESTIVAL_PRIEST: festival_guy_action(); break;
         case FIGURE_SLED_PULLER: sled_puller_action(); break;
         case FIGURE_HYENA: hyena_action(); break;
 
         default:
-            dcast()->figure_action();
+            {
+                auto *impl = dcast();
+                impl->figure_action();
+                impl->update_animation();
+            }
             break;
         }
 
@@ -529,11 +407,11 @@ void figure::action_perform() {
         }
 
         // poof if LOST
-        if (direction == DIR_FIGURE_CAN_NOT_REACH) {
-            if (figure_type_none_of(*this, FIGURE_ARROW, FIGURE_HUNTER_ARROW, FIGURE_BOLT)) {
-                dcast()->poof();
-            }
-        }
+        //if (direction == DIR_FIGURE_CAN_NOT_REACH) {
+        //    if (figure_type_none_of(*this, FIGURE_ARROW, FIGURE_HUNTER_ARROW, FIGURE_BOLT)) {
+        //        dcast()->poof();
+        //    }
+        //}
 
         // advance sprite offset
         figure_image_update(false);
@@ -542,8 +420,8 @@ void figure::action_perform() {
 
 void figure_action_handle() {
     OZZY_PROFILER_SECTION("Game/Run/Tick/Figure Action");
-    city_figures_reset();
-    city_entertainment_set_hippodrome_has_race(0);
+    g_city.figures_reset();
+    //g_city.entertainment.hippodrome_has_race = false;
 
     for (auto &figure: map_figures()) {
         figure->action_perform();

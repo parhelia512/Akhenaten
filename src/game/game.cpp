@@ -24,10 +24,10 @@
 #include "mission.h"
 #include "scenario/events.h"
 #include "scenario/scenario.h"
-#include "sound/city.h"
-#include "sound/system.h"
+#include "sound/sound_city.h"
+#include "sound/sound.h"
 #include "translation/translation.h"
-#include "window/city.h"
+#include "window/window_city.h"
 #include "window/editor/map.h"
 #include "window/logo.h"
 #include "window/main_menu.h"
@@ -158,19 +158,23 @@ static int get_elapsed_ticks() {
         return 0;
     }
 
-    if (scroll_in_progress() && !scroll_is_smooth())
+    if (scroll_in_progress() && !scroll_is_smooth()) {
         return 0;
+    }
 
     time_millis now = time_get_millis();
     time_millis diff = now - last_update;
-    if (diff < MILLIS_PER_TICK_PER_SPEED[game_speed_index] + 2)
+    if (diff < MILLIS_PER_TICK_PER_SPEED[game_speed_index] + 2) {
         return 0;
+    }
 
     last_update = now;
     return ticks_per_frame;
 }
 
 bool game_pre_init(void) {
+    vfs::content_cache_paths();
+
     if (!lang_load(0)) {
         return false;
     }
@@ -184,6 +188,9 @@ bool game_pre_init(void) {
     random_init();
 
     game.paused = false;
+    game.mt.reset(4);
+    game.mtrpc.reset(4);
+
     return true;
 }
 
@@ -221,7 +228,7 @@ bool game_init() {
     }
 
     //    mods_init();
-    sound_system_init();
+    g_sound.init();
     game_state_init();
     window_logo_show(missing_fonts ? MESSAGE_MISSING_FONTS : (is_unpatched() ? MESSAGE_MISSING_PATCH : MESSAGE_NONE));
 
@@ -306,5 +313,5 @@ void game_exit() {
     video_shutdown();
     g_settings.save();
     config_save();
-    sound_system_shutdown();
+    g_sound.shutdown();
 }

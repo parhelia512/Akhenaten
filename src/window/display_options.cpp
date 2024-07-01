@@ -1,103 +1,112 @@
 #include "display_options.h"
 
+#include "file_dialog.h"
+
+#include <cassert>
+
 #include "core/app.h"
+#include "core/calc.h"
+#include "core/encoding.h"
+#include "core/string.h"
+#include "core/time.h"
 #include "game/settings.h"
-#include "game/system.h"
+#include "graphics/screen.h"
 #include "graphics/graphics.h"
-#include "graphics/elements/generic_button.h"
+#include "graphics/elements/image_button.h"
 #include "graphics/elements/lang_text.h"
 #include "graphics/elements/panel.h"
+#include "graphics/elements/scroll_list_panel.h"
+#include "graphics/image_groups.h"
 #include "graphics/window.h"
-#include "input/input.h"
+#include "io/gamefiles/lang.h"
+#include "platform/renderer.h"
 
-static void button_fullscreen(int param1, int param2);
-static void button_set_resolution(int id, int param2);
-static void button_cancel(int param1, int param2);
+constexpr uint32_t NUM_FILES_IN_VIEW = 13;
 
-static generic_button buttons[] = {
-  {128, 136, 224, 20, button_fullscreen, button_none, 1, 0},
-  {128, 160, 224, 20, button_set_resolution, button_none, 1, 0},
-  {128, 184, 224, 20, button_set_resolution, button_none, 2, 0},
-  {128, 208, 224, 20, button_set_resolution, button_none, 3, 0},
-  {128, 232, 224, 20, button_cancel, button_none, 1, 0},
-};
+ui::window_display_options ui::window_display_options::window;
 
-struct display_options_data_t {
-    int focus_button_id;
-    void (*close_callback)(void);
-};
+void ui::window_display_options::init(close_callback close_cb) {
+    if (!panel) {
+        scrollable_list_ui_params ui_params;
+        ui_params.x = 144;
+        ui_params.y = 100;
+        ui_params.blocks_x = 20;
+        ui_params.blocks_y = NUM_FILES_IN_VIEW + 1;
+        ui_params.draw_scrollbar_always = true;
 
-display_options_data_t g_display_options_data;
+        panel = new scroll_list_panel(NUM_FILES_IN_VIEW, 
+                                      button_none, 
+                                      button_none, 
+                                      button_none, 
+                                      button_none, 
+                                      ui_params, false, "", "");
+    }
 
-static void init(void (*close_callback)(void)) {
-    g_display_options_data.focus_button_id = 0;
-    g_display_options_data.close_callback = close_callback;
+    focus_button_id = 0;
+    _close_cb = close_cb;
+
+    panel->clear_entry_list();
+    video_modes = get_video_modes();
+    for (const auto& mode : video_modes) {
+        panel->add_entry(mode.str);
+    }
+
+    auto wsize = g_settings.display_size;
+    original_resolution = wsize;
+    selected_resolution = wsize;
+
+    video_mode selected(wsize.x, wsize.y);
+    panel->select(selected.str);
 }
 
-static void draw_foreground(void) {
-    auto& data = g_display_options_data;
+void ui::window_display_options::draw_foreground() {
     graphics_set_to_dialog();
+    outer_panel_draw({128, 40}, 24, 21);
 
-    outer_panel_draw(vec2i{96, 80}, 18, 12);
+    // title
+    lang_text_draw_centered(e_text_display_options, 0, 160, 50, 304, FONT_LARGE_BLACK_ON_LIGHT);
+    lang_text_draw(e_text_saving_dialog, 5, 224, 342, FONT_NORMAL_BLACK_ON_LIGHT);
 
-    label_draw(128, 136, 14, data.focus_button_id == 1 ? 1 : 2);
-    label_draw(128, 160, 14, data.focus_button_id == 2 ? 1 : 2);
-    label_draw(128, 184, 14, data.focus_button_id == 3 ? 1 : 2);
-    label_draw(128, 208, 14, data.focus_button_id == 4 ? 1 : 2);
-    label_draw(128, 232, 14, data.focus_button_id == 5 ? 1 : 2);
-
-    lang_text_draw_centered(42, 0, 128, 94, 224, FONT_LARGE_BLACK_ON_LIGHT);
-
-    lang_text_draw_centered(42, g_settings.is_fullscreen() ? 2 : 1, 128, 140, 224, FONT_NORMAL_BLACK_ON_DARK);
-
-    lang_text_draw_centered(42, 3, 128, 164, 224, FONT_NORMAL_BLACK_ON_DARK);
-    lang_text_draw_centered(42, 4, 128, 188, 224, FONT_NORMAL_BLACK_ON_DARK);
-    lang_text_draw_centered(42, 5, 128, 212, 224, FONT_NORMAL_BLACK_ON_DARK);
-    lang_text_draw_centered(42, 6, 128, 236, 224, FONT_NORMAL_BLACK_ON_DARK);
-
+    panel->draw();
     graphics_reset_dialog();
+
+    ui::begin_widget(screen_dialog_offset());
+    pcstr fullscreen_text = (pcstr)lang_get_string(42, g_settings.is_fullscreen(e_setting_none) ? 2 : 1);
+    ui::button(fullscreen_text, {148, 76}, {224, 20})
+        .onclick([this] (int, int) {
+            app_fullscreen(!g_settings.is_fullscreen(e_setting_none));
+            _close_cb();
+        });
+
+    ui::imgok_button({344, 335}, [this] (int, int) {
+        app_window_resize(selected_resolution);
+        _close_cb();
+    });
+
+    ui::imgcancel_button({392, 335}, [this] (int, int) {
+        _close_cb();
+    });
 }
 
-static void handle_input(const mouse* m, const hotkeys* h) {
-    if (generic_buttons_handle_mouse(mouse_in_dialog(m), 0, 0, buttons, 5, &g_display_options_data.focus_button_id))
-        return;
+void ui::window_display_options::handle_input(const mouse* m, const hotkeys* h) {
+    bool button_id = ui::handle_mouse(m);
 
-    if (input_go_back_requested(m, h)) {
-        g_display_options_data.close_callback();
+    const mouse* m_dialog = mouse_in_dialog(m);
+    if (panel->input_handle(m_dialog)) {
+        auto it = video_modes.begin();
+        std::advance(it, panel->get_selected_entry_idx());
+        selected_resolution = {it->x, it->y};
     }
 }
 
-static void button_fullscreen(int param1, int param2) {
-    app_fullscreen(!g_settings.is_fullscreen());
-    g_display_options_data.close_callback();
-}
-
-static void button_set_resolution(int id, int param2) {
-    switch (id) {
-    case 1:
-        app_window_resize({640, 480});
-        break;
-    case 2:
-        app_window_resize({800, 600});
-        break;
-    case 3:
-        app_window_resize({1024, 768});
-        break;
-    }
-    g_display_options_data.close_callback();
-}
-
-static void button_cancel(int param1, int param2) {
-    g_display_options_data.close_callback();
-}
-
-void window_display_options_show(void (*close_callback)(void)) {
-    window_type window = {
-        WINDOW_DISPLAY_OPTIONS,
+void ui::window_display_options::show(close_callback close_cb) {
+    static window_type instance = {
+        WINDOW_FILE_DIALOG,
         window_draw_underlying_window,
-        draw_foreground,
-        handle_input
+        [] { window.draw_foreground(); },
+        [] (const mouse *m, const hotkeys *h) { window.handle_input(m, h); }
     };
-    init(close_callback);
-    window_show(&window);
+
+    init(close_cb);
+    window_show(&instance);
 }

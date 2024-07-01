@@ -34,7 +34,7 @@ void game_settings::load_default_settings() {
     scroll_speed = 70;
 
     difficulty = DIFFICULTY_HARD;
-    tooltips = TOOLTIPS_FULL;
+    tooltips = e_tooltip_show_full;
     warnings = true;
     gods_enabled = true;
     victory_video = false;
@@ -192,17 +192,7 @@ void game_settings::decrease_game_speed(void) {
 
 void game_settings::toggle_tooltips() {
     auto& data = g_settings;
-    switch (data.tooltips) {
-    case TOOLTIPS_NONE:
-        data.tooltips = TOOLTIPS_SOME;
-        break;
-    case TOOLTIPS_SOME:
-        data.tooltips = TOOLTIPS_FULL;
-        break;
-    default:
-        data.tooltips = TOOLTIPS_NONE;
-        break;
-    }
+    data.tooltips = (data.tooltips + 1) % e_tooltip_count;
 }
 
 void game_settings::set_player_name(const uint8_t* name) {

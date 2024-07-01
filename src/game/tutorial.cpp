@@ -1,6 +1,6 @@
 #include "tutorial.h"
 
-#include "building/menu.h"
+#include "building/building_menu.h"
 #include "city/buildings.h"
 #include "city/message.h"
 #include "city/mission.h"
@@ -12,12 +12,22 @@
 #include "io/io_buffer.h"
 #include "platform/arguments.h"
 #include "scenario/criteria.h"
-#include "scenario/property.h"
+#include "scenario/scenario.h"
 #include "city/sentiment.h"
 
 #include <algorithm>
+#include "dev/debug.h"
+#include <iostream>
 
 static tutorial_flags_t g_tutorials_flags;
+const tutorial_stage_t tutorial_stage;
+
+declare_console_command_p(runstage, game_cheat_tutorial_step);
+void game_cheat_tutorial_step(std::istream &is, std::ostream &) {
+    std::string args;
+    is >> args;
+    tutorial_update_step(args.c_str());
+}
 
 const tutorial_flags_t* tutorial_flags_struct() {
     return &g_tutorials_flags;
@@ -67,69 +77,31 @@ static void set_all_tut_flags_null() {
     }
 }
 
-void tutorial_init() {
-    set_all_tut_flags_null();
+template<class T>
+void memset_if(bool ok, char v, T &t) {
+    if (ok) {
+        memset(&t, 1, sizeof(t));
+    }
+}
 
-    if (scenario_is_custom()) {
+void tutorial_init(bool clear_all_flags, bool custom) {
+    if (clear_all_flags) {
+        set_all_tut_flags_null();
+    }
+
+    if (custom) {
         return;
     }
 
     int scenario_id = scenario_campaign_scenario_id();
-    bool tut_passed[10];
-
-    for (int i = 0; i < 10; ++i) {
-        tut_passed[i] = (i > scenario_id);
-    }
-
-    // tut1
-    g_tutorials_flags.tutorial_1.started = tut_passed[0];
-    g_tutorials_flags.tutorial_1.fire = tut_passed[0];
-    g_tutorials_flags.tutorial_1.collapse = tut_passed[0];
-    g_tutorials_flags.tutorial_1.population_150_reached = tut_passed[0];
-    g_tutorials_flags.tutorial_1.gamemeat_400_stored = tut_passed[0];
-    // tut2
-    g_tutorials_flags.tutorial_2.started = tut_passed[1];
-    g_tutorials_flags.tutorial_2.gold_mined_500 = tut_passed[1];
-    g_tutorials_flags.tutorial_2.temples_built = tut_passed[1];
-    g_tutorials_flags.tutorial_2.crime = tut_passed[1];
-    // tut3
-    g_tutorials_flags.tutorial_3.started = tut_passed[2];
-    g_tutorials_flags.tutorial_3.pottery_made = tut_passed[2];
-    g_tutorials_flags.tutorial_3.figs_800_stored = tut_passed[2];
-    g_tutorials_flags.tutorial_3.disease = tut_passed[2];
-    // tut4
-    g_tutorials_flags.tutorial_4.started = tut_passed[3];
-    g_tutorials_flags.tutorial_4.beer_made = tut_passed[3];
-    // tut5
-    g_tutorials_flags.tutorial_5.started = tut_passed[4];
-    g_tutorials_flags.tutorial_5.spacious_apartment = tut_passed[4];
-    g_tutorials_flags.tutorial_5.papyrus_made = tut_passed[4];
-    g_tutorials_flags.tutorial_5.bricks_bought = tut_passed[4];
-    // tut6
-    g_tutorials_flags.tutorial_6.started = tut_passed[5];
-
-
-    g_tutorials_flags.pharaoh.flags[8] = tut_passed[4];
-
-    //
-    g_tutorials_flags.pharaoh.tut7_start = tut_passed[6];
-    g_tutorials_flags.pharaoh.tut8_start = tut_passed[7];
-    //
-    g_tutorials_flags.pharaoh.flags[26] = tut_passed[0];
-    g_tutorials_flags.pharaoh.flags[27] = tut_passed[2];
-
-    g_tutorials_flags.pharaoh.flags[30] = tut_passed[3];
-
-    g_tutorials_flags.pharaoh.flags[33] = tut_passed[0];
-    g_tutorials_flags.pharaoh.flags[34] = tut_passed[3];
-
-    g_tutorials_flags.pharaoh.flags[36] = tut_passed[1];
-    g_tutorials_flags.pharaoh.flags[37] = tut_passed[1];
-    g_tutorials_flags.pharaoh.flags[38] = tut_passed[3];
-    g_tutorials_flags.pharaoh.flags[39] = tut_passed[3];
+    memset_if(0 < scenario_id, 1, g_tutorials_flags.tutorial_1);
+    memset_if(1 < scenario_id, 1, g_tutorials_flags.tutorial_2);
+    memset_if(2 < scenario_id, 1, g_tutorials_flags.tutorial_3);
+    memset_if(3 < scenario_id, 1, g_tutorials_flags.tutorial_4);
+    memset_if(4 < scenario_id, 1, g_tutorials_flags.tutorial_5);
+    memset_if(5 < scenario_id, 1, g_tutorials_flags.tutorial_6);
 
     tutorial_map_update(scenario_id + 1);
-
     tutorial_menu_update(scenario_id + 1);
 }
 
@@ -199,40 +171,48 @@ void tutorial_map_update(int tut) {
 
 void tutorial_menu_update(int tut) {
     if (tut == 1) {
-        building_menu_update(BUILDSET_TUT1_START);
-            
-        if (g_tutorials_flags.tutorial_1.population_150_reached)  building_menu_update(BUILDSET_TUT1_FOOD);
-        if (g_tutorials_flags.tutorial_1.fire) building_menu_update(BUILDSET_TUT1_FIRE);
-        if (g_tutorials_flags.tutorial_1.collapse) building_menu_update(BUILDSET_TUT1_COLLAPSE);
-        if (g_tutorials_flags.tutorial_1.gamemeat_400_stored) building_menu_update(BUILDSET_TUT1_WATER);
+        building_menu_update(tutorial_stage.disable_all);
+
+        if (g_tutorials_flags.tutorial_1.fire) building_menu_update(tutorial_stage.tutorial_fire);
+        if (g_tutorials_flags.tutorial_1.population_150_reached)  building_menu_update(tutorial_stage.tutorial_food);
+        if (g_tutorials_flags.tutorial_1.collapse) building_menu_update(tutorial_stage.tutorial_collapse);
+        if (g_tutorials_flags.tutorial_1.gamemeat_400_stored) building_menu_update(tutorial_stage.tutorial_water);
     } else if (tut == 2) {
-        building_menu_update(BUILDSET_TUT2_START);
+        building_menu_update(tutorial_stage.disable_all);
+        building_menu_update(tutorial_stage.tutorial_start);
 
-        if (g_tutorials_flags.tutorial_2.gold_mined_500) building_menu_update(BUILDSET_TUT2_GODS);
-        if (g_tutorials_flags.tutorial_2.temples_built) building_menu_update(BUILDSET_TUT2_ENTERTAINMENT);
+        if (g_tutorials_flags.tutorial_2.gold_mined_500) building_menu_update(tutorial_stage.tutorial_gods);
+        if (g_tutorials_flags.tutorial_2.temples_built) building_menu_update(tutorial_stage.tutorial_entertainment);
     } else if (tut == 3) {
-        building_menu_update(BUILDSET_TUT3_START);
+        building_menu_update(tutorial_stage.disable_all);
+        building_menu_update(tutorial_stage.tutorial_start);
             
-        if (g_tutorials_flags.tutorial_3.figs_800_stored) building_menu_update(BUILDSET_TUT3_INDUSTRY);
-        if (g_tutorials_flags.tutorial_3.pottery_made) building_menu_update(BUILDSET_TUT3_INDUSTRY);
-        if (g_tutorials_flags.tutorial_3.disease) building_menu_update(BUILDSET_TUT3_HEALTH);
-        if (g_tutorials_flags.tutorial_3.pottery_made) building_menu_update(BUILDSET_TUT3_GARDENS);
+        if (g_tutorials_flags.tutorial_3.figs_800_stored) building_menu_update(tutorial_stage.tutorial_industry);
+        if (g_tutorials_flags.tutorial_3.pottery_made) building_menu_update(tutorial_stage.tutorial_industry);
+        if (g_tutorials_flags.tutorial_3.disease) building_menu_update(tutorial_stage.tutorial_health);
+        if (g_tutorials_flags.tutorial_3.pottery_made) building_menu_update(tutorial_stage.tutorial_gardens);
     } else if (tut == 4) {
-        building_menu_update(BUILDSET_TUT4_START);
+        building_menu_update(tutorial_stage.disable_all);
+        building_menu_update(tutorial_stage.tutorial_start);
 
-        if (g_tutorials_flags.tutorial_4.beer_made) building_menu_update(BUILDSET_TUT4_FINANCE);
+        if (g_tutorials_flags.tutorial_4.beer_made) building_menu_update(tutorial_stage.tutorial_finance);
     } else if (tut == 5) {
-        building_menu_update(BUILDSET_TUT5_START);
-        if (g_tutorials_flags.tutorial_5.spacious_apartment) building_menu_update(BUILDSET_TUT5_EDUCATION);
-        if (g_tutorials_flags.tutorial_5.papyrus_made) building_menu_update(BUILDSET_TUT5_TRADING);
-        if (g_tutorials_flags.tutorial_5.bricks_bought) building_menu_update(BUILDSET_TUT5_MONUMENTS);
+        building_menu_update(tutorial_stage.disable_all);
+        building_menu_update(tutorial_stage.tutorial_start);
+        if (g_tutorials_flags.tutorial_5.spacious_apartment) building_menu_update(tutorial_stage.tutorial_education);
+        if (g_tutorials_flags.tutorial_5.papyrus_made) building_menu_update(tutorial_stage.tutorial_trading);
+        if (g_tutorials_flags.tutorial_5.bricks_bought) building_menu_update(tutorial_stage.tutorial_monuments);
 
     } else if (tut == 6) {
-        building_menu_update(BUILDSET_TUT6_START);
+        building_menu_update(tutorial_stage.disable_all);
+        building_menu_update(tutorial_stage.tutorial_start);
+
     } else if (tut == 7) {
-        building_menu_update(BUILDSET_TUT7_START);
+        building_menu_update(tutorial_stage.disable_all);
+        building_menu_update(tutorial_stage.tutorial_start);
     } else if (tut == 8) {
-        building_menu_update(BUILDSET_TUT8_START);
+        building_menu_update(tutorial_stage.disable_all);
+        building_menu_update(tutorial_stage.tutorial_start);
     }
 }
 
@@ -325,7 +305,7 @@ int tutorial_handle_fire() {
     }
 
     g_tutorials_flags.tutorial_1.fire = 1;
-    building_menu_update(BUILDSET_TUT1_FIRE);
+    building_menu_update(tutorial_stage.tutorial_fire);
     post_message(MESSAGE_TUTORIAL_FIRE_IN_THE_VILLAGE);
     return 1;
 }
@@ -335,7 +315,7 @@ int tutorial_handle_collapse(void) {
         return 0;
 
     g_tutorials_flags.tutorial_1.collapse = 1;
-    building_menu_update(BUILDSET_TUT1_COLLAPSE);
+    building_menu_update(tutorial_stage.tutorial_collapse);
     post_message(MESSAGE_TUTORIAL_COLLAPSED_BUILDING);
     return 1;
 }
@@ -343,14 +323,14 @@ int tutorial_handle_collapse(void) {
 void tutorial_on_crime(void) {
     if (!g_tutorials_flags.pharaoh.crime) {
         g_tutorials_flags.pharaoh.crime = 1;
-        building_menu_update(BUILDSET_TUT1_CRIME);
+        building_menu_update(tutorial_stage.tutorial_crime);
     }
 }
 
 void tutorial_on_disease() {
     if (scenario_is_mission_rank(3) && !g_tutorials_flags.tutorial_3.disease) {
         g_tutorials_flags.tutorial_3.disease = true;
-        building_menu_update(BUILDSET_TUT3_HEALTH);
+        building_menu_update(tutorial_stage.tutorial_health);
         post_message(MESSAGE_TUTORIAL_BASIC_HEALTHCARE);
     }
 }
@@ -358,13 +338,13 @@ void tutorial_on_disease() {
 void tutorial_on_filled_granary(int quantity) {
     if (scenario_is_mission_rank(1) && !g_tutorials_flags.tutorial_1.gamemeat_400_stored && quantity >= 400) {
         g_tutorials_flags.tutorial_1.gamemeat_400_stored = 1;
-        building_menu_update(BUILDSET_TUT1_WATER);
+        building_menu_update(tutorial_stage.tutorial_water);
         post_message(MESSAGE_TUTORIAL_CLEAN_WATER);
     }
 
     if (scenario_is_mission_rank(3) && !g_tutorials_flags.tutorial_3.figs_800_stored && quantity >= 800) {
         g_tutorials_flags.tutorial_3.figs_800_stored = 1;
-        building_menu_update(BUILDSET_TUT3_INDUSTRY);
+        building_menu_update(tutorial_stage.tutorial_industry);
         post_message(MESSAGE_TUTORIAL_INDUSTRY);
     }
 }
@@ -373,23 +353,23 @@ void tutorial_check_resources_on_storageyard() {
     if (!g_tutorials_flags.tutorial_3.pottery_made && city_resource_count(RESOURCE_POTTERY) >= 1) {
         g_tutorials_flags.tutorial_3.pottery_made = true;
         g_tutorials_flags.tutorial_3.pottery_made_year = game_time_year();
-        building_menu_update(BUILDSET_NORMAL);
+        //building_menu_update(BUILDSET_NORMAL);
         post_message(MESSAGE_TUTORIAL_TRADE);
     } else if (!g_tutorials_flags.tutorial_3.pottery_made && city_resource_count(RESOURCE_POTTERY) >= 2) {
         g_tutorials_flags.tutorial_3.pottery_made = true;
-        building_menu_update(BUILDSET_TUT3_GARDENS);
+        building_menu_update(tutorial_stage.tutorial_gardens);
         post_message(MESSAGE_TUTORIAL_MUNICIPAL_STRUCTURES);
     } else if (!g_tutorials_flags.tutorial_4.beer_made && city_resource_count(RESOURCE_BEER) >= 3) {
         g_tutorials_flags.tutorial_4.beer_made = true;
-        building_menu_update(BUILDSET_TUT4_FINANCE);
+        building_menu_update(tutorial_stage.tutorial_finance);
         post_message(MESSAGE_TUTORIAL_FINANCES);
     } if (!g_tutorials_flags.tutorial_5.papyrus_made && city_resource_count(RESOURCE_PAPYRUS) >= 1) {
         g_tutorials_flags.tutorial_5.papyrus_made = 1;
-        building_menu_update(BUILDSET_TUT5_TRADING);
+        building_menu_update(tutorial_stage.tutorial_trading);
         post_message(MESSAGE_TUTORIAL_TRADE_WITH_OTHER_CITIES);
     } if (!g_tutorials_flags.tutorial_5.bricks_bought && city_resource_count(RESOURCE_BRICKS) >= 1) {
         g_tutorials_flags.tutorial_5.bricks_bought = 1;
-        building_menu_update(BUILDSET_TUT5_MONUMENTS);
+        building_menu_update(tutorial_stage.tutorial_monuments);
         post_message(MESSAGE_TUTORIAL_MONUMENTS);
     }
 }
@@ -397,15 +377,15 @@ void tutorial_check_resources_on_storageyard() {
 void tutorial_on_gold_extracted() {
     if (scenario_is_mission_rank(2) && !g_tutorials_flags.tutorial_2.gold_mined_500) {
         g_tutorials_flags.tutorial_2.gold_mined_500 = true;
-        building_menu_update(BUILDSET_TUT2_GODS);
+        building_menu_update(tutorial_stage.tutorial_gods);
         post_message(MESSAGE_TUTORIAL_GODS_OF_EGYPT);
     }
 }
 
 void tutorial_on_religion() {
-    if (!g_tutorials_flags.tutorial_2.temples_built) {
+    if (scenario_is_mission_rank(2) && !g_tutorials_flags.tutorial_2.temples_built) {
         g_tutorials_flags.tutorial_2.temples_built = true;
-        building_menu_update(BUILDSET_TUT2_ENTERTAINMENT);
+        building_menu_update(tutorial_stage.tutorial_entertainment);
         post_message(MESSAGE_TUTORIAL_ENTERTAINMENT);
     }
 }
@@ -413,58 +393,39 @@ void tutorial_on_religion() {
 void tutorial_on_house_evolve(e_house_level level) {
     if (!g_tutorials_flags.tutorial_5.spacious_apartment && level >= HOUSE_SPACIOUS_APARTMENT) {
         g_tutorials_flags.tutorial_5.spacious_apartment = true;
-        building_menu_update(BUILDSET_TUT5_EDUCATION);
+        building_menu_update(tutorial_stage.tutorial_education);
         post_message(MESSAGE_TUTORIAL_EDUCATION);
     }
 }
 
-void tutorial_update_step(int step) {
-    switch (step) {
-    case BUILDSET_TUT1_FIRE:
+void tutorial_update_step(pcstr s) {
+    const bstring64 step(s);
+    if (step == tutorial_stage.tutorial_fire) {
         g_tutorials_flags.tutorial_1.fire = false;
         tutorial_handle_fire();
-        break;
-
-    case BUILDSET_TUT1_FOOD:
-        building_menu_update(BUILDSET_TUT1_FOOD);
+    } else if (step == tutorial_stage.tutorial_food) {
+        building_menu_update(step);
         post_message(MESSAGE_TUTORIAL_FOOD_OR_FAMINE);
-        break;
-
-    case BUILDSET_TUT1_WATER:
-        building_menu_update(BUILDSET_TUT1_WATER);
+    } else if (step == tutorial_stage.tutorial_water) {
+        building_menu_update(step);
         post_message(MESSAGE_TUTORIAL_CLEAN_WATER);
-        break;
-
-    case BUILDSET_TUT1_COLLAPSE:
+    } else if (step == tutorial_stage.tutorial_collapse) {
         g_tutorials_flags.tutorial_1.collapse = false;
         tutorial_handle_collapse();
-        break;
-
-    case BUILDSET_TUT2_GODS:
-        building_menu_update(BUILDSET_TUT2_GODS);
+    } else if (step == tutorial_stage.tutorial_gods) {
+        building_menu_update(step);
         post_message(MESSAGE_TUTORIAL_GODS_OF_EGYPT);
-        break;
-
-    case BUILDSET_TUT2_ENTERTAINMENT:
-        building_menu_toggle_building(BUILDING_BOOTH);
-        building_menu_toggle_building(BUILDING_JUGGLER_SCHOOL);
-        post_message(MESSAGE_TUTORIAL_ENTERTAINMENT);
-        break;
-
-    case BUILDSET_TUT3_INDUSTRY:
-        building_menu_update(BUILDSET_TUT3_INDUSTRY);
+    } else if (step == tutorial_stage.tutorial_entertainment) {
+        building_menu_update(step);
+    } else if (step == tutorial_stage.tutorial_industry) {
+        building_menu_update(step);
         post_message(MESSAGE_TUTORIAL_INDUSTRY);
-        break;
-
-    case BUILDSET_TUT3_HEALTH:
-        building_menu_update(BUILDSET_TUT3_HEALTH);
+    } else if (step == tutorial_stage.tutorial_health) {
+        building_menu_update(step);
         post_message(MESSAGE_TUTORIAL_BASIC_HEALTHCARE);
-        break;
-
-    case BUILDSET_TUT3_GARDENS:
-        building_menu_update(BUILDSET_TUT3_GARDENS);
+    } else if (step == tutorial_stage.tutorial_gardens) {
+        building_menu_update(step);
         post_message(MESSAGE_TUTORIAL_MUNICIPAL_STRUCTURES);
-        break;
     }
 }
 
@@ -483,7 +444,6 @@ void tutorial_starting_message() {
         g_tutorials_flags.tutorial_2.started = 1;
     }
     if (scenario_is_mission_rank(3) && !g_tutorials_flags.tutorial_3.started) {
-        post_message(MESSAGE_TUTORIAL_FARMING_ALONG_THE_NILE);
         g_tutorials_flags.tutorial_3.started = 1;
     }
     if (scenario_is_mission_rank(4) && !g_tutorials_flags.tutorial_4.started) {
@@ -511,6 +471,7 @@ void tutorial_starting_message() {
         g_tutorials_flags.pharaoh.tut8_start = 1;
     }
 }
+
 void tutorial_on_day_tick() {
     if (scenario_is_mission_rank(1) && g_tutorials_flags.tutorial_1.fire) {
         city_mission_tutorial_set_fire_message_shown(1);
@@ -519,7 +480,7 @@ void tutorial_on_day_tick() {
     if (scenario_is_mission_rank(1)) {
         if (!g_tutorials_flags.tutorial_1.population_150_reached && city_population() >= 150) {
             g_tutorials_flags.tutorial_1.population_150_reached = 1;
-            building_menu_update(BUILDSET_TUT1_FOOD);
+            building_menu_update(tutorial_stage.tutorial_food);
             post_message(MESSAGE_TUTORIAL_FOOD_OR_FAMINE);
         }
     }

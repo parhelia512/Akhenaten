@@ -1,13 +1,12 @@
 #include "monuments.h"
 
 #include "building/building.h"
-#include "building/properties.h"
 #include "building/model.h"
 #include "building/count.h"
 #include "graphics/image.h"
 #include "graphics/image_groups.h"
 #include "graphics/view/view.h"
-#include "empire/empire_city.h"
+#include "empire/empire.h"
 #include "figure/figure.h"
 #include "core/svector.h"
 #include "city/resource.h"
@@ -19,6 +18,7 @@
 #include "grid/terrain.h"
 #include "core/calc.h"
 #include "core/log.h"
+#include "city/city.h"
 #include "io/io_buffer.h"
 
 #include "js/js_game.h"
@@ -334,9 +334,9 @@ int building_image_get(building *b) {
     case BUILDING_SMALL_MASTABA:
         switch (b->data.monuments.phase) {
         case MONUMENT_START:
-            return image_group(IMG_SMALL_MASTABA);
+            return building_impl::params(BUILDING_SMALL_MASTABA).anim["base"].first_img();
         default:
-            return image_group(IMG_SMALL_MASTABA) + 1;
+            return building_impl::params(BUILDING_SMALL_MASTABA).anim["base"].first_img() + 1;
         }
     }
 
@@ -370,7 +370,7 @@ bool building_monument_type_is_monument(e_building_type type) {
 }
 
 bool building_monument_type_is_mini_monument(e_building_type type) {
-    return building_monument_type_is_monument(type) && building_properties_for_type(type)->size < 5;
+    return building_monument_type_is_monument(type) && building_impl::params(type).building_size < 5;
 }
 
 bool building_monument_is_temple_complex(e_building_type type) {
@@ -607,17 +607,17 @@ bool building_monument_requires_resource(e_building_type type, e_resource resour
     return false;
 }
 
-int building_monument_has_required_resources_to_build(e_building_type type) {
+bool building_monument_has_required_resources_to_build(e_building_type type) {
     int phases = building_monument_phases(type);
     for (int phase = 1; phase < phases; phase++) {
         for (e_resource r = RESOURCE_MIN; r < RESOURCES_MAX; ++r) {
             if (building_monument_needs_resources(type, r, phase) > 0 &&
-                !empire_can_produce_resource(r, false) && !empire_can_produce_resource(r, false)) {
-                return 0;
+                !g_city.can_produce_resource(r)) {
+                return false;
             }
         }
     }
-    return 1;
+    return true;
 }
 
 int building_monument_upgraded(e_building_type type) {

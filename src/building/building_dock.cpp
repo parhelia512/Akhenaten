@@ -7,7 +7,7 @@
 #include "city/buildings.h"
 #include "city/resource.h"
 #include "core/profiler.h"
-#include "empire/empire_city.h"
+#include "empire/empire.h"
 #include "grid/figure.h"
 #include "grid/grid.h"
 #include "grid/sprite.h"
@@ -36,6 +36,13 @@ static generic_button dock_order_buttons[] = {
 
 void building_dock::on_create(int orientation) {
     data.dock.orientation = orientation;
+
+    city_buildings_add_dock();
+}
+
+void building_dock::on_place(int orientation, int variant) {
+    int orientation_rel = city_view_relative_orientation(orientation);
+    map_water_add_building(id(), tile(), params().building_size, anim("base").first_img() + orientation_rel);
 }
 
 void building_dock::on_destroy() {
@@ -52,23 +59,23 @@ bool building_dock::can_play_animation() const {
 }
 
 void building_dock::update_count() const {
-    if (base.num_workers > 0 && base.has_open_water_access) {
+    if (num_workers() > 0 && base.has_open_water_access) {
         city_buildings_add_working_dock(id());
     }
 }
 
 void building_dock::update_map_orientation(int orientation) {
     int image_offset = city_view_relative_orientation(data.dock.orientation);
-    int image_id = image_group(IMG_BUILDING_DOCK) + image_offset;
+    int image_id = dock_m.anim["base"].first_img() + image_offset;
     map_water_add_building(id(), tile(), 3, image_id);
 }
 
 void building_dock::spawn_figure() {
-    check_labor_problem();
-    tile2i road;
     if (!has_road_access()) {
         return;
     }
+
+    check_labor_problem();
     common_spawn_labor_seeker(50);
     int pct_workers = worker_percentage();
     int max_dockers;
@@ -104,7 +111,7 @@ void building_dock::spawn_figure() {
     } 
     
     if (existing_dockers < max_dockers) {
-        figure *f = figure_create(FIGURE_DOCKER, road, DIR_4_BOTTOM_LEFT);
+        figure *f = figure_create(FIGURE_DOCKER, base.road_access, DIR_4_BOTTOM_LEFT);
         f->action_state = FIGURE_ACTION_132_DOCKER_IDLING;
         f->set_home(&base);
         for (int i = 0; i < 3; i++) {
@@ -126,7 +133,7 @@ void building_dock::draw_dock_orders(object_info* c) {
 
 void building_dock::draw_dock(object_info* c) {
     c->help_id = 83;
-    window_building_play_sound(c, "wavs/dock.wav");
+    window_building_play_sound(c, "Wavs/dock.wav");
     outer_panel_draw(c->offset, c->bgsize.x, c->bgsize.y);
     lang_text_draw_centered(101, 0, c->offset.x, c->offset.y + 10, 16 * c->bgsize.x, FONT_LARGE_BLACK_ON_LIGHT);
 
@@ -218,7 +225,7 @@ void window_building_dock_orders(int index, int param2) {
 
 int window_building_handle_mouse_dock(const mouse* m, object_info* c) {
     auto &data = g_window_building_distribution;
-    return generic_buttons_handle_mouse(m, c->offset.x + 80, c->offset.y + 16 * c->bgsize.y - 34, data.go_to_orders_button.data(), 1, &data.focus_button_id);
+    return generic_buttons_handle_mouse(m, {c->offset.x + 80, c->offset.y + 16 * c->bgsize.y - 34}, data.go_to_orders_button.data(), 1, &data.focus_button_id);
 }
 
 int window_building_handle_mouse_dock_orders(const mouse* m, object_info* c) {
@@ -226,11 +233,11 @@ int window_building_handle_mouse_dock_orders(const mouse* m, object_info* c) {
     int y_offset = window_building_get_vertical_offset(c, 28);
 
     data.building_id = c->building_id;
-    if (generic_buttons_handle_mouse(m, c->offset.x + 180, y_offset + 46, data.orders_resource_buttons.data(), 15, &data.resource_focus_button_id)) {
+    if (generic_buttons_handle_mouse(m, {c->offset.x + 180, y_offset + 46}, data.orders_resource_buttons.data(), 15, &data.resource_focus_button_id)) {
         return 1;
     }
 
-    return generic_buttons_handle_mouse(m, c->offset.x + 80, y_offset + 404, dock_order_buttons, 1, &data.orders_focus_button_id);
+    return generic_buttons_handle_mouse(m, {c->offset.x + 80, y_offset + 404}, dock_order_buttons, 1, &data.orders_focus_button_id);
 }
 
 int building_dock::window_info_handle_mouse(const mouse *m, object_info &c) {
@@ -241,26 +248,21 @@ int building_dock::window_info_handle_mouse(const mouse *m, object_info &c) {
 }
 
 bool building_dock::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i t, color color_mask) {
-    int num_dockers = count_idle_dockers();
-    if (num_dockers > 0) {
+    int num_idle_dockers = count_idle_dockers();
+    if (num_idle_dockers > 0) {
         int image_dock = map_image_at(t);
-        int image_dockers = image_id_from_group(GROUP_BUILDING_DOCK_DOCKERS);
-        if (image_dock == image_group(IMG_BUILDING_DOCK))
-            image_dockers += 0;
-        else if (image_dock == image_group(IMG_BUILDING_DOCK) + 1)
-            image_dockers += 3;
-        else if (image_dock == image_group(IMG_BUILDING_DOCK) + 2)
-            image_dockers += 6;
-        else
-            image_dockers += 9;
+        animation_t anim_dockers;
+        int image_dock_base = dock_m.anim["base"].first_img();
+        if (image_dock == image_dock_base) anim_dockers = dock_m.anim["work_n"];
+        else if (image_dock == image_dock_base + 1) anim_dockers = dock_m.anim["work_w"];
+        else if (image_dock == image_dock_base + 2) anim_dockers = dock_m.anim["work_s"];
+        else anim_dockers = dock_m.anim["work_e"];
 
-        if (num_dockers == 2)
-            image_dockers += 1;
-        else if (num_dockers == 3)
-            image_dockers += 2;
-
-        const image_t* img = image_get(image_dockers);
-        ImageDraw::img_generic(ctx, image_dockers, t.x() + img->animation.sprite_offset.x, t.y() + img->animation.sprite_offset.y, color_mask);
+        data.dock.docker_anim_frame++;
+        data.dock.docker_anim_frame %= (anim_dockers.max_frames * anim_dockers.duration);
+        int img_id = anim_dockers.first_img() + (data.dock.docker_anim_frame / anim_dockers.duration) * 4;
+        const image_t* img = image_get(img_id);
+        ImageDraw::img_generic(ctx, img_id, point + anim_dockers.pos, color_mask);
     }
     return false;
 }
@@ -280,16 +282,20 @@ int building_dock::count_idle_dockers() const {
 }
 
 void building_river_update_open_water_access() {
-    OZZY_PROFILER_SECTION("Game/Run/Tick/Oper Water Access Update");
+    OZZY_PROFILER_SECTION("Game/Run/Tick/Open Water Access Update");
     tile2i river_entry = scenario_map_river_entry();
+    if (!river_entry.valid()) {
+        return;
+    }
+
     map_routing_calculate_distances_water_boat(river_entry);
 
     buildings_valid_do([] (building &b) {
-        bool found = map_terrain_is_adjacent_to_open_water(b.tile, 3);
+        bool found = map_terrain_is_adjacent_to_open_water(b.tile, b.size);
         if (found) {
             b.has_water_access = true;
             b.has_open_water_access = true;
-            auto ppoints = map_water_docking_points(&b);
+            ferry_tiles ppoints = map_water_docking_points(b);
             b.data.dock.dock_tiles[0] = ppoints.point_a.grid_offset();
             b.data.dock.dock_tiles[1] = ppoints.point_b.grid_offset();
         } else {
@@ -305,6 +311,16 @@ bool map_tile_is_connected_to_open_water(tile2i tile) {
     tile2i river_entry = scenario_map_river_entry();
     map_routing_calculate_distances_water_boat(river_entry);
     return map_terrain_is_adjacent_to_open_water(tile, 3);
+}
+
+int building_dock::trader_id() {
+    return figure_get(data.dock.trade_ship_id)->trader_id;
+}
+
+int building_dock::trader_city_id() {
+    return data.dock.trade_ship_id
+                ? figure_get(data.dock.trade_ship_id)->empire_city_id
+                : 0;
 }
 
 bool building_dock::is_good_accepted(int index) {
@@ -325,7 +341,7 @@ int building_dock_accepts_ship(int ship_id, int dock_id) {
 
     figure* f = figure_get(ship_id);
 
-    empire_city* city = empire_city_get(f->empire_city_id);
+    empire_city* city = g_empire.city(f->empire_city_id);
     for (int resource = RESOURCE_GRAIN; resource < RESOURCES_MAX; resource++) {
         if (city->sells_resource[resource] || city->buys_resource[resource]) {
             if (!dock->is_good_accepted(resource - 1)) {
@@ -339,7 +355,7 @@ int building_dock_accepts_ship(int ship_id, int dock_id) {
 
 building_dest map_get_free_destination_dock(int ship_id) {
     if (!city_buildings_has_working_dock())
-        return {0, map_point_invalid};
+        return {0, tile2i::invalid};
 
     int dock_id = 0;
     for (int i = 0; i < 10; i++) {
@@ -357,29 +373,17 @@ building_dest map_get_free_destination_dock(int ship_id) {
     }
     // BUG: when 10 docks in city, always takes last one... regardless of whether it is free
     if (dock_id <= 0)
-        return {0, map_point_invalid};
+        return {0, tile2i::invalid};
 
     building* dock = building_get(dock_id);
-    int dx, dy;
+    vec2i offset;
     switch (dock->data.dock.orientation) {
-    case 0:
-        dx = 1;
-        dy = -1;
-        break;
-    case 1:
-        dx = 3;
-        dy = 1;
-        break;
-    case 2:
-        dx = 1;
-        dy = 3;
-        break;
-    default:
-        dx = -1;
-        dy = 1;
-        break;
+    case 0: offset = {1, -1};  break;
+    case 1: offset = {3, 1}; break;
+    case 2: offset = {1, 3}; break;
+    default: offset = {-1, 1}; break;
     }
-    tile2i dock_tile = dock->tile.shifted(dx, dy);
+    tile2i dock_tile = dock->tile.shifted(offset.x, offset.y);
     tile2i dest_tile;
     map_point_store_result(dock_tile, dest_tile);
     dock->data.dock.trade_ship_id = ship_id;
@@ -388,7 +392,7 @@ building_dest map_get_free_destination_dock(int ship_id) {
 
 building_dest map_get_queue_destination_dock(int ship_id) {
     if (!city_buildings_has_working_dock())
-        return {0, map_point_invalid};
+        return {0, tile2i::invalid};
 
     // first queue position
     for (int i = 0; i < 10; i++) {
@@ -467,5 +471,5 @@ building_dest map_get_queue_destination_dock(int ship_id) {
             return {dock_id, dest_dock};
         }
     }
-    return {0, map_point_invalid};
+    return {0, tile2i::invalid};
 }

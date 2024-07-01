@@ -3,7 +3,7 @@
 #include "building/count.h"
 #include "city/coverage.h"
 #include "city/health.h"
-#include "city/houses.h"
+#include "city/city.h"
 #include "city/population.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -14,15 +14,17 @@
 
 #define ADVISOR_HEIGHT 18
 
+ui::advisor_health_window g_advisor_health_window;
+
 static int get_health_advice() {
-    house_demands* demands = city_houses_demands();
-    switch (demands->health) {
+    house_demands &demands = g_city.houses;
+    switch (demands.health) {
     case 1:
-        return demands->requiring.water_supply ? 1 : 0;
+        return demands.requiring.water_supply ? 1 : 0;
     case 2:
-        return demands->requiring.dentist ? 3 : 2;
+        return demands.requiring.dentist ? 3 : 2;
     case 3:
-        return demands->requiring.physician ? 5 : 4;
+        return demands.requiring.physician ? 5 : 4;
     case 4:
         return 6;
     default:
@@ -30,14 +32,14 @@ static int get_health_advice() {
     }
 }
 
-static int draw_background() {
+int ui::advisor_health_window::draw_background() {
     outer_panel_draw(vec2i{0, 0}, 40, ADVISOR_HEIGHT);
     painter ctx = game.painter();
     ImageDraw::img_generic(ctx, image_id_from_group(GROUP_ADVISOR_ICONS) + 6, 10, 10);
 
     lang_text_draw(56, 0, 60, 12, FONT_LARGE_BLACK_ON_LIGHT);
     if (city_population() >= 200) {
-        lang_text_draw_multiline(56, city_health() / 10 + 16, vec2i{60, 46}, 512, FONT_NORMAL_BLACK_ON_LIGHT);
+        lang_text_draw_multiline(56, g_city.health.value / 10 + 16, vec2i{60, 46}, 512, FONT_NORMAL_BLACK_ON_LIGHT);
     } else {
         lang_text_draw_multiline(56, 15, vec2i{60, 46}, 512, FONT_NORMAL_BLACK_ON_LIGHT);
     }
@@ -86,12 +88,6 @@ static int draw_background() {
     return ADVISOR_HEIGHT;
 }
 
-const advisor_window* window_advisor_health() {
-    static const advisor_window window = {
-        draw_background,
-        nullptr,
-        nullptr,
-        nullptr
-    };
-    return &window;
+advisor_window* ui::advisor_health_window::instance() {
+    return &g_advisor_health_window;
 }

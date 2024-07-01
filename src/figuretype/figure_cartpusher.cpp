@@ -17,28 +17,80 @@
 #include "figure/movement.h"
 #include "figure/route.h"
 #include "game/resource.h"
+#include "game/game.h"
 #include "graphics/image.h"
 #include "grid/road_network.h"
+#include "grid/terrain.h"
+#include "window/building/figures.h"
+#include "graphics/elements/ui.h"
 #include "grid/routing/routing_terrain.h"
 #include "config/config.h"
 
 #include "city/finance.h"
 #include "js/js_game.h"
 
-struct cartpusher_model : public figures::model_t<FIGURE_CART_PUSHER, figure_cartpusher> {};
-cartpusher_model cartpusher_m;
+figures::model_t<figure_cartpusher> cartpusher_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_cartpusher);
 void config_load_figure_cartpusher() {
-    g_config_arch.r_section("figure_cartpusher", [] (archive arch) {
-        cartpusher_m.anim.load(arch);
-        cartpusher_m.sounds.load(arch);
-    });
+    cartpusher_m.load();
 }
 
 static const int CART_OFFSET_MULTIPLE_LOADS_FOOD[] = {0, 0, 8, 16, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 static const int CART_OFFSET_MULTIPLE_LOADS_NON_FOOD[] = {0, 0, 0, 0, 0, 8, 0, 16, 24, 32, 40, 48, 56, 64, 72, 80};
 static const int CART_OFFSET_8_LOADS_FOOD[] = {0, 40, 48, 56, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+bool figure_carrier::window_info_background(object_info &ctx) {
+    painter p = game.painter();
+    ImageDraw::img_generic(p, big_people_image(type()), ctx.offset + vec2i{28, 112});
+
+    lang_text_draw(name_group_id(), base.name, ctx.offset.x + 90, ctx.offset.y + 108, FONT_LARGE_BLACK_ON_DARK);
+    int width = 0;
+    if (base.has_home()) {
+        width += lang_text_draw(41, home()->type, ctx.offset.x + 92, ctx.offset.y + 139, FONT_NORMAL_BLACK_ON_DARK);
+    }
+    width += lang_text_draw(64, type(), ctx.offset.x + 92 + width, ctx.offset.y + 139, FONT_NORMAL_BLACK_ON_DARK);
+
+    if (action_state() != FIGURE_ACTION_132_DOCKER_IDLING && base.resource_id) {
+        int resource = base.resource_id;
+        ImageDraw::img_generic(p, image_id_resource_icon(resource) + resource_image_offset(resource, RESOURCE_IMAGE_ICON), ctx.offset + vec2i{92, 154});
+
+        width = text_draw_number(base.resource_amount_full, ' ', " ", ctx.offset.x + 108, ctx.offset.y + 154, FONT_NORMAL_BLACK_ON_DARK);
+        width += lang_text_draw(129, 20, ctx.offset.x + 108 + width, ctx.offset.y + 154, FONT_NORMAL_BLACK_ON_DARK);
+        width += lang_text_draw(23, base.resource_id, ctx.offset.x + 108 + width, ctx.offset.y + 154, FONT_NORMAL_BLACK_ON_DARK);
+    }
+
+    //    int phrase_height = lang_text_draw_multiline(130, 21 * c->figure.sound_id + c->figure.phrase_id + 1,
+    //                                                 c->offset.x + 90, c->offset.y + 160, 16 * (c->width_blocks - 8),
+    //                                                 FONT_NORMAL_GREEN);
+
+    if (!base.has_home()) {
+        return true;
+    }
+
+    building* source_building = home();
+    building* target_building = destination();
+    bool is_returning = false;
+    switch (action_state()) {
+    case ACTION_11_RETURNING_EMPTY:
+    case FIGURE_ACTION_27_CARTPUSHER_RETURNING:
+    case FIGURE_ACTION_53_WAREHOUSEMAN_RETURNING_EMPTY:
+    case FIGURE_ACTION_56_WAREHOUSEMAN_RETURNING_WITH_FOOD:
+    case FIGURE_ACTION_59_WAREHOUSEMAN_RETURNING_WITH_RESOURCE:
+    case FIGURE_ACTION_134_DOCKER_EXPORT_QUEUE:
+    case FIGURE_ACTION_137_DOCKER_EXPORT_RETURNING:
+    case FIGURE_ACTION_138_DOCKER_IMPORT_RETURNING:
+        is_returning = true;
+        break;
+    }
+
+    if (ctx.figure.phrase_group > 0 && ctx.figure.phrase_id >= 0) {
+        lang_text_draw_multiline(ctx.figure.phrase_group, ctx.figure.phrase_id, ctx.offset + vec2i{90, 180}, 16 * (ctx.bgsize.x - 8), FONT_NORMAL_BLACK_ON_DARK);
+    }
+
+    return true;
+}
+
 
 void figure_carrier::load_resource(e_resource resource, int amount) {
     base.resource_id = resource;
@@ -61,7 +113,7 @@ int figure::get_carrying_amount() {
 }
 
 void figure_cartpusher::do_deliver(bool warehouseman, int action_done) {
-    base.anim_frame = 0;
+    base.anim.frame = 0;
     base.wait_ticks++;
 
     if ((!warehouseman && base.wait_ticks >= 10) || (warehouseman && base.wait_ticks >= 4)) {
@@ -115,7 +167,8 @@ void figure_cartpusher::do_deliver(bool warehouseman, int action_done) {
 
             case BUILDING_RECRUITER:
                 for (int i = 0; i < times; i++) { // do one by one...
-                    dest->barracks_add_weapon(amount_single_turn);
+                    building_recruiter *recruiter = dest->dcast_recruiter();
+                    recruiter->add_weapon(amount_single_turn);
                     dump_resource(amount_single_turn); // assume barracks will ALWAYS accept a weapon
                 }
                 break;
@@ -173,7 +226,7 @@ void figure_cartpusher::do_deliver(bool warehouseman, int action_done) {
 
 void figure_cartpusher::do_retrieve(int action_done) {
     base.wait_ticks++;
-    base.anim_frame = 0;
+    base.anim.frame = 0;
     if (base.wait_ticks > 4) {
         building* dest = destination();
         switch (dest->type) {
@@ -221,7 +274,7 @@ void figure_cartpusher::do_retrieve(int action_done) {
 
 void figure_cartpusher::calculate_destination(bool warehouseman) {
     set_destination(0);
-    base.anim_frame = 0;
+    base.anim.frame = 0;
     base.wait_ticks++;
 
     if (!warehouseman) {
@@ -285,8 +338,7 @@ void figure_cartpusher::determine_deliveryman_destination() {
         int dist = 0;
         building* src_building = home();
         building* dst_building = destination();
-        int src_int = src_building->type;
-        if ((src_int >= BUILDING_BARLEY_FARM && src_int <= BUILDING_CHICKPEAS_FARM) || src_int == BUILDING_FISHING_WHARF) {
+        if (src_building->dcast_farm() || src_building->dcast_fishing_wharf()) {
             dist = calc_distance_with_penalty(src_building->tile, dst_building->tile, src_building->distance_from_entry,dst_building->distance_from_entry);
         }
 
@@ -320,8 +372,7 @@ void figure_cartpusher::determine_deliveryman_destination() {
         int dist = 0;
         building* src_building = home();
         building* dst_building = destination();
-        int src_int = src_building->type;
-        if ((src_int >= BUILDING_BARLEY_FARM && src_int <= BUILDING_CHICKPEAS_FARM) || src_int == BUILDING_FISHING_WHARF) {
+        if (src_building->dcast_farm() || src_building->dcast_fishing_wharf()) {
             dist = calc_distance_with_penalty(src_building->tile, dst_building->tile, src_building->distance_from_entry, dst_building->distance_from_entry);
         }
 
@@ -546,6 +597,9 @@ void figure_cartpusher::figure_before_action() {
     }
 }
 
+void figure_cartpusher::before_poof() {
+}
+
 void figure_cartpusher::figure_action() {
     OZZY_PROFILER_SECTION("Game/Run/Tick/Figure/Cartpusher");
     building* b = home();
@@ -555,12 +609,15 @@ void figure_cartpusher::figure_action() {
     case FIGURE_ACTION_20_CARTPUSHER_INITIAL:
         calculate_destination(false);
         break;
+
     case ACTION_9_DELIVERING_GOODS:
-        do_gotobuilding(destination(), true, TERRAIN_USAGE_ROADS, ACTION_12_UNLOADING1, ACTION_8_RECALCULATE);
+        do_gotobuilding(destination(), true, TERRAIN_USAGE_ROADS, ACTION_12_DELIVERING_UNLOADING_GOODS, ACTION_8_RECALCULATE);
         break;
+
     case ACTION_10_DELIVERING_FOOD:
-        do_gotobuilding(destination(), true, TERRAIN_USAGE_ROADS, ACTION_13_UNLOADING2, ACTION_8_RECALCULATE);
+        do_gotobuilding(destination(), true, TERRAIN_USAGE_ROADS, ACTION_13_DELIVERING_UNLOADING_FOODS, ACTION_8_RECALCULATE);
         break;
+
     case ACTION_11_DELIVERING_GOLD:
         do_gotobuilding(destination(), true, TERRAIN_USAGE_ROADS, ACTION_14_UNLOADING_GOLD, ACTION_8_RECALCULATE);
         break;
@@ -599,13 +656,16 @@ void figure_cartpusher::figure_draw(painter &ctx, vec2i pixel, int highlight, ve
     base.draw_figure_with_cart(ctx, base.cached_pos, highlight, coord_out);
 }
 
-bool figure_cartpusher::window_info_background(object_info &ctx) {
-    base.draw_cartpusher(&ctx);
-    return true;
-}
-
 figure_sound_t figure_cartpusher::get_sound_reaction(pcstr key) const {
     return cartpusher_m.sounds[key];
+}
+
+bool figure_cartpusher::can_move_by_water() const {
+    return map_terrain_is(tile(), TERRAIN_FERRY_ROUTE);
+}
+
+const animations_t &figure_cartpusher::anim() const {
+    return cartpusher_m.anim;
 }
 
 sound_key figure_cartpusher::phrase_key() const {

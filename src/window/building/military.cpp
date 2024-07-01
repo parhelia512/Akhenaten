@@ -16,8 +16,8 @@
 #include "graphics/window.h"
 #include "grid/routing/routing.h"
 #include "io/gamefiles/lang.h"
-#include "sound/speech.h"
-#include "window/city.h"
+#include "sound/sound.h"
+#include "window/window_city.h"
 #include "window/building/common.h"
 #include "game/game.h"
 
@@ -69,82 +69,10 @@ static void draw_priority_buttons(int x, int y, int buttons) {
 
 void window_building_draw_wall(object_info* c) {
     c->help_id = 85;
-    window_building_play_sound(c, "wavs/wall.wav");
+    window_building_play_sound(c, "Wavs/wall.wav");
     outer_panel_draw(c->offset, c->bgsize.x, c->bgsize.y);
     lang_text_draw_centered(139, 0, c->offset.x, c->offset.y + 10, 16 * c->bgsize.x, FONT_LARGE_BLACK_ON_LIGHT);
     window_building_draw_description_at(c, 16 * c->bgsize.y - 158, 139, 1);
-}
-
-void window_building_draw_ferry(object_info* c) {
-    c->help_id = 85;
-    window_building_play_sound(c, "wavs/gatehouse.wav");
-    outer_panel_draw(c->offset, c->bgsize.x, c->bgsize.y);
-    lang_text_draw_centered(e_text_ferry_landing, 0, c->offset.x, c->offset.y + 10, 16 * c->bgsize.x, FONT_LARGE_BLACK_ON_LIGHT);
-    building *ferry = building_get(c->building_id);
-    if (!map_routing_ferry_has_routes(ferry)) {
-        window_building_draw_description_at(c, 16 * c->bgsize.y - 158, e_text_ferry_landing, e_text_ferry_landing_no_routes);
-    } else if (!ferry->has_road_access) {
-        window_building_draw_description_at(c, 16 * c->bgsize.y - 158, e_text_ferry_landing, e_text_ferry_landing_no_roads);
-    } else if (ferry->num_workers <= 0) {
-        window_building_draw_description_at(c, 16 * c->bgsize.y - 158, e_text_ferry_landing, e_text_ferry_landing_no_workers);
-    }
-}
-
-void window_building_draw_gatehouse(object_info* c) {
-    c->help_id = 85;
-    window_building_play_sound(c, "wavs/gatehouse.wav");
-    outer_panel_draw(c->offset, c->bgsize.x, c->bgsize.y);
-    lang_text_draw_centered(e_text_gate_house, 0, c->offset.x, c->offset.y + 10, 16 * c->bgsize.x, FONT_LARGE_BLACK_ON_LIGHT);
-    window_building_draw_description_at(c, 16 * c->bgsize.y - 158, 90, 1);
-}
-
-void window_building_draw_tower(object_info* c) {
-    c->help_id = 85;
-    window_building_play_sound(c, "wavs/tower.wav");
-    outer_panel_draw(c->offset, c->bgsize.x, c->bgsize.y);
-    lang_text_draw_centered(e_text_tower, 0, c->offset.x, c->offset.y + 10, 16 * c->bgsize.x, FONT_LARGE_BLACK_ON_LIGHT);
-
-    building* b = building_get(c->building_id);
-    if (!c->has_road_access)
-        window_building_draw_description(c, 69, 25);
-    else if (b->num_workers <= 0)
-        window_building_draw_description(c, 91, 2);
-    else if (b->has_figure(0))
-        window_building_draw_description(c, 91, 3);
-    else {
-        window_building_draw_description(c, 91, 4);
-    }
-    inner_panel_draw(c->offset.x + 16, c->offset.y + 136, c->bgsize.x - 2, 4);
-    window_building_draw_employment(c, 142);
-}
-
-void window_building_draw_military_academy(object_info* c) {
-    c->help_id = 88;
-    window_building_play_sound(c, "wavs/mil_acad.wav");
-    outer_panel_draw(c->offset, c->bgsize.x, c->bgsize.y);
-    lang_text_draw_centered(135, 0, c->offset.x, c->offset.y + 10, 16 * c->bgsize.x, FONT_LARGE_BLACK_ON_LIGHT);
-
-    building* b = building_get(c->building_id);
-    if (!c->has_road_access)
-        window_building_draw_description(c, 69, 25);
-    else if (b->num_workers <= 0)
-        window_building_draw_description(c, 135, 2);
-    else if (c->worker_percentage >= 100)
-        window_building_draw_description(c, 135, 1);
-    else {
-        window_building_draw_description(c, 135, 3);
-    }
-    inner_panel_draw(c->offset.x + 16, c->offset.y + 136, c->bgsize.x - 2, 4);
-    window_building_draw_employment(c, 142);
-}
-
-void window_building_draw_fort(object_info* c) {
-    c->help_id = 87;
-    window_building_play_sound(c, "wavs/fort.wav");
-    outer_panel_draw(c->offset, c->bgsize.x, c->bgsize.y);
-    lang_text_draw_centered(89, 0, c->offset.x, c->offset.y + 10, 16 * c->bgsize.x, FONT_LARGE_BLACK_ON_LIGHT);
-    int text_id = formation_get(c->formation_id)->cursed_by_mars ? 1 : 2;
-    window_building_draw_description_at(c, 16 * c->bgsize.y - 158, 89, text_id);
 }
 
 void window_building_draw_legion_info(object_info* c) {
@@ -253,8 +181,10 @@ void window_building_draw_legion_info(object_info* c) {
 void window_building_draw_legion_info_foreground(object_info* c) {
     auto& data = g_military_data;
     const formation* m = formation_get(c->formation_id);
-    if (!m->num_figures)
+    if (!m->num_figures) {
         return;
+    }
+
     for (int i = 5 - c->formation_types; i < 5; i++) {
         int has_focus = 0;
         if (data.focus_button_id) {
@@ -366,13 +296,13 @@ void window_building_draw_legion_info_foreground(object_info* c) {
 int window_building_handle_mouse_legion_info(const mouse* m, object_info* c) {
     auto& data = g_military_data;
     data.context_for_callback = c;
-    int button_id = generic_buttons_handle_mouse(m, c->offset.x, c->offset.y, layout_buttons, 5, &data.focus_button_id);
+    int button_id = generic_buttons_handle_mouse(m, c->offset, layout_buttons, 5, &data.focus_button_id);
     if (formation_get(c->formation_id)->figure_type == FIGURE_INFANTRY) {
         if (data.focus_button_id == 1 || (data.focus_button_id == 2 && c->formation_types == 3))
             data.focus_button_id = 0;
     }
     if (!button_id) {
-        button_id = generic_buttons_handle_mouse(m, c->offset.x + 16 * (c->bgsize.x - 18) / 2, c->offset.y + 16 * c->bgsize.y - 48, return_button, 1, &data.return_button_id);
+        button_id = generic_buttons_handle_mouse(m, {c->offset.x + 16 * (c->bgsize.x - 18) / 2, c->offset.y + 16 * c->bgsize.y - 48}, return_button, 1, &data.return_button_id);
     }
     data.context_for_callback = 0;
     return button_id;
@@ -443,19 +373,19 @@ static void button_layout(int index, int param2) {
     formation_legion_change_layout(m, new_layout);
     switch (index) {
     case 0:
-        sound_speech_play_file("wavs/cohort1.wav");
+        g_sound.speech_play_file("Wavs/cohort1.wav", 255);
         break;
     case 1:
-        sound_speech_play_file("wavs/cohort2.wav");
+        g_sound.speech_play_file("Wavs/cohort2.wav", 255);
         break;
     case 2:
-        sound_speech_play_file("wavs/cohort3.wav");
+        g_sound.speech_play_file("Wavs/cohort3.wav", 255);
         break;
     case 3:
-        sound_speech_play_file("wavs/cohort4.wav");
+        g_sound.speech_play_file("Wavs/cohort4.wav", 255);
         break;
     case 4:
-        sound_speech_play_file("wavs/cohort5.wav");
+    g_sound.speech_play_file("Wavs/cohort5.wav", 255);
         break;
     }
     window_city_military_show(data.context_for_callback->formation_id);

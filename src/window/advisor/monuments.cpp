@@ -1,12 +1,11 @@
 #include "monuments.h"
 
-#include "city/city_data.h"
-#include "city/emperor.h"
+#include "city/city.h"
 #include "city/finance.h"
 #include "city/military.h"
 #include "city/ratings.h"
 #include "city/resource.h"
-#include "empire/empire_city.h"
+#include "empire/empire.h"
 #include "figure/formation_legion.h"
 #include "graphics/image.h"
 #include "graphics/graphics.h"
@@ -16,16 +15,18 @@
 #include "graphics/elements/panel.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
-#include "scenario/property.h"
+#include "scenario/scenario.h"
 #include "scenario/request.h"
 #include "window/donate_to_city.h"
-#include "window/empire.h"
-#include "window/gift_to_emperor.h"
+#include "window/window_empire.h"
+#include "window/window_gift_to_kingdome.h"
 #include "window/popup_dialog.h"
 #include "window/set_salary.h"
 #include "game/game.h"
 
 #define ADVISOR_HEIGHT 27
+
+ui::advisor_monuments_window g_advisor_monuments_window;
 
 enum E_STATUS_2 {
     STATUS_NOT_ENOUGH_RESOURCES = -1,
@@ -90,10 +91,10 @@ static void draw_request(int index, const scenario_request* request) {
     }
 }
 
-static int draw_background(void) {
+int ui::advisor_monuments_window::draw_background() {
     painter ctx = game.painter();
     int military_resource = RESOURCE_WEAPONS;
-    city_emperor_calculate_gift_costs();
+    g_city.kingdome.calculate_gift_costs();
 
     outer_panel_draw(vec2i{0, 0}, 40, ADVISOR_HEIGHT);
     ImageDraw::img_generic(ctx, image_id_from_group(GROUP_ADVISOR_ICONS) + 2, vec2i{10, 10});
@@ -101,9 +102,9 @@ static int draw_background(void) {
     text_draw(city_player_name(), 60, 12, FONT_LARGE_BLACK_ON_LIGHT, 0);
 
     int width = lang_text_draw(52, 0, 60, 44, FONT_NORMAL_BLACK_ON_LIGHT);
-    text_draw_number(city_rating_kingdom(), '@', " ", 60 + width, 44, FONT_NORMAL_BLACK_ON_LIGHT);
+    text_draw_number(g_city.ratings.kingdom, '@', " ", 60 + width, 44, FONT_NORMAL_BLACK_ON_LIGHT);
 
-    lang_text_draw_multiline(52, city_rating_kingdom() / 5 + 22, vec2i{60, 60}, 544, FONT_NORMAL_BLACK_ON_LIGHT);
+    lang_text_draw_multiline(52, g_city.ratings.kingdom / 5 + 22, vec2i{60, 60}, 544, FONT_NORMAL_BLACK_ON_LIGHT);
 
     inner_panel_draw(32, 90, 36, 14);
 
@@ -114,7 +115,8 @@ static int draw_background(void) {
         button_border_draw(38, 96, 560, 40, 0);
         ImageDraw::img_generic(ctx, image_id_resource_icon(military_resource), vec2i{50, 106});
         width = lang_text_draw(52, 72, 80, 102, FONT_NORMAL_WHITE_ON_DARK);
-        lang_text_draw(21, empire_city_get(city_military_distant_battle_city())->name_id, 80 + width, 102, FONT_NORMAL_WHITE_ON_DARK);
+        int name_id = g_empire.city(city_military_distant_battle_city())->name_id;
+        lang_text_draw(21, name_id, 80 + width, 102, FONT_NORMAL_WHITE_ON_DARK);
         int strength_text_id;
         int enemy_strength = city_military_distant_battle_enemy_strength();
         if (enemy_strength < 46)
@@ -166,20 +168,20 @@ static int get_request_status(int index) {
     return 0;
 }
 
-static void draw_foreground(void) {
+void ui::advisor_monuments_window::draw_foreground() {
     inner_panel_draw(64, 324, 32, 6);
 
-    lang_text_draw(32, city_emperor_rank(), 72, 338, FONT_LARGE_BLACK_ON_DARK);
+    lang_text_draw(32, g_city.kingdome.player_rank, 72, 338, FONT_LARGE_BLACK_ON_DARK);
 
     int width = lang_text_draw(52, 1, 72, 372, FONT_NORMAL_WHITE_ON_DARK);
-    text_draw_money(city_emperor_personal_savings(), 80 + width, 372, FONT_NORMAL_WHITE_ON_DARK);
+    text_draw_money(g_city.kingdome.personal_savings, 80 + width, 372, FONT_NORMAL_WHITE_ON_DARK);
 
     button_border_draw(320, 367, 250, 20, focus_button_id == 1);
     lang_text_draw_centered(52, 2, 320, 372, 250, FONT_NORMAL_WHITE_ON_DARK);
 
     button_border_draw(70, 393, 500, 20, focus_button_id == 2);
-    width = lang_text_draw(52, city_emperor_salary_rank() + 4, 120, 398, FONT_NORMAL_WHITE_ON_DARK);
-    width += text_draw_number(city_emperor_salary_amount(), '@', " ", 120 + width, 398, FONT_NORMAL_WHITE_ON_DARK);
+    width = lang_text_draw(52, g_city.kingdome.salary_rank + 4, 120, 398, FONT_NORMAL_WHITE_ON_DARK);
+    width += text_draw_number(g_city.kingdome.salary_amount, '@', " ", 120 + width, 398, FONT_NORMAL_WHITE_ON_DARK);
     lang_text_draw(52, 3, 120 + width, 398, FONT_NORMAL_WHITE_ON_DARK);
 
     button_border_draw(320, 341, 250, 20, focus_button_id == 3);
@@ -202,55 +204,23 @@ static void draw_foreground(void) {
     //    button_border_draw(38, 264, 560, 40, focus_button_id == 8);
 }
 
-static int handle_mouse(const mouse* m) {
-    return generic_buttons_handle_mouse(m, 0, 0, imperial_buttons, 8, &focus_button_id);
+int ui::advisor_monuments_window::handle_mouse(const mouse* m) {
+    return generic_buttons_handle_mouse(m, {0, 0}, imperial_buttons, 8, &focus_button_id);
 }
 
 static void button_donate_to_city(int param1, int param2) {
-    window_donate_to_city_show();
 }
 
 static void button_set_salary(int param1, int param2) {
-    window_set_salary_show();
 }
 
 static void button_gift_to_emperor(int param1, int param2) {
-    window_gift_to_emperor_show();
 }
 
 static void confirm_nothing(bool accepted) {
 }
 
 static void button_request(int index, int param2) {
-    int status = get_request_status(index);
-    if (status) {
-        city_military_clear_empire_service_legions();
-        switch (status) {
-        case STATUS_NO_LEGIONS_AVAILABLE:
-            window_ok_dialog_show("#popup_dialog_no_legions_available");
-            break;
-
-        case STATUS_NO_LEGIONS_SELECTED:
-            window_ok_dialog_show("#popup_dialog_no_legions_selected");
-            break;
-
-        case STATUS_CONFIRM_SEND_LEGIONS:
-            window_yes_dialog_show("#popup_dialog_send_troops", [] {
-                formation_legions_dispatch_to_distant_battle();
-                window_empire_show();
-            });
-            break;
-
-        case STATUS_NOT_ENOUGH_RESOURCES:
-            window_ok_dialog_show("#popup_dialog_not_enough_goods");
-            break;
-
-        default:
-            selected_request_id = status - 1;
-            window_yes_dialog_show("#popup_dialog_send_goods", [] { scenario_request_dispatch(selected_request_id); });
-            break;
-        }
-    }
 }
 
 static int get_tooltip_text(void) {
@@ -263,12 +233,6 @@ static int get_tooltip_text(void) {
     }
 }
 
-const advisor_window* window_advisor_monuments(void) {
-    static const advisor_window window = {
-        draw_background,
-        draw_foreground,
-        handle_mouse,
-        get_tooltip_text
-    };
-    return &window;
+advisor_window* ui::advisor_monuments_window::instance() {
+    return &g_advisor_monuments_window;
 }

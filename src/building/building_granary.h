@@ -33,9 +33,10 @@ public:
     virtual void window_info_background(object_info &ctx) override;
     virtual void window_info_foreground(object_info &ctx) override;
     virtual int window_info_handle_mouse(const mouse *m, object_info &c) override;
+    virtual void on_place_checks() override;
 
-    const building_storage *storage();
-    int amount(e_resource resource);
+    const building_storage *storage() const;
+    int amount(e_resource resource) const;
     bool is_accepting(e_resource resource);
     int is_not_accepting(e_resource resource);
     bool is_getting(e_resource resource);
@@ -43,11 +44,13 @@ public:
     int add_resource(e_resource resource, int is_produced, int amount);
     int total_stored() const;
     int space_for() const;
+    bool is_empty_all() const;
 
     void bless();
     bool is_gettable(e_resource resource);
     granary_task_status determine_worker_task();
     int remove_resource(e_resource resource, int amount);
+    void draw_stores(vec2i point, color color_mask, painter &ctx);
     static int remove_for_getting_deliveryman(building* src, building* dst, e_resource& resource);
 
     void draw_orders_foreground(object_info &c);

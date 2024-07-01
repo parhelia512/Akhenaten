@@ -2,17 +2,16 @@
 
 #include "core/profiler.h"
 #include "grid/road_network.h"
-
+#include "graphics/graphics.h"
+#include "graphics/image.h"
+#include "game/game.h"
 #include "js/js_game.h"
 
-struct storageyard_cart_model : public figures::model_t<FIGURE_STORAGEYARD_CART, figure_storageyard_cart> {};
-storageyard_cart_model storageyard_cart_m;
+figures::model_t<figure_storageyard_cart> storageyard_cart_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_storageyard_cart);
 void config_load_figure_storageyard_cart() {
-    g_config_arch.r_section("figure_storageyard_cart", [] (archive arch) {
-        storageyard_cart_m.anim.load(arch);
-    });
+    storageyard_cart_m.load();
 }
 
 void figure_storageyard_cart::figure_before_action() {
@@ -40,7 +39,7 @@ void figure_storageyard_cart::figure_action() {
         do_gotobuilding(destination(), true, TERRAIN_USAGE_ROADS, FIGURE_ACTION_52_WAREHOUSEMAN_AT_DELIVERY_BUILDING, ACTION_8_RECALCULATE);
         break;
 
-    case ACTION_12_UNLOADING1:
+    case ACTION_12_DELIVERING_UNLOADING_GOODS:
     case FIGURE_ACTION_52_WAREHOUSEMAN_AT_DELIVERY_BUILDING:
         do_deliver(true, ACTION_11_RETURNING_EMPTY);
         break;

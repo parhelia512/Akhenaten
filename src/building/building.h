@@ -4,6 +4,7 @@
 #include "core/bstring.h"
 #include "core/vec2i.h"
 #include "core/core.h"
+#include "core/calc.h"
 #include "graphics/animation.h"
 #include "graphics/color.h"
 #include "building/building_type.h"
@@ -14,7 +15,7 @@
 #include "figure/figure_type.h"
 #include "game/resource.h"
 #include "grid/point.h"
-#include "sound/city.h"
+#include "sound/sound_city.h"
 #include "model.h"
 
 #include <stdint.h>
@@ -43,12 +44,24 @@ class building_reed_gatherer;
 class building_papyrus_maker;
 class building_dock;
 class building_small_mastaba;
+class building_wood_cutter;
+class building_recruiter;
+class building_pavilion;
+class building_statue;
+class building_ferry;
+class building_fort_ground;
+class building_fort;
+class building_fishing_wharf;
+class building_shipyard;
+class building_plaza;
+class building_garden;
+class building_house;
+class building_burning_ruin;
 struct object_info;
 struct painter;
 struct mouse;
 
 constexpr uint32_t MAX_BUILDINGS = 4000;
-constexpr uint32_t MAX_FIGURES_PER_BUILDING = 8;
 
 enum e_labor_state {
     LABOR_STATE_NONE,
@@ -72,13 +85,20 @@ enum e_building_slot {
     BUILDING_SLOT_CARTPUSHER_2 = 3,
 };
 
+enum e_fancy_state {
+    efancy_normal,
+    efancy_good
+};
+
 class building_work_camp;
 class building_farm;
 
 class building {
 private:
-    short figure_ids_array[MAX_FIGURES_PER_BUILDING]; // oh boy!
-    class building_impl *_ptr = nullptr;
+    enum { max_figures = 4 };
+    class building_impl *_ptr = nullptr; // dcast
+
+    std::array<uint16_t, max_figures> figure_ids;
 
 public:
     struct metainfo {
@@ -127,7 +147,7 @@ public:
     short stored_full_amount;
     bool has_well_access;
     short num_workers;
-    short internal_state;
+    e_fancy_state fancy_state;
     e_labor_category labor_category;
     e_resource output_resource_first_id;
     e_resource output_resource_second_id;
@@ -142,6 +162,7 @@ public:
     short fire_duration;
     unsigned char health_proof;
     unsigned char fire_proof; // cannot catch fire or collapse
+    unsigned char damage_proof;
     unsigned char map_random_7bit;
     unsigned char house_tax_coverage;
     unsigned short tax_collector_id;
@@ -150,10 +171,11 @@ public:
         struct dock_t {
             short queued_docker_id;
             int dock_tiles[2];
-            unsigned char num_ships;
-            signed char orientation;
+            uint8_t num_ships;
+            char orientation;
             short docker_ids[3];
             short trade_ship_id;
+            uint8_t docker_anim_frame;
         } dock;
         struct market_t {
             short inventory[8];
@@ -169,6 +191,9 @@ public:
         struct guild_t {
             uint8_t max_workers;
         } guild;
+        struct farm_t {
+            uint8_t worker_frame;
+        } farm;
         struct industry_t {
             short ready_production;
             short progress;
@@ -188,7 +213,7 @@ public:
             short fishing_boat_id;
             int unk_40[40];
             e_labor_state labor_state;
-            unsigned char labor_days_left;
+            uint8_t labor_days_left;
             int unk_12[10];
             unsigned short work_camp_id;
             unsigned char worker_id;
@@ -216,28 +241,28 @@ public:
             uint8_t magistrate;
             uint8_t hippodrome;
             uint8_t school;
-            unsigned char library;
-            unsigned char academy;
-            unsigned char apothecary;
-            unsigned char dentist;
-            unsigned char mortuary;
-            unsigned char physician;
-            unsigned char temple_osiris;
-            unsigned char temple_ra;
-            unsigned char temple_ptah;
-            unsigned char temple_seth;
-            unsigned char temple_bast;
-            unsigned char no_space_to_expand;
-            unsigned char num_foods;
-            unsigned char entertainment;
-            unsigned char education;
-            unsigned char health;
-            unsigned char num_gods;
-            unsigned char shrine_access;
-            unsigned char devolve_delay;
-            unsigned char evolve_text_id;
-            unsigned char bazaar_access;
-            unsigned char water_supply;
+            uint8_t library;
+            uint8_t academy;
+            uint8_t apothecary;
+            uint8_t dentist;
+            uint8_t mortuary;
+            uint8_t physician;
+            uint8_t temple_osiris;
+            uint8_t temple_ra;
+            uint8_t temple_ptah;
+            uint8_t temple_seth;
+            uint8_t temple_bast;
+            uint8_t no_space_to_expand;
+            uint8_t num_foods;
+            uint8_t entertainment;
+            uint8_t education;
+            uint8_t health;
+            uint8_t num_gods;
+            uint8_t shrine_access;
+            uint8_t devolve_delay;
+            uint8_t evolve_text_id;
+            uint8_t bazaar_access;
+            uint8_t water_supply;
         } house;
         struct {
             uint8_t variant;
@@ -261,8 +286,10 @@ public:
         signed char house_happiness;
         signed char native_anger;
     } sentiment;
+    animation_t minimap_anim;
     uint8_t show_on_problem_overlay;
     uint16_t deben_storage;
+    animation_context anim;
 
     building();
     building* main();
@@ -272,7 +299,7 @@ public:
     building* top_xy();
     bool is_main();
 
-    inline bool is_valid() { return state == BUILDING_STATE_VALID; }
+    inline bool is_valid() { return type != BUILDING_NONE && state == BUILDING_STATE_VALID; }
     bool is_house();
     bool is_fort();
     bool is_defense();
@@ -303,17 +330,19 @@ public:
 
     void clear_related_data();
     void clear_impl();
+    void reset_impl();
     void new_fill_in_data_for_type(e_building_type type, tile2i tile, int orientation);
+    void update_tick(bool refresh_only);
 
     e_overlay get_overlay() const;
-
-    const int get_figureID(int i) const { return figure_ids_array[i]; };
+    const int get_figure_id(int i) const { return figure_ids[i]; };
 
     figure* get_figure(int i);
     void bind_iob_figures(io_buffer* iob);
     void set_figure(int i, int figure_id = -1);
     void set_figure(int i, figure* f);
     void remove_figure(int i);
+    void remove_figure_by_id(int id);
     bool has_figure(int i, int figure_id = -1);
     bool has_figure(int i, figure* f);
     bool has_figure_of_type(int i, e_figure_type _type);
@@ -363,44 +392,38 @@ public:
     building_dock *dcast_dock();
     building_work_camp *dcast_work_camp();
     building_small_mastaba *dcast_small_mastaba();
+    building_wood_cutter *dcast_wood_cutter();
+    building_recruiter *dcast_recruiter();
+    building_pavilion *dcast_pavilion();
+    building_statue *dcast_statue();
+    building_ferry *dcast_ferry();
+    building_fort *dcast_fort();
+    building_fort_ground *dcast_fort_ground();
+    building_fishing_wharf *dcast_fishing_wharf();
+    building_shipyard *dcast_shipyard();
+    building_plaza *dcast_plaza();
+    building_garden *dcast_garden();
+    building_house *dcast_house();
+    building_burning_ruin *dcast_burning_ruin();
 
     bool spawn_noble(bool spawned);
-    void spawn_figure_police();
-    void spawn_figure_dancer();
-    void spawn_figure_senet();
-    void spawn_figure_pavillion();
     void set_water_supply_graphic();
-    void spawn_figure_school();
-    void spawn_figure_library();
-    void spawn_figure_dentist();
-    void spawn_figure_mortuary();
-    void set_greate_palace_graphic();
-    void spawn_figure_tax_collector();
     void spawn_figure_industry();
-    void spawn_figure_wharf();
-    void spawn_figure_shipyard();
-    void spawn_figure_wood_cutters();
     void spawn_figure_native_hut();
     void spawn_figure_native_meeting();
-    void spawn_figure_tower();
 
     int get_figures_number(e_figure_type ftype);
-    bool can_spawn_gatherer(e_figure_type ftype, int max_gatherers_per_building, int carry_per_person);
 
     void update_native_crop_progress();
     tile2i access_tile();
-    void update_road_access();
     bool figure_generate();
 
     void school_add_papyrus(int amount);
 
-    void barracks_add_weapon(int amount);
     void monument_add_workers(int fid);
     void monument_remove_worker(int fid);
     void industry_add_workers(int fid);
     void industry_remove_worker(int fid);
-    int barracks_create_soldier();
-    bool barracks_create_tower_sentry();
     void barracks_toggle_priority();
     int barracks_get_priority();
 };
@@ -409,31 +432,47 @@ public:
 class building_impl {
 public:
     struct static_params {
+        static static_params dummy;
         pcstr name;
+        bool fire_proof;
+        bool damage_proof;
+        bool is_draggable;
         bstring64 meta_id;
+        building::metainfo meta;
         e_resource output_resource;
         e_labor_category labor_category;
-        static static_params dummy;
         animations_t anim;
+        uint8_t building_size;
+        int window_info_height_id;
+        int planer_relative_orientation;
+        uint16_t production_rate;
+        bool unique_building;
 
         void load(archive arch);
     };
 
     building_impl(building &b) : base(b), data(b.data) {}
     virtual void on_create(int orientation) {}
+    virtual void on_place(int orientation, int variant);
+    virtual void on_place_update_tiles(int orientation, int variant);
+    virtual void on_place_checks();
     virtual void on_destroy() {}
+    virtual void on_undo() {}
     virtual void spawn_figure() {}
-    virtual void update_graphic() {}
+    virtual void update_graphic();
     virtual void update_month() {}
     virtual void update_day();
-    virtual const static_params &params() const { return static_params::dummy; }
+    virtual const static_params &params() const { return params(type()); }
     virtual void window_info_background(object_info &ctx) {}
     virtual void window_info_foreground(object_info &ctx) {}
     virtual int window_info_handle_mouse(const mouse *m, object_info &c) { return 0; }
     virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask);
+    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) { return false; }
+    virtual bool force_draw_flat_tile(painter &ctx, tile2i tile, vec2i pixel, color mask) { return false; }
+    virtual bool force_draw_height_tile(painter &ctx, tile2i tile, vec2i pixel, color mask) { return false; }
     virtual e_overlay get_overlay() const { return OVERLAY_NONE; }
     virtual bool need_road_access() const { return true; }
-    virtual bool can_play_animation() const { return true; }
+    virtual bool can_play_animation() const;
     virtual void update_count() const {}
     virtual void update_map_orientation(int orientation) {}
     virtual e_sound_channel_city sound_channel() const { return SOUND_CHANNEL_CITY_NONE; }
@@ -441,7 +480,8 @@ public:
     virtual int get_produce_uptick_per_day() const { return base.num_workers; }
     virtual int get_fire_risk(int value) const { return value; }
     virtual std::pair<int, int> get_tooltip() const { return {-1, -1}; }
-    virtual int ready_production() const { return 100; }
+    virtual int ready_production() const { return params().production_rate; }
+    virtual void draw_normal_anim(painter &ctx, vec2i point, tile2i tile, color mask);
 
     virtual building_farm *dcast_farm() { return nullptr; }
     virtual building_brewery *dcast_brewery() { return nullptr; }
@@ -465,6 +505,19 @@ public:
     virtual building_dock *dcast_dock() { return nullptr; }
     virtual building_work_camp *dcast_work_camp() { return nullptr; }
     virtual building_small_mastaba *dcast_small_mastaba() { return nullptr; }
+    virtual building_wood_cutter *dcast_wood_cutter() { return nullptr; }
+    virtual building_recruiter *dcast_recruiter() { return nullptr; }
+    virtual building_pavilion *dcast_pavilion() { return nullptr; }
+    virtual building_statue *dcast_statue() { return nullptr; }
+    virtual building_ferry *dcast_ferry() { return nullptr; }
+    virtual building_fort *dcast_fort() { return nullptr; }
+    virtual building_fort_ground *dcast_fort_ground() { return nullptr; }
+    virtual building_fishing_wharf *dcast_fishing_wharf() { return nullptr; }
+    virtual building_shipyard *dcast_shipyard() { return nullptr; }
+    virtual building_plaza *dcast_plaza() { return nullptr; }
+    virtual building_garden *dcast_garden() { return nullptr; }
+    virtual building_house *dcast_house() { return nullptr; }
+    virtual building_burning_ruin *dcast_burning_ruin() { return nullptr; }
 
     inline building_impl *next() { return base.next()->dcast(); }
     inline building_impl *main() { return base.main()->dcast(); }
@@ -477,6 +530,8 @@ public:
     inline bool common_spawn_figure_trigger(int min_houses) { return base.common_spawn_figure_trigger(min_houses); }
     inline bool common_spawn_roamer(e_figure_type type, int min_houses, e_figure_action created_action) { return base.common_spawn_roamer(type, min_houses, created_action); }
     inline const model_building *model() const { return model_get_building(type()); }
+    inline int max_workers() const { return model_get_building(type())->laborers; }
+    inline int pct_workers() const { return calc_percentage<int>(num_workers(), max_workers()); }
 
     inline bool has_figure_of_type(int i, e_figure_type _type) { return base.has_figure_of_type(i, _type);  }
     inline figure *create_figure_with_destination(e_figure_type _type, building *destination, e_figure_action created_action = ACTION_10_GOING, e_building_slot slot = BUILDING_SLOT_SERVICE) { return base.create_figure_with_destination(_type, destination, created_action, slot); }
@@ -497,20 +552,28 @@ public:
     inline bool has_road_access() const { return base.has_road_access; }
     inline short distance_from_entry() const { return base.distance_from_entry; }
     inline int road_network() const { return base.road_network_id; }
+    inline const animation_t &anim(const xstring &key) const { return params().anim[key]; }
 
     virtual bool is_workshop() const { return false; }
     virtual bool is_administration() const { return false; }
     virtual bool is_unique_building() const { return false; }
     virtual void destroy_by_poof(bool clouds);
+    virtual void highlight_waypoints();
 
     using resources_vec = std::array<e_resource, 4>;
     virtual resources_vec required_resource() const { return {}; }
+    building::metainfo get_info() const;
+    void set_animation(const animation_t &anim);
+    inline void set_animation(const xstring &key) { set_animation(anim(key)); }
+
+    static void params(e_building_type, const static_params &);
+    static const static_params &params(e_building_type);
 
     building &base;
     building::impl_data_t &data;
 };
 
-inline bool building_is_house(e_building_type type) { return type >= BUILDING_HOUSE_VACANT_LOT && type <= BUILDING_HOUSE_LUXURY_PALACE; }
+inline bool building_is_house(e_building_type type) { return type >= BUILDING_HOUSE_VACANT_LOT && type <= BUILDING_HOUSE_PALATIAL_ESTATE; }
 
 int building_id_first(e_building_type type);
 building* building_first(e_building_type type);
@@ -572,26 +635,26 @@ bool building_is_harvester(e_building_type type);
 bool building_is_monument(int type);
 bool building_is_administration(e_building_type type);
 bool building_is_palace(e_building_type type);
-bool building_is_tax_collector(int type);
-bool building_is_governor_mansion(int type);
+bool building_is_tax_collector(e_building_type type);
+bool building_is_governor_mansion(e_building_type type);
 bool building_is_temple(int type);
 bool building_is_large_temple(int type);
 bool building_is_shrine(int type);
 bool building_is_guild(e_building_type type);
-bool building_is_statue(int type);
-bool building_is_beautification(int type);
-bool building_is_water_crossing(int type);
+bool building_is_statue(e_building_type type);
+bool building_is_beautification(e_building_type type);
+bool building_is_water_crossing(e_building_type type);
 bool building_is_industry_type(const building* b);
 
 bool building_is_industry(e_building_type type);
 bool building_is_food_category(e_building_type type);
-bool building_is_infrastructure(int type);
-bool building_is_religion(int type);
-bool building_is_entertainment(int type);
+bool building_is_infrastructure(e_building_type type);
+bool building_is_religion(e_building_type type);
+bool building_is_entertainment(e_building_type type);
 bool building_is_education(e_building_type type);
-bool building_is_military(int type);
+bool building_is_military(e_building_type type);
 
-bool building_is_draggable(int type);
+bool building_is_draggable(e_building_type type);
 
 int building_get_highest_id();
 void building_update_highest_id();
@@ -670,11 +733,7 @@ void buildings_valid_farms_do(T func) {
 template<typename ... Args, typename T>
 void buildings_valid_do(T func, Args ... args) {
     for (auto &b: city_buildings()) {
-        if (!building_type_any_of(b, args...)) {
-            continue;
-        }
-
-        if (b.is_valid()) {
+        if (b.is_valid() && building_type_any_of(b, args...)) {
             func(b);
         }
     }
@@ -707,24 +766,34 @@ using BuildingIterator = FuncLinkedList<create_building_function_cb>;
 
 template<typename T>
 struct model_t : public building_impl::static_params {
+    using building_type = T;
     static constexpr e_building_type TYPE = T::TYPE;
     static constexpr pcstr CLSID = T::CLSID;
 
     model_t() {
         name = CLSID;
         static BuildingIterator config_handler(&create);
+        building_impl::params(TYPE, *this);
     }
 
     void load() {
-        g_config_arch.r_section(name, [this] (archive arch) {
+        bool loaded = false;
+        g_config_arch.r_section(name, [&] (archive arch) {
             static_params::load(arch);
             city_labor_set_category(*this);
+            loaded = true;
+            this->load(arch);
         });
+        assert(loaded);
+    }
+
+    virtual void load(archive) {
+        /*overload options*/
     }
 
     static building_impl *create(e_building_type e, building &data) {
         if (e == TYPE) {
-            return new T(data);
+            return new building_type(data);
         }
         return nullptr;
     }

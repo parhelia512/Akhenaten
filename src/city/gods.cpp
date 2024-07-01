@@ -6,7 +6,7 @@
 #include "building/industry.h"
 #include "building/building_storage_yard.h"
 #include "city/coverage.h"
-#include "city/data_private.h"
+#include "city/city.h"
 #include "city/health.h"
 #include "city/message.h"
 #include "city/sentiment.h"
@@ -15,7 +15,6 @@
 #include "core/calc.h"
 #include "core/random.h"
 #include "figure/formation_legion.h"
-#include "figuretype/water.h"
 #include "floods.h"
 #include "game/settings.h"
 #include "game/tutorial.h"
@@ -24,12 +23,13 @@
 #include "config/config.h"
 #include "ratings.h"
 #include "scenario/invasion.h"
-#include "scenario/property.h"
+#include "scenario/scenario.h"
 #include "sound/effect.h"
 
 #include <algorithm>
 #include <array>
 
+static auto &city_data = g_city;
 void city_gods_reset() {
     for (auto &god: city_data.religion.gods) {
         god.type = e_god(std::distance(city_data.religion.gods, &god));
@@ -165,7 +165,7 @@ static bool PTAH_warehouse_destruction() {
             continue;
 
         int total_stored = 0;
-        for (e_resource r = RESOURCE_MIN; r < RESOURCES_MAX; r = (e_resource)(r + 1)) {
+        for (e_resource r = RESOURCE_MIN; r < RESOURCES_MAX; ++r) {
             total_stored += warehouse->amount(r);
         }
 
@@ -470,7 +470,7 @@ static void perform_major_blessing(e_god god) {
             return;
         } else {
             // increased kingdom by 15
-            city_ratings_change_kingdom(15);
+            g_city.ratings.change_kingdom(15);
             city_message_god_post(GOD_RA, true, MESSAGE_BLESSING_RA_KINGDOM, 0, 0);
             return;
         }
@@ -520,7 +520,7 @@ static void perform_minor_blessing(int god) {
         } else {
             // slightly increased reputation
             city_message_post(true, MESSAGE_SMALL_BLESSING_RA_1, 0, 0);
-            city_ratings_change_kingdom(5);
+            g_city.ratings.change_kingdom(5);
             return;
         }
         break;
@@ -579,7 +579,7 @@ static void perform_major_curse(int god) {
 
         if (anti_scum_random_15bit() % 3 == 1) {
             // lowers reputation
-            city_ratings_change_kingdom(-15);
+            g_city.ratings.change_kingdom(-15);
             city_message_post(true, MESSAGE_CURSE_RA_1, 0, 0);
             return;
         }
@@ -656,7 +656,7 @@ static void perform_minor_curse(e_god god) {
             return;
         } else {
             // lowers reputation
-            city_ratings_change_kingdom(-5);
+            g_city.ratings.change_kingdom(-5);
             city_message_god_post(GOD_RA, true, MESSAGE_SMALL_CURSE_RA_1, 0, 0);
             return;
         }

@@ -1,6 +1,6 @@
 #include "building/figure.h"
 
-#include "city/data_private.h"
+#include "city/city.h"
 
 #include "building/building_barracks.h"
 #include "building/building_granary.h"
@@ -13,7 +13,6 @@
 #include "building/monument_mastaba.h"
 #include "building/building_work_camp.h"
 #include "city/buildings.h"
-#include "city/data_private.h"
 #include "city/entertainment.h"
 #include "city/floods.h"
 #include "city/message.h"
@@ -49,17 +48,18 @@
 const int generic_delay_table[] = {0, 1, 3, 7, 15, 29, 44};
 
 figure* building::get_figure(int i) {
-    return ::figure_get(get_figureID(i));
+    return ::figure_get(get_figure_id(i));
 }
+
 void building::bind_iob_figures(io_buffer* iob) {
-    iob->bind(BIND_SIGNATURE_UINT16, &figure_ids_array[0]);
-    iob->bind(BIND_SIGNATURE_UINT16, &figure_ids_array[1]);
-    iob->bind(BIND_SIGNATURE_UINT16, &figure_ids_array[2]);
-    iob->bind(BIND_SIGNATURE_UINT16, &figure_ids_array[3]);
+    iob->bind(BIND_SIGNATURE_UINT16, &figure_ids[0]);
+    iob->bind(BIND_SIGNATURE_UINT16, &figure_ids[1]);
+    iob->bind(BIND_SIGNATURE_UINT16, &figure_ids[2]);
+    iob->bind(BIND_SIGNATURE_UINT16, &figure_ids[3]);
 }
 void building::set_figure(int i, int figure_id) {
     //assert(figure_ids_array[i] == 0);
-    figure_ids_array[i] = figure_id;
+    figure_ids[i] = figure_id;
 }
 
 void building::set_figure(int i, figure* f) {
@@ -70,11 +70,19 @@ void building::remove_figure(int i) {
     set_figure(i, 0);
 }
 
+void building::remove_figure_by_id(int id) {
+    for (auto &fid : figure_ids) {
+        if (fid == id) {
+            fid = 0;
+        }
+    }
+}
+
 bool building::has_figure(int i, int figure_id) {
     // seatrch through all the figures if index is -1
     if (i == -1) {
         bool has_any = false;
-        for (int i = 0; i < MAX_FIGURES_PER_BUILDING; i++) {
+        for (int i = 0; i < max_figures; i++) {
             if (has_figure(i, figure_id))
                 has_any = true;
         }
@@ -99,7 +107,7 @@ bool building::has_figure_of_type(int i, e_figure_type _type) {
     // seatrch through all the figures if index is -1
     if (i == -1) {
         bool has_any = false;
-        for (int i = 0; i < MAX_FIGURES_PER_BUILDING; i++) {
+        for (int i = 0; i < max_figures; i++) {
             if (get_figure(i)->type == _type) {
                 has_any = true;
             }
@@ -113,7 +121,7 @@ bool building::has_figure_of_type(int i, e_figure_type _type) {
 
 int building::get_figure_slot(figure* f) {
     // search through all the slots, check if figure matches
-    for (int i = 0; i < MAX_FIGURES_PER_BUILDING; i++) {
+    for (int i = 0; i < max_figures; i++) {
         if (has_figure(i, f)) {
             return i;
         }
@@ -368,141 +376,6 @@ bool building::spawn_noble(bool spawned) {
     return common_spawn_roamer(FIGURE_NOBLES, 50);
 }
 
-void building::spawn_figure_police() {
-    common_spawn_roamer(FIGURE_CONSTABLE, 50, FIGURE_ACTION_70_FIREMAN_CREATED);
-}
-
-void building::spawn_figure_dancer() {
-    if (common_spawn_figure_trigger(50)) {
-        int building_id = figure_entertainer::determine_venue_destination(road_access, {BUILDING_PAVILLION});
-        building* dest= building_get(building_id);
-        if (dest->id > 0) {
-            create_figure_with_destination(FIGURE_DANCER, dest, FIGURE_ACTION_92_ENTERTAINER_GOING_TO_VENUE);
-        } else {
-            common_spawn_roamer(FIGURE_DANCER, 50, FIGURE_ACTION_90_ENTERTAINER_AT_SCHOOL_CREATED);
-        }
-    }
-}
-
-void building::spawn_figure_pavillion() {
-    if (!is_main())
-        return;
-    if (common_spawn_figure_trigger(100)) {
-        if (data.entertainment.days1 > 0)
-            create_roaming_figure(FIGURE_JUGGLER, FIGURE_ACTION_94_ENTERTAINER_ROAMING);
-        if (data.entertainment.days2 > 0)
-            create_roaming_figure(FIGURE_MUSICIAN, FIGURE_ACTION_94_ENTERTAINER_ROAMING);
-        if (data.entertainment.days3_or_play > 0)
-            create_roaming_figure(FIGURE_DANCER, FIGURE_ACTION_94_ENTERTAINER_ROAMING);
-    }
-}
-
-void building::spawn_figure_senet() {
-    // TODO
-    //    check_labor_problem();
-    //    if (prev_part_building_id)
-    //        return;
-    //    building *part = b;
-    //    for (int i = 0; i < 2; i++) {
-    //        part = part->next();
-    //        if (part->id)
-    //            part->show_on_problem_overlay = show_on_problem_overlay;
-    //
-    //    }
-    //    if (has_figure_of_type(FIGURE_CHARIOTEER))
-    //        return;
-    //    map_point road;
-    //    if (map_has_road_access_hippodrome_rotation(x, y, &road, subtype.orientation)) {
-    //        if (houses_covered <= 50 || data.entertainment.days1 <= 0)
-    //            generate_labor_seeker(road.x, road.y);
-    //
-    //        int pct_workers = worker_percentage();
-    //        int spawn_delay;
-    //        if (pct_workers >= 100)
-    //            spawn_delay = 7;
-    //        else if (pct_workers >= 75)
-    //            spawn_delay = 15;
-    //        else if (pct_workers >= 50)
-    //            spawn_delay = 30;
-    //        else if (pct_workers >= 25)
-    //            spawn_delay = 50;
-    //        else if (pct_workers >= 1)
-    //            spawn_delay = 80;
-    //        else
-    //            return;
-    //        figure_spawn_delay++;
-    //        if (figure_spawn_delay > spawn_delay) {
-    //            figure_spawn_delay = 0;
-    //            figure *f = figure_create(FIGURE_CHARIOTEER, road.x, road.y, DIR_0_TOP_RIGHT);
-    //            f->action_state = FIGURE_ACTION_94_ENTERTAINER_ROAMING;
-    //            f->home() = b;
-    //            figure_id = f->id;
-    //            f->init_roaming();
-    //
-    //            if (!city_entertainment_hippodrome_has_race()) {
-    //                // create mini-horses
-    //                figure *horse1 = figure_create(FIGURE_HIPPODROME_HORSES, x + 2, y + 1, DIR_2_BOTTOM_RIGHT);
-    //                horse1->action_state = FIGURE_ACTION_200_HIPPODROME_HORSE_CREATED;
-    //                horse1->building_id = id;
-    //                horse1->set_resource(0);
-    //                horse1->speed_multiplier = 3;
-    //
-    //                figure *horse2 = figure_create(FIGURE_HIPPODROME_HORSES, x + 2, y + 2, DIR_2_BOTTOM_RIGHT);
-    //                horse2->action_state = FIGURE_ACTION_200_HIPPODROME_HORSE_CREATED;
-    //                horse2->building_id = id;
-    //                horse1->set_resource(1);
-    //                horse2->speed_multiplier = 2;
-    //
-    //                if (data.entertainment.days1 > 0) {
-    //                    if (city_entertainment_show_message_hippodrome())
-    //                        city_message_post(true, MESSAGE_WORKING_HIPPODROME, 0, 0);
-    //
-    //                }
-    //            }
-    //        }
-    //    }
-}
-
-void building::spawn_figure_library() {
-    common_spawn_roamer(FIGURE_LIBRARIAN, 50);
-    check_labor_problem();
-    //    if (has_figure_of_type(FIGURE_LIBRARIAN))
-    //        return;
-    //    map_point road;
-    //    if (map_has_road_access(x, y, size, &road)) {
-    //        spawn_labor_seeker(50);
-    //        int spawn_delay = figure_spawn_timer();
-    //        if (spawn_delay == -1)
-    //            return;
-    //        figure_spawn_delay++;
-    //        if (figure_spawn_delay > spawn_delay) {
-    //            figure_spawn_delay = 0;
-    //            create_roaming_figure(road.x, road.y, FIGURE_LIBRARIAN);
-    //        }
-    //    }
-}
-void building::spawn_figure_mortuary() {
-    common_spawn_roamer(FIGURE_EMBALMER, 50);
-    //    check_labor_problem();
-    //    if (has_figure_of_type(FIGURE_BARBER))
-    //        return;
-    //    map_point road;
-    //    if (map_has_road_access(x, y, size, &road)) {
-    //        spawn_labor_seeker(50);
-    //        int spawn_delay = figure_spawn_timer();
-    //        if (spawn_delay == -1)
-    //            return;
-    //        figure_spawn_delay++;
-    //        if (figure_spawn_delay > spawn_delay) {
-    //            figure_spawn_delay = 0;
-    //            create_roaming_figure(road.x, road.y, FIGURE_BARBER);
-    //        }
-    //    }
-}
-
-void building::spawn_figure_dentist() {
-    common_spawn_roamer(FIGURE_DENTIST, 50);
-}
 
 //void building::set_water_supply_graphic() {
 //    if (state != BUILDING_STATE_VALID) {
@@ -540,58 +413,6 @@ void building::set_water_supply_graphic() {
     //}
 }
 
-void building::set_greate_palace_graphic() {
-    if (state != BUILDING_STATE_VALID)
-        return;
-
-    if (map_desirability_get(tile.grid_offset()) <= 30) {
-        map_building_tiles_add(id, tile, size, image_id_from_group(GROUP_BUILDING_PALACE), TERRAIN_BUILDING);
-    } else {
-        map_building_tiles_add(id, tile, size, image_id_from_group(GROUP_BUILDING_PALACE_FANCY), TERRAIN_BUILDING);
-    }
-}
-
-void building::spawn_figure_tax_collector() {
-    if (type == BUILDING_TOWN_PALACE) {
-        set_greate_palace_graphic();
-    }
-
-    //common_spawn_roamer(FIGURE_TAX_COLLECTOR, 50);
-
-    check_labor_problem();
-    if (has_figure_of_type(0, FIGURE_TAX_COLLECTOR)) {
-        return;
-    }
-
-    if (!has_road_access) {
-        return;
-    }
-
-    common_spawn_labor_seeker(50);
-
-    int pct_workers = worker_percentage();
-    int spawn_delay;
-    if (pct_workers >= 100) {
-        spawn_delay = 0;
-    } else if (pct_workers >= 75) {
-        spawn_delay = 1;
-    } else if (pct_workers >= 50) {
-        spawn_delay = 3;
-    } else if (pct_workers >= 25) {
-        spawn_delay = 7;
-    } else if (pct_workers >= 1) {
-        spawn_delay = 15;
-    } else {
-        return;
-    }
-
-    figure_spawn_delay++;
-    if (figure_spawn_delay > spawn_delay) {
-        figure_spawn_delay = 0;
-        create_roaming_figure(FIGURE_TAX_COLLECTOR, FIGURE_ACTION_40_TAX_COLLECTOR_CREATED);
-    }
-}
-
 void building::spawn_figure_industry() {
     check_labor_problem();
     if (!has_road_access) {
@@ -610,108 +431,16 @@ void building::spawn_figure_industry() {
     }
 }
 
-void building::spawn_figure_wharf() {
-    check_labor_problem();
-    if (has_road_access) {
-        common_spawn_labor_seeker(100);
-        int pct_workers = worker_percentage();
-        int spawn_delay = figure_spawn_timer();
-        if (spawn_delay == -1) {
-            ; // nothing
-        } else {
-            figure_spawn_delay++;
-            if (data.industry.fishing_boat_id == 0 && figure_spawn_delay > spawn_delay) {
-                figure_spawn_delay = 0;
-
-                if (config_get(CONFIG_GP_CH_FISHING_WHARF_SPAWN_BOATS)) {
-                    tile2i dock_tile(data.dock.dock_tiles[0]);
-                    figure* f = figure_create(FIGURE_FISHING_BOAT, dock_tile, DIR_4_BOTTOM_LEFT);
-                    f->action_state = FIGURE_ACTION_190_FISHING_BOAT_CREATED;
-                    f->set_home(id);
-                    set_figure(BUILDING_SLOT_BOAT, f);
-                    random_generate_next();
-                    f->wait_ticks = random_short() % 30; // ok
-                    f->allow_move_type = EMOVE_BOAT;
-                    data.industry.fishing_boat_id = f->id;
-                }
-            }
-        }
-    }
-    
-    bool cart_spawned = common_spawn_goods_output_cartpusher();
-    if (cart_spawned) {
-        if (data.industry.has_fish) {
-            data.industry.has_fish = (stored_full_amount > 0);
-        }
-    }
-}
-
-void building::spawn_figure_shipyard() {
-    //    check_labor_problem();
-    //    map_point road;
-    //    if (map_has_road_access(x, y, size, &road)) {
-    //        spawn_labor_seeker(50);
-    //        if (has_figure_of_type(FIGURE_FISHING_BOAT))
-    //            return;
-    //        int pct_workers = worker_percentage();
-    //        if (pct_workers >= 100)
-    //            data.industry.progress += 10;
-    //        else if (pct_workers >= 75)
-    //            data.industry.progress += 8;
-    //        else if (pct_workers >= 50)
-    //            data.industry.progress += 6;
-    //        else if (pct_workers >= 25)
-    //            data.industry.progress += 4;
-    //        else if (pct_workers >= 1)
-    //            data.industry.progress += 2;
-    //
-    //        if (data.industry.progress >= 160) {
-    //            data.industry.progress = 0;
-    //            map_point boat;
-    //            if (map_water_can_spawn_fishing_boat(x, y, size, &boat)) {
-    //                figure *f = figure_create(FIGURE_FISHING_BOAT, boat.x, boat.y, DIR_0_TOP_RIGHT);
-    //                f->action_state = FIGURE_ACTION_190_FISHING_BOAT_CREATED;
-    //                f->home() = b;
-    //                figure_id = f->id;
-    //            }
-    //        }
-    //    }
-}
-
 int building::get_figures_number(e_figure_type ftype) {
-    int gatherers_this_yard = 0;
-    for (int i = 0; i < MAX_FIGURES[GAME_ENV]; i++) {
+    int figures_this_yard = 0;
+    for (int i = 0; i < MAX_FIGURES; i++) {
         figure* f = figure_get(i);
         if (f->has_type(ftype) && f->has_home(this)) {        // figure with type on map and  belongs to this building
-            gatherers_this_yard++;
+            figures_this_yard++;
         }
     }
 
-    return gatherers_this_yard;
-}
-
-bool building::can_spawn_gatherer(e_figure_type ftype, int max_gatherers_per_building, int carry_per_person) {
-    bool resource_reachable = false;
-    switch (ftype) {
-    case FIGURE_LUMBERJACK:
-        resource_reachable = map_routing_citizen_found_terrain(road_access, nullptr, TERRAIN_TREE);
-        break;
-    }
-
-    if (!resource_reachable) {
-        return false;
-    }
-
-    int gatherers_this_yard = get_figures_number(ftype);
-
-    // can only spawn if there's space for more reed in the building
-    int max_loads = 500 / carry_per_person;
-    if (gatherers_this_yard < max_gatherers_per_building
-        && gatherers_this_yard + (stored_amount() / carry_per_person) < (max_loads - gatherers_this_yard)) {
-        return true;
-    }
-
-    return false;
+    return figures_this_yard;
 }
 
 void building::spawn_figure_native_hut() {
@@ -749,31 +478,14 @@ void building::spawn_figure_native_meeting() {
     //    }
 }
 
-void building::spawn_figure_tower() {
-    check_labor_problem();
-    map_point road;
-    if (map_get_road_access_tile(tile, size, road)) {
-        common_spawn_labor_seeker(50);
-        if (num_workers <= 0)
-            return;
-
-        if (has_figure(0) && !has_figure(3)) { // has sentry but no ballista -> create
-            create_figure_generic(FIGURE_BALLISTA, FIGURE_ACTION_180_BALLISTA_CREATED, BUILDING_SLOT_BALLISTA, DIR_0_TOP_RIGHT);
-        }
-
-        if (!has_figure(0)) {
-            building_barracks_request_tower_sentry();
-        }
-    }
-}
-
 void building::update_native_crop_progress() {
     data.industry.progress++;
     if (data.industry.progress >= 5) {
         data.industry.progress = 0;
     }
 
-    map_image_set(tile.grid_offset(), image_id_from_group(GROUP_BUILDING_FARMLAND) + data.industry.progress);
+    int img_id = building_impl::params(BUILDING_BARLEY_FARM).anim["farmland"].first_img();
+    map_image_set(tile.grid_offset(), img_id + data.industry.progress);
 }
 
 tile2i building::access_tile() {
@@ -788,28 +500,20 @@ tile2i building::access_tile() {
     return road_access;
 }
 
-void building::update_road_access() {
-    // update building road access
-}
-
 bool building::figure_generate() {
     show_on_problem_overlay = 0;
 
     bool noble_generated = false;
-    if (type >= BUILDING_HOUSE_COMMON_MANOR && type <= BUILDING_HOUSE_LUXURY_PALACE) {
+    if (type >= BUILDING_HOUSE_COMMON_MANOR && type <= BUILDING_HOUSE_PALATIAL_ESTATE) {
         noble_generated = spawn_noble(noble_generated);
-    } else if (type == BUILDING_WOOD_CUTTERS) {
-        spawn_figure_wood_cutters();
     } else if (is_workshop() || is_extractor()) {// farms are handled by a separate cycle in Pharaoh!
         spawn_figure_industry();
-    } else if (is_tax_collector()) {
-        spawn_figure_tax_collector();
     } else if (is_administration()) {
         common_spawn_figure_trigger(50);
 
         if (is_governor_mansion() && !has_figure(BUILDING_SLOT_GOVERNOR)) {
-            tile2i road_tile;
-            if (map_closest_road_within_radius(tile, size, 2, road_tile)) {
+            tile2i road_tile = map_closest_road_within_radius(tile, size, 2);
+            if (road_tile.valid()) {
                 figure *f = figure_create(FIGURE_GOVERNOR, road_tile, DIR_4_BOTTOM_LEFT);
                 f->advance_action(FIGURE_ACTION_120_GOVERNOR_CREATED);
                 f->set_home(this);
@@ -822,34 +526,9 @@ bool building::figure_generate() {
     } else {
         // single building type
         switch (type) {
-        case BUILDING_MUD_TOWER: spawn_figure_tower(); break;
-        case BUILDING_POLICE_STATION: spawn_figure_police(); break;
-        case BUILDING_DANCE_SCHOOL: spawn_figure_dancer(); break;
-        case BUILDING_SENET_HOUSE: spawn_figure_senet(); break;
-        case BUILDING_PAVILLION: spawn_figure_pavillion(); break;
-        case BUILDING_SCRIBAL_SCHOOL: spawn_figure_school(); break;
-        case BUILDING_LIBRARY: spawn_figure_library(); break;
-        case BUILDING_WATER_LIFT: common_spawn_figure_trigger(50); break;
-        case BUILDING_DENTIST: spawn_figure_dentist(); break;
-        case BUILDING_MORTUARY: spawn_figure_mortuary(); break;
-        case BUILDING_FISHING_WHARF: spawn_figure_wharf(); break;
-        case BUILDING_SHIPWRIGHT: spawn_figure_shipyard(); break;
         case BUILDING_UNUSED_NATIVE_HUT_88: spawn_figure_native_hut(); break;
         case BUILDING_UNUSED_NATIVE_MEETING_89: spawn_figure_native_meeting(); break;
         case BUILDING_UNUSED_NATIVE_CROPS_93: update_native_crop_progress(); break;
-
-        case BUILDING_FORT_CHARIOTEERS:
-        case BUILDING_FORT_ARCHERS:
-        case BUILDING_FORT_INFANTRY:
-            formation_legion_update_recruit_status(this);
-            break;
-
-        case BUILDING_VILLAGE_PALACE:
-        case BUILDING_TOWN_PALACE:
-        case BUILDING_CITY_PALACE:
-        case BUILDING_MILITARY_ACADEMY:
-            common_spawn_figure_trigger(100);
-            break;
 
         default:
             dcast()->spawn_figure();
@@ -869,13 +548,7 @@ void building::school_add_papyrus(int amount) {
 void building_figure_generate() {
     OZZY_PROFILER_SECTION("Game/Run/Tick/Figure Generate");
     building_barracks_decay_tower_sentry_request();
-    int max_id = building_get_highest_id();
     buildings_valid_do([] (building &b) {
-        if (b.type == BUILDING_STORAGE_ROOM || (b.type == BUILDING_SENET_HOUSE && b.prev_part_building_id)) {
-            return;
-        }
-
-        //b->update_road_access();
         b.figure_generate();
     });
 }

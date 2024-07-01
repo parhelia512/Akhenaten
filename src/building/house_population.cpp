@@ -1,18 +1,18 @@
 #include "house_population.h"
 
 #include "building/building.h"
-#include "building/house.h"
+#include "building/building_house.h"
 #include "building/list.h"
 #include "building/model.h"
 #include "config/config.h"
 #include "city/labor.h"
 #include "city/message.h"
-#include "city/migration.h"
+#include "city/city.h"
 #include "city/population.h"
 #include "core/calc.h"
 #include "core/profiler.h"
 #include "core/game_environment.h"
-#include "figuretype/migrant.h"
+#include "figuretype/figure_emigrant.h"
 #include "figuretype/figure_immigrant.h"
 #include "figuretype/figure_homeless.h"
 #include "figure/figure.h"
@@ -161,10 +161,10 @@ int house_population_create_emigrants(int num_people) {
             }
 
             if (to_emigrate <= current_people) {
-                figure_create_emigrant(b, to_emigrate);
+                figure_emigrant::create(b, to_emigrate);
                 to_emigrate = 0;
             } else {
-                figure_create_emigrant(b, current_people);
+                figure_emigrant::create(b, current_people);
                 to_emigrate -= current_people;
             }
         }
@@ -188,7 +188,7 @@ static void calculate_working_population(void) {
             }
         }
     }
-    city_labor_calculate_workers(num_peasants, num_nobles);
+    g_city.labor.calculate_workers(num_peasants, num_nobles);
 }
 
 void city_population_reached_milestone(bool force) {
@@ -223,7 +223,7 @@ void city_population_reached_milestone(bool force) {
 
 void house_population_update_migration() {
     OZZY_PROFILER_SECTION("Game/Run/Tick/House Migration Update");
-    city_migration_update();
+    g_city.migration_update();
 
     city_population_yearly_update();
     calculate_working_population();

@@ -9,8 +9,7 @@
 #include "graphics/image_groups.h"
 #include "graphics/window.h"
 #include "io/gamestate/boilerplate.h"
-#include "scenario/property.h"
-#include "sound/speech.h"
+#include "scenario/scenario.h"
 #include "window/main_menu.h"
 #include "window/mission_briefing.h"
 #include "game/game.h"
@@ -68,8 +67,9 @@ static void draw_foreground() {
     painter ctx = game.painter();
     graphics_set_to_dialog();
 
-    if (g_mission_next.choice > 0)
-        image_buttons_draw(580, 410, &image_button_start_mission, 1);
+    if (g_mission_next.choice > 0) {
+        image_buttons_draw({580, 410}, &image_button_start_mission, 1);
+    }
 
     int rank = scenario_campaign_rank();
     vec2i peaceful{CAMPAIGN_SELECTION[rank].x_peaceful - 4, CAMPAIGN_SELECTION[rank].y_peaceful - 4};
@@ -107,8 +107,9 @@ static void handle_input(const mouse* m, const hotkeys* h) {
         g_mission_next.focus_button = 2;
 
     if (g_mission_next.choice > 0) {
-        if (image_buttons_handle_mouse(m_dialog, 580, 410, &image_button_start_mission, 1, 0))
+        if (image_buttons_handle_mouse(m_dialog, {580, 410}, &image_button_start_mission, 1, 0))
             return;
+
         if (m_dialog->right.went_up || h->escape_pressed) {
             g_mission_next.choice = 0;
             window_invalidate();
@@ -126,7 +127,7 @@ static void handle_input(const mouse* m, const hotkeys* h) {
         //                return;
         //            }
         //            window_invalidate();
-        //            sound_speech_play_file("wavs/fanfare_nu1.wav");
+        //            sound_speech_play_file("Wavs/fanfare_nu1.wav");
         //        }
         //        if (is_mouse_hit(m_dialog, x_military, y_military, 44)) {
         //            scenario_set_campaign_mission(game_mission_military());
@@ -136,7 +137,7 @@ static void handle_input(const mouse* m, const hotkeys* h) {
         //                return;
         //            }
         //            window_invalidate();
-        //            sound_speech_play_file("wavs/fanfare_nu5.wav");
+        //            sound_speech_play_file("Wavs/fanfare_nu5.wav");
         //        }
     }
 }

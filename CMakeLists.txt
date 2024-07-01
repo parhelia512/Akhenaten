@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.13...3.26)
 include(CMakeDependentOption)
 
 set(CMAKE_BUILD_PLATFORM "default" CACHE STRING "Platform to cross-compile for. Options: android default")
@@ -362,19 +362,24 @@ cmrc_add_resource_library(
     ALIAS akhenaten::rc
     NAMESPACE akhenaten
 
-    ${SCRIPTS_FOLDER}/modules.js
-    ${SCRIPTS_FOLDER}/math.js
-    ${SCRIPTS_FOLDER}/common.js
-    ${SCRIPTS_FOLDER}/city_sounds.js
-    ${SCRIPTS_FOLDER}/building_sounds.js
     ${SCRIPTS_FOLDER}/building_info.js
-    ${SCRIPTS_FOLDER}/walker_sounds.js
-    ${SCRIPTS_FOLDER}/mission_sounds.js
-    ${SCRIPTS_FOLDER}/overlays.js
+    ${SCRIPTS_FOLDER}/building_menu.js
+    ${SCRIPTS_FOLDER}/building_sounds.js
+    ${SCRIPTS_FOLDER}/city_sounds.js
+    ${SCRIPTS_FOLDER}/desirability.js
+    ${SCRIPTS_FOLDER}/figures.js
+    ${SCRIPTS_FOLDER}/imagepaks.js
     ${SCRIPTS_FOLDER}/images.js
     ${SCRIPTS_FOLDER}/images_remap.js
-    ${SCRIPTS_FOLDER}/imagepaks.js
+    ${SCRIPTS_FOLDER}/common.js
+    ${SCRIPTS_FOLDER}/localization.js
+    ${SCRIPTS_FOLDER}/math.js
+    ${SCRIPTS_FOLDER}/mission_sounds.js
+    ${SCRIPTS_FOLDER}/missions.js
+    ${SCRIPTS_FOLDER}/modules.js
+    ${SCRIPTS_FOLDER}/overlays.js
     ${SCRIPTS_FOLDER}/ui.js
+    ${SCRIPTS_FOLDER}/walker_sounds.js
     ${PROJECT_SOURCE_DIR}/res/akhenaten_72.png
     ${PROJECT_SOURCE_DIR}/res/patreon_48.png
 )
@@ -421,7 +426,7 @@ if(APPLE)
     # setting variables that will populate Info.plist
     set(MACOSX_BUNDLE_GUI_IDENTIFIER "mt.dalerank.akhenaten")
     set(MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME})
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.10" CACHE STRING "Minimum OS X deployment version" FORCE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version" FORCE)
     set(MACOSX_BUNDLE_ICON_FILE "akhenaten.icns")
     set(MACOSX_BUNDLE_BUNDLE_VERSION "0.2.1 ${GAME_BUILD_NUMBER}")
     set(MACOSX_BUNDLE_LONG_VERSION_STRING ${MACOSX_BUNDLE_BUNDLE_VERSION})

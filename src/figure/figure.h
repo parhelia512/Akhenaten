@@ -12,7 +12,7 @@
 #include "grid/point.h"
 #include "graphics/image_desc.h"
 #include "io/io_buffer.h"
-#include "widget/city.h"
+#include "widget/widget_city.h"
 #include "window/building/common.h"
 #include "figure_phrase.h"
 #include "graphics/animation.h"
@@ -32,10 +32,13 @@ class figure_musician;
 class figure_dancer;
 class figure_labor_seeker;
 class figure_worker;
+class figure_soldier;
+class figure_fishing_boat;
+class figure_fishing_point;
 
 struct animation_t;
 
-constexpr int MAX_FIGURES[] = {5000, 2000};
+constexpr int MAX_FIGURES = 2000;
 constexpr int MAX_CLOUD_IMAGE_OFFSETS = 19;
 
 enum e_minimap_figure_color {
@@ -48,8 +51,8 @@ enum e_minimap_figure_color {
 
 enum e_move_type : uint8_t {
     EMOVE_TERRAIN = 0,
-    EMOVE_BOAT = 1,
-    EMOVE_FLOTSAM = 2,
+    EMOVE_WATER = 1,
+    EMOVE_DEEPWATER = 2,
     EMOVE_HIPPO = 3,
 };
 
@@ -70,11 +73,7 @@ public:
     int id;
     int sprite_image_id;
     int cart_image_id;
-    int anim_base;
-    int anim_offset;
-    unsigned char anim_frame_duration;
-    unsigned char anim_max_frames;
-    unsigned char anim_frame;
+    animation_context anim;
     unsigned char is_enemy_image;
 
     unsigned char alternative_location_index;
@@ -155,7 +154,6 @@ public:
     uint8_t index_in_formation;
     uint8_t formation_at_rest;
     uint8_t migrant_num_people;
-    bool is_ghost;
     bool is_drawn;
     uint8_t min_max_seen;
     uint8_t movement_ticks_watchdog;
@@ -168,7 +166,7 @@ public:
     uint8_t empire_city_id;
     uint16_t trader_amount_bought;
     short name;
-    char terrain_usage;
+    uint8_t terrain_usage;
     e_move_type allow_move_type;
     uint8_t height_adjusted_ticks;
     uint8_t current_height;
@@ -247,6 +245,9 @@ public:
     figure_dancer *dcast_dancer();
     figure_labor_seeker *dcast_labor_seeker();
     figure_worker *dcast_worker();
+    figure_soldier *dcast_soldier();
+    figure_fishing_boat *dcast_fishing_boat();
+    figure_fishing_point *dcast_fishing_point();
 
     figure(int _id) {
         // ...can't be bothered to add default values to ALL
@@ -262,7 +263,6 @@ public:
     bool is_dead(); // figure.c
     bool is_enemy();
     bool is_herd();
-    bool is_legion();
     bool is_formation();        // formation_legion.c
     bool is_attacking_native(); // combat.c
     bool is_citizen();          // missile.c
@@ -271,20 +271,18 @@ public:
     bool is_fighting_enemy();
     e_minimap_figure_color get_figure_color(); // minimap.c
 
-    void kill() {
-        if (state != FIGURE_STATE_ALIVE)
-            return;
-        set_state(FIGURE_STATE_DYING);
-        action_state = FIGURE_ACTION_149_CORPSE;
-    };
+    void kill();
 
     bool is_boat();
     bool can_move_by_water();
     bool can_move_by_terrain();
     void set_direction_to(building *b);
+    void clear_impl();
 
     void poof();
     inline bool available() { return state == FIGURE_STATE_NONE; };
+    inline bool is_valid() { return state != FIGURE_STATE_NONE; }
+    inline bool is_alive() { return state == FIGURE_STATE_ALIVE; }
     inline bool has_type(e_figure_type value) { return type == value; }
     inline bool has_state(e_figure_state value) { return state == value; }
 
@@ -312,8 +310,6 @@ public:
     void set_destination(building* b);
     bool has_home(int _id = -1);
     bool has_home(building* b);
-    bool has_immigrant_home(int _id = -1);
-    bool has_immigrant_home(building* b);
     bool has_destination(int _id = -1);
     bool has_destination(building* b);
 
@@ -327,10 +323,9 @@ public:
     void route_remove();
 
     // image.c
-    void image_set_die_animation(const animation_t &anim);
     void image_set_animation(const animation_t &anim);
     void image_set_animation(e_image_id img, int offset = 0, int max_frames = 12, int duration = 1);
-    void image_set_animation(int collection, int group, int offset = 0, int max_frames = 12, int duration = 1);
+    void image_set_animation(int collection, int group, int offset = 0, int max_frames = 12, int duration = 1, bool loop = true);
     void figure_image_update(bool refresh_only);
     void figure_image_set_sled_offset(int direction);
     void figure_image_set_cart_offset(int direction);
@@ -368,7 +363,7 @@ public:
     void follow_ticks(int num_ticks);
     void advance_attack();
     void set_cross_country_direction(int x_src, int y_src, int x_dst, int y_dst, int is_missile);
-    void set_cross_country_destination(int x_dst, int y_dst);
+    void set_cross_country_destination(tile2i dst);
     int move_ticks_cross_country(int num_ticks);
 
     void cross_country_update_delta();
@@ -377,9 +372,8 @@ public:
     void cross_country_advance();
 
     // actions.c
-    static void check_action_properties_lookup();
     void action_perform();
-    void advance_action(short NEXT_ACTION);
+    void advance_action(short next_action);
     bool do_roam(int terrainchoice = TERRAIN_USAGE_ROADS, short NEXT_ACTION = ACTION_2_ROAMERS_RETURNING);
     bool do_goto(tile2i dest, int terrainchoice = TERRAIN_USAGE_ROADS, short NEXT_ACTION = -1, short FAIL_ACTION = -1);
     bool do_gotobuilding(building* dest, bool stop_at_road = true, e_terrain_usage terrainchoice = TERRAIN_USAGE_ROADS, short NEXT_ACTION = -1, short FAIL_ACTION = -1);
@@ -388,16 +382,10 @@ public:
     bool do_enterbuilding(bool invisible, building* b, short NEXT_ACTION = -1, short FAIL_ACTION = -1);
 
     void sled_puller_action();
-    void soldier_action();
-    void military_standard_action();
     void protestor_action();
     void mugger_action();
     void rioter_action();
-    void governor_action();
-    void fishing_boat_action();
-    void bricklayer_action();
     void editor_flag_action();
-    void flotsam_action();
     void noble_action();
     void indigenous_native_action();
     void tower_sentry_action();
@@ -413,28 +401,13 @@ public:
     void enemy52_mounted_archer_action();
     void enemy53_axe_action();
     void enemy_gladiator_action();
-    void enemy_caesar_legionary_action();
-    void arrow_action();
-    void javelin_action();
-    void bolt_action();
+    void enemy_kingdome_soldier_action();
     void ballista_action();
-    //    void missionary_action();
-    void fishing_point_action();
-    void shipwreck_action();
     void sheep_action();
     void hyena_action();
-    void hippo_action();
     void zebra_action();
-    void spear_action();
     void hippodrome_horse_action();
-    // pharaoh
-    void ostrich_hunter_action();
-    void lumberjack_action();
-    void policeman_action();
-    void magistrate_action();
-    void festival_guy_action();
 
-    void update_direction_and_image();
     int is_nearby(int category, int* distance, int max_distance = 10000, bool gang_on = true);
     bool herd_roost(int step, int bias, int max_dist, int terrain_mask);
 
@@ -447,7 +420,6 @@ public:
     int trader_total_bought();
     int trader_total_sold();
 
-    bool policeman_fight_enemy(int category, int max_distance);
     int target_is_alive();
 
     int figure_rioter_collapse_building();
@@ -462,23 +434,12 @@ public:
     void javelin_launch_missile();
     void legionary_attack_adjacent_enemy();
     int find_mop_up_target();
-    void update_image_javelin(int dir);
-    void update_image_mounted(int dir);
-    void update_image_legionary(const formation* m, int dir);
-    void soldier_update_image(const formation* m);
 
     void figure_combat_handle_corpse();
     void resume_activity_after_attack();
     void hit_opponent();
     void figure_combat_handle_attack();
-    //    int figure_combat_get_target_for_soldier(int x, int y, int max_distance);
-    //    int figure_combat_get_target_for_wolf(int x, int y, int max_distance);
-    //    int figure_combat_get_target_for_enemy(int x, int y);
     void figure_combat_attack_figure_at(int grid_offset);
-
-    // missile.c
-    void missile_hit_target(int target_id, int legionary_type);
-    void missile_fire_at(int target_id, e_figure_type missile_type);
 
     // wall.c
     void tower_sentry_pick_target();
@@ -497,36 +458,61 @@ public:
     // window/building/figures.c
     void draw_enemy(object_info* c);
     void draw_animal(object_info* c);
-    void draw_cartpusher(object_info* c);
     void draw_normal_figure(object_info* c);
 
     // grid/marshland.c
     bool find_resource_tile(int resource_type, tile2i &out);
 };
 
+#define FIGURE_METAINFO(type, clsid) static constexpr e_figure_type TYPE = type; static constexpr pcstr CLSID = #clsid;
 class figure_impl {
 public:
+    struct static_params {
+        static static_params dummy;
+
+        pcstr name;
+        animations_t anim;
+        figure_sounds_t sounds;
+        int8_t terrain_usage;
+        uint16_t max_roam_length;
+        uint8_t speed_mult;
+
+        void load(archive arch);
+    };
+
     figure_impl(figure *f) : base(*f), wait_ticks(f->wait_ticks), destination_tile(f->destination_tile) {}
 
-    virtual void on_create() {}
+    virtual void on_create();
     virtual void on_destroy() {}
     virtual void figure_action() {}
     virtual void figure_before_action() {}
+    virtual void figure_roaming_action();
     virtual bool window_info_background(object_info &ctx) { return false; }
     virtual void figure_draw(painter &ctx, vec2i pixel, int highlight, vec2i* coord_out);
+    virtual void before_poof() {}
     virtual void poof() { base.poof(); }
     virtual e_figure_sound phrase() const { return {FIGURE_NONE, ""}; }
     virtual e_overlay get_overlay() const { return OVERLAY_NONE; }
     virtual figure_sound_t get_sound_reaction(pcstr key) const;
-    virtual sound_key phrase_key() const { return {}; }
+    virtual sound_key phrase_key() const { return "empty"; }
     virtual int provide_service() { return 0; }
     virtual bool play_die_sound() { return false; }
-    virtual void update_direction_and_image() { base.update_direction_and_image(); }
+    virtual void update_animation();
+    virtual void update_day() {}
     virtual bool can_move_by_water() const;
     virtual int y_correction(int y) const { return y; }
     virtual void cart_update_image() { base.cart_update_image(); }
-    virtual bool is_common_roaming() { return true; }
+    virtual void main_update_image();
     virtual e_minimap_figure_color minimap_color() const { return FIGURE_COLOR_NONE; }
+    virtual const animations_t &anim() const { return params().anim; }
+    virtual const static_params &params() const { return params(type()); }
+    virtual void kill();
+    inline const animation_t &anim(const xstring &anim_key) const { return anim()[anim_key]; }
+    inline const animation_context &animation() const { return base.anim; }
+    inline animation_context &animation() { return base.anim; }
+
+    static void params(e_figure_type, const static_params &);
+    static const static_params &params(e_figure_type);
 
     virtual figure_immigrant *dcast_immigrant() { return nullptr; }
     virtual figure_cartpusher *dcast_cartpusher() { return nullptr; }
@@ -537,14 +523,26 @@ public:
     virtual figure_dancer *dcast_dancer() { return nullptr; }
     virtual figure_labor_seeker *dcast_labor_seeker() { return nullptr; }
     virtual figure_worker *dcast_worker() { return nullptr; }
+    virtual figure_soldier *dcast_soldier() { return nullptr; }
+    virtual figure_fishing_boat *dcast_fishing_boat() { return nullptr; }
+    virtual figure_fishing_point *dcast_fishing_point() { return nullptr; }
 
     inline building *home() { return base.home(); }
     inline e_figure_type type() const { return base.type; }
     inline int id() { return base.id; }
     inline short action_state() const { return base.action_state; }
+
+    template<typename ... Args>
+    bool action_state(const Args... args) const {
+        int states[] = {args...};
+        return std::find(std::begin(states), std::end(states), base.action_state) != std::end(states);
+    }
+
     inline uint8_t direction() const { return base.direction; }
     inline const building *home() const { return base.home(); }
-    inline void advance_action(int action) { base.advance_action(action); }
+    inline void advance_action(int action) { int saved_action = action; base.advance_action(action); on_action_changed(saved_action); }
+           void advance_action(int action, tile2i t);
+    virtual void on_action_changed(int saved_action) {}
     inline bool do_returnhome(e_terrain_usage terrainchoice, short next_action = -1) { return base.do_returnhome(terrainchoice, next_action); }
     inline bool do_gotobuilding(building *dest, bool stop_at_road = true, e_terrain_usage terrainchoice = TERRAIN_USAGE_ROADS, short NEXT_ACTION = -1, short FAIL_ACTION = -1) { return base.do_gotobuilding(dest, stop_at_road, terrainchoice, NEXT_ACTION, FAIL_ACTION); }
     inline bool do_enterbuilding(bool invisible, building *b, short next_action = -1, short fail_action = -1) { return base.do_enterbuilding(invisible, b, next_action, fail_action); }
@@ -552,15 +550,18 @@ public:
     inline bool do_roam(int terrainchoice, short next_action) { return base.do_roam(terrainchoice, next_action); }
     inline bool do_goto(tile2i dest, int terrainchoice = TERRAIN_USAGE_ROADS, short next_action = -1, short fail_action = -1) { return base.do_goto(dest, terrainchoice, next_action, fail_action); }
     inline tile2i tile() const { return base.tile; }
+    inline int tilex() const { return base.tile.x(); }
+    inline int tiley() const { return base.tile.y(); }
     inline building *destination() const { return base.destination(); }
     inline void route_remove() { base.route_remove(); }
+    inline void image_set_animation(const xstring &anim_key) { image_set_animation(anim(anim_key)); }
     inline void image_set_animation(const animation_t &anim) { base.image_set_animation(anim); }
-    inline void image_set_die_animation(const animation_t &anim) { base.image_set_die_animation(anim); }
     inline void image_set_animation(e_image_id img, int offset = 0, int max_frames = 12, int duration = 1) { base.image_set_animation(img, offset, max_frames, duration);}
     inline void follow_ticks(int num_ticks) { base.follow_ticks(num_ticks); }
     inline bool has_destination(int _id = -1) { return base.has_destination(_id); }
     inline void set_destination(int _id) { base.set_destination(_id); }
     inline void set_destination(building *b) { base.set_destination(b); }
+           void set_destination(building *b, tile2i t);
     inline void set_home(int _id) { base.set_home(_id); }
     inline void set_home(building *b) { base.set_home(b); }
     inline void set_direction_to(building *b) { return base.set_direction_to(b); }
@@ -583,8 +584,33 @@ bool figure_type_none_of(figure &f, Args ... args) {
     return (std::find(std::begin(types), std::end(types), f.type) == std::end(types));
 }
 
-int figure_movement_can_launch_cross_country_missile(map_point src, map_point dst);
+template<typename ... Args>
+bool figure_type_any_of(figure &f, Args ... args) {
+    int types[] = {args...};
+    return (std::find(std::begin(types), std::end(types), f.type) != std::end(types));
+}
+
+template<typename ... Args, typename T>
+void figure_valid_do(T func, Args ... args) {
+    for (auto *f: map_figures()) {
+        if (f->is_valid() && figure_type_any_of(*f, args...)) {
+            func(*f);
+        }
+    }
+}
+
+template<typename ... Args, typename T>
+void figure_valid_do(T func) {
+    for (auto *f: map_figures()) {
+        if (f->is_valid()) {
+            func(*f);
+        }
+    }
+}
+
+int figure_movement_can_launch_cross_country_missile(tile2i src, tile2i dst);
 void figure_create_explosion_cloud(tile2i tile, int size);
+void figure_clear_all();
 
 namespace figures {
 
@@ -593,23 +619,39 @@ typedef figure_impl* (*create_figure_function_cb)(e_figure_type, figure*);
 
 using FigureIterator = FuncLinkedList<create_figure_function_cb>;
 
-template<e_figure_type E, typename T>
-struct model_t {
-    static constexpr e_figure_type type = E;
-    animations_t anim;
-    figure_sounds_t sounds;
+template<typename T>
+struct model_t : public figure_impl::static_params {
+    using figure_type = T;
+    static constexpr e_figure_type type = T::TYPE;
+    static constexpr pcstr CLSID = T::CLSID;
 
     model_t() {
+        name = CLSID;
         static FigureIterator config_handler(&create);
+        figure_impl::params(type, *this);
+    }
+
+    void load() {
+        bool loaded = false;
+        g_config_arch.r_section(name, [&] (archive arch) {
+            static_params::load(arch);
+            loaded = true;
+            this->load(arch);
+        });
+        assert(loaded);
+    }
+
+    virtual void load(archive) {
+        /*overload options*/
     }
 
     static figure_impl *create(e_figure_type e, figure *data) {
         if (e == type) {
-            return new T(data);
+            return new figure_type(data);
         }
         return nullptr;
     }
 };
 
-} // end namespace config
+} // end namespace figures
     

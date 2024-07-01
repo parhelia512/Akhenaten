@@ -4,14 +4,13 @@
 #include "building/building_type.h"
 #include "city/finance.h"
 #include "city/health.h"
-#include "city/labor.h"
+#include "city/city.h"
 #include "city/message.h"
 #include "city/population.h"
 #include "city/trade.h"
 #include "core/random.h"
 #include "config/config.h"
-#include "scenario/property.h"
-#include "scenario/scenario_data.h"
+#include "scenario/scenario.h"
 
 enum E_EVENT_DK {
     EVENT_ROME_RAISES_WAGES = 1,
@@ -19,7 +18,7 @@ enum E_EVENT_DK {
     EVENT_LAND_TRADE_DISRUPTED = 3,
     EVENT_LAND_SEA_DISRUPTED = 4,
     EVENT_CONTAMINATED_WATER = 5,
-    EVENT_IRON_MINE_COLLAPSED = 6,
+    EVENT_COPPER_MINE_COLLAPSED = 6,
     EVENT_CLAY_PIT_FLOODED = 7
 };
 
@@ -31,14 +30,14 @@ static const int RANDOM_EVENT_PROBABILITY[128]
 
 static void raise_wages(void) {
     if (g_scenario_data.random_events.raise_wages) {
-        if (city_labor_raise_wages_rome())
+        if (g_city.labor.raise_wages_kingdome())
             city_message_post(true, MESSAGE_ROME_RAISES_WAGES, 0, 0);
     }
 }
 
 static void lower_wages(void) {
     if (g_scenario_data.random_events.lower_wages) {
-        if (city_labor_lower_wages_rome())
+        if (g_city.labor.lower_wages_kingdome())
             city_message_post(true, MESSAGE_ROME_LOWERS_WAGES, 0, 0);
     }
 }
@@ -69,7 +68,7 @@ static void contaminate_water(void) {
     if (g_scenario_data.random_events.contaminated_water) {
         if (city_population() > 200) {
             int change;
-            int health_rate = city_health();
+            int health_rate = g_city.health.value;
             if (health_rate > 80)
                 change = -50;
             else if (health_rate > 60)
@@ -77,13 +76,13 @@ static void contaminate_water(void) {
             else {
                 change = -25;
             }
-            city_health_change(change);
+            g_city.health.change(change);
             city_message_post(true, MESSAGE_CONTAMINATED_WATER, 0, 0);
         }
     }
 }
 
-static void destroy_iron_mine(void) {
+static void destroy_copper_mine() {
     if (g_scenario_data.random_events.iron_mine_collapse) {
         if (config_get(CONFIG_GP_CH_RANDOM_COLLAPSES_TAKE_MONEY)) {
             if (building_id_first(BUILDING_LIMESTONE_QUARRY) < MAX_BUILDINGS) {
@@ -131,8 +130,8 @@ void scenario_random_event_process(void) {
     case EVENT_CONTAMINATED_WATER:
         contaminate_water();
         break;
-    case EVENT_IRON_MINE_COLLAPSED:
-        destroy_iron_mine();
+    case EVENT_COPPER_MINE_COLLAPSED:
+        destroy_copper_mine();
         break;
     case EVENT_CLAY_PIT_FLOODED:
         destroy_clay_pit();

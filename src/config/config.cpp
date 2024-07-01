@@ -132,6 +132,8 @@ enhanced_option_t ini_keys_defaults[CONFIG_MAX_ENTRIES] = {
     {"city_building_bricklayes", true},
     {"city_building_road_closest", true},
     {"floodplain_random_grow", true},
+    {"city_building_booth", true},
+    {"city_building_bandstand", true},
 };
 
 static const char* ini_string_keys[] = {

@@ -16,12 +16,19 @@ public:
     virtual building_small_mastaba *dcast_small_mastaba() override { return this; }
 
     virtual void on_create(int orientation) override;
+    virtual void on_place(int orientation, int variant) override;
+    virtual void on_place_checks() override;
     virtual void update_day() override;
     virtual void update_month() override;
-    virtual void update_count() const override;
+    virtual void update_map_orientation(int map_orientation) override;
     virtual void window_info_background(object_info &ctx) override;
+    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual bool force_draw_flat_tile(painter &ctx, tile2i tile, vec2i pixel, color mask) override;
 
     std::span<uint16_t> active_workers();
+
+    static void ghost_preview(painter &ctx, e_building_type type, vec2i pixel, tile2i start, tile2i end);
 };
 
 class building_small_mastaba_part_side : public building_small_mastaba {
@@ -43,7 +50,6 @@ public:
 };
 
 void map_mastaba_tiles_add(int building_id, tile2i tile, int size, int image_id, int terrain);
-void draw_small_mastaba_anim_flat(painter &ctx, vec2i pixel, building *b, int color_mask);
 void draw_small_mastaba_anim(painter &ctx, vec2i pixel, building *b, int color_mask);
 int building_small_mastabe_get_image(int orientation, tile2i tile, tile2i start, tile2i end);
 void building_small_mastabe_update_images(building *b, int curr_phase);

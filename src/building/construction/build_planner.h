@@ -1,6 +1,6 @@
 #pragma once
 
-#include "building/building_type.h"
+#include "building/building.h"
 #include "graphics/color.h"
 #include "graphics/view/view.h"
 #include "grid/point.h"
@@ -81,11 +81,11 @@ private:
     void draw_flat_tile(vec2i pos, color color_mask, painter &ctx);
     void draw_blueprints(painter &ctx, bool fully_blocked);
     void draw_graphics(painter &ctx);
-
-    /////
+    bool place_building(e_building_type type, tile2i tile, int orientation, int variant);
 
 public:
     e_building_type build_type;
+    building* last_created_building = nullptr;
     bool in_progress;
     bool draw_as_constructing;
     tile2i start;
@@ -94,14 +94,8 @@ public:
     int relative_orientation;
     int absolute_orientation;
     int variant;
-    struct {
-        int x;
-        int y;
-    } size;
-    struct {
-        int x;
-        int y;
-    } pivot;
+    vec2i size;
+    vec2i pivot;
 
     tile2i north_tile;
     tile2i east_tile;
@@ -130,5 +124,7 @@ public:
     void draw(painter &ctx);
     bool place();
 };
+
+void build_planner_latch_on_venue(e_building_type type, building *b, int dx, int dy, int orientation, bool main_venue = false);
 
 extern BuildPlanner Planner;

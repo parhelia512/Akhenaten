@@ -4,6 +4,7 @@
 
 class figure_musician : public figure_entertainer {
 public:
+    FIGURE_METAINFO(FIGURE_MUSICIAN, figure_musician)
     figure_musician(figure *f) : figure_entertainer(f) {}
 
     virtual void on_create() override {}
@@ -15,4 +16,5 @@ public:
     virtual int provide_service() override;
     virtual e_overlay get_overlay() const override { return OVERLAY_BANDSTAND; }
     virtual figure_sound_t get_sound_reaction(pcstr key) const override;
+    virtual const animations_t &anim() const override;
 };

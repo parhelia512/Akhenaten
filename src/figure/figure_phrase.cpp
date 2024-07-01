@@ -7,9 +7,8 @@
 #include "city/health.h"
 #include "city/ratings.h"
 #include "city/houses.h"
-#include "city/data_private.h"
+#include "city/city.h"
 #include "city/coverage.h"
-#include "city/figures.h"
 #include "city/gods.h"
 #include "city/labor.h"
 #include "city/population.h"
@@ -21,181 +20,27 @@
 #include "figure/trader.h"
 #include "figure/formation.h"
 #include "figure/figure.h"
-#include "sound/speech.h"
+#include "sound/sound.h"
 #include "sound/sound_walker.h"
 
 #include <string.h>
 
 static e_figure_sound g_figure_sounds[] = {
     {FIGURE_NONE, "artisan"},
-    {FIGURE_NONE, "barge"},
-    {FIGURE_NONE, "brick"},
     {FIGURE_NONE, "carpenter"},
-    {FIGURE_DENTIST, "dentist"},
     {FIGURE_NONE, "desease"},
     {FIGURE_EMBALMER, "embalmer"},
-    {FIGURE_FISHING_BOAT, "fishing"},
     {FIGURE_NONE, "governor"},
     {FIGURE_NONE, "guard"},
-    {FIGURE_NONE, "labor"},
-    {FIGURE_LIBRARIAN, "library"},
-    {FIGURE_MAGISTRATE, "magistrate"},
     {FIGURE_NONE, "pharaoh"},
-    {FIGURE_CONSTABLE, "police"},
     {FIGURE_CRIMINAL, "robber"},
-    {FIGURE_SCRIBER, "scribe"},
     {FIGURE_NONE, "senet"},
     {FIGURE_NONE, "thief"},
     {FIGURE_NONE, "transport"},
     {FIGURE_NONE, "vagrant"},
     {FIGURE_NONE, "warship"},
-    {FIGURE_NONE, "woodcutter"},
-    {FIGURE_WORKER, "worker"},
     {FIGURE_NONE, "zookeeper"}
 };
-
-static int lion_tamer_phrase() {
-    //    if (action_state == FIGURE_ACTION_150_ATTACK) {
-    //        if (++phrase_sequence_exact >= 3)
-    //            phrase_sequence_exact = 0;
-    //
-    //        return 7 + phrase_sequence_exact;
-    //    }
-    return 0;
-}
-
-static sound_key hunter_ostric_phrase(figure *f) {
-    if (f->action_state == ACTION_16_HUNTER_INVESTIGATE || f->action_state == ACTION_9_CHASE_PREY || f->action_state == ACTION_15_HUNTER_HUNT) {
-        return "hunterostrich_hunting";
-    } else {
-        return "hunterostrich_back";
-    }
-}
-
-static sound_key magistrate_phrase(figure *f) {
-    int houses_in_disease = 0;
-    buildings_valid_do([&] (building &b) {
-        if (!b.house_size || !b.house_population) {
-            return;
-        }
-        houses_in_disease = (b.disease_days > 0) ? 1 : 0;
-    });
-
-    if (houses_in_disease > 0) {
-        return "magistrate_disease_in_city";
-    }
-
-    svector<sound_key, 10> keys;
-    int criminals = city_sentiment_criminals();
-    if (criminals <= 0) {
-        keys.push_back("magistrate_no_criminals_in_city");
-    }
-
-    if (formation_get_num_forts() < 1) {
-        keys.push_back("magistrate_city_not_safety");
-    }
-
-    if (city_labor_workers_needed() >= 10) {
-        keys.push_back("magistrate_need_workers");
-    }
-
-    if (city_gods_least_mood() <= GOD_MOOD_INDIFIRENT) { // any gods in wrath
-        keys.push_back("magistrate_gods_are_angry");
-    }
-
-    if (city_sentiment_low_mood_cause() == LOW_MOOD_NO_FOOD) {
-        keys.push_back("magistrate_no_food_in_city");
-    }
-
-    if (city_rating_kingdom() < 10) {
-        keys.push_back("magistrate_city_bad_reputation");
-    }
-
-    if (city_sentiment_low_mood_cause() == LOW_MOOD_NO_JOBS) {
-        keys.push_back("magistrate_much_unemployments");
-    }
-
-    const house_demands *demands = city_houses_demands();
-    if (demands->missing.more_entertainment > 0) {
-        keys.push_back("magistrate_no_entertainment_need");
-    }
-
-    if (city_sentiment() > 90) {
-        keys.push_back("magistrate_city_is_amazing");
-    } else if (city_sentiment() > 30) {
-        keys.push_back("magistrate_city_not_bad");
-    }
-
-    if (f->min_max_seen > 60) {
-        keys.push_back("magistrate_all_good_in_city");
-    } else {
-        keys.push_back("magistrate_streets_still_arent_safety");
-    }
-
-    keys.push_back("magistrate_i_hope_we_are_ready");
-
-    int index = rand() % keys.size();
-    return keys[index];
-}
-
-static sound_key policeman_phrase(figure *f) {
-    svector<sound_key, 10> keys;
-
-    if (f->min_max_seen < 10) {
-        keys.push_back("policeman_very_low_crime_level");
-    } else if (f->min_max_seen < 30) {
-        keys.push_back("policeman_low_crime_level");
-    } else {
-        keys.push_back("policeman_usual_crime_level");
-    }
-
-    if (formation_get_num_forts() < 0) {
-        keys.push_back("policeman_city_not_safety");
-        keys.push_back("policeman_enemies_are_coming");
-        keys.push_back("policeman_no_army");
-        keys.push_back("policeman_no_army_2");
-    }
-
-    if (city_labor_workers_needed() >= 10) {
-        keys.push_back("policeman_need_workers");
-    }
-
-    if (city_labor_workers_needed() >= 20) {
-        keys.push_back("policeman_need_more_workers");
-    }
-
-    if (city_health() < 20) {
-        keys.push_back("policeman_desease_can_start_at_any_moment");
-    }
-
-    if (city_sentiment_low_mood_cause() == LOW_MOOD_NO_FOOD) {
-        keys.push_back("policeman_no_food_in_city");
-    }
-
-    if (city_gods_least_mood() <= GOD_MOOD_INDIFIRENT) { // any gods in wrath
-        keys.push_back("policeman_gods_are_angry");
-    }
-
-    if (city_labor_unemployment_percentage() >= 15) {
-        keys.push_back("policeman_much_unemployments");
-    }
-
-    if (city_data_struct()->festival.months_since_festival > 6) {  // low entertainment
-        keys.push_back("policeman_low_entertainment");
-    }
-
-    if (city_sentiment() > 90) {
-        keys.push_back("policeman_city_is_amazing");
-    } else  if (city_sentiment() > 40) {
-        keys.push_back("policeman_city_is_good");
-    }
-
-    keys.push_back("policeman_iam_too_busy_that_talk");
-    keys.push_back("policeman_i_hope_my_work_is_need");
-
-    int index = rand() % keys.size();
-    return keys[index];
-}
 
 static int citizen_phrase() {
     //    if (++f->phrase_sequence_exact >= 3)
@@ -203,27 +48,6 @@ static int citizen_phrase() {
     //
     //    return 7 + f->phrase_sequence_exact;
     return 0;
-}
-
-static sound_key governor_phrase(figure *f) {
-    int nobles_in_city = 0;
-    buildings_valid_do([&] (building &b) {
-        if (!b.house_size || !b.house_population || b.subtype.house_level < BUILDING_HOUSE_COMMON_MANOR) {
-            return;
-        }
-        nobles_in_city += b.house_population;
-    });
-
-    int nolbes_leave_city_pct = calc_percentage<int>(city_data_struct()->migration.nobles_leave_city_this_year, nobles_in_city);
-    if (nolbes_leave_city_pct > 10) {
-        return "governor_city_left_much_nobles";
-    }
-
-    if (city_data_struct()->festival.months_since_festival < 6) {
-        return "governor_festival_was_near";
-    }
-
-    return {};
 }
 
 static int tower_sentry_phrase() {
@@ -244,7 +68,7 @@ static int tower_sentry_phrase() {
 }
 
 static int soldier_phrase() {
-    int enemies = city_figures_enemies();
+    int enemies = g_city.figures.enemies;
     if (enemies >= 40) {
         return 11;
     } else if (enemies > 20) {
@@ -256,48 +80,19 @@ static int soldier_phrase() {
     return 0;
 }
 
-static int trade_ship_phrase() {
-    //    if (f->action_state == FIGURE_ACTION_115_TRADE_SHIP_LEAVING) {
-    //        if (!trader_has_traded(f->trader_id))
-    //            return 9; // no trade
-    //        else {
-    //            return 11; // good trade
-    //        }
-    //    } else if (f->action_state == FIGURE_ACTION_112_TRADE_SHIP_MOORED) {
-    //        int state = figure_trade_ship_is_trading(f);
-    //        if (state == TRADE_SHIP_BUYING)
-    //            return 8; // buying goods
-    //        else if (state == TRADE_SHIP_SELLING)
-    //            return 7; // selling goods
-    //        else {
-    //            return 9; // no trade
-    //        }
-    //    } else {
-    //        return 10; // can't wait to trade
-    //    }
-    return 0;
-}
-
 static sound_key phrase_based_on_figure_state(figure *f) {
     switch (f->type) {
-
-    case FIGURE_OSTRICH_HUNTER: return hunter_ostric_phrase(f);
-    case FIGURE_MAGISTRATE: return magistrate_phrase(f);
-    case FIGURE_CONSTABLE: return policeman_phrase(f);
     //        case FIGURE_PROTESTER:
     //        case FIGURE_CRIMINAL:
     //        case FIGURE_RIOTER:
     //        case FIGURE_MISSIONARY:
     //            return citizen_phrase(f);
-    case FIGURE_GOVERNOR: return governor_phrase(f);
     //        case FIGURE_TOWER_SENTRY:
     //            return tower_sentry_phrase(f);
     //        case FIGURE_FORT_JAVELIN:
     //        case FIGURE_FORT_MOUNTED:
     //        case FIGURE_FORT_LEGIONARY:
     //            return soldier_phrase();
-    //        case FIGURE_TRADE_SHIP:
-    //            return trade_ship_phrase(f);
     default:
         return f->dcast()->phrase_key();
     }
@@ -400,7 +195,7 @@ static int figure_play_phrase_file(figure *f, e_figure_type type, bstring64 key)
             }
             path.printf("Voice/Walker/%s_random_%02u.wav", type_it->prefix.c_str(), key.c_str(), f->phrase_id);
 
-            if (!sound_speech_file_exist(path)) {
+            if (!g_sound.speech_file_exist(path)) {
                 // fallback to standart phrase
                 path.printf("Voice/Walker/%s_random_01.wav", type_it->prefix.c_str(), key.c_str());
             }
@@ -409,7 +204,7 @@ static int figure_play_phrase_file(figure *f, e_figure_type type, bstring64 key)
             path.printf("Voice/Walker/%s", reaction.fname.c_str());
         }
 
-        sound_speech_play_file(path);
+        g_sound.speech_play_file(path, 255);
     }
 
     return -1;

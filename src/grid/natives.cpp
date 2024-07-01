@@ -3,7 +3,7 @@
 #include "building/building.h"
 #include "building/list.h"
 #include "city/buildings.h"
-#include "city/military.h"
+#include "city/city.h"
 #include "core/calc.h"
 #include "core/profiler.h"
 #include "graphics/image.h"
@@ -15,7 +15,7 @@
 #include "grid/property.h"
 #include "grid/random.h"
 #include "grid/terrain.h"
-#include "scenario/building.h"
+#include "scenario/scenario.h"
 #include "scenario/map.h"
 
 static void mark_native_land(int x, int y, int size, int radius) {
@@ -102,7 +102,8 @@ void map_natives_init() {
                 map_image_set(grid_offset + GRID_OFFSET(1, 1), native_image + 2);
             } else if (image_id == image_crops) {
                 type = BUILDING_UNUSED_NATIVE_CROPS_93;
-                map_image_set(grid_offset, image_id_from_group(GROUP_BUILDING_FARMLAND) + random_bit);
+                int img_id = building_impl::params(BUILDING_BARLEY_FARM).anim["farmlnd"].first_img();
+                map_image_set(grid_offset, img_id + random_bit);
             } else { // unknown building
                 map_building_tiles_remove(0, tile2i(x, y));
                 continue;
@@ -183,7 +184,7 @@ void map_natives_init_editor(void) {
 void map_natives_check_land(void) {
     OZZY_PROFILER_SECTION("Game/Run/Tick/Map Natives Update");
     map_property_clear_all_native_land();
-    city_military_decrease_native_attack_duration();
+    g_city.military.decrease_native_attack_duration();
 
     for (int i = 1; i < MAX_BUILDINGS; i++) {
         building* b = building_get(i);
@@ -203,7 +204,7 @@ void map_natives_check_land(void) {
         if (b->sentiment.native_anger >= 100) {
             mark_native_land(b->tile.x(), b->tile.y(), size, radius);
             if (has_building_on_native_land(b->tile.x(), b->tile.y(), size, radius))
-                city_military_start_native_attack();
+                g_city.military.start_native_attack();
 
         } else {
             b->sentiment.native_anger++;

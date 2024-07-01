@@ -5,6 +5,8 @@
 #include "city/buildings.h"
 #include "city/military.h"
 #include "city/resource.h"
+#include "city/warnings.h"
+#include "city/labor.h"
 #include "core/calc.h"
 #include "figure/action.h"
 #include "figure/formation_legion.h"
@@ -24,6 +26,13 @@
 
 int g_tower_sentry_request = 0;
 
+buildings::model_t<building_recruiter> brecruiter_m;
+
+ANK_REGISTER_CONFIG_ITERATOR(config_load_building_recruiter);
+void config_load_building_recruiter() {
+    brecruiter_m.load();
+}
+
 static void button_priority(int index, int param2);
 
 struct rectuiter_data_t {
@@ -40,21 +49,6 @@ struct rectuiter_data_t {
 };
 
 rectuiter_data_t g_rectuiter_data;
-
-void building::barracks_add_weapon(int amount) {
-    if (id > 0) {
-        stored_full_amount += amount;
-    }
-}
-
-void building::monument_remove_worker(int fid) {
-    for (auto &wid : data.monuments.workers) {
-        if (wid == fid) {
-            wid = 0;
-            return;
-        }
-    }
-}
 
 static int get_closest_legion_needing_soldiers(building* barracks) {
     int recruit_type = LEGION_RECRUIT_NONE;
@@ -81,6 +75,7 @@ static int get_closest_legion_needing_soldiers(building* barracks) {
     }
     return min_formation_id;
 }
+
 static int get_closest_military_academy(building* fort) {
     int min_building_id = 0;
     int min_distance = INFINITE;
@@ -98,16 +93,19 @@ static int get_closest_military_academy(building* fort) {
     return min_building_id;
 }
 
-int building::barracks_create_soldier() {
-    int formation_id = get_closest_legion_needing_soldiers(this);
+bool building_recruiter::create_soldier() {
+    if (base.stored_full_amount < 100) {
+        return false;
+    }
+
+    int formation_id = get_closest_legion_needing_soldiers(&base);
     if (formation_id > 0) {
         const formation* m = formation_get(formation_id);
-        figure* f = figure_create(m->figure_type, road_access, DIR_0_TOP_RIGHT);
+        figure* f = figure_create(m->figure_type, base.road_access, DIR_0_TOP_RIGHT);
         f->formation_id = formation_id;
         f->formation_at_rest = 1;
-        if (m->figure_type == FIGURE_STANDARD_BEARER) {
-            if (stored_full_amount > 0)
-                stored_full_amount -= 100;
+        if (base.stored_full_amount > 0) {
+            base.stored_full_amount -= 100;
         }
         int academy_id = get_closest_military_academy(building_get(m->building_id));
         if (academy_id) {
@@ -116,9 +114,6 @@ int building::barracks_create_soldier() {
             if (map_get_road_access_tile(academy->tile, academy->size, road)) {
                 f->action_state = FIGURE_ACTION_85_SOLDIER_GOING_TO_MILITARY_ACADEMY;
                 f->destination_tile = road;
-                //                f->destination_x = road.x();
-                //                f->destination_y = road.y();
-                //                f->destination_grid_offset = MAP_OFFSET(f->destination_x, f->destination_y);
             } else {
                 f->action_state = FIGURE_ACTION_81_SOLDIER_GOING_TO_FORT;
             }
@@ -128,37 +123,6 @@ int building::barracks_create_soldier() {
     }
     formation_calculate_figures();
     return formation_id ? 1 : 0;
-}
-
-bool building::barracks_create_tower_sentry() {
-    if (g_tower_sentry_request <= 0)
-        return false;
-
-    building* tower = 0;
-    for (int i = 1; i < MAX_BUILDINGS; i++) {
-        building* b = building_get(i);
-        if (b->state == BUILDING_STATE_VALID && b->type == BUILDING_MUD_TOWER && b->num_workers > 0 && !b->has_figure(0)
-            && (b->road_network_id == road_network_id || config_get(CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD))) {
-            tower = b;
-            break;
-        }
-    }
-    if (!tower)
-        return false;
-
-    figure* f = figure_create(FIGURE_TOWER_SENTRY, road_access, DIR_0_TOP_RIGHT);
-    f->action_state = FIGURE_ACTION_174_TOWER_SENTRY_GOING_TO_TOWER;
-    tile2i road;
-    if (map_get_road_access_tile(tower->tile, tower->size, road)) {
-        f->destination_tile = road;
-        //        f->destination_x = road.x();
-        //        f->destination_y = road.y();
-    } else {
-        f->poof();
-    }
-    tower->set_figure(0, f->id);
-    f->set_home(tower->id);
-    return true;
 }
 
 void building_barracks_request_tower_sentry() {
@@ -188,8 +152,50 @@ int building::barracks_get_priority() {
     return subtype.barracks_priority;
 }
 
+bool building_recruiter::create_tower_sentry() {
+    if (g_tower_sentry_request <= 0)
+        return false;
+
+    building* tower = 0;
+    for (int i = 1; i < MAX_BUILDINGS; i++) {
+        building* b = building_get(i);
+        if (b->state == BUILDING_STATE_VALID && b->type == BUILDING_MUD_TOWER && b->num_workers > 0 && !b->has_figure(0)
+            && (b->road_network_id == base.road_network_id || config_get(CONFIG_GP_CH_TOWER_SENTRIES_GO_OFFROAD))) {
+            tower = b;
+            break;
+        }
+    }
+
+    if (!tower) {
+        return false;
+    }
+
+    figure* f = figure_create(FIGURE_TOWER_SENTRY, base.road_access, DIR_0_TOP_RIGHT);
+    f->action_state = FIGURE_ACTION_174_TOWER_SENTRY_GOING_TO_TOWER;
+    tile2i road;
+    if (map_get_road_access_tile(tower->tile, tower->size, road)) {
+        f->destination_tile = road;
+    } else {
+        f->poof();
+    }
+
+    tower->set_figure(0, f->id);
+    f->set_home(tower->id);
+    return true;
+}
+
 void building_recruiter::on_create(int orientation) {
     city_buildings_add_recruiter(&base);
+}
+
+void building_recruiter::on_place_checks() {
+    if (building_construction_has_warning()) {
+        return;
+    }
+
+    if (city_resource_count(RESOURCE_WEAPONS) <= 0) {
+        building_construction_warning_show(WARNING_WEAPONS_NEEDED);
+    }
 }
 
 void building_recruiter::spawn_figure() {
@@ -216,12 +222,13 @@ void building_recruiter::spawn_figure() {
             base.figure_spawn_delay = 0;
             switch (base.subtype.barracks_priority) {
             case PRIORITY_FORT:
-            if (!base.barracks_create_soldier())
-                base.barracks_create_tower_sentry();
+            if (!create_soldier())
+                create_tower_sentry();
             break;
+
             default:
-            if (!base.barracks_create_tower_sentry())
-                base.barracks_create_soldier();
+            if (!create_tower_sentry())
+                create_soldier();
             }
         }
     }
@@ -235,7 +242,7 @@ void building_recruiter::window_info_background(object_info &c) {
     c.help_id = 37;
     g_rectuiter_data.building_id = c.building_id;
 
-    window_building_play_sound(&c, "wavs/barracks.wav");
+    window_building_play_sound(&c, "Wavs/barracks.wav");
     outer_panel_draw(c.offset, c.bgsize.x, c.bgsize.y);
     lang_text_draw_centered(136, 0, c.offset.x, c.offset.y + 10, 16 * c.bgsize.x, FONT_LARGE_BLACK_ON_LIGHT);
     ImageDraw::img_generic(ctx, image_id_resource_icon(RESOURCE_WEAPONS), c.offset + vec2i{64, 38});
@@ -287,11 +294,16 @@ static void button_priority(int index, int param2) {
 
 int building_recruiter::window_info_handle_mouse(const mouse* m, object_info &c) {
     auto& data = g_rectuiter_data;
-    if (generic_buttons_handle_mouse(m, c.offset.x + 46, c.offset.y + 224, data.priority_buttons, 2, &data.focus_priority_button_id)) {
+    if (generic_buttons_handle_mouse(m, {c.offset.x + 46, c.offset.y + 224}, data.priority_buttons, 2, &data.focus_priority_button_id)) {
         window_invalidate();
         return 1;
     }
     return 0;
+}
+
+void building_recruiter::add_weapon(int amount) {
+    assert(id() > 0);
+    base.stored_full_amount += amount;
 }
 
 void building_recruiter::window_info_foreground(object_info &c) {

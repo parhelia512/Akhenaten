@@ -3,28 +3,27 @@
 #include "graphics/text.h"
 #include "io/gamefiles/lang.h"
 #include "core/bstring.h"
+#include "core/xstring.h"
 
 #include <map>
 
-std::map<size_t, loc_text> g_localization;
+std::map<xstring, loc_text> g_localization;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_localization);
 void config_load_localization() {
     g_localization.clear();
 
     g_config_arch.r_array("localization", [] (archive arch) {
-        pcstr key = arch.r_string("key");
+        xstring key = arch.r_string("key");
         int group = arch.r_int("group");
         int id = arch.r_int("id");
 
-        size_t hash = bstring128(key).hash();
-        g_localization.insert({hash, {group, id}});
+        g_localization.insert({key, {group, id}});
     });
 }
 
 loc_text loc_text_from_key(pcstr key) {
-    size_t hash = bstring128(key).hash();
-    auto it = g_localization.find(hash);
+    auto it = g_localization.find(key);
     return (it != g_localization.end()) ? it->second : loc_text{0, 0};
 }
 
@@ -33,8 +32,7 @@ pcstr lang_text_from_key(pcstr key) {
         return "";
     }
 
-    size_t hash = bstring128(key).hash();
-    auto it = g_localization.find(hash);
+    auto it = g_localization.find(key);
     pcstr str = (it != g_localization.end())
                     ? (pcstr)lang_get_string(it->second.group, it->second.id)
                     : key;
@@ -50,12 +48,18 @@ int lang_text_get_width(const char* str, e_font font) {
     return text_get_width((const uint8_t*)str, font) + font_definition_for(font)->space_width;
 }
 
-int lang_text_draw(int group, int number, int x_offset, int y_offset, e_font font) {
-    const uint8_t* str = lang_get_string(group, number);
-    return text_draw(str, x_offset, y_offset, font, 0);
+int lang_text_draw(int group, int number, int x_offset, int y_offset, e_font font, int box_width) {
+    pcstr str = (pcstr)lang_get_string(group, number);
+    return lang_text_draw(str, vec2i{x_offset, y_offset}, font, box_width);
 }
 
-int lang_text_draw(pcstr str, vec2i pos, e_font font) {
+int lang_text_draw(pcstr str, vec2i pos, e_font font, int box_width) {
+    if (box_width > 0) {
+        uint32_t maxlen = text_get_max_length_for_width((const uint8_t*)str, strlen((pcstr)str), font, box_width, false);
+        bstring1024 temp_str;
+        temp_str.ncat((pcstr)str, maxlen);
+        return text_draw((const uint8_t*)temp_str.c_str(), pos.x, pos.y, font, 0);
+    }
     return text_draw((const uint8_t*)str, pos.x, pos.y, font, 0);
 }
 

@@ -9,6 +9,7 @@
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_cart_offsets);
 ANK_REGISTER_CONFIG_ITERATOR(config_load_sled_offsets);
+ANK_REGISTER_CONFIG_ITERATOR(config_load_cart_images);
 
 static const int CORPSE_IMAGE_OFFSETS[128] = {
     0, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
@@ -47,6 +48,17 @@ void config_load_sled_offsets() {
     });
 }
 
+static image_desc g_cart_images[RESOURCES_MAX] = {{}};
+void config_load_cart_images() {
+    g_config_arch.r_array("cart_images", [] (archive arch) {
+        e_resource res = arch.r_type<e_resource>("resource");
+        int pack = arch.r_int("pack");
+        int id = arch.r_int("id");
+        int offset = arch.r_int("offset");
+        g_cart_images[res] = {pack, id, offset};
+    });
+}
+
 static void cc_coords_to_pixel_offset(int cross_country_x, int cross_country_y, int* pixel_x, int* pixel_y) {
     int dir = city_view_orientation();
     if (dir == DIR_0_TOP_RIGHT || dir == DIR_4_BOTTOM_LEFT) {
@@ -72,30 +84,14 @@ vec2i figure::tile_pixel_coords() {
         int prg_x = 2 * (prg_r);
         int prg_y = (prg_r);
         switch ((8 + direction - city_view_orientation()) % 8) {
-        case 0:
-            return {prg_x, -prg_y};
-            break;
-        case 1:
-            return {2 * prg_x, 0};
-            break;
-        case 2:
-            return {prg_x, prg_y};
-            break;
-        case 3:
-            return {0, 2 * prg_y};
-            break;
-        case 4:
-            return {-prg_x, prg_y};
-            break;
-        case 5:
-            return {-2 * prg_x, 0};
-            break;
-        case 6:
-            return {-prg_x, -prg_y};
-            break;
-        case 7:
-            return {0, -2 * prg_y};
-            break;
+        case 0: return {prg_x, -prg_y};
+        case 1: return {2 * prg_x, 0};
+        case 2: return {prg_x, prg_y};
+        case 3: return {0, 2 * prg_y};
+        case 4: return {-prg_x, prg_y};
+        case 5: return {-2 * prg_x, 0};
+        case 6: return {-prg_x, -prg_y};
+        case 7: return {0, -2 * prg_y};
         }
     } else {
         cc_coords_to_pixel_offset(cc_coords.x % 15, cc_coords.y % 15, &x, &y);
@@ -104,13 +100,16 @@ vec2i figure::tile_pixel_coords() {
     return {x, y};
 }
 
-void figure::image_set_die_animation(const animation_t &anim) {
-    sprite_image_id = image_group(ANIM_OSTRICH_DEATH);
-}
-
 void figure::image_set_animation(const animation_t &anim) {
+    if (anim.iid > 0) {
+        if (this->anim.id != anim.id) {
+            this->anim.setup(anim);
+        }
+        return;
+    }
+
     image_desc desc = get_image_desc(anim.anim_id);
-    image_set_animation(desc.pack, desc.id, 0, anim.max_frames, anim.duration);
+    image_set_animation(desc.pack, desc.id, desc.offset, anim.max_frames, anim.duration, anim.loop);
 }
 
 void figure::image_set_animation(e_image_id img, int offset, int max_frames, int duration) {
@@ -118,86 +117,33 @@ void figure::image_set_animation(e_image_id img, int offset, int max_frames, int
     image_set_animation(desc.pack, desc.id, offset, max_frames, duration);
 }
 
-void figure::image_set_animation(int collection, int group, int offset, int max_frames, int duration) {
-    anim_base = image_id_from_group(collection, group);
-    anim_offset = offset;
-    anim_max_frames = max_frames;
-    if (duration <= 0)
-        duration = 1;
-    anim_frame_duration = duration;
+void figure::image_set_animation(int collection, int group, int offset, int max_frames, int duration, bool loop) {
+    anim.base = image_id_from_group(collection, group);
+    anim.offset = offset;
+    anim.max_frames = max_frames;
+    anim.frame_duration = std::max(1, duration);
+    anim.loop = loop;
 }
 
 void figure::figure_image_update(bool refresh_only) {
-    // update pixel coords
-    //    sprite_pixel_on_tile = {HALF_TILE_WIDTH_PIXELS, HALF_TILE_HEIGHT_PIXELS};
-    //    if (use_cross_country) {
-    //        int prg_x;
-    //        int prg_y;
-    //        cc_coords_to_pixel_offset(cc_coords.x % 15, cc_coords.y % 15,
-    //                                  &prg_x, &prg_y);
-    //        sprite_pixel_on_tile += {prg_x, prg_y};
-    //    } else {
-    //        int prg_r = progress_on_tile > 7 ? progress_on_tile - 16 : progress_on_tile;
-    //        int prg_x = 2 * (prg_r);
-    //        int prg_y = (prg_r);
-    //        switch ((8 + direction - city_view_orientation()) % 8) {
-    //            case 0: sprite_pixel_on_tile += {prg_x, -prg_y}; break;
-    //            case 1: sprite_pixel_on_tile += {2 * prg_x, 0}; break;
-    //            case 2: sprite_pixel_on_tile += {prg_x, prg_y}; break;
-    //            case 3: sprite_pixel_on_tile += {0, 2 * prg_y}; break;
-    //            case 4: sprite_pixel_on_tile += {-prg_x, prg_y}; break;
-    //            case 5: sprite_pixel_on_tile += {-2 * prg_x, 0}; break;
-    //            case 6: sprite_pixel_on_tile += {-prg_x, -prg_y}; break;
-    //            case 7: sprite_pixel_on_tile += {0, -2 * prg_y}; break;
-    //        }
-    //    }
-
-    // null images
-    if (anim_base <= 0)
+    if (!anim.valid()) {
         return;
-
-    // advance animation frame
-    if (!refresh_only)
-        anim_frame++;
-    if (anim_frame >= anim_max_frames * anim_frame_duration)
-        anim_frame = 0;
-
-    switch (type) {
-    case FIGURE_FISHING_POINT:
-        break;
-
-    default:
-        dcast()->cart_update_image();
     }
+
+    anim.update(refresh_only);
 
     switch (type) {
     case FIGURE_JAVELIN:
     case FIGURE_ARROW:
     case FIGURE_HUNTER_ARROW: {
         int dir = (16 + direction - 2 * city_view_orientation()) % 16;
-        sprite_image_id = anim_base + 16 + dir;
-        break;
-    }
-
-    case FIGURE_EXPLOSION:
-        break;
-
-    case FIGURE_FISHING_POINT: {
-        int effective_frame = anim_frame / anim_frame_duration;
-        sprite_image_id = anim_base + anim_offset + effective_frame;
+        sprite_image_id = anim.base + 16 + dir;
         break;
     }
 
     default:
-        // play death animation if it's dying, otherwise always follow the same pattern - offsets are set during action
-        // logic
-        if (state == FIGURE_STATE_DYING)
-            sprite_image_id = anim_base + figure_image_corpse_offset();
-        else {
-            int effective_frame = anim_frame / anim_frame_duration;
-            sprite_image_id = anim_base + anim_offset + figure_image_direction() + 8 * effective_frame;
-        }
-        break;
+        dcast()->main_update_image();
+        dcast()->cart_update_image();
     }
 }
 
@@ -229,13 +175,13 @@ int cart_image_offset_from_amount(int amount) {
     return 2;
 }
 
-e_image_id resoure2imgid(e_resource resource_id) {
-    switch (resource_id) {
-    case RESOURCE_BARLEY: return IMG_CART_BARLEY;
-    case RESOURCE_COPPER: return IMG_CART_COPPER;
+image_desc resource2cartanim(e_resource resource_id) {
+    image_desc ret = g_cart_images[resource_id];
+    if (ret.pack && ret.id) {
+        return ret;
     }
 
-    return IMG_CARTPUSHER_CART;
+    return g_cart_images[RESOURCE_NONE];
 }
 
 void figure::cart_update_image() {
@@ -256,16 +202,18 @@ void figure::cart_update_image() {
 
     case RESOURCE_BARLEY:
     case RESOURCE_COPPER:
-        cart_image_id = image_group(IMG_CARTPUSHER_CART);
+    case RESOURCE_BEER:
+    case RESOURCE_PAPYRUS:
+        cart_image_id = image_group(resource2cartanim(RESOURCE_NONE));
         if (resource_amount_full > 0) {
-            cart_image_id = image_group(resoure2imgid(resource_id));
+            cart_image_id = image_group(resource2cartanim(resource_id));
             int amount_offset = cart_image_offset_from_amount(resource_amount_full);
             cart_image_id += 8 * amount_offset;
         }
         break;
 
     default:
-        cart_image_id = image_group(IMG_CARTPUSHER_CART);
+        cart_image_id = image_group(resource2cartanim(RESOURCE_NONE));
         if (resource_amount_full > 0) {
             int amount_offset = cart_image_offset_from_amount(resource_amount_full);
             cart_image_id += 8 + 24 * (resource_id - 1) + 8 * amount_offset;
@@ -282,9 +230,9 @@ void figure::cart_update_image() {
     int dir = figure_image_normalize_direction(direction < 8 ? direction : previous_tile_direction);
 
     if (action_state == FIGURE_ACTION_149_CORPSE) {
-        sprite_image_id = image_group(ANIM_CARTPUSHER_DEATH);
+        //sprite_image_id = image_id_from_group(PACK_SPR_MAIN, 44);
     } else {
-        sprite_image_id = image_group(ANIM_CARTPUSHER_WALK) + dir + 8 * anim_frame;
+        //sprite_image_id = image_id_from_group(PACK_SPR_MAIN, 43) + dir + 8 * anim.frame;
     }
 
     switch (resource_id) {
@@ -322,10 +270,6 @@ int figure::figure_image_corpse_offset() {
     case FIGURE_FCHARIOTEER:
         type_offset = 144;
         break;
-    case FIGURE_INFANTRY:
-    case FIGURE_ENEMY_CAESAR_LEGIONARY:
-        type_offset = 152;
-        break;
     case FIGURE_ENEMY44_SWORD:
     case FIGURE_ENEMY45_SWORD:
     case FIGURE_ENEMY50_SWORD:
@@ -353,8 +297,9 @@ int figure::figure_image_corpse_offset() {
             type_offset = 593;
         break;
     }
-    return CORPSE_IMAGE_OFFSETS[wait_ticks / 2] + type_offset;
+    return CORPSE_IMAGE_OFFSETS[wait_ticks / 2];// +type_offset;
 }
+
 void figure::figure_image_set_sled_offset(int direction) {
     cart_offset = SLED_OFFSETS[direction];
 }

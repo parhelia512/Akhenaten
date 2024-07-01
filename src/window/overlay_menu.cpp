@@ -13,7 +13,7 @@
 #include "graphics/window.h"
 #include "input/input.h"
 #include "io/gamefiles/lang.h"
-#include "window/city.h"
+#include "window/window_city.h"
 #include "game/game.h"
 
 static void button_menu_item(int index, int param2);
@@ -76,7 +76,7 @@ static const int submenu_id_to_overlay[7][8] = {
    OVERLAY_BOOTH,
    OVERLAY_BANDSTAND,
    OVERLAY_PAVILION,
-   OVERLAY_HIPPODROME,
+   OVERLAY_SENET_HOUSE,
    0},
 
   { // Education
@@ -202,7 +202,7 @@ static void draw_foreground() {
     }
 
     if (data.selected_submenu > 0) {
-        ImageDraw::img_generic(ctx, image_id_from_group(GROUP_BULLET), x_offset - 185, 80 + 24 * data.selected_menu);
+        ImageDraw::img_generic(ctx, image_id_from_group(PACK_GENERAL, 158), x_offset - 185, 80 + 24 * data.selected_menu);
         for (int i = 0; i < data.num_submenu_items; i++) {
             label_draw(x_offset - 348, 74 + 24 * (i + data.selected_menu), 10, data.submenu_focus_button_id == i + 1 ? 1 : 2);
 
@@ -254,14 +254,14 @@ static void handle_input(const mouse* m, const hotkeys* h) {
     auto& data = g_overlay_menu_data;
     int x_offset = get_sidebar_x_offset();
     bool handled = false;
-    handled |= !!generic_buttons_handle_mouse(m, x_offset - 170, 72, menu_buttons, 8, &data.menu_focus_button_id);
+    handled |= !!generic_buttons_handle_mouse(m, {x_offset - 170, 72}, menu_buttons, 8, &data.menu_focus_button_id);
 
     if (!data.keep_submenu_open) {
         handle_submenu_focus();
     }
 
     if (data.selected_submenu) {
-        handled |= !!generic_buttons_handle_mouse(m, x_offset - 348, 72 + 24 * data.selected_menu, submenu_buttons, data.num_submenu_items, &data.submenu_focus_button_id);
+        handled |= !!generic_buttons_handle_mouse(m, {x_offset - 348, 72 + 24 * data.selected_menu}, submenu_buttons, data.num_submenu_items, &data.submenu_focus_button_id);
     }
 
     if (!handled && input_go_back_requested(m, h)) {

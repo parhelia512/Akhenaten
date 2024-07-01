@@ -1,25 +1,12 @@
 #include "building.h"
 
-#include "building/properties.h"
 #include "building/rotation.h"
 #include "building/building_type.h"
 #include "building/storage.h"
-#include "building/building_temple.h"
-#include "building/building_statue.h"
-#include "building/building_barracks.h"
-#include "building/building_bazaar.h"
-#include "building/building_cattle_ranch.h"
-#include "building/building_weaponsmith.h"
-#include "building/building_tax_collector.h"
-#include "building/building_physician.h"
-#include "building/building_bandstand.h"
-#include "building/building_shrine.h"
-#include "building/building_mansion.h"
-#include "building/building_hunting_lodge.h"
-#include "building/building_palace.h"
 #include "building/destruction.h"
 #include "city/buildings.h"
 #include "city/population.h"
+#include "city/warnings.h"
 #include "widget/city/ornaments.h"
 #include "city/warning.h"
 #include "core/svector.h"
@@ -40,12 +27,25 @@
 #include "grid/tiles.h"
 #include "io/io_buffer.h"
 #include "graphics/graphics.h"
-#include "menu.h"
 #include "monuments.h"
 #include "overlays/city_overlay.h"
-#include "city/labor.h"
+#include "city/city.h"
 
 #include <string.h>
+#include <map>
+
+#include "dev/debug.h"
+#include <iostream>
+
+declare_console_command_p(destroytype, game_cheat_destroy_type)
+void game_cheat_destroy_type(std::istream &is, std::ostream &os) {
+    std::string args; is >> args;
+    int type = atoi(args.empty() ? (pcstr)"0" : args.c_str());
+    
+    buildings_valid_do([] (building &b) {
+        building_destroy_by_collapse(&b);
+    }, (e_building_type)type);
+};
 
 building g_all_buildings[5000];
 std::span<building> g_city_buildings = make_span(g_all_buildings);
@@ -99,20 +99,21 @@ building* building_get(int id) {
 
 void building::new_fill_in_data_for_type(e_building_type _tp, tile2i _tl, int orientation) {
     assert(!_ptr);
-    const building_properties* props = building_properties_for_type(_tp);
+    const auto &props = building_impl::params(_tp);
     type = _tp;
     tile = _tl;
     state = BUILDING_STATE_CREATED;
     faction_id = 1;
     reserved_id = false; // city_buildings_unknown_value();
-    size = props->size;
+    size = props.building_size;
     creation_sequence_index = building_extra_data.created_sequence++;
     sentiment.house_happiness = 50;
     distance_from_entry = 0;
 
     map_random_7bit = map_random_get(tile.grid_offset()) & 0x7f;
     figure_roam_direction = map_random_7bit & 6;
-    fire_proof = props->fire_proof;
+    fire_proof = props.fire_proof;
+    damage_proof = props.damage_proof;
     is_adjacent_to_water = map_terrain_is_adjacent_to_water(tile, size);
 
     // house size
@@ -121,9 +122,9 @@ void building::new_fill_in_data_for_type(e_building_type _tp, tile2i _tl, int or
         house_size = 1;
     } else if (type >= BUILDING_HOUSE_COMMON_RESIDENCE && type <= BUILDING_HOUSE_FANCY_RESIDENCE) {
         house_size = 2;
-    } else if (type >= BUILDING_HOUSE_COMMON_MANOR && type <= BUILDING_HOUSE_MEDIUM_PALACE) {
+    } else if (type >= BUILDING_HOUSE_COMMON_MANOR && type <= BUILDING_HOUSE_STATELY_MANOR) {
         house_size = 3;
-    } else if (type >= BUILDING_HOUSE_LARGE_PALACE && type <= BUILDING_HOUSE_LUXURY_PALACE) {
+    } else if (type >= BUILDING_HOUSE_MODEST_ESTATE && type <= BUILDING_HOUSE_PALATIAL_ESTATE) {
         house_size = 4;
     }
 
@@ -136,68 +137,6 @@ void building::new_fill_in_data_for_type(e_building_type _tp, tile2i _tl, int or
 
     // unique data
     switch (type) {
-    case BUILDING_LIMESTONE_QUARRY:
-        output_resource_first_id = RESOURCE_LIMESTONE;
-        break;
-
-    case BUILDING_WOOD_CUTTERS:
-        output_resource_first_id = RESOURCE_TIMBER;
-        data.industry.max_gatheres = 1;
-        break;
-
-    case BUILDING_WEAVER_WORKSHOP:
-        data.industry.first_material_id = RESOURCE_FLAX;
-        output_resource_first_id = RESOURCE_LINEN;
-        break;
-
-    case BUILDING_JEWELS_WORKSHOP:
-        data.industry.first_material_id = RESOURCE_GEMS;
-        output_resource_first_id = RESOURCE_LUXURY_GOODS;
-        break;
-
-    case BUILDING_SCRIBAL_SCHOOL:
-        data.entertainment.consume_material_id = RESOURCE_PAPYRUS;
-        break;
-
-    case BUILDING_BRICKS_WORKSHOP:
-        data.industry.first_material_id = RESOURCE_STRAW;
-        data.industry.second_material_id = RESOURCE_CLAY;
-        output_resource_first_id = RESOURCE_BRICKS;
-        break;
-
-    case BUILDING_CHARIOTS_WORKSHOP:
-        data.industry.first_material_id = RESOURCE_TIMBER;
-        data.industry.second_material_id = RESOURCE_WEAPONS;
-        output_resource_first_id = RESOURCE_CHARIOTS;
-        break;
-
-    case BUILDING_GRANITE_QUARRY:
-        output_resource_first_id = RESOURCE_GRANITE;
-        break;
-
-    case BUILDING_SANDSTONE_QUARRY:
-        output_resource_first_id = RESOURCE_SANDSTONE;
-        break;
-
-    case BUILDING_HENNA_FARM:
-        output_resource_first_id = RESOURCE_HENNA;
-        break;
-
-    case BUILDING_LAMP_WORKSHOP:
-        data.industry.first_material_id = RESOURCE_OIL;
-        data.industry.second_material_id = RESOURCE_TIMBER;
-        output_resource_first_id = RESOURCE_LAMPS;
-        break;
-
-    case BUILDING_PAINT_WORKSHOP:
-        data.industry.first_material_id = RESOURCE_OIL;
-        output_resource_first_id = RESOURCE_PAINT;
-        break;
-
-    case BUILDING_BAZAAR: // Set it as accepting all goods
-        subtype.market_goods = 0x0000;
-        break;
-
     case BUILDING_TEMPLE_COMPLEX_OSIRIS:
     case BUILDING_TEMPLE_COMPLEX_RA:
     case BUILDING_TEMPLE_COMPLEX_PTAH:
@@ -206,28 +145,27 @@ void building::new_fill_in_data_for_type(e_building_type _tp, tile2i _tl, int or
         data.monuments.variant = (10 - (2 * orientation)) % 8; // ugh!
         break;
 
-    case BUILDING_FISHING_WHARF:
-        data.industry.orientation = orientation;
-        output_resource_first_id = RESOURCE_FISH;
-        break;
-
-    case BUILDING_WATER_LIFT:
-    case BUILDING_TRANSPORT_WHARF:
-    case BUILDING_SHIPWRIGHT:
-    case BUILDING_WARSHIP_WHARF:
-    case BUILDING_FERRY:
-        data.industry.orientation = orientation;
-        break;
-
-    case BUILDING_BRICK_GATEHOUSE:
-    case BUILDING_MUD_GATEHOUSE:
-        subtype.orientation = orientation;
-        break;
-
     default:
         output_resource_first_id = RESOURCE_NONE;
         dcast()->on_create(orientation);
         break;
+    }
+}
+
+void building::update_tick(bool refresh_only) {
+    if (!anim.valid()) {
+        return;
+    }
+
+    anim.update(refresh_only);
+}
+
+void building::monument_remove_worker(int fid) {
+    for (auto &wid : data.monuments.workers) {
+        if (wid == fid) {
+            wid = 0;
+            return;
+        }
     }
 }
 
@@ -266,62 +204,35 @@ building_impl *buildings::create(e_building_type e, building &data) {
     return new building_impl(data);
 }
 
+static std::map<e_building_type, const building_impl::static_params *> *building_impl_params = nullptr;
+building::metainfo building_impl::get_info() const {
+    const auto &metainfo = !params().meta_id.empty()
+                                ? base.get_info(params().meta_id)
+                                : params().meta;
+    return metainfo;
+}
+
+void building_impl::set_animation(const animation_t &anim) {
+    base.anim.setup(anim);
+}
+
+void building_impl::params(e_building_type e, const static_params &p) {
+    if (!building_impl_params) {
+        building_impl_params = new std::map<e_building_type, const building_impl::static_params *>();
+    }
+    building_impl_params->insert(std::make_pair(e, &p));
+}
+
+const building_impl::static_params &building_impl::params(e_building_type e) {
+    auto it = building_impl_params->find(e);
+    return (it == building_impl_params->end()) ? building_impl::static_params::dummy : *it->second;
+}
+
 building_impl *building::dcast() {
-    if (_ptr) {
-        return _ptr;
-    }
-
-    switch (type) {
-    case BUILDING_BANDSTAND: _ptr = new building_bandstand(*this); break;
-    case BUILDING_HUNTING_LODGE: _ptr = new building_hunting_lodge(*this); break;
-    case BUILDING_PHYSICIAN: _ptr = new building_physician(*this); break;
-    case BUILDING_WEAPONSMITH: _ptr = new building_weaponsmith(*this); break;
-    case BUILDING_RECRUITER: _ptr = new building_recruiter(*this); break;
-    case BUILDING_CATTLE_RANCH: _ptr = new building_cattle_ranch(*this); break;
-
-    case BUILDING_TEMPLE_OSIRIS:
-    case BUILDING_TEMPLE_RA:
-    case BUILDING_TEMPLE_PTAH:
-    case BUILDING_TEMPLE_SETH:
-    case BUILDING_TEMPLE_BAST:
-        _ptr = new building_temple(*this);
-        break;
-
-    case BUILDING_VILLAGE_PALACE:
-    case BUILDING_TOWN_PALACE:
-    case BUILDING_CITY_PALACE:
-        _ptr = new building_palace(*this);
-        break;
-
-    case BUILDING_TAX_COLLECTOR:
-    case BUILDING_TAX_COLLECTOR_UPGRADED:
-        _ptr = new building_tax_collector(*this);
-        break;
-
-    case BUILDING_SMALL_STATUE:
-    case BUILDING_MEDIUM_STATUE:
-    case BUILDING_LARGE_STATUE:
-        _ptr = new building_statue(*this);
-        break;
-
-    case BUILDING_SHRINE_OSIRIS:
-    case BUILDING_SHRINE_RA:
-    case BUILDING_SHRINE_PTAH:
-    case BUILDING_SHRINE_SETH:
-    case BUILDING_SHRINE_BAST:
-        _ptr = new building_shrine(*this); 
-        break;
-
-    case BUILDING_PERSONAL_MANSION:
-    case BUILDING_FAMILY_MANSION:
-    case BUILDING_DYNASTY_MANSION:
-        _ptr = new building_mansion(*this);
-        break;
-    }
-
     if (!_ptr) {
         _ptr = buildings::create(type, *this);
     }
+    assert(!!_ptr);
     return _ptr;
 }
 
@@ -347,6 +258,19 @@ building_papyrus_maker *building::dcast_papyrus_maker() { return dcast()->dcast_
 building_dock *building::dcast_dock() { return dcast()->dcast_dock(); }
 building_work_camp *building::dcast_work_camp() { return dcast()->dcast_work_camp(); }
 building_small_mastaba *building::dcast_small_mastaba() { return dcast()->dcast_small_mastaba(); }
+building_wood_cutter *building::dcast_wood_cutter() { return dcast()->dcast_wood_cutter(); }
+building_recruiter *building::dcast_recruiter() { return dcast()->dcast_recruiter(); }
+building_pavilion *building::dcast_pavilion() { return dcast()->dcast_pavilion(); }
+building_statue *building::dcast_statue() { return dcast()->dcast_statue(); }
+building_ferry *building::dcast_ferry() { return dcast()->dcast_ferry(); }
+building_fort *building::dcast_fort() { return dcast()->dcast_fort(); }
+building_fort_ground *building::dcast_fort_ground() { return dcast()->dcast_fort_ground(); }
+building_fishing_wharf *building::dcast_fishing_wharf() { return dcast()->dcast_fishing_wharf(); }
+building_shipyard *building::dcast_shipyard() { return dcast()->dcast_shipyard(); }
+building_plaza *building::dcast_plaza() { return dcast()->dcast_plaza(); }
+building_garden *building::dcast_garden() { return dcast()->dcast_garden(); }
+building_house *building::dcast_house() { return dcast()->dcast_house(); }
+building_burning_ruin *building::dcast_burning_ruin() { return dcast()->dcast_burning_ruin(); }
 
 building* building_at(int grid_offset) {
     return building_get(map_building_at(grid_offset));
@@ -449,6 +373,11 @@ void building::clear_impl() {
     _ptr = nullptr;
 }
 
+void building::reset_impl() {
+    _ptr = nullptr;
+}
+
+
 void building::clear_related_data() {
     if (storage_id)
         building_storage_delete(storage_id);
@@ -471,13 +400,9 @@ void building::clear_related_data() {
     if (building_is_fort(type)) {
         formation_legion_delete_for_fort(this);
     }
-
-    if (type == BUILDING_SENET_HOUSE)
-        city_buildings_remove_hippodrome();
-
     if (type == BUILDING_RESERVED_TRIUMPHAL_ARCH_56) {
         city_buildings_remove_triumphal_arch();
-        building_menu_update(BUILDSET_NORMAL);
+        //building_menu_update(BUILDSET_NORMAL);
     }
 
     if (type == BUILDING_FESTIVAL_SQUARE) {
@@ -489,11 +414,6 @@ void building::clear_related_data() {
 }
 
 e_overlay building::get_overlay() const {
-    switch (type) {
-        case BUILDING_POLICE_STATION: return OVERLAY_CRIME;
-        case BUILDING_SCRIBAL_SCHOOL: return OVERLAY_SCRIBAL_SCHOOL;
-    }
-
     return const_cast<building*>(this)->dcast()->get_overlay();
 }
 
@@ -653,11 +573,11 @@ bool building_is_palace(e_building_type type) {
     return building_type_any_of(type, BUILDING_VILLAGE_PALACE, BUILDING_TOWN_PALACE, BUILDING_CITY_PALACE);
 }
 
-bool building_is_tax_collector(int type) {
-    return (type >= BUILDING_TAX_COLLECTOR && type <= BUILDING_TAX_COLLECTOR_UPGRADED);
+bool building_is_tax_collector(e_building_type type) {
+    return building_type_any_of(type, BUILDING_TAX_COLLECTOR, BUILDING_TAX_COLLECTOR_UPGRADED);
 }
 
-bool building_is_governor_mansion(int type) {
+bool building_is_governor_mansion(e_building_type type) {
     return (type >= BUILDING_PERSONAL_MANSION && type <= BUILDING_DYNASTY_MANSION);
 }
 
@@ -675,13 +595,13 @@ bool building_is_shrine(int type) {
 bool building_is_guild(e_building_type type) {
     return building_type_any_of(type, BUILDING_CARPENTERS_GUILD, BUILDING_STONEMASONS_GUILD, BUILDING_BRICKLAYERS_GUILD);
 }
-bool building_is_statue(int type) {
+bool building_is_statue(e_building_type type) {
     return (type >= BUILDING_SMALL_STATUE && type <= BUILDING_LARGE_STATUE);
 }
-bool building_is_beautification(int type) {
+bool building_is_beautification(e_building_type type) {
     return building_is_statue(type) || type == BUILDING_GARDENS || type == BUILDING_PLAZA;
 }
-bool building_is_water_crossing(int type) {
+bool building_is_water_crossing(e_building_type type) {
     return (type == BUILDING_FERRY) || type == BUILDING_LOW_BRIDGE || type == BUILDING_UNUSED_SHIP_BRIDGE_83;
 }
 bool building_is_industry_type(const building* b) {
@@ -719,7 +639,7 @@ bool building_is_food_category(e_building_type type) {
     return false;
 }
 
-bool building_is_infrastructure(int type) {
+bool building_is_infrastructure(e_building_type type) {
     if (type == BUILDING_ARCHITECT_POST || type == BUILDING_FIREHOUSE || type == BUILDING_POLICE_STATION)
         return true;
 
@@ -741,16 +661,19 @@ bool building_is_administration(e_building_type type) {
     return false;
 }
 
-bool building_is_religion(int type) {
-    if (building_is_temple(type) || building_is_large_temple(type) || building_is_shrine(type))
+bool building_is_religion(e_building_type type) {
+    if (building_is_temple(type) || building_is_large_temple(type) || building_is_shrine(type)) {
         return true;
+    }
 
-    if (type == BUILDING_FESTIVAL_SQUARE)
+    if (type == BUILDING_FESTIVAL_SQUARE) {
         return true;
+    }
+
     return false;
 }
 
-bool building_is_entertainment(int type) {
+bool building_is_entertainment(e_building_type type) {
     if (type == BUILDING_BOOTH || type == BUILDING_BANDSTAND || type == BUILDING_PAVILLION) {
         return true;
     }
@@ -770,7 +693,7 @@ bool building_is_education(e_building_type type) {
     return building_type_any_of(type, BUILDING_SCRIBAL_SCHOOL, BUILDING_LIBRARY, BUILDING_ACADEMY);
 }
 
-bool building_is_military(int type) {
+bool building_is_military(e_building_type type) {
     if (building_is_fort(type)) {
         return true;
     }
@@ -782,28 +705,22 @@ bool building_is_military(int type) {
     return false;
 }
 
-bool building_is_draggable(int type) {
+bool building_is_draggable(e_building_type type) {
     switch (type) {
     case BUILDING_CLEAR_LAND:
-    case BUILDING_ROAD:
     case BUILDING_IRRIGATION_DITCH:
     case BUILDING_MUD_WALL:
-    case BUILDING_PLAZA:
-    case BUILDING_GARDENS:
-    case BUILDING_HOUSE_VACANT_LOT:
         return true;
 
-    case BUILDING_WATER_LIFT:
-        return false;
-
     default:
-        return false;
+        return building_impl::params(type).is_draggable;
     }
 }
 
 int building_get_highest_id(void) {
     return building_extra_data.highest_id_in_use;
 }
+
 void building_update_highest_id(void) {
     OZZY_PROFILER_SECTION("Game/Run/Tick/Update Highest Id");
     auto& extra = building_extra_data;
@@ -860,7 +777,7 @@ void building_update_state(void) {
     }
 
     if (aqueduct_recalc) {
-        map_tiles_update_all_aqueducts(0);
+        map_tiles_update_all_canals(0);
     }
 
     if (land_recalc) {
@@ -883,9 +800,10 @@ void building_update_desirability(void) {
         if (b->state != BUILDING_STATE_VALID)
             continue;
 
-        b->desirability = map_desirability_get_max(b->tile, b->size);
-        if (b->is_adjacent_to_water)
+        b->desirability = g_desirability.get_max(b->tile, b->size);
+        if (b->is_adjacent_to_water) {
             b->desirability += 10;
+        }
 
         switch (map_elevation_at(b->tile.grid_offset())) {
         case 0:
@@ -933,13 +851,59 @@ int building_mothball_set(building* b, int mothball) {
     return b->state;
 }
 
+void building_impl::on_place(int orientation, int variant) {
+    auto &p = params();
+    
+    base.fire_proof = p.fire_proof;
+    base.damage_proof = p.damage_proof;
+
+    on_place_update_tiles(orientation, variant);
+    update_graphic();
+}
+
+void building_impl::on_place_update_tiles(int orientation, int variant) {
+    int img_id = params().anim["base"].first_img();
+    map_building_tiles_add(id(), tile(), base.size, img_id, TERRAIN_BUILDING);
+}
+
+void building_impl::on_place_checks() {
+    // check road access
+    switch (type()) {
+    case BUILDING_NONE:
+    case BUILDING_CLEAR_LAND:
+    case BUILDING_IRRIGATION_DITCH:
+    case BUILDING_TEMPLE_COMPLEX_ALTAR:
+    case BUILDING_TEMPLE_COMPLEX_ORACLE:
+        return;
+    }
+
+    if (!map_has_road_access(tile(), size())) {
+        building_construction_warning_show(WARNING_ROAD_ACCESS_NEEDED);
+    }
+
+    if (!building_construction_has_warning()) {
+        if (model_get_building(type())->laborers > 0 && g_city.labor.workers_needed >= 10) {
+            building_construction_warning_show(WARNING_WORKERS_NEEDED);
+        }
+    }
+}
+
+void building_impl::update_graphic() {
+    base.minimap_anim = anim("minimap");
+}
+
 void building_impl::update_day() {
     update_graphic();
 }
 
 bool building_impl::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
-    int image_id = map_image_at(tile.grid_offset());
-    building_draw_normal_anim(ctx, point, &base, tile, image_id, color_mask);
+    if (!base.anim.valid()) {
+        int image_id = map_image_at(tile.grid_offset());
+        building_draw_normal_anim(ctx, point, &base, tile, image_id, color_mask);
+    } else {
+        draw_normal_anim(ctx, point, tile, color_mask);
+    }
+
     if (base.has_plague) {
         ImageDraw::img_generic(ctx, image_id_from_group(GROUP_PLAGUE_SKULL), point.x + 18, point.y - 32, color_mask);
     }
@@ -947,8 +911,69 @@ bool building_impl::draw_ornaments_and_animations_height(painter &ctx, vec2i poi
     return false;
 }
 
+bool building_impl::can_play_animation() const {
+    return base.main()->num_workers > 0;
+}
+
+void building_impl::draw_normal_anim(painter &ctx, vec2i pixel, tile2i tile, color mask) {
+    if (!base.anim.valid()) {
+        return;
+    }
+
+    if (!can_play_animation()) {
+        return;
+    }
+
+    vec2i pos = pixel + base.anim.pos;
+    ImageDraw::img_sprite(ctx, base.anim.start() + base.anim.current_frame(), pos.x, pos.y, mask);
+}
+
 void building_impl::destroy_by_poof(bool clouds) {
     building_destroy_by_poof(&base, clouds);
+}
+
+void building_impl::highlight_waypoints() { // highlight the 4 routing tiles for roams from this building
+    map_clear_highlights();
+    if (has_road_access()) {
+        map_highlight_set(base.road_access, 2);
+    }
+
+    if (base.house_size) { // building doesn't send roamers
+        return;
+    }
+
+    int hx, hy;
+    hx = tilex();
+    hy = tiley() - 8;
+    map_grid_bound(&hx, &hy);
+    map_point road_tile = map_closest_road_within_radius(tile2i(hx, hy), 1, 6);
+    if (road_tile.valid()) {
+        map_highlight_set(road_tile, 1);
+    }
+
+    hx = tilex() + 8;
+    hy = tiley();
+    map_grid_bound(&hx, &hy);
+    road_tile = map_closest_road_within_radius(tile2i(hx, hy), 1, 6);
+    if (road_tile.valid()) {
+        map_highlight_set(road_tile, 1);
+    }
+
+    hx = tilex();
+    hy = tiley() + 8;
+    map_grid_bound(&hx, &hy);
+    road_tile = map_closest_road_within_radius(tile2i(hx, hy), 1, 6);
+    if (road_tile.valid()) {
+        map_highlight_set(road_tile, 1);
+    }
+
+    hx = tilex() - 8;
+    hy = tiley();
+    map_grid_bound(&hx, &hy);
+    road_tile = map_closest_road_within_radius(tile2i(hx, hy), 1, 6);
+    if (road_tile.valid()) {
+        map_highlight_set(road_tile, 1);
+    }
 }
 
 bool resource_required_by_workshop(building* b, e_resource resource) {
@@ -969,8 +994,19 @@ bool resource_required_by_workshop(building* b, e_resource resource) {
 
 void building_impl::static_params::load(archive arch) {
     labor_category = arch.r_type<e_labor_category>("labor_category");
+    fire_proof = arch.r_bool("fire_proof");
+    damage_proof = arch.r_bool("damage_proof");
     output_resource = arch.r_type<e_resource>("output_resource");
     meta_id = arch.r_string("meta_id");
+    meta.help_id = arch.r_int("info_help_id");
+    meta.text_id = arch.r_int("info_text_id");
+    window_info_height_id = arch.r_int("window_info_height_id");
+    building_size = arch.r_int("building_size");
+    unique_building = arch.r_bool("unique_building");
+    planer_relative_orientation = arch.r_int("planer_relative_orientation");
+    is_draggable = arch.r_bool("is_draggable");
+    production_rate = arch.r_uint("production_rate", 100);
+
     anim.load(arch);
 }
 
@@ -989,7 +1025,7 @@ static void read_type_data(io_buffer *iob, building *b, size_t version) {
         }
 
         for (int i = 0; i < 4; i++) {
-            int good_n = city_allowed_foods(i);
+            int good_n = g_city.allowed_foods(i);
             b->data.house.inventory[i] = b->data.house.inventory[good_n];
             iob->bind(BIND_SIGNATURE_INT16, &b->data.house.inventory[i + 4]);
         }
@@ -1119,12 +1155,11 @@ static void read_type_data(io_buffer *iob, building *b, size_t version) {
     } else if (b->type == BUILDING_WATER_LIFT || b->type == BUILDING_FERRY) {
         iob->bind____skip(88);
         iob->bind(BIND_SIGNATURE_UINT8, &b->data.industry.orientation);
-
-    } else if (building_is_guild(b->type)) {
-        iob->bind(BIND_SIGNATURE_UINT8, &b->data.guild.max_workers);
     } else {
         iob->bind____skip(26);
-        iob->bind____skip(58);
+        iob->bind____skip(56);
+        iob->bind(BIND_SIGNATURE_UINT8, &b->data.guild.max_workers);
+        iob->bind(BIND_SIGNATURE_UINT8, &b->data.farm.worker_frame);
         iob->bind(BIND_SIGNATURE_UINT8, &b->data.entertainment.num_shows);
         iob->bind(BIND_SIGNATURE_UINT8, &b->data.entertainment.days1);
         iob->bind(BIND_SIGNATURE_UINT8, &b->data.entertainment.days2);
@@ -1156,10 +1191,9 @@ io_buffer* iob_buildings = new io_buffer([](io_buffer* iob, size_t version) {
         iob->bind(BIND_SIGNATURE_UINT8, &b->size);
         iob->bind(BIND_SIGNATURE_UINT8, &b->house_is_merged);
         iob->bind(BIND_SIGNATURE_UINT8, &b->house_size);
-        iob->bind(BIND_SIGNATURE_INT16, b->tile.private_access(_X));
-        iob->bind(BIND_SIGNATURE_INT16, b->tile.private_access(_Y));
+        iob->bind(BIND_SIGNATURE_INT32, b->tile);
         iob->bind____skip(2);
-        iob->bind(BIND_SIGNATURE_INT32, b->tile.private_access(_GRID_OFFSET));
+        iob->bind____skip(4);
         iob->bind(BIND_SIGNATURE_INT16, &b->type);
         iob->bind(BIND_SIGNATURE_INT16, &b->subtype.house_level); // which union field we use does not matter
         iob->bind(BIND_SIGNATURE_UINT16, &b->road_network_id);
@@ -1172,12 +1206,8 @@ io_buffer* iob_buildings = new io_buffer([](io_buffer* iob, size_t version) {
         iob->bind(BIND_SIGNATURE_INT16, &b->house_highest_population);
 
         iob->bind(BIND_SIGNATURE_INT16, &b->house_unreachable_ticks);
-        iob->bind(BIND_SIGNATURE_UINT16, b->road_access.private_access(_X));
-        iob->bind(BIND_SIGNATURE_UINT16, b->road_access.private_access(_Y));
-        //        b->set_figure(0, buf->read_u16());
-        //        b->set_figure(1, buf->read_u16());
-        //        b->set_figure(2, buf->read_u16());
-        //        b->set_figure(3, buf->read_u16());
+        iob->bind(BIND_SIGNATURE_UINT32, b->road_access);
+
         b->bind_iob_figures(iob);
 
         iob->bind(BIND_SIGNATURE_INT16, &b->figure_spawn_delay);
@@ -1229,7 +1259,7 @@ io_buffer* iob_buildings = new io_buffer([](io_buffer* iob, size_t version) {
         iob->bind(BIND_SIGNATURE_UINT8, &b->output_resource_second_id); // 1
         iob->bind(BIND_SIGNATURE_UINT8, &b->output_resource_second_rate); // 1
 
-        iob->bind(BIND_SIGNATURE_INT16, &b->internal_state); // 2
+        iob->bind(BIND_SIGNATURE_INT16, &b->fancy_state); // 2
         // 63 additional bytes
         iob->bind____skip(61); // temp for debugging
                                //            assert(iob->get_offset() - sind == 264);

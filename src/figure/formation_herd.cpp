@@ -1,6 +1,6 @@
 #include "formation_herd.h"
 
-#include "city/figures.h"
+#include "city/city.h"
 #include "city/sound.h"
 #include "core/random.h"
 #include "empire/empire_city.h"
@@ -16,9 +16,12 @@
 #include "grid/terrain.h"
 #include "grid/water.h"
 #include "sound/effect.h"
+#include "dev/debug.h"
 
 #include <vector>
 #include <time.h>
+
+declare_console_var_bool(allow_span_ostrich, true)
 
 static int get_free_tile(int x, int y, int allow_negative_desirability, tile2i &outtile) {
     unsigned int disallowed_terrain = ~(TERRAIN_ACCESS_RAMP | TERRAIN_MEADOW);
@@ -34,7 +37,7 @@ static int get_free_tile(int x, int y, int allow_negative_desirability, tile2i &
                     return 0;
                 }
 
-                int desirability = map_desirability_get(grid_offset);
+                int desirability = g_desirability.get(grid_offset);
                 if (allow_negative_desirability) {
                     if (desirability > 1) {
                         return 0;
@@ -53,12 +56,14 @@ static int get_free_tile(int x, int y, int allow_negative_desirability, tile2i &
     return tile_found;
 }
 
-static int get_roaming_destination(int formation_id, int allow_negative_desirability, int x, int y, int distance, int direction, tile2i &outtile) {
+static int get_roaming_destination(int formation_id, int allow_negative_desirability, tile2i tile, int distance, int direction, tile2i &outtile) {
     int target_direction = (formation_id + random_byte()) & 6;
     if (direction) {
         target_direction = direction;
         allow_negative_desirability = 1;
     }
+    int x = tile.x();
+    int y = tile.y();
     for (int i = 0; i < 4; i++) {
         int x_target, y_target;
         switch (target_direction) {
@@ -199,30 +204,33 @@ static void set_figures_to_initial(const formation* m) {
 static void update_herd_formation(formation* m) {
     if (can_spawn_ph_wolf(m)) {
         // spawn new wolf
-        if (!map_terrain_is(MAP_OFFSET(m->x, m->y), TERRAIN_IMPASSABLE_WOLF)) {
-            figure* wolf = figure_create(m->figure_type, tile2i(m->x, m->y), DIR_0_TOP_RIGHT);
+        if (!map_terrain_is(m->tile, TERRAIN_IMPASSABLE_WOLF)) {
+            figure* wolf = figure_create(m->figure_type, m->tile, DIR_0_TOP_RIGHT);
             wolf->action_state = FIGURE_ACTION_196_HERD_ANIMAL_AT_REST;
             wolf->action_state = 24;
             wolf->formation_id = m->id;
             wolf->wait_ticks = wolf->id & 0x1f;
         }
     }
-    if (can_spawn_ostrich(m)) {
-        // spawn new ostrich
-        if (!map_terrain_is(MAP_OFFSET(m->x, m->y), TERRAIN_IMPASSABLE_OSTRICH)) {
-            figure* ostrich = figure_create(m->figure_type, tile2i(m->x, m->y), DIR_0_TOP_RIGHT);
-            // ostrich->action_state = FIGURE_ACTION_196_HERD_ANIMAL_AT_REST;
-            ostrich->action_state = FIGURE_ACTION_24_CARTPUSHER_AT_WAREHOUSE;
+
+    if (can_spawn_ostrich(m) && allow_span_ostrich()) {
+        const bool is_passible = !map_terrain_is(m->tile, TERRAIN_IMPASSABLE_OSTRICH);
+        const bool valid_tile = m->tile.valid();
+        if (is_passible && valid_tile) {
+            figure* ostrich = figure_create(m->figure_type, m->tile, DIR_0_TOP_RIGHT);
+            ostrich->advance_action(FIGURE_ACTION_196_HERD_ANIMAL_AT_REST);
             ostrich->formation_id = m->id;
             ostrich->wait_ticks = ostrich->id & 0x1f;
         }
     }
+
     int attacking_animals = 0;
     for (int fig = 0; fig < MAX_FORMATION_FIGURES; fig++) {
         int figure_id = m->figures[fig];
         if (figure_id > 0 && figure_get(figure_id)->action_state == FIGURE_ACTION_150_ATTACK)
             attacking_animals++;
     }
+
     if (m->missile_attack_timeout) {
         attacking_animals = 1;
         m->missile_attack_timeout--;
@@ -265,7 +273,7 @@ static void update_herd_formation(formation* m) {
     if (m->wait_ticks > roam_delay || attacking_animals) {
         m->wait_ticks = 0;
         if (attacking_animals) {
-            formation_set_destination(m, m->x_home, m->y_home);
+            formation_set_destination(m, m->home);
             move_animals(m, attacking_animals, terrain_mask);
         } else {
             tile2i rtile;
@@ -279,51 +287,15 @@ static void update_herd_formation(formation* m) {
                 }
             }*/
 
-            if (get_roaming_destination(m->id, allow_negative_desirability, m->x_home, m->y_home, roam_distance, m->herd_direction, rtile)) {
+            if (get_roaming_destination(m->id, allow_negative_desirability, m->home, roam_distance, m->herd_direction, rtile)) {
                 m->herd_direction = 0;
                 if (formation_enemy_move_formation_to(m, rtile, rtile)) {
-                    formation_set_destination(m, rtile.x(), rtile.y());
+                    formation_set_destination(m, rtile);
                     move_animals(m, attacking_animals, terrain_mask);
                 }
             }
         }
     }
-}
-
-void formation_fish_update(int points_num) {
-    figure_clear_fishing_points();
-    if (!can_city_produce_resource(RESOURCE_FISH)) {
-        return;
-    }
-
-    int num_fishing_spots = 0;
-    for (int i = 0; i < MAX_FISH_POINTS; i++) {
-        if (g_scenario_data.fishing_points[i].x() > 0)
-            num_fishing_spots++;
-
-        g_scenario_data.fishing_points[i] = {-1, -1};
-    }
-
-    if (points_num >= 0) {
-        num_fishing_spots = std::min(MAX_FISH_POINTS, points_num);
-    }
-
-    tile_cache &river = river_tiles();
-    std::vector<int> deep_water;
-    for (const auto &tile : river) {
-        if (map_terrain_is(tile, TERRAIN_DEEPWATER)) {
-            deep_water.push_back(tile);
-        }
-    }
-
-    srand (time(nullptr));
-
-    for (int i = 0; i < num_fishing_spots; i++) {
-        int index = rand() % deep_water.size();
-        g_scenario_data.fishing_points[i] = tile2i(deep_water[index]);
-    }
-
-    figure_create_fishing_points();
 }
 
 void formation_herd_update() {
@@ -343,7 +315,7 @@ int formation_herd_breeding_ground_at(int x, int y, int size) {
     for (int i = 1; i < MAX_FORMATIONS; i++) {
         formation* m = formation_get(i);
         if (m->in_use && m->is_herd && !m->is_legion) {
-            if (m->x >= x && m->x < x + size && m->y >= y && m->y < y + size)
+            if (m->tile.x() >= x && m->tile.x() < x + size && m->tile.y() >= y && m->tile.y() < y + size)
                 return 1;
         }
     }

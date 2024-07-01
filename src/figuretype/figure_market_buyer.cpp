@@ -23,20 +23,16 @@
 #include "city/gods.h"
 #include "city/ratings.h"
 #include "city/labor.h"
-#include "city/data_private.h"
+#include "city/city.h"
 #include "city/sentiment.h"
 
 #include "js/js_game.h"
 
-struct market_buyer_model : public figures::model_t<FIGURE_MARKET_BUYER, figure_market_buyer> {};
-market_buyer_model market_buyer_m;
+figures::model_t<figure_market_buyer> market_buyer_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_market_buyer);
 void config_load_figure_market_buyer() {
-    g_config_arch.r_section("figure_market_buyer", [] (archive arch) {
-        market_buyer_m.anim.load(arch);
-        market_buyer_m.sounds.load(arch);
-    });
+    market_buyer_m.load();
 }
 
 void figure_market_buyer::figure_before_action() {
@@ -48,6 +44,7 @@ void figure_market_buyer::figure_before_action() {
 
 void figure_market_buyer::figure_action() {
     image_set_animation(market_buyer_m.anim["walk"]);
+
     switch (action_state()) {
     case 8:
     case FIGURE_ACTION_144_MARKET_BUYER_CREATE:
@@ -87,7 +84,7 @@ sound_key figure_market_buyer::phrase_key() const {
         keys.push_back("buyer_back_to_market");
     } 
 
-    if (city_health() < 30) {
+    if (g_city.health.value < 30) {
         keys.push_back("buyer_city_has_low_health");
     }
 
@@ -107,15 +104,15 @@ sound_key figure_market_buyer::phrase_key() const {
         keys.push_back("buyer_gods_are_angry");
     }
 
-    if (city_rating_kingdom() < 30) {
+    if (g_city.ratings.kingdom < 30) {
         keys.push_back("buyer_city_is_bad_reputation");
     }
 
-    if (city_labor_unemployment_percentage() >= 15) {
+    if (g_city.labor.unemployment_percentage >= 15) {
         keys.push_back("buyer_too_much_unemployments");
     }
 
-    if (city_data_struct()->festival.months_since_festival > 6) {  // low entertainment
+    if (g_city.festival.months_since_festival > 6) {  // low entertainment
         keys.push_back("buyer_low_entertainment");
     }
 
@@ -307,13 +304,17 @@ bool figure_market_buyer::window_info_background(object_info &c) {
     return true;
 }
 
+const animations_t &figure_market_buyer::anim() const {
+    return market_buyer_m.anim;
+}
+
 int figure_market_buyer::take_food_from_granary(building* market, building* b) {
     int resource;
     switch (base.collecting_item_id) {
-    case 0: resource = city_allowed_foods(0); break;
-    case 1: resource = city_allowed_foods(1); break;
-    case 2: resource = city_allowed_foods(2); break;
-    case 3: resource = city_allowed_foods(3); break;
+    case 0: resource = g_city.allowed_foods(0); break;
+    case 1: resource = g_city.allowed_foods(1); break;
+    case 2: resource = g_city.allowed_foods(2); break;
+    case 3: resource = g_city.allowed_foods(3); break;
 
     default:
     return 0;

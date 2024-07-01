@@ -1,20 +1,32 @@
 #pragma once
 
-#include "game/resource.h"
+#include "empire_city.h"
+#include "core/span.hpp"
 
-void empire_load_editor(int empire_id, int viewport_width, int viewport_height);
+class empire_t {
+public:
+    enum {
+        MAX_CITIES = 61
+    };
 
-void empire_init_scenario(void);
-void empire_scroll_map(int x, int y);
-void empire_set_viewport(int width, int height);
-void empire_get_scroll(int* x_scroll, int* y_scroll);
-void empire_set_scroll(int x, int y);
-void empire_adjust_scroll(int* x_offset, int* y_offset);
+    void generate_traders();
+    void clear_cities_data();
+    bool can_import_resource(e_resource resource, bool check_if_open);
+    bool can_export_resource(e_resource resource, bool check_if_open);
+    bool can_import_resource_from_city(int city_id, e_resource resource);
+    int get_city_for_trade_route(int route_id);
+    bool is_trade_route_open(int route_id);
+    void reset_yearly_trade_amounts();
+    int get_city_for_object(int empire_object_id);
+    int count_wine_sources();
+    void expand();
+    int get_city_vulnerable();
 
-int empire_selected_object(void);
+    empire_city *city(int city_id);
+    std::span<empire_city> get_cities() { return make_span(cities); }
 
-void empire_clear_selected_object();
-void empire_select_object(int x, int y);
+private:
+    empire_city cities[MAX_CITIES] = {};
+};
 
-bool empire_can_export_resource_to_city(int city_id, e_resource resource);
-int empire_can_import_resource_from_city(int city_id, e_resource resource);
+extern empire_t g_empire;

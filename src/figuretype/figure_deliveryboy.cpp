@@ -7,15 +7,11 @@
 
 #include "js/js_game.h"
 
-struct delivery_boy_model : public figures::model_t<FIGURE_DELIVERY_BOY, figure_delivery_boy> {};
-delivery_boy_model delivery_boy_m;
+figures::model_t<figure_delivery_boy> delivery_boy_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_delivery_boy);
 void config_load_figure_delivery_boy() {
-    g_config_arch.r_section("figure_delivery_boy", [] (archive arch) {
-        delivery_boy_m.anim.load(arch);
-        delivery_boy_m.sounds.load(arch);
-    });
+    delivery_boy_m.load();
 }
 
 void figure_delivery_boy::figure_before_action() {
@@ -26,10 +22,6 @@ void figure_delivery_boy::figure_before_action() {
 
     if (leader->action_state == FIGURE_ACTION_149_CORPSE) {  
         poof(); // TODO make runaway from this tile
-    }
-
-    if (leader->is_ghost) {
-        base.is_ghost = true;
     }
 }
 
@@ -53,17 +45,6 @@ void figure_delivery_boy::figure_action() {
             poof();
         }
     }
-
-    if (leader->is_ghost) {
-        base.is_ghost = true;
-    }
-
-    int dir = figure_image_normalize_direction(direction() < 8 ? direction() : base.previous_tile_direction);
-    if (action_state() == FIGURE_ACTION_149_CORPSE) {
-        base.sprite_image_id = image_group(ANIM_DELIVERY_BOY_DEATH);
-    } else {
-        base.sprite_image_id = image_group(ANIM_DELIVERY_BOY_WALK) + dir + 8 * base.anim_frame;
-    }
 }
 
 sound_key figure_delivery_boy::phrase_key() const {
@@ -77,4 +58,12 @@ sound_key figure_delivery_boy::phrase_key() const {
 
 figure_sound_t figure_delivery_boy::get_sound_reaction(pcstr key) const {
     return delivery_boy_m.sounds[key];
+}
+
+const animations_t &figure_delivery_boy::anim() const {
+    return delivery_boy_m.anim;
+}
+
+void figure_delivery_boy::update_animation() {
+    figure_impl::update_animation();
 }

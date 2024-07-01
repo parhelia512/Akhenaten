@@ -6,15 +6,11 @@
 
 #include "js/js_game.h"
 
-struct bricklayer_model : public figures::model_t<FIGURE_BRICKLAYER, figure_bricklayer> {};
-bricklayer_model bricklayer_m;
+figures::model_t<figure_bricklayer> bricklayer_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_bricklayer);
 void config_load_figure_bricklayer() {
-    g_config_arch.r_section("figure_bricklayer", [] (archive arch) {
-        bricklayer_m.anim.load(arch);
-        bricklayer_m.sounds.load(arch);
-    });
+    bricklayer_m.load();
 }
 
 void figure_bricklayer::figure_action() {
@@ -56,7 +52,7 @@ void figure_bricklayer::figure_action() {
     case FIGURE_ACTION_15_BRICKLAYER_LOOKING_FOR_IDLE_TILE:
         if (building_type_any_of(b_dest->type, BUILDING_SMALL_MASTABA, BUILDING_SMALL_MASTABA_SIDE, BUILDING_SMALL_MASTABA_WALL, BUILDING_SMALL_MASTABA_ENTRANCE)) {
             tile2i wait_tile = building_small_mastaba_bricks_waiting_tile(b_dest);
-            if (wait_tile == tile2i{-1, -1}) {
+            if (!wait_tile.valid()) {
                 poof();
                 return;
             }
@@ -127,6 +123,14 @@ void figure_bricklayer::figure_action() {
         }
         break;
     }
+}
+
+const animations_t &figure_bricklayer::anim() const {
+    return bricklayer_m.anim;
+}
+
+void figure_bricklayer::update_animation() {
+    figure_impl::update_animation();
 
     switch (action_state()) {
     case FIGURE_ACTION_13_BRICKLAYER_WAITING_RESOURCES:

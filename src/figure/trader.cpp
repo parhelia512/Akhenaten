@@ -1,12 +1,13 @@
 #include "figure/trader.h"
 
 #include "core/game_environment.h"
+#include "empire/empire.h"
 #include "empire/trade_prices.h"
 #include "building/storage.h"
 #include "building/building_storage_yard.h"
 #include "building/building_storage_room.h"
 #include "io/io_buffer.h"
-#include "empire/empire.h"
+#include "empire/empire_map.h"
 #include "figure/figure.h"
 
 #include "city/finance.h"
@@ -42,25 +43,32 @@ void traders_clear(void) {
 int trader_create(void) {
     auto &data = g_figure_trader_data;
     int trader_id = data.next_index++;
-    if (data.next_index >= MAX_TRADERS)
+    if (data.next_index >= MAX_TRADERS) {
         data.next_index = 0;
+    }
 
     memset(&data.traders[trader_id], 0, sizeof(struct trader));
     return trader_id;
 }
 
-void trader_record_bought_resource(int trader_id, e_resource resource) {
+int trader_record_bought_resource(int trader_id, e_resource resource) {
+    constexpr int amount = 100;
     auto &data = g_figure_trader_data;
-    data.traders[trader_id].bought_amount += 100;
-    data.traders[trader_id].bought_resources[resource] += 100;
+    data.traders[trader_id].bought_amount += amount;
+    data.traders[trader_id].bought_resources[resource] += amount;
     data.traders[trader_id].bought_value += trade_price_sell(resource);
+
+    return amount;
 }
 
-void trader_record_sold_resource(int trader_id, e_resource resource) {
+int trader_record_sold_resource(int trader_id, e_resource resource) {
+    constexpr int amount = 100;
     auto &data = g_figure_trader_data;
-    data.traders[trader_id].sold_amount += 100;
-    data.traders[trader_id].sold_resources[resource] += 100;
+    data.traders[trader_id].sold_amount += amount;
+    data.traders[trader_id].sold_resources[resource] += amount;
     data.traders[trader_id].sold_value += trade_price_buy(resource);
+
+    return amount;
 }
 
 int trader_bought_resources(int trader_id, e_resource resource) {
@@ -119,7 +127,7 @@ e_resource trader_get_sell_resource(building* b, int city_id) {
 
     e_resource resource_to_import = city_trade_current_caravan_import_resource();
     int imp = RESOURCE_MIN;
-    while (imp < RESOURCES_MAX && !empire_can_import_resource_from_city(city_id, resource_to_import)) {
+    while (imp < RESOURCES_MAX && !g_empire.can_import_resource_from_city(city_id, resource_to_import)) {
         imp++;
         resource_to_import = city_trade_next_caravan_import_resource();
     }
@@ -152,7 +160,7 @@ e_resource trader_get_sell_resource(building* b, int city_id) {
     // find another importable resource that can be added to this warehouse
     for (int r = RESOURCE_MIN; r < RESOURCES_MAX; r++) {
         resource_to_import = city_trade_next_caravan_backup_import_resource();
-        if (empire_can_import_resource_from_city(city_id, resource_to_import)) {
+        if (g_empire.can_import_resource_from_city(city_id, resource_to_import)) {
             space = warehouse->room();
             while (space) {
                 if (space->stored_full_amount < 400

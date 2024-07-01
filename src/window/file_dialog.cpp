@@ -23,7 +23,7 @@
 #include "io/gamefiles/lang.h"
 #include "io/gamestate/boilerplate.h"
 #include "widget/input_box.h"
-#include "window/city.h"
+#include "window/window_city.h"
 #include "window/editor/map.h"
 
 #include "graphics/elements/scroll_list_panel.h"
@@ -173,7 +173,7 @@ static void draw_foreground(void) {
 
     data.panel->draw();
 
-    image_buttons_draw(0, 0, image_buttons, 2);
+    image_buttons_draw({0, 0}, image_buttons, 2);
 
     //    uint8_t txt[200];
     //    auto v = get_file_version();
@@ -308,7 +308,7 @@ static void handle_input(const mouse* m, const hotkeys* h) {
 
     const mouse* m_dialog = mouse_in_dialog(m);
     if (input_box_handle_mouse(m_dialog, &file_name_input) || data.panel->input_handle(m_dialog)
-        || image_buttons_handle_mouse(m_dialog, 0, 0, image_buttons, 2, 0)) {
+        || image_buttons_handle_mouse(m_dialog, {0, 0}, image_buttons, 2, 0)) {
         return;
     }
 }

@@ -143,14 +143,14 @@ void figure_entertainer::figure_action() {
         break;
 
     case FIGURE_ACTION_90_ENTERTAINER_AT_SCHOOL_CREATED:
-        base.anim_frame = 0;
+        base.anim.frame = 0;
         base.wait_ticks_missile = 0;
         wait_ticks--;
         if (wait_ticks <= 0) { // todo: summarize
-            tile2i road_tile;
-            if (map_closest_road_within_radius(b->tile, b->size, 2, road_tile)) {
+            tile2i road_tile = map_closest_road_within_radius(b->tile, b->size, 2);
+            if (road_tile.valid()) {
                 base.action_state = FIGURE_ACTION_91_ENTERTAINER_EXITING_SCHOOL;
-                base.set_cross_country_destination(road_tile.x(), road_tile.y());
+                base.set_cross_country_destination(road_tile);
                 base.roam_length = 0;
             } else {
                 poof();
@@ -165,8 +165,8 @@ void figure_entertainer::figure_action() {
 
             if (dst_building_id) { // todo: summarize
                 building* b_dst = building_get(dst_building_id);
-                tile2i road_tile;
-                if (map_closest_road_within_radius(b_dst->tile, b_dst->size, 2, road_tile)) {
+                tile2i road_tile = map_closest_road_within_radius(b_dst->tile, b_dst->size, 2);
+                if (road_tile.valid()) {
                     set_destination(dst_building_id);
                     advance_action(FIGURE_ACTION_92_ENTERTAINER_GOING_TO_VENUE);
                     destination_tile = road_tile;
@@ -185,8 +185,8 @@ void figure_entertainer::figure_action() {
             int dst_building_id = determine_closest_venue_destination(tile(), allow_venue_types());
             if (dst_building_id) { // todo: summarize
                 building* b_dst = building_get(dst_building_id);
-                tile2i road_tile;
-                if (map_closest_road_within_radius(b_dst->tile, b_dst->size, 2, road_tile)) {
+                tile2i road_tile = map_closest_road_within_radius(b_dst->tile, b_dst->size, 2);
+                if (road_tile.valid()) {
                     set_destination(dst_building_id);
                     advance_action(FIGURE_ACTION_92_ENTERTAINER_GOING_TO_VENUE);
                     destination_tile = road_tile;
@@ -231,11 +231,9 @@ void figure_entertainer::figure_action() {
         do_returnhome(TERRAIN_USAGE_ROADS);
         break;
     }
-
-    update_image();
 }
 
-void figure_entertainer::update_image() {
+void figure_entertainer::update_animation() {
     int dir = figure_image_normalize_direction(direction() < 8 ? direction() : base.previous_tile_direction);
 
     //if (type() == FIGURE_CHARIOR_RACER) {
@@ -248,33 +246,24 @@ void figure_entertainer::update_image() {
     //}
 
     int image_id;
-    if (type() == FIGURE_JUGGLER) {
-        image_id = image_group(ANIM_JUGGLER_WALK);
-    } else if (type() == FIGURE_MUSICIAN) {
-        image_id = image_group(ANIM_MUSICIAN_WALK);
-    } else if (type() == FIGURE_DANCER) {
-        image_id = image_group(ANIM_DANCER_WALK);
-        if (base.wait_ticks_missile >= 96) {
-            image_id = image_id_from_group(GROUP_FIGURE_DANCER_WHIP);
-        }
-
-        base.cart_image_id = image_id_from_group(GROUP_FIGURE_LION);
+    if (figure_type_any_of(base, FIGURE_JUGGLER, FIGURE_MUSICIAN, FIGURE_DANCER)) {
+        image_id = anim("walk").first_img();
     } else {
         return;
     }
 
     if (action_state() == FIGURE_ACTION_150_ATTACK) {
         if (type() == FIGURE_MUSICIAN)
-            image_id = image_id + 104 + dir + 8 * (base.anim_frame / 2);
+            image_id = image_id + 104 + dir + 8 * (base.anim.frame / 2);
         else
             image_id = image_id + dir;
     } else if (action_state() == FIGURE_ACTION_149_CORPSE) {
         image_id = image_id + 96 + base.figure_image_corpse_offset();
         base.cart_image_id = 0;
     } else
-        image_id = image_id + dir + 8 * base.anim_frame;
+        image_id = image_id + dir + 8 * base.anim.frame;
     if (base.cart_image_id) {
-        base.cart_image_id += dir + 8 * base.anim_frame;
+        base.cart_image_id += dir + 8 * base.anim.frame;
         base.figure_image_set_cart_offset(dir);
     }
 }

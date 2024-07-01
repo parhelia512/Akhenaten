@@ -1,22 +1,18 @@
 #include "figure_teacher.h"
 
 #include "city/health.h"
-#include "city/data_private.h"
+#include "city/city.h"
 #include "city/sentiment.h"
 #include "city/ratings.h"
 
 #include "figure/service.h"
 #include "js/js_game.h"
 
-struct teacher_model : public figures::model_t<FIGURE_TEACHER, figure_teacher> {};
-teacher_model teacher_m;
+figures::model_t<figure_teacher> teacher_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_teacher);
 void config_load_figure_teacher() {
-    g_config_arch.r_section("figure_teacher", [] (archive arch) {
-        teacher_m.anim.load(arch);
-        teacher_m.sounds.load(arch);
-    });
+    teacher_m.load();
 }
 
 void figure_teacher::figure_action() {
@@ -39,11 +35,11 @@ void figure_teacher::figure_action() {
 sound_key figure_teacher::phrase_key() const {
     svector<sound_key, 10> keys;
 
-    if (city_health() < 20) {
+    if (g_city.health.value < 20) {
         keys.push_back("teacher_desease_can_start_at_any_moment");
     }
 
-    if (city_data_struct()->festival.months_since_festival > 6) {  // low entertainment
+    if (g_city.festival.months_since_festival > 6) {  // low entertainment
         keys.push_back("teacher_low_entertainment");
     }
 
@@ -59,15 +55,15 @@ sound_key figure_teacher::phrase_key() const {
         keys.push_back("teacher_gods_are_angry");
     }
 
-    if (city_labor_workers_needed() >= 10) {
+    if (g_city.labor.workers_needed >= 10) {
         keys.push_back("teacher_need_workers");
     }
 
-    if (city_rating_kingdom() < 30) {
+    if (g_city.ratings.kingdom < 30) {
         keys.push_back("teacher_low_rating");
     }
 
-    if (city_labor_unemployment_percentage() >= 15) {
+    if (g_city.labor.unemployment_percentage >= 15) {
         keys.push_back("teacher_much_unemployments");
     }
 
@@ -101,4 +97,8 @@ int figure_teacher::provide_service() {
     int none_value;
     int houses_serviced = figure_provide_service(tile(), &base, none_value, school_coverage);
     return houses_serviced;
+}
+
+const animations_t &figure_teacher::anim() const {
+    return teacher_m.anim;
 }

@@ -6,20 +6,16 @@
 #include "city/sentiment.h"
 #include "city/labor.h"
 #include "city/gods.h"
-#include "city/data_private.h"
+#include "city/city.h"
 #include "figure/service.h"
 
 #include "js/js_game.h"
 
-struct physician_model : public figures::model_t<FIGURE_PHYSICIAN, figure_physician> {};
-physician_model fphysician_m;
+figures::model_t<figure_physician> fphysician_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_physician);
 void config_load_figure_physician() {
-    g_config_arch.r_section("figure_physician", [] (archive arch) {
-        fphysician_m.anim.load(arch);
-        fphysician_m.sounds.load(arch);
-    });
+    fphysician_m.load();
 }
 
 void figure_physician::figure_action() {
@@ -56,11 +52,11 @@ void figure_physician::figure_before_action() {
 
 sound_key figure_physician::phrase_key() const {
     svector<sound_key, 10> keys;
-    if (city_health() < 40) {
-        keys.push_back(city_health() < 20
+    if (g_city.health.value < 40) {
+        keys.push_back(g_city.health.value < 20
                        ? "desease_can_start_at_any_moment"
                        : "city_has_low_health");
-    } else if (city_health() > 80) {
+    } else if (g_city.health.value > 80) {
         keys.push_back("city_very_healthy");
     }
 
@@ -76,7 +72,7 @@ sound_key figure_physician::phrase_key() const {
         keys.push_back("no_job_in_city");
     }
 
-    if (city_labor_workers_needed() >= 10) {
+    if (g_city.labor.workers_needed >= 10) {
         keys.push_back("need_workers");
     }
 
@@ -86,7 +82,7 @@ sound_key figure_physician::phrase_key() const {
         keys.push_back("gods_are_pleasures");
     }
 
-    if (city_data_struct()->festival.months_since_festival > 6) {  // low entertainment
+    if (g_city.festival.months_since_festival > 6) {  // low entertainment
         keys.push_back("low_entertainment");
     }
 
@@ -107,6 +103,10 @@ int figure_physician::provide_service() {
     int none_service = 0;
     int houses_serviced = figure_provide_service(tile(), &base, none_service, physician_coverage);
     return houses_serviced;
+}
+
+const animations_t &figure_physician::anim() const {
+    return fphysician_m.anim;
 }
 
 figure_sound_t figure_physician::get_sound_reaction(pcstr key) const {

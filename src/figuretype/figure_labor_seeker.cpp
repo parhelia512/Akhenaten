@@ -4,20 +4,16 @@
 #include "city/sentiment.h"
 #include "city/labor.h"
 #include "city/gods.h"
-#include "city/data_private.h"
+#include "city/city.h"
 #include "figure/service.h"
 
 #include "js/js_game.h"
 
-struct labor_seeker_model : public figures::model_t<FIGURE_LABOR_SEEKER, figure_labor_seeker> {};
-labor_seeker_model labor_seeker_m;
+figures::model_t<figure_labor_seeker> labor_seeker_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_figure_labor_seeker);
 void config_load_figure_labor_seeker() {
-    g_config_arch.r_section("figure_labor_seeker", [] (archive arch) {
-        labor_seeker_m.anim.load(arch);
-        labor_seeker_m.sounds.load(arch);
-    });
+    labor_seeker_m.load();
 }
 
 void figure_labor_seeker::figure_action() {
@@ -53,15 +49,15 @@ sound_key figure_labor_seeker::phrase_key() const {
         keys.push_back("no_jobs");
     }
 
-    if (city_labor_workers_needed() >= 0) {
+    if (g_city.labor.workers_needed >= 0) {
         keys.push_back("no_some_workers");
     }
 
-    if (city_labor_workers_needed() >= 10) {
+    if (g_city.labor.workers_needed >= 10) {
         keys.push_back("need_workers");
     }
 
-    if (city_labor_workers_needed() >= 20) {
+    if (g_city.labor.workers_needed >= 20) {
         keys.push_back("need_more_workers");
     }
 
@@ -95,7 +91,7 @@ sound_key figure_labor_seeker::phrase_key() const {
         keys.push_back("i_want_to_leave_city");
     }
 
-    if (city_labor_unemployment_percentage() >= 15) {
+    if (g_city.labor.unemployment_percentage >= 15) {
         keys.push_back("much_unemployments");
     }
 
@@ -116,4 +112,8 @@ int figure_labor_seeker::provide_service() {
 
 figure_sound_t figure_labor_seeker::get_sound_reaction(pcstr key) const {
     return labor_seeker_m.sounds[key];
+}
+
+const animations_t &figure_labor_seeker::anim() const {
+    return labor_seeker_m.anim;
 }

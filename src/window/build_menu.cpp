@@ -2,6 +2,7 @@
 #include "city/buildings.h"
 
 #include "building/building.h"
+#include "building/building_menu.h"
 #include "building/construction/build_planner.h"
 #include "building/model.h"
 #include "core/game_environment.h"
@@ -13,9 +14,9 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
-#include "widget/city.h"
-#include "widget/sidebar/city.h"
-#include "window/city.h"
+#include "widget/widget_city.h"
+#include "widget/sidebar/sidebar.h"
+#include "window/window_city.h"
 #include "game/game.h"
 
 static void button_menu_index(int param1, int param2);
@@ -29,7 +30,7 @@ static const int Y_MENU_OFFSETS[] = {0,   322, 306, 274, 258, 226, 210, 178,  16
                                      -30, -46, -62, -78, -78, -94, -94, -110, -110, 0,   0,   0,  0,  0,  0};
 
 struct build_menu_data_t {
-    int selected_submenu;
+    int selected_submenu = BUILDING_MENU_VACANT_HOUSE;
     int num_items;
     int y_offset;
 
@@ -78,7 +79,7 @@ static bool init(int submenu) {
     data.y_offset = Y_MENU_OFFSETS[data.num_items];
 
     Planner.setup_build(BUILDING_NONE);
-    if (submenu == BUILD_MENU_VACANT_HOUSE || submenu == BUILD_MENU_CLEAR_LAND || submenu == BUILD_MENU_ROAD) {
+    if (submenu == BUILDING_MENU_VACANT_HOUSE || submenu == BUILDING_MENU_CLEAR_LAND || submenu == BUILDING_MENU_ROAD) {
         button_menu_item(0);
         return false;
     } else {
@@ -96,51 +97,8 @@ static int get_sidebar_x_offset() {
 
 static int is_all_button(int type) {
     auto &data = g_build_menu_data;
-    return (type == BUILDING_MENU_TEMPLES && data.selected_submenu == BUILD_MENU_SMALL_TEMPLES)
-           || (type == BUILDING_MENU_TEMPLE_COMPLEX && data.selected_submenu == BUILD_MENU_LARGE_TEMPLES);
-}
-
-static int set_submenu_for_type(int type) {
-    auto &data = g_build_menu_data;
-    int current_menu = data.selected_submenu;
-    switch (type) {
-    case BUILDING_MENU_FARMS:
-        data.selected_submenu = BUILD_MENU_FARMS;
-        break;
-    case BUILDING_MENU_RAW_MATERIALS:
-        data.selected_submenu = BUILD_MENU_RAW_MATERIALS;
-        break;
-    case BUILDING_MENU_CONSTURCTION_GUILDS:
-        data.selected_submenu = BUILD_MENU_WORKSHOPS;
-        break;
-    case BUILDING_MENU_TEMPLES:
-        data.selected_submenu = BUILD_MENU_SMALL_TEMPLES;
-        break;
-    case BUILDING_MENU_TEMPLE_COMPLEX:
-        data.selected_submenu = BUILD_MENU_LARGE_TEMPLES;
-        break;
-    case BUILDING_MENU_FORTS:
-        data.selected_submenu = BUILD_MENU_FORTS;
-        break;
-    case BUILDING_MENU_MONUMENTS:
-        data.selected_submenu = BUILD_MENU_MONUMENTS;
-        break;
-    case BUILDING_MENU_WATER_CROSSINGS:
-        data.selected_submenu = BUILD_MENU_WATER_CROSSINGS;
-        break;
-    case BUILDING_MENU_BEAUTIFICATION:
-        data.selected_submenu = BUILD_MENU_BEAUTIFICATION;
-        break;
-    case BUILDING_MENU_DEFENSES:
-        data.selected_submenu = BUILD_MENU_DEFENCES;
-        break;
-    case BUILDING_MENU_SHRINES:
-        data.selected_submenu = BUILD_MENU_SHRINES;
-        break;
-    default:
-        return 0;
-    }
-    return current_menu != data.selected_submenu;
+    return (type == BUILDING_MENU_TEMPLES && data.selected_submenu == BUILDING_MENU_TEMPLES)
+           || (type == BUILDING_MENU_TEMPLE_COMPLEX && data.selected_submenu == BUILDING_MENU_LARGE_TEMPLES);
 }
 
 static void draw_background(void) {
@@ -221,7 +179,7 @@ static void draw_foreground(void) {
 
 static int handle_build_submenu(const mouse* m) {
     auto &data = g_build_menu_data;
-    return generic_buttons_handle_mouse(m, get_sidebar_x_offset() - 258, data.y_offset + 110, data.buttons, data.num_items, &data.focus_button_id);
+    return generic_buttons_handle_mouse(m, {get_sidebar_x_offset() - 258, data.y_offset + 110}, data.buttons, data.num_items, &data.focus_button_id);
 }
 
 static void handle_input(const mouse* m, const hotkeys* h) {
@@ -260,8 +218,9 @@ static void button_menu_item(int item) {
 
     Planner.setup_build(type);
 
-    if (set_submenu_for_type(type)) {
-        data.num_items = building_menu_count_items(data.selected_submenu);
+    if (building_menu_is_submenu(type)) {
+        data.num_items = building_menu_count_items(type);
+        data.selected_submenu = type;
         data.y_offset = Y_MENU_OFFSETS[data.num_items];
         Planner.reset();
         window_invalidate();
@@ -270,48 +229,9 @@ static void button_menu_item(int item) {
     }
 }
 
-int window_build_menu_image() {
+const animation_t &window_build_menu_image() {
     auto &data = g_build_menu_data;
-    int image_base = image_id_from_group(GROUP_BUILD_MENU_CATEGORIES);
-    switch (data.selected_submenu) {
-    default:
-        //            return image_base;
-    case BUILD_MENU_VACANT_HOUSE:
-        return image_base + 1;
-    case BUILD_MENU_ROAD:
-        return image_base + 5;
-    case BUILD_MENU_CLEAR_LAND:
-        return image_base + 9;
-    case BUILD_MENU_FARMS:
-    case BUILD_MENU_FOOD:
-        return image_base + 10;
-    case BUILD_MENU_GUILDS:
-    case BUILD_MENU_RAW_MATERIALS:
-    case BUILD_MENU_INDUSTRY:
-        return image_base + 6;
-    case BUILD_MENU_DISTRIBUTION:
-        return image_base + 2;
-    case BUILD_MENU_ENTERTAINMENT:
-        return image_base + 3;
-    case BUILD_MENU_SHRINES:
-    case BUILD_MENU_TEMPLES:
-    case BUILD_MENU_LARGE_TEMPLES:
-    case BUILD_MENU_MONUMENTS:
-    case BUILD_MENU_RELIGION:
-        return image_base + 7;
-    case BUILD_MENU_EDUCATION:
-        return image_base + 11;
-    case BUILD_MENU_HEALTH:
-        return image_base + 4;
-    case BUILD_MENU_WATER_CROSSINGS:
-    case BUILD_MENU_BEAUTIFICATION:
-    case BUILD_MENU_ADMINISTRATION:
-        return image_base + 8;
-    case BUILD_MENU_DEFENCES:
-    case BUILD_MENU_FORTS:
-    case BUILD_MENU_SECURITY:
-        return image_base + 12;
-    }
+    return building_menu_anim(data.selected_submenu);
 }
 
 void window_build_menu_show(int submenu) {

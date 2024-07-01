@@ -11,7 +11,10 @@
 #include "graphics/view/view.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
+#include "grid/desirability.h"
 #include "grid/property.h"
+#include "grid/terrain.h"
+#include "grid/building_tiles.h"
 #include "io/gamefiles/lang.h"
 #include "config/config.h"
 #include "window/building/common.h"
@@ -19,20 +22,23 @@
 #include "sound/sound_building.h"
 #include "game/game.h"
 
-struct building_village_palace : public building_impl { 
-    building_village_palace(building &b) : building_impl(b) {}
-    BUILDING_METAINFO(BUILDING_VILLAGE_PALACE, building_village_palace)
-};
-
 buildings::model_t<building_village_palace> village_building_palace_m;
+buildings::model_t<building_town_palace> town_building_palace_m;
+buildings::model_t<building_city_palace> city_building_palace_m;
 
 ANK_REGISTER_CONFIG_ITERATOR(config_load_building_palace_model);
 void config_load_building_palace_model() {
     village_building_palace_m.load();
+    town_building_palace_m.load();
+    city_building_palace_m.load();
 }
 
 void building_palace::on_create(int orientation) {
     base.labor_category = village_building_palace_m.labor_category;
+}
+
+void building_palace::update_day() {
+    set_animation(params().anim["work"]);
 }
 
 void building_palace::window_info_background(object_info &c) {
@@ -73,13 +79,8 @@ void building_palace::window_info_background(object_info &c) {
 }
 
 bool building_palace::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
-    switch (type()) {
-    case BUILDING_VILLAGE_PALACE:
-        if (worker_percentage() > 50) {
-            const animation_t &anim = params().anim["work"];
-            building_draw_normal_anim(ctx, point, &base, tile, anim, color_mask);
-        }
-        break;
+    if (worker_percentage() > 50) {
+        draw_normal_anim(ctx, point, tile, color_mask);
     }
 
     //int image_id = image_id_from_group(GROUP_BUILDING_PALACE);
@@ -97,4 +98,12 @@ bool building_palace::draw_ornaments_and_animations_height(painter &ctx, vec2i p
     //if (unemployment_pct > 20) ImageDraw::img_generic(ctx, image_id + 106, point.x + 66,  point.y + 20, color_mask);
 
     return true;
+}
+
+void building_palace::update_graphic() {
+    //if (g_desirability.get(tile()) <= 30) {
+    //    map_building_tiles_add(id(), tile(), size(), image_id_from_group(GROUP_BUILDING_PALACE), TERRAIN_BUILDING);
+    //} else {
+    //    map_building_tiles_add(id(), tile(), size(), image_id_from_group(GROUP_BUILDING_PALACE_FANCY), TERRAIN_BUILDING);
+    //}
 }
