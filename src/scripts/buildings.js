@@ -1126,6 +1126,7 @@ building_reed_gatherer = {
     preview : { pos : [0, 0], pack:PACK_GENERAL, id:24 },
     base : { pos : [0, 0], pack:PACK_GENERAL, id:24 },
     work : { pos : [30, -17], pack:PACK_GENERAL, id:24, offset:1, max_frames:19, duration:4 },
+    reeds : { pos : [35, 4], pack:PACK_GENERAL, id:206 },
   }
   output : {
     resource : RESOURCE_REEDS
@@ -1134,6 +1135,8 @@ building_reed_gatherer = {
   meta : { help_id : 92, text_id : 116 }
   labor_category : LABOR_CATEGORY_INDUSTRY_COMMERCE
   min_houses_coverage : 100
+  max_storage_amount : 200
+  max_gatherers : 1
   cost: [ 10, 20, 40, 80, 120 ]
   desirability : { value:[-2], step:[1], step_size:[1], range: [2] }
   laborers:[8], fire_risk:[2], damage_risk: [3]
