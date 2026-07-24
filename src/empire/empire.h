@@ -5,6 +5,7 @@
 #include "core/custom_span.hpp"
 #include "trade_route.h"
 #include "core/svector.h"
+#include "graphics/image_desc.h"
 
 struct mission_id_t;
 
@@ -109,6 +110,8 @@ public:
 
     const map_route_object &get_route_object(int id) const ;
     map_route_object &ref_route_object(int id);
+
+    image_desc map_background;
 
 private:
     void load_empire_cities(archive arch);

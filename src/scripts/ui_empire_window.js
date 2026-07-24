@@ -464,6 +464,18 @@ function empire_window_draw_trader(ev) {
     ui.image(img, empire_window_map_point(ev.draw_offset, t.current_position))
 }
 
+[es=(empire_window, draw_map, EMPIRE_OBJECT_BATTLE_ICON)]
+function empire_window_draw_battle_icon(ev) {
+    // Pak image_id is a raw tid; get_image(n) treats n as pack. Use the Cleopatra bits sprite
+    // (same as distant-battle icon). Mission scripts can later override via custom handlers.
+    var img = get_image("pharaoh_general/empire_bits_00001")
+    if (!img) {
+        return
+    }
+
+    ui.image(img, empire_window_map_point(ev.draw_offset, ev.pos))
+}
+
 [es=(empire_window, draw_map, EMPIRE_OBJECT_DISTANT_BATTLE_ROUTE)]
 function empire_window_draw_distant_battle_path(ev) {
     if (!empire.has_distant_battle) {

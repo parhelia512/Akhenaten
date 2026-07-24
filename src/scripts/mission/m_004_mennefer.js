@@ -45,6 +45,7 @@ mission4 {
 	}
 
 	// Empire cities from mission1.pak scenario 4 (empire id=1) — full map objects, not pak patch.
+	map_background : {pack:PACK_EMPIRE, id:1}
 	hide_pak_cities : true
 	cities [
 		{

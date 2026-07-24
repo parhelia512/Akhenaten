@@ -74,6 +74,16 @@ struct empire_window_draw_trader {
 };
 ANK_REGISTER_STRUCT_WRITER(empire_window_draw_trader, draw_offset, index);
 
+struct empire_window_draw_battle_icon {
+    vec2i draw_offset;
+    vec2i pos;
+    int image_id = 0;
+    int path = 0;
+    int years = 0;
+    int object_index = 0;
+};
+ANK_REGISTER_STRUCT_WRITER(empire_window_draw_battle_icon, draw_offset, pos, image_id, path, years, object_index);
+
 struct empire_window_init_event {
     vec2i pos;
 };
@@ -422,7 +432,9 @@ void empire_window::draw_empire_object(int object_index, const empire_object& ob
     }
 
     if (obj.type == EMPIRE_OBJECT_BATTLE_ICON) {
-        // handled later
+        ui.event(empire_window_draw_battle_icon{draw_offset, pos, image_id, obj.invasion_path_id, obj.invasion_years,
+                   object_index},
+          get_section(), "draw_map", empire_object_tokens.name(EMPIRE_OBJECT_BATTLE_ICON));
         return;
     }
 
@@ -495,7 +507,8 @@ void empire_window::draw_map() {
     deffer_city_route_id = -1;
 
     painter ctx = game.painter();
-    if (const image_t* map_img = image_get(image)) {
+    image_desc map_bg = g_empire.map_background.valid() ? g_empire.map_background : image;
+    if (const image_t* map_img = image_get(map_bg.tid())) {
         sprite spr;
         spr.img = map_img;
         ctx.draw(spr, draw_offset, COLOR_MASK_NONE, scale, scale);
