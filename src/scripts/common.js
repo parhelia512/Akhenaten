@@ -141,7 +141,6 @@ var trade_city_want_buy = {}
 
 // misc
 var empire_window = {}
-var empire_images_remap = []
 
 Math.approximate_value = function(v, arr) {
     var index = Math.max(0, Math.min(Math.floor(v * arr.length), arr.length - 1));

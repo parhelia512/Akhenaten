@@ -77,6 +77,28 @@ mission4 {
 		}
 	]
 
+	// Region labels from mission1.pak empire_map_objects (scenario 4 dump).
+	hide_pak_objects : true
+	empire_texts [
+		{ name : "#crete", pos : [83, 159] }
+		{ name : "#cyprus", pos : [594, 107] }
+		{ name : "#eastern_africa", pos : [1019, 1560] }
+		{ name : "#eastern_desert", pos : [702, 773] }
+		{ name : "#greece", pos : [1, 67] }
+		{ name : "#libya", pos : [17, 425] }
+		{ name : "#lower_egypt", pos : [429, 476] }
+		{ name : "#delta", pos : [518, 362] }
+		{ name : "#fayuum", pos : [462, 606] }
+		{ name : "#nubia", pos : [806, 1445] }
+		{ name : "#palestine", pos : [833, 182] }
+		{ name : "#sinai", pos : [787, 478] }
+		{ name : "#syria", pos : [1003, 46] }
+		{ name : "#upper_egypt", pos : [696, 993] }
+		{ name : "#western_desert", pos : [230, 774] }
+		{ name : "#lebanon", pos : [877, 109] }
+		{ name : "#canaan", pos : [850, 271] }
+	]
+
 	vars {
 		spacious_apartment_needed : 1
 		papyrus_stored : 100
@@ -123,7 +145,7 @@ function mission4_fire_request(tag, resource, amount, months, ok_tag, fail_tag, 
 [es=event_mission_start, mission=mission4]
 function mission4_on_start(ev) {
 	mission_show_start_message(mission, "message_trade_on_the_water")
-	city.set_empire_available(-1)
+	city.set_empire_available(1)
 
 	if (mission.papyrus_made_handled) {
 		city.set_advisor_available(ADVISOR_TRADE, 1)

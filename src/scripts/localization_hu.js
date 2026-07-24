@@ -1466,4 +1466,21 @@ localization_hu = [
   { key: "#TR_PALACE_TOOLTIP_PROSPERITY_RATING", text: "Jólétérték" }
   { key: "#TR_PALACE_TOOLTIP_MONUMENT_RATING", text: "Emlékműérték" }
   { key: "#TR_PALACE_TOOLTIP_KINGDOM_RATING", text: "Királyságérték" }
+  { key: "#crete", text: "KRÉTA" }
+  { key: "#cyprus", text: "CIPRUS" }
+  { key: "#eastern_africa", text: "KELET-AFRIKA" }
+  { key: "#eastern_desert", text: "KELETI-SIVATAG" }
+  { key: "#greece", text: "GÖRÖGORSZÁG" }
+  { key: "#libya", text: "LÍBIA" }
+  { key: "#lower_egypt", text: "ALSÓ-EGYIPTOM" }
+  { key: "#delta", text: "DELTA" }
+  { key: "#fayuum", text: "FÁJÚM" }
+  { key: "#nubia", text: "NÚBIA" }
+  { key: "#palestine", text: "PALESZTINA" }
+  { key: "#sinai", text: "SÍNAI-félsziget" }
+  { key: "#syria", text: "SZÍRIA" }
+  { key: "#upper_egypt", text: "FELSŐ-EGYIPTOM" }
+  { key: "#western_desert", text: "NYUGATI-SIVATAG" }
+  { key: "#lebanon", text: "LIBANON" }
+  { key: "#canaan", text: "KÁNAÁN" }
 ]

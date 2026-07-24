@@ -37,6 +37,11 @@ public:
     void load_mission_metadata(const mission_id_t &missionid);
     void update_month();
 
+    void hide_non_city_objects();
+    int alloc_empire_object();
+    full_empire_object *ref_full_object(int object_id);
+    int find_region_name_id(pcstr name) const;
+
     empire_city *city(int city_id);
     empire_city *city(xstring name);
 
@@ -52,7 +57,7 @@ public:
 
             if (func(&city)) {
                 arr.push_back(&city);
-            }   
+            }
         }
     }
 
@@ -103,6 +108,14 @@ public:
     map_route_object &ref_route_object(int id);
 
 private:
+    void load_empire_texts(archive arch);
+    void load_empire_ornaments(archive arch);
+    void load_empire_battle_icons(archive arch);
+    void load_empire_land_routes(archive arch);
+    void load_empire_sea_routes(archive arch);
+    void load_empire_kingdome_armies(archive arch);
+    void load_empire_enemy_armies(archive arch);
+
     empire_city cities[MAX_CITIES] = {};
 };
 

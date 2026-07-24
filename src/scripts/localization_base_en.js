@@ -4858,23 +4858,6 @@ localization_base_en = [
     { group:195, id:63, text: "Piramesse" }
     { group:195, id:64, text: "Athens" }
     { group:195, id:65, text: "Cleoantonopolis" }
-    { group:196, id:0, text: "CRETE" }
-    { group:196, id:1, text: "CYPRUS" }
-    { group:196, id:2, text: "EASTERN AFRICA" }
-    { group:196, id:3, text: "EASTERN DESERT" }
-    { group:196, id:4, text: "GREECE" }
-    { group:196, id:5, text: "LIBYA" }
-    { group:196, id:6, text: "LOWER EGYPT" }
-    { group:196, id:7, text: "DELTA" }
-    { group:196, id:8, text: "FAYUUM" }
-    { group:196, id:9, text: "NUBIA" }
-    { group:196, id:10, text: "PALESTINE" }
-    { group:196, id:11, text: "SINAI" }
-    { group:196, id:12, text: "SYRIA" }
-    { group:196, id:13, text: "UPPER EGYPT" }
-    { group:196, id:14, text: "WESTERN DESERT" }
-    { group:196, id:15, text: "LEBANON" }
-    { group:196, id:16, text: "CANAAN" }   
     { group:198, id:0, text: "None " }
     { group:198, id:1, text: "Small Bent Pyramid" }
     { group:198, id:2, text: "Medium Bent Pyramid" }

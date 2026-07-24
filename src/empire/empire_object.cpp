@@ -2,12 +2,15 @@
 
 #include "core/calc.h"
 #include "core/log.h"
+#include "core/string.h"
 #include "core/svector.h"
 #include "empire/empire.h"
 #include "empire/trade_route.h"
 #include "empire/type.h"
+#include "empire/empire_city.h"
 #include "graphics/image.h"
-#include "graphics/image_groups.h"
+#include "graphics/elements/lang_text.h"
+#include "io/gamefiles/lang.h"
 #include "io/gamestate/boilerplate.h"
 #include "io/io_buffer.h"
 #include "io/manager.h"
@@ -23,6 +26,7 @@
 
 #define MAX_OBJECTS 200
 #define MAX_ROUTES 20
+#define EMPIRE_REGION_NAME_SCAN 128
 
 full_empire_object g_empire_objects[MAX_OBJECTS];
 
@@ -32,6 +36,188 @@ void empire_t::foreach_object(std::function<void(int object_index, const empire_
         if (objects[i].in_use)
             callback(i, objects[i].obj);
     }
+}
+
+void empire_t::hide_non_city_objects() {
+    // Replace pak ornaments/texts/armies from script, but keep cities and trade routes.
+    for (int i = 0; i < MAX_OBJECTS; i++) {
+        const int type = g_empire_objects[i].obj.type;
+        if (type == EMPIRE_OBJECT_CITY
+            || type == EMPIRE_OBJECT_LAND_TRADE_ROUTE
+            || type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+            continue;
+        }
+        g_empire_objects[i].in_use = 0;
+    }
+}
+
+int empire_t::alloc_empire_object() {
+    for (int i = 0; i < MAX_OBJECTS; i++) {
+        if (g_empire_objects[i].in_use) {
+            continue;
+        }
+        g_empire_objects[i] = {};
+        g_empire_objects[i].obj.id = i;
+        g_empire_objects[i].in_use = 1;
+        return i;
+    }
+    logs::error("empire: no free map object slots");
+    return -1;
+}
+
+full_empire_object *empire_t::ref_full_object(int object_id) {
+    if (object_id < 0 || object_id >= MAX_OBJECTS) {
+        return nullptr;
+    }
+    return &g_empire_objects[object_id];
+}
+
+int empire_t::find_region_name_id(pcstr name) const {
+    if (!name || !name[0]) {
+        return -1;
+    }
+    for (int id = 0; id < EMPIRE_REGION_NAME_SCAN; id++) {
+        pcstr s = lang_get_string(196, id);
+        if (!s || !s[0]) {
+            continue;
+        }
+        if (string_compare_case_insensitive(s, name) == 0) {
+            return id;
+        }
+    }
+    return -1;
+}
+
+static full_empire_object *begin_script_map_object(archive arch, e_empire_object type) {
+    const int idx = arch.r_int("idx", -1);
+    full_empire_object *full = nullptr;
+    if (idx >= 0) {
+        full = g_empire.ref_full_object(idx);
+        if (!full) {
+            logs::info("empire: invalid map object idx=%d", idx);
+            return nullptr;
+        }
+    } else {
+        const int allocated = g_empire.alloc_empire_object();
+        if (allocated < 0) {
+            return nullptr;
+        }
+        full = g_empire.ref_full_object(allocated);
+    }
+
+    full->in_use = 1;
+    if (idx >= 0) {
+        full->obj.id = idx;
+    }
+    full->obj.type = type;
+    full->obj.pos = arch.r_vec2i("pos", full->obj.pos);
+    full->obj.image_id = arch.r_int("image", full->obj.image_id);
+    full->obj.expanded.pos = arch.r_vec2i("expanded_pos", full->obj.expanded.pos);
+    full->obj.expanded.image_id = arch.r_int("expanded_image", full->obj.expanded.image_id);
+    full->obj.text_align = arch.r_int("text_align", full->obj.text_align);
+    return full;
+}
+
+void empire_t::load_empire_texts(archive arch) {
+    arch.r_array("empire_texts", [](archive entry) {
+        full_empire_object *full = begin_script_map_object(entry, EMPIRE_OBJECT_TEXT);
+        if (!full) {
+            return;
+        }
+
+        const int name_id = entry.r_int("name_id", -1);
+        if (name_id >= 0) {
+            full->city_name_id = name_id;
+            full->text_key = {};
+            return;
+        }
+
+        // Text key as [group, id] (e.g. [196, 11] for SINAI) — same pattern as mission tooltips.
+        const vec2i text_key = entry.r_vec2i("name", {-1, -1});
+        if (text_key.x >= 0 && text_key.y >= 0) {
+            full->city_name_id = text_key.y;
+            full->text_key = {};
+            return;
+        }
+
+        xstring name = entry.r_string("name");
+        if (!!name && name[0] == '#') {
+            const xstring resolved = lang_xtext_from_key(name);
+            if (!resolved || resolved == name) {
+                logs::info("empire: unknown region text key '%s'", name.c_str());
+                full->in_use = 0;
+                return;
+            }
+            full->text_key = name;
+            return;
+        }
+
+        const int resolved = g_empire.find_region_name_id(name.c_str());
+        if (resolved < 0) {
+            logs::info("empire: unknown region text name '%s'", name.c_str() ? name.c_str() : "");
+            full->in_use = 0;
+            return;
+        }
+        full->city_name_id = resolved;
+        full->text_key = {};
+    });
+}
+
+void empire_t::load_empire_ornaments(archive arch) {
+    arch.r_array("empire_ornaments", [](archive entry) {
+        begin_script_map_object(entry, EMPIRE_OBJECT_ORNAMENT);
+    });
+}
+
+void empire_t::load_empire_battle_icons(archive arch) {
+    arch.r_array("empire_battle_icons", [](archive entry) {
+        full_empire_object *full = begin_script_map_object(entry, EMPIRE_OBJECT_BATTLE_ICON);
+        if (!full) {
+            return;
+        }
+        full->obj.invasion_path_id = entry.r_int("path", full->obj.invasion_path_id);
+        full->obj.invasion_years = entry.r_int("years", full->obj.invasion_years);
+    });
+}
+
+void empire_t::load_empire_land_routes(archive arch) {
+    arch.r_array("empire_land_routes", [](archive entry) {
+        full_empire_object *full = begin_script_map_object(entry, EMPIRE_OBJECT_LAND_TRADE_ROUTE);
+        if (!full) {
+            return;
+        }
+        full->obj.trade_route_id = (uint8_t)entry.r_int("route", full->obj.trade_route_id);
+    });
+}
+
+void empire_t::load_empire_sea_routes(archive arch) {
+    arch.r_array("empire_sea_routes", [](archive entry) {
+        full_empire_object *full = begin_script_map_object(entry, EMPIRE_OBJECT_SEA_TRADE_ROUTE);
+        if (!full) {
+            return;
+        }
+        full->obj.trade_route_id = (uint8_t)entry.r_int("route", full->obj.trade_route_id);
+    });
+}
+
+void empire_t::load_empire_kingdome_armies(archive arch) {
+    arch.r_array("empire_kingdome_armies", [](archive entry) {
+        full_empire_object *full = begin_script_map_object(entry, EMPIRE_OBJECT_KINGDOME_ARMY);
+        if (!full) {
+            return;
+        }
+        full->obj.distant_battle_travel_months = entry.r_int("months", full->obj.distant_battle_travel_months);
+    });
+}
+
+void empire_t::load_empire_enemy_armies(archive arch) {
+    arch.r_array("empire_enemy_armies", [](archive entry) {
+        full_empire_object *full = begin_script_map_object(entry, EMPIRE_OBJECT_ENEMY_ARMY);
+        if (!full) {
+            return;
+        }
+        full->obj.distant_battle_travel_months = entry.r_int("months", full->obj.distant_battle_travel_months);
+    });
 }
 
 static bool is_trade_city(int index) {
@@ -233,10 +419,10 @@ int empire_t::get_closest_object(vec2i pos) const {
 void empire_t::object_set_expanded(int object_id, e_empire_city new_city_type) {
     auto& objects = g_empire_objects;
     objects[object_id].city_type = new_city_type;
-    if (new_city_type == EMPIRE_CITY_PHARAOH)
-        objects[object_id].obj.expanded.image_id = image_id_from_group(GROUP_EMPIRE_CITY_PH_PHARAOH);
-    else if (new_city_type == EMPIRE_CITY_OURS)
-        objects[object_id].obj.expanded.image_id = image_id_from_group(GROUP_EMPIRE_CITY_PH_OURS);
+    const int image_id = empire_city_images.image_id(new_city_type, true);
+    if (image_id > 0) {
+        objects[object_id].obj.expanded.image_id = image_id;
+    }
 }
 
 bool empire_t::city_buys_resource(int object_id, e_resource resource, bool from_raw_object) {
@@ -321,7 +507,7 @@ static int get_animation_offset(int image_id, int current_index) {
 int empire_t::update_animation(int object_index, const empire_object &obj, int image_id) {
     auto& objects = g_empire_objects;
     objects[object_index].obj.animation_index = get_animation_offset(image_id, obj.animation_index);
-    return objects[object_index].obj.animation_index;
+    return objects[object_index].obj.animation_index & 0x7f;
 }
 
 std::array<map_route_object, 50> g_empire_route_objects;

@@ -34,7 +34,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <thread>
 
 #define TILE_X_SIZE 60
 #define TILE_Y_SIZE 30
@@ -282,7 +281,6 @@ static void create_full_city_screenshot() {
     }
     vec2i original_camera_pixels = g_camera.camera_position;
 
-    viewport_t full_city_view_data = g_camera;
     auto mm_view = g_camera.get_scrollable_pixel_limits();
 
     vec2i view_size = g_camera.size_pixels;
@@ -321,20 +319,15 @@ static void create_full_city_screenshot() {
     g_zoom.set_scale(100);
     graphics_set_clip_rectangle({0, TOP_MENU_HEIGHT}, {canvas_width, canvas_height});
 
-    vec2i viewport_offset, viewport_size;
-    viewport_offset = g_camera.offset;
-    viewport_size = g_camera.size_pixels;
+    vec2i viewport_size = g_camera.size_pixels;
     g_camera.set_screen_size(canvas_width + widget_sidebar_city_offset_max(), canvas_height + TOP_MENU_HEIGHT);
     int current_height = base_height;
 
-    int yy = 0;
+    // draw_without_overlay() iterates global g_camera (not ctx.view), so each strip
+    // must reposition g_camera itself. Restored to original_camera_pixels after the loop.
     while ((size = image_request_rows()) != 0) {
-
         int y_offset = (current_height + canvas_height > mm_view.max.y) ? canvas_height - (mm_view.max.y - current_height) - TILE_Y_SIZE : 0;
 
-        std::vector<std::thread> threads;
-
-        int i = 0;
         for (int width = 0; width < city_canvas_pixels.x; width += canvas_width) {
             int image_section_width = canvas_width;
             int x_offset = 0;
@@ -343,44 +336,22 @@ static void create_full_city_screenshot() {
                 x_offset = canvas_width - image_section_width - TILE_X_SIZE * 2;
             }
 
-            //threads.push_back(std::thread([] (vec2i min_pos, int width, int canvas_width, int current_height, color *canvas,
-              //                                  int x_offset, int y_offset, int image_section_width, int canvas_height, vec2i city_canvas_pixels, view_data_t &full_city_view_data, int color) {
-               //SDL_Surface *surface = SDL_CreateRGBSurface(SDL_SWSURFACE, viewport_size.x, viewport_size.y, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-               //SDL_Renderer *renderer = SDL_CreateSoftwareRenderer(surface);
+            painter local_context;
+            local_context.view = &g_camera;
+            local_context.global_render_scale = 1.f;
+            local_context.renderer = g_render.renderer();
 
-               //SDL_Rect rect{0, 0, canvas_width, canvas_height};
-               //SDL_FillRect(surface, &rect, ((yy + i) % 2) ? 0xff00ff00 : 0xff0000ff);
-                // draw_without_overlay() iterates the GLOBAL g_camera (not ctx.view), so we
-                // must reposition g_camera itself for each strip — moving a local copy renders
-                // the same view every time (buildings/monuments dropped). g_camera is restored
-                // to original_camera_pixels after the loop.
-                painter local_context;
-                local_context.view = &g_camera;
-                local_context.global_render_scale = 1.f;
-                local_context.renderer = g_render.renderer();
-
-                g_camera.go_to_pixel(vec2i{mm_view.min.x + width, current_height}, false);
-                g_render.clear_screen();
-                g_screen_city.draw_without_overlay(local_context, 0);
-                g_render.save_screen_buffer(local_context, &canvas[width], x_offset, TOP_MENU_HEIGHT + y_offset, image_section_width, canvas_height - y_offset, city_canvas_pixels.x);
-                //SDL_Rect rect2 = {x_offset, y_offset, canvas_width, canvas_height};
-                //bool ok = SDL_RenderReadPixels(local_context.renderer, &rect2, SDL_PIXELFORMAT_ARGB8888, &canvas[width], city_canvas_pixels.x * sizeof(color)) == 0;
-               //SDL_DestroyRenderer(renderer);
-               //SDL_FreeSurface(surface);
-            //}, min_pos, width, canvas_width, current_height, canvas, x_offset, y_offset, image_section_width, canvas_height, city_canvas_pixels, full_city_view_data, ((yy + i) % 2) ? 0xff00ff00 : 0xff0000ff));
-            i++;
+            g_camera.go_to_pixel(vec2i{mm_view.min.x + width, current_height}, false);
+            g_render.clear_screen();
+            g_screen_city.draw_without_overlay(local_context, 0);
+            g_render.save_screen_buffer(local_context, &canvas[width], x_offset, TOP_MENU_HEIGHT + y_offset, image_section_width, canvas_height - y_offset, city_canvas_pixels.x);
         }
-
-        //for (std::thread& t : threads) {
-        //    t.join();
-        //}
 
         if (!image_write_rows(canvas, city_canvas_pixels.x)) {
             logs::error("Error writing image", 0, 0);
             error = 1;
             break;
         }
-        yy++;
         current_height += canvas_height;
     }
 

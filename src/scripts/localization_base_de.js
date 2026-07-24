@@ -4864,23 +4864,6 @@ localization_base_de = [
     { group:195, id:63, text: "Piramesse" }
     { group:195, id:64, text: "Athen" }
     { group:195, id:65, text: "Kleoantinopolis" }
-    { group:196, id:0, text: "KRETA" }
-    { group:196, id:1, text: "ZYPERN" }
-    { group:196, id:2, text: "OSTAFRIKA" }
-    { group:196, id:3, text: "ÖSTLICHE WÜSTE" }
-    { group:196, id:4, text: "GRIECHENLAND" }
-    { group:196, id:5, text: "LIBYEN" }
-    { group:196, id:6, text: "UNTERÄGYPTEN" }
-    { group:196, id:7, text: "DELTA" }
-    { group:196, id:8, text: "FAYUUM" }
-    { group:196, id:9, text: "NUBIEN" }
-    { group:196, id:10, text: "PALÄSTINA" }
-    { group:196, id:11, text: "SINAI" }
-    { group:196, id:12, text: "SYRIEN" }
-    { group:196, id:13, text: "OBERÄGYPTEN" }
-    { group:196, id:14, text: "WESTLICHE WÜSTE" }
-    { group:196, id:15, text: "LIBANON" }
-    { group:196, id:16, text: "KANAAN" }   
     { group:198, id:0, text: "Keine " }
     { group:198, id:1, text: "Kleine Knickpyramide" }
     { group:198, id:2, text: "Mittlere Knickpyramide" }

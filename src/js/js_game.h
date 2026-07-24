@@ -78,6 +78,9 @@ namespace js_helpers {
 
     template<>
     inline xstring js_to_value<xstring>(js_State *J, int idx) {
+        if (js_isundefined(J, idx) || js_isnull(J, idx)) {
+            return xstring();
+        }
         auto pp = js_tostring(J, idx);
         xstring r;
         r._set(pp);

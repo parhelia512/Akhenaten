@@ -5042,23 +5042,6 @@ localization_base_hu = [
     { group:195, id:63, text: "Piramesz" }
     { group:195, id:64, text: "Athén" }
     { group:195, id:65, text: "Kleoantonopolisz" }
-    { group:196, id:0, text: "KRÉTA" }
-    { group:196, id:1, text: "CIPRUS" }
-    { group:196, id:2, text: "KELET-AFRIKA" }
-    { group:196, id:3, text: "KELETI-SIVATAG" }
-    { group:196, id:4, text: "GÖRÖGORSZÁG" }
-    { group:196, id:5, text: "LÍBIA" }
-    { group:196, id:6, text: "ALSÓ-EGYIPTOM" }
-    { group:196, id:7, text: "DELTA" }
-    { group:196, id:8, text: "FÁJÚM" }
-    { group:196, id:9, text: "NÚBIA" }
-    { group:196, id:10, text: "PALESZTINA" }
-    { group:196, id:11, text: "SÍNAI-félsziget" }
-    { group:196, id:12, text: "SZÍRIA" }
-    { group:196, id:13, text: "FELSŐ-EGYIPTOM" }
-    { group:196, id:14, text: "NYUGATI-SIVATAG" }
-    { group:196, id:15, text: "LIBANON" }
-    { group:196, id:16, text: "KÁNAÁN" }
     { group:198, id:0, text: "Nincs" }
     { group:198, id:1, text: "Kis tört piramis" }
     { group:198, id:2, text: "Közepes tört piramis" }

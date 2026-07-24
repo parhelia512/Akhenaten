@@ -357,6 +357,7 @@ js_StringNode property_pack = js_intern("pack");
 js_StringNode property_offset = js_intern("offset");
 js_StringNode property_duration = js_intern("duration");
 js_StringNode property_max_frames = js_intern("max_frames");
+js_StringNode property_path = js_intern("path");
 
 bool archive::r_anim(pcstr name, animation_t &anim) {
     auto vm = (js_State *)state;
@@ -404,11 +405,22 @@ bool archive::r_desc_impl(image_desc &desc) {
         return false;
     }
 
+    if (js_isstring(vm, -1)) {
+        desc.path._set(js_tostring(vm, -1));
+        return !desc.path.empty();
+    }
+
     if (vm->isobject(-1)) {
         vm->getproperty(-1, property_pack); desc.pack = js_isundefined(vm, -1) ? 0 : js_tointeger(vm, -1); js_pop(vm, 1);
         vm->getproperty(-1, property_id); desc.id = js_isundefined(vm, -1) ? 0 : js_tointeger(vm, -1); js_pop(vm, 1);
         vm->getproperty(-1, property_offset); desc.offset = js_isundefined(vm, -1) ? 0 : js_tointeger(vm, -1); js_pop(vm, 1);
-        return true;
+
+        vm->getproperty(-1, property_path);
+        if (!js_isundefined(vm, -1) && js_isstring(vm, -1)) {
+            desc.path._set(js_tostring(vm, -1));
+        }
+        js_pop(vm, 1);
+        return desc.valid();
     }
 
     return false;

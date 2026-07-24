@@ -36,8 +36,6 @@
 #include "dev/debug.h"
 #include <cmath>
 
-uint16_t empire_images_remap[32000] = {0};
-
 static const vec2i EMPIRE_MAP_SIZE_PX{1200, 1600};
 
 static int consume_scroll_remainder(float& remainder) {
@@ -50,20 +48,6 @@ static int consume_scroll_remainder(float& remainder) {
 
 using empire_object_tokens_t = token_holder<e_empire_object, EMPIRE_OBJECT_ORNAMENT, EMPIRE_OBJECT_COUNT>;
 const empire_object_tokens_t ANK_CONFIG_ENUM(empire_object_tokens);
-
-void ANK_REGISTER_CONFIG_ITERATOR(
-  config_load_images_remap_config) {
-    g_config_arch.r_array("empire_images_remap", [](archive arch) {
-        int id = arch.r_int("id");
-        int remap = arch.r_int("rid");
-        empire_images_remap[id] = remap;
-    });
-}
-
-int image_id_remap(int id) {
-    int rimg = empire_images_remap[id];
-    return rimg ? rimg : id;
-}
 
 struct object_trade_info {
     rect r;
@@ -330,19 +314,25 @@ void empire_window::draw_empire_object(int object_index, const empire_object& ob
         image_id = obj.image_id;
     }
 
-    image_id = image_id_remap(image_id);
     const float scale = map_scale();
     const vec2i draw_pos = map_to_screen(pos);
 
     if (obj.type == EMPIRE_OBJECT_CITY) {
         painter ctx = game.painter();
-        const image_t* img = image_get(image_id);
-        if (!img) {
-            return;
-        }
         int empire_city_id = g_empire.get_city_for_object(object_index);
         const empire_city* city = g_empire.city(empire_city_id);
         if (!city || !city->shows_as_trade_city_on_map()) {
+            return;
+        }
+
+        // Type→texture from empire_city_images (empire.js); pak Cleopatra IDs are ignored.
+        image_id = empire_city_images.image_id(city->type, scenario_empire_is_expanded());
+        if (image_id <= 0) {
+            return;
+        }
+
+        const image_t* img = image_get(image_id);
+        if (!img) {
             return;
         }
         sprite spr;
@@ -421,8 +411,13 @@ void empire_window::draw_empire_object(int object_index, const empire_object& ob
         const full_empire_object* full = g_empire.get_full_object(object_index);
         vec2i text_pos = map_to_screen(pos);
 
-        tooltip_text = ui::str(196, full->city_name_id);
-        ui::label_colored(tooltip_text, text_pos - vec2i{5, 0}, FONT_SMALL_PLAIN, COLOR_FONT_SHITTY_BROWN, 100);
+        xstring label;
+        if (full && !!full->text_key) {
+            label = lang_xtext_from_key(full->text_key);
+        } else if (full) {
+            label = ui::str(196, full->city_name_id);
+        }
+        ui::label_colored(label.c_str(), text_pos - vec2i{5, 0}, FONT_SMALL_PLAIN, COLOR_FONT_SHITTY_BROWN, 100);
         return;
     }
 

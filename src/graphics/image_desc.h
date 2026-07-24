@@ -19,5 +19,5 @@ struct image_desc {
     }
 
     image_desc operator+(int16_t v) const { return {pack, id, int16_t(offset + v)}; }
-    bool valid() const { return pack || id || offset; }
+    bool valid() const { return pack || id || offset || !path.empty(); }
 };

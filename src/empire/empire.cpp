@@ -115,6 +115,17 @@ void empire_t::load_mission_metadata(const mission_id_t &missionid) {
                 g_empire.set_trade_route_type(city->route_id, city->is_sea_trade);
             }
         });
+
+        if (arch.r_bool("hide_pak_objects", false)) {
+            g_empire.hide_non_city_objects();
+        }
+        g_empire.load_empire_texts(arch);
+        g_empire.load_empire_ornaments(arch);
+        g_empire.load_empire_battle_icons(arch);
+        g_empire.load_empire_land_routes(arch);
+        g_empire.load_empire_sea_routes(arch);
+        g_empire.load_empire_kingdome_armies(arch);
+        g_empire.load_empire_enemy_armies(arch);
     });
 
     for (auto &city : cities) {

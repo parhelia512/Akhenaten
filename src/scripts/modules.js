@@ -26,7 +26,6 @@ import buildings
 import overlays
 import images
 import population
-import images_remap
 import imagepaks
 import missions
 import figures

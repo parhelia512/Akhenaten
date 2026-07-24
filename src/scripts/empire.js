@@ -38,6 +38,19 @@ empire_city_options {
     text_group_new_names : 21
 }
 
+// Empire-map city sprites: Pharaoh_General group 169 = empire_bits city block (17 frames).
+// Browse as pharaoh_general/empire_bits_00057..00073. Paths preferred; pack/id/offset also OK.
+empire_city_images {
+    ours              : {path:"pharaoh_general/empire_bits_00057"}
+    ours_expanded     : {path:"pharaoh_general/empire_bits_00057"}
+    pharaoh_trading   : {path:"pharaoh_general/empire_bits_00063"}
+    pharaoh           : {path:"pharaoh_general/empire_bits_00063"}
+    egyptian_trading  : {path:"pharaoh_general/empire_bits_00063"}
+    egyptian          : {path:"pharaoh_general/empire_bits_00063"}
+    foreign_trading   : {path:"pharaoh_general/empire_bits_00066"}
+    foreign           : {path:"pharaoh_general/empire_bits_00066"}
+}
+
 empire_traders {
     ship_movement_delay [2, 5]
     land_movement_delay [1, 4]

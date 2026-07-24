@@ -1477,4 +1477,21 @@ localization_en = [
   { key: "#TR_PALACE_TOOLTIP_PROSPERITY_RATING", text: "Prosperity rating" }
   { key: "#TR_PALACE_TOOLTIP_MONUMENT_RATING", text: "Monument rating" }
   { key: "#TR_PALACE_TOOLTIP_KINGDOM_RATING", text: "Kingdom rating" }
+  { key: "#crete", text: "CRETE" }
+  { key: "#cyprus", text: "CYPRUS" }
+  { key: "#eastern_africa", text: "EASTERN AFRICA" }
+  { key: "#eastern_desert", text: "EASTERN DESERT" }
+  { key: "#greece", text: "GREECE" }
+  { key: "#libya", text: "LIBYA" }
+  { key: "#lower_egypt", text: "LOWER EGYPT" }
+  { key: "#delta", text: "DELTA" }
+  { key: "#fayuum", text: "FAYUUM" }
+  { key: "#nubia", text: "NUBIA" }
+  { key: "#palestine", text: "PALESTINE" }
+  { key: "#sinai", text: "SINAI" }
+  { key: "#syria", text: "SYRIA" }
+  { key: "#upper_egypt", text: "UPPER EGYPT" }
+  { key: "#western_desert", text: "WESTERN DESERT" }
+  { key: "#lebanon", text: "LEBANON" }
+  { key: "#canaan", text: "CANAAN" }
 ]

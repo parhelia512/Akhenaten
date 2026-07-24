@@ -668,4 +668,21 @@ localization_ru_f = [
     { key: "#TR_PALACE_TOOLTIP_PROSPERITY_RATING", text: "Бoгaтcтвo" }
     { key: "#TR_PALACE_TOOLTIP_MONUMENT_RATING", text: "Moнyмeнты" }
     { key: "#TR_PALACE_TOOLTIP_KINGDOM_RATING", text: "Цapcтвo" }
+    { key: "#crete", text: "KPИT" }
+    { key: "#cyprus", text: "KИПP" }
+    { key: "#eastern_africa", text: "BCTOЧHAЯ AФPИKA" }
+    { key: "#eastern_desert", text: "BOCTOЧHAЯ ПУCTЫHЯ" }
+    { key: "#greece", text: "ГPEЦИЯ" }
+    { key: "#libya", text: "ЛИBИЯ" }
+    { key: "#lower_egypt", text: "HИЖHИЙ EГИПET" }
+    { key: "#delta", text: "ДEЛЬTA" }
+    { key: "#fayuum", text: "ФAЮM" }
+    { key: "#nubia", text: "HУБИЯ" }
+    { key: "#palestine", text: "ПAЛECTИHA" }
+    { key: "#sinai", text: "CИHAЙ" }
+    { key: "#syria", text: "CИPИЯ" }
+    { key: "#upper_egypt", text: "BEPXHИЙ EГИПET" }
+    { key: "#western_desert", text: "ЗAПAДHAЯ ПУCTЫHЯ" }
+    { key: "#lebanon", text: "ЛИBAH" }
+    { key: "#canaan", text: "XAHAAH" }
 ]

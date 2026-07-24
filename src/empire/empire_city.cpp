@@ -2,6 +2,8 @@
 #include "empire/empire.h"
 #include "empire_object.h"
 #include "game/game_config.h"
+#include "graphics/image.h"
+#include "graphics/image_groups.h"
 #include "io/gamefiles/lang.h"
 #include "js/js_game.h"
 
@@ -9,6 +11,57 @@
 
 const e_empire_city_tokens_t ANK_CONFIG_ENUM(e_empire_city_tokens);
 empire_city_options_t ANK_VARIABLE(empire_city_options);
+empire_city_images_t ANK_VARIABLE(empire_city_images);
+
+image_desc empire_city_images_t::for_type(e_empire_city type, bool expanded) const {
+    image_desc desc;
+    switch (type) {
+    case EMPIRE_CITY_OURS:
+        desc = (expanded && ours_expanded.valid()) ? ours_expanded : ours;
+        break;
+    case EMPIRE_CITY_PHARAOH_TRADING:
+        desc = pharaoh_trading.valid() ? pharaoh_trading : pharaoh;
+        break;
+    case EMPIRE_CITY_PHARAOH:
+        desc = pharaoh.valid() ? pharaoh : pharaoh_trading;
+        break;
+    case EMPIRE_CITY_EGYPTIAN_TRADING:
+        desc = egyptian_trading;
+        break;
+    case EMPIRE_CITY_EGYPTIAN:
+        desc = egyptian.valid() ? egyptian : egyptian_trading;
+        break;
+    case EMPIRE_CITY_FOREIGN_TRADING:
+        desc = foreign_trading.valid() ? foreign_trading : egyptian_trading;
+        break;
+    case EMPIRE_CITY_FOREIGN:
+        desc = foreign.valid() ? foreign : foreign_trading;
+        if (!desc.valid()) {
+            desc = egyptian_trading;
+        }
+        break;
+    default:
+        break;
+    }
+
+    if (!desc.valid()) {
+        // Group 169 city block: frame 0 = empire_bits_00057 (ours), +6 egyptian trading.
+        if (type == EMPIRE_CITY_OURS) {
+            desc = image_desc::resolve("pharaoh_general/empire_bits_00057");
+        } else if (type == EMPIRE_CITY_FOREIGN || type == EMPIRE_CITY_FOREIGN_TRADING) {
+            desc = image_desc::resolve("pharaoh_general/empire_bits_00066");
+        } else {
+            desc = image_desc::resolve("pharaoh_general/empire_bits_00063");
+        }
+    }
+    return desc;
+}
+
+int empire_city_images_t::image_id(e_empire_city type, bool expanded) const {
+    image_desc desc = for_type(type, expanded);
+    const int id = desc.tid();
+    return id > 0 ? id : 0;
+}
 
 void empire_city::remove_trader(int figure_id) {
     for (int i = 0; i < 3; i++) {

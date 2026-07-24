@@ -4831,23 +4831,6 @@ localization_base_ru = [
     { group:195, id:63, text: "Пирамесс" }
     { group:195, id:64, text: "Афины" }
     { group:195, id:65, text: "Клеоантонополис" }
-    { group:196, id:0, text: "КРИТ" }
-    { group:196, id:1, text: "КИПР" }
-    { group:196, id:2, text: "ВОСТОЧНАЯ АФРИКА" }
-    { group:196, id:3, text: "ВОСТОЧНАЯ ПУСТЫНЯ" }
-    { group:196, id:4, text: "ГРЕЦИЯ" }
-    { group:196, id:5, text: "ЛИВИЯ" }
-    { group:196, id:6, text: "НИЖНИЙ ЕГИПЕТ" }
-    { group:196, id:7, text: "ДЕЛЬТА" }
-    { group:196, id:8, text: "ФАЙЮМ" }
-    { group:196, id:9, text: "НУБИЯ" }
-    { group:196, id:10, text: "ПАЛЕСТИНА" }
-    { group:196, id:11, text: "СИНАЙ" }
-    { group:196, id:12, text: "СИРИЯ" }
-    { group:196, id:13, text: "ВЕРХНИЙ ЕГИПЕТ" }
-    { group:196, id:14, text: "ЗАПАДНАЯ ПУСТЫНЯ" }
-    { group:196, id:15, text: "ЛИВАН" }
-    { group:196, id:16, text: "ХАНААН" }
     { group:197, id:0, text: "Мужские имена" }
     { group:197, id:1, text: "Акуношь" }
     { group:197, id:2, text: "Бенермерут" }

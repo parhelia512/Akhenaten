@@ -14,6 +14,26 @@ struct empire_city_options_t {
 };
 ANK_CONFIG_STRUCT(empire_city_options_t, text_group_old_names, text_group_new_names)
 
+// Empire-map city sprites by type (configured in empire.js — no Cleopatra absolute IDs).
+struct empire_city_images_t {
+    image_desc ours;
+    image_desc ours_expanded;
+    image_desc pharaoh_trading;
+    image_desc pharaoh;
+    image_desc egyptian_trading;
+    image_desc egyptian;
+    image_desc foreign_trading;
+    image_desc foreign;
+
+    image_desc for_type(e_empire_city type, bool expanded) const;
+    int image_id(e_empire_city type, bool expanded) const;
+};
+ANK_CONFIG_STRUCT(empire_city_images_t,
+    ours, ours_expanded, pharaoh_trading, pharaoh,
+    egyptian_trading, egyptian, foreign_trading, foreign)
+
+extern empire_city_images_t empire_city_images;
+
 struct empire_city {
     enum {
         check_open_route = 1

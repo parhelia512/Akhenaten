@@ -2,6 +2,7 @@
 
 #include "empire/type.h"
 #include "core/vec2i.h"
+#include "core/xstring.h"
 #include "game/resource.h"
 
 #include <functional>
@@ -42,6 +43,7 @@ struct full_empire_object {
     int trade25;
     int trade15;
     empire_object obj;
+    xstring text_key;
 
     void add_sell_resource(e_resource);
 };

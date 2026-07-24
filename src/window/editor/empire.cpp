@@ -1,6 +1,7 @@
 #include "empire.h"
 
 #include "empire/empire.h"
+#include "empire/empire_city.h"
 #include "empire/empire_map.h"
 #include "empire/empire_object.h"
 #include "empire/trade_route.h"
@@ -151,7 +152,10 @@ static void draw_empire_object(int object_index, const empire_object &obj) {
     if (obj.type == EMPIRE_OBJECT_CITY) {
         int city_id = g_empire.get_city_for_object(object_index);
         const empire_city* city = g_empire.city(city_id);
-        if (city->type == EMPIRE_CITY_EGYPTIAN || city->type == EMPIRE_CITY_FOREIGN) {
+        const int typed_id = city ? empire_city_images.image_id(city->type, false) : 0;
+        if (typed_id > 0) {
+            image_id = typed_id;
+        } else if (city && (city->type == EMPIRE_CITY_EGYPTIAN || city->type == EMPIRE_CITY_FOREIGN)) {
             image_id = image_id_from_group(GROUP_EDITOR_EMPIRE_FOREIGN_CITY);
         }
     } else if (obj.type == EMPIRE_OBJECT_BATTLE_ICON) {
