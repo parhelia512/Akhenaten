@@ -9,6 +9,7 @@
 #include "core/log.h"
 #include "core/variant.h"
 #include "core/vec2i.h"
+#include "core/xvalue.h"
 #include "js/js.h"
 #include "js/js_game.h"
 #include "mujs/mujs.h"
@@ -21,6 +22,8 @@
 #include <cctype>
 #include <cstring>
 #include <string>
+#include <thread>
+#include <vector>
 
 bool g_test_signal_ready = false;
 
@@ -164,6 +167,81 @@ ANK_CONFIG_PROPERTY(archive_property_roundtrip_t, evolve_text, count)
 
 namespace {
 
+struct xvalue_test_a_t {
+    int value = 42;
+};
+
+struct xvalue_test_b_t {
+    int value = 7;
+};
+
+struct xvalue_test_find_t {
+    int value = 0;
+};
+
+struct xvalue_test_threaded_t {
+    int value = 0;
+};
+
+void run_xvalue_unit_tests() {
+    {
+        auto &a1 = xvalue<xvalue_test_a_t>::get();
+        auto &a2 = xvalue<xvalue_test_a_t>::get();
+        expect_true(&a1 == &a2, "xvalue get returns same instance");
+        expect_true(a1.value == 42, "xvalue default constructed");
+        a1.value = 100;
+        expect_true(a2.value == 100, "xvalue mutation visible via second get");
+    }
+
+    {
+        auto &a = xvalue<xvalue_test_a_t>::get();
+        auto &b = xvalue<xvalue_test_b_t>::get();
+        expect_true(static_cast<void *>(&a) != static_cast<void *>(&b), "xvalue different types are distinct");
+        expect_true(b.value == 7, "xvalue second type default constructed");
+        a.value = 111;
+        b.value = 222;
+        expect_true(xvalue<xvalue_test_a_t>::get().value == 111, "xvalue type A persists");
+        expect_true(xvalue<xvalue_test_b_t>::get().value == 222, "xvalue type B persists");
+    }
+
+    {
+        expect_true(xvalue<xvalue_test_find_t>::find() == nullptr, "xvalue find before get is null");
+        auto &inst = xvalue<xvalue_test_find_t>::get();
+        auto *found = xvalue<xvalue_test_find_t>::find();
+        expect_true(found != nullptr, "xvalue find after get is non-null");
+        expect_true(found == &inst, "xvalue find matches get");
+        inst.value = 55;
+        expect_true(found->value == 55, "xvalue find points at live instance");
+    }
+
+    {
+        constexpr int k_threads = 8;
+        std::vector<xvalue_test_threaded_t *> ptrs(k_threads, nullptr);
+        std::vector<std::thread> threads;
+        threads.reserve(k_threads);
+        for (int i = 0; i < k_threads; ++i) {
+            threads.emplace_back([&ptrs, i]() {
+                ptrs[i] = &xvalue<xvalue_test_threaded_t>::get();
+            });
+        }
+        for (auto &t : threads) {
+            t.join();
+        }
+
+        bool all_same = ptrs[0] != nullptr;
+        for (int i = 1; i < k_threads; ++i) {
+            if (ptrs[i] != ptrs[0]) {
+                all_same = false;
+                break;
+            }
+        }
+        expect_true(all_same, "xvalue concurrent get yields same instance");
+
+        auto *found = xvalue<xvalue_test_threaded_t>::find();
+        expect_true(found != nullptr && found == ptrs[0], "xvalue find matches concurrent get instance");
+    }
+}
+
 void run_archive_property_unit_tests() {
     {
         const xstring src = "#cannot_evolve_cause_low_desirability";
@@ -227,6 +305,7 @@ void run_integral_tests_impl() {
     run_bstring_cat_unit_tests();
     run_es_hash_unit_tests();
     run_archive_property_unit_tests();
+    run_xvalue_unit_tests();
 }
 
 hvector<xstring, 16> list_test_files() {
