@@ -347,6 +347,8 @@ bool building::is_floodplain_farm() {
 bool building::is_monument() const {
     switch (type) {
     case BUILDING_SPHINX:
+    case BUILDING_SMALL_OBELISK:
+    case BUILDING_LARGE_OBELISK:
     case BUILDING_MAUSOLEUM:
     case BUILDING_ALEXANDRIA_LIBRARY:
     case BUILDING_CAESAREUM:

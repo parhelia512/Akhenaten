@@ -89,6 +89,7 @@ C++ smoke checks run first (before JS files): `SDL_strlen`/`strcmp`, `vec2i`, `g
 | `41_city_smoke_run.js` | Broad crash smoke (TS1): place ~12 building types via the real planner path, open each info window (`[es=(info_window_*, init)]`), advance the sim; driver's whole-log `!!! TypeError:` scan catches on_place/update/init crashes broadly. Per-type `smoke_ok:*` markers isolate the culprit; `smoke_skip:*` logged loudly |
 | `42_enemy_config_valid.js` | Static validator (V1) for all 13 `enemy_*` configs in `enemies.js`: `percentage_type1+2+3 == 100`, a nonzero share has a non-NONE `figure_types[i]` (F1), and every declared figure type resolves to a registered enemy class via `__test_enemy_figure_registered` (F2) |
 | `43_sphinx_place.js` | C6 Sphinx: planner-place `BUILDING_SPHINX`, assert 3 linked parts (`next_part_building_id`), open info window without TypeError |
+| `44_obelisk_place.js` | C7 Small Obelisk: staffed SY + 100 granite → place 3×3 (no parts), granite consumed, `__test_monument_add_resource` fills timber; display + full-city screenshots |
 
 Farm **placement** tests (34/35) cover `can_place` / terrain rules; **37** covers preview image helpers.
 When adding more preview draw coverage, follow JS draw conventions in
@@ -152,8 +153,13 @@ After each test script loads, the driver calls `js_vm_sync({})` so any top-level
 | `__test_show_tile_info(bid)` | undefined | Open building info window for `bid` |
 | `__test_color_roundtrip(color)` | number | Echo a `color` (uint32) back through the binding conversion; asserts full `COLOR_MASK_*` survive MuJS→C++ (J1) |
 | `__test_enemy_figure_registered(type)` | boolean | Spawn `type` and report whether it resolved to a registered enemy class (`dcast_enemy` != null); false for a missing `FIGURE_METAINFO` (F2) |
-| `__building_static_building_size(type)` | int | Footprint from static building params |
-| `__figure_get_tile(fid)` | `{x,y}` | Current figure tile (invalid/empty when figure missing) |
+| `__test_monument_set_phase(bid, phase)` | undefined | Force monument (+ linked parts) construction phase |
+| `__test_monument_add_resource(bid, resource, amount)` | boolean | Deliver resource units into monument (`deliver_resource`) |
+| `__test_monument_resource_pct(bid, resource)` | int | Monument `resources_pct[resource]` (0..100+; −1 if invalid) |
+| `__test_storage_yard_add_resource(bid, resource, amount)` | boolean | Force-stock a Storage Yard (bypass accept rules) |
+| `__test_yards_stored(resource)` / `__test_yards_stored_staffed(resource)` | int | City granite/etc. in yards (all / staffed only) |
+| `__test_building_current_image(bid)` | int | Monument `building_image_get()` |
+| `__test_camera_center_building(bid)` | undefined | Center camera on building / monument `center_point` |
 
 ## JS helpers (`integral_test.js`)
 
@@ -170,6 +176,7 @@ Loaded via `import integral_test` in `modules.js` (after `city_planner`).
 | `test_prepare_shoreline_patch(cx, cy, w, h)` | undefined | Paint water and rebuild shores (land row at `cy - 1`) |
 | `test_shoreline_building_place(type, size)` | building id | Reload not included; shoreline patch + `test_building_place` at map center |
 | `test_assert_building_placed(bid, type, tag)` | boolean | Type, map tile, and per-bid marker checks |
+| `test_staffed_yard_with_resource(resource, amount, x, y)` | building id | Place SY, set workers, force-stock resource |
 | `test_log_building_placed(bid)` | undefined | `[test-marker] test_building_placed:…` (work camp uses `work_camp` suffix) |
 | `test_figure_create(type, x, y)` | figure id | `__test_figure_create` + marker; auto-tile when `x`/`y` omitted or negative |
 | `test_assert_figure_created(fid, type, tag)` | boolean | Type, validity, map occupancy, and marker checks |

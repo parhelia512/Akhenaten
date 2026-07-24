@@ -15,8 +15,8 @@ struct event_stats_append_resource { e_resource resource; int amount; };
 struct event_produced_resources { e_resource resource; int amount; };;
 struct event_granaries_remove_resource { e_resource resource; int amount; };
 struct event_storageyards_add_resource { e_resource resource; int amount; };
-struct event_storageyards_remove_resource { e_resource resource; int amount; };
-struct event_city_remove_resource { e_resource resource; int amount; };
+struct event_storageyards_remove_resource { e_resource resource; int amount; bool staffed_only = false; };
+struct event_city_remove_resource { e_resource resource; int amount; bool staffed_only = false; };
 struct event_toggle_industry_mothballed { e_resource resource; };
 
 struct city_resources_t {
@@ -67,6 +67,7 @@ struct city_resources_t {
     } granaries;
 
     int yards_stored(e_resource resource);
+    int yards_stored_staffed(e_resource resource);
     int granary_stored(e_resource resource);
     int stored(e_resource resource);
     int gettable(e_resource resource);

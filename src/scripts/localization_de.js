@@ -377,6 +377,8 @@ localization_de = [
   {key: "#building_needs_straw", group:19, id:80}
   {key: "#build_grain_farm", group:19, id:81}
   {key: "#full_complement_of_warship_wharves", group:19, id:82}
+  {key: "#need_blocks_of_granite_for_obelisk", group:19, id:83}
+  {key: "#need_blocks_of_granite_for_large_obelisk", group:19, id:84}
   {key: "#need_100_blocks_of_granite_for_obelisk", group:19, id:83}
   {key: "#need_200_blocks_of_granite_for_large_obelisk", group:19, id:84}
   {key: "#monuments_removed", group:19, id:85}

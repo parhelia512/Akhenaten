@@ -494,9 +494,8 @@ void build_planner::setup_build_flags() {
         //        case BUILDING_LIBRARY: // TODO
         //            set_requirements(PlannerReqs::Resources, RESOURCE_PAPYRUS, 300);
         //            break;
-        //        case BUILDING_OBELYSK: // TODO
-        //            set_requirements(PlannerReqs::Resources, RESOURCE_GRANITE, 200);
-        //            break;
+        // Obelisk granite pre-stock is handled in building_obelisk::preview
+        // (placement_resources from JS config) — not via the removed set_requirements API.
 
     case BUILDING_LOW_BRIDGE:
     case BUILDING_UNUSED_SHIP_BRIDGE_83:

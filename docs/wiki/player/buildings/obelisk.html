@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Obelisk — Akhenaten Wiki</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .bld-header-grid {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1.5rem;
+      align-items: start;
+      margin-bottom: 2rem;
+    }
+    .bld-header-right {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .bld-image-wrap { text-align: center; }
+    .bld-image-wrap img {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      image-rendering: pixelated;
+      max-width: 200px;
+      height: auto;
+      background: #1a1810;
+      margin: 0 auto;
+    }
+    .bld-image-wrap figcaption {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+    .bld-infobox {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.9rem 1.1rem;
+    }
+    .bld-infobox h4 {
+      margin: 0 0 0.6rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--gold);
+    }
+    .bld-infobox dl {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.2rem 1rem;
+      margin: 0;
+    }
+    .bld-infobox dt { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; padding-top: 0.1rem; }
+    .bld-infobox dd { margin: 0; font-size: 0.85rem; color: var(--text); }
+    .bld-infobox .sep { grid-column: 1/-1; border: none; border-top: 1px solid var(--border); margin: 0.4rem 0; }
+    .bld-stat-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .bld-stat { text-align: center; }
+    .bld-stat .val { font-size: 1.3rem; font-weight: 700; color: var(--gold); display: block; }
+    .bld-stat .lbl { font-size: 0.7rem; color: var(--text-muted); }
+    .stats-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    @media (max-width: 700px) {
+      .bld-header-grid { grid-template-columns: 1fr; }
+      .stats-pair { grid-template-columns: 1fr; }
+    }
+    .chain-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.8rem 1.1rem;
+      margin: 1rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-size: 0.88rem;
+      flex-wrap: wrap;
+    }
+    .chain-box .step {
+      background: rgba(201,168,76,0.08);
+      border: 1px solid rgba(201,168,76,0.25);
+      border-radius: 3px;
+      padding: 0.3rem 0.7rem;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .chain-box .arrow { color: var(--gold); font-size: 1.1rem; }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; }
+    summary { padding: 0.7rem 1rem; cursor: pointer; font-size: 0.875rem; font-weight: 600; color: var(--text); list-style: none; display: flex; align-items: center; gap: 0.6rem; user-select: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: "▶"; font-size: 0.6rem; color: var(--gold); transition: transform 0.15s; flex-shrink: 0; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    details[open] > summary { border-bottom: 1px solid var(--border); }
+    .details-body { padding: 1rem 1.1rem; font-size: 0.85rem; line-height: 1.6; }
+    .details-body pre { background: #0a0905; border: 1px solid var(--border); border-radius: 3px; padding: 0.75rem 1rem; overflow-x: auto; font-size: 0.78rem; line-height: 1.55; margin: 0.6rem 0; }
+    .kw  { color: #c9a84c; } .num { color: #9ecbff; } .str { color: #7ec87e; } .cmt { color: #5a5650; font-style: italic; }
+    .file-ref { display: inline-block; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.78rem; background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.2); border-radius: 2px; padding: 0.05rem 0.45rem; color: var(--gold); margin: 0 0.1rem; }
+    .bld-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; }
+    .bld-nav a { color: var(--gold); }
+    .dev-section { margin-top: 2.5rem; }
+    .dev-section h2 { color: var(--text-muted); font-size: 1rem; letter-spacing: 0.04em; text-transform: uppercase; border-color: rgba(255,255,255,0.08); }
+    .note-box {
+      background: rgba(201,168,76,0.06);
+      border: 1px solid rgba(201,168,76,0.25);
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      margin: 1rem 0;
+    }
+    .ext-link { font-size: 0.8rem; color: var(--text-muted); }
+    .ext-link a { color: var(--gold); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">Akhenaten</a>
+      <ul>
+        <li><a href="../../../about.html">About</a></li>
+        <li><a href="../../../devblog.html">Devblog</a></li>
+        <li><a href="../../index.html" class="active">Wiki</a></li>
+        <li><a href="../../../screenshots.html">Screenshots</a></li>
+        <li><a href="../../../downloads.html">Downloads</a></li>
+        <li><a href="../../../contributors.html">Contributors</a></li>
+        <li><a href="../../../contact.html">Join us</a></li>
+        <li><a href="../../../reportbug.html">Report Bug</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="wiki-layout">
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title"><a href="index.html">← All Buildings</a></div>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Monuments</div>
+        <ul>
+          <li><a href="monuments.html">Overview</a></li>
+          <li><a href="sphinx.html">Sphinx</a></li>
+          <li><a href="obelisk.html" class="active">Obelisk</a></li>
+        </ul>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">On this page</div>
+        <ul>
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#construction">Construction</a></li>
+          <li><a href="#placement">Placement</a></li>
+          <li><a href="#missions">Missions</a></li>
+          <li><a href="#tips">Tips</a></li>
+          <li><a href="#dev">Developer reference</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <div class="wiki-content">
+      <div class="wiki-breadcrumb">
+        <a href="../../index.html">Wiki</a> /
+        <a href="../index.html">Player Guide</a> /
+        <a href="index.html">Buildings</a> /
+        <a href="monuments.html">Monuments</a> /
+        Obelisk
+      </div>
+
+      <h1>Obelisk</h1>
+
+      <div class="bld-header-grid">
+        <figure class="bld-image-wrap">
+          <img src="obelisk.png" alt="Finished small granite obelisk from Pharaoh" width="178" height="277" />
+          <figcaption>Small obelisk — finished art (stage d)</figcaption>
+        </figure>
+        <div class="bld-header-right">
+          <div>
+            <p>The <strong>Obelisk</strong> is a granite monument commemorating deeds and achievements. Unlike pyramids and mastabas, all granite must already sit in <strong>staffed</strong> Storage Yards before you can place the site — after placement the stone is set at once, then carpenters raise scaffolding and stonemasons carve the faces.</p>
+            <p>You do <strong>not</strong> need Work Camp peasants. Only one unfinished obelisk (small or large) may be under construction at a time.</p>
+            <p class="ext-link">Source summary adapted from
+              <a href="https://impressionsgames.fandom.com/wiki/Obelisk" target="_blank" rel="noopener">Impressions Games Fandom — Obelisk</a>
+              and <a href="https://pharaoh.heavengames.com/strategy/monuments/" target="_blank" rel="noopener">Pharaoh Heaven monuments chart</a>.</p>
+          </div>
+          <div class="stats-pair">
+            <div class="bld-infobox">
+              <h4>Small</h4>
+              <div class="bld-stat-row" style="margin-bottom:0.7rem">
+                <div class="bld-stat"><span class="val">3×3</span><span class="lbl">Footprint</span></div>
+                <div class="bld-stat"><span class="val">100</span><span class="lbl">Granite</span></div>
+                <div class="bld-stat"><span class="val">2</span><span class="lbl">Monument wt.</span></div>
+              </div>
+              <dl>
+                <dt>Cost (Normal)</dt>
+                <dd>2&nbsp;500 Db</dd>
+                <dt>Cost by difficulty</dt>
+                <dd style="font-size:0.75rem;color:var(--text-muted)">
+                  VE 1&nbsp;500 · Easy 2&nbsp;000 · <strong style="color:var(--text)">Normal 2&nbsp;500</strong> · Hard 3&nbsp;500 · VH 5&nbsp;000
+                </dd>
+                <dt>Art stages</dt>
+                <dd>4 (a–d)</dd>
+              </dl>
+            </div>
+            <div class="bld-infobox">
+              <h4>Large</h4>
+              <div class="bld-stat-row" style="margin-bottom:0.7rem">
+                <div class="bld-stat"><span class="val">5×5</span><span class="lbl">Footprint</span></div>
+                <div class="bld-stat"><span class="val">200</span><span class="lbl">Granite</span></div>
+                <div class="bld-stat"><span class="val">4</span><span class="lbl">Monument wt.</span></div>
+              </div>
+              <dl>
+                <dt>Cost (Normal)</dt>
+                <dd>5&nbsp;000 Db</dd>
+                <dt>Cost by difficulty</dt>
+                <dd style="font-size:0.75rem;color:var(--text-muted)">
+                  VE 3&nbsp;000 · Easy 4&nbsp;000 · <strong style="color:var(--text)">Normal 5&nbsp;000</strong> · Hard 7&nbsp;000 · VH 10&nbsp;000
+                </dd>
+                <dt>Art stages</dt>
+                <dd>6 (a–f)</dd>
+              </dl>
+            </div>
+          </div>
+          <div class="bld-infobox">
+            <dl>
+              <dt>Materials</dt>
+              <dd>Granite (pre-stock in staffed SY) · Timber (scaffolding)</dd>
+              <dt>Guilds</dt>
+              <dd>Carpenters · Stonemasons</dd>
+              <dt>Labor</dt>
+              <dd>Guild craftsmen only — <strong>no</strong> Work Camp</dd>
+              <dt>Fire / damage</dt>
+              <dd>Fireproof · damage-proof</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <div class="chain-box">
+        <span class="step">Granite in staffed SY</span>
+        <span class="arrow">→</span>
+        <span class="step">Place footprint</span>
+        <span class="arrow">→</span>
+        <span class="step">Timber · Carpenters</span>
+        <span class="arrow">→</span>
+        <span class="step">Stonemasons carve</span>
+        <span class="arrow">→</span>
+        <span class="step"><strong>Finished</strong></span>
+      </div>
+
+      <h2 id="overview">Overview</h2>
+      <p>Obelisks are single buildings (no linked parts). Granite amount required to place comes from each building’s JS <code>placement_resources</code> — currently <strong>100</strong> for small and <strong>200</strong> for large. Storage Yards that hold that granite must have workers (<code>num_workers &gt; 0</code>); empty yards do not count toward the pre-stock check, and granite is removed only from staffed yards on place.</p>
+      <p>Under the current additive rating formula, one finished small obelisk (weight 2) yields monument rating <strong>9</strong> — the goal used on <a href="../missions/buhen.html">Buhen</a>.</p>
+
+      <div class="note-box">
+        <strong>Akhenaten status (C7):</strong> place, granite pre-stock / consume, only-one unfinished rule, art stages, info window, menu, and Buhen buildings list are in.
+        Timber units per scaffolding phase live in <code>timber_loads</code> in
+        <span class="file-ref">src/scripts/building/obelisk.js</span> (tune without C++ rebuild;
+        current values are working defaults pending original <code>.pak</code> calibration).
+        Large granite (200 vs some charts’ 300) is likewise config-only via <code>placement_resources</code>.
+        Integral test <code>44_obelisk_place</code> covers staffed-SY place + granite consume +
+        <code>__test_monument_add_resource</code>. Visual polish (ladder offset) still open.
+      </div>
+
+      <h2 id="construction">Construction</h2>
+      <ol>
+        <li>Accumulate granite in staffed Storage Yards (≥ amount from the building config).</li>
+        <li>Place when the ghost footprint is all green. Granite is deducted immediately; the monument appears at stage <strong>a</strong>.</li>
+        <li>Carpenters’ Guild + timber build scaffolding (early phases).</li>
+        <li>Stonemasons’ Guild carve hieroglyphs through remaining art stages.</li>
+        <li>Finished — contributes its monument weight to the city rating.</li>
+      </ol>
+
+      <div class="wiki-table-wrap">
+        <table class="wiki-table">
+          <thead><tr><th>Size</th><th>Footprint</th><th>Granite to place</th><th>Art packs</th><th>Weight</th></tr></thead>
+          <tbody>
+            <tr><td>Small</td><td>3×3</td><td>100</td><td><code>obelisk3x3a</code>…<code>d</code></td><td>2</td></tr>
+            <tr><td>Large</td><td>5×5</td><td>200</td><td><code>obelisk5x5a</code>…<code>f</code></td><td>4</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Scaffolding ornament uses <code>obelisk_extra</code> image id <strong>1</strong> (ladder). Work Camp laborers are not used.</p>
+
+      <h2 id="placement">Placement</h2>
+      <p>Clear land with an all-green footprint — <strong>3×3</strong> (small) or <strong>5×5</strong> (large). Each stage pack has a single isometric sprite (no alternate camera diagonals, unlike the Sphinx). Warnings fire if granite in staffed yards is insufficient, or if another unfinished obelisk already exists (text group <strong>19</strong> ids 83 / 84 / 86). Road access is not required on the monument tiles themselves, but guilds and storage need roads so carpenters and stonemasons can reach the site.</p>
+
+      <h2 id="missions">Missions</h2>
+      <ul>
+        <li><a href="../missions/buhen.html">13 — Buhen</a> — one small granite obelisk (import granite from Abu); monument goal 9.</li>
+        <li>Later campaigns (Dakhla, Iken, Byblos, etc.) use small and/or large obelisks once those missions are fully wired.</li>
+      </ul>
+
+      <h2 id="tips">Tips</h2>
+      <ul>
+        <li>Staff every Storage Yard that holds granite before trying to place — unstaffed stock does not count.</li>
+        <li>Import granite early on maps without a granite quarry (e.g. Buhen from Abu).</li>
+        <li>Keep Carpenters’ and Stonemasons’ Guilds near the site; timber must keep flowing or scaffolding stalls.</li>
+        <li>Finish or demolish an unfinished obelisk before placing another.</li>
+        <li>Do not stockpile timber in the Overseer of Commerce, or carpenter deliveries will freeze.</li>
+      </ul>
+
+      <div class="dev-section">
+        <h2 id="dev">Developer reference</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem">All paths relative to the repository root. Plan: <span class="file-ref">REMAKE_OBELISK_PLAN.md</span>.</p>
+
+        <details open>
+          <summary>Building config — <code>src/scripts/building/obelisk.js</code></summary>
+          <div class="details-body">
+            <pre><code><span class="kw">building_small_obelisk</span> {
+  <span class="kw">building_size</span> : <span class="num">3</span>
+  <span class="kw">art_stages</span> : <span class="num">4</span>
+  <span class="kw">timber_loads</span> [ <span class="num">200</span>, <span class="num">200</span>, <span class="num">200</span> ]
+  <span class="kw">placement_resources</span> [
+    { resource: RESOURCE_GRANITE, count: <span class="num">100</span> }
+  ]
+  <span class="kw">cost</span> [ <span class="num">1500</span>, <span class="num">2000</span>, <span class="num">2500</span>, <span class="num">3500</span>, <span class="num">5000</span> ]
+  <span class="kw">meta</span> { help_id: <span class="num">372</span>, text_id: <span class="num">178</span> }
+  <span class="kw">info_title_id</span> [198, 22]
+  <span class="kw">flags</span> { is_monument: <span class="kw">true</span> }
+}
+
+<span class="kw">building_large_obelisk</span> {
+  <span class="kw">building_size</span> : <span class="num">5</span>
+  <span class="kw">art_stages</span> : <span class="num">6</span>
+  <span class="kw">timber_loads</span> [ <span class="num">400</span>, <span class="num">400</span>, <span class="num">400</span>, <span class="num">200</span> ]
+  <span class="kw">placement_resources</span> [
+    { resource: RESOURCE_GRANITE, count: <span class="num">200</span> }
+  ]
+  <span class="kw">cost</span> [ <span class="num">3000</span>, <span class="num">4000</span>, <span class="num">5000</span>, <span class="num">7000</span>, <span class="num">10000</span> ]
+  <span class="kw">info_title_id</span> [198, 23]
+}</code></pre>
+            <p>Imagepaks <code>PACK_OBELISK_*</code> at dense indices <code>51000..51025</code> in
+              <span class="file-ref">src/scripts/imagepaks.js</span>.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>C++ class — <code>src/building/monument_obelisk.{h,cpp}</code></summary>
+          <div class="details-body">
+            <p><code>BUILDING_SMALL_OBELISK</code> (=262), <code>BUILDING_LARGE_OBELISK</code> (=263).
+            Shared <code>building_obelisk</code> base; pre-stock via
+            <code>yards_stored_staffed</code> / <code>staffed_only</code> remove on place;
+            <code>has_unfinished_obelisk()</code> enforces only-one.
+            Info UI: <span class="file-ref">src/window/window_obelisk_info.cpp</span>.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Messages &amp; weight</summary>
+          <div class="details-body">
+            <ul>
+              <li>Titles: <strong>198:22</strong> small · <strong>198:23</strong> large</li>
+              <li>Progress / status: group <strong>178</strong> (e.g. 42–44)</li>
+              <li>Foreman: group <strong>199</strong> (43–46)</li>
+              <li>Placement warnings: group <strong>19</strong> ids 83 / 84 / 86</li>
+              <li>Help dialog: <code>message_building_obelisk</code> id <strong>372</strong></li>
+              <li>Monument weights in
+                <span class="file-ref">src/scripts/city/monuments.js</span>:
+                small = <strong>2</strong>, large = <strong>4</strong> (large draft until F3)</li>
+            </ul>
+          </div>
+        </details>
+
+        <details>
+          <summary>Mission &amp; tests</summary>
+          <div class="details-body">
+            <p>Mission 13: <span class="file-ref">src/scripts/mission/m_013_buhen.js</span>
+              — <code>BUILDING_SMALL_OBELISK</code> + packs <code>PACK_OBELISK_EXTRA</code> / <code>X3_A..D</code>.</p>
+            <p>Integral test: <span class="file-ref">tests/44_obelisk_place.js</span> —
+              staffed SY granite → place; consume; <code>__test_monument_add_resource</code>.
+              Run: <code>--integraltests --integraltest-only 44_obelisk</code>.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="bld-nav">
+        <a href="sphinx.html">← Sphinx</a>
+        <a href="monuments.html">Monuments →</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Akhenaten is an open-source, non-commercial project. All rights to Pharaoh, its mechanics and setting belong to their respective copyright owners.</p>
+    <p><a href="https://github.com/dalerank/Akhenaten" target="_blank">github.com/dalerank/Akhenaten</a></p>
+  </footer>
+</body>
+</html>

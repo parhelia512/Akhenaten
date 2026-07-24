@@ -30,6 +30,18 @@ int city_resources_t::yards_stored(e_resource resource) {
     return stored_in_storages[resource];
 }
 
+int city_resources_t::yards_stored_staffed(e_resource resource) {
+    int total = 0;
+    buildings_valid_do([&](building &b) {
+        building_storage_yard *yard = b.dcast_storage_yard();
+        if (!yard || !yard->is_valid() || !yard->is_staffed()) {
+            return;
+        }
+        total += yard->amount(resource);
+    });
+    return total;
+}
+
 int city_resources_t::granary_stored(e_resource resource) {
     if (!resource_is_food(resource)) {
         return 0;
@@ -112,28 +124,34 @@ void city_storageyards_remove_resource(event_storageyards_remove_resource &ev) {
         return;
     }
 
+    auto yard_ok = [&](building_storage_yard *warehouse) {
+        return warehouse && warehouse->is_valid() && (!ev.staffed_only || warehouse->is_staffed());
+    };
+
     // first go for non-getting warehouses
-    buildings_valid_do([&] (building &b) {
+    buildings_valid_do([&](building &b) {
         building_storage_yard *warehouse = b.dcast_storage_yard();
-        if (warehouse && warehouse->is_valid() && !warehouse->is_getting(ev.resource)) {
+        if (yard_ok(warehouse) && !warehouse->is_getting(ev.resource)) {
             ev.amount = warehouse->remove_resource(ev.resource, ev.amount);
         }
     });
-    // if that doesn't work, take it anyway
-    buildings_valid_do([&] (building &b) {
+    // if that doesn't work, take it anyway (still respecting staffed_only)
+    buildings_valid_do([&](building &b) {
         building_storage_yard *warehouse = b.dcast_storage_yard();
-        if (warehouse && warehouse->is_valid()) {
+        if (yard_ok(warehouse)) {
             ev.amount = warehouse->remove_resource(ev.resource, ev.amount);
         }
     });
 }
 
 void city_remove_resource(event_city_remove_resource ev) {
-    event_storageyards_remove_resource wh_ev{ ev.resource, ev.amount };
+    event_storageyards_remove_resource wh_ev{ev.resource, ev.amount, ev.staffed_only};
     city_storageyards_remove_resource(wh_ev);
 
-    event_granaries_remove_resource gr_ev{ wh_ev.resource, wh_ev.amount };
-    city_granaries_remove_resource(gr_ev);
+    if (!ev.staffed_only) {
+        event_granaries_remove_resource gr_ev{wh_ev.resource, wh_ev.amount};
+        city_granaries_remove_resource(gr_ev);
+    }
 }
 
 void city_resources_t::calculate_stocks() {

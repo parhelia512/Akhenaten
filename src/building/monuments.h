@@ -15,6 +15,7 @@ struct monument_phase_resource {
     e_resource resource;
     uint16_t count;
 };
+ANK_CONFIG_STRUCT(monument_phase_resource, resource, count)
 
 struct monument_phase {
     uint8_t id;

@@ -467,8 +467,8 @@ localization_base_de = [
     { group:19, id:80, text: "Dieses Gebäude benötigt Stroh" }
     { group:19, id:81, text: "Baut eine Getreidefarm" }
     { group:19, id:82, text: "Eure Stadt hat ihre vollständige Anzahl an Kriegsschiffwerften" }
-    { group:19, id:83, text: "Ihr benötigt 100 Granitblöcke, um einen kleinen Obelisken zu bauen" }
-    { group:19, id:84, text: "Ihr benötigt 200 Granitblöcke, um einen großen Obelisken zu bauen" }
+    { group:19, id:83, text: "Ihr benötigt %d Granitblöcke, um einen kleinen Obelisken zu bauen" }
+    { group:19, id:84, text: "Ihr benötigt %d Granitblöcke, um einen großen Obelisken zu bauen" }
     { group:19, id:85, text: "Einige der gewählten Monumente können nicht mehr gebaut werden. Sie wurden entfernt!" }
     { group:19, id:86, text: "Ihr dürft nur einen Obelisken gleichzeitig bauen" }
     { group:19, id:87, text: "Eure Stadt kann ohne Palast keine Steuern erheben." }

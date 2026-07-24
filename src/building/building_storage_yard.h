@@ -60,6 +60,7 @@ public:
 
     virtual bool is_getting(e_resource resource) override;
     virtual int stored_amount(e_resource resource) const override;
+    bool is_staffed() const { return num_workers() > 0; }
 
     int freespace(e_resource resource);
     int16_t stored_full_amount() const { return base.storage.sum();  }

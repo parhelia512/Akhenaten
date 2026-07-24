@@ -466,8 +466,8 @@ localization_base_en = [
     { group:19, id:80, text: "This building needs straw" }
     { group:19, id:81, text: "Build a Grain Farm" }
     { group:19, id:82, text: "Your city has its full complement of Warship Wharves" }
-    { group:19, id:83, text: "You need 100 blocks of granite to build a small obelisk" }
-    { group:19, id:84, text: "You need 200 blocks of granite to build a large obelisk" }
+    { group:19, id:83, text: "You need %d blocks of granite to build a small obelisk" }
+    { group:19, id:84, text: "You need %d blocks of granite to build a large obelisk" }
     { group:19, id:85, text: "Some of the monuments you have chosen can no longer be built. They have been removed!" }
     { group:19, id:86, text: "You may only build one obelisk at a time" }
     { group:19, id:87, text: "Your city cannot collect taxes without a Palace." }

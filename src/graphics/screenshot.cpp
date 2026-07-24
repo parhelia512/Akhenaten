@@ -439,6 +439,12 @@ static void create_minimap_screenshot() {
 }
 
 void graphics_save_screenshot(screenshot_type type) {
+    // Build farm / hermetic runs use --no-resource (no Pharaoh packs); skip PNG capture.
+    if (g_args.no_resource()) {
+        logs::info("Screenshot skipped (--no-resource)");
+        return;
+    }
+
     switch (type) {
     case SCREENSHOT_FULL_CITY:
         create_full_city_screenshot();

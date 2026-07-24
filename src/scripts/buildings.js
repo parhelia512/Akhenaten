@@ -15,6 +15,7 @@ import building.house
 import building.monument
 import building.mastaba
 import building.sphinx
+import building.obelisk
 import building.pyramid
 import building.farm
 import building.fort

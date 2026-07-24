@@ -16,6 +16,7 @@
 
 #include "building/building.h"
 #include "building/building_static_params.h"
+#include "building/building_storage_yard.h"
 #include "building/monuments.h"
 #include "graphics/view/view.h"
 #include "figure/figure.h"
@@ -330,6 +331,58 @@ static void __test_monument_set_phase(int bid, int phase) {
     }
 }
 ANK_FUNCTION_2(__test_monument_set_phase);
+
+// Deliver resource loads into a monument (updates resources_pct like cart delivery).
+// amount is resource units (same as deliver_resource); returns false if full / not a monument.
+static bool __test_monument_add_resource(int bid, int resource, int amount) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    auto mm = head ? head->dcast_monument() : nullptr;
+    if (!mm || resource <= RESOURCE_NONE || resource >= RESOURCES_MAX || amount <= 0) {
+        return false;
+    }
+    return mm->deliver_resource(static_cast<e_resource>(resource), amount);
+}
+ANK_FUNCTION_3(__test_monument_add_resource);
+
+// Current delivery progress for a resource on the monument (0..100+).
+static int __test_monument_resource_pct(int bid, int resource) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    auto mm = head ? head->dcast_monument() : nullptr;
+    if (!mm || resource <= RESOURCE_NONE || resource >= RESOURCES_MAX) {
+        return -1;
+    }
+    return mm->runtime_data().resources_pct[resource];
+}
+ANK_FUNCTION_2(__test_monument_resource_pct);
+
+// Force-stock a storage yard (bypasses accepting/getting rules). Yard must already exist.
+static bool __test_storage_yard_add_resource(int bid, int resource, int amount) {
+    building *b = building_get(bid);
+    auto *yard = b ? b->dcast_storage_yard() : nullptr;
+    if (!yard || !b->is_valid() || resource <= RESOURCE_NONE || resource >= RESOURCES_MAX || amount <= 0) {
+        return false;
+    }
+    return yard->add_resource(static_cast<e_resource>(resource), amount, /*force*/true) >= 0;
+}
+ANK_FUNCTION_3(__test_storage_yard_add_resource);
+
+static int __test_yards_stored(int resource) {
+    if (resource <= RESOURCE_NONE || resource >= RESOURCES_MAX) {
+        return 0;
+    }
+    return g_city.resource.yards_stored(static_cast<e_resource>(resource));
+}
+ANK_FUNCTION_1(__test_yards_stored);
+
+static int __test_yards_stored_staffed(int resource) {
+    if (resource <= RESOURCE_NONE || resource >= RESOURCES_MAX) {
+        return 0;
+    }
+    return g_city.resource.yards_stored_staffed(static_cast<e_resource>(resource));
+}
+ANK_FUNCTION_1(__test_yards_stored_staffed);
 
 // Return the current resolved image id for a monument building (per phase + variant + camera).
 static int __test_building_current_image(int bid) {

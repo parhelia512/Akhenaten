@@ -241,6 +241,31 @@ function test_assert_building_placed(bid, type, tag) {
     return true
 }
 
+function test_staffed_yard_with_resource(resource, amount, x, y) {
+    var place_x = (typeof x === 'number') ? x : -1
+    var place_y = (typeof y === 'number') ? y : -1
+    var sy = test_building_place(BUILDING_STORAGE_YARD, place_x, place_y)
+    if (!sy) {
+        __log_info_native('[test_yard] failed to place BUILDING_STORAGE_YARD')
+        return 0
+    }
+
+    var b = city.get_building(sy)
+    if (!b) {
+        return 0
+    }
+    var staff = b.max_workers > 0 ? b.max_workers : 1
+    b.num_workers = staff
+
+    if (!__test_storage_yard_add_resource(sy, resource, amount)) {
+        __log_info_native('[test_yard] add_resource failed bid=' + sy + ' res=' + resource + ' amt=' + amount)
+        return 0
+    }
+
+    __log_marker('test_staffed_yard_ok:' + sy + ':' + resource + ':' + amount)
+    return sy
+}
+
 function test_shoreline_building_place(type, building_size) {
     var cx = (__scenario_map.width / 2) | 0
     var cy = (__scenario_map.height / 2) | 0

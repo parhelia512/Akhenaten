@@ -50,20 +50,16 @@ mission13 { // Buhen — Expansion to Nubia
 				BUILDING_GRAIN_FARM, BUILDING_FIGS_FARM,
 				BUILDING_STONE_QUARRY, BUILDING_LIMESTONE_QUARRY, BUILDING_CLAY_PIT,
 				BUILDING_FERRY,
-				BUILDING_SMALL_MASTABA, BUILDING_MEDIUM_MASTABA,
+				BUILDING_SMALL_OBELISK,
 				BUILDING_LIBRARY,
 				BUILDING_FESTIVAL_SQUARE, BUILDING_BOOTH, BUILDING_JUGGLER_SCHOOL, BUILDING_BANDSTAND, BUILDING_CONSERVATORY, BUILDING_PAVILLION, BUILDING_DANCE_SCHOOL,
                 BUILDING_SCRIBAL_SCHOOL,
 			  ]
 
 	// Goals from the Pharaoh Heaven walkthrough (original .pak values NOT yet verified):
-	// pop 3000, culture 25, prosperity 25, monument 9 (small obelisk), kingdom 75.
-	// The small obelisk (BUILDING_SMALL_OBELISK, granite) is not implemented yet (task C7).
-	// A small mastaba (weight 2) yields the same rating: 2.25*2+4.5 = 9 (additive rating,
-	// see city/monuments.js), so the original monument goal 9 is kept and a small mastaba
-	// stands in for the obelisk.
-	// TODO(C7): add BUILDING_SMALL_OBELISK to the buildings list (granite imported from
-	// Abu) and, if desired, drop the mastaba stand-in.
+	// pop 3000, culture 25, prosperity 25, monument 9 (1 small obelisk, weight 2 →
+	// 2.25*2+4.5 = 9; see city/monuments.js), kingdom 75.
+	// Granite is imported from Abu (no local granite quarry this far south).
 	win_criteria {
 		population {enabled : true, goal : 3000 }
 		culture    {enabled : true, goal : 25 }
@@ -120,7 +116,11 @@ mission13 { // Buhen — Expansion to Nubia
 [es=event_mission_start, mission=mission13]
 function mission13_on_start(ev) {
 	__image_request_pak(PACK_ENEMY_NUBIAN)
-	__image_request_pak(PACK_MASTABA)
+	__image_request_pak(PACK_OBELISK_EXTRA)
+	__image_request_pak(PACK_OBELISK_X3_A)
+	__image_request_pak(PACK_OBELISK_X3_B)
+	__image_request_pak(PACK_OBELISK_X3_C)
+	__image_request_pak(PACK_OBELISK_X3_D)
 	mission_show_start_message(mission, "message_mission_buhen")
 	city.set_empire_available(1)
 	for (var i = ADVISOR_NONE + 1; i <= ADVISOR_DIPLOMACY; i++) {

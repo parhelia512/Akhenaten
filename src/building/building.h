@@ -432,6 +432,7 @@ public:
     ALLOW_SMART_CAST_BUILDING(small_stepped_pyramid)
     ALLOW_SMART_CAST_BUILDING(medium_stepped_pyramid)
     ALLOW_SMART_CAST_BUILDING(sphinx)
+    ALLOW_SMART_CAST_BUILDING(obelisk)
 
     int get_figures_number(e_figure_type ftype);
 

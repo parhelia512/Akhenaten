@@ -30,16 +30,19 @@ imagepaks = [
   {id: PACK_CAESAREUM_2, name:"caesareum2", index:36360, delayed:true, system:false}, // 36360 --> 36360 + 201 + 9
   {id: PACK_CAESAREUM_3, name:"caesareum3", index:36570, delayed:true, system:false}, // 36570 --> 36570 + 201 + 9
   {id: PACK_CAESAREUM_4, name:"caesareum4", index:36780, delayed:true, system:false}, // 36780 --> 36780 + 201 + 9
-  {id: PACK_OBELISK_EXTRA, name:"obelisk_extra", index:51000, delayed:true, system:false}, // 51000 --> 51000 + 201 + 16
-  {id: PACK_OBELISK_X3_A, name:"obelisk3x3a", index:51220, delayed:true, system:false}, // 51220 --> 51220 + 201 + 1
-  {id: PACK_OBELISK_X3_B, name:"obelisk3x3b", index:51430, delayed:true, system:false}, // 51430 --> 51430 + 201 + 1
-  {id: PACK_OBELISK_X3_C, name:"obelisk3x3c", index:51640, delayed:true, system:false}, // 51640 --> 51640 + 201 + 1
-  {id: PACK_OBELISK_X5_A, name:"obelisk5x5a", index:51850, delayed:true, system:false}, // 51850 --> 51850 + 201 + 1
-  {id: PACK_OBELISK_X5_B, name:"obelisk5x5b", index:52000, delayed:true, system:false}, // 52000 --> 52000 + 201 + 1
-  {id: PACK_OBELISK_X5_C, name:"obelisk5x5c", index:52220, delayed:true, system:false}, // 52220 --> 52000 + 201 + 1
-  {id: PACK_OBELISK_X5_D, name:"obelisk5x5d", index:52430, delayed:true, system:false}, // 52430 --> 36067 + 201 + 1
-  {id: PACK_OBELISK_X5_E, name:"obelisk5x5e", index:52640, delayed:true, system:false}, // 52430 --> 36068 + 201 + 1
-  {id: PACK_OBELISK_X5_F, name:"obelisk5x5f", index:51850, delayed:true, system:false}, // 52430 --> 36069 + 201 + 1
+  // Obelisk packs: dense indices after system:false compaction (no SYSTEM slots).
+  // EXTRA: 16 entries (id1 = ladder); X3 stages a–d: 1 each; X5 stages a–f: 1 each.
+  {id: PACK_OBELISK_EXTRA, name:"obelisk_extra", index:51000, delayed:true, system:false}, // 16
+  {id: PACK_OBELISK_X3_A, name:"obelisk3x3a", index:51016, delayed:true, system:false},
+  {id: PACK_OBELISK_X3_B, name:"obelisk3x3b", index:51017, delayed:true, system:false},
+  {id: PACK_OBELISK_X3_C, name:"obelisk3x3c", index:51018, delayed:true, system:false},
+  {id: PACK_OBELISK_X3_D, name:"obelisk3x3d", index:51019, delayed:true, system:false},
+  {id: PACK_OBELISK_X5_A, name:"obelisk5x5a", index:51020, delayed:true, system:false},
+  {id: PACK_OBELISK_X5_B, name:"obelisk5x5b", index:51021, delayed:true, system:false},
+  {id: PACK_OBELISK_X5_C, name:"obelisk5x5c", index:51022, delayed:true, system:false},
+  {id: PACK_OBELISK_X5_D, name:"obelisk5x5d", index:51023, delayed:true, system:false},
+  {id: PACK_OBELISK_X5_E, name:"obelisk5x5e", index:51024, delayed:true, system:false},
+  {id: PACK_OBELISK_X5_F, name:"obelisk5x5f", index:51025, delayed:true, system:false},
   {id: PACK_SPHINX_1_A, name:"sphinx1a", index:53000, delayed:true, system:false}, // 2 textures (no SYSTEM slots)
   {id: PACK_SPHINX_1_B, name:"sphinx1b", index:53002, delayed:true, system:false},
   {id: PACK_SPHINX_1_C, name:"sphinx1c", index:53004, delayed:true, system:false},
