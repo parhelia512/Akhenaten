@@ -4,10 +4,10 @@
 #include "game/resource.h"
 
 struct trade_route {
-    enum e_limit { 
-        e_limit_with_bonus, 
-        e_limit_base_only, 
-        e_limit_bonus_only 
+    enum e_limit {
+        e_limit_with_bonus,
+        e_limit_base_only,
+        e_limit_bonus_only
     };
 
     struct route_resource {
@@ -27,4 +27,6 @@ struct trade_route {
     bool increase_limit(e_resource resource);
     int traded(e_resource resource) const;
     void init(e_resource resource, int limit);
+    void set_limit(e_resource resource, int limit);
+    void set_traded(e_resource resource, int traded);
 };

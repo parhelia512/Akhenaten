@@ -153,12 +153,41 @@ static void sync_city_object_size(full_empire_object *full, e_empire_city city_t
     }
 }
 
-static void apply_scripted_trade_route_limits(empire_city *city) {
+static void apply_scripted_trade_route_limits(empire_city *city, archive entry) {
     if (!city || !city->can_trade()) {
         return;
     }
 
     trade_route &route = city->get_route();
+    bool has_explicit_limits = false;
+
+    // route_limits [ { resource: RESOURCE_FIGS, limit: 4000, traded: 0 } ]
+    entry.r_array("route_limits", [&](archive lim) {
+        const e_resource res = lim.r_type<e_resource>("resource", RESOURCE_NONE);
+        if (res <= RESOURCE_NONE || res >= RESOURCES_MAX) {
+            return;
+        }
+
+        has_explicit_limits = true;
+        const int limit = lim.r_int("limit", -1);
+        if (limit >= 0) {
+            route.set_limit(res, limit);
+        }
+
+        const int traded = lim.r_int("traded", -1);
+        if (traded >= 0) {
+            route.set_traded(res, traded);
+        } else if (limit >= 0) {
+            // New limit without traded → start year fresh.
+            route.set_traded(res, 0);
+        }
+    });
+
+    if (has_explicit_limits) {
+        return;
+    }
+
+    // No route_limits: fill missing sells/buys with default yearly tier.
     constexpr int k_default_limit = 1500;
     for (e_resource resource = RESOURCES_MIN; resource < RESOURCES_MAX; ++resource) {
         if (city->sells_resource[resource] || city->buys_resource[resource]) {
@@ -286,7 +315,7 @@ void empire_t::load_empire_cities(archive arch) {
 
         if (city->can_trade()) {
             g_empire.set_trade_route_type(city->route_id, city->is_sea_trade);
-            apply_scripted_trade_route_limits(city);
+            apply_scripted_trade_route_limits(city, entry);
         }
     });
 }

@@ -69,6 +69,13 @@ mission4 {
 			max_traders : 1
 			trade_limits : default_trade_limits
 			sells [ RESOURCE_FIGS, RESOURCE_CLAY, RESOURCE_BRICKS, RESOURCE_POTTERY, RESOURCE_REEDS ]
+			route_limits [
+				{ resource: RESOURCE_FIGS, limit: 4000 }
+				{ resource: RESOURCE_CLAY, limit: 2500 }
+				{ resource: RESOURCE_BRICKS, limit: 4000 }
+				{ resource: RESOURCE_POTTERY, limit: 4000 }
+				{ resource: RESOURCE_REEDS, limit: 4000 }
+			]
 		}
 
 		{
@@ -84,6 +91,12 @@ mission4 {
 			trade_limits : default_trade_limits
 			sells [ RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_BEER ]
 			buys [ RESOURCE_PAPYRUS ]
+			route_limits [
+				{ resource: RESOURCE_CLAY, limit: 2500 }
+				{ resource: RESOURCE_POTTERY, limit: 1500 }
+				{ resource: RESOURCE_BEER, limit: 2500 }
+				{ resource: RESOURCE_PAPYRUS, limit: 2500 }
+			]
 		}
 
 		{
@@ -212,6 +225,8 @@ function mission4_fire_request(tag, resource, amount, months, ok_tag, fail_tag, 
 function mission4_on_start(ev) {
 	mission_show_start_message(mission, "message_trade_on_the_water")
 	city.set_empire_available(-1)
+	empire.set_id(1)
+	empire.set_expanded(false)
 
 	if (mission.papyrus_made_handled) {
 		city.set_advisor_available(ADVISOR_TRADE, 1)

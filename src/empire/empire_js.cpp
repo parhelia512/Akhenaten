@@ -5,8 +5,10 @@
 #include "empire/empire_object.h"
 #include "empire/empire_traders.h"
 #include "city/city.h"
+#include "city/city_message.h"
 #include "game/resource.h"
 #include "scenario/distant_battle.h"
+#include "scenario/scenario.h"
 #include "core/profiler.h"
 #include "js/js_game.h"
 
@@ -110,6 +112,36 @@ int __imperial_distant_battle_city_name_id() {
     return c ? c->name_id : 0;
 }
 ANK_FUNCTION(__imperial_distant_battle_city_name_id)
+
+int __empire_get_id() {
+    return g_scenario.empire.id;
+}
+ANK_FUNCTION(__empire_get_id)
+
+void __empire_set_id(int id) {
+    g_scenario.empire.id = id;
+}
+ANK_FUNCTION_1(__empire_set_id)
+
+bool __empire_is_expanded() {
+    return g_scenario.empire.is_expanded != 0;
+}
+ANK_FUNCTION(__empire_is_expanded)
+
+void __empire_set_expanded(bool expanded) {
+    g_scenario.empire.is_expanded = expanded ? 1 : 0;
+}
+ANK_FUNCTION_1(__empire_set_expanded)
+
+void __empire_expand() {
+    if (g_scenario.empire.is_expanded) {
+        return;
+    }
+    g_empire.expand();
+    g_scenario.empire.is_expanded = 1;
+    messages::popup("message_empire_has_expanded", 0, 0);
+}
+ANK_FUNCTION(__empire_expand)
 
 void js_register_empire_objects(js_State *J) {
     js_register_empire_city_map_proto(J);

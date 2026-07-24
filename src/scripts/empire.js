@@ -59,6 +59,13 @@ empire_traders {
 empire {
     @luxury_goods_traded_sum { get: __empire_luxury_goods_traded_sum }
     @has_distant_battle { get: __empire_has_distant_battle }
+    @id { get: __empire_get_id }
+    @is_expanded { get: __empire_is_expanded }
+
+    set_id : __empire_set_id
+    set_expanded : __empire_set_expanded
+    expand : __empire_expand
+
     active_battle {
         __property_getter: function(property) { return __game_get_active_battle_property(property) }
         @egyptian_months_to_travel_back { }

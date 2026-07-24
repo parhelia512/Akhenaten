@@ -4,6 +4,9 @@
 #include "io/io_buffer.h"
 #include "city/city.h"
 
+#include <algorithm>
+#include <limits>
+
 void trade_route::init(e_resource resource, int limit) {
     if (resource != RESOURCE_NONE) {
         resources[resource].limit = limit;
@@ -11,6 +14,18 @@ void trade_route::init(e_resource resource, int limit) {
     } else {
         resources[resource].limit = std::numeric_limits<uint16_t>::max();
         resources[resource].traded = std::numeric_limits<uint16_t>::max();
+    }
+}
+
+void trade_route::set_limit(e_resource resource, int limit) {
+    if (resource != RESOURCE_NONE && resource < RESOURCES_MAX) {
+        resources[resource].limit = (uint16_t)std::max(0, limit);
+    }
+}
+
+void trade_route::set_traded(e_resource resource, int traded) {
+    if (resource != RESOURCE_NONE && resource < RESOURCES_MAX) {
+        resources[resource].traded = (uint16_t)std::max(0, traded);
     }
 }
 
