@@ -641,9 +641,8 @@ bool GamestateIO::write_map(pcstr filename_short) {
     return FILEIO.serialize(full, 0, FILE_FORMAT_MAP_FILE, 160, file_schema);
 }
 
-bool GamestateIO::load_mission(const int scenario_id, bool start_immediately) {
-    // get mission pack file offset
-    int offset = get_campaign_scenario_offset(scenario_id);
+bool GamestateIO::load_mission_pak_raw(const int scenario_id) {
+    const int offset = get_campaign_scenario_offset(scenario_id);
     if (offset <= 0) {
         return false;
     }
@@ -652,7 +651,6 @@ bool GamestateIO::load_mission(const int scenario_id, bool start_immediately) {
     const uint16_t saved_carry = g_city.kingdome.campaign_carry_personal_savings;
     const int32_t saved_rank = g_scenario.campaign_mission_rank;
 
-    // read file
     pre_load();
     vfs::path mission_pak_path = vfs::path(MISSION_PACK_FILE).resolve();
     auto mission_pak = vfs::file_open(mission_pak_path);
@@ -666,6 +664,14 @@ bool GamestateIO::load_mission(const int scenario_id, bool start_immediately) {
     game.session.last_loaded = e_session_mission;
     game.session.last_loaded_mission = MISSION_PACK_FILE;
     g_scenario.campaign_scenario_id = scenario_id;
+    return true;
+}
+
+bool GamestateIO::load_mission(const int scenario_id, bool start_immediately) {
+    if (!load_mission_pak_raw(scenario_id)) {
+        return false;
+    }
+
     post_load();
 
     g_empire.fix_trade_routes();

@@ -295,27 +295,35 @@
           <span class="obj-value">80</span>
         </li>
       </ul>
-      <p>There are no culture, prosperity, or monument goals. The kingdom rating requirement of 80 is the real difficulty: every one of Pharaoh's requests refused or failed costs reputation, while each fulfilled request raises it. Keeping copper, gems, weapons, and luxury goods flowing is the core of the mission.</p>
+      <p>There are no culture, prosperity, or monument goals. The kingdom rating requirement of 80 is the real difficulty: every one of Pharaoh's requests refused or failed costs reputation, while each fulfilled request raises it. Keeping copper, weapons, and luxury goods flowing is the core of the mission.</p>
 
       <!-- ─── Scripted events ───────────────────────────────── -->
       <h2 id="events">Scripted events</h2>
-      <p>All events are driven by the mission script — requests arrive on a fixed yearly schedule, and two scripted invasions land in the early years. Invasion timing follows the Pharaoh Heaven walkthrough.</p>
+      <p>Request and invasion schedule verified against <code>mission1.pak</code> (scenario 11) via the integral dump test <code>45_mission11_pak_dump.js</code> (task D1b). Scenario enemy type is <strong>Libyan</strong> (<code>ENEMY_7_LIBIAN</code>). Remaining chain-triggered pak events still need B2 to fire from the binary; timed raids are proxied in JS.</p>
 
       <div class="tutorial-step">
-        <span class="step-tag">Year 1</span>
-        <span>Pharaoh requests <strong>8 copper</strong> (12 months to comply). Fulfilling it raises kingdom rating by 8; refusing costs 6.</span>
+        <span class="step-tag">Year 1 · month 7</span>
+        <span>Pharaoh requests <strong>8 copper</strong> (18 months). Libyan raid of <strong>8</strong> units around month 10.</span>
       </div>
       <div class="tutorial-step">
-        <span class="step-tag">Year 2</span>
-        <span><strong>Bedouin raid</strong> — a foreign army of 8 units invades and tries to destroy buildings. Pharaoh also requests <strong>6 gemstones</strong>.</span>
+        <span class="step-tag">Year 2 · month 4</span>
+        <span>Libyan raid of <strong>16</strong> units.</span>
       </div>
       <div class="tutorial-step">
-        <span class="step-tag">Year 3</span>
-        <span>Pharaoh requests <strong>8 weapons</strong>. In midsummer a <strong>Canaanite invasion</strong> of 10 units arrives — stronger than the Bedouin raid.</span>
+        <span class="step-tag">Year 3 · month 3–4</span>
+        <span>Libyan raid of <strong>12</strong>; Pharaoh requests <strong>11 copper</strong> (18 months).</span>
       </div>
       <div class="tutorial-step">
-        <span class="step-tag">Year 4</span>
-        <span>Pharaoh requests <strong>4 luxury goods</strong> — surplus gems must be turned into jewelry at the Jewels Workshop.</span>
+        <span class="step-tag">Year 4 · month 8</span>
+        <span>Libyan raid of <strong>20</strong>.</span>
+      </div>
+      <div class="tutorial-step">
+        <span class="step-tag">Year 5 · month 9</span>
+        <span>Pharaoh requests <strong>13 weapons</strong> (18 months).</span>
+      </div>
+      <div class="tutorial-step">
+        <span class="step-tag">Year 6+</span>
+        <span>Further Libyan raids (28 / 28 / 32). Year 7: <strong>16 luxury goods</strong> (24 months). Year 8: <strong>21 weapons</strong> (12 months).</span>
       </div>
 
       <!-- ─── Strategy ──────────────────────────────────────── -->
@@ -326,18 +334,18 @@
       <p>Food comes from Hunting Lodges — ostrich herds roam the map. Place housing near the road, cover it with Water Supply, Firehouse, Architect's Post, and Police Station, and set up two or more Hunting Lodges with a Granary and Bazaar. There is no Nilometer here; water and food are scarce, so keep the housing block compact.</p>
 
       <h3>Phase 2 — Mines and industry</h3>
-      <p>Copper Mines and Gemstone Mines are the reason this expedition exists. Site them on the ore-bearing rock, staff them via Work Camps, and store output in Storage Yards. A Weaponsmith turns copper into weapons (needed for Pharaoh's year-3 request and for your own recruits); the Jewels Workshop turns gems into luxury goods for the year-4 request and for housing evolution. Mines deplete over time — pace your exports and keep a reserve for requests.</p>
+      <p>Copper Mines and Gemstone Mines are the reason this expedition exists. Site them on the ore-bearing rock, staff them via Work Camps, and store output in Storage Yards. A Weaponsmith turns copper into weapons (needed for Pharaoh's later weapons requests and for your own recruits); the Jewels Workshop turns gems into luxury goods for the year-7 request and for housing evolution. Mines deplete over time — pace your exports and keep a reserve for requests.</p>
 
       <h3>Phase 3 — Defense</h3>
-      <p>The first Bedouin raid arrives around year 2, Canaanites from year 3. Build a Recruiter, a Weaponsmith, and at least one Infantry Fort and one Archers Fort before the second year. Mud walls, gatehouses, and towers are available — wall off the approach to the housing block and mines. The old outpost ruins on the map hint at the defensive line. Raids continue through the mission, so do not disband the army after the first victory.</p>
+      <p>The first Libyan raid arrives late in year 1, then larger waves from year 2 onward. Build a Recruiter, a Weaponsmith, and at least one Infantry Fort and one Archers Fort before year 2. Mud walls, gatehouses, and towers are available — wall off the approach to the housing block and mines. The old outpost ruins on the map hint at the defensive line. Raids continue through the mission, so do not disband the army after the first victory.</p>
 
       <h3>Phase 4 — Trade and the kingdom rating</h3>
-      <p>Land routes to Abu, Behdet, and the Selima Oasis let you import what the desert cannot provide (barley, beer, linen, timber, papyrus) and export copper, gems, and jewelry. Fulfill every request from Pharaoh — each one completed is +8 kingdom rating, and 80 is required to win. If the rating stalls, send gifts to Pharaoh from personal savings.</p>
+      <p>Land routes (all start closed — pay to open) to Men-nefer, Abu, Behdet, Nekhen, and the Selima Oasis let you import food staples, beer, linen, timber, and papyrus and export copper, gems, and jewelry. Fulfill every request from Pharaoh. If the rating stalls, send gifts to Pharaoh from personal savings.</p>
 
       <h3>Tips</h3>
       <ul>
-        <li>Requests arrive on a fixed schedule (copper → gems → weapons → luxury goods, one per year). Stockpile the next resource in advance instead of scrambling when the request lands.</li>
-        <li>Keep 8 copper in a Storage Yard before the end of year 1 — the first request has a 12-month deadline.</li>
+        <li>Request schedule from the pak: copper → copper → weapons → luxury goods → weapons. Stockpile ahead of each deadline.</li>
+        <li>Keep 8 copper ready before year 1 month 7 — the first request allows 18 months to comply.</li>
         <li>Ostrich herds respawn from two points in the north of the map; keep Hunting Lodges within range of both.</li>
         <li>Temples of Seth keep the god of the desert appeased — his wrath in a military mission is costly. Ra's blessing helps trade.</li>
         <li>Scribal School and entertainment (Booth → Pavilion chain) are available and needed to push housing high enough for 2 000 population in a compact block.</li>
@@ -397,72 +405,37 @@
 
   <span class="kw">env</span> { <span class="kw">has_animals</span> : <span class="num">true</span>, <span class="kw">hide_nilometer</span> : <span class="num">true</span> }
 }</code></pre>
-            <p>Goal values follow the Pharaoh Heaven / Impressions walkthroughs (pop 2000, kingdom 80). Trade partners with active routes: Abu, Behdet, Selima Oasis. Men-nefer and Kebet are declared in <code>cities[]</code> but their <code>sells</code>/<code>buys</code> lists are currently commented out (lines 76–91).</p>
+            <p>Goal values match <code>mission1.pak</code> (pop 2000, kingdom 80). Trade partners (D1b dump): Men-nefer, Abu, Behdet, Nekhen, Selima Oasis — all start closed. Kebet is not present on this scenario.</p>
           </div>
         </details>
 
         <details>
           <summary>Event handlers — all functions in <code>m_011_serabit_khadim.js</code></summary>
           <div class="details-body">
-            <p>Each function is bound to a game event via an attribute annotation. Handlers fire only while <code>mission=mission11</code> is active. All invasions use the JS API <code>city.start_foreign_army_invasion</code> (not <code>EVENT_TYPE_INVASION</code>).</p>
+            <p>Each function is bound to a game event via an attribute annotation. Handlers fire only while <code>mission=mission11</code> is active. Timed invasions use the JS API <code>city.start_foreign_army_invasion</code> with <code>ENEMY_7_LIBIAN</code> (pak <code>enemy_id</code>); native <code>EVENT_TYPE_INVASION</code> from the pak still awaits B2.</p>
             <ul class="event-list">
               <li>
                 <span class="ev-name">event_mission_start</span>
-                <span class="ev-line">line 133</span>
-                <span class="ev-desc">Shows the start message, enables the empire map, and unlocks every advisor up to Diplomacy.</span>
+                <span class="ev-desc">Start message, empire map, advisors; loads <code>PACK_ENEMY_LIBIAN</code>.</span>
                 <span class="ev-fn">mission11_on_start</span>
-                <span></span>
               </li>
               <li>
                 <span class="ev-name">city_animals / create_herds</span>
-                <span class="ev-line">line 142</span>
-                <span class="ev-desc">Registers two ostrich herd spawn points (5 ostriches each, radius 16) at tiles (55, 75) and (85, 135).</span>
+                <span class="ev-desc">Two ostrich herd points (5 each, radius 16).</span>
                 <span class="ev-fn">mission11_register_animals</span>
-                <span></span>
               </li>
               <li>
-                <span class="ev-name">event_advance_month (request 1)</span>
-                <span class="ev-line">line 153</span>
-                <span class="ev-desc">From year 1: request for <strong>8 copper</strong>, 12 months. Completion +8 kingdom, refusal −6 (chain events tags 101/102). Runs once.</span>
-                <span class="ev-fn">mission11_pharaoh_request_copper</span>
-                <span></span>
+                <span class="ev-name">requests (pak)</span>
+                <span class="ev-desc">copper 8@y1m7/18mo → copper 11@y3m4/18mo → weapons 13@y5m9/18mo → luxury 16@y7/24mo → weapons 21@y8m2/12mo.</span>
+                <span class="ev-fn">mission11_pharaoh_request_*</span>
               </li>
               <li>
-                <span class="ev-name">event_advance_month (request 2)</span>
-                <span class="ev-line">line 172</span>
-                <span class="ev-desc">From year 2: request for <strong>6 gems</strong>, 12 months. +8 / −6 kingdom (tags 201/202). Runs once.</span>
-                <span class="ev-fn">mission11_pharaoh_request_gems</span>
-                <span></span>
-              </li>
-              <li>
-                <span class="ev-name">event_advance_month (request 3)</span>
-                <span class="ev-line">line 191</span>
-                <span class="ev-desc">From year 3: request for <strong>8 weapons</strong>, 12 months. +8 / −6 kingdom (tags 301/302). Runs once.</span>
-                <span class="ev-fn">mission11_pharaoh_request_weapons</span>
-                <span></span>
-              </li>
-              <li>
-                <span class="ev-name">event_advance_month (request 4)</span>
-                <span class="ev-line">line 210</span>
-                <span class="ev-desc">From year 4: request for <strong>4 luxury goods</strong>, 12 months. +8 / −6 kingdom (tags 401/402). Runs once.</span>
-                <span class="ev-fn">mission11_pharaoh_request_luxury_goods</span>
-                <span></span>
-              </li>
-              <li>
-                <span class="ev-name">event_advance_month (invasion 1)</span>
-                <span class="ev-line">line 230</span>
-                <span class="ev-desc">From year 2: Bedouin raid — <code>start_foreign_army_invasion(enemy: ENEMY_0_BARBARIAN, size: 8, want_destroy_buildings: 8)</code>. Runs once.</span>
-                <span class="ev-fn">mission11_bedouin_invasion</span>
-                <span></span>
-              </li>
-              <li>
-                <span class="ev-name">event_advance_month (invasion 2)</span>
-                <span class="ev-line">line 247</span>
-                <span class="ev-desc">From year 3, month 6: Canaanite invasion — <code>start_foreign_army_invasion(enemy: ENEMY_2_CANAANITE, size: 10, want_destroy_buildings: 10)</code>. Runs once.</span>
-                <span class="ev-fn">mission11_canaanite_invasion</span>
-                <span></span>
+                <span class="ev-name">Libyan raids (pak)</span>
+                <span class="ev-desc">sizes 8/16/12/20/28/28/32 at y1m10, y2m4, y3m3, y4m8, y6, y8m6, y10m1.</span>
+                <span class="ev-fn">mission11_libyan_invasion_*</span>
               </li>
             </ul>
+            <p>Dump helper: <span class="file-ref">src/js/js_test_mission_pak_dump.cpp</span> + <span class="file-ref">tests/45_mission11_pak_dump.js</span> (<code>GamestateIO::load_mission_pak_raw</code>).</p>
           </div>
         </details>
 

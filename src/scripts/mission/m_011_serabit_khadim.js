@@ -1,13 +1,18 @@
 log_info("akhenaten: mission 11 serabit khadim started")
 
+// Trade / requests / invasions verified vs mission1.pak (scenario 11) via
+// tests/45_mission11_pak_dump.js + __test_mission_pak_dump (D1b, 2026-07-24).
+// Remaining pak EVENT_TYPE_INVASION / chain events need B2 to fire from the binary;
+// JS proxies the timed requests + Libyan raids below.
+
 mission11 { // Serabit Khadim
 	start_message : "message_mission_serabit_khadim"
 	selection_title : "Serabit Khadim"
-	player_rank : 1
+	player_rank : 5
 
 	choice_background {pack:PACK_UNLOADED, id:12}
 	choice_image1 {pack:PACK_UNLOADED, id:13}
-	choice_image1_pos [192, 144]
+    choice_image1_pos [192, 144]
 	choice_title [144, 31]
 
 	choice [
@@ -60,8 +65,7 @@ mission11 { // Serabit Khadim
 				BUILDING_MUD_WALL, BUILDING_MUD_GATEHOUSE, BUILDING_MUD_TOWER,
 			  ]
 
-	// Goals match Pharaoh walkthroughs (Pharaoh Heaven, Impressions wiki):
-	// pop 2000, kingdom 80; no culture, prosperity, or monument rating goals.
+	// Goals match mission1.pak (pop 2000, kingdom 80; culture/prosperity/monuments off).
 	win_criteria {
 		population {enabled : true, goal : 2000 }
 		culture    {enabled : false }
@@ -72,22 +76,16 @@ mission11 { // Serabit Khadim
 
 	enable_scenario_events : true
 
+	// Empire sells/buys from mission1.pak empire_cities (raw dump, no JS overlay).
+	// Kebet is not a partner on this scenario; Nekhen is. All routes start closed (cost>0).
 	cities [
 		{
 			name : "Men-nefer"
 			is_sea_trade : false
 			max_traders : 1
 			trade_limits : default_trade_limits
-            // sells chickpeas, pottery, papyrus
-            // buys bricks, barley, beer, luxury goods
-		}
-
-		{
-			name : "Kebet"
-			is_sea_trade : false
-			max_traders : 1
-			trade_limits : default_trade_limits
-            // sells fish, reeds, clay
+			sells [ RESOURCE_CHICKPEAS, RESOURCE_POTTERY, RESOURCE_PAPYRUS ]
+			buys [ RESOURCE_BRICKS, RESOURCE_BEER, RESOURCE_GEMS, RESOURCE_LUXURY_GOODS ]
 		}
 
 		{
@@ -95,8 +93,8 @@ mission11 { // Serabit Khadim
 			is_sea_trade : false
 			max_traders : 1
 			trade_limits : default_trade_limits
-			sells [ RESOURCE_CHICKPEAS, RESOURCE_POTTERY, RESOURCE_PAPYRUS ]
-			buys [ RESOURCE_BRICKS, RESOURCE_BARLEY, RESOURCE_BEER, RESOURCE_LUXURY_GOODS ]
+			sells [ RESOURCE_GRAIN, RESOURCE_STRAW, RESOURCE_FLAX, RESOURCE_LINEN, RESOURCE_GEMS ]
+			buys [ RESOURCE_POTTERY, RESOURCE_PAPYRUS ]
 		}
 
 		{
@@ -104,8 +102,17 @@ mission11 { // Serabit Khadim
 			is_sea_trade : false
 			max_traders : 1
 			trade_limits : default_trade_limits
-            sells [ RESOURCE_FISH, RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_BEER, RESOURCE_FLAX, RESOURCE_PAPYRUS, RESOURCE_GRANITE ]
-            buys [ RESOURCE_BRICKS, RESOURCE_LINEN, RESOURCE_GEMS, RESOURCE_LUXURY_GOODS, RESOURCE_TIMBER ]
+			sells [ RESOURCE_FISH, RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_BEER, RESOURCE_REEDS, RESOURCE_PAPYRUS ]
+			buys [ RESOURCE_BRICKS, RESOURCE_LINEN, RESOURCE_GEMS, RESOURCE_LUXURY_GOODS ]
+		}
+
+		{
+			name : "Nekhen"
+			is_sea_trade : false
+			max_traders : 1
+			trade_limits : default_trade_limits
+			sells [ RESOURCE_POTTERY, RESOURCE_BEER, RESOURCE_FLAX, RESOURCE_LINEN ]
+			buys [ RESOURCE_PAPYRUS ]
 		}
 
 		{
@@ -113,26 +120,31 @@ mission11 { // Serabit Khadim
 			is_sea_trade : false
 			max_traders : 1
 			trade_limits : default_trade_limits
-            sells [ RESOURCE_LUXURY_GOODS, RESOURCE_TIMBER ]
-            buys [ RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_COPPER, RESOURCE_BEER, RESOURCE_LINEN, RESOURCE_PAPYRUS ]
+			sells [ RESOURCE_LUXURY_GOODS, RESOURCE_TIMBER ]
+			buys [ RESOURCE_POTTERY, RESOURCE_BEER, RESOURCE_LINEN, RESOURCE_PAPYRUS, RESOURCE_COPPER ]
 		}
 	]
 
 	vars {
-		pharaoh_requested_copper : false
-		pharaoh_requested_gems : false
-		pharaoh_requested_weapons : false
+		pharaoh_requested_copper1 : false
+		pharaoh_requested_copper2 : false
+		pharaoh_requested_weapons1 : false
 		pharaoh_requested_luxury_goods : false
-		bedouin_invasion_started : false
-		canaanite_invasion_started : false
+		pharaoh_requested_weapons2 : false
+		libyan_invasion_1 : false
+		libyan_invasion_2 : false
+		libyan_invasion_3 : false
+		libyan_invasion_4 : false
+		libyan_invasion_5 : false
+		libyan_invasion_6 : false
+		libyan_invasion_7 : false
 		start_message_shown : false
 	}
 }
 
 [es=event_mission_start, mission=mission11]
 function mission11_on_start(ev) {
-	__image_request_pak(PACK_ENEMY_BARBARIAN)
-	__image_request_pak(PACK_ENEMY_CANAANITE)
+	__image_request_pak(PACK_ENEMY_LIBIAN)
 	mission_show_start_message(mission, "message_mission_serabit_khadim")
 	city.set_empire_available(1)
 	for (var i = ADVISOR_NONE + 1; i <= ADVISOR_DIPLOMACY; i++) {
@@ -151,112 +163,152 @@ function mission11_register_animals(ev) {
 	city.set_animals_area(1, 16)
 }
 
-[es=event_advance_month, mission=mission11]
-function mission11_pharaoh_request_copper(ev) {
-	if (mission.pharaoh_requested_copper) {
-		return
-	}
-
-	if (ev.years_since_start < 1) {
-		return
-	}
-
-	mission.pharaoh_requested_copper = true
-	var request = city.create_good_request({ tag_id: 1, resource: RESOURCE_COPPER, amount: 8, months_initial: 12 })
-	city.create_chain_event({ tag_id: 101, type: EVENT_TYPE_REPUTATION_INCREASE, amount: 8 })
-	city.create_chain_event({ tag_id: 102, type: EVENT_TYPE_REPUTATION_DECREASE, amount: 6 })
-	request.set_completed_action_tag(101)
-	request.set_refusal_action_tag(102)
+function mission11_fire_request(tag, resource, amount, months, ok_tag, fail_tag, ok_amt, fail_amt) {
+	var request = city.create_good_request({ tag_id: tag, resource: resource, amount: amount, months_initial: months })
+	city.create_chain_event({ tag_id: ok_tag, type: EVENT_TYPE_REPUTATION_INCREASE, amount: ok_amt })
+	city.create_chain_event({ tag_id: fail_tag, type: EVENT_TYPE_REPUTATION_DECREASE, amount: fail_amt })
+	request.set_completed_action_tag(ok_tag)
+	request.set_refusal_action_tag(fail_tag)
 	request.execute()
 }
 
+// pak: year=1 month=7 copper 8 / 18mo
 [es=event_advance_month, mission=mission11]
-function mission11_pharaoh_request_gems(ev) {
-	if (mission.pharaoh_requested_gems) {
+function mission11_pharaoh_request_copper1(ev) {
+	if (mission.pharaoh_requested_copper1) {
 		return
 	}
-
-	if (ev.years_since_start < 2) {
+	if (ev.years_since_start < 1 || (ev.years_since_start == 1 && ev.month < 7)) {
 		return
 	}
-
-	mission.pharaoh_requested_gems = true
-	var request = city.create_good_request({ tag_id: 2, resource: RESOURCE_GEMS, amount: 6, months_initial: 12 })
-	city.create_chain_event({ tag_id: 201, type: EVENT_TYPE_REPUTATION_INCREASE, amount: 8 })
-	city.create_chain_event({ tag_id: 202, type: EVENT_TYPE_REPUTATION_DECREASE, amount: 6 })
-	request.set_completed_action_tag(201)
-	request.set_refusal_action_tag(202)
-	request.execute()
+	mission.pharaoh_requested_copper1 = true
+	mission11_fire_request(1, RESOURCE_COPPER, 8, 18, 101, 102, 5, 10)
 }
 
+// pak: year=3 month=4 copper 11 / 18mo
 [es=event_advance_month, mission=mission11]
-function mission11_pharaoh_request_weapons(ev) {
-	if (mission.pharaoh_requested_weapons) {
+function mission11_pharaoh_request_copper2(ev) {
+	if (mission.pharaoh_requested_copper2) {
 		return
 	}
-
-	if (ev.years_since_start < 3) {
+	if (ev.years_since_start < 3 || (ev.years_since_start == 3 && ev.month < 4)) {
 		return
 	}
-
-	mission.pharaoh_requested_weapons = true
-	var request = city.create_good_request({ tag_id: 3, resource: RESOURCE_WEAPONS, amount: 8, months_initial: 12 })
-	city.create_chain_event({ tag_id: 301, type: EVENT_TYPE_REPUTATION_INCREASE, amount: 8 })
-	city.create_chain_event({ tag_id: 302, type: EVENT_TYPE_REPUTATION_DECREASE, amount: 6 })
-	request.set_completed_action_tag(301)
-	request.set_refusal_action_tag(302)
-	request.execute()
+	mission.pharaoh_requested_copper2 = true
+	mission11_fire_request(2, RESOURCE_COPPER, 11, 18, 201, 202, 6, 8)
 }
 
+// pak: year=5 month=9 weapons 13 / 18mo
+[es=event_advance_month, mission=mission11]
+function mission11_pharaoh_request_weapons1(ev) {
+	if (mission.pharaoh_requested_weapons1) {
+		return
+	}
+	if (ev.years_since_start < 5 || (ev.years_since_start == 5 && ev.month < 9)) {
+		return
+	}
+	mission.pharaoh_requested_weapons1 = true
+	mission11_fire_request(3, RESOURCE_WEAPONS, 13, 18, 301, 302, 5, 10)
+}
+
+// pak: year=7 month=0 luxury_goods 16 / 24mo
 [es=event_advance_month, mission=mission11]
 function mission11_pharaoh_request_luxury_goods(ev) {
 	if (mission.pharaoh_requested_luxury_goods) {
 		return
 	}
-
-	if (ev.years_since_start < 4) {
+	if (ev.years_since_start < 7) {
 		return
 	}
-
 	mission.pharaoh_requested_luxury_goods = true
-	var request = city.create_good_request({ tag_id: 4, resource: RESOURCE_LUXURY_GOODS, amount: 4, months_initial: 12 })
-	city.create_chain_event({ tag_id: 401, type: EVENT_TYPE_REPUTATION_INCREASE, amount: 8 })
-	city.create_chain_event({ tag_id: 402, type: EVENT_TYPE_REPUTATION_DECREASE, amount: 6 })
-	request.set_completed_action_tag(401)
-	request.set_refusal_action_tag(402)
-	request.execute()
+	mission11_fire_request(4, RESOURCE_LUXURY_GOODS, 16, 24, 401, 402, 6, 8)
 }
 
-// First Bedouin attack ~year 2 (Pharaoh Heaven walkthrough).
+// pak: year=8 month=2 weapons 21 / 12mo
 [es=event_advance_month, mission=mission11]
-function mission11_bedouin_invasion(ev) {
-	if (mission.bedouin_invasion_started) {
+function mission11_pharaoh_request_weapons2(ev) {
+	if (mission.pharaoh_requested_weapons2) {
 		return
 	}
-
-	if (ev.years_since_start < 2) {
+	if (ev.years_since_start < 8 || (ev.years_since_start == 8 && ev.month < 2)) {
 		return
 	}
-
-	mission.bedouin_invasion_started = true
-	log_info("akhenaten: mission 11 serabit khadim:${ev.years_since_start}:${ev.month} bedouin invasion", {ev:ev})
-
-	city.start_foreign_army_invasion({ invasion_id: 0, enemy: ENEMY_0_BARBARIAN, size: 8, tilex: -1, tiley: -1, want_destroy_buildings: 8 })
+	mission.pharaoh_requested_weapons2 = true
+	mission11_fire_request(5, RESOURCE_WEAPONS, 21, 12, 501, 502, 5, 10)
 }
 
-// Canaanite attacks follow Bedouin raids (walkthrough: SW, north, east).
+function mission11_libyan_raid(invasion_id, size) {
+	// Scenario enemy_id in pak is ENEMY_7_LIBIAN. No invasion land points in pak → auto tile.
+	city.start_foreign_army_invasion({
+		invasion_id: invasion_id,
+		enemy: ENEMY_7_LIBIAN,
+		size: size,
+		tilex: -1,
+		tiley: -1,
+		want_destroy_buildings: size
+	})
+}
+
+// pak invasions (timed; scenario enemy = Libyan). Extra chain-triggered invasions await B2.
 [es=event_advance_month, mission=mission11]
-function mission11_canaanite_invasion(ev) {
-	if (mission.canaanite_invasion_started) {
-		return
-	}
+function mission11_libyan_invasion_1(ev) {
+	if (mission.libyan_invasion_1) { return }
+	if (ev.years_since_start < 1 || (ev.years_since_start == 1 && ev.month < 10)) { return }
+	mission.libyan_invasion_1 = true
+	log_info("akhenaten: mission 11 libyan invasion 1 size=8", {ev:ev})
+	mission11_libyan_raid(0, 8)
+}
 
-	if (ev.years_since_start < 3 || ev.month < 6) {
-		return
-	}
+[es=event_advance_month, mission=mission11]
+function mission11_libyan_invasion_2(ev) {
+	if (mission.libyan_invasion_2) { return }
+	if (ev.years_since_start < 2 || (ev.years_since_start == 2 && ev.month < 4)) { return }
+	mission.libyan_invasion_2 = true
+	log_info("akhenaten: mission 11 libyan invasion 2 size=16", {ev:ev})
+	mission11_libyan_raid(1, 16)
+}
 
-	mission.canaanite_invasion_started = true
-	log_info("akhenaten: mission 11 serabit khadim:${ev.years_since_start}:${ev.month} canaanite invasion", {ev:ev})
+[es=event_advance_month, mission=mission11]
+function mission11_libyan_invasion_3(ev) {
+	if (mission.libyan_invasion_3) { return }
+	if (ev.years_since_start < 3 || (ev.years_since_start == 3 && ev.month < 3)) { return }
+	mission.libyan_invasion_3 = true
+	log_info("akhenaten: mission 11 libyan invasion 3 size=12", {ev:ev})
+	mission11_libyan_raid(2, 12)
+}
 
-	city.start_foreign_army_invasion({ invasion_id: 1, enemy: ENEMY_2_CANAANITE, size: 10, tilex: -1, tiley: -1, want_destroy_buildings: 10 })
+[es=event_advance_month, mission=mission11]
+function mission11_libyan_invasion_4(ev) {
+	if (mission.libyan_invasion_4) { return }
+	if (ev.years_since_start < 4 || (ev.years_since_start == 4 && ev.month < 8)) { return }
+	mission.libyan_invasion_4 = true
+	log_info("akhenaten: mission 11 libyan invasion 4 size=20", {ev:ev})
+	mission11_libyan_raid(3, 20)
+}
+
+[es=event_advance_month, mission=mission11]
+function mission11_libyan_invasion_5(ev) {
+	if (mission.libyan_invasion_5) { return }
+	if (ev.years_since_start < 6) { return }
+	mission.libyan_invasion_5 = true
+	log_info("akhenaten: mission 11 libyan invasion 5 size=28", {ev:ev})
+	mission11_libyan_raid(4, 28)
+}
+
+[es=event_advance_month, mission=mission11]
+function mission11_libyan_invasion_6(ev) {
+	if (mission.libyan_invasion_6) { return }
+	if (ev.years_since_start < 8 || (ev.years_since_start == 8 && ev.month < 6)) { return }
+	mission.libyan_invasion_6 = true
+	log_info("akhenaten: mission 11 libyan invasion 6 size=28", {ev:ev})
+	mission11_libyan_raid(5, 28)
+}
+
+[es=event_advance_month, mission=mission11]
+function mission11_libyan_invasion_7(ev) {
+	if (mission.libyan_invasion_7) { return }
+	if (ev.years_since_start < 10 || (ev.years_since_start == 10 && ev.month < 1)) { return }
+	mission.libyan_invasion_7 = true
+	log_info("akhenaten: mission 11 libyan invasion 7 size=32", {ev:ev})
+	mission11_libyan_raid(6, 32)
 }
