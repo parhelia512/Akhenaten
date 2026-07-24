@@ -105,6 +105,11 @@ void empire_t::load_mission_metadata(const mission_id_t &missionid) {
             g_empire.hide_unused_city_objects();
         }
 
+        if (arch.r_bool("hide_pak_routes", false)) {
+            g_empire.clear_route_objects();
+        }
+        g_empire.load_empire_routes(arch);
+
         if (arch.r_bool("hide_pak_objects", false)) {
             g_empire.hide_non_city_objects();
         }

@@ -39,6 +39,7 @@ public:
 
     void hide_non_city_objects();
     void hide_unused_city_objects();
+    void clear_route_objects();
     int alloc_empire_object();
     full_empire_object *ref_full_object(int object_id);
     int find_region_name_id(pcstr name) const;
@@ -111,6 +112,7 @@ public:
 
 private:
     void load_empire_cities(archive arch);
+    void load_empire_routes(archive arch);
     void load_empire_texts(archive arch);
     void load_empire_ornaments(archive arch);
     void load_empire_battle_icons(archive arch);

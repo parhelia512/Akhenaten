@@ -109,6 +109,40 @@ mission4 {
 		}
 	]
 
+	// Trade route polylines from mission1.pak empire_map_routes (scenario 4).
+	// type: 1=land, 2=sea. Route 3 (Nubt) is empty in pak.
+	hide_pak_routes : true
+	empire_routes [
+		{
+			route : 1
+			type : 1
+			points [
+				[508, 382], [520, 399], [530, 416], [534, 441],
+				[540, 466], [551, 486], [555, 506], [555, 506]
+			]
+		}
+		{
+			route : 2
+			type : 1
+			points [
+				[421, 880], [418, 942], [489, 927], [480, 886], [456, 883], [430, 883]
+			]
+		}
+		{
+			route : 4
+			type : 1
+			points [
+				[821, 1024], [812, 996], [808, 982], [810, 973], [804, 958],
+				[788, 946], [773, 940], [760, 926], [754, 922], [744, 919],
+				[735, 910], [708, 892], [679, 864], [651, 846], [632, 828],
+				[608, 815], [590, 798], [580, 781], [567, 739], [562, 722],
+				[565, 702], [565, 683], [567, 671], [575, 646], [583, 618],
+				[588, 608], [588, 598], [586, 585], [584, 565], [581, 546],
+				[576, 525], [560, 511], [560, 511]
+			]
+		}
+	]
+
 	// Region labels from mission1.pak empire_map_objects (scenario 4 dump).
 	hide_pak_objects : true
 	empire_texts [
@@ -177,7 +211,7 @@ function mission4_fire_request(tag, resource, amount, months, ok_tag, fail_tag, 
 [es=event_mission_start, mission=mission4]
 function mission4_on_start(ev) {
 	mission_show_start_message(mission, "message_trade_on_the_water")
-	city.set_empire_available(1)
+	city.set_empire_available(-1)
 
 	if (mission.papyrus_made_handled) {
 		city.set_advisor_available(ADVISOR_TRADE, 1)

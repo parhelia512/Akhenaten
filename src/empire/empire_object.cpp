@@ -29,6 +29,7 @@
 #define EMPIRE_REGION_NAME_SCAN 128
 
 full_empire_object g_empire_objects[MAX_OBJECTS];
+std::array<map_route_object, 50> g_empire_route_objects;
 
 void empire_t::foreach_object(std::function<void(int object_index, const empire_object&)> callback) {
     auto& objects = g_empire_objects;
@@ -286,6 +287,52 @@ void empire_t::load_empire_cities(archive arch) {
         if (city->can_trade()) {
             g_empire.set_trade_route_type(city->route_id, city->is_sea_trade);
             apply_scripted_trade_route_limits(city);
+        }
+    });
+}
+
+void empire_t::clear_route_objects() {
+    for (auto &route : g_empire_route_objects) {
+        route = {};
+    }
+}
+
+void empire_t::load_empire_routes(archive arch) {
+    arch.r_array("empire_routes", [](archive entry) {
+        const int route_id = entry.r_int("route", entry.r_int("route_id", -1));
+        if (route_id < 0 || route_id >= (int)g_empire_route_objects.size()) {
+            logs::info("empire: invalid empire_routes id=%d", route_id);
+            return;
+        }
+
+        map_route_object &route = g_empire_route_objects[route_id];
+        route = {};
+        route.in_use = true;
+
+        // 1 = land, 2 = sea (same as pak). Also accept is_sea bool.
+        int route_type = entry.r_int("route_type", entry.r_int("type", 0));
+        if (route_type != 1 && route_type != 2) {
+            route_type = entry.r_bool("is_sea", false) ? 2 : 1;
+        }
+        route.route_type = (char)route_type;
+
+        std::vector<vec2i> points = entry.r_array_vec2i("points");
+        const int max_points = (int)std::size(route.points);
+        const int count = std::min((int)points.size(), max_points);
+        for (int i = 0; i < count; i++) {
+            route.points[i].p = points[i];
+            route.points[i].is_in_use = true;
+        }
+        route.num_points = (unsigned char)count;
+        route.length = entry.r_int("length", 0);
+        route.path_length = route.calc_length();
+        if (route.length <= 0) {
+            route.length = route.path_length;
+        }
+
+        if (route.num_points == 0) {
+            logs::info("empire: empire_routes[%d] has no points", route_id);
+            route.in_use = false;
         }
     });
 }
@@ -714,8 +761,6 @@ int empire_t::update_animation(int object_index, const empire_object &obj, int i
     objects[object_index].obj.animation_index = get_animation_offset(image_id, obj.animation_index);
     return objects[object_index].obj.animation_index & 0x7f;
 }
-
-std::array<map_route_object, 50> g_empire_route_objects;
 
 const map_route_object& empire_t::get_route_object(int id) const {
     return g_empire_route_objects[id];

@@ -13,6 +13,7 @@
 #include "core/string.h"
 #include "empire/empire.h"
 #include "empire/empire_city.h"
+#include "empire/empire_object.h"
 #include "empire/trade_route.h"
 #include "empire/type.h"
 #include "figure/figure_type.h"
@@ -462,6 +463,42 @@ static void dump_empire_objects() {
         counts[EMPIRE_OBJECT_DISTANT_BATTLE_ROUTE]);
 }
 
+static void dump_empire_routes() {
+    int n = 0;
+    for (int id = 0; id < 50; id++) {
+        const map_route_object& route = g_empire.get_route_object(id);
+        if (!route.in_use || route.num_points == 0) {
+            continue;
+        }
+
+        char pts[1024] = {0};
+        size_t used = 0;
+        const int count = std::min<int>(route.num_points, 50);
+        for (int i = 0; i < count; i++) {
+            if (!route.points[i].is_in_use) {
+                continue;
+            }
+            const int w = snprintf(pts + used, sizeof pts - used, "%s%d,%d",
+                used ? ";" : "",
+                route.points[i].p.x,
+                route.points[i].p.y);
+            if (w <= 0 || used + (size_t)w >= sizeof pts) {
+                break;
+            }
+            used += (size_t)w;
+        }
+
+        dump_marker("pak_map_route:id=%d|type=%d|n=%d|len=%d|pts=%s",
+            id,
+            (int)route.route_type,
+            (int)route.num_points,
+            route.length,
+            pts[0] ? pts : "-");
+        n++;
+    }
+    dump_marker("pak_map_route_count:%d", n);
+}
+
 static pcstr invader_name(int item) {
     switch (item) {
     case EVENT_INVADER_ENEMY: return "enemy";
@@ -719,6 +756,7 @@ static int __test_mission_pak_dump(int scenario_id) {
     dump_gods();
     dump_empire_cities();
     dump_empire_objects();
+    dump_empire_routes();
     dump_scenario_events();
     dump_legacy_tables();
     dump_starting_buildings();

@@ -79,10 +79,20 @@ mission7 { // Abydos / Abedju
 		housing_level {enabled : true, goal : 10 }
 	}
 
-	// hide_pak_cities: only cities below appear on the empire map (pak leftovers hidden).
+	// hide_pak_cities: only cities below appear on the empire map (including ours).
 	// Display-only city example: { name : "Selima", trade : false } or type : EMPIRE_CITY_FOREIGN
 	hide_pak_cities : true
 	cities [
+		{
+			name : "Abedju"
+			idx : 0
+			pos : [696, 907]
+			route : 0
+			type : EMPIRE_CITY_OURS
+			sells [ RESOURCE_FISH, RESOURCE_BARLEY, RESOURCE_FLAX, RESOURCE_REEDS ]
+			buys [ RESOURCE_GAMEMEAT, RESOURCE_CLAY, RESOURCE_BRICKS, RESOURCE_TIMBER, RESOURCE_PAPYRUS, RESOURCE_LIMESTONE, RESOURCE_GRANITE, RESOURCE_SANDSTONE ]
+		}
+
 		{
 			name : "Behdet"
 			is_sea_trade : true
