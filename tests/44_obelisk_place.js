@@ -1,8 +1,9 @@
 // C7: Small obelisk place via planner after staffing a Storage Yard with granite
-// from placement_resources (100 in obelisk.js). Also exercises monument resource delivery.
+// from placement_resources (100 in obelisk.js). Also rejects place without granite
+// and a second unfinished obelisk (C7-T1), then exercises monument resource delivery.
 
 function run_test() {
-    __log_info_native('[test:44] small obelisk place + granite consume + monument add_resource')
+    __log_info_native('[test:44] small obelisk reject + place + granite consume + add_resource')
     test_reload_city_session('data/default.map')
 
     if (!__scenario_building_allowed(BUILDING_SMALL_OBELISK)) {
@@ -14,11 +15,23 @@ function run_test() {
 
     __test_set_treasury(500000)
 
-    // Granite amount must match building_small_obelisk.placement_resources in obelisk.js.
-    var granite_need = 100
-
     var cx = (__scenario_map.width / 2) | 0
     var cy = (__scenario_map.height / 2) | 0
+
+    // --- C7-T1: reject place without granite in staffed SY ---
+    var rejected_no_granite = test_building_place(BUILDING_SMALL_OBELISK, cx - 1, cy - 1)
+    if (!rejected_no_granite) {
+        rejected_no_granite = test_building_place(BUILDING_SMALL_OBELISK, -1, -1)
+    }
+    if (rejected_no_granite) {
+        __log_info_native('[test:44] unexpected place without granite bid=' + rejected_no_granite)
+        __test_signal_ready()
+        return
+    }
+    __log_marker('obelisk_reject_no_granite_ok')
+
+    // Granite amount must match building_small_obelisk.placement_resources in obelisk.js.
+    var granite_need = 100
 
     // Keep the Storage Yard off-centre so the 3×3 obelisk can sit at the map centre
     // (auto-place prefers centre and would steal the screenshot spot).
@@ -74,6 +87,21 @@ function run_test() {
         __test_signal_ready()
         return
     }
+
+    // --- C7-T1: only one unfinished obelisk (still unfinished — do not finish yet) ---
+    var second = test_building_place(BUILDING_SMALL_OBELISK, cx + 10, cy + 10)
+    if (!second) {
+        second = test_building_place(BUILDING_SMALL_OBELISK, cx + 15, cy + 15)
+    }
+    if (!second) {
+        second = test_building_place(BUILDING_SMALL_OBELISK, 20, 50)
+    }
+    if (second) {
+        __log_info_native('[test:44] unexpected second unfinished obelisk bid=' + second)
+        __test_signal_ready()
+        return
+    }
+    __log_marker('obelisk_reject_only_one_ok')
 
     // Single building — no multi-part chain (unlike sphinx).
     if (b.next_part_building_id > 0 || b.prev_part_building_id > 0) {
@@ -143,7 +171,9 @@ function run_test() {
 
 function check_valid() {
     var required = [
+        'obelisk_reject_no_granite_ok',
         'obelisk_placed_ok',
+        'obelisk_reject_only_one_ok',
         'obelisk_single_ok',
         'obelisk_size_ok:3',
         'obelisk_granite_consumed',
