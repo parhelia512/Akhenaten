@@ -48,6 +48,7 @@ Sources are collected via `file(GLOB ...)` with **no `CONFIGURE_DEPENDS`**, so a
 --language ru         set language (en, ru, fr, de, it, sp, po, pr, sw, tc, sc, kr)
 --nosound             disable audio (skips sound manager init and audio file probing)
 --no-resource         run without Pharaoh data files (skips campaign.txt and AUDIO/ probing)
+--nodatacheck         skip Pharaoh/Cleopatra install validation at startup
 --config              show configuration dialog on startup
 --noconfig-window     skip configuration dialog on startup (even without akhenaten.cfg)
 --mods PATH           set mods directory

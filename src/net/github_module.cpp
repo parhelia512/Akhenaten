@@ -34,7 +34,7 @@ bool github_is_active() {
 }
 
 xstring github_download_changelog() {
-    auto &cache = xvalue<github_cache_t>::get();
+    auto &cache = xvalue<github_cache_t>::ref();
     if (cache.changelog_attempted) {
         return cache.changelog;
     }
@@ -64,7 +64,7 @@ int github_get_total_commits(pcstr owner, pcstr repo) {
         return -1;
     }
 
-    auto &cache = xvalue<github_cache_t>::get();
+    auto &cache = xvalue<github_cache_t>::ref();
     if (cache.commits_attempted) {
         return cache.commits;
     }

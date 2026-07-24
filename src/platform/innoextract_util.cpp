@@ -1,6 +1,7 @@
 #include "platform/innoextract_util.h"
 
 #include "core/log.h"
+#include "core/xvalue.h"
 #include "platform/platform.h"
 
 #include <SDL.h>
@@ -773,11 +774,21 @@ bool has_pharaoh_data(pcstr dir) {
     return !find_campaign_dir(fs::path(dir)).empty();
 }
 
-pcstr required_game_files_help() {
-    return "Akhenaten requires a full Pharaoh + Cleopatra installation.\n"
-           "The Pharaoh demo (and installs without Cleopatra) are not supported.\n"
-           "Needed under the game folder: Data/Expansion.sg3 or Data/SprMain2.sg3.\n"
+pcstr settings_t::required_game_files_help() const {
+    return "Akhenaten needs original Pharaoh game files (campaign.txt).\n"
+           "A full Pharaoh + Cleopatra install is recommended.\n"
+           "Cleopatra packs under the game folder: Data/Expansion.sg3 or Data/SprMain2.sg3.\n"
+           "Pharaoh-only installs can start after a warning; some assets may be missing.\n"
            "(Missing Pharaoh_Fonts.sg3 falls back to Akhenaten's built-in font.)";
+}
+
+pcstr settings_t::cleopatra_packs_warning() const {
+    return "This folder has Pharaoh data but not Cleopatra expansion packs "
+           "(Data/Expansion.sg3 or Data/SprMain2.sg3).\n\n"
+           "You can continue with Pharaoh-only files; some Cleopatra content "
+           "and assets will be missing or may fail later.\n\n"
+           "For full support, point data_directory at a Pharaoh + Cleopatra install "
+           "(or unpack a full GOG/Inno Setup.exe via Installer/).";
 }
 
 bool has_required_game_files(pcstr dir) {
@@ -878,11 +889,9 @@ xstring try_bootstrap_pharaoh_data(xstring *error_out) {
                 logs::info("PharaohData: using existing data at %s", existing.c_str());
                 return existing;
             }
-            logs::warn("PharaohData at %s is incomplete (demo / no Cleopatra)", existing.c_str());
-            if (error_out) {
-                *error_out = required_game_files_help();
-            }
-            return {};
+            // Pharaoh-only tree is still usable (startup warns about missing Cleopatra).
+            logs::warn("PharaohData at %s has no Cleopatra packs — using Pharaoh-only", existing.c_str());
+            return existing;
         }
     }
 
@@ -922,8 +931,12 @@ xstring try_bootstrap_pharaoh_data(xstring *error_out) {
         return {};
     }
     if (!has_required_game_files(root.c_str())) {
+        if (has_pharaoh_data(root.c_str())) {
+            logs::warn("Extracted PharaohData has no Cleopatra packs — using Pharaoh-only: %s", root.c_str());
+            return root;
+        }
         if (error_out) {
-            *error_out = required_game_files_help();
+            *error_out = xvalue<settings_t>::ref().required_game_files_help();
         }
         return {};
     }

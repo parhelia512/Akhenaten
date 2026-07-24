@@ -185,31 +185,31 @@ struct xvalue_test_threaded_t {
 
 void run_xvalue_unit_tests() {
     {
-        auto &a1 = xvalue<xvalue_test_a_t>::get();
-        auto &a2 = xvalue<xvalue_test_a_t>::get();
-        expect_true(&a1 == &a2, "xvalue get returns same instance");
+        auto &a1 = xvalue<xvalue_test_a_t>::ref();
+        auto &a2 = xvalue<xvalue_test_a_t>::ref();
+        expect_true(&a1 == &a2, "xvalue ref returns same instance");
         expect_true(a1.value == 42, "xvalue default constructed");
         a1.value = 100;
-        expect_true(a2.value == 100, "xvalue mutation visible via second get");
+        expect_true(a2.value == 100, "xvalue mutation visible via second ref");
     }
 
     {
-        auto &a = xvalue<xvalue_test_a_t>::get();
-        auto &b = xvalue<xvalue_test_b_t>::get();
+        auto &a = xvalue<xvalue_test_a_t>::ref();
+        auto &b = xvalue<xvalue_test_b_t>::ref();
         expect_true(static_cast<void *>(&a) != static_cast<void *>(&b), "xvalue different types are distinct");
         expect_true(b.value == 7, "xvalue second type default constructed");
         a.value = 111;
         b.value = 222;
-        expect_true(xvalue<xvalue_test_a_t>::get().value == 111, "xvalue type A persists");
-        expect_true(xvalue<xvalue_test_b_t>::get().value == 222, "xvalue type B persists");
+        expect_true(xvalue<xvalue_test_a_t>::ref().value == 111, "xvalue type A persists");
+        expect_true(xvalue<xvalue_test_b_t>::ref().value == 222, "xvalue type B persists");
     }
 
     {
-        expect_true(xvalue<xvalue_test_find_t>::find() == nullptr, "xvalue find before get is null");
-        auto &inst = xvalue<xvalue_test_find_t>::get();
+        expect_true(xvalue<xvalue_test_find_t>::find() == nullptr, "xvalue find before ref is null");
+        auto &inst = xvalue<xvalue_test_find_t>::ref();
         auto *found = xvalue<xvalue_test_find_t>::find();
-        expect_true(found != nullptr, "xvalue find after get is non-null");
-        expect_true(found == &inst, "xvalue find matches get");
+        expect_true(found != nullptr, "xvalue find after ref is non-null");
+        expect_true(found == &inst, "xvalue find matches ref");
         inst.value = 55;
         expect_true(found->value == 55, "xvalue find points at live instance");
     }
@@ -221,7 +221,7 @@ void run_xvalue_unit_tests() {
         threads.reserve(k_threads);
         for (int i = 0; i < k_threads; ++i) {
             threads.emplace_back([&ptrs, i]() {
-                ptrs[i] = &xvalue<xvalue_test_threaded_t>::get();
+                ptrs[i] = &xvalue<xvalue_test_threaded_t>::ref();
             });
         }
         for (auto &t : threads) {
@@ -235,10 +235,10 @@ void run_xvalue_unit_tests() {
                 break;
             }
         }
-        expect_true(all_same, "xvalue concurrent get yields same instance");
+        expect_true(all_same, "xvalue concurrent ref yields same instance");
 
         auto *found = xvalue<xvalue_test_threaded_t>::find();
-        expect_true(found != nullptr && found == ptrs[0], "xvalue find matches concurrent get instance");
+        expect_true(found != nullptr && found == ptrs[0], "xvalue find matches concurrent ref instance");
     }
 }
 

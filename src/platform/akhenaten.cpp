@@ -22,6 +22,7 @@
 #include "platform/version.hpp"
 #include "platform/options_window.h"
 #include "platform/innoextract_util.h"
+#include "core/xvalue.h"
 #include "widget/debug_console.h"
 #include "graphics/imagepak_holder.h"
 #include "graphics/image.h"
@@ -81,6 +82,37 @@ static int init_sdl() {
     return 1;
 }
 
+// Soft gate: allow Pharaoh-only installs after a one-time warning.
+static bool confirm_continue_without_cleopatra(pcstr data_dir) {
+    auto &ix = xvalue<innoextract::settings_t>::ref();
+    if (ix.missing_cleopatra_warning_accepted) {
+        return true;
+    }
+
+    logs::warn("Cleopatra packs missing under %s — prompting to continue with Pharaoh-only", data_dir);
+
+    const SDL_MessageBoxButtonData buttons[] = {
+        {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Continue"},
+        {SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 0, "Quit"},
+    };
+    const SDL_MessageBoxData messageboxdata = {
+        SDL_MESSAGEBOX_WARNING,
+        nullptr,
+        "Cleopatra data missing",
+        ix.cleopatra_packs_warning(),
+        SDL_arraysize(buttons),
+        buttons,
+        nullptr,
+    };
+    int result = 1;
+    SDL_ShowMessageBox(&messageboxdata, &result);
+    if (result != 1) {
+        return false;
+    }
+    ix.missing_cleopatra_warning_accepted = true;
+    return true;
+}
+
 bool pre_init_dir_attempt(const xstring& data_dir, pcstr lmsg) {
     logs::info(lmsg, data_dir.c_str()); // TODO: get rid of data ???
     const bool ok = vfs::platform_file_manager_set_base_path(data_dir.c_str());
@@ -89,10 +121,20 @@ bool pre_init_dir_attempt(const xstring& data_dir, pcstr lmsg) {
         return false;
     }
 
-    // Demo / base-only Pharaoh lack Cleopatra assets and crash in UI text rendering.
-    if (!g_args.no_resource() && !innoextract::has_required_game_files(data_dir.c_str())) {
-        logs::error("Incomplete Pharaoh data at %s (need Cleopatra)", data_dir.c_str());
-        return false;
+    if (!g_args.no_resource() && !g_args.no_data_check()) {
+        // Minimum: Pharaoh campaign tree. Cleopatra packs are preferred but optional.
+        if (!innoextract::has_pharaoh_data(data_dir.c_str())) {
+            logs::info("%s: no Pharaoh data (campaign.txt)", data_dir.c_str());
+            return false;
+        }
+        if (!innoextract::has_required_game_files(data_dir.c_str())) {
+            if (!confirm_continue_without_cleopatra(data_dir.c_str())) {
+                logs::info("User declined Pharaoh-only startup");
+                exit(0);
+            }
+        }
+    } else if (g_args.no_data_check()) {
+        logs::info("Skipping Pharaoh/Cleopatra data checks (--nodatacheck) for %s", data_dir.c_str());
     }
 
     if (game.check_valid()) {
@@ -107,8 +149,7 @@ static bool pre_init(const xstring& custom_data_dir) {
         return true;
     }
 
-    logs::info("Attempting to load game from working directory");
-    if ((!g_args.no_resource() ? innoextract::has_required_game_files(".") : true) && game.check_valid()) {
+    if (pre_init_dir_attempt(".", "Attempting to load game from working directory %s")) {
         return true;
     }
 
@@ -126,7 +167,7 @@ static bool pre_init(const xstring& custom_data_dir) {
         return true;
     }
 
-    logs::error("'*.eng' or '*_mm.eng' files not found or too large.");
+    logs::error("Pharaoh data not found (need campaign.txt under data_directory).");
     return false;
 }
 
@@ -172,11 +213,12 @@ static void setup() {
               "Extraction finished but Pharaoh data (campaign.txt) was not found.", nullptr);
             exit(2);
         }
-        if (!innoextract::has_required_game_files(game_root.c_str())) {
-            logs::error("Extracted install is incomplete (demo / no Cleopatra): %s", game_root.c_str());
-            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Incomplete game data",
-              innoextract::required_game_files_help(), nullptr);
-            exit(2);
+        if (!g_args.no_data_check() && !innoextract::has_required_game_files(game_root.c_str())) {
+            // game_root already has campaign.txt (from find_extracted_game_path).
+            if (!confirm_continue_without_cleopatra(game_root.c_str())) {
+                logs::info("User declined Pharaoh-only extracted data");
+                exit(0);
+            }
         }
         g_args.set_data_directory(game_root.c_str());
         arguments::store(g_args);
@@ -187,23 +229,27 @@ static void setup() {
     // 1) keep current if complete
     // 2) else Steam Pharaoh + Cleopatra
     // 3) else use existing PharaohData, or ask to unpack Installer/ (cwd / next to exe)
-    if (!skip_data_bootstrap && g_args.get_extract_installer().empty()) {
+    if (!skip_data_bootstrap && !g_args.no_data_check() && g_args.get_extract_installer().empty()) {
         if (!innoextract::has_required_game_files(g_args.get_data_directory().c_str())) {
-            vfs::path steam_path = platform.get_steam_path();
-            if (!steam_path.empty()) {
-                vfs::path steam_data(steam_path, "/steamapps/common/Pharaoh + Cleopatra/");
-                if (innoextract::has_required_game_files(steam_data.c_str())) {
-                    g_args.set_data_directory(steam_data.c_str());
-                    arguments::store(g_args);
-                    logs::info("Using Steam Pharaoh data at %s", steam_data.c_str());
+            // Prefer Steam Cleopatra only when the configured path has no usable Pharaoh data.
+            if (!innoextract::has_pharaoh_data(g_args.get_data_directory().c_str())) {
+                vfs::path steam_path = platform.get_steam_path();
+                if (!steam_path.empty()) {
+                    vfs::path steam_data(steam_path, "/steamapps/common/Pharaoh + Cleopatra/");
+                    if (innoextract::has_required_game_files(steam_data.c_str())) {
+                        g_args.set_data_directory(steam_data.c_str());
+                        arguments::store(g_args);
+                        logs::info("Using Steam Pharaoh data at %s", steam_data.c_str());
+                    }
                 }
             }
         }
 
         if (!innoextract::has_required_game_files(g_args.get_data_directory().c_str())) {
-            // Existing PharaohData (already complete) can be picked up without asking.
-            // If Installer/*.exe is pending, ask inside options_window instead of extracting here.
-            if (innoextract::installer_pending_bootstrap().empty()) {
+            // Prefer a local/extracted tree only when the configured path has no Pharaoh data.
+            // Do not replace a working Pharaoh-only install with another folder.
+            if (!innoextract::has_pharaoh_data(g_args.get_data_directory().c_str())
+                && innoextract::installer_pending_bootstrap().empty()) {
                 xstring err;
                 xstring local_root = innoextract::try_bootstrap_pharaoh_data(&err);
                 if (!local_root.empty()) {
@@ -223,9 +269,10 @@ static void setup() {
     // and SDL_CreateRenderer there fails because the dummy video driver doesn't support
     // SDL_RENDERER_ACCELERATED, which is what options_window.cpp requests.
     const bool support_window_options = !(platform.is_android() || platform.is_emscripten() || g_args.is_integral_tests());
-    const bool pending_installer = !skip_data_bootstrap && g_args.get_extract_installer().empty()
+    const bool pending_installer = !skip_data_bootstrap && !g_args.no_data_check()
+                                   && g_args.get_extract_installer().empty()
                                    && !innoextract::installer_pending_bootstrap().empty()
-                                   && !innoextract::has_required_game_files(g_args.get_data_directory().c_str());
+                                   && !innoextract::has_pharaoh_data(g_args.get_data_directory().c_str());
     if (support_window_options
         && (g_args.should_show_startup_config_window() || pending_installer)) {
         show_options_window(g_args);
@@ -241,9 +288,9 @@ static void setup() {
     while (!pre_init(g_args.get_data_directory())) {
             platform.append_startup_log("Startup: folder validation failed");
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Pharaoh data required",
-              "Akhenaten requires the original files from Pharaoh + Cleopatra.\n\n"
-              "The Pharaoh demo is not supported.\n"
-              "Point data_directory to a full Cleopatra install, or place a GOG/Inno "
+              "Akhenaten needs the original Pharaoh game files (campaign.txt).\n\n"
+              "A full Pharaoh + Cleopatra install is recommended.\n"
+              "Point data_directory to a Pharaoh install, or place a GOG/Inno "
               "Setup.exe under Installer/ in the launch directory (or next to akhenaten.exe).",
               nullptr);
 

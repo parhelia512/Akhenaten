@@ -3,6 +3,7 @@
 #include "platform/arguments.h"
 #include "platform/innoextract_util.h"
 #include "platform/platform.h"
+#include "core/xvalue.h"
 #include "platform/renderer.h"
 #include "platform/version.hpp"
 #include "core/archive.h"
@@ -478,7 +479,7 @@ void show_options_window(Arguments& args) {
                     installer_prompt_checked = true;
                     pending_installer = innoextract::installer_pending_bootstrap();
                     if (!pending_installer.empty()
-                        && !innoextract::has_required_game_files(args.get_data_directory().c_str())) {
+                        && !innoextract::has_pharaoh_data(args.get_data_directory().c_str())) {
                         installer_prompt_open = true;
                     }
                 }
@@ -495,10 +496,20 @@ void show_options_window(Arguments& args) {
                             arguments::store(args);
                             extract_status = "Extract OK";
                             logs::info("Using extracted game data at %s", game_root.c_str());
+                        } else if (!game_root.empty() && innoextract::has_pharaoh_data(game_root.c_str())) {
+                            args.set_data_directory(game_root.c_str());
+                            data_directory = args.get_data_directory().c_str();
+                            arguments::store(args);
+                            extract_status = "Pharaoh-only (Cleopatra packs missing)";
+                            logs::warn("Using Pharaoh-only extracted data at %s", game_root.c_str());
+                            auto &ix = xvalue<innoextract::settings_t>::ref();
+                            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Cleopatra data missing",
+                              ix.cleopatra_packs_warning(), platform_window);
+                            ix.missing_cleopatra_warning_accepted = true;
                         } else if (!game_root.empty()) {
-                            extract_status = "Incomplete install (demo / no Cleopatra)";
+                            extract_status = "Incomplete install (no campaign.txt)";
                             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Incomplete game data",
-                              innoextract::required_game_files_help(), platform_window);
+                              xvalue<innoextract::settings_t>::ref().required_game_files_help(), platform_window);
                         } else {
                             extract_status = "Extract finished but campaign.txt not found";
                             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Extract failed",

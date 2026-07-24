@@ -10,7 +10,7 @@
 //
 // Usage:
 //   struct my_cache_t { int value = 0; };
-//   auto &cache = xvalue<my_cache_t>::get();
+//   auto &cache = xvalue<my_cache_t>::ref();
 //
 // First call default-constructs T, registers it by type index, and returns a reference.
 // Later calls return the same reference (no lock after first initialization).
@@ -64,7 +64,7 @@ template <typename T>
 struct xvalue {
     static_assert(std::is_default_constructible_v<T>, "xvalue<T> requires a default-constructible type");
 
-    static T &get() {
+    static T &ref() {
         static T instance{};
         static const bool registered = [] {
             xvalue_registry::register_instance(&instance);

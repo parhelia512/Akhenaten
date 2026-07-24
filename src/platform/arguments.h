@@ -93,6 +93,7 @@ public:
     [[nodiscard]] bool no_intro() const { return is("nointro", false); }
     [[nodiscard]] bool no_mouse() const { return is("nomouse", false); }
     [[nodiscard]] bool no_resource() const { return is("no_resource", false); }
+    [[nodiscard]] bool no_data_check() const { return is("no_data_check", false); }
 
     [[nodiscard]] const xstring& get_language() const { return get_str("language"); }
     [[nodiscard]] const xstring& get_scripts_directory() const { return get_str("scripts_directory"); }

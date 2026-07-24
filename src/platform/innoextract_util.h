@@ -4,13 +4,19 @@
 
 namespace innoextract {
 
+struct settings_t {
+    bool missing_cleopatra_warning_accepted = false;
+
+    pcstr required_game_files_help() const;
+    pcstr cleopatra_packs_warning() const;
+};
+
 xstring find_binary();
 xstring binary_directory();
 xstring pharaoh_data_directory();
 xstring default_extract_directory();
 bool has_pharaoh_data(pcstr dir);
 bool has_required_game_files(pcstr dir);
-pcstr required_game_files_help();
 bool extract_installer(pcstr setup_exe, pcstr out_dir, xstring *error_out = nullptr);
 xstring find_extracted_game_path(pcstr out_dir);
 xstring find_installer_exe(pcstr installer_dir);
