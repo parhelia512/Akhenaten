@@ -44,7 +44,8 @@ mission4 {
 		housing_level {enabled : true, goal : 10 }
 	}
 
-	// Empire sells/buys from pak (both land routes, start closed — cost 300 / 550).
+	// Empire map from pak (empire id=1): ours + 2 trade + 2 display-only.
+	hide_pak_cities : true
 	cities [
 		{
 			name : "Perwadjyt"
@@ -61,6 +62,18 @@ mission4 {
 			trade_limits : default_trade_limits
 			sells [ RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_BEER ]
 			buys [ RESOURCE_PAPYRUS ]
+		}
+
+		{
+			name : "Nubt"
+			trade : false
+			type : EMPIRE_CITY_EGYPTIAN
+		}
+
+		{
+			name : "Thinis"
+			trade : false
+			type : EMPIRE_CITY_EGYPTIAN
 		}
 	]
 

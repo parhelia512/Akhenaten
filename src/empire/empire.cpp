@@ -88,6 +88,17 @@ declare_console_command_p(save_empire_routes) {
 
 void empire_t::load_mission_metadata(const mission_id_t &missionid) {
     g_config_arch.r_section(missionid, [] (archive arch) {
+        // When true: ignore pak cities (except ours) and show only cities listed in JS.
+        const bool hide_pak_cities = arch.r_bool("hide_pak_cities", false);
+        if (hide_pak_cities) {
+            for (auto &city : g_empire.get_cities()) {
+                if (!city.in_use || city.type == EMPIRE_CITY_OURS) {
+                    continue;
+                }
+                city.in_use = 0;
+            }
+        }
+
         arch.r_array("cities", [] (archive city_arch) {
             xstring name = city_arch.r_string("name");
             auto city = g_empire.city(name);
@@ -96,9 +107,13 @@ void empire_t::load_mission_metadata(const mission_id_t &missionid) {
                 return;
             }
 
+            // Scripted cities are always visible (trading or display-only).
+            city->in_use = 1;
             city_arch.r(*city);
 
-            g_empire.set_trade_route_type(city->route_id, city->is_sea_trade);
+            if (city->can_trade()) {
+                g_empire.set_trade_route_type(city->route_id, city->is_sea_trade);
+            }
         });
     });
 
@@ -115,8 +130,8 @@ void empire_t::update_month() {
     for (auto &city: cities) {
         if (!city.in_use) {
             continue;
-        } 
-        
+        }
+
         if (city.months_under_siege > 0) {
             city.months_under_siege--;
         }

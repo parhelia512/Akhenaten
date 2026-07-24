@@ -46,6 +46,9 @@ struct empire_city {
 
     void remove_trader(int figure_id);
     bool can_trade() const;
+    void set_trade_enabled(bool enabled);
+    void clear_trade_resources();
+
     bool shows_as_trade_city_on_map() const;
     bool is_selectable_on_empire_map() const;
     trade_route &get_route();

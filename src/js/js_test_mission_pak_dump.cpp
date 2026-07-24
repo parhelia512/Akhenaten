@@ -292,10 +292,24 @@ static void dump_gods() {
     dump_marker("pak_gods:%s", known[0] ? known : "-");
 }
 
+static pcstr empire_city_type_name(e_empire_city type) {
+    switch (type) {
+    case EMPIRE_CITY_OURS: return "ours";
+    case EMPIRE_CITY_PHARAOH_TRADING: return "pharaoh_trading";
+    case EMPIRE_CITY_PHARAOH: return "pharaoh";
+    case EMPIRE_CITY_EGYPTIAN_TRADING: return "egyptian_trading";
+    case EMPIRE_CITY_EGYPTIAN: return "egyptian";
+    case EMPIRE_CITY_FOREIGN_TRADING: return "foreign_trading";
+    case EMPIRE_CITY_FOREIGN: return "foreign";
+    default: return "?";
+    }
+}
+
 static void dump_empire_cities() {
     char sells[512];
     char buys[512];
     int trade_cities = 0;
+    int map_cities = 0;
 
     for (int i = 0; i < g_empire.get_cities().size(); i++) {
         const empire_city& city = g_empire.get_cities()[i];
@@ -312,11 +326,29 @@ static void dump_empire_cities() {
         append_resource_list(buys, sizeof buys, city.buys_resource);
 
         const bool has_trade = sells[0] || buys[0] || city.can_trade();
+        map_cities++;
+        if (has_trade || city.type == EMPIRE_CITY_OURS) {
+            trade_cities++;
+        }
+
+        // All in-use cities on the empire map (trading + display-only).
+        dump_marker("pak_map_city:%s|id=%d|type=%s(%d)|trade=%d|open=%d|sea=%d|cost=%d|route=%d|sells=%s|buys=%s",
+            name,
+            i,
+            empire_city_type_name(city.type),
+            (int)city.type,
+            has_trade ? 1 : 0,
+            city.is_open ? 1 : 0,
+            city.is_sea_trade ? 1 : 0,
+            (int)city.cost_to_open,
+            city.route_id,
+            sells[0] ? sells : "-",
+            buys[0] ? buys : "-");
+
         if (!has_trade && city.type != EMPIRE_CITY_OURS) {
             continue;
         }
 
-        trade_cities++;
         dump_marker("pak_city:%s|id=%d|type=%d|open=%d|sea=%d|cost=%d|route=%d|sells=%s|buys=%s",
             name,
             i,
@@ -354,7 +386,80 @@ static void dump_empire_cities() {
         }
     }
 
+    dump_marker("pak_map_city_count:%d", map_cities);
     dump_marker("pak_trade_city_count:%d", trade_cities);
+}
+
+static pcstr empire_object_type_name(int type) {
+    switch (type) {
+    case EMPIRE_OBJECT_ORNAMENT: return "ornament";
+    case EMPIRE_OBJECT_CITY: return "city";
+    case EMPIRE_OBJECT_TEXT: return "text";
+    case EMPIRE_OBJECT_BATTLE_ICON: return "battle_icon";
+    case EMPIRE_OBJECT_LAND_TRADE_ROUTE: return "land_route";
+    case EMPIRE_OBJECT_SEA_TRADE_ROUTE: return "sea_route";
+    case EMPIRE_OBJECT_KINGDOME_ARMY: return "kingdome_army";
+    case EMPIRE_OBJECT_ENEMY_ARMY: return "enemy_army";
+    case EMPIRE_OBJECT_DISTANT_BATTLE_ROUTE: return "distant_battle_route";
+    case EMPIRE_OBJECT_TRADER: return "trader";
+    case EMPIRE_OBJECT_TRADE_ROUTE: return "trade_route";
+    default: return "?";
+    }
+}
+
+static void dump_empire_objects() {
+    int counts[EMPIRE_OBJECT_COUNT] = {};
+    int total = 0;
+
+    g_empire.foreach_object([&](int object_index, const empire_object& obj) {
+        total++;
+        if (obj.type >= 0 && obj.type < EMPIRE_OBJECT_COUNT) {
+            counts[obj.type]++;
+        }
+
+        pcstr city_name = "-";
+        if (obj.type == EMPIRE_OBJECT_CITY) {
+            const int city_id = g_empire.get_city_for_object(object_index);
+            const empire_city* city = city_id ? g_empire.city(city_id) : nullptr;
+            if (city) {
+                pcstr name = (pcstr)lang_get_string(195, city->name_id);
+                if (name && name[0]) {
+                    city_name = name;
+                }
+            }
+        } else if (obj.type == EMPIRE_OBJECT_TEXT) {
+            const full_empire_object* full = g_empire.get_full_object(object_index);
+            if (full) {
+                pcstr name = (pcstr)lang_get_string(196, full->city_name_id);
+                if (name && name[0]) {
+                    city_name = name;
+                }
+            }
+        }
+
+        dump_marker("pak_map_obj:%s|idx=%d|pos=%d,%d|img=%d|route=%d|city=%s|path=%d|years=%d",
+            empire_object_type_name(obj.type),
+            object_index,
+            obj.pos.x,
+            obj.pos.y,
+            obj.image_id,
+            (int)obj.trade_route_id,
+            city_name,
+            obj.invasion_path_id,
+            obj.invasion_years);
+    });
+
+    dump_marker("pak_map_obj_count:total=%d|ornament=%d|city=%d|text=%d|battle=%d|land_route=%d|sea_route=%d|army=%d|enemy_army=%d|distant=%d",
+        total,
+        counts[EMPIRE_OBJECT_ORNAMENT],
+        counts[EMPIRE_OBJECT_CITY],
+        counts[EMPIRE_OBJECT_TEXT],
+        counts[EMPIRE_OBJECT_BATTLE_ICON],
+        counts[EMPIRE_OBJECT_LAND_TRADE_ROUTE],
+        counts[EMPIRE_OBJECT_SEA_TRADE_ROUTE],
+        counts[EMPIRE_OBJECT_KINGDOME_ARMY],
+        counts[EMPIRE_OBJECT_ENEMY_ARMY],
+        counts[EMPIRE_OBJECT_DISTANT_BATTLE_ROUTE]);
 }
 
 static pcstr invader_name(int item) {
@@ -613,6 +718,7 @@ static int __test_mission_pak_dump(int scenario_id) {
     dump_monuments();
     dump_gods();
     dump_empire_cities();
+    dump_empire_objects();
     dump_scenario_events();
     dump_legacy_tables();
     dump_starting_buildings();

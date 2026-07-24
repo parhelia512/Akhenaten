@@ -79,7 +79,9 @@ mission7 { // Abydos / Abedju
 		housing_level {enabled : true, goal : 10 }
 	}
 
-	// Empire from pak (sea + land, start closed). Men-nefer is land here.
+	// hide_pak_cities: only cities below appear on the empire map (pak leftovers hidden).
+	// Display-only city example: { name : "Selima", trade : false } or type : EMPIRE_CITY_FOREIGN
+	hide_pak_cities : true
 	cities [
 		{
 			name : "Behdet"

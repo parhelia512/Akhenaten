@@ -5,6 +5,8 @@
 #include "io/gamefiles/lang.h"
 #include "js/js_game.h"
 
+#include <algorithm>
+
 const e_empire_city_tokens_t ANK_CONFIG_ENUM(e_empire_city_tokens);
 empire_city_options_t ANK_VARIABLE(empire_city_options);
 
@@ -31,20 +33,53 @@ bool empire_city::can_trade() const {
     return false;
 }
 
+void empire_city::clear_trade_resources() {
+    std::fill_n(sells_resource, RESOURCES_MAX, false);
+    std::fill_n(buys_resource, RESOURCES_MAX, false);
+}
+
+void empire_city::set_trade_enabled(bool enabled) {
+    if (enabled) {
+        switch (type) {
+        case EMPIRE_CITY_PHARAOH:
+            type = EMPIRE_CITY_PHARAOH_TRADING;
+            break;
+        case EMPIRE_CITY_EGYPTIAN:
+            type = EMPIRE_CITY_EGYPTIAN_TRADING;
+            break;
+        case EMPIRE_CITY_FOREIGN:
+            type = EMPIRE_CITY_FOREIGN_TRADING;
+            break;
+        default:
+            break;
+        }
+        return;
+    }
+
+    switch (type) {
+    case EMPIRE_CITY_PHARAOH_TRADING:
+        type = EMPIRE_CITY_PHARAOH;
+        break;
+    case EMPIRE_CITY_EGYPTIAN_TRADING:
+        type = EMPIRE_CITY_EGYPTIAN;
+        break;
+    case EMPIRE_CITY_FOREIGN_TRADING:
+        type = EMPIRE_CITY_FOREIGN;
+        break;
+    default:
+        break;
+    }
+    clear_trade_resources();
+}
+
 bool empire_city::shows_as_trade_city_on_map() const {
-    if (type == EMPIRE_CITY_OURS) {
-        return true;
-    }
-
-    if (!can_trade()) {
-        return false;
-    }
-
-    return is_open || cost_to_open > 0;
+    // Original draws every in-use empire city (trading and non-trading).
+    // Trade UI stays gated by can_trade() / is_open — not by visibility.
+    return in_use != 0;
 }
 
 bool empire_city::is_selectable_on_empire_map() const {
-    return shows_as_trade_city_on_map();
+    return in_use != 0;
 }
 
 trade_route &empire_city::get_route() {
@@ -77,6 +112,12 @@ int empire_city::get_free_slot() const {
 }
 
 void empire_city::archive_load(archive arch) {
+    // Optional type — missing property must not overwrite pak type (r_int def=0 is OURS).
+    const int type_value = arch.r_int("type", -1);
+    if (type_value >= EMPIRE_CITY_OURS && type_value < EMPIRE_CITY_COUNT) {
+        type = (e_empire_city)type_value;
+    }
+
     svector<e_resource, RESOURCES_MAX> sells;
     arch.r_array_num<e_resource>("sells", sells);
     if (!sells.empty()) {
@@ -93,6 +134,16 @@ void empire_city::archive_load(archive arch) {
         for (auto r : buys) {
             buys_resource[r] = true;
         }
+    }
+
+    // trade: false → display-only on empire map; true / omitted with sells/buys → trading.
+    const bool has_trade_lists = !sells.empty() || !buys.empty();
+    if (arch.r_bool("trade", has_trade_lists || can_trade())) {
+        if (has_trade_lists) {
+            set_trade_enabled(true);
+        }
+    } else {
+        set_trade_enabled(false);
     }
 
     check_attributes();
