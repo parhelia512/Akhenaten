@@ -29,6 +29,7 @@
 #include "sound/sound.h"
 #include "scenario/scenario.h"
 #include "core/cstring.h"
+#include "core/bstring.h"
 #include "renderer.h"
 
 #include <SDL.h>
@@ -111,6 +112,46 @@ static bool confirm_continue_without_cleopatra(pcstr data_dir) {
     }
     ix.missing_cleopatra_warning_accepted = true;
     return true;
+}
+
+// Engine assets shipped with Akhenaten (not from the original Pharaoh install).
+static const char *const ENGINE_DATA_FILES[] = {
+    "data/neucha.ttf",
+    "data/pharaoh_fonts_pack.sgx",
+    "data/pharaoh_custom_pack.sgx",
+    "data/pharaoh_houses_pack.sgx",
+};
+
+// Abort when build/deploy data/ is missing (common if only the binary was copied into the Pharaoh folder).
+static bool check_engine_data_files() {
+    bstring512 missing;
+    int missing_count = 0;
+    for (pcstr file : ENGINE_DATA_FILES) {
+        if (!vfs::file_exists(file)) {
+            if (missing_count > 0) {
+                missing.append("\n");
+            }
+            missing.append("- ");
+            missing.append(file);
+            ++missing_count;
+            logs::error("engine data missing: %s", file);
+        }
+    }
+
+    if (missing_count == 0) {
+        return true;
+    }
+
+    bstring2048 message;
+    message.printf(
+        "Akhenaten engine data files are missing (%d):\n\n%s\n\n"
+        "Copy the \"data\" folder from the Akhenaten build next to the akhenaten "
+        "executable, or into the Pharaoh Data/ folder.",
+        missing_count,
+        missing.c_str());
+
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Akhenaten data missing", message.c_str(), nullptr);
+    return false;
 }
 
 bool pre_init_dir_attempt(const xstring& data_dir, pcstr lmsg) {
@@ -322,6 +363,13 @@ static void setup() {
 
         if (support_window_options) {
             show_options_window(g_args);
+        }
+    }
+
+    if (!skip_data_bootstrap) {
+        if (!check_engine_data_files()) {
+            logs::error("Exiting: Akhenaten engine data files missing");
+            exit(2);
         }
     }
 

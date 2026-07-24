@@ -136,10 +136,10 @@ void sound_manager_t::set_volume(int b, int e, int percentage) {
 void sound_manager_t::shutdown() {
     close();
 
-
     unload_formats();
 
     delete _music_player;
+    _music_player = nullptr;
 }
 
 vfs::reader sound_manager_t::load_cached_chunk(vfs::path filename) {
@@ -559,6 +559,10 @@ void sound_manager_t::stop_city_channels() {
 }
 
 void sound_manager_t::free_custom_audio_stream() {
+    if (!_music_player) {
+        return;
+    }
+
 #ifdef USE_SDL_AUDIOSTREAM
     if (_music_player->use_audiostream) {
         if (_music_player->stream) {
@@ -576,6 +580,10 @@ void sound_manager_t::free_custom_audio_stream() {
 }
 
 bool sound_manager_t::create_custom_audio_stream(uint16_t src_format, uint8_t src_channels, int src_rate, uint16_t dst_format, uint8_t dst_channels, int dst_rate) {
+    if (!_music_player) {
+        return false;
+    }
+
     free_custom_audio_stream();
     _music_player->custom_stream_bytes_written = 0;
     _music_player->custom_stream_bytes_read = 0;
@@ -607,6 +615,9 @@ bool sound_manager_t::create_custom_audio_stream(uint16_t src_format, uint8_t sr
 }
 
 bool sound_manager_t::is_audio_stream_active() {
+    if (!_music_player) {
+        return false;
+    }
 #ifdef USE_SDL_AUDIOSTREAM
     if (_music_player->use_audiostream) {
         return !!_music_player->stream;
@@ -741,6 +752,11 @@ void sound_manager_t::custom_music_callback(void* dummy, Uint8* stream, int len)
 }
 
 void sound_manager_t::use_custom_music_player(int bitdepth, int num_channels, int rate, void* audio_data, int len) {
+    // --nosound / failed mixer init: video may still play, but skip BIK audio path.
+    if (!_music_player || !initialized) {
+        return;
+    }
+
     SDL_AudioFormat format;
     if (bitdepth == 8)
         format = AUDIO_U8;
@@ -783,6 +799,10 @@ void sound_manager_t::write_custom_music_data(void* audio_data, int len) {
 }
 
 void sound_manager_t::use_default_music_player() {
+    if (!_music_player || !initialized) {
+        return;
+    }
+
     Mix_HookMusic(0, 0);
     free_custom_audio_stream();
 }

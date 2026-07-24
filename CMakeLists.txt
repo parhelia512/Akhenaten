@@ -1528,6 +1528,15 @@ if(UNIX AND NOT APPLE)
     install(FILES "res/metainfo.xml"      DESTINATION "share/metainfo" RENAME "com.github.dalerank.akhenaten.metainfo.xml")
 endif()
 
+# Engine data assets (UTF fonts / custom packs). Required for non-English locales.
+set(AKHENATEN_DATA_FILES
+    "${CMAKE_SOURCE_DIR}/data/pharaoh_custom_pack.sgx"
+    "${CMAKE_SOURCE_DIR}/data/pharaoh_fonts_pack.sgx"
+    "${CMAKE_SOURCE_DIR}/data/pharaoh_houses_pack.sgx"
+    "${CMAKE_SOURCE_DIR}/data/neucha.ttf"
+    "${CMAKE_SOURCE_DIR}/data/default.map"
+)
+
 if (MSVC)
     set(BINARY_FILES
         "$<TARGET_FILE:${GAME}>"
@@ -1549,26 +1558,26 @@ if (MSVC)
         )
     endforeach( file_i )
 
-    set(DATA_FILES
-        "${CMAKE_SOURCE_DIR}/data/pharaoh_custom_pack.sgx"
-        "${CMAKE_SOURCE_DIR}/data/pharaoh_fonts_pack.sgx"
-        "${CMAKE_SOURCE_DIR}/data/pharaoh_houses_pack.sgx"
-        "${CMAKE_SOURCE_DIR}/data/neucha.ttf"
-        "${CMAKE_SOURCE_DIR}/data/default.map"
-    )
-    set(BINARY_FILES_DIRECTORY "${GAME_WORKING_DIRECTORY}/Data")
+    # VS debugger working directory is bin_x64 — keep Data/ there.
+    set(AKHENATEN_DATA_OUT_DIR "${GAME_WORKING_DIRECTORY}/Data")
+elseif(NOT ANDROID AND NOT EMSCRIPTEN AND NOT WIN_EMSCRIPTEN)
+    # Linux/macOS/MinGW: place next to the binary. Use lowercase "data/" so
+    # vfs::path::resolve("./data/neucha.ttf") finds it on case-sensitive FS
+    # (localization.js references data/..., Windows "Data/" is case-insensitive).
+    set(AKHENATEN_DATA_OUT_DIR "$<TARGET_FILE_DIR:${GAME}>/data")
+endif()
+
+if(DEFINED AKHENATEN_DATA_OUT_DIR)
     add_custom_command(
         TARGET ${GAME}
         POST_BUILD
-        COMMAND ${CMAKE_COMMAND}
-        ARGS -E make_directory "${BINARY_FILES_DIRECTORY}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${AKHENATEN_DATA_OUT_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${AKHENATEN_DATA_FILES} "${AKHENATEN_DATA_OUT_DIR}"
+        COMMENT "Deploy engine data/ next to binary"
     )
-    foreach( file_i ${DATA_FILES})
-        add_custom_command(
-            TARGET ${GAME}
-            POST_BUILD
-            COMMAND ${CMAKE_COMMAND}
-            ARGS -E copy_if_different ${file_i} "${BINARY_FILES_DIRECTORY}"
-        )
-    endforeach( file_i )
+endif()
+
+# Linux package install: ship data/ beside the executable.
+if(UNIX AND NOT APPLE AND NOT ANDROID AND NOT EMSCRIPTEN)
+    install(FILES ${AKHENATEN_DATA_FILES} DESTINATION bin/data)
 endif()
