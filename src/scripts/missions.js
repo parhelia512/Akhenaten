@@ -129,6 +129,27 @@ function mission_show_start_message(mission, message_id) {
     mission.start_message_shown = true
 }
 
+function mission_pharaoh_favour_invasion_tick(mission, army_size) {
+    if (mission.pharaoh_favour_invasion_done) {
+        return
+    }
+    if (city.rating_kingdom > 0) {
+        return
+    }
+    mission.pharaoh_favour_invasion_done = true
+    log_info("akhenaten: pharaoh favour invasion size=" + army_size + " kr=" + city.rating_kingdom)
+    __image_request_pak(PACK_ENEMY_EGYPTIAN)
+    city.start_foreign_army_invasion({
+        mode: ATTACK_TYPE_KINGDOME,
+        enemy: ENEMY_3_EGYPTIAN,
+        size: army_size,
+        invasion_id: 24,
+        tilex: -1,
+        tiley: -1,
+        want_destroy_buildings: 0
+    })
+}
+
 import mission.m_000_nubt
 import mission.m_001_thinis
 import mission.m_002_perwadjyt

@@ -5,15 +5,19 @@
 #include "figure/formation.h"
 #include "figure/figure_type.h"
 #include "core/archive.h"
+#include "core/tokenum.h"
 
 #include <array>
 #include <functional>
 
-enum e_attack_faction { 
-    ATTACK_TYPE_ENEMIES, 
-    ATTACK_TYPE_KINGDOME, 
-    ATTACK_TYPE_NATIVES 
+enum e_attack_faction {
+    ATTACK_TYPE_ENEMIES = 0,
+    ATTACK_TYPE_KINGDOME = 1,
+    ATTACK_TYPE_NATIVES = 2,
+    ATTACK_TYPE_MAX
 };
+using e_attack_faction_tokens_t = token_holder<e_attack_faction, ATTACK_TYPE_ENEMIES, ATTACK_TYPE_MAX>;
+extern const e_attack_faction_tokens_t e_attack_faction_tokens;
 
 struct invasion_warning_t {
     bool in_use;

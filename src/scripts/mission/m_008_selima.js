@@ -1,24 +1,27 @@
 log_info("akhenaten: mission 8 selima started")
 
+// Trade / requests / invasions verified vs mission1.pak scenario 8 (2026-07-24 dump).
+// Favour Pharaoh army size=63 (trigger=by_favour) proxied in JS until B2b.
+
 mission8 { // Selima
 	start_message : "message_the_finer_things_tutorial"
 	selection_title : "Selima"
-	player_rank : 1
+	player_rank : 3
 	next_mission : 10
 	initial_funds [7500, 5000, 3750, 2500, 2000]
 	rescue_loans [7500, 5000, 3750, 2500, 2000]
 	house_tax_multipliers [300, 200, 150, 100, 75]
 
 	env {
-		has_animals : true
-	    hide_nilometer : true
-	    marshland_grow : default_marshland_grow
-	    tree_grow : default_tree_grow
+		has_animals : false
+		hide_nilometer : true
+		marshland_grow : default_marshland_grow
+		tree_grow : default_tree_grow
 	}
 
 	sounds {
 		briefing : "Voice/Mission/208_mission.mp3"
-		victory : "Voice/Mission/20_victory.mp3"  
+		victory : "Voice/Mission/20_victory.mp3"
 	}
 
 	buildings [
@@ -36,32 +39,30 @@ mission8 { // Selima
                 BUILDING_SCRIBAL_SCHOOL,
 			  ]
 
-	// Goals match the original Pharaoh 1.3 mission pak (verified against the raw
-	// pak values and the HeavenGames/Sierra walkthroughs): pop 3000, culture 20,
-	// prosperity 20, kingdom 55, no monument rating goal.
 	win_criteria {
-		population {enabled : true, goal : 3000 }
-		culture    {enabled : true, goal : 20 }
-		prosperity {enabled : true, goal : 20 }
-		kingdom    {enabled : true, goal : 55 }
-		monuments  {enabled : false }
+		population    {enabled : true, goal : 3000 }
+		culture       {enabled : true, goal : 20 }
+		prosperity    {enabled : true, goal : 20 }
+		kingdom       {enabled : true, goal : 55 }
+		housing_level {enabled : true, goal : 10 }
+		monuments     {enabled : false }
 	}
 
-    enable_scenario_events : true
+	enable_scenario_events : true
 
+	invasion_points_land [
+		[30, 26]
+	]
 
-    invasion_points_land [
-        [30, 26]
-    ]
-
-    cities [
+	// Empire from pak (all land, start closed).
+	cities [
 		{
-			name : "Kerma"
+			name : "Abedju"
 			is_sea_trade : false
 			max_traders : 1
 			trade_limits : default_trade_limits
-            // sell Ebony
-            // buys linen, jewelry
+			sells [ RESOURCE_FISH, RESOURCE_BARLEY, RESOURCE_BEER, RESOURCE_LINEN, RESOURCE_STONE ]
+			buys [ RESOURCE_GAMEMEAT, RESOURCE_CLAY, RESOURCE_BRICKS, RESOURCE_TIMBER, RESOURCE_PAPYRUS, RESOURCE_LIMESTONE, RESOURCE_GRANITE, RESOURCE_SANDSTONE ]
 		}
 
 		{
@@ -69,51 +70,64 @@ mission8 { // Selima
 			is_sea_trade : false
 			max_traders : 1
 			trade_limits : default_trade_limits
-            // sell fish, clay, pottery, beer, flax, papyrus, granite
-            // buys bricks, linen, gems, jewelry, tibmer
+			sells [ RESOURCE_FISH, RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_BEER, RESOURCE_REEDS, RESOURCE_PAPYRUS, RESOURCE_GRANITE ]
+			buys [ RESOURCE_BRICKS, RESOURCE_LINEN, RESOURCE_GEMS, RESOURCE_LUXURY_GOODS, RESOURCE_TIMBER ]
 		}
 
-        {
-			name : "Abedju"
+		{
+			name : "Kerma"
 			is_sea_trade : false
 			max_traders : 1
 			trade_limits : default_trade_limits
-            // sell fish, grain, beer, linen, limestone
-            // buys gamemeat, clay, bricks, wood, papyrus, sunstone, limestone
+			sells [ RESOURCE_LUXURY_GOODS ]
+			buys [ RESOURCE_LINEN, RESOURCE_LUXURY_GOODS ]
 		}
 
-        {
+		{
 			name : "Men-nefer"
-            is_sea_trade : false
+			is_sea_trade : false
 			max_traders : 1
 			trade_limits : default_trade_limits
-            // sell chickpeas, pottery, papyrus
-            // buys bricks, barley, beer, jewelry
+			sells [ RESOURCE_CHICKPEAS, RESOURCE_POTTERY, RESOURCE_PAPYRUS ]
+			buys [ RESOURCE_LETTUCE, RESOURCE_BRICKS, RESOURCE_BARLEY, RESOURCE_BEER, RESOURCE_LUXURY_GOODS ]
 		}
 
-        {
+		{
 			name : "Timna"
-            is_sea_trade : false
+			is_sea_trade : false
 			max_traders : 1
 			trade_limits : default_trade_limits
-            // sell weapons, clay, pottery, copper
-            // buys fish, beer, linen, papyrus
+			sells [ RESOURCE_WEAPONS, RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_COPPER ]
+			buys [ RESOURCE_FISH, RESOURCE_BEER, RESOURCE_LINEN, RESOURCE_PAPYRUS ]
 		}
 	]
 
 	vars {
-		pharaoh_requested_luxury_goods : false
+		pharaoh_luxury_request_count : 0
+		pharaoh_troops_requested_1 : false
+		pharaoh_troops_requested_2 : false
 		random_trade_city_under_siege : false
-		foreign_army_attack_warning_shown : false
-		foreign_army_attacked_city : false
+		hyksos_invasion_1 : false
+		hyksos_invasion_2 : false
+		pharaoh_favour_invasion_done : false
 		distant_battle_requested : false
 		start_message_shown : false
 	}
 }
 
+function mission8_fire_request(tag, resource, amount, months, ok_tag, fail_tag, ok_amt, fail_amt) {
+	var request = city.create_good_request({ tag_id: tag, resource: resource, amount: amount, months_initial: months })
+	city.create_chain_event({ tag_id: ok_tag, type: EVENT_TYPE_REPUTATION_INCREASE, amount: ok_amt })
+	city.create_chain_event({ tag_id: fail_tag, type: EVENT_TYPE_REPUTATION_DECREASE, amount: fail_amt })
+	request.set_completed_action_tag(ok_tag)
+	request.set_refusal_action_tag(fail_tag)
+	request.execute()
+}
+
 [es=event_mission_start, mission=mission8]
 function mission8_on_start(ev) {
-	__image_request_pak(PACK_ENEMY_LIBIAN)
+	__image_request_pak(PACK_ENEMY_HYKSOS)
+	__image_request_pak(PACK_ENEMY_EGYPTIAN)
 	__image_request_pak(PACK_TEMPLE_SETH)
 	mission_show_start_message(mission, "message_the_finer_things_tutorial")
 	city.set_empire_available(1)
@@ -122,123 +136,112 @@ function mission8_on_start(ev) {
 	}
 }
 
-[es=(city_animals, create_herds), mission=mission8]
-function mission8_register_animals(ev) {
-	city.remove_animals()
-
-	city.add_animals_point(0, /*x*/70, /*y*/50, FIGURE_OSTRICH, 5)
-	city.set_animals_area(0, 16)
-
-	city.add_animals_point(1, /*x*/45, /*y*/80, FIGURE_OSTRICH, 5)
-	city.set_animals_area(1, 16)
+// pak: luxury_goods 2 / 4mo, trigger=recurring — re-request every 2 years.
+[es=event_advance_month, mission=mission8]
+function mission8_pharaoh_request_luxury(ev) {
+	var next_year = 1 + mission.pharaoh_luxury_request_count * 2
+	if (ev.years_since_start < next_year) {
+		return
+	}
+	mission.pharaoh_luxury_request_count = mission.pharaoh_luxury_request_count + 1
+	log_info("akhenaten: mission 8 selima luxury request #" + mission.pharaoh_luxury_request_count, {ev:ev})
+	mission8_fire_request(1, RESOURCE_LUXURY_GOODS, 2, 4, 101, 102, 10, 19)
 }
 
-[event=event_advance_month, mission=mission8]
-function mission8_pharaoh_requested1_luxury_goods(ev) {
-	if (mission.pharaoh_requested_luxury_goods) {
+// pak: request subtype=CITY_ASKS_FOR_TROOPS (item id 32 collides with henna) amount=7 @ y6m8.
+[es=event_advance_month, mission=mission8]
+function mission8_pharaoh_request_troops_1(ev) {
+	if (mission.pharaoh_troops_requested_1) {
 		return
 	}
-
-	log_info("akhenaten: mission 8 selima:${ev.years_since_start}:${ev.month} pharaoh requested luxury goods", {ev:ev})
-	if (ev.years_since_start < 2 && ev.month < 2) {
+	if (ev.years_since_start < 6 || (ev.years_since_start == 6 && ev.month < 8)) {
 		return
 	}
-
-	mission.pharaoh_requested_luxury_goods = true
-	var request = city.create_good_request({ tag_id: 1, resource: RESOURCE_LUXURY_GOODS, amount: 2, months_initial: 4 })
-	request.execute()
+	mission.pharaoh_troops_requested_1 = true
+	mission8_fire_request(3, RESOURCE_TROOPS, 7, 12, 301, 302, 2, 10)
 }
 
-[event=event_advance_month, mission=mission8]
-function mission8_pharaoh_requested2_luxury_goods(ev) {
-	if (mission.pharaoh_requested_luxury_goods) {
+// pak: troop request amount=4 @ y16m4 (chain in pak; calendar proxy).
+[es=event_advance_month, mission=mission8]
+function mission8_pharaoh_request_troops_2(ev) {
+	if (mission.pharaoh_troops_requested_2) {
 		return
 	}
-
-	log_info("akhenaten: mission 8 selima:${ev.years_since_start}:${ev.month} pharaoh requested luxury goods", {ev:ev})
-	if (ev.years_since_start < 4 && ev.month < 4) {
+	if (ev.years_since_start < 16 || (ev.years_since_start == 16 && ev.month < 4)) {
 		return
 	}
-
-	mission.pharaoh_requested_luxury_goods = true
-	var request = city.create_good_request({ tag_id: 1, resource: RESOURCE_LUXURY_GOODS, amount: 2, months_initial: 4 })
-	request.execute()
+	mission.pharaoh_troops_requested_2 = true
+	mission8_fire_request(4, RESOURCE_TROOPS, 4, 16, 401, 402, 2, 10)
 }
 
-[event=event_advance_month, mission=mission8]
-function mission8_random_trade_city_under_siege(ev) {
+[es=event_advance_month, mission=mission8]
+function mission8_trade_city_under_siege(ev) {
 	if (mission.random_trade_city_under_siege) {
 		return
 	}
-
-	if (ev.years_since_start < 2 && ev.month < 2) {
+	if (ev.years_since_start < 2) {
 		return
 	}
-
 	mission.random_trade_city_under_siege = true
-
 	var request = city.create_trade_city_under_siege(/*tag_id*/2, /*months_initial*/12)
 	request.set_reasons(PHRASE_trade_city_siege_no_reason_A, PHRASE_trade_city_siege_no_reason_B, PHRASE_trade_city_siege_no_reason_C, -1)
 	request.execute()
 }
 
-[event=event_advance_month, mission=mission8]
-function mission8_foreign_army_attack_warning(ev) {
-	if (mission.foreign_army_attack_warning_shown) {
+// pak: year=2 month=4 enemy size=9 recurring. Scenario enemy = Hyksos.
+[es=event_advance_month, mission=mission8]
+function mission8_hyksos_invasion_1(ev) {
+	if (mission.hyksos_invasion_1) {
 		return
 	}
-
-	if (ev.years_since_start < 3 || ev.month < 5) {
+	if (ev.years_since_start < 2 || (ev.years_since_start == 2 && ev.month < 4)) {
 		return
 	}
-
-	mission.foreign_army_attack_warning_shown = true
-
-	log_info("akhenaten: mission 8 selima:${ev.years_since_start}:${ev.month} foreign army attack warning", {ev:ev})
-
-	var request = city.create_foreign_army_attack_warning({ tag_id: 4, sender_faction: ENEMY_7_LIBIAN })
-	request.set_location_fields(-1, -1, -1, -1)
-	request.set_image("pharaoh_unloaded/dialougedrawing_00012")
-	request.set_reasons(PHRASE_foreign_army_attacks_you_1month_Warning, PHRASE_foreign_army_attacks_you_no_reason_A, -1, -1)
-	request.execute()
+	mission.hyksos_invasion_1 = true
+	log_info("akhenaten: mission 8 selima hyksos invasion 1 size=9", {ev:ev})
+	city.start_foreign_army_invasion({
+		invasion_id: 0,
+		enemy: ENEMY_5_HYKSOS,
+		size: 9,
+		tilex: 30,
+		tiley: 26,
+		want_destroy_buildings: 9
+	})
 }
 
-[event=event_advance_month, mission=mission8]
-function mission8_foreign_army_attack(ev) {	
-	if (mission.foreign_army_attacked_city) {
+// pak: year=7 month=0 enemy size=22 once.
+[es=event_advance_month, mission=mission8]
+function mission8_hyksos_invasion_2(ev) {
+	if (mission.hyksos_invasion_2) {
 		return
 	}
-
-	if (ev.years_since_start < 3 || ev.month < 6) {
+	if (ev.years_since_start < 7) {
 		return
 	}
-
-	mission.foreign_army_attacked_city = true
-	log_info("akhenaten: mission 8 selima:${ev.years_since_start}:${ev.month} foreign army attack", {ev:ev})
-
-	city.start_foreign_army_invasion({ invasion_id: 0, enemy: ENEMY_7_LIBIAN, size: 10, tilex: 30, tiley: 26, want_destroy_buildings: 10 })
-
-	var event = city.create_foreign_army_attack_warning({ tag_id: 5, sender_faction: ENEMY_7_LIBIAN })
-	event.set_location_fields(-1, -1, -1, -1)
-	event.set_image("pharaoh_unloaded/dialougedrawing_00012")
-	event.set_reasons(PHRASE_foreign_army_attacks_you_city_attacked_alert, PHRASE_foreign_army_attacks_you_no_reason_A, -1, -1)
-	event.execute()
+	mission.hyksos_invasion_2 = true
+	log_info("akhenaten: mission 8 selima hyksos invasion 2 size=22", {ev:ev})
+	city.start_foreign_army_invasion({
+		invasion_id: 1,
+		enemy: ENEMY_5_HYKSOS,
+		size: 22,
+		tilex: 30,
+		tiley: 26,
+		want_destroy_buildings: 22
+	})
 }
 
-[event=event_advance_month, mission=mission8]
+// pak: favour Pharaoh army amount=63. Walkthrough distant battles ≈ CITY_STATUS_CHANGE;
+// keep a Kerma distant-battle proxy (no EVENT_TYPE_DISTANT_BATTLE in pak).
+[es=event_advance_month, mission=mission8]
 function mission8_distant_battle_request(ev) {
-	log_info("akhenaten: mission 8 selima:${ev.years_since_start}:${ev.month} distant battle request", {ev:ev})
 	if (mission.distant_battle_requested) {
 		return
 	}
-
-	if (ev.years_since_start < 5 || ev.month < 1) {
+	if (ev.years_since_start < 5) {
 		return
 	}
- 
 	mission.distant_battle_requested = true
-	log_info("akhenaten: mission 8 selima:${ev.years_since_start}:${ev.month} distant battle request", {ev:ev})
-
+	log_info("akhenaten: mission 8 selima distant battle proxy Kerma", {ev:ev})
 	var battle = city.create_distant_battle({ tag_id: 5, city: "Kerma" })
 	battle.set_location_fields(-1, -1, -1, -1)
 	battle.set_image("pharaoh_unloaded/dialougedrawing_00012")
@@ -246,4 +249,9 @@ function mission8_distant_battle_request(ev) {
 	battle.set_param("amount", 2)
 	battle.set_reasons(PHRASE_distant_battle_initial_announcement_P, -1, -1, -1)
 	battle.execute()
+}
+
+[es=event_advance_month, mission=mission8]
+function mission8_pharaoh_favour_invasion(ev) {
+	mission_pharaoh_favour_invasion_tick(mission, 63)
 }

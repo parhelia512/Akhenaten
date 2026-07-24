@@ -1,14 +1,16 @@
 log_info("akhenaten: mission 7 abydos started")
 
-mission7 { // Abydos
+// Trade / requests / invasions verified vs mission1.pak scenario 7 (2026-07-24 dump).
+
+mission7 { // Abydos / Abedju
 	start_message : "message_soldiers_and_forts"
 	selection_title : "Abydos"
 	env {
-		has_animals : true
+		has_animals : false
 		marshland_grow : default_marshland_grow
-	    tree_grow : default_tree_grow
+		tree_grow : default_tree_grow
 	}
-	player_rank : 1
+	player_rank : 3
 
 	choice_background {pack:PACK_UNLOADED, id:12}
 	choice_image1 {pack:PACK_UNLOADED, id:13}
@@ -44,7 +46,7 @@ mission7 { // Abydos
 
 	sounds {
 		briefing : "Voice/Mission/207_mission.mp3"
-		victory : "Voice/Mission/207_victory.mp3"  
+		victory : "Voice/Mission/207_victory.mp3"
 	}
 
 	buildings [
@@ -69,86 +71,161 @@ mission7 { // Abydos
 				]
 
 	win_criteria {
-		population {enabled : true, goal : 2500 }
-		culture    {enabled : true, goal : 25 }
-		prosperity {enabled : true, goal : 25 }
-		monuments  {enabled : true, goal : 17 }
-		kingdom    {enabled : true, goal : 60 }
+		population    {enabled : true, goal : 2500 }
+		culture       {enabled : true, goal : 25 }
+		prosperity    {enabled : true, goal : 25 }
+		monuments     {enabled : true, goal : 17 }
+		kingdom       {enabled : true, goal : 60 }
+		housing_level {enabled : true, goal : 10 }
 	}
 
+	// Empire from pak (sea + land, start closed). Men-nefer is land here.
 	cities [
+		{
+			name : "Behdet"
+			is_sea_trade : true
+			max_traders : 1
+			trade_limits : default_trade_limits
+			sells [ RESOURCE_FISH, RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_BEER, RESOURCE_REEDS, RESOURCE_PAPYRUS, RESOURCE_GRANITE ]
+			buys [ RESOURCE_BRICKS, RESOURCE_LINEN, RESOURCE_GEMS, RESOURCE_LUXURY_GOODS, RESOURCE_TIMBER ]
+		}
+
 		{
 			name : "Byblos"
 			is_sea_trade : true
 			max_traders : 1
 			trade_limits : default_trade_limits
+			sells [ RESOURCE_LUXURY_GOODS, RESOURCE_TIMBER, RESOURCE_COPPER ]
+			buys [ RESOURCE_GEMS, RESOURCE_LUXURY_GOODS ]
 		}
+
 		{
-			name : "Perwadjyt"
-			is_sea_trade : true,
+			name : "Men-nefer"
+			is_sea_trade : false
 			max_traders : 1
 			trade_limits : default_trade_limits
+			sells [ RESOURCE_CHICKPEAS, RESOURCE_POTTERY, RESOURCE_PAPYRUS ]
+			buys [ RESOURCE_LETTUCE, RESOURCE_BRICKS, RESOURCE_BARLEY, RESOURCE_BEER, RESOURCE_LUXURY_GOODS ]
+		}
+
+		{
+			name : "Nubt"
+			is_sea_trade : true
+			max_traders : 1
+			trade_limits : default_trade_limits
+			sells [ RESOURCE_GAMEMEAT, RESOURCE_STRAW, RESOURCE_CLAY, RESOURCE_BRICKS ]
+		}
+
+		{
+			name : "Perwadjyt"
+			is_sea_trade : true
+			max_traders : 1
+			trade_limits : default_trade_limits
+			sells [ RESOURCE_FIGS, RESOURCE_STRAW, RESOURCE_CLAY, RESOURCE_BRICKS, RESOURCE_POTTERY, RESOURCE_REEDS ]
+		}
+
+		{
+			name : "Timna"
+			is_sea_trade : false
+			max_traders : 1
+			trade_limits : default_trade_limits
+			sells [ RESOURCE_WEAPONS, RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_COPPER ]
+			buys [ RESOURCE_FISH, RESOURCE_BEER, RESOURCE_LINEN, RESOURCE_PAPYRUS ]
 		}
 	]
 
 	vars {
 		pharaoh_beer_requested : false
+		pharaoh_fish_requested : false
 		pharaoh_bricks_gift_sent : false
+		kushite_invasion_1 : false
+		pharaoh_favour_invasion_done : false
 		start_message_shown : false
 	}
 }
 
-[es=(city_animals, create_herds), mission=mission7]
-function mission7_register_animals(ev) {
-	// Abedju has no native fauna; suppress crocodiles/hyenas spawned via create_herds
-	// during fresh mission start (before any save exists).
-	city.remove_animals()
+function mission7_fire_request(tag, resource, amount, months, ok_tag, fail_tag, ok_amt, fail_amt) {
+	var request = city.create_good_request({ tag_id: tag, resource: resource, amount: amount, months_initial: months })
+	city.create_chain_event({ tag_id: ok_tag, type: EVENT_TYPE_REPUTATION_INCREASE, amount: ok_amt })
+	city.create_chain_event({ tag_id: fail_tag, type: EVENT_TYPE_REPUTATION_DECREASE, amount: fail_amt })
+	request.set_completed_action_tag(ok_tag)
+	request.set_refusal_action_tag(fail_tag)
+	request.execute()
 }
 
 [es=event_mission_start, mission=mission7]
 function mission7_on_start(ev) {
+	__image_request_pak(PACK_ENEMY_KUSHITE)
 	mission_show_start_message(mission, "message_soldiers_and_forts")
 	city.set_empire_available(1)
-
 	for (var i = ADVISOR_NONE + 1; i <= ADVISOR_DIPLOMACY; i++) {
 		city.set_advisor_available(i, 1)
 	}
-
-	city.remove_animals()
 }
 
+// pak: year=2 month=2 beer 9 / 12mo
 [es=event_advance_month, mission=mission7]
 function mission7_pharaoh_request_beer(ev) {
 	if (mission.pharaoh_beer_requested) {
 		return
 	}
-
-	if (ev.years_since_start < 2) {
+	if (ev.years_since_start < 2 || (ev.years_since_start == 2 && ev.month < 2)) {
 		return
 	}
-	if (ev.years_since_start == 2 && ev.month < 2) {
-		return
-	}
-
 	mission.pharaoh_beer_requested = true
-	var request = city.create_good_request({ tag_id: 1, resource: RESOURCE_BEER, amount: 9, months_initial: 12 })
-	request.execute()
+	mission7_fire_request(1, RESOURCE_BEER, 9, 12, 101, 102, 4, 3)
 }
 
+// Gift not in request dump; keep prior JS timing (y3 m4, bricks 21).
 [es=event_advance_month, mission=mission7]
 function mission7_pharaoh_bricks_gift(ev) {
 	if (mission.pharaoh_bricks_gift_sent) {
 		return
 	}
-
-	if (ev.years_since_start < 3) {
+	if (ev.years_since_start < 3 || (ev.years_since_start == 3 && ev.month < 4)) {
 		return
 	}
-	if (ev.years_since_start == 3 && ev.month < 4) {
-		return
-	}
-
 	mission.pharaoh_bricks_gift_sent = true
 	var gift = city.create_pharaoh_gift({ tag_id: 2, resource: RESOURCE_BRICKS, amount: 21 })
 	gift.execute()
+}
+
+// pak: year=12 month=1 fish 18 / 12mo
+[es=event_advance_month, mission=mission7]
+function mission7_pharaoh_request_fish(ev) {
+	if (mission.pharaoh_fish_requested) {
+		return
+	}
+	if (ev.years_since_start < 12 || (ev.years_since_start == 12 && ev.month < 1)) {
+		return
+	}
+	mission.pharaoh_fish_requested = true
+	mission7_fire_request(3, RESOURCE_FISH, 18, 12, 301, 302, 4, 3)
+}
+
+// pak: y14 m9 size=3 Kushite (timed). Favour-KR Pharaoh army amount=40 via JS helper.
+// chain_only Pharaoh army (amount=40, trigger=1) still needs B2c.
+[es=event_advance_month, mission=mission7]
+function mission7_kushite_invasion_1(ev) {
+	if (mission.kushite_invasion_1) {
+		return
+	}
+	if (ev.years_since_start < 14 || (ev.years_since_start == 14 && ev.month < 9)) {
+		return
+	}
+	mission.kushite_invasion_1 = true
+	log_info("akhenaten: mission 7 abydos kushite invasion size=3", {ev:ev})
+	city.start_foreign_army_invasion({
+		invasion_id: 0,
+		enemy: ENEMY_6_KUSHITE,
+		size: 3,
+		tilex: -1,
+		tiley: -1,
+		want_destroy_buildings: 3
+	})
+}
+
+[es=event_advance_month, mission=mission7]
+function mission7_pharaoh_favour_invasion(ev) {
+	mission_pharaoh_favour_invasion_tick(mission, 40)
 }

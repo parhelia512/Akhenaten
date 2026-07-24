@@ -86,12 +86,16 @@ enum e_event_faction_request {
 
 enum e_event_trigger_type {
     EVENT_TRIGGER_ONCE = 0,
-    EVENT_TRIGGER_ONLY_VIA_EVENT = 1,
+    EVENT_TRIGGER_ONLY_VIA_EVENT = 1,   // chain child — fired only via parent on_*_action
     EVENT_TRIGGER_RECURRING = 2,
-    EVENT_TRIGGER_ALREADY_FIRED = 4,
-    EVENT_TRIGGER_ACTIVATED_8 = 8,
-    EVENT_TRIGGER_BY_RATING = 10,
-    EVENT_TRIGGER_ACTIVATED_12 = 12,
+    EVENT_TRIGGER_ALREADY_FIRED = 4,    // 0x04 — one-time completed
+    EVENT_TRIGGER_ACTIVATED_8 = 8,      // 0x08 — "automatic" / active chain clone
+    EVENT_TRIGGER_BY_RATING = 10,       // unused/legacy name; original editor uses 0x10 for favour
+    EVENT_TRIGGER_ACTIVATED_12 = 12,    // 0x0C — automatic completed
+    // Pharaoh editor "triggered by favor" (Heaven forums: occur byte 0x10).
+    // Invasion with this trigger fires when Kingdom Rating collapses — not on calendar.
+    EVENT_TRIGGER_BY_FAVOUR = 16,       // 0x10
+    EVENT_TRIGGER_BY_FAVOUR_IN_USE = 20,// 0x14 — favour invasion in progress / spent
 
     EVENT_TRIGGER_MAX
 };

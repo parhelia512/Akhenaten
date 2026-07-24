@@ -23,6 +23,8 @@
 #include "empire/empire.h"
 #include "js/js_game.h"
 
+const e_attack_faction_tokens_t ANK_CONFIG_ENUM(e_attack_faction_tokens);
+
 declare_console_command_p(start_invasion) {
     invasion_opts_t opts;
     opts.mode = ATTACK_TYPE_ENEMIES;

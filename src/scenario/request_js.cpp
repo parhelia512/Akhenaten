@@ -83,11 +83,11 @@ ANK_FUNCTION_2(__city_request_set_too_late_action)
 
 void ANK_FUNCTION_UNIFIED(__city_start_foreign_army_invasion)(const bvariant_map &args) {
     invasion_opts_t opts;
-    opts.mode = ATTACK_TYPE_ENEMIES;
-    opts.enemy_type = (e_enemy_type)args.n("enemy"); // 0 type, 1 kingdome, 2 seth natives
-    opts.size = args.n("size");
-    opts.invasion_point = { (int)args.n("tilex"), (int)args.n("tiley") };
-    opts.invasion_id = args.n("invasion_id");
-    opts.want_destroy = args.n("want_destroy_buildings");
+    opts.mode = (e_attack_faction)args.i32("mode", ATTACK_TYPE_ENEMIES);
+    opts.enemy_type = (e_enemy_type)args.i32("enemy", ENEMY_0_BARBARIAN);
+    opts.size = args.i32("size", 0);
+    opts.invasion_point = { args.i32("tilex", -1), args.i32("tiley", -1) };
+    opts.invasion_id = args.i32("invasion_id", 0);
+    opts.want_destroy = (uint8_t)args.i32("want_destroy_buildings", 0);
     scenario_invasion_start(opts);
 }

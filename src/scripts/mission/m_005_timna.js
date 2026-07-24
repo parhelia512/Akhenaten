@@ -1,10 +1,13 @@
 log_info("akhenaten: mission 5 timna started")
 
+// Trade / requests / invasions verified vs mission1.pak scenario 5 (2026-07-24 dump).
+// Stub events/attacks/trade_routes removed — they were never wired (enable_scenario_events:false).
+
 mission5 { // Timna
 	start_message : "message_history_military"
 	selection_title : "Timna"
 	env {
-		has_animals : true
+		has_animals : false
 		marshland_grow : default_marshland_grow
 	    tree_grow : default_tree_grow
 		hide_nilometer : true
@@ -12,10 +15,10 @@ mission5 { // Timna
 
 	sounds {
 		briefing : "Voice/Mission/205_mission.mp3"
-		victory : "Voice/Mission/205_victory.mp3"  
+		victory : "Voice/Mission/205_victory.mp3"
 	}
 
-	player_rank : 1
+	player_rank : 2
 
 	choice_background {pack:PACK_UNLOADED, id:12}
 	choice_image1 {pack:PACK_UNLOADED, id:13}
@@ -59,9 +62,10 @@ mission5 { // Timna
 				]
 
 	win_criteria {
-		population {enabled : true, goal : 2000 }
-		prosperity {enabled : true, goal : 15 }
-		kingdom    {enabled : true, goal : 70 }
+		population    {enabled : true, goal : 2000 }
+		prosperity    {enabled : true, goal : 15 }
+		kingdom       {enabled : true, goal : 70 }
+		housing_level {enabled : true, goal : 10 }
 	}
 
 	stages {
@@ -69,65 +73,160 @@ mission5 { // Timna
 		tutorial_guilds { buildings: [BUILDING_STORAGE_YARD, BUILDING_TAX_COLLECTOR, BUILDING_BOOTH, BUILDING_JUGGLER_SCHOOL] }
 	}
 
-	enable_scenario_events : false
-	events [
+	// Empire from pak (land routes, start closed). Men-nefer is NOT a partner here.
+	cities [
 		{
-			time { year : 2848, month : 1 }
-			resource : "copper"
-			amount { value : 500 }
-			deadline : 12
+			name : "Nekhen"
+			is_sea_trade : false
+			max_traders : 1
+			trade_limits : default_trade_limits
+			sells [ RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_BEER, RESOURCE_FLAX, RESOURCE_LINEN ]
+			buys [ RESOURCE_PAPYRUS ]
 		}
-		{
-			time { year : 2847, month : 1 }
-			resource : "gems"
-			amount { value : 1500 }
-			deadline : 12
-		}
-		{
-			year : 2846
-			resource : "deben"
-			amount : [800, 1000]
-			deadline : 12
-		}
-	]
 
-	attacks  [
 		{
-			year : 2848
-			type : "bedouin"
-			amount : 4
-			pepeat_after [6]
+			name : "Nubt"
+			is_sea_trade : false
+			max_traders : 1
+			trade_limits : default_trade_limits
+			sells [ RESOURCE_GAMEMEAT ]
 		}
-	]
 
-	gifts [
 		{
-				from: "pharaoh"
-				condition {
-					kingdome : 65
-					resource : RESOURCE_CHICKPEAS
-					amount [1600, 2400]
-				}
-		}
-	]
-
-	trade_routes [
-		{
-			city : "meninefer"
-			reputation : 60
+			name : "Thinis"
+			is_sea_trade : false
+			max_traders : 1
+			trade_limits : default_trade_limits
+			sells [ RESOURCE_CHICKPEAS, RESOURCE_POTTERY, RESOURCE_BEER ]
+			buys [ RESOURCE_COPPER ]
 		}
 	]
 
 	vars {
+		pharaoh_requested_copper : false
+		pharaoh_requested_gems : false
+		pharaoh_requested_deben : false
+		pharaoh_requested_weapons : false
+		libyan_invasion_1 : false
+		libyan_invasion_2 : false
+		libyan_invasion_3 : false
+		pharaoh_favour_invasion_done : false
 		start_message_shown : false
 	}
 }
 
+function mission5_fire_request(tag, resource, amount, months, ok_tag, fail_tag, ok_amt, fail_amt) {
+	var request = city.create_good_request({ tag_id: tag, resource: resource, amount: amount, months_initial: months })
+	city.create_chain_event({ tag_id: ok_tag, type: EVENT_TYPE_REPUTATION_INCREASE, amount: ok_amt })
+	city.create_chain_event({ tag_id: fail_tag, type: EVENT_TYPE_REPUTATION_DECREASE, amount: fail_amt })
+	request.set_completed_action_tag(ok_tag)
+	request.set_refusal_action_tag(fail_tag)
+	request.execute()
+}
+
+function mission5_libyan_raid(invasion_id, size) {
+	city.start_foreign_army_invasion({
+		invasion_id: invasion_id,
+		enemy: ENEMY_7_LIBIAN,
+		size: size,
+		tilex: -1,
+		tiley: -1,
+		want_destroy_buildings: size
+	})
+}
+
 [es=event_mission_start, mission=mission5]
 function mission5_on_start(ev) {
+	__image_request_pak(PACK_ENEMY_LIBIAN)
 	mission_show_start_message(mission, "message_history_military")
 	city.set_empire_available(1)
 	for (var i = ADVISOR_NONE + 1; i <= ADVISOR_DIPLOMACY; i++) {
 		city.set_advisor_available(i, 1)
 	}
+}
+
+// pak: year=0 month=8 copper 5 / 9mo
+[es=event_advance_month, mission=mission5]
+function mission5_pharaoh_request_copper(ev) {
+	if (mission.pharaoh_requested_copper) {
+		return
+	}
+	if (ev.years_since_start == 0 && ev.month < 8) {
+		return
+	}
+	mission.pharaoh_requested_copper = true
+	mission5_fire_request(1, RESOURCE_COPPER, 5, 9, 101, 102, 4, 2)
+}
+
+// pak: year=2 month=4 gems 15 / 12mo
+[es=event_advance_month, mission=mission5]
+function mission5_pharaoh_request_gems(ev) {
+	if (mission.pharaoh_requested_gems) {
+		return
+	}
+	if (ev.years_since_start < 2 || (ev.years_since_start == 2 && ev.month < 4)) {
+		return
+	}
+	mission.pharaoh_requested_gems = true
+	mission5_fire_request(2, RESOURCE_GEMS, 15, 12, 201, 202, 4, 3)
+}
+
+// pak: year=2 month=8 item=31 amount=885 / 12mo. Id 31 is C3 denarii / money slot;
+// Cleopatra remapped that id to RESOURCE_OIL — briefing + amount say treasury deben.
+[es=event_advance_month, mission=mission5]
+function mission5_pharaoh_request_deben(ev) {
+	if (mission.pharaoh_requested_deben) {
+		return
+	}
+	if (ev.years_since_start < 2 || (ev.years_since_start == 2 && ev.month < 8)) {
+		return
+	}
+	mission.pharaoh_requested_deben = true
+	mission5_fire_request(3, RESOURCE_DEBEN, 885, 12, 301, 302, 4, 2)
+}
+
+// pak: year=7 month=3 weapons 11 / 12mo
+[es=event_advance_month, mission=mission5]
+function mission5_pharaoh_request_weapons(ev) {
+	if (mission.pharaoh_requested_weapons) {
+		return
+	}
+	if (ev.years_since_start < 7 || (ev.years_since_start == 7 && ev.month < 3)) {
+		return
+	}
+	mission.pharaoh_requested_weapons = true
+	mission5_fire_request(4, RESOURCE_WEAPONS, 11, 12, 401, 402, 4, 3)
+}
+
+// pak invasions (scenario enemy = Libyan). Favour-KR Pharaoh army amount=45 via JS helper.
+[es=event_advance_month, mission=mission5]
+function mission5_libyan_invasion_1(ev) {
+	if (mission.libyan_invasion_1) { return }
+	if (ev.years_since_start < 2 || (ev.years_since_start == 2 && ev.month < 7)) { return }
+	mission.libyan_invasion_1 = true
+	log_info("akhenaten: mission 5 timna libyan invasion 1 size=9", {ev:ev})
+	mission5_libyan_raid(0, 9)
+}
+
+[es=event_advance_month, mission=mission5]
+function mission5_libyan_invasion_2(ev) {
+	if (mission.libyan_invasion_2) { return }
+	if (ev.years_since_start < 3 || (ev.years_since_start == 3 && ev.month < 9)) { return }
+	mission.libyan_invasion_2 = true
+	log_info("akhenaten: mission 5 timna libyan invasion 2 size=16", {ev:ev})
+	mission5_libyan_raid(1, 16)
+}
+
+[es=event_advance_month, mission=mission5]
+function mission5_libyan_invasion_3(ev) {
+	if (mission.libyan_invasion_3) { return }
+	if (ev.years_since_start < 5) { return }
+	mission.libyan_invasion_3 = true
+	log_info("akhenaten: mission 5 timna libyan invasion 3 size=24", {ev:ev})
+	mission5_libyan_raid(2, 24)
+}
+
+[es=event_advance_month, mission=mission5]
+function mission5_pharaoh_favour_invasion(ev) {
+	mission_pharaoh_favour_invasion_tick(mission, 45)
 }
