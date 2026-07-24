@@ -3179,9 +3179,9 @@ game_messages_hu {
             message_type: 4,
             size [40, 30]
         title { text: "Alapvető egészségügy" }
-        content { text: "Városod egészségügyi problémákkal küzd, ami várható a növekvő népesség mellett. A malária és a betegségek a leggyakoribb egészségügyi válságok, amelyek a város háztartásait sújtják, bár széles körű járvány is kitörhet, ha az egészségügyi ellátás rendkívül hiányos. @P Ha egy házat malária vagy betegség fertőz meg, minden lakója meghal, és az épület egy bizonyos ideig nem lakható újra. @G64 @L Malária @L@P A malária leginkább víz és mocsaras területek közelében fordul elő. A „Kockázatok: Malária” réteg megmutatja, mely házak vannak nagyobb veszélyben. @P A Vízellátóból származó tiszta vízhez való hozzáférés, valamint a helyi patikus által biztosított rovarriasztó jelentősen csökkenti a malária kockázatát minden háztartásban. A legtöbb épülethez hasonlóan a patikus is csak akkor működik, ha útkapcsolattal és munkaerővel rendelkezik. @G63 @L Betegség @L@P Az orvosok gyógyszerek beadásával segítenek csökkenteni a betegségek kockázatát az általuk ellátott házakban. A folyamatos élelmiszerellátás szintén elengedhetetlen a betegségek megelőzéséhez. A „Kockázatok: Betegség” réteg megmutatja, mely házak vannak veszélyben."
+        content { text: "Városod egészségügyi problémákkal küzd, ami várható a növekvő népesség mellett. A malária és a betegségek a leggyakoribb egészségügyi válságok, amelyek a város háztartásait sújtják, bár széles körű járvány is kitörhet, ha az egészségügyi ellátás rendkívül hiányos. @P Ha egy házat malária vagy betegség fertőz meg, minden lakója meghal, és az épület egy bizonyos ideig nem lakható újra. @G64 @L Malária @L@P A malária leginkább víz és mocsaras területek közelében fordul elő. A „Kockázatok: Malária” réteg megmutatja, mely házak vannak nagyobb veszélyben. @P A Vízellátóból származó tiszta vízhez való hozzáférés, valamint a helyi patikus által biztosított rovarriasztó jelentősen csökkenti a malária kockázatát minden háztartásban. A legtöbb épülethez hasonlóan a patikus is csak akkor működik, ha útkapcsolattal és munkaerővel rendelkezik. @G63 @L Betegség @L@P Az orvosok gyógyszerek beadásával segítenek csökkenteni a betegségek kockázatát az általuk ellátott házakban. A folyamatos élelmiszerellátás szintén elengedhetetlen a betegségek megelőzéséhez. A „Kockázatok: Betegség” réteg megmutatja, mely házak vannak veszélyben." }
     }
-        message_requests_from_other_cities {
+    message_requests_from_other_cities {
             id: 251
             type: 2
             message_type: 4
@@ -3209,7 +3209,7 @@ game_messages_hu {
             message_type: 4
             size [40, 30]
             title { text: "Összeomlott épület" }
-            content { text: "Bizonyos nagy épületek megfelelő karbantartás nélkül összeomlanak. Ennek megelőzésére építs építészirodát. A tűzőrséghez hasonlóan ez az épület is dolgozókat küld ki, jelen esetben építészeket, akik az utcákat járva kijavítják az útjukba kerülő sérült épületeket. @G68 @L@P Kattints a „Rétegek: Kockázatok” gombra, hogy lásd, mely épületeket fenyegeti tűz vagy összeomlás veszélye."
+            content { text: "Bizonyos nagy épületek megfelelő karbantartás nélkül összeomlanak. Ennek megelőzésére építs építészirodát. A tűzőrséghez hasonlóan ez az épület is dolgozókat küld ki, jelen esetben építészeket, akik az utcákat járva kijavítják az útjukba kerülő sérült épületeket. @G68 @L@P Kattints a „Rétegek: Kockázatok” gombra, hogy lásd, mely épületeket fenyegeti tűz vagy összeomlás veszélye." }
             }
             message_tutorial_education {
                 id: 254
