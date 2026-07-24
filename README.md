@@ -60,7 +60,8 @@ On startup (when Steam Pharaoh is not found) Akhenaten will unpack `Installer/*.
 
 Supported formats:
 - **Inno Setup / GOG** via bundled [innoextract-nb](https://github.com/dalerank/innoextract-nb)
-  (downloaded and built with Akhenaten when `OPTION_ENABLE_INNOEXTRACT` is on)
+  (prebuilt binary downloaded from its GitHub Releases when `OPTION_ENABLE_INNOEXTRACT` is on;
+  not built as part of the game)
 - **InstallShield** (Sierra demo/retail) via `7z` (outer CAB) + [unshield](https://github.com/twogood/unshield) (`data1.cab`)
 
 You can also use **Extract from installer…** in the configuration window, or:

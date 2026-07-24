@@ -33,6 +33,29 @@ jobs:
         cmake --build --preset macos-clang-relwithdebinfo-make-x86_64 --target install/local
         mkdir macos_build
         cp -R ./build/install/akhenaten.app ./macos_build/akhenaten.app
+        INNO_SRC=""
+        if [ -f ./build/tools/innoextract/bin/innoextract ]; then
+          INNO_SRC=./build/tools/innoextract/bin/innoextract
+        elif [ -f ./build/innoextract ]; then
+          INNO_SRC=./build/innoextract
+        else
+          curl -fsSL -o /tmp/inno-mac.tar.gz \
+            "https://github.com/dalerank/innoextract-nb/releases/download/v1.0.0/innoextract-macos-x64.tar.gz" \
+            && tar -xzf /tmp/inno-mac.tar.gz -C /tmp \
+            && INNO_SRC=/tmp/innoextract
+        fi
+        if [ -n "$INNO_SRC" ] && [ -f "$INNO_SRC" ]; then
+          mkdir -p ./macos_build/akhenaten.app/Contents/Resources \
+                   ./macos_build/akhenaten.app/Contents/MacOS
+          cp "$INNO_SRC" ./macos_build/akhenaten.app/Contents/Resources/innoextract
+          cp "$INNO_SRC" ./macos_build/akhenaten.app/Contents/MacOS/innoextract
+          cp "$INNO_SRC" ./macos_build/innoextract
+          chmod +x ./macos_build/akhenaten.app/Contents/Resources/innoextract \
+                   ./macos_build/akhenaten.app/Contents/MacOS/innoextract \
+                   ./macos_build/innoextract
+        else
+          echo "::warning::innoextract not bundled (mac x64 release asset missing?)"
+        fi
 
     - uses: actions/upload-artifact@v6
       with:

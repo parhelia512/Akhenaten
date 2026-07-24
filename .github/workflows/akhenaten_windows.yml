@@ -26,6 +26,16 @@ jobs:
         cmake --build --preset win-relwithdebinfo --target akhenaten -j $env:NUMBER_OF_PROCESSORS
         copy ./build/RelWithDebInfo/akhenaten.exe ./bin_x64/akhenaten.exe
         copy ./build/RelWithDebInfo/akhenaten.pdb ./bin_x64/akhenaten.pdb
+        if (Test-Path ./build/RelWithDebInfo/innoextract.exe) {
+          copy ./build/RelWithDebInfo/innoextract.exe ./bin_x64/innoextract.exe
+        } elseif (Test-Path ./build/tools/innoextract/bin/innoextract.exe) {
+          copy ./build/tools/innoextract/bin/innoextract.exe ./bin_x64/innoextract.exe
+        } else {
+          $url = "https://github.com/dalerank/innoextract-nb/releases/download/v1.0.0/innoextract-windows-x64.zip"
+          Invoke-WebRequest -Uri $url -OutFile "$env:TEMP\innoextract-windows-x64.zip"
+          Expand-Archive -Path "$env:TEMP\innoextract-windows-x64.zip" -DestinationPath "$env:TEMP\innoextract-win" -Force
+          copy "$env:TEMP\innoextract-win\innoextract.exe" ./bin_x64/innoextract.exe
+        }
         copy ./data/pharaoh_fonts_pack.sgx ./bin_x64/data/pharaoh_fonts_pack.sgx
         copy ./data/pharaoh_custom_pack.sgx ./bin_x64/data/pharaoh_custom_pack.sgx
         copy ./data/pharaoh_houses_pack.sgx ./bin_x64/data/pharaoh_houses_pack.sgx

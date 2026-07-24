@@ -4,6 +4,10 @@ on:
   push:
     branches: [ "master" ]
 
+env:
+  # Prebuilt helper from https://github.com/dalerank/innoextract-nb/releases
+  INNOEXTRACT_VERSION: v1.0.0
+
 jobs:
   build:
     name: run content
@@ -27,10 +31,59 @@ jobs:
         cd ..
         cmake --build ./build
         cp ./build/akhenaten ./artifacts/akhenaten.linux
-        zip -r linux_build.zip ./artifacts
         wget -O windows_build.zip "https://nightly.link/dalerank/Akhenaten/workflows/akhenaten_windows/master/windows_build.zip"
         wget -O macos_build.zip "https://nightly.link/dalerank/Akhenaten/workflows/akhenaten_mac_arm/master/macos_arm_build.zip"
         unzip windows_build.zip -d artifacts
+    - name: Bundle innoextract into itch packages
+      run: |
+        set -euo pipefail
+        BASE="https://github.com/dalerank/innoextract-nb/releases/download/${INNOEXTRACT_VERSION}"
+        mkdir -p /tmp/inno-dl
+
+        echo "::group::Linux innoextract"
+        curl -fsSL -o /tmp/inno-dl/linux.tar.gz "$BASE/innoextract-linux-x64.tar.gz"
+        tar -xzf /tmp/inno-dl/linux.tar.gz -C ./artifacts
+        chmod +x ./artifacts/innoextract
+        test -f ./artifacts/innoextract
+        rm -f linux_build.zip
+        zip -r linux_build.zip ./artifacts
+        echo "::endgroup::"
+
+        echo "::group::Windows innoextract"
+        rm -rf /tmp/win_pkg && mkdir -p /tmp/win_pkg
+        unzip -qo windows_build.zip -d /tmp/win_pkg
+        curl -fsSL -o /tmp/inno-dl/windows.zip "$BASE/innoextract-windows-x64.zip"
+        rm -rf /tmp/inno-win && mkdir -p /tmp/inno-win
+        unzip -qo /tmp/inno-dl/windows.zip -d /tmp/inno-win
+        win_exe="$(find /tmp/win_pkg -name 'akhenaten.exe' -type f | head -n 1)"
+        test -n "$win_exe"
+        win_dir="$(dirname "$win_exe")"
+        cp /tmp/inno-win/innoextract.exe "$win_dir/innoextract.exe"
+        cp /tmp/inno-win/innoextract.exe ./artifacts/innoextract.exe
+        rm -f windows_build.zip
+        (cd /tmp/win_pkg && zip -r "$GITHUB_WORKSPACE/windows_build.zip" .)
+        echo "::endgroup::"
+
+        echo "::group::macOS innoextract"
+        rm -rf /tmp/mac_pkg && mkdir -p /tmp/mac_pkg
+        unzip -qo macos_build.zip -d /tmp/mac_pkg
+        if curl -fsSL -o /tmp/inno-dl/macos.tar.gz "$BASE/innoextract-macos-arm64.tar.gz"; then
+          tar -xzf /tmp/inno-dl/macos.tar.gz -C /tmp/inno-dl
+          app="$(find /tmp/mac_pkg -name 'akhenaten.app' -type d | head -n 1)"
+          test -n "$app"
+          # SDL_GetBasePath() on macOS → Contents/Resources; also ship next to the binary.
+          mkdir -p "$app/Contents/Resources" "$app/Contents/MacOS"
+          cp /tmp/inno-dl/innoextract "$app/Contents/Resources/innoextract"
+          cp /tmp/inno-dl/innoextract "$app/Contents/MacOS/innoextract"
+          chmod +x "$app/Contents/Resources/innoextract" "$app/Contents/MacOS/innoextract"
+          cp /tmp/inno-dl/innoextract "$(dirname "$app")/innoextract"
+          chmod +x "$(dirname "$app")/innoextract"
+          rm -f macos_build.zip
+          (cd /tmp/mac_pkg && zip -r "$GITHUB_WORKSPACE/macos_build.zip" .)
+        else
+          echo "::warning::innoextract-macos-arm64.tar.gz not in release ${INNOEXTRACT_VERSION} yet — mac package unchanged"
+        fi
+        echo "::endgroup::"
     - name: Verify itch build archives
       run: |
         set -euo pipefail
@@ -39,6 +92,15 @@ jobs:
           test -s "$z" || { echo "empty: $z"; exit 1; }
           ls -lh "$z"
         done
+        echo "::group::innoextract presence"
+        unzip -l windows_build.zip | grep -E 'innoextract\.exe$'
+        unzip -l linux_build.zip | grep -E '(^|/)innoextract$'
+        if unzip -l macos_build.zip | grep -E 'innoextract$'; then
+          echo "macos: innoextract present"
+        else
+          echo "::warning::macos package has no innoextract yet"
+        fi
+        echo "::endgroup::"
     - uses: actions/upload-artifact@v6
       with:
         name: linux_windows_build
