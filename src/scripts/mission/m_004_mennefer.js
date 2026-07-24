@@ -44,12 +44,28 @@ mission4 {
 		housing_level {enabled : true, goal : 10 }
 	}
 
-	// Empire map from pak (empire id=1): ours + 2 trade + 2 display-only.
+	// Empire cities from mission1.pak scenario 4 (empire id=1) — full map objects, not pak patch.
 	hide_pak_cities : true
 	cities [
 		{
+			name : "Men-nefer"
+			idx : 0
+			pos : [541, 491]
+			route : 0
+			type : EMPIRE_CITY_OURS
+			sells [ RESOURCE_CHICKPEAS, RESOURCE_CLAY, RESOURCE_BARLEY, RESOURCE_REEDS ]
+			buys [ RESOURCE_LETTUCE, RESOURCE_BRICKS, RESOURCE_BARLEY, RESOURCE_BEER, RESOURCE_LUXURY_GOODS ]
+		}
+
+		{
 			name : "Perwadjyt"
+			idx : 3
+			pos : [489, 350]
+			route : 1
+			is_open : false
+			cost_to_open : 300
 			is_sea_trade : false
+			type : EMPIRE_CITY_EGYPTIAN_TRADING
 			max_traders : 1
 			trade_limits : default_trade_limits
 			sells [ RESOURCE_FIGS, RESOURCE_CLAY, RESOURCE_BRICKS, RESOURCE_POTTERY, RESOURCE_REEDS ]
@@ -57,7 +73,13 @@ mission4 {
 
 		{
 			name : "Nekhen"
+			idx : 22
+			pos : [803, 1009]
+			route : 4
+			is_open : false
+			cost_to_open : 550
 			is_sea_trade : false
+			type : EMPIRE_CITY_EGYPTIAN_TRADING
 			max_traders : 1
 			trade_limits : default_trade_limits
 			sells [ RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_BEER ]
@@ -66,12 +88,22 @@ mission4 {
 
 		{
 			name : "Nubt"
+			idx : 2
+			pos : [800, 933]
+			route : 3
+			is_open : false
+			cost_to_open : 450
 			trade : false
 			type : EMPIRE_CITY_EGYPTIAN
 		}
 
 		{
 			name : "Thinis"
+			idx : 4
+			pos : [687, 871]
+			route : 2
+			is_open : false
+			cost_to_open : 550
 			trade : false
 			type : EMPIRE_CITY_EGYPTIAN
 		}

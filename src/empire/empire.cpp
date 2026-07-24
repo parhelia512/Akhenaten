@@ -88,33 +88,22 @@ declare_console_command_p(save_empire_routes) {
 
 void empire_t::load_mission_metadata(const mission_id_t &missionid) {
     g_config_arch.r_section(missionid, [] (archive arch) {
-        // When true: ignore pak cities (except ours) and show only cities listed in JS.
+        // When true: ignore all pak cities and show only cities listed in JS (including ours).
         const bool hide_pak_cities = arch.r_bool("hide_pak_cities", false);
         if (hide_pak_cities) {
             for (auto &city : g_empire.get_cities()) {
-                if (!city.in_use || city.type == EMPIRE_CITY_OURS) {
+                if (!city.in_use) {
                     continue;
                 }
                 city.in_use = 0;
             }
         }
 
-        arch.r_array("cities", [] (archive city_arch) {
-            xstring name = city_arch.r_string("name");
-            auto city = g_empire.city(name);
+        g_empire.load_empire_cities(arch);
 
-            if (!city) {
-                return;
-            }
-
-            // Scripted cities are always visible (trading or display-only).
-            city->in_use = 1;
-            city_arch.r(*city);
-
-            if (city->can_trade()) {
-                g_empire.set_trade_route_type(city->route_id, city->is_sea_trade);
-            }
-        });
+        if (hide_pak_cities) {
+            g_empire.hide_unused_city_objects();
+        }
 
         if (arch.r_bool("hide_pak_objects", false)) {
             g_empire.hide_non_city_objects();
@@ -165,11 +154,9 @@ empire_city* empire_t::city(int city_id) {
 }
 
 empire_city *empire_t::city(xstring name) {
-    for (auto &city : cities) {
-        pcstr city_name = (pcstr)lang_get_string(195, city.name_id);
-        if (name == city_name) {
-            return &city;
-        }
+    const int name_id = find_city_name_id(name.c_str());
+    if (name_id >= 0) {
+        return city(name_id);
     }
     return nullptr;
 }

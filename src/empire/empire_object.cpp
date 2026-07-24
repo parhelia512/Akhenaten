@@ -51,6 +51,21 @@ void empire_t::hide_non_city_objects() {
     }
 }
 
+void empire_t::hide_unused_city_objects() {
+    // Drop city map icons that are not in the scripted cities[] list.
+    for (int i = 0; i < MAX_OBJECTS; i++) {
+        full_empire_object &full = g_empire_objects[i];
+        if (!full.in_use || full.obj.type != EMPIRE_OBJECT_CITY) {
+            continue;
+        }
+
+        empire_city *city = g_empire.city(full.city_name_id);
+        if (!city || !city->in_use) {
+            full.in_use = 0;
+        }
+    }
+}
+
 int empire_t::alloc_empire_object() {
     for (int i = 0; i < MAX_OBJECTS; i++) {
         if (g_empire_objects[i].in_use) {
@@ -86,6 +101,193 @@ int empire_t::find_region_name_id(pcstr name) const {
         }
     }
     return -1;
+}
+
+int empire_t::find_city_name_id(pcstr name) const {
+    if (!name || !name[0]) {
+        return -1;
+    }
+
+    // City slot index == lang id (group 195 old names / 21 new names).
+    for (int id = 0; id < empire_t::MAX_CITIES; id++) {
+        pcstr old_name = lang_get_string(195, id);
+        if (old_name && old_name[0] && string_compare_case_insensitive(old_name, name) == 0) {
+            return id;
+        }
+        pcstr new_name = lang_get_string(21, id);
+        if (new_name && new_name[0] && string_compare_case_insensitive(new_name, name) == 0) {
+            return id;
+        }
+    }
+    return -1;
+}
+
+static int find_city_object_index(int city_name_id) {
+    for (int i = 0; i < MAX_OBJECTS; i++) {
+        const full_empire_object &full = g_empire_objects[i];
+        if (full.obj.type != EMPIRE_OBJECT_CITY) {
+            continue;
+        }
+        if (full.city_name_id == city_name_id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static void sync_city_object_size(full_empire_object *full, e_empire_city city_type) {
+    const int image_id = empire_city_images.image_id(city_type, false);
+    if (image_id <= 0) {
+        return;
+    }
+    full->obj.image_id = image_id;
+    if (full->obj.expanded.image_id <= 0) {
+        const int expanded_id = empire_city_images.image_id(city_type, true);
+        full->obj.expanded.image_id = expanded_id > 0 ? expanded_id : image_id;
+    }
+    const image_t *img = image_get(image_id);
+    if (img) {
+        full->obj.width = img->width;
+        full->obj.height = img->height;
+    }
+}
+
+static void apply_scripted_trade_route_limits(empire_city *city) {
+    if (!city || !city->can_trade()) {
+        return;
+    }
+
+    trade_route &route = city->get_route();
+    constexpr int k_default_limit = 1500;
+    for (e_resource resource = RESOURCES_MIN; resource < RESOURCES_MAX; ++resource) {
+        if (city->sells_resource[resource] || city->buys_resource[resource]) {
+            if (route.limit(resource, trade_route::e_limit_base_only) <= 0) {
+                route.init(resource, k_default_limit);
+            }
+        }
+    }
+}
+
+void empire_t::load_empire_cities(archive arch) {
+    arch.r_array("cities", [](archive entry) {
+        const int name_id_field = entry.r_int("name_id", -1);
+        xstring name = entry.r_string("name");
+
+        int name_id = name_id_field;
+        if (name_id < 0) {
+            name_id = g_empire.find_city_name_id(name.c_str());
+        }
+        if (name_id < 0 || name_id >= empire_t::MAX_CITIES) {
+            logs::info("empire: unknown city name '%s'", name.c_str() ? name.c_str() : "");
+            return;
+        }
+
+        empire_city *city = g_empire.city(name_id);
+        if (!city) {
+            return;
+        }
+
+        // pos / idx → full map-object create or replace; otherwise patch an existing pak city.
+        const bool has_pos = !std::holds_alternative<archive::variant_none_t>(entry.r_variant("pos"));
+        const int object_idx = entry.r_int("idx", -1);
+        const bool full_define = has_pos || object_idx >= 0;
+
+        full_empire_object *full = nullptr;
+        int object_id = -1;
+
+        if (full_define) {
+            object_id = object_idx >= 0 ? object_idx : find_city_object_index(name_id);
+            if (object_id < 0 && city->name_id == name_id
+                && city->empire_object_id >= 0 && city->empire_object_id < MAX_OBJECTS
+                && g_empire_objects[city->empire_object_id].obj.type == EMPIRE_OBJECT_CITY
+                && g_empire_objects[city->empire_object_id].city_name_id == name_id) {
+                object_id = city->empire_object_id;
+            }
+
+            const bool fresh_slot = (object_id < 0);
+
+            if (object_id < 0) {
+                object_id = g_empire.alloc_empire_object();
+            }
+            full = object_id >= 0 ? g_empire.ref_full_object(object_id) : nullptr;
+
+            if (!full) {
+                logs::info("empire: failed to allocate city object for '%s'", name.c_str() ? name.c_str() : "");
+                return;
+            }
+
+            full->in_use = 1;
+            full->obj.id = object_id;
+            full->obj.type = EMPIRE_OBJECT_CITY;
+            full->city_name_id = name_id;
+            full->obj.pos = entry.r_vec2i("pos", full->obj.pos);
+            const vec2i expanded_fallback = (full->obj.expanded.pos.x || full->obj.expanded.pos.y)
+                ? full->obj.expanded.pos
+                : full->obj.pos;
+            full->obj.expanded.pos = entry.r_vec2i("expanded_pos", expanded_fallback);
+            full->obj.text_align = entry.r_int("text_align", full->obj.text_align);
+            full->obj.trade_route_id = (uint8_t)entry.r_int("route", full->obj.trade_route_id);
+            full->trade_route_open = entry.r_bool("is_open", full->trade_route_open != 0) ? 1 : 0;
+            full->trade_route_cost = entry.r_int("cost_to_open", full->trade_route_cost);
+
+            city->in_use = 1;
+            city->name_id = name_id;
+            city->empire_object_id = object_id;
+            city->route_id = full->obj.trade_route_id;
+            city->is_open = full->trade_route_open != 0;
+            city->cost_to_open = full->trade_route_cost;
+
+            const int type_value = entry.r_int("type", -1);
+            if (type_value >= EMPIRE_CITY_OURS && type_value < EMPIRE_CITY_COUNT) {
+                city->type = (e_empire_city)type_value;
+            } else if (fresh_slot) {
+                city->type = EMPIRE_CITY_EGYPTIAN_TRADING;
+            }
+            full->city_type = city->type;
+        } else {
+            object_id = find_city_object_index(name_id);
+            if (object_id < 0 && city->name_id == name_id
+                && city->empire_object_id >= 0 && city->empire_object_id < MAX_OBJECTS
+                && g_empire_objects[city->empire_object_id].obj.type == EMPIRE_OBJECT_CITY
+                && g_empire_objects[city->empire_object_id].city_name_id == name_id) {
+                object_id = city->empire_object_id;
+            }
+            if (object_id < 0 || object_id >= MAX_OBJECTS
+                || g_empire_objects[object_id].obj.type != EMPIRE_OBJECT_CITY) {
+                logs::info("empire: city '%s' has no pak object; add pos:[x,y] for full define",
+                    name.c_str() ? name.c_str() : "");
+                return;
+            }
+            full = &g_empire_objects[object_id];
+            full->in_use = 1;
+            city->in_use = 1;
+            city->name_id = name_id;
+            city->empire_object_id = object_id;
+        }
+
+        entry.r(*city);
+
+        // Keep object in sync after archive_load may change type / trade / route fields.
+        full->city_type = city->type;
+        full->city_name_id = city->name_id;
+        full->obj.trade_route_id = (uint8_t)std::clamp(city->route_id, 0, MAX_ROUTES - 1);
+        city->route_id = full->obj.trade_route_id;
+        full->trade_route_open = city->is_open ? 1 : 0;
+        full->trade_route_cost = city->cost_to_open;
+
+        if (has_pos && full->obj.expanded.pos.x == 0 && full->obj.expanded.pos.y == 0) {
+            full->obj.expanded.pos = full->obj.pos;
+        }
+
+        sync_city_object_size(full, city->type);
+        city->name_str = empire_city::get_display_name(city->name_id);
+        city->check_attributes();
+
+        if (city->can_trade()) {
+            g_empire.set_trade_route_type(city->route_id, city->is_sea_trade);
+            apply_scripted_trade_route_limits(city);
+        }
+    });
 }
 
 static full_empire_object *begin_script_map_object(archive arch, e_empire_object type) {
@@ -382,7 +584,10 @@ int empire_t::get_closest_object(vec2i pos) const {
     auto& objects = g_empire_objects;
     int min_dist = 10000;
     int min_obj_id = 0;
-    for (int i = 0; i < MAX_OBJECTS && objects[i].in_use; i++) {
+    for (int i = 0; i < MAX_OBJECTS; i++) {
+        if (!objects[i].in_use) {
+            continue;
+        }
         const empire_object* obj = &objects[i].obj;
         vec2i obj_pos;
         if (scenario_empire_is_expanded()) {

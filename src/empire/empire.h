@@ -38,9 +38,11 @@ public:
     void update_month();
 
     void hide_non_city_objects();
+    void hide_unused_city_objects();
     int alloc_empire_object();
     full_empire_object *ref_full_object(int object_id);
     int find_region_name_id(pcstr name) const;
+    int find_city_name_id(pcstr name) const;
 
     empire_city *city(int city_id);
     empire_city *city(xstring name);
@@ -108,6 +110,7 @@ public:
     map_route_object &ref_route_object(int id);
 
 private:
+    void load_empire_cities(archive arch);
     void load_empire_texts(archive arch);
     void load_empire_ornaments(archive arch);
     void load_empire_battle_icons(archive arch);
