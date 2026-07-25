@@ -1,15 +1,17 @@
 log_info("akhenaten: mission 8 selima started")
 
-// Trade / requests / invasions verified vs mission1.pak scenario 8 (2026-07-24 dump).
+// Empire / requests / invasions verified vs mission1.pak scenario 8 (2026-07-25 dump).
 // Favour Pharaoh army size=63 (trigger=by_favour) proxied in JS until B2b.
+// No EVENT_TYPE_DISTANT_BATTLE in pak — Kerma pressure is CITY_UNDER_SIEGE (+ troop request chain).
 
-mission8 { // Selima
+mission8 { // Selima — The Road to Africa
 	start_message : "message_the_finer_things_tutorial"
 	selection_title : "Selima"
 	player_rank : 3
 	next_mission : 10
 	initial_funds [7500, 5000, 3750, 2500, 2000]
 	rescue_loans [7500, 5000, 3750, 2500, 2000]
+	debt_interest [10, 15, 20, 25, 30]
 	house_tax_multipliers [300, 200, 150, 100, 75]
 
 	env {
@@ -39,6 +41,7 @@ mission8 { // Selima
                 BUILDING_SCRIBAL_SCHOOL,
 			  ]
 
+	// Win ratings match mission1.pak scenario 8.
 	win_criteria {
 		population    {enabled : true, goal : 3000 }
 		culture       {enabled : true, goal : 20 }
@@ -50,78 +53,312 @@ mission8 { // Selima
 
 	enable_scenario_events : true
 
-	invasion_points_land [
-		[30, 26]
-	]
-
-	// Empire from pak (all land, start closed).
+	// Empire from mission1.pak scenario 8 (empire id=0) — full map objects.
+	map_background : {pack:PACK_EMPIRE, id:1}
+	hide_pak_cities : true
 	cities [
 		{
-			name : "Abedju"
-			is_sea_trade : false
-			max_traders : 1
-			trade_limits : default_trade_limits
-			sells [ RESOURCE_FISH, RESOURCE_BARLEY, RESOURCE_BEER, RESOURCE_LINEN, RESOURCE_STONE ]
-			buys [ RESOURCE_GAMEMEAT, RESOURCE_CLAY, RESOURCE_BRICKS, RESOURCE_TIMBER, RESOURCE_PAPYRUS, RESOURCE_LIMESTONE, RESOURCE_GRANITE, RESOURCE_SANDSTONE ]
-		}
-
-		{
-			name : "Behdet"
-			is_sea_trade : false
-			max_traders : 1
-			trade_limits : default_trade_limits
-			sells [ RESOURCE_FISH, RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_BEER, RESOURCE_REEDS, RESOURCE_PAPYRUS, RESOURCE_GRANITE ]
-			buys [ RESOURCE_BRICKS, RESOURCE_LINEN, RESOURCE_GEMS, RESOURCE_LUXURY_GOODS, RESOURCE_TIMBER ]
-		}
-
-		{
-			name : "Kerma"
-			is_sea_trade : false
-			max_traders : 1
-			trade_limits : default_trade_limits
-			sells [ RESOURCE_LUXURY_GOODS ]
-			buys [ RESOURCE_LINEN, RESOURCE_LUXURY_GOODS ]
+			name : "Selima Oasis"
+			idx : 9
+			pos : [615, 1354]
+			route : 0
+			type : EMPIRE_CITY_OURS
+			sells [ RESOURCE_GAMEMEAT, RESOURCE_TIMBER ]
+			buys [ RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_BEER, RESOURCE_LINEN, RESOURCE_PAPYRUS, RESOURCE_COPPER ]
 		}
 
 		{
 			name : "Men-nefer"
+			idx : 5
+			pos : [530, 485]
+			route : 1
+			is_open : false
+			cost_to_open : 1100
 			is_sea_trade : false
+			type : EMPIRE_CITY_PHARAOH_TRADING
 			max_traders : 1
 			trade_limits : default_trade_limits
 			sells [ RESOURCE_CHICKPEAS, RESOURCE_POTTERY, RESOURCE_PAPYRUS ]
 			buys [ RESOURCE_LETTUCE, RESOURCE_BRICKS, RESOURCE_BARLEY, RESOURCE_BEER, RESOURCE_LUXURY_GOODS ]
+			route_limits [
+				{ resource: RESOURCE_LETTUCE, limit: 2500 }
+				{ resource: RESOURCE_CHICKPEAS, limit: 2500 }
+				{ resource: RESOURCE_BRICKS, limit: 2500 }
+				{ resource: RESOURCE_POTTERY, limit: 2500 }
+				{ resource: RESOURCE_BARLEY, limit: 2500 }
+				{ resource: RESOURCE_BEER, limit: 2500 }
+				{ resource: RESOURCE_LUXURY_GOODS, limit: 2500 }
+				{ resource: RESOURCE_PAPYRUS, limit: 2500 }
+			]
 		}
 
 		{
 			name : "Timna"
+			idx : 10
+			pos : [906, 456]
+			route : 2
+			is_open : false
+			cost_to_open : 1650
 			is_sea_trade : false
+			type : EMPIRE_CITY_EGYPTIAN_TRADING
 			max_traders : 1
 			trade_limits : default_trade_limits
 			sells [ RESOURCE_WEAPONS, RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_COPPER ]
 			buys [ RESOURCE_FISH, RESOURCE_BEER, RESOURCE_LINEN, RESOURCE_PAPYRUS ]
+			route_limits [
+				{ resource: RESOURCE_FISH, limit: 2500 }
+				{ resource: RESOURCE_WEAPONS, limit: 2500 }
+				{ resource: RESOURCE_CLAY, limit: 2500 }
+				{ resource: RESOURCE_POTTERY, limit: 2500 }
+				{ resource: RESOURCE_BEER, limit: 2500 }
+				{ resource: RESOURCE_LINEN, limit: 2500 }
+				{ resource: RESOURCE_PAPYRUS, limit: 2500 }
+				{ resource: RESOURCE_COPPER, limit: 2500 }
+			]
 		}
+
+		{
+			name : "Behdet"
+			idx : 1
+			pos : [836, 1069]
+			route : 3
+			is_open : false
+			cost_to_open : 400
+			is_sea_trade : false
+			type : EMPIRE_CITY_EGYPTIAN_TRADING
+			max_traders : 1
+			trade_limits : default_trade_limits
+			sells [ RESOURCE_FISH, RESOURCE_CLAY, RESOURCE_POTTERY, RESOURCE_BEER, RESOURCE_REEDS, RESOURCE_PAPYRUS, RESOURCE_GRANITE ]
+			buys [ RESOURCE_BRICKS, RESOURCE_LINEN, RESOURCE_GEMS, RESOURCE_LUXURY_GOODS, RESOURCE_TIMBER ]
+			route_limits [
+				{ resource: RESOURCE_FISH, limit: 2500 }
+				{ resource: RESOURCE_CLAY, limit: 2500 }
+				{ resource: RESOURCE_BRICKS, limit: 2500 }
+				{ resource: RESOURCE_POTTERY, limit: 2500 }
+				{ resource: RESOURCE_BEER, limit: 2500 }
+				{ resource: RESOURCE_LINEN, limit: 2500 }
+				{ resource: RESOURCE_GEMS, limit: 2500 }
+				{ resource: RESOURCE_LUXURY_GOODS, limit: 2500 }
+				{ resource: RESOURCE_TIMBER, limit: 2500 }
+				{ resource: RESOURCE_REEDS, limit: 2500 }
+				{ resource: RESOURCE_PAPYRUS, limit: 2500 }
+				{ resource: RESOURCE_GRANITE, limit: 2500 }
+			]
+		}
+
+		{
+			name : "Abedju"
+			idx : 0
+			pos : [696, 907]
+			route : 4
+			is_open : false
+			cost_to_open : 500
+			is_sea_trade : false
+			type : EMPIRE_CITY_EGYPTIAN_TRADING
+			max_traders : 1
+			trade_limits : default_trade_limits
+			sells [ RESOURCE_FISH, RESOURCE_BARLEY, RESOURCE_BEER, RESOURCE_LINEN, RESOURCE_STONE ]
+			buys [ RESOURCE_GAMEMEAT, RESOURCE_CLAY, RESOURCE_BRICKS, RESOURCE_TIMBER, RESOURCE_PAPYRUS, RESOURCE_LIMESTONE, RESOURCE_GRANITE, RESOURCE_SANDSTONE ]
+			route_limits [
+				{ resource: RESOURCE_FISH, limit: 2500 }
+				{ resource: RESOURCE_GAMEMEAT, limit: 2500 }
+				{ resource: RESOURCE_CLAY, limit: 2500 }
+				{ resource: RESOURCE_BRICKS, limit: 2500 }
+				{ resource: RESOURCE_BARLEY, limit: 2500 }
+				{ resource: RESOURCE_BEER, limit: 2500 }
+				{ resource: RESOURCE_LINEN, limit: 2500 }
+				{ resource: RESOURCE_TIMBER, limit: 2500 }
+				{ resource: RESOURCE_PAPYRUS, limit: 2500 }
+				{ resource: RESOURCE_STONE, limit: 2500 }
+				{ resource: RESOURCE_LIMESTONE, limit: 2500 }
+				{ resource: RESOURCE_GRANITE, limit: 2500 }
+				{ resource: RESOURCE_SANDSTONE, limit: 2500 }
+			]
+		}
+
+		{
+			name : "Kerma"
+			idx : 3
+			pos : [729, 1489]
+			route : 9
+			is_open : false
+			cost_to_open : 450
+			is_sea_trade : false
+			type : EMPIRE_CITY_FOREIGN_TRADING
+			max_traders : 1
+			trade_limits : default_trade_limits
+			sells [ RESOURCE_LUXURY_GOODS ]
+			buys [ RESOURCE_LINEN, RESOURCE_LUXURY_GOODS ]
+			route_limits [
+				{ resource: RESOURCE_LINEN, limit: 2500 }
+				{ resource: RESOURCE_LUXURY_GOODS, limit: 1500 }
+			]
+		}
+
+		// Display-only cities on the empire map (pak route ids; no trade).
+		{
+			name : "Byblos"
+			idx : 2
+			pos : [891, 68]
+			route : 10
+			trade : false
+			type : EMPIRE_CITY_FOREIGN
+		}
+
+		{
+			name : "Kyrene"
+			idx : 4
+			pos : [22, 341]
+			route : 8
+			trade : false
+			type : EMPIRE_CITY_FOREIGN
+		}
+
+		{
+			name : "Nekhen"
+			idx : 7
+			pos : [797, 1011]
+			route : 6
+			trade : false
+			type : EMPIRE_CITY_EGYPTIAN
+		}
+
+		{
+			name : "Nubt"
+			idx : 8
+			pos : [800, 933]
+			route : 7
+			trade : false
+			type : EMPIRE_CITY_EGYPTIAN
+		}
+	]
+
+	hide_pak_routes : true
+	empire_routes [
+		{
+			route : 1
+			type : 1
+			points [
+				[631, 1376], [458, 804], [404, 622], [394, 578], [395, 551], [409, 527],
+				[432, 515], [465, 509], [561, 505]
+			]
+		}
+		{
+			route : 2
+			type : 1
+			points [
+				[647, 1370], [894, 1182], [1020, 1205], [1056, 1206], [1074, 1187], [1074, 1167],
+				[1061, 1110], [1058, 1065], [1043, 1041], [1041, 1013], [1007, 930], [926, 850],
+				[915, 848], [883, 859], [869, 862], [854, 855], [837, 837], [831, 813],
+				[846, 799], [861, 798], [871, 789], [871, 773], [841, 738], [827, 712],
+				[788, 673], [720, 624], [677, 562], [666, 512], [681, 486], [733, 473],
+				[921, 472]
+			]
+		}
+		{
+			route : 3
+			type : 1
+			points [ [636, 1367], [689, 1296], [852, 1083] ]
+		}
+		{
+			route : 4
+			type : 1
+			points [ [633, 1375], [708, 924] ]
+		}
+		{
+			route : 9
+			type : 1
+			points [
+				[746, 1511], [733, 1532], [722, 1546], [706, 1544], [686, 1536], [669, 1531],
+				[671, 1518], [669, 1505], [667, 1498], [662, 1479], [657, 1462], [648, 1448],
+				[638, 1418], [634, 1391], [633, 1375]
+			]
+		}
+		// Display Nekhen (pak route=6). Geography is the west approach (near Kyrene).
+		{
+			route : 6
+			type : 1
+			points [ [56, 427], [357, 975], [622, 1372] ]
+		}
+		// Display routes 7/8/10: two-point stubs; improve_route + deviation bends the line.
+		{
+			route : 7 // Nubt
+			type : 1
+			deviation : 40
+			points [ [633, 1375], [800, 933] ]
+		}
+		{
+			route : 8 // Kyrene
+			type : 1
+			deviation : 60
+			points [ [633, 1375], [22, 341] ]
+		}
+		{
+			route : 10 // Byblos
+			type : 1
+			deviation : 50
+			points [ [633, 1375], [891, 68] ]
+		}
+	]
+
+	hide_pak_objects : true
+	empire_ornaments [
+		// pak w/h 29x28 → mastaba bits; 37x34 → neighbouring ornament frame.
+		{ pos : [510, 490], image : "pharaoh_general/empire_bits_00120" }
+		{ pos : [839, 1095], image : "pharaoh_general/empire_bits_00119" }
+		{ pos : [666, 891], image : "pharaoh_general/empire_bits_00119" }
+	]
+	empire_texts [
+		{ name : "#crete", pos : [83, 159] }
+		{ name : "#cyprus", pos : [594, 107] }
+		{ name : "#eastern_africa", pos : [1051, 1561] }
+		{ name : "#eastern_desert", pos : [702, 773] }
+		{ name : "#greece", pos : [1, 67] }
+		{ name : "#libya", pos : [17, 425] }
+		{ name : "#lower_egypt", pos : [440, 480] }
+		{ name : "#delta", pos : [518, 362] }
+		{ name : "#fayuum", pos : [428, 580] }
+		{ name : "#nubia", pos : [806, 1445] }
+		{ name : "#palestine", pos : [833, 182] }
+		{ name : "#sinai", pos : [787, 478] }
+		{ name : "#syria", pos : [1003, 46] }
+		{ name : "#upper_egypt", pos : [696, 993] }
+		{ name : "#western_desert", pos : [230, 774] }
+		{ name : "#lebanon", pos : [877, 109] }
+		{ name : "#canaan", pos : [850, 271] }
 	]
 
 	vars {
 		pharaoh_luxury_request_count : 0
 		pharaoh_troops_requested_1 : false
 		pharaoh_troops_requested_2 : false
-		random_trade_city_under_siege : false
-		hyksos_invasion_1 : false
+		troops4_wired : false
+		kerma_siege_done : false
+		luxury_price_decreased : false
+		reeds_price_increased : false
+		wage_increase_done : false
+		hyksos_raid_small_last_year : -1
+		hyksos_raid_small_enemies_seen : false
+		hyksos_raid_small_resolved : false
+		hyksos_raid_small_active : false
 		hyksos_invasion_2 : false
+		hyksos_invasion_2_enemies_seen : false
+		hyksos_invasion_2_resolved : false
 		pharaoh_favour_invasion_done : false
-		distant_battle_requested : false
 		start_message_shown : false
 	}
 }
 
-function mission8_fire_request(tag, resource, amount, months, ok_tag, fail_tag, ok_amt, fail_amt) {
-	var request = city.create_good_request({ tag_id: tag, resource: resource, amount: amount, months_initial: months })
-	city.create_chain_event({ tag_id: ok_tag, type: EVENT_TYPE_REPUTATION_INCREASE, amount: ok_amt })
-	city.create_chain_event({ tag_id: fail_tag, type: EVENT_TYPE_REPUTATION_DECREASE, amount: fail_amt })
-	request.set_completed_action_tag(ok_tag)
-	request.set_refusal_action_tag(fail_tag)
-	request.execute()
+function mission8_hyksos_raid(invasion_id, size) {
+	city.start_foreign_army_invasion({
+		invasion_id: invasion_id,
+		enemy: ENEMY_5_HYKSOS,
+		size: size,
+		tilex: -1,
+		tiley: -1,
+		want_destroy_buildings: size,
+		invasion_attack_target: EVENT_ATTACK_TARGET_TROOPS // pak attack=3
+	})
 }
 
 [es=event_mission_start, mission=mission8]
@@ -130,13 +367,35 @@ function mission8_on_start(ev) {
 	__image_request_pak(PACK_ENEMY_EGYPTIAN)
 	__image_request_pak(PACK_TEMPLE_SETH)
 	mission_show_start_message(mission, "message_the_finer_things_tutorial")
+	empire.set_id(0)
+	empire.set_expanded(false)
 	city.set_empire_available(1)
 	for (var i = ADVISOR_NONE + 1; i <= ADVISOR_DIPLOMACY; i++) {
 		city.set_advisor_available(i, 1)
 	}
 }
 
-// pak: luxury_goods 2 / 4mo, trigger=recurring — re-request every 2 years.
+// pak: year=0 month=2 PRICE_DECREASE luxury_goods amount=10 once (buy/sell table via trade_price_change).
+[es=event_advance_month, mission=mission8]
+function mission8_luxury_price_decrease(ev) {
+	if (mission.luxury_price_decreased) {
+		return
+	}
+	if (ev.years_since_start > 0 || ev.month < 2) {
+		return
+	}
+	mission.luxury_price_decreased = true
+	city.create_chain_event({
+		tag_id: 901,
+		type: EVENT_TYPE_PRICE_DECREASE,
+		resource: RESOURCE_LUXURY_GOODS,
+		amount: 10,
+		trigger: EVENT_TRIGGER_ONCE
+	}).execute()
+}
+
+// pak: luxury_goods 2 / 4mo from y1m0, trigger=recurring — re-request every 2 years.
+// ok→+10; refuse→−19; late→KR+2→Kerma siege→troops×4 (pak late=i=9→i=1→i=19, same as Hyksos×22 wipe).
 [es=event_advance_month, mission=mission8]
 function mission8_pharaoh_request_luxury(ev) {
 	var next_year = 1 + mission.pharaoh_luxury_request_count * 2
@@ -144,72 +403,103 @@ function mission8_pharaoh_request_luxury(ev) {
 		return
 	}
 	mission.pharaoh_luxury_request_count = mission.pharaoh_luxury_request_count + 1
-	log_info("akhenaten: mission 8 selima luxury request #" + mission.pharaoh_luxury_request_count, {ev:ev})
-	mission8_fire_request(1, RESOURCE_LUXURY_GOODS, 2, 4, 101, 102, 10, 19)
-}
-
-// pak: request subtype=CITY_ASKS_FOR_TROOPS (item id 32 collides with henna) amount=7 @ y6m8.
-[es=event_advance_month, mission=mission8]
-function mission8_pharaoh_request_troops_1(ev) {
-	if (mission.pharaoh_troops_requested_1) {
-		return
-	}
-	if (ev.years_since_start < 6 || (ev.years_since_start == 6 && ev.month < 8)) {
-		return
-	}
-	mission.pharaoh_troops_requested_1 = true
-	mission8_fire_request(3, RESOURCE_TROOPS, 7, 12, 301, 302, 2, 10)
-}
-
-// pak: troop request amount=4 @ y16m4 (chain in pak; calendar proxy).
-[es=event_advance_month, mission=mission8]
-function mission8_pharaoh_request_troops_2(ev) {
-	if (mission.pharaoh_troops_requested_2) {
-		return
-	}
-	if (ev.years_since_start < 16 || (ev.years_since_start == 16 && ev.month < 4)) {
-		return
-	}
-	mission.pharaoh_troops_requested_2 = true
-	mission8_fire_request(4, RESOURCE_TROOPS, 4, 16, 401, 402, 2, 10)
-}
-
-[es=event_advance_month, mission=mission8]
-function mission8_trade_city_under_siege(ev) {
-	if (mission.random_trade_city_under_siege) {
-		return
-	}
-	if (ev.years_since_start < 2) {
-		return
-	}
-	mission.random_trade_city_under_siege = true
-	var request = city.create_trade_city_under_siege(/*tag_id*/2, /*months_initial*/12)
-	request.set_reasons(PHRASE_trade_city_siege_no_reason_A, PHRASE_trade_city_siege_no_reason_B, PHRASE_trade_city_siege_no_reason_C, -1)
+	var n = mission.pharaoh_luxury_request_count
+	var base = n * 10
+	log_info("akhenaten: mission 8 selima luxury request #" + n, {ev:ev})
+	var request = city.create_good_request({
+		tag_id: base,
+		resource: RESOURCE_LUXURY_GOODS,
+		amount: 2,
+		months_initial: 4
+	})
+	city.create_chain_event({ tag_id: base + 1, type: EVENT_TYPE_REPUTATION_INCREASE, amount: 10 })
+	city.create_chain_event({ tag_id: base + 2, type: EVENT_TYPE_REPUTATION_DECREASE, amount: 19 })
+	var late_kr = city.create_chain_event({ tag_id: base + 3, type: EVENT_TYPE_REPUTATION_INCREASE, amount: 2 })
+	var late_siege = city.create_chain_event({
+		tag_id: base + 4,
+		type: EVENT_TYPE_CITY_STATUS_CHANGE,
+		subtype: 4, // EVENT_SUBTYPE_CITY_UNDER_SIEGE
+		city: "Kerma",
+		amount: 3
+	})
+	late_kr.set_completed_action_tag(base + 4)
+	mission8_ensure_troops_request_4(true)
+	late_siege.set_completed_action_tag(4)
+	request.set_completed_action_tag(base + 1)
+	request.set_refusal_action_tag(base + 2)
+	request.set_too_late_action_tag(base + 3)
 	request.execute()
 }
 
-// pak: year=2 month=4 enemy size=9 recurring. Scenario enemy = Hyksos.
+// Resolve invasion after formations leave: player wipe → ok; want_destroy met → refuse.
+function mission8_resolve_hyksos_invasion(invasion_id, seen_flag, resolved_flag, ok_tag, refuse_tag) {
+	if (mission[resolved_flag]) {
+		return
+	}
+	var enemies = city.num_enemy_formations
+	if (enemies > 0) {
+		mission[seen_flag] = true
+		return
+	}
+	if (!mission[seen_flag]) {
+		return
+	}
+	mission[resolved_flag] = true
+	// Invaders leave after destroying enough buildings → pak refuse chain (if any).
+	if (refuse_tag && city.enemy_army_achieved_destroy_goal(invasion_id)) {
+		log_info("akhenaten: mission 8 selima hyksos invasion " + invasion_id + " destroy goal → KR −2")
+		city.create_chain_event({
+			tag_id: refuse_tag,
+			type: EVENT_TYPE_REPUTATION_DECREASE,
+			amount: 2,
+			trigger: EVENT_TRIGGER_ONCE
+		}).execute()
+		return
+	}
+	log_info("akhenaten: mission 8 selima hyksos invasion " + invasion_id + " cleared → KR +2")
+	city.create_chain_event({
+		tag_id: ok_tag,
+		type: EVENT_TYPE_REPUTATION_INCREASE,
+		amount: 2,
+		trigger: EVENT_TRIGGER_ONCE
+	}).execute()
+}
+
+// pak: year=2 month=4 enemy size=9 recurring (months=12 → yearly m4). ok→KR+2.
 [es=event_advance_month, mission=mission8]
 function mission8_hyksos_invasion_1(ev) {
-	if (mission.hyksos_invasion_1) {
+	if (ev.years_since_start < 2 || ev.month != 4) {
 		return
 	}
-	if (ev.years_since_start < 2 || (ev.years_since_start == 2 && ev.month < 4)) {
+	if (mission.hyksos_raid_small_last_year == ev.years_since_start) {
 		return
 	}
-	mission.hyksos_invasion_1 = true
-	log_info("akhenaten: mission 8 selima hyksos invasion 1 size=9", {ev:ev})
-	city.start_foreign_army_invasion({
-		invasion_id: 0,
-		enemy: ENEMY_5_HYKSOS,
-		size: 9,
-		tilex: 30,
-		tiley: 26,
-		want_destroy_buildings: 9
-	})
+	// Wait out any active army (including the y7 size-22 wave).
+	if (city.num_enemy_formations > 0) {
+		return
+	}
+	if (mission.hyksos_raid_small_active && !mission.hyksos_raid_small_resolved) {
+		return
+	}
+	mission.hyksos_raid_small_last_year = ev.years_since_start
+	mission.hyksos_raid_small_enemies_seen = false
+	mission.hyksos_raid_small_resolved = false
+	mission.hyksos_raid_small_active = true
+	log_info("akhenaten: mission 8 selima hyksos raid size=9 year=" + ev.years_since_start, {ev:ev})
+	mission8_hyksos_raid(0, 9)
+}
+
+[es=event_advance_month, mission=mission8]
+function mission8_hyksos_invasion_1_resolve(ev) {
+	if (!mission.hyksos_raid_small_active) {
+		return
+	}
+	// pak: ok→+2; refuse=-1 (no refuse chain). Tags 1000+year avoid clash with y7 ok/refuse 801/802.
+	mission8_resolve_hyksos_invasion(0, "hyksos_raid_small_enemies_seen", "hyksos_raid_small_resolved", 1000 + ev.years_since_start, 0)
 }
 
 // pak: year=7 month=0 enemy size=22 once.
+// ok→KR+2→CITY_UNDER_SIEGE Kerma→troops×4; refuse→KR−2→troops×4 (i=19 is chain_only, not calendar).
 [es=event_advance_month, mission=mission8]
 function mission8_hyksos_invasion_2(ev) {
 	if (mission.hyksos_invasion_2) {
@@ -220,35 +510,264 @@ function mission8_hyksos_invasion_2(ev) {
 	}
 	mission.hyksos_invasion_2 = true
 	log_info("akhenaten: mission 8 selima hyksos invasion 2 size=22", {ev:ev})
-	city.start_foreign_army_invasion({
-		invasion_id: 1,
-		enemy: ENEMY_5_HYKSOS,
-		size: 22,
-		tilex: 30,
-		tiley: 26,
-		want_destroy_buildings: 22
-	})
+	mission8_hyksos_raid(1, 22)
 }
 
-// pak: favour Pharaoh army amount=63. Walkthrough distant battles ≈ CITY_STATUS_CHANGE;
-// keep a Kerma distant-battle proxy (no EVENT_TYPE_DISTANT_BATTLE in pak).
 [es=event_advance_month, mission=mission8]
-function mission8_distant_battle_request(ev) {
-	if (mission.distant_battle_requested) {
+function mission8_hyksos_invasion_2_resolve(ev) {
+	if (!mission.hyksos_invasion_2 || mission.hyksos_invasion_2_resolved) {
 		return
 	}
-	if (ev.years_since_start < 5) {
+	if (ev.years_since_start < 7 || (ev.years_since_start == 7 && ev.month < 1)) {
 		return
 	}
-	mission.distant_battle_requested = true
-	log_info("akhenaten: mission 8 selima distant battle proxy Kerma", {ev:ev})
-	var battle = city.create_distant_battle({ tag_id: 5, city: "Kerma" })
-	battle.set_location_fields(-1, -1, -1, -1)
-	battle.set_image("pharaoh_unloaded/dialougedrawing_00012")
-	battle.set_param("months_initial", 14)
-	battle.set_param("amount", 2)
-	battle.set_reasons(PHRASE_distant_battle_initial_announcement_P, -1, -1, -1)
-	battle.execute()
+	var enemies = city.num_enemy_formations
+	if (enemies > 0) {
+		mission.hyksos_invasion_2_enemies_seen = true
+		return
+	}
+	if (!mission.hyksos_invasion_2_enemies_seen) {
+		return
+	}
+	mission.hyksos_invasion_2_resolved = true
+	var wiped = !city.enemy_army_achieved_destroy_goal(1)
+	if (wiped) {
+		log_info("akhenaten: mission 8 selima hyksos invasion 2 cleared → KR +2 → Kerma siege → troops 4")
+		city.create_chain_event({
+			tag_id: 801,
+			type: EVENT_TYPE_REPUTATION_INCREASE,
+			amount: 2,
+			trigger: EVENT_TRIGGER_ONCE
+		}).execute()
+		city.create_chain_event({
+			tag_id: 710,
+			type: EVENT_TYPE_CITY_STATUS_CHANGE,
+			subtype: 4, // EVENT_SUBTYPE_CITY_UNDER_SIEGE (pak i=1)
+			city: "Kerma",
+			amount: 3,
+			trigger: EVENT_TRIGGER_ONCE
+		}).execute()
+	} else {
+		log_info("akhenaten: mission 8 selima hyksos invasion 2 destroy goal → KR −2 → troops 4")
+		city.create_chain_event({
+			tag_id: 802,
+			type: EVENT_TYPE_REPUTATION_DECREASE,
+			amount: 2,
+			trigger: EVENT_TRIGGER_ONCE
+		}).execute()
+	}
+	mission8_fire_troops_request_4()
+}
+
+// pak: year=7 month=8 CITY_UNDER_SIEGE Kerma once → ok→troops×7 / 12mo (chain_only).
+// create_good_request is ONCE (cannot be chain child); fire siege + request same month.
+// Troops×7 tails (pak i=8): ok/late→MESSAGE city_saved (Nubt)→NEW_TRADE_ROUTE;
+// refuse/defeat→MESSAGE battle_lost (Nubt)→KR −10. No KR on success.
+// pak NEW_TRADE city_id=5 is Kyrene (display); open Men-nefer (playable trade unlock).
+[es=event_advance_month, mission=mission8]
+function mission8_kerma_siege_and_troops(ev) {
+	if (mission.kerma_siege_done) {
+		return
+	}
+	if (ev.years_since_start < 7 || (ev.years_since_start == 7 && ev.month < 8)) {
+		return
+	}
+	mission.kerma_siege_done = true
+	mission.pharaoh_troops_requested_1 = true
+	log_info("akhenaten: mission 8 selima Kerma under siege → troops request 7", {ev:ev})
+
+	city.create_chain_event({
+		tag_id: 700,
+		type: EVENT_TYPE_CITY_STATUS_CHANGE,
+		subtype: 4, // EVENT_SUBTYPE_CITY_UNDER_SIEGE
+		city: "Kerma",
+		amount: 12, // months under siege (months_initial unset on chain events)
+		trigger: EVENT_TRIGGER_ONCE
+	}).execute()
+
+	var request = city.create_good_request({
+		tag_id: 3,
+		resource: RESOURCE_TROOPS,
+		amount: 7,
+		months_initial: 12,
+		subtype: 1 // EVENT_SUBTYPE_CITY_ASKS_FOR_TROOPS (pak i=8)
+	})
+	var ok_msg = city.create_chain_event({
+		tag_id: 310,
+		type: EVENT_TYPE_MESSAGE,
+		subtype: 0, // EVENT_SUBTYPE_MSG_CITY_SAVED
+		city: "Nubt",
+		amount: 2
+	})
+	city.create_chain_event({
+		tag_id: 311,
+		type: EVENT_TYPE_CITY_STATUS_CHANGE,
+		subtype: 2, // EVENT_SUBTYPE_NEW_TRADE_ROUTE — pak city_id=5=Kyrene; open Men-nefer
+		city: "Men-nefer",
+		amount: 4
+	})
+	ok_msg.set_completed_action_tag(311)
+
+	var fail_msg = city.create_chain_event({
+		tag_id: 312,
+		type: EVENT_TYPE_MESSAGE,
+		subtype: 2, // EVENT_SUBTYPE_MSG_DISTANT_BATTLE_LOST
+		city: "Nubt",
+		amount: 3
+	})
+	city.create_chain_event({ tag_id: 313, type: EVENT_TYPE_REPUTATION_DECREASE, amount: 10 })
+	fail_msg.set_completed_action_tag(313)
+
+	request.set_completed_action_tag(310)
+	request.set_too_late_action_tag(310)
+	request.set_refusal_action_tag(312)
+	request.execute()
+}
+
+// pak: year=8 month=0 PRICE_INCREASE reeds amount=7 once.
+[es=event_advance_month, mission=mission8]
+function mission8_reeds_price_increase(ev) {
+	if (mission.reeds_price_increased) {
+		return
+	}
+	if (ev.years_since_start < 8) {
+		return
+	}
+	mission.reeds_price_increased = true
+	city.create_chain_event({
+		tag_id: 902,
+		type: EVENT_TYPE_PRICE_INCREASE,
+		resource: RESOURCE_REEDS,
+		amount: 7,
+		trigger: EVENT_TRIGGER_ONCE
+	}).execute()
+}
+
+// pak: year=8 month=8 DEMAND_INCREASE timber amount=2 recurring — yearly m8 from year 8.
+[es=event_advance_month, mission=mission8]
+function mission8_timber_demand_increase(ev) {
+	if (ev.years_since_start < 8 || ev.month != 8) {
+		return
+	}
+	city.create_chain_event({
+		tag_id: 910 + ev.years_since_start,
+		type: EVENT_TYPE_DEMAND_INCREASE,
+		resource: RESOURCE_TIMBER,
+		amount: 2,
+		trigger: EVENT_TRIGGER_ONCE
+	}).execute()
+}
+
+// pak: year=10 month=4 WAGE_INCREASE once
+[es=event_advance_month, mission=mission8]
+function mission8_wage_increase(ev) {
+	if (mission.wage_increase_done) {
+		return
+	}
+	if (ev.years_since_start < 10 || (ev.years_since_start == 10 && ev.month < 4)) {
+		return
+	}
+	mission.wage_increase_done = true
+	city.create_chain_event({
+		tag_id: 904,
+		type: EVENT_TYPE_WAGE_INCREASE,
+		amount: 4,
+		trigger: EVENT_TRIGGER_ONCE
+	}).execute()
+}
+
+// pak i=19: troops×4 / 16mo. From Hyksos×22 wipe / luxury late (i=9→i=1→i=19).
+// subtype=2 distant_battle. ok→MESSAGE→NEW_TRADE(Men-nefer)→KR+2; refuse→lost→KR−2; late→lost.
+// as_chain_child=true → ONLY_VIA_EVENT template (luxury late siege); else ONCE+execute.
+function mission8_ensure_troops_request_4(as_chain_child) {
+	if (mission.troops4_wired) {
+		return null
+	}
+	mission.troops4_wired = true
+	log_info("akhenaten: mission 8 selima troops request 4" + (as_chain_child ? " (chain)" : ""))
+
+	var opts = {
+		tag_id: 4,
+		resource: RESOURCE_TROOPS,
+		amount: 4,
+		months_initial: 16,
+		subtype: 2 // EVENT_SUBTYPE_DISTANT_BATTLE (pak i=19)
+	}
+	if (as_chain_child) {
+		opts.trigger = EVENT_TRIGGER_ONLY_VIA_EVENT
+	}
+	var request = city.create_good_request(opts)
+	var ok_msg = city.create_chain_event({
+		tag_id: 410,
+		type: EVENT_TYPE_MESSAGE,
+		subtype: 1, // EVENT_SUBTYPE_FOREIGN_CITY_CONQUERED
+		city: "Men-nefer",
+		amount: 5
+	})
+	var ok_trade = city.create_chain_event({
+		tag_id: 411,
+		type: EVENT_TYPE_CITY_STATUS_CHANGE,
+		subtype: 2, // EVENT_SUBTYPE_NEW_TRADE_ROUTE
+		city: "Men-nefer",
+		amount: 2
+	})
+	city.create_chain_event({ tag_id: 412, type: EVENT_TYPE_REPUTATION_INCREASE, amount: 2 })
+	ok_msg.set_completed_action_tag(411)
+	ok_trade.set_completed_action_tag(412)
+
+	var fail_msg = city.create_chain_event({
+		tag_id: 413,
+		type: EVENT_TYPE_MESSAGE,
+		subtype: 2, // EVENT_SUBTYPE_MSG_DISTANT_BATTLE_LOST
+		city: "Kyrene",
+		amount: 7
+	})
+	city.create_chain_event({ tag_id: 414, type: EVENT_TYPE_REPUTATION_DECREASE, amount: 2 })
+	fail_msg.set_completed_action_tag(414)
+
+	city.create_chain_event({
+		tag_id: 415,
+		type: EVENT_TYPE_MESSAGE,
+		subtype: 2, // late = battle_lost (Men-nefer); skip pak ok→re-request
+		city: "Men-nefer",
+		amount: 5
+	})
+
+	request.set_completed_action_tag(410)
+	request.set_refusal_action_tag(413)
+	request.set_too_late_action_tag(415)
+	return request
+}
+
+function mission8_fire_troops_request_4() {
+	if (mission.pharaoh_troops_requested_2) {
+		return
+	}
+	mission.pharaoh_troops_requested_2 = true
+	if (mission.troops4_wired) {
+		// Luxury prepared ONLY_VIA template — activate if late never did (one-shot master).
+		__city_event_fire_chain(4)
+		return
+	}
+	var request = mission8_ensure_troops_request_4(false)
+	if (request) {
+		request.execute()
+	}
+}
+
+// pak: year=19 month=2 DEMAND_INCREASE luxury_goods amount=3 recurring — yearly m2 from year 19.
+[es=event_advance_month, mission=mission8]
+function mission8_luxury_demand_increase(ev) {
+	if (ev.years_since_start < 19 || ev.month != 2) {
+		return
+	}
+	city.create_chain_event({
+		tag_id: 930 + ev.years_since_start,
+		type: EVENT_TYPE_DEMAND_INCREASE,
+		resource: RESOURCE_LUXURY_GOODS,
+		amount: 3,
+		trigger: EVENT_TRIGGER_ONCE
+	}).execute()
 }
 
 [es=event_advance_month, mission=mission8]

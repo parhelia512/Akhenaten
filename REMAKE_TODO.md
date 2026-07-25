@@ -8,7 +8,8 @@ D4 (миссия 15), D5 (миссии 16 Iunet / 17 On / 18 Rostja); стату
 сверен с кодом. Добавлены B5 (валидация choice) и блок F — вражеские колесницы, баг
 данных `enemies.js`, формула рейтинга монументов (F3). Заскриптованы миссии 0–18.
 Обновлено 2026-07-18: закрыты хотфиксы волны 3 — F3 (форма формулы, калибровка весов
-осталась), F1 (`enemies.js`), B5 (валидация choice). Открыты в блоке B: B2, B3, B4.
+осталась), F1 (`enemies.js`), B5 (валидация choice). Открыты в блоке B: B2
+      ([план](REMAKE_B2_INVASION_PLAN.md)), B3, B4.
 Дополнено 2026-07-18 (вечер): в P3 добавлены H1 / J1 / FP1 / J2 / T1 / T2 —
 баги, техдолг и процессные задачи после farm preview и house `evolve_text` в JS.
 Позже 2026-07-18: закрыт #608 (STOP Empty All больше не оставляет всем Empty);
@@ -24,6 +25,17 @@ B2/B3/B4 по-прежнему открыты (TODO-заглушки на мес
 в P3 добавлен блок **DX1–DX6** (старт / data paths / docs / degrade).
 Ещё позже 2026-07-24: в P3 добавлены **QA1–QA3**, **DX7–DX10**, **AS1–AS3**,
 **PC1–PC3** (локали-заглушки, mission dumps, first-run UX, community sticky, техдолг bootstrap).
+Обновлено 2026-07-25: Low Bridge engine-срез закрыт (`REMAKE_BRIDGE_PLAN.md`); в P2 —
+**BR1–BR2** (unlock/миссии), в P3 — **BR3–BR5** (стили UI, тест smoke, offsets);
+паттерны terrain-feature grids — `REMAKE_NOTES.md` §9.
+Позже 2026-07-25: **UB1** (allowed buildings из pak — общий unlock кампании; BR1 —
+первый потребитель), **TG1** (чеклист/тест для новых grids), **PC4** (раздельные
+треки PR + cmake reconfigure в review).
+Ещё позже 2026-07-25: hot-reload MuJS stack overflow (mixed ×~10) — закрыт **HR1** +
+тест `47_js_hotreload_stack`; уроки — `REMAKE_NOTES.md` §10. Закрыты: **HR5** (инвариант
+стека в suite), **HR6** (notes), **HR7** (лог `vm_sync`), **QA4** (canary table).
+Открыты: **HR2** (аудит pcall), **HR3** (диагностика), **HR4** (dirty refresh), **PC5**
+(трек infra/dev). Приоритет: HR2 ≫ HR4.
 
 Приоритеты:
 - **P1** — блокирует прохождение оригинальной кампании;
@@ -65,6 +77,9 @@ B2/B3/B4 по-прежнему открыты (TODO-заглушки на мес
   с реальными эффектами, эволюция/деградация жилья всех 20 уровней.
 - **Инфраструктура**: MuJS-скриптование (~90k строк JS, идёт активная миграция логики),
   JS-отладчик (DAP), Tracy, 23 интеграционных теста, сборки Win/Linux/mac/Android/Web.
+- **Low Bridge (engine)** — place/draw/routing/config, `bridge_part`/`bridge_type` grids +
+  dual-write в `sprite_grid`, migrate при load, ship path вынесен; тест `46_bridge_placement`.
+  Детали и открытый unlock — **[REMAKE_BRIDGE_PLAN.md](REMAKE_BRIDGE_PLAN.md)**.
 
 ---
 
@@ -82,11 +97,15 @@ B2/B3/B4 по-прежнему открыты (TODO-заглушки на мес
 - [x] **B1. Ветвление кампании и ранги (JS)** — независимые выборы через `choice[]`
       (Timna→6/7, Behdet/Abydos→8/9, Saqqara→11/12), сохранение `campaign_mission_rank`
       (`f5a17b591`, `bd1298219`).
-- [ ] **B2. Event-driven вторжения — no-op**: `case EVENT_TYPE_INVASION: // TODO break;`
-      в `src/scenario/scenario_event_manager.cpp:544-546`. Таймерные/редакторские вторжения
-      не срабатывают (прямой спавн через `scenario_invasion.cpp` работает). Редактор
-      сценариев (`src/window/editor/`) позволяет создавать invasions/events, которые
-      рантайм молча игнорирует. **Разблокирует редакторские вторжения — см. ED5.**
+- [ ] **B2. Event-driven вторжения — no-op**: `case EVENT_TYPE_INVASION: // TODO`
+      в `scenario_event_manager.cpp`. Спавн есть (`scenario_invasion.cpp`); нет deferred
+      `on_completed`/`on_refusal`. Миссии 5–8 на JS poll/favour helper.
+      **План:** [`REMAKE_B2_INVASION_PLAN.md`](REMAKE_B2_INVASION_PLAN.md)
+      (B2a → resolve → B2c → B2b → B2d → B2-migrate m5–8; опц. B2.5 JS helper).
+      Triage/DoD миссий: [`MISSION_PAK_TRIAGE.md`](MISSION_PAK_TRIAGE.md).
+      **Разблокирует редакторские вторжения — см. ED5.**
+- [x] **B2x (Selima wave):** PRICE↑/↓ mutates prices; `debt_interest`/`int_dcy`;
+      route `deviation`; NEW_TRADE `is_open` — см. `REMAKE_TASKS_P1.md` § B2x.
 - [ ] **B3. Сериализация invasion warnings** — тело `iob_invasion_warnings` закомментировано
       (`src/scenario/scenario_invasion.cpp:456-477`, `// TODO`). После load предупреждения теряются.
 - [ ] **B4. Подстановка фраз в событийных сообщениях**: `int phrase_id = -1; // TODO`
@@ -170,9 +189,10 @@ enum в `src/building/building_type.h` — класса и конфига нет
 
 - [x] **D1. Миссия 11 — Serabit Khadim** (`fa91fa687`; wiki-страница дописана 2026-07-16).
 - [x] **D1b. Доводка миссии 11 — сверка с оригиналом** (2026-07-24): dump
-      `45_mission11_pak_dump` / `load_mission_pak_raw`; торговля Men-nefer/Abu/Behdet/
-      Nekhen/Selima из pak (Kebet убран); враг `ENEMY_7_LIBIAN`; запросы и 7 timed-raid
-      в JS; wiki обновлена. Цепочки `EVENT_TYPE_INVASION` из бинарника → B2.
+      `__test_mission_pak_dump` / `load_mission_pak_raw` (ad-hoc, без постоянного теста);
+      торговля Men-nefer/Abu/Behdet/Nekhen/Selima из pak (Kebet убран); враг
+      `ENEMY_7_LIBIAN`; запросы и 7 timed-raid в JS; wiki обновлена. Цепочки
+      `EVENT_TYPE_INVASION` из бинарника → B2.
 - [x] **D2. Миссия 12 — Meidum** — заскриптована с **временным monument goal**
       (31 при скриптовании, **сейчас 58 после F3**; малая + средняя ступенчатые):
       оригинал требует комплекс ступенчатой пирамиды
@@ -238,6 +258,18 @@ enum в `src/building/building_type.h` — класса и конфига нет
       углы травы «doesn't work yet» (`:768`).
 - [ ] Prosperity: бонус за «food_types_eaten» закомментирован (`src/city/rating_prosperity.cpp:26`);
       `city_finance.cpp:195` — «fix this calculation».
+- [x] **Low Bridge engine** — см. «Что уже сделано»; план/архив —
+      [REMAKE_BRIDGE_PLAN.md](REMAKE_BRIDGE_PLAN.md).
+- [ ] **UB1. Allowed buildings из pak (кампания)** — RE `scenario_info` / reserved:
+      массив «можно строить» из оригинала → bind + dump `pak_allowed:…` + (опц.)
+      подмешивание в `allowed_buildings` / сверка с JS `buildings[]`. Сейчас меню =
+      только ручной JS — источник рассинхрона миссий (не только мост). **BR1** —
+      первый потребитель; польза для всего D-блока. Не угадывать unlock «как у Ferry».
+- [ ] **BR1. Unlock Low Bridge из pak** — применить **UB1** к `BUILDING_LOW_BRIDGE`:
+      править `buildings[]` / `use_building` только по дампу. Детали —
+      `REMAKE_BRIDGE_PLAN.md` § Unlock.
+- [ ] **BR2. Сверка миссий с водой** — после BR1: Perwadjyt / узкие протоки / custom
+      `m_129_bridges`; wiki buildings/missions при расхождении.
 
 ## P2 — UI и оверлеи
 
@@ -328,7 +360,7 @@ enum в `src/building/building_type.h` — класса и конфига нет
       восстановить хранилище или переложить на новый event-manager.
 - [ ] **ED5. Рантайм-потребители редакторских данных (средняя).** Редактор умеет авторить то,
       что рантайм молча игнорирует:
-      - `EVENT_TYPE_INVASION` — no-op (`scenario_event_manager.cpp:544-546`); это **задача B2** выше.
+      - `EVENT_TYPE_INVASION` — no-op; это **задача B2** ([план](REMAKE_B2_INVASION_PLAN.md)).
         Редактор полноценно создаёт вторжения (`editor.cpp:145-185`, `window/editor/invasions.cpp`,
         `edit_invasion.cpp`, точки в `editor_map.cpp`) — на рантайме они мертвы.
       - price/demand changes: авторинг есть (`editor.cpp:187-271`), рантайм-кейсы
@@ -402,6 +434,76 @@ enum в `src/building/building_type.h` — класса и конфига нет
       (ниже).
 - [ ] Мультиплеера нет (`src/net/` — только HTTP к GitHub) — вне скоупа ремейка, зафиксировано
       для полноты.
+- [ ] **BR3. UI стилей моста** — выбор `bridge_type` ≠ 0, слоты в `bridge_styles`
+      (`src/scripts/building/bridge.js`), ассеты. Enhanced / не parity с Pharaoh
+      (см. **PC2** — не тащить в «закрытие мостов»).
+- [ ] **BR4. Bridge save/rotate/undo smoke** — расширить `tests/46_bridge_placement.js`
+      (или отдельный тест): reload part/type, rotate, undo place/remove.
+- [ ] **BR5. Pixel offsets Low Bridge** — тюнинг `bridge_styles[].parts` в
+      `src/scripts/building/bridge.js` (`img`/`pos`) vs Pharaoh `PACK_TERRAIN/63`
+      (visual QA; fallback в C++ если parts нет).
+- [ ] **TG1. Чеклист нового tile-grid** — шаблон для Akhenaten-only / dual-write grids
+      (как bridge): version bump + chunk size, pre_load clear, undo backup, migrate,
+      integral place→save→load→assert. Зафиксировать в `tests/README.md` + ссылка на
+      `REMAKE_NOTES.md` §9. **BR4** — первый прогон на мостах.
+
+### Hot-reload / MuJS value stack (HR)
+
+Выявлено 2026-07-25: при `--mixed` после ~10 сохранений скрипта — `stackoverflow` в
+MuJS → `Fatal program exit` во время `config::refresh` / UI archive load. Причина —
+утечка value stack (`JS_STACKSIZE` = 256). Детали — `REMAKE_NOTES.md` §10.
+Порядок: ~~**HR1**~~ ✅ → ~~**HR5**~~ ✅ / **HR2** → ~~**HR7**~~ ✅ / **HR3** → **HR4**
+(только после HR2 — удобство, не страховка). ~~**HR6**~~ ✅ (notes). ~~**QA4**~~ ✅ (canary table).
+
+- [x] **HR1. Утечка стека при hot-reload `[console_command=…]`.** ✅
+      Каждый `js_vm_sync` → `js_register_game_handlers` → для ~30 функций с модификатором
+      `console_command` вызывался `js_getglobal` без `pop` (~30 слотов/reload). Также:
+      `js_call_function` / `js_call_function_bool` не снимали результат `pcall` на success;
+      `js_vm_exec_function_args` делал ошибочный `js_pop(2)` после `trypcall`.
+      **Сделано:** pop в `js_register_console_command_from_function`; wrappers восстанавливают
+      baseline; pop результата в `js_call_function*`; safety-net в `js_vm_sync` чистит только
+      прирост относительно entry baseline (безопасно при nested JS→C).
+      **Регрессия:** `tests/47_js_hotreload_stack.js` + `__test_js_hotreload_handlers_stack_ok` /
+      `__test_js_hotreload_file_stack_ok` — 20× handlers + 20× reload `:console_commands.js`.
+      **Прогон:** `--integraltest-only 47_js_hotreload --no-resource` → PASS.
+      **Файлы:** `js_console_command_registry.cpp`, `js_game.cpp`, `js.cpp`, `js_test_game.cpp`.
+
+- [ ] **HR2. Аудит `pcall` / стека в JS↔C мостах.**
+      Пройти raw `J->pcall`, `js_getglobal` / `js_getregistry` без парного `pop`, modifier
+      callbacks, console wrappers. Правило: success и error оставляют стек на baseline
+      вызова. Зафиксировать в `src/js/CLAUDE.md` (короткий «stack hygiene»).
+      **Приёмка:** нет новых сайтов «push без pop»; тест 47 остаётся зелёным.
+      **Файлы:** `src/js/*.cpp`, `src/graphics/elements/ui*.cpp` (onclick paths).
+
+- [ ] **HR3. Диагностика стека в dev.**
+      При `bot==0` и `top` выше порога (или leftover после `js_vm_sync`) — лог/assert, а не
+      только молчаливый safety-net. Опционально: счётчик в Tracy / debug console.
+      **Приёмка:** искусственная утечка даёт видимую строку в логе до краша.
+      **Файлы:** `src/js/js.cpp` (`js_vm_sync` / `js_vm_frame_end`).
+
+- [ ] **HR4. Hot-reload без полного `config::refresh` (по желанию).**
+      Сейчас любое изменение скрипта перезагружает все autoconfig windows + handlers.
+      Dirty-set: только изменённый файл / затронутые секции UI. Ускоряет mixed-dev и
+      сужает поверхность утечек. Не блокер геймплея. **Не раньше HR2** — сначала
+      страховка от abort, потом оптимизация. Лог длительности уже есть (**HR7** ✅).
+      **Файлы:** `js_folder_notifier*`, `js.cpp` (`js_vm_sync`), `autoconfig_window.cpp`.
+
+- [x] **HR5. Инвариант стека в integral-suite.** ✅
+      Перед каждым JS-тестом: `js_vm_force_idle_stack()` (сбрасывает stale со старта VM;
+      лог `cleared N stale MuJS stack slot(s)`). После теста и в конце suite: leftover →
+      FAIL. API: `js_vm_stack_depth_if_idle` / `js_vm_force_idle_stack`.
+      **Прогон:** `--integraltest-only 47_js_hotreload --no-resource` → PASS (+ stale clear).
+      **Файлы:** `src/platform/integral_tests.cpp`, `src/js/js.{h,cpp}`.
+
+- [x] **HR6. Заметка §10 в `REMAKE_NOTES.md`.** ✅
+      MuJS value stack: размер 256, `gettop = TOP−BOT`, типичные грабли, тест 47 как эталон.
+      См. `REMAKE_NOTES.md` §10. Дополнять ссылками при закрытии **HR2**.
+
+- [x] **HR7. Лог hot-reload: что синкнулось и сколько заняло.** ✅
+      `js_vm_sync`: `JS: vm_sync done files=N (…) refresh=full elapsed_ms=…`
+      (список файлов + длительность). Помогает решать, нужен ли **HR4**.
+      **Прогон:** видно в логе при тесте 47 (`files=1 (:console_commands.js)`).
+      **Файлы:** `src/js/js.cpp`.
 
 ## P3 — Старт / Pharaoh data (DX)
 
@@ -470,9 +572,8 @@ Pharaoh-only (и Linux case-symlink'ами) получали «Pharaoh data requ
 
 - [ ] **QA1. Mission golden dumps.** Расширить `mission_pak_dump` / `js_test_mission_pak_dump`
       → baseline vs оригинал для миссий 0–18 (win criteria, empire, requests, starting funds).
-      Маркеры + опционально `--integraltest-only` на одну миссию.
-      **Файлы:** `src/js/js_test_mission_pak_dump.cpp`, `tests/45_*.js` (или рядом), wiki
-      Developer Reference.
+      Маркеры + ad-hoc `--integraltest-only 99_tmp_*` (постоянный dump-тест не заводим).
+      **Файлы:** `src/js/js_test_mission_pak_dump.cpp`, wiki Developer Reference.
 
 - [ ] **QA2. Deterministic tick harness.** N месяцев на фикс. сейве + hash ключевых гридов /
       finance/population (ловля рассинхрона economy/flood). Не блокер геймплея; полезно
@@ -482,6 +583,11 @@ Pharaoh-only (и Linux case-symlink'ами) получали «Pharaoh data requ
 - [ ] **QA3. Crash triage без Cleopatra packs.** Каталог известных падений после Continue
       (Pharaoh-only) с минимальным repro → корм для **DX2**. Живёт в `REMAKE_NOTES.md`
       или wiki troubleshooting.
+
+- [x] **QA4. Canary на класс бага (процесс).** ✅
+      Таблица canary в `tests/README.md` (36 xstring, 38 color, 47 stack) + правило:
+      новый класс краша → узкий `tests/NN_*.js` до мержа MuJS-волны. Драйвер suite
+      дополнительно валит тест при non-idle стеке (**HR5**).
 
 ## P3 — Архитектура старта (AS)
 
@@ -506,13 +612,24 @@ Pharaoh-only (и Linux case-symlink'ами) получали «Pharaoh data requ
       (`CONTRIBUTING.md`).
 
 - [ ] **PC2. Backlog «Enhanced later».** Явный список «не сейчас» (autosave slots, overlays
-      polish, QoL), чтобы PRы не уезжали в polish вопреки CONTRIBUTING. Можно секция в
-      этом файле или wiki.
+      polish, QoL, **BR3** UI стилей моста), чтобы PRы не уезжали в polish вопреки
+      CONTRIBUTING. Можно секция в этом файле или wiki.
 
 - [ ] **PC3. Wiki sync из mission scripts.** Детальные страницы только у ~3 миссий при
       0–18 в скриптах — шаблон/генератор Developer Reference (paths, line numbers, message
       IDs) из `m_NNN_*.js`. Связано с правилом wiki в `CLAUDE.md`.
 
+- [ ] **PC4. Раздельные треки PR + cmake reconfigure.** (1) Не мешать engine-фичи
+      (мосты/grids) с mission/empire-скриптами в одном PR — handoff уже ловил смешение.
+      (2) В review checklist: новый `.cpp`/`.h` → был `cmake --preset` (GLOB без
+      `CONFIGURE_DEPENDS`). Зафиксировать в `CLAUDE.md` / CONTRIBUTING при удобном PR.
+
+- [ ] **PC5. Трек infra/dev vs gameplay parity.** CONTRIBUTING режет PRы, меняющие
+      игровую логику / крупный UI; hot-reload hygiene, integral canary, cmake, логи sync —
+      безопасная полоса. Явно вести **infra/dev** отдельно от mission/building parity
+      (расширение **PC4**): агентам/ревью — не смешивать «починить стек MuJS» с «дописать
+      Selima» в одном PR. Зафиксировать в `CLAUDE.md` при удобном PR.
+      **Связано:** HR*, QA4, PC4.
 ## P3 — MuJS биндинги и house/farm (после farm preview / evolve_text)
 
 Выявлено 2026-07-18 при переносе farm ghost_preview в JS и фиксе `House.evolve_text`
@@ -670,3 +787,6 @@ preview crops/image в `farm.js`.
 7. Дальше по эпохам до 37-й, затем контент Cleopatra (дамбы, поздние монументы, миссии 38–52).
 8. По желанию / после обсуждения: **L1** (заглушки языков), **PC1** (редактор), **DX7/DX10**
    (first-run + community sticky).
+9. При работе с MuJS / `--mixed`: **HR2** (аудит pcall) раньше **HR4**; закрыты
+   **HR5** (инвариант suite), **HR7** (лог sync), **QA4** (canary table).
+   См. `REMAKE_NOTES.md` §10. Infra/dev vs parity — **PC5**.

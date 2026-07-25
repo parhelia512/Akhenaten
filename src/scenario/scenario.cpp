@@ -42,6 +42,9 @@ void scenario_data_t::init() {
     campaign_mission_rank = 0;
     scmode = e_scenario_normal;
     settings.starting_kingdom = difficulty_starting_kingdom();
+    if (debt_interest_rate <= 0) {
+        debt_interest_rate = 10;
+    }
 }
 
 void scenario_data_t::distant_battle_set_enemy_travel_months(int value) {
@@ -49,7 +52,7 @@ void scenario_data_t::distant_battle_set_enemy_travel_months(int value) {
 }
 
 int scenario_data_t::startup_funds() const {
-    const int funds = meta.initial_funds[game.difficulty()];
+    const int funds = meta.initial_funds.get();
     if (funds > 0) {
         return funds;
     }
@@ -58,7 +61,7 @@ int scenario_data_t::startup_funds() const {
 }
 
 int scenario_data_t::rescue_loan() const {
-    const int loan = meta.rescue_loans[game.difficulty()];
+    const int loan = meta.rescue_loans.get();
     if (loan > 0) {
         return loan;
     }
@@ -67,12 +70,23 @@ int scenario_data_t::rescue_loan() const {
 }
 
 int scenario_data_t::house_tax_multiplier(int v) const {
-    const int multiplier = meta.house_tax_multipliers[game.difficulty()];
+    const int multiplier = meta.house_tax_multipliers.get();
     if (multiplier > 0) {
         return calc_adjust_with_percentage<int>(v, multiplier);
     }
 
     return difficulty.house_tax_multiplier(v);
+}
+
+int scenario_data_t::debt_interest() const {
+    const int rate = meta.debt_interest.get();
+    if (rate > 0) {
+        return rate;
+    }
+    if (debt_interest_rate > 0) {
+        return debt_interest_rate;
+    }
+    return 10;
 }
 
 void scenario_data_t::load_metadata(const mission_id_t &missionid, bool is_new_mission) {
@@ -103,6 +117,11 @@ void scenario_data_t::load_metadata(const mission_id_t &missionid, bool is_new_m
         arch.r("vars", newvars);
         vars.insert(newvars);
     });
+
+    // Keep pak rate if present; otherwise default 10%. Mission meta ladder is read via debt_interest().
+    if (debt_interest_rate <= 0) {
+        debt_interest_rate = 10;
+    }
 
     if (is_new_mission) {
         events.load_mission_metadata(missionid);
@@ -146,7 +165,8 @@ int scenario_building_image_native_crops() {
 
 // fancy lambdas! probably gonna create many problems down the road. :3
 io_buffer* iob_scenario_mission_id = new io_buffer([](io_buffer* iob, size_t version) {
-    iob->bind(BIND_SIGNATURE_INT8, &g_scenario.campaign_scenario_id);
+    // Chunk is 4 bytes; INT8 truncated custom mission ids > 127 (e.g. mission 129).
+    iob->bind(BIND_SIGNATURE_INT32, &g_scenario.campaign_scenario_id);
 });
 
 e_scenario_mode scenario_data_t::mode() {

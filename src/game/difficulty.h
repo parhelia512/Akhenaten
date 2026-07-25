@@ -32,6 +32,7 @@ using int8_dcy = value_dcy<int8_t>;
 using uint8_dcy = value_dcy<uint8_t>;
 using uint16_dcy = value_dcy<uint16_t>;
 
+template<> inline void archive::r<int_dcy>(pcstr name, int_dcy &v) { r(name, v.value); }
 template<> inline void archive::r<int8_dcy>(pcstr name, int8_dcy &v) { r(name, v.value); }
 template<> inline void archive::r<uint8_dcy>(pcstr name, uint8_dcy &v) { r(name, v.value); }
 template<> inline void archive::r<uint16_dcy>(pcstr name, uint16_dcy &v) { r(name, v.value); }

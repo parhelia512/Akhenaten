@@ -226,7 +226,8 @@ struct event_manager_t {
     xstring msg_text(int group_id, int index);
     void load_mission_metadata(const mission_id_t &missionid);
 
-    void create_good_request(int tag, e_resource r, int amount, int months_initial);
+    void create_good_request(int tag, e_resource r, int amount, int months_initial, int8_t subtype = 0,
+                             e_event_trigger_type trigger = EVENT_TRIGGER_ONCE);
     void create_pharaoh_gift(int tag, e_resource r, int amount);
     void create_trade_city_under_siege(int tag, int months_initial);
     void create_foreign_army_attack_warning(int tag, int8_t sender_faction);

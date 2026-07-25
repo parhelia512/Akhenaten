@@ -199,32 +199,26 @@ Cleopatra packs (`Data/Expansion.sg3` / `SprMain2.sg3`) — см. **DX2** в
 `REMAKE_TODO.md`; Pharaoh-only install — не критерий приёмки B1b.
 
 ### B2. Реализовать EVENT_TYPE_INVASION в менеджере событий
-**Файлы:** `src/scenario/scenario_event_manager.cpp:544-546`.
-**Зависимости:** нет.
-**Проблема:** `case EVENT_TYPE_INVASION: // TODO` — таймерные и редакторские вторжения
-не происходят. Рабочий механизм спавна есть в `src/scenario/scenario_invasion.cpp`.
-**Подзадачи:**
-- **B2a. Enemy / Bedouin army (timed):** в `case EVENT_TYPE_INVASION` для
-  `EVENT_TRIGGER_ONCE` / `RECURRING` извлечь `item` (= `e_event_invader`: enemy/egypt/
-  pharaoh/beduins), `amount` (size), `location_fields`, `invasion_attack_target`;
-  вызвать спавн из `scenario_invasion.cpp`; выставить `chain_action_next`.
-- **B2b. Pharaoh favour invasion:** `EVENT_TRIGGER_BY_FAVOUR` (0x10, editor
-  «triggered by favor»). Это **не distant battle** и не календарный рейд — наказание
-  при обвале Kingdom Rating. В pak (Timna/Behdet/Abedju): `item=PHARAOH`, amount
-  40–45. Сейчас параллельно живёт Caesar-наследие
-  `kingdome_relation_t::process_invasion` (sizes 32/64/…) — при B2b сверить/заменить
-  на scenario-event, иначе двойной спавн.
-- **B2c. Chain-only invasions:** `EVENT_TRIGGER_ONLY_VIA_EVENT` (parent `on_refusal` /
-  `on_defeat` / …) — клон через `create(..., ACTIVATED_*)` как у requests.
-- **B2d. Интеграционный тест:** timed + favour (KR→0) + chain; `start_invasion` из
-  консоли продолжает работать.
-**Приёмка:** событие вторжения из редактора/`.pak`/JS приводит к предупреждениям
-и реальному вторжению; favour-event стреляет при низком KR; `start_invasion` ок.
-**Проверка:** тестовая карта; dump `__test_mission_pak_dump` → `semantics=favour_kr_punishment`
-для 0x10; интеграционный тест.
-**Справка (2026-07-24 dump m5–7):** крупные amount=40/45 — favour/chain Pharaoh army,
-`EVENT_TYPE_DISTANT_BATTLE` в этих миссиях **отсутствует**. Distant battle — отдельный
-тип (движок + `create_distant_battle` уже есть).
+**Статус:** открыт · **план:** [`REMAKE_B2_INVASION_PLAN.md`](REMAKE_B2_INVASION_PLAN.md) (2026-07-25).  
+**Файлы:** `scenario_event_manager.cpp` (`EVENT_TYPE_INVASION` TODO), `scenario_invasion.*`.  
+**Зависимости:** нет. Soft-dep save pending ↔ B3.
+**Проблема:** spawn есть; handler пустой; `on_completed` сейчас синхронный (для invasion
+нужен **отложенный** resolve wipe/destroy-goal). Миссии 5–8 на JS poll.
+**Подзадачи (детали и фазы PR — в плане):**
+- **B2a** timed spawn + `chain_action_next = NONE` + pending registry
+- **B2-resolve** tick → `on_completed` / `on_refusal` / `on_defeat`
+- **B2b** favour `EVENT_TRIGGER_BY_FAVOUR` (0x10); убрать dual spawn с legacy/JS
+- **B2c** chain-only `ONLY_VIA` → `ACTIVATED_*`
+- **B2d** integral tests + console `start_invasion`
+- **B2-migrate** (после B2d): снять JS poll/favour в m5–8 по одной миссии
+- **B2.5** (опц.): общий `mission_resolve_invasion` в `missions.js` до native resolve
+**Приёмка / DoD:** см. план §10. Distant battle — **не** B2.
+
+### B2x. Закрыто рядом с Selima (2026-07-25) — не отдельный эпик
+- [x] `EVENT_TYPE_PRICE_↑/↓` → `trade_price_change` + price phrases
+- [x] meta `debt_interest` / funds / loans / tax как `int_dcy`; finance читает rate
+- [x] empire route `deviation` в `improve_route`
+- [x] NEW_TRADE выставляет `is_open`; triage/DoD — `MISSION_PAK_TRIAGE.md`
 
 ### B3. Сериализация invasion warnings
 **Файлы:** `src/scenario/scenario_invasion.cpp:456-477` (`iob_invasion_warnings`).
@@ -562,15 +556,15 @@ Canaanite-вторжения — баг данных, закрывается з�
 
 ### D1b. Доводка миссии 11 — сверка с оригиналом — ✅ сделано (2026-07-24)
 **Файлы:** `src/scripts/mission/m_011_serabit_khadim.js`, wiki `serabit-khadim.html`,
-  dump: `src/js/js_test_mission_pak_dump.cpp`, `tests/45_mission11_pak_dump.js`,
-  `GamestateIO::load_mission_pak_raw`.
-**Зависимости:** нет (нужен `mission1.pak` / Cleop для dump-теста).
+  dump: `src/js/js_test_mission_pak_dump.cpp` / `GamestateIO::load_mission_pak_raw`
+  (ad-hoc `tests/99_tmp_*.js`; постоянного dump-теста нет).
+**Зависимости:** нет (нужен `mission1.pak` / Cleop для dump).
 **Сделано:**
 1. Торговля из pak: Men-nefer / Abu / Behdet / Nekhen / Selima Oasis (Kebet убран).
 2. Враг сценария `ENEMY_7_LIBIAN`; 7 timed Libyan raids в JS.
 3. Запросы из pak (2×copper, 2×weapons, luxury); wiki Developer Reference обновлена.
 **Осталось (не блокер D1b):** native `EVENT_TYPE_INVASION` / chain events из `.pak` → B2.
-**Проверка:** `--integraltest-only 45_mission11` с Cleop → PASS (`pak_dump_ok:11`).
+**Проверка:** ad-hoc `__test_mission_pak_dump(11)` с Cleop → `pak_dump_ok:11`.
 
 ### D2. Миссия 12 — Meidum («A Royal Necropolis») ✅ (с временным отступлением)
 **Файлы:** `src/scripts/mission/m_012_meidum.js`, `missions.js`,

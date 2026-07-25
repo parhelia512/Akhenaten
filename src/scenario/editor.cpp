@@ -30,6 +30,7 @@ void scenario_editor_create(int map_size) {
 
     g_scenario.finance.initial_funds = 1000;
     g_scenario.finance.rescue_loan = 500;
+    g_scenario.debt_interest_rate = 10;
     g_scenario.start_year = -500;
 
     g_scenario.win_criteria.milestone25_year = 10;

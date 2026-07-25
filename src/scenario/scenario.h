@@ -10,6 +10,7 @@
 #include "grid/point.h"
 #include "scenario/types.h"
 #include "scenario/scenario_difficulty.h"
+#include "game/difficulty.h"
 #include "core/archive.h"
 #include "core/settings_vars.h"
 #include "figure/formation.h"
@@ -297,9 +298,10 @@ struct scenario_data_t {
     struct meta_t {
         xstring start_message;
         bool hide_won_screen;
-        std::array<int, 8> initial_funds = { 0 };
-        std::array<int, 8> rescue_loans = { 0 };
-        std::array<int, 8> house_tax_multipliers = { 0 };
+        int_dcy initial_funds;
+        int_dcy rescue_loans;
+        int_dcy house_tax_multipliers;
+        int_dcy debt_interest;
     } meta;
 
     event_manager_t events;
@@ -314,6 +316,7 @@ struct scenario_data_t {
     int startup_funds() const;
     int rescue_loan() const;
     int house_tax_multiplier(int v) const;
+    int debt_interest() const; // annual % for current difficulty
 
     void load_metadata(const mission_id_t &missionid, bool is_new_mission);
     void bind_data(io_buffer *iob, size_t version, size_t size);
@@ -339,7 +342,7 @@ struct scenario_data_t {
         return is_scenario_id(make_span(values));
     }
 };
-ANK_CONFIG_STRUCT(scenario_data_t::meta_t, start_message, hide_won_screen, initial_funds, rescue_loans, house_tax_multipliers)
+ANK_CONFIG_STRUCT(scenario_data_t::meta_t, start_message, hide_won_screen, initial_funds, rescue_loans, house_tax_multipliers, debt_interest)
 ANK_CONFIG_STRUCT(scenario_data_t::env_t, flotsam_enabled, has_animals, gods_least_mood, hide_nilometer, marshland_grow, tree_grow)
 ANK_CONFIG_STRUCT(scenario_data_t::sounds_t, briefing, victory)
 ANK_CONFIG_STRUCT(scenario_data_t::win_criterias_t, population, culture, prosperity, monuments, kingdom, housing_count, housing_level, next_mission)

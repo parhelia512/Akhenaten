@@ -15,6 +15,7 @@
 #include "io/gamefiles/lang.h"
 #include "empire/empire.h"
 #include "empire/empire_city.h"
+#include "empire/trade_prices.h"
 #include "empire/trade_route.h"
 #include "io/io.h"
 #include "io/io_buffer.h"
@@ -97,6 +98,7 @@ void event_ph_t::set_param(pcstr name, int param) {
     bstring32 pname(name);
     if (pname == "months_initial") { months_initial = param; return; }
     if (pname == "amount") { amount.value = param; return; }
+    if (pname == "subtype") { subtype = (int8_t)param; return; }
 }
 
 void event_ph_t::archive_load(archive arch) {
@@ -132,7 +134,8 @@ void event_manager_t::load_mission_metadata(const mission_id_t &missionid) {
     });
 }
 
-void event_manager_t::create_good_request(int tag, e_resource r, int amount, int months_initial) {
+void event_manager_t::create_good_request(int tag, e_resource r, int amount, int months_initial, int8_t subtype,
+                                          e_event_trigger_type trigger) {
     auto& request = g_scenario_events.event_list.emplace_back();
     int event_id = g_scenario_events.event_list.size() - 1;
     memset(&request, 0, sizeof(event_ph_t));
@@ -142,6 +145,8 @@ void event_manager_t::create_good_request(int tag, e_resource r, int amount, int
     request.item.value = r;
     request.sender_faction = 1;
     request.amount.value = amount;
+    request.subtype = subtype;
+    request.event_trigger_type = trigger;
     request.tag_id = tag;
     request.location_fields = { -1, -1, -1, -1 };
     request.months_initial = months_initial;
@@ -455,8 +460,13 @@ void event_manager_t::process_event_distant_battle(const event_ph_t &event, bool
 }
 
 void event_manager_t::process_event_city_under_siege(const event_ph_t& event, bool via_event_trigger, int chain_action_parent, int caller_event_id, int caller_event_var) {
+    // Prefer explicit location, then city_id from create_chain_event({ city: "…" }),
+    // then a random open trade city.
     int8_t cityid = event.location_fields[0];
-    if (cityid == -1) {
+    if (cityid < 0 && event.city_id >= 0) {
+        cityid = event.city_id;
+    }
+    if (cityid < 0) {
         svector<empire_city *, 16> trade_cities;
         g_empire.select_cities(trade_cities, [&] (empire_city *city) {
             int route_id = g_empire.trade_route_for_city(city->name_id);
@@ -468,17 +478,22 @@ void event_manager_t::process_event_city_under_siege(const event_ph_t& event, bo
         }
     }
 
-    if (cityid == -1) {
+    if (cityid < 0) {
         cityid = g_empire.random_city();
     }
 
-    if (cityid == -1) {
+    if (cityid < 0) {
         logs::debug("EVENT_TYPE_TRADE_CITY_UNDER_SIEGE: no valid trade city found");
         return;
     }
 
+    int months = event.months_initial > 0 ? event.months_initial : event.amount.value;
+    if (months <= 0) {
+        months = 12;
+    }
+
     empire_city_handle city{ static_cast<uint8_t>(cityid) };
-    city.set_under_siege(event.months_initial);
+    city.set_under_siege((uint8_t)months);
 
     event_ph_t copy_event = event;
     copy_event.location_fields[0] = (cityid + 1);
@@ -504,10 +519,6 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
 
     event_ph_t &event = data.event_list[id];
 
-    // must be a valid event type;
-    // also, can not invoke event from an event if trigger is set to global update;
-    // also, can not invoke from global update if trigger is set to event only;
-    // also, events with 'EVENT_TRIGGER_ALREADY_FIRED' can not fire again.
     if (event.type == EVENT_TYPE_NONE) {
         return;
     }
@@ -525,8 +536,6 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         return;
     }
 
-    // create follow-up "actual" active events when triggered
-    // (very convoluted and annoying way in which Pharaoh events work...)
     if (event.event_trigger_type == EVENT_TRIGGER_ONLY_VIA_EVENT) {
         if (!is_valid_event_index(caller_event_id)) {
             return;
@@ -534,6 +543,7 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
 
         if (event.type == EVENT_TYPE_REQUEST) {
             create(&event, at(caller_event_id), EVENT_TRIGGER_ACTIVATED_8);
+            event.event_trigger_type = EVENT_TRIGGER_ALREADY_FIRED;
         } else {
             create(&event, at(caller_event_id), EVENT_TRIGGER_ACTIVATED_12);
         }
@@ -657,10 +667,22 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         break;
 
     case EVENT_TYPE_PRICE_INCREASE:
-    case EVENT_TYPE_PRICE_DECREASE:
-        city_message_post_full(true, "message_template_general", &event, caller_event_id,
-                               PHRASE_rating_change_title_I, PHRASE_rating_change_initial_announcement_I, PHRASE_rating_change_reason_I_A,
-                               id, 0);
+    case EVENT_TYPE_PRICE_DECREASE: {
+            const e_resource resource = (e_resource)event.item.value;
+            const int amount = event.amount.value;
+            const bool is_rise = (event.type == EVENT_TYPE_PRICE_INCREASE);
+            if (trade_price_change(resource, is_rise ? amount : -amount)) {
+                if (is_rise) {
+                    city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                                           PHRASE_price_change_title_I, PHRASE_price_change_initial_announcement_I,
+                                           PHRASE_price_change_no_reason_I_A, id, 0);
+                } else {
+                    city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                                           PHRASE_price_change_title_D, PHRASE_price_change_initial_announcement_D,
+                                           PHRASE_price_change_no_reason_D_A, id, 0);
+                }
+            }
+        }
         break;
 
     case EVENT_TYPE_GOLD_MINE_COLLAPSE: {
@@ -746,14 +768,24 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
 
             switch (event.subtype) {
             case EVENT_SUBTYPE_NEW_TRADE_ROUTE:
+                // Unlock trading type (e.g. PHARAOH → PHARAOH_TRADING) and open the route.
                 city->set_trade_enabled(true);
+                city->is_open = true;
+                if (full_empire_object *full = g_empire.ref_full_object(city->empire_object_id)) {
+                    full->trade_route_open = 1;
+                    full->city_type = city->type;
+                }
                 city_message_post_full(true, "message_template_general", &event, caller_event_id,
                     PHRASE_route_opened_title, PHRASE_route_opened_initial_announcement, PHRASE_route_opened_reason_A,
                     id, city->name_id);
                 break;
 
             case EVENT_SUBTYPE_LOST_TRADE_ROUTE:
-                city->set_trade_enabled(false);
+                // Close the route only — do not demote type / wipe sells-buys (temporary loss).
+                city->is_open = false;
+                if (full_empire_object *full = g_empire.ref_full_object(city->empire_object_id)) {
+                    full->trade_route_open = 0;
+                }
                 city_message_post_full(true, "message_template_general", &event, caller_event_id,
                     PHRASE_route_closed_title, PHRASE_route_closed_initial_announcement, PHRASE_route_closed_reason_A,
                     id, city->name_id);
@@ -782,6 +814,12 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
             city_message_post_full(true, "message_template_city_saved", &event, caller_event_id,
                                    PHRASE_eg_city_saved_title, PHRASE_eg_city_saved_initial_announcement, PHRASE_eg_city_saved_reason_A,
                                    id, 0);
+            break;
+
+        case EVENT_SUBTYPE_FOREIGN_CITY_CONQUERED:
+            city_message_post_full(true, "message_template_foreign_city_conquered", &event, caller_event_id,
+                                   PHRASE_foreign_city_conquered_title, PHRASE_foreign_city_conquered_initial_announcement,
+                                   PHRASE_foreign_city_conquered_reason_A, id, 0);
             break;
 
         case EVENT_SUBTYPE_MSG_DISTANT_BATTLE_LOST:

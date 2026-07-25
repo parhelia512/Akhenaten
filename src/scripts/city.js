@@ -10,6 +10,8 @@ city {
     @num_enemy_formations { get: __enemy_army_total_enemy_formations }
     @current_overlay { get: __city_get_current_overlay, set: __city_set_current_overlay }
 
+    enemy_army_achieved_destroy_goal : __enemy_army_achieved_destroy_goal
+
     figures {
         __property_getter: __city_get_figures_property
         @enemies { }

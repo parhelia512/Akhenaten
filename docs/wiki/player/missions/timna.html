@@ -350,7 +350,7 @@
       <p>Raids begin year 2 month 7 (size 9), then 16 and 24. Recruiter, Weaponsmith, Infantry and Archers forts should be online before then. Seth temples fit the desert setting.</p>
 
       <h3>Phase 4 — Trade</h3>
-      <p>Land routes start closed: Nekhen (1 020 Db), Nubt (850), Thinis (800). Men-nefer starts display-only (Pharaoh city) and becomes openable for 460 Db after a successful gems or weapons request. Perwadjyt stays display-only. Import fish, beer, linen, papyrus; sell clay, pottery, beer, flax, linen, game meat, chickpeas, copper as partners allow.</p>
+      <p>Land routes start closed: Nekhen (1 020 Db), Nubt (850), Thinis (800). Men-nefer starts display-only (Pharaoh city) and opens after a successful gems or weapons request. Perwadjyt stays display-only. Import fish, beer, linen, papyrus; sell clay, pottery, beer, flax, linen, game meat, chickpeas, copper as partners allow.</p>
 
       <h3>Tips</h3>
       <ul>
@@ -414,7 +414,7 @@
   <span class="kw">map_background</span> : { <span class="kw">pack</span>:PACK_EMPIRE, <span class="kw">id</span>:<span class="num">1</span> }
   <span class="cmt">// cities[] / empire_routes[] / empire_ornaments[] / empire_texts[] from pak dump</span>
 }</code></pre>
-            <p>Trade partners (pak): Nekhen route 4 cost 1020; Nubt route 1 cost 850; Thinis route 2 cost 800 — all closed land. Men-nefer: locked Pharaoh city (route 5, cost 460) unlocked by chain <code>CITY_STATUS_CHANGE</code> / <code>NEW_TRADE_ROUTE</code> after gems or weapons success. Perwadjyt display-only. Ornament: mastaba <code>pharaoh_general/empire_bits_00120</code> at [522, 492].</p>
+            <p>Trade partners (pak): Nekhen route 4 cost 1020; Nubt route 1 cost 850; Thinis route 2 cost 800 — all closed land. Men-nefer: locked Pharaoh city (route 5, cost 460) — <code>CITY_STATUS_CHANGE</code> / <code>NEW_TRADE_ROUTE</code> after gems or weapons success enables trading type and opens the route. Perwadjyt display-only. Ornament: mastaba <code>pharaoh_general/empire_bits_00120</code> at [522, 492].</p>
           </div>
         </details>
 
@@ -431,7 +431,7 @@
               <li>
                 <span class="ev-name">event_advance_month</span>
                 <span class="ev-line">~312–361</span>
-                <span class="ev-desc">Pharaoh requests: copper 5@y0m8/9mo → gems 15@y2m4/12mo (ok→Men-nefer trade unlock) → deben 885@y2m8/12mo (ok→chickpeas gift ×16) → weapons 11@y7m3/12mo (ok→Men-nefer unlock again).</span>
+                <span class="ev-desc">Pharaoh requests: copper 5@y0m8/9mo → gems 15@y2m4/12mo (ok→open Men-nefer) → deben 885@y2m8/12mo (ok→chickpeas gift ×16) → weapons 11@y7m3/12mo (ok→open Men-nefer again).</span>
                 <span class="ev-fn">mission5_pharaoh_request_*</span>
               </li>
               <li>

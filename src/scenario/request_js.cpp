@@ -8,9 +8,16 @@
 #include "core/variant.h"
 #include "core/profiler.h"
 
+#include <algorithm>
+
 void ANK_FUNCTION_UNIFIED(__city_create_good_request)(const bvariant_map &args) {
     g_scenario.events.create_good_request(
-        args.n("tag_id"), (e_resource)args.n("resource"), args.n("amount"), args.n("months_initial")
+        args.n("tag_id"),
+        (e_resource)args.n("resource"),
+        args.n("amount"),
+        args.n("months_initial"),
+        (int8_t)args.i32("subtype", 0),
+        (e_event_trigger_type)args.i32("trigger", EVENT_TRIGGER_ONCE)
     );
 }
 
@@ -58,6 +65,20 @@ void __city_request_execute(int tag) {
     g_scenario.events.execute_event(tag);
 }
 ANK_FUNCTION_1(__city_request_execute)
+
+// Fire an ONLY_VIA_EVENT master (chain child) from JS — e.g. force troops×4 if luxury late never came.
+void __city_event_fire_chain(int tag) {
+    for (int i = 0; i < g_scenario.events.events_count(); ++i) {
+        event_ph_t *e = g_scenario.events.at(i);
+        if (!e || e->tag_id != tag) {
+            continue;
+        }
+        // caller_event_id=0: header slot (always valid); used only for activation date math.
+        g_scenario.events.process_event(e->event_id, true, EVENT_ACTION_COMPLETED, 0);
+        return;
+    }
+}
+ANK_FUNCTION_1(__city_event_fire_chain)
 
 void __city_request_set_param(int tag, pcstr name, int param1) {
     g_scenario.events.set_request_param(tag, name, param1);

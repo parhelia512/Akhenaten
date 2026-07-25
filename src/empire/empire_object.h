@@ -62,6 +62,7 @@ struct map_route_object {
     bool in_use;
     char unk_03; // 00
     int path_length;
+    int deviation;
 
     int calc_length();
     void improve_route();

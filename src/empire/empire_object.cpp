@@ -352,6 +352,7 @@ void empire_t::load_empire_routes(archive arch) {
         }
         route.num_points = (unsigned char)count;
         route.length = entry.r_int("length", 0);
+        route.deviation = entry.r_int("deviation", 0);
         route.path_length = route.calc_length();
         if (route.length <= 0) {
             route.length = route.path_length;
@@ -911,6 +912,8 @@ io_buffer* iob_empire_map_routes = new io_buffer([](io_buffer* iob, size_t versi
 
         iob->bind(BIND_SIGNATURE_UINT8, &obj.unk_03);
 
+        // Not stored in pak/save — only set from JS empire_routes.
+        obj.deviation = 0;
         obj.path_length = obj.calc_length();
     }
 });
@@ -957,20 +960,34 @@ void map_route_object::improve_route() {
         return;
     }
 
-    // Step 1: Split short segments (< 50) into two parts
-    // Repeat until no short segments remain
+    const float max_deviation = (float)std::max(0, deviation);
+
+    // Step 1: Split long segments (> 50). With deviation>0, nudge midpoints off the line.
     bool has_changes = true;
     while (has_changes) {
         has_changes = false;
 
         for (size_t i = 0; i < temp_points.size() - 1; i++) {
-            float dist = temp_points[i].p.dist(temp_points[i + 1].p);
-                
+            const vec2i a = temp_points[i].p;
+            const vec2i b = temp_points[i + 1].p;
+            const float dist = a.dist(b);
+
             if (dist > 50.0f) {
-                // Split segment: insert a point in the middle
                 vec2i mid_point;
-                mid_point.x = (temp_points[i].p.x + temp_points[i + 1].p.x) / 2;
-                mid_point.y = (temp_points[i].p.y + temp_points[i + 1].p.y) / 2;
+                mid_point.x = (a.x + b.x) / 2;
+                mid_point.y = (a.y + b.y) / 2;
+
+                if (max_deviation > 0.f && dist > 0.f) {
+                    // Perpendicular unit vector; scale offset by segment length so fine splits wiggle less.
+                    const float dx = (float)(b.x - a.x);
+                    const float dy = (float)(b.y - a.y);
+                    const float px = -dy / dist;
+                    const float py = dx / dist;
+                    const float t = ((rand() % 2001) - 1000) / 1000.f; // [-1, 1]
+                    const float amount = t * max_deviation * std::min(1.f, dist / 200.f);
+                    mid_point.x += (int)(px * amount);
+                    mid_point.y += (int)(py * amount);
+                }
 
                 map_route_object::point new_point;
                 new_point.p = mid_point;

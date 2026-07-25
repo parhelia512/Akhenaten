@@ -14,6 +14,7 @@
 #include "figure/figure.h"
 #include "building/building_mansion.h"
 #include "js/js_game.h"
+#include "scenario/scenario.h"
 
 #include <map>
 
@@ -295,7 +296,8 @@ void city_finance_t::pay_monthly_wages() {
 
 void city_finance_t::pay_monthly_interest() {
     if (treasury < 0) {
-        int interest = calc_adjust_with_percentage(-treasury, 10) / 12;
+        const int rate = g_scenario.debt_interest();
+        int interest = calc_adjust_with_percentage(-treasury, rate) / 12;
         treasury -= interest;
         interest_so_far += interest;
     }

@@ -59,6 +59,16 @@ ANK_FUNCTION(__formation_get_num_forts)
 int __enemy_army_total_enemy_formations() { return enemy_army_total_enemy_formations(); }
 ANK_FUNCTION(__enemy_army_total_enemy_formations)
 
+// 1 if this invasion met buildings_to_destroy and left; used for pak invasion refuse chains.
+int __enemy_army_achieved_destroy_goal(int invasion_id) {
+    enemy_army *army = enemy_army_get_editable((uint8_t)invasion_id);
+    if (!army || army->buildings_to_destroy == 0) {
+        return 0;
+    }
+    return army->buildings_destroyed >= army->buildings_to_destroy ? 1 : 0;
+}
+ANK_FUNCTION_1(__enemy_army_achieved_destroy_goal)
+
 std::optional<bvariant> __city_get_battalion_property(int fid, pcstr property) {
     const auto form = formation_get(g_formations.get_battalion_id_from_index(fid + 1));
     if (!form) {
