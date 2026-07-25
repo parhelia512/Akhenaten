@@ -482,13 +482,11 @@ static void dump_empire_routes() {
             continue;
         }
 
-        char pts[1024] = {0};
+        char pts[2048] = {0};
         size_t used = 0;
-        const int count = std::min<int>(route.num_points, 50);
+        const int count = std::min<int>(route.num_points, 80);
         for (int i = 0; i < count; i++) {
-            if (!route.points[i].is_in_use) {
-                continue;
-            }
+            // Dump every slot up to num_points — is_in_use is often unset in pak polylines.
             const int w = snprintf(pts + used, sizeof pts - used, "%s%d,%d",
                 used ? ";" : "",
                 route.points[i].p.x,
@@ -505,6 +503,24 @@ static void dump_empire_routes() {
             (int)route.num_points,
             route.length,
             pts[0] ? pts : "-");
+        // Also split long routes for copy-paste into mission JS.
+        const int chunk = 12;
+        for (int start = 0; start < count; start += chunk) {
+            char chunk_pts[512] = {0};
+            size_t cu = 0;
+            const int end = std::min(start + chunk, count);
+            for (int i = start; i < end; i++) {
+                const int w = snprintf(chunk_pts + cu, sizeof chunk_pts - cu, "%s[%d,%d]",
+                    cu ? "," : "",
+                    route.points[i].p.x,
+                    route.points[i].p.y);
+                if (w <= 0 || cu + (size_t)w >= sizeof chunk_pts) {
+                    break;
+                }
+                cu += (size_t)w;
+            }
+            dump_marker("pak_map_route_chunk:id=%d|i=%d-%d|%s", id, start, end - 1, chunk_pts);
+        }
         n++;
     }
     dump_marker("pak_map_route_count:%d", n);

@@ -1,6 +1,6 @@
 log_info("akhenaten: mission 4 started")
 
-// Trade + pharaoh requests verified vs mission1.pak scenario 4 (2026-07-24 dump).
+// Trade + pharaoh request chains verified vs mission1.pak scenario 4 (2026-07-25 dump).
 
 mission4 {
 	start_message : "message_trade_on_the_water"
@@ -213,13 +213,18 @@ function mission4_get_goal_tooltip() {
 	return ""
 }
 
-function mission4_fire_request(tag, resource, amount, months, ok_tag, fail_tag, ok_amt, fail_amt) {
+function mission4_fire_request(tag, resource, amount, months, ok_tag, fail_tag, late_tag, ok_amt, fail_amt, late_amt) {
 	var request = city.create_good_request({ tag_id: tag, resource: resource, amount: amount, months_initial: months })
-	city.create_chain_event({ tag_id: ok_tag, type: EVENT_TYPE_REPUTATION_INCREASE, amount: ok_amt })
+	var ok_ev = city.create_chain_event({ tag_id: ok_tag, type: EVENT_TYPE_REPUTATION_INCREASE, amount: ok_amt })
 	city.create_chain_event({ tag_id: fail_tag, type: EVENT_TYPE_REPUTATION_DECREASE, amount: fail_amt })
 	request.set_completed_action_tag(ok_tag)
 	request.set_refusal_action_tag(fail_tag)
+	if (late_tag) {
+		city.create_chain_event({ tag_id: late_tag, type: EVENT_TYPE_REPUTATION_DECREASE, amount: late_amt })
+		request.set_too_late_action_tag(late_tag)
+	}
 	request.execute()
+	return ok_ev
 }
 
 [es=event_mission_start, mission=mission4]
@@ -334,8 +339,8 @@ function mission4_handle_bricks(ev) {
 	ui.popup_message("message_tutorial_monuments")
 }
 
-// pak requests (reputation chains approximated from pak ±5/±6 style events).
-// beer y6m8 / 9 / 12mo
+// pak request chains (scenario 4 dump 2026-07-25).
+// beer y6m8 / 9 / 12mo — once; ok→+5→GIFT bricks 20; refuse/late→−6
 [es=event_advance_month, mission=mission4]
 function mission4_pharaoh_request_beer(ev) {
 	if (mission.pharaoh_requested_beer) {
@@ -345,10 +350,18 @@ function mission4_pharaoh_request_beer(ev) {
 		return
 	}
 	mission.pharaoh_requested_beer = true
-	mission4_fire_request(10, RESOURCE_BEER, 9, 12, 110, 111, 5, 6)
+	var ok_ev = mission4_fire_request(10, RESOURCE_BEER, 9, 12, 110, 111, 112, 5, 6, 6)
+	city.create_chain_event({
+		tag_id: 113,
+		type: EVENT_TYPE_GIFT_FROM_PHARAOH,
+		resource: RESOURCE_BRICKS,
+		amount: 20
+	})
+	ok_ev.set_completed_action_tag(113)
 }
 
-// papyrus y8m10 / 8 / 9mo
+// papyrus y8m10 / 8 / 9mo — ok→DEMAND_INCREASE→+5; refuse/late→DEMAND_DECREASE→−4
+// (demand ± currently message-only in engine, same as Behdet stubs)
 [es=event_advance_month, mission=mission4]
 function mission4_pharaoh_request_papyrus(ev) {
 	if (mission.pharaoh_requested_papyrus) {
@@ -358,10 +371,32 @@ function mission4_pharaoh_request_papyrus(ev) {
 		return
 	}
 	mission.pharaoh_requested_papyrus = true
-	mission4_fire_request(11, RESOURCE_PAPYRUS, 8, 9, 112, 113, 5, 6)
+	var request = city.create_good_request({ tag_id: 20, resource: RESOURCE_PAPYRUS, amount: 8, months_initial: 9 })
+	var ok_demand = city.create_chain_event({
+		tag_id: 201,
+		type: EVENT_TYPE_DEMAND_INCREASE,
+		resource: RESOURCE_PAPYRUS,
+		amount: 8
+	})
+	city.create_chain_event({ tag_id: 202, type: EVENT_TYPE_REPUTATION_INCREASE, amount: 5 })
+	ok_demand.set_completed_action_tag(202)
+
+	var fail_demand = city.create_chain_event({
+		tag_id: 203,
+		type: EVENT_TYPE_DEMAND_DECREASE,
+		resource: RESOURCE_PAPYRUS,
+		amount: 8
+	})
+	city.create_chain_event({ tag_id: 204, type: EVENT_TYPE_REPUTATION_DECREASE, amount: 4 })
+	fail_demand.set_completed_action_tag(204)
+
+	request.set_completed_action_tag(201)
+	request.set_refusal_action_tag(203)
+	request.set_too_late_action_tag(203)
+	request.execute()
 }
 
-// barley y10m5 / 10 / 18mo
+// barley y10m5 / 10 / 18mo — ok→+9; refuse/late→−6
 [es=event_advance_month, mission=mission4]
 function mission4_pharaoh_request_barley(ev) {
 	if (mission.pharaoh_requested_barley) {
@@ -371,10 +406,10 @@ function mission4_pharaoh_request_barley(ev) {
 		return
 	}
 	mission.pharaoh_requested_barley = true
-	mission4_fire_request(12, RESOURCE_BARLEY, 10, 18, 114, 115, 5, 6)
+	mission4_fire_request(12, RESOURCE_BARLEY, 10, 18, 301, 302, 303, 9, 6, 6)
 }
 
-// pottery y15m4 / 8 / 12mo
+// pottery y15m4 / 8 / 12mo — ok→+9; refuse/late→−6
 [es=event_advance_month, mission=mission4]
 function mission4_pharaoh_request_pottery(ev) {
 	if (mission.pharaoh_requested_pottery) {
@@ -384,5 +419,5 @@ function mission4_pharaoh_request_pottery(ev) {
 		return
 	}
 	mission.pharaoh_requested_pottery = true
-	mission4_fire_request(13, RESOURCE_POTTERY, 8, 12, 116, 117, 5, 6)
+	mission4_fire_request(13, RESOURCE_POTTERY, 8, 12, 401, 402, 403, 9, 6, 6)
 }
