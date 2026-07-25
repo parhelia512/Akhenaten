@@ -133,7 +133,9 @@ void jsV_toprimitive(js_State* J, js_Value* v, int preferred) {
             v->u.number = *(int16_t*)p;
             return;
         case JS_PTR_XSTRING: {
-            J->pushstring((js_StringNode)p);
+            // p points at an xstring object, not an interned xstring_value.
+            xstring *xs = (xstring *)p;
+            J->pushstring(xs ? (js_StringNode)xs->_get() : nullptr);
             *v = *js_tovalue(J, -1);
             js_pop(J, 1);
             return;

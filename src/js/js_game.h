@@ -269,7 +269,7 @@ namespace js_helpers {
 
     template<>
     inline void js_push_value<xstring>(js_State *J, xstring value) {
-        J->pushstring(value.c_str());
+        J->pushstring((js_StringNode)value._get());
     }
 
     template<>
