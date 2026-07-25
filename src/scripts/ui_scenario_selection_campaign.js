@@ -132,8 +132,7 @@ window_scenario_selection_campaign {
 
         img_history : image({ pos[0, 0], pack:PACK_UNLOADED, id:33, offset:0 })
 
-        // Same portrait slot as mission-list screen on this history background.
-        campaign_hover_thumb : image({ pos[270, 200], size[256, 152], fit:true, pack:PACK_UNLOADED, id:28, offset:0 })
+        campaign_hover_thumb : image_queue({ pos[270, 200], size[256, 152], fit:true, fade_ms:280, pack:PACK_UNLOADED, id:28, offset:0 })
 
         // Button block below portrait (thumb bottom ~352), with clear gap under the frame.
         tab_individual : large_button({ pos[210, 370], size[144, 24], text[294, 38], font:FONT_NORMAL_BLACK_ON_LIGHT, onclick: campaign_tab_individual })

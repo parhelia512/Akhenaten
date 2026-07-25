@@ -316,6 +316,9 @@ static ui::element::ptr create_element(const xstring type) {
     case _("image"):
         elm = std::make_shared<ui::eimg>();
         break;
+    case _("image_queue"):
+        elm = std::make_shared<ui::eimg_queue>();
+        break;
     case _("label"):
         elm = std::make_shared<ui::elabel>();
         break;
@@ -1238,6 +1241,153 @@ void ui::eimg::image(const animation_t& anim) {
 
 void ui::eimg::image(int image) {
     img_desc.offset = image;
+}
+
+namespace {
+bool img_desc_same(const image_desc& a, const image_desc& b) {
+    return a.pack == b.pack && a.id == b.id && a.offset == b.offset && a.path == b.path;
+}
+
+color alpha_mask(int alpha_0_255) {
+    const int a = std::clamp(alpha_0_255, 0, 255);
+    return (color(a) << COLOR_BITSHIFT_ALPHA) | 0x00ffffffu;
+}
+} // namespace
+
+void ui::eimg_queue::enqueue(const image_desc& desc) {
+    if (!desc.valid()) {
+        return;
+    }
+
+    // First texture appears immediately (window init / first selection).
+    if (!showing.valid() && !fading) {
+        showing = desc;
+        return;
+    }
+
+    if (coalesce) {
+        pending.clear();
+        if (fading) {
+            if (img_desc_same(incoming, desc)) {
+                return;
+            }
+            // Retarget the in-flight fade so rapid hover stays responsive.
+            incoming = desc;
+            fade_start_ms = time_get_millis();
+            return;
+        }
+        if (img_desc_same(showing, desc)) {
+            return;
+        }
+        pending.push_back(desc);
+        return;
+    }
+
+    const image_desc& latest = !pending.empty() ? pending.back() : (fading ? incoming : showing);
+    if (img_desc_same(latest, desc)) {
+        return;
+    }
+    if (pending.size() >= MAX_QUEUE) {
+        pending.erase(pending.begin());
+    }
+    pending.push_back(desc);
+}
+
+void ui::eimg_queue::clear_queue() {
+    pending.clear();
+}
+
+void ui::eimg_queue::begin_next() {
+    if (pending.empty() || fading) {
+        return;
+    }
+    incoming = pending.front();
+    pending.erase(pending.begin());
+    if (img_desc_same(incoming, showing)) {
+        return;
+    }
+    fading = true;
+    fade_start_ms = time_get_millis();
+}
+
+void ui::eimg_queue::update_fade() {
+    if (!fading) {
+        begin_next();
+        return;
+    }
+
+    const int duration = std::max(1, fade_ms);
+    const int elapsed = (int)(time_get_millis() - fade_start_ms);
+    if (elapsed >= duration) {
+        showing = incoming;
+        incoming = {};
+        fading = false;
+        begin_next();
+    }
+}
+
+void ui::eimg_queue::draw_one(image_desc desc, color mask) const {
+    if (!desc.valid()) {
+        return;
+    }
+
+    const int tid = desc.tid();
+    vec2i rpos = pos;
+    const image_t* img = (fit && size.x > 0 && size.y > 0) ? image_get(tid) : nullptr;
+    float draw_scale = 1.f;
+    if (fit && img && img->width > 0 && img->height > 0) {
+        draw_scale = std::min({(float)size.x / img->width, (float)size.y / img->height, 1.f});
+    }
+
+    ui::push(cmd_t::image,
+             Pos{rpos + ui::current_offset()},
+             ImageId{tid},
+             Mask{mask},
+             Scale{draw_scale},
+             ImgFlagsTag{ImgFlag_Alpha});
+}
+
+void ui::eimg_queue::draw(UiFlags flags) {
+    scr_pos = pos + ui::current_offset();
+    update_fade();
+
+    if (!fading) {
+        draw_one(showing, COLOR_MASK_NONE);
+        return;
+    }
+
+    const int duration = std::max(1, fade_ms);
+    const int elapsed = std::clamp((int)(time_get_millis() - fade_start_ms), 0, duration);
+    const int alpha_in = (elapsed * 255) / duration;
+    draw_one(showing, alpha_mask(255 - alpha_in));
+    draw_one(incoming, alpha_mask(alpha_in));
+}
+
+void ui::eimg_queue::load(archive arch, element* parent, items& elems) {
+    element::load(arch, parent, elems);
+
+    xstring type = arch.r_string("type");
+    assert(type == "image_queue");
+    showing.pack = arch.r_int("pack");
+    showing.id = arch.r_int("id");
+    showing.offset = arch.r_int("offset");
+    fit = arch.r_bool("fit");
+    coalesce = arch.r_bool("coalesce", true);
+    fade_ms = arch.r_int("fade_ms", 280);
+}
+
+void ui::eimg_queue::image(const image_desc& image) {
+    enqueue(image);
+}
+
+void ui::eimg_queue::image(const animation_t& anim) {
+    enqueue(anim.to_desc());
+}
+
+void ui::eimg_queue::image(int image) {
+    image_desc d = showing;
+    d.offset = (int16_t)image;
+    enqueue(d);
 }
 
 void ui::ebackground::draw(UiFlags flags) {

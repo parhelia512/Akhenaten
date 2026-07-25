@@ -16,6 +16,8 @@
 #include "graphics/elements/generic_button.h"
 #include "graphics/elements/image_button.h"
 #include "graphics/elements/arrow_button.h"
+#include "core/system_time.h"
+#include "core/svector.h"
 #include "graphics/elements/scrollbar.h"
 #include "graphics/elements/rich_text.h"
 #include "graphics/elements/lang_text.h"
@@ -62,6 +64,7 @@ using UiFlags = int;
 namespace ui {
 
     struct einput;
+    struct eimg_queue;
 
     namespace opt {
         struct Pos {
@@ -501,6 +504,7 @@ namespace ui {
         virtual escrollbar* dcast_escrollbar() { return nullptr; }
         virtual etext* dcast_etext() { return nullptr; }
         virtual einput* dcast_einput() { return nullptr; }
+        virtual eimg_queue* dcast_img_queue() { return nullptr; }
 
         virtual pcstr get_value() const { return ""; }
         virtual void set_value(pcstr) {}
@@ -602,6 +606,41 @@ namespace ui {
 
         static const xstring skind() { return "UIImage"; }
         virtual xstring kind() const override { return eimg::skind(); }
+    };
+
+    // Crossfades through queued textures. Assigning `.image` / calling `enqueue`
+    // queues a target; draw() advances the transition automatically.
+    struct eimg_queue : public element {
+        static constexpr size_t MAX_QUEUE = 8;
+
+        image_desc showing;
+        image_desc incoming;
+        svector<image_desc, MAX_QUEUE> pending;
+        bool fading = false;
+        bool fit = false;
+        // When true (default), a new enqueue replaces pending targets so hover stays snappy.
+        bool coalesce = true;
+        int fade_ms = 280;
+        time_millis fade_start_ms = 0;
+
+        void enqueue(const image_desc& desc);
+        void clear_queue();
+
+        virtual void draw(UiFlags flags) override;
+        virtual void load(archive elem, element* parent, items& elems) override;
+        virtual void image(const image_desc& image) override;
+        virtual void image(const animation_t& image) override;
+        virtual void image(int image) override;
+        virtual image_desc image() const override { return showing; }
+        virtual eimg_queue* dcast_img_queue() override { return this; }
+
+        static const xstring skind() { return "UIImageQueue"; }
+        virtual xstring kind() const override { return eimg_queue::skind(); }
+
+    private:
+        void update_fade();
+        void begin_next();
+        void draw_one(image_desc desc, color mask) const;
     };
 
     struct ebackground : public element {

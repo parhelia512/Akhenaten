@@ -167,6 +167,7 @@ function label(config) { return ui_extend({type:"label", font : FONT_NORMAL_WHIT
 function header(config) { return ui_extend({type:"label", font : FONT_LARGE_BLACK_ON_LIGHT}, config) }
 function multiline(config) { return ui_extend({type:"label", multiline:true, font : FONT_NORMAL_WHITE_ON_DARK}, config) }
 function image(config) { return ui_extend({type:"image"}, config) }
+function image_queue(config) { return ui_extend({type:"image_queue"}, config) }
 function image_button(config) { return ui_extend({type:"image_button"}, config) }
 function ok_button(config) { return ui_extend({type:"image_button", size[39, 26], pack:PACK_GENERAL, id:96, offset:0 }, config) }
 function cancel_button(config) { return ui_extend({type:"image_button", size[39, 26], pack:PACK_GENERAL, id:96, offset:4 }, config) }
