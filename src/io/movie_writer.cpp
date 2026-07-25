@@ -2,219 +2,236 @@
 
 #include "core/log.h"
 
-#ifdef GAME_PLATFORM_WIN
+#ifdef GAME_HAS_VIDEO_RECORDING
 
-#include <vpx/vpx_codec.h>
-#include <vpx/vpx_encoder.h>
-#include <vpx/vp8cx.h>
+#define MINIMP4_IMPLEMENTATION
+#include "minimp4.h"
 
-MovieWriter::MovieWriter(const std::string& filename_, const unsigned int width_, const unsigned int height_, const int frameRate_) :
-	width(width_), height(height_), iframe(0), frameRate(frameRate_), filename(filename_), initialized(false)
-{
-	// Allocate YUV buffer (YUV420: Y plane + U/V planes)
-	yuv_buffer.resize(width * height * 3 / 2); // Y: width*height, U: width*height/4, V: width*height/4
-	
-	// Change extension to .webm if needed
-	std::string output_filename = filename;
-	if (output_filename.size() < 5 || output_filename.substr(output_filename.size() - 5) != ".webm") {
-		output_filename = filename + ".webm";
-	}
-	
-	// Open output file
-	output_file.open(output_filename, std::ios::binary);
-	if (!output_file.is_open()) {
-		logs::info("MovieWriter: Failed to open output file: %s\n", output_filename.c_str());
-		return;
-	}
-	filename = output_filename;
-	
-	// Initialize VP9 encoder
-	codec = new vpx_codec_ctx_t;
-	vpx_codec_enc_cfg_t cfg;
-	vpx_codec_err_t res;
-	
-	// Get default VP9 encoder configuration
-	res = vpx_codec_enc_config_default(vpx_codec_vp9_cx(), &cfg, 0);
-	if (res != VPX_CODEC_OK) {
-		logs::info("MovieWriter: Failed to get default VP9 config\n");
-		delete codec;
-		codec = nullptr;
-		return;
-	}
-	
-	// Configure encoder
-	cfg.g_w = width;
-	cfg.g_h = height;
-	cfg.g_timebase.num = 1;
-	cfg.g_timebase.den = frameRate;
-	cfg.rc_target_bitrate = width * height * frameRate / 1000; // Simple bitrate calculation
-	cfg.g_lag_in_frames = 0; // No lookahead for real-time encoding
-	cfg.g_error_resilient = 1;
-	
-	// Set encoder options in config before initialization
-	cfg.g_usage = 0; // Real-time encoding
-	cfg.rc_end_usage = VPX_CBR; // Constant bitrate
-	
-	// Initialize encoder
-	res = vpx_codec_enc_init_ver(codec, vpx_codec_vp9_cx(), &cfg, 0, VPX_ENCODER_ABI_VERSION);
-	if (res != VPX_CODEC_OK) {
-		logs::info("MovieWriter: Failed to initialize VP9 encoder: %s\n", vpx_codec_error_detail(codec));
-		delete codec;
-		codec = nullptr;
-		return;
-	}
-	
-	// Set encoder options after initialization using vpx_codec_control
-	// Note: vpx_codec_ctl is a macro, use vpx_codec_control directly
-	if (vpx_codec_control(codec, VP8E_SET_CPUUSED, 4) != VPX_CODEC_OK) {
-		logs::info("MovieWriter: Warning - failed to set CPUUSED\n");
-	}
-	if (vpx_codec_control(codec, VP9E_SET_LOSSLESS, 0) != VPX_CODEC_OK) {
-		logs::info("MovieWriter: Warning - failed to set LOSSLESS\n");
-	}
-	
-	// Allocate YUV image
-	yuv_image = vpx_img_alloc(nullptr, VPX_IMG_FMT_I420, width, height, 1);
-	if (!yuv_image) {
-		logs::info("MovieWriter: Failed to allocate YUV image\n");
-		vpx_codec_destroy(codec);
-		delete codec;
-		codec = nullptr;
-		return;
-	}
-	
-	// Note: For now, we write raw VP9 frames
-	// A proper WebM muxer would wrap these in EBML/Matroska container
-	// The output file will be raw VP9 stream - can be converted to WebM with:
-	// ffmpeg -i input.raw -c:v copy output.webm
-	// Or we can add libwebm for proper WebM muxing later
-	
-	initialized = true;
-	logs::info("MovieWriter: Initialized VP9 encoder for %dx%d @ %d fps\n", width, height, frameRate);
+#include <wels/codec_api.h>
+#include <wels/codec_app_def.h>
+#include <wels/codec_def.h>
+
+#include <algorithm>
+#include <cstring>
+
+namespace {
+
+int mp4_write_callback(int64_t offset, const void *buffer, size_t size, void *token) {
+    FILE *f = (FILE *)token;
+    if (fseek(f, (long)offset, SEEK_SET) != 0) {
+        return 1;
+    }
+    return fwrite(buffer, 1, size, f) != size;
 }
 
-void MovieWriter::convertRGBtoYUV420(const uint8_t* rgb, uint8_t* yuv) {
-	// Convert ARGB8888 to YUV420
-	// Input: RGB in ARGB format (4 bytes per pixel: A, R, G, B)
-	// Output: YUV420 (Y plane, then U plane, then V plane)
-	
-	uint8_t* y_plane = yuv;
-	uint8_t* u_plane = yuv + width * height;
-	uint8_t* v_plane = yuv + width * height * 5 / 4;
-	
-	// Convert each pixel
-	for (unsigned int y = 0; y < height; y++) {
-		for (unsigned int x = 0; x < width; x++) {
-			// Get RGB values (skip alpha channel)
-			int r = rgb[(y * width + x) * 4 + 2];
-			int g = rgb[(y * width + x) * 4 + 1];
-			int b = rgb[(y * width + x) * 4 + 0];
-			
-			// Convert to YUV (ITU-R BT.601)
-			int y_val = (int)(0.299 * r + 0.587 * g + 0.114 * b);
-			int u_val = (int)(-0.169 * r - 0.331 * g + 0.5 * b + 128);
-			int v_val = (int)(0.5 * r - 0.419 * g - 0.081 * b + 128);
-			
-			// Clamp values
-			y_plane[y * width + x] = (uint8_t)(y_val < 0 ? 0 : (y_val > 255 ? 255 : y_val));
-			
-			// For U and V, we need to downsample (420 format)
-			if (x % 2 == 0 && y % 2 == 0) {
-				u_plane[(y / 2) * (width / 2) + (x / 2)] = (uint8_t)(u_val < 0 ? 0 : (u_val > 255 ? 255 : u_val));
-				v_plane[(y / 2) * (width / 2) + (x / 2)] = (uint8_t)(v_val < 0 ? 0 : (v_val > 255 ? 255 : v_val));
-			}
-		}
-	}
+} // namespace
+
+void MovieWriter::convertBGRAtoYUV420(const uint8_t *bgra, uint8_t *yuv) {
+    uint8_t *y_plane = yuv;
+    uint8_t *u_plane = yuv + width * height;
+    uint8_t *v_plane = yuv + width * height * 5 / 4;
+
+    for (unsigned int y = 0; y < height; y++) {
+        for (unsigned int x = 0; x < width; x++) {
+            const uint8_t *px = &bgra[(y * src_stride + x) * 4];
+            int b = px[0];
+            int g = px[1];
+            int r = px[2];
+
+            int y_val = (int)(0.299 * r + 0.587 * g + 0.114 * b);
+            int u_val = (int)(-0.169 * r - 0.331 * g + 0.5 * b + 128);
+            int v_val = (int)(0.5 * r - 0.419 * g - 0.081 * b + 128);
+
+            y_plane[y * width + x] = (uint8_t)std::clamp(y_val, 0, 255);
+
+            if ((x % 2) == 0 && (y % 2) == 0) {
+                u_plane[(y / 2) * (width / 2) + (x / 2)] = (uint8_t)std::clamp(u_val, 0, 255);
+                v_plane[(y / 2) * (width / 2) + (x / 2)] = (uint8_t)std::clamp(v_val, 0, 255);
+            }
+        }
+    }
 }
 
-void MovieWriter::addFrame(const uint8_t* pixels) {
-	if (!initialized || !codec || !output_file.is_open()) {
-		return;
-	}
-	
-	// Convert RGB to YUV420
-	convertRGBtoYUV420(pixels, yuv_buffer.data());
-	
-	// Copy to vpx_image structure
-	// Y plane
-	for (unsigned int y = 0; y < height; y++) {
-		memcpy(yuv_image->planes[VPX_PLANE_Y] + y * yuv_image->stride[VPX_PLANE_Y],
-		       yuv_buffer.data() + y * width,
-		       width);
-	}
-	// U plane
-	for (unsigned int y = 0; y < height / 2; y++) {
-		memcpy(yuv_image->planes[VPX_PLANE_U] + y * yuv_image->stride[VPX_PLANE_U],
-		       yuv_buffer.data() + width * height + y * (width / 2),
-		       width / 2);
-	}
-	// V plane
-	for (unsigned int y = 0; y < height / 2; y++) {
-		memcpy(yuv_image->planes[VPX_PLANE_V] + y * yuv_image->stride[VPX_PLANE_V],
-		       yuv_buffer.data() + width * height * 5 / 4 + y * (width / 2),
-		       width / 2);
-	}
-	
-	// Encode frame
-	vpx_codec_iter_t iter = nullptr;
-	const vpx_codec_cx_pkt_t* pkt;
-	
-	vpx_codec_err_t res = vpx_codec_encode(codec, yuv_image, iframe, 1, 0, VPX_DL_GOOD_QUALITY);
-	if (res != VPX_CODEC_OK) {
-		logs::info("MovieWriter: Encoding error: %s\n", vpx_codec_error_detail(codec));
-		return;
-	}
-	
-	// Get encoded packets
-	while ((pkt = vpx_codec_get_cx_data(codec, &iter)) != nullptr) {
-		if (pkt->kind == VPX_CODEC_CX_FRAME_PKT) {
-			// Write frame data (for now, just write raw VP9 data)
-			// In a full implementation, we'd mux this into WebM format
-			output_file.write((const char*)pkt->data.frame.buf, pkt->data.frame.sz);
-			encoded_frames.push_back(iframe);
-			
-			logs::info("MovieWriter: Encoded frame %d (size = %zu)\n", iframe, pkt->data.frame.sz);
-		}
-	}
-	
-	iframe++;
+MovieWriter::MovieWriter(const std::string &filename_, unsigned int width_, unsigned int height_, int frameRate_)
+    : width((uint16_t)(width_ & ~1u)), height((uint16_t)(height_ & ~1u)), src_stride((uint16_t)width_),
+      frameRate((uint16_t)std::max(1, frameRate_)), filename(filename_) {
+    if (width < 2 || height < 2) {
+        logs::info("MovieWriter: invalid size %ux%u", width_, height_);
+        return;
+    }
+
+    yuv_buffer.resize((size_t)width * height * 3 / 2);
+
+    std::string output_filename = filename;
+    if (output_filename.size() < 4 || output_filename.substr(output_filename.size() - 4) != ".mp4") {
+        output_filename = filename + ".mp4";
+    }
+    filename = output_filename;
+
+    output_file = fopen(output_filename.c_str(), "wb");
+    if (!output_file) {
+        logs::info("MovieWriter: Failed to open output file: %s", output_filename.c_str());
+        return;
+    }
+
+    if (WelsCreateSVCEncoder(&encoder) != 0 || !encoder) {
+        logs::info("MovieWriter: WelsCreateSVCEncoder failed");
+        fclose(output_file);
+        output_file = nullptr;
+        return;
+    }
+
+    SEncParamExt param;
+    memset(&param, 0, sizeof(param));
+    encoder->GetDefaultParams(&param);
+    param.iUsageType = SCREEN_CONTENT_REAL_TIME;
+    param.fMaxFrameRate = (float)frameRate;
+    param.iPicWidth = width;
+    param.iPicHeight = height;
+    // Screen capture needs more bits than camera video; keep a high floor so
+    // low-fps city recordings are not almost entirely frame-skipped.
+    param.iTargetBitrate = std::max(2500000, (int)width * (int)height * (int)frameRate / 4);
+    param.iMaxBitrate = param.iTargetBitrate * 2;
+    param.iRCMode = RC_BITRATE_MODE;
+    param.bEnableFrameSkip = false;
+    param.uiIntraPeriod = (unsigned int)frameRate * 2;
+    param.eSpsPpsIdStrategy = CONSTANT_ID;
+    param.bPrefixNalAddingCtrl = false;
+    param.iSpatialLayerNum = 1;
+    param.sSpatialLayers[0].iVideoWidth = width;
+    param.sSpatialLayers[0].iVideoHeight = height;
+    param.sSpatialLayers[0].fFrameRate = (float)frameRate;
+    param.sSpatialLayers[0].iSpatialBitrate = param.iTargetBitrate;
+    param.sSpatialLayers[0].iMaxSpatialBitrate = param.iMaxBitrate;
+
+    if (encoder->InitializeExt(&param) != 0) {
+        logs::info("MovieWriter: InitializeExt failed");
+        WelsDestroySVCEncoder(encoder);
+        encoder = nullptr;
+        fclose(output_file);
+        output_file = nullptr;
+        return;
+    }
+
+    int video_format = videoFormatI420;
+    encoder->SetOption(ENCODER_OPTION_DATAFORMAT, &video_format);
+
+    mux = MP4E_open(0, 0, output_file, mp4_write_callback);
+    if (!mux) {
+        logs::info("MovieWriter: MP4E_open failed");
+        encoder->Uninitialize();
+        WelsDestroySVCEncoder(encoder);
+        encoder = nullptr;
+        fclose(output_file);
+        output_file = nullptr;
+        return;
+    }
+
+    auto *writer = new mp4_h26x_writer_t();
+    memset(writer, 0, sizeof(*writer));
+    if (mp4_h26x_write_init(writer, (MP4E_mux_t *)mux, width, height, 0) != MP4E_STATUS_OK) {
+        logs::info("MovieWriter: mp4_h26x_write_init failed");
+        delete writer;
+        MP4E_close((MP4E_mux_t *)mux);
+        mux = nullptr;
+        encoder->Uninitialize();
+        WelsDestroySVCEncoder(encoder);
+        encoder = nullptr;
+        fclose(output_file);
+        output_file = nullptr;
+        return;
+    }
+    mp4wr = writer;
+
+    initialized = true;
+    logs::info("MovieWriter: Initialized OpenH264 for %dx%d @ %d fps -> %s", width, height, frameRate,
+               filename.c_str());
+}
+
+void MovieWriter::addFrame(const uint8_t *pixels) {
+    if (!initialized || !encoder || !mp4wr || !pixels) {
+        return;
+    }
+
+    convertBGRAtoYUV420(pixels, yuv_buffer.data());
+
+    SSourcePicture pic;
+    memset(&pic, 0, sizeof(pic));
+    pic.iPicWidth = width;
+    pic.iPicHeight = height;
+    pic.iColorFormat = videoFormatI420;
+    pic.iStride[0] = width;
+    pic.iStride[1] = width / 2;
+    pic.iStride[2] = width / 2;
+    pic.pData[0] = yuv_buffer.data();
+    pic.pData[1] = yuv_buffer.data() + width * height;
+    pic.pData[2] = yuv_buffer.data() + width * height * 5 / 4;
+
+    SFrameBSInfo info;
+    memset(&info, 0, sizeof(info));
+    const int enc_ret = encoder->EncodeFrame(&pic, &info);
+    if (enc_ret != 0) {
+        logs::info("MovieWriter: EncodeFrame failed (%d)", enc_ret);
+        return;
+    }
+    if (info.eFrameType == videoFrameTypeSkip || info.iLayerNum <= 0) {
+        skipped_frames++;
+        return;
+    }
+
+    // OpenH264 emits contiguous Annex-B for this picture starting at layer 0.
+    int total_size = 0;
+    for (int layer = 0; layer < info.iLayerNum; layer++) {
+        const SLayerBSInfo &li = info.sLayerInfo[layer];
+        for (int nal = 0; nal < li.iNalCount; nal++) {
+            total_size += li.pNalLengthInByte[nal];
+        }
+    }
+    if (total_size <= 0 || !info.sLayerInfo[0].pBsBuf) {
+        skipped_frames++;
+        return;
+    }
+
+    const unsigned duration_90k = 90000u / (unsigned)frameRate;
+    auto *writer = (mp4_h26x_writer_t *)mp4wr;
+    if (mp4_h26x_write_nal(writer, info.sLayerInfo[0].pBsBuf, total_size, duration_90k) != MP4E_STATUS_OK) {
+        logs::info("MovieWriter: mp4_h26x_write_nal failed on frame %u", iframe);
+        return;
+    }
+
+    iframe++;
+    if ((iframe % (unsigned)frameRate) == 0) {
+        logs::info("MovieWriter: encoded %u frames (%u skipped)", iframe, skipped_frames);
+    }
 }
 
 MovieWriter::~MovieWriter() {
-	if (!initialized) {
-		return;
-	}
-	
-	// Flush encoder
-	if (codec) {
-		vpx_codec_iter_t iter = nullptr;
-		const vpx_codec_cx_pkt_t* pkt;
-		
-		// Encode NULL frame to flush
-		vpx_codec_err_t res = vpx_codec_encode(codec, nullptr, iframe, 1, 0, VPX_DL_GOOD_QUALITY);
-		if (res == VPX_CODEC_OK) {
-			while ((pkt = vpx_codec_get_cx_data(codec, &iter)) != nullptr) {
-				if (pkt->kind == VPX_CODEC_CX_FRAME_PKT) {
-					output_file.write((const char*)pkt->data.frame.buf, pkt->data.frame.sz);
-					logs::info("MovieWriter: Flushed frame (size = %zu)\n", pkt->data.frame.sz);
-				}
-			}
-		}
-		
-		vpx_codec_destroy(codec);
-		delete codec;
-	}
-	
-	// Cleanup
-	if (yuv_image) {
-		vpx_img_free(yuv_image);
-	}
-	
-	if (output_file.is_open()) {
-		output_file.close();
-	}
-	
-	logs::info("MovieWriter: Finished writing %d frames to %s\n", iframe, filename.c_str());
+    if (mp4wr) {
+        auto *writer = (mp4_h26x_writer_t *)mp4wr;
+        if (initialized) {
+            mp4_h26x_write_close(writer);
+        }
+        delete writer;
+        mp4wr = nullptr;
+    }
+    if (mux) {
+        MP4E_close((MP4E_mux_t *)mux);
+        mux = nullptr;
+    }
+    if (encoder) {
+        encoder->Uninitialize();
+        WelsDestroySVCEncoder(encoder);
+        encoder = nullptr;
+    }
+    if (output_file) {
+        fclose(output_file);
+        output_file = nullptr;
+    }
+
+    if (initialized) {
+        logs::info("MovieWriter: Finished writing %u frames (%u skipped) to %s", iframe, skipped_frames,
+                   filename.c_str());
+    }
 }
 
-#endif // GAME_PLATFORM_WIN
+#endif // GAME_HAS_VIDEO_RECORDING

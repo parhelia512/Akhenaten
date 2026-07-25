@@ -7,6 +7,7 @@
 #include "core/random.h"
 #include "core/profiler.h"
 #include "core/log.h"
+#include "core/system_time.h"
 #include "grid/vegetation.h"
 #include "grid/trees.h"
 #include "grid/canals.h"
@@ -221,41 +222,44 @@ void game_t::shutdown() {
 void game_t::set_write_video(bool v) {
     if (!write_video && v) {
         assert(!mvwriter);
-        mvwriter = new MovieWriter("test.webm", screen_width(), screen_height(), 4);
+        last_video_capture_ms = 0;
+        mvwriter = new MovieWriter("akhenaten_capture.mp4", screen_width(), screen_height(), 4);
     } else if (write_video && !v) {
         assert(mvwriter);
         delete mvwriter;
         mvwriter = nullptr;
+        last_video_capture_ms = 0;
     }
     write_video = v;
 }
 
 void game_t::write_frame() {
-    if (!write_video) {
+    if (!write_video || !mvwriter) {
         return;
     }
 
-    if (!mvwriter) {
+    // Wall-clock throttle (~4 fps), independent of present rate / game speed.
+    const time_millis now = time_get_millis();
+    constexpr time_millis interval_ms = 1000 / 4;
+    if (last_video_capture_ms != 0 && (now - last_video_capture_ms) < interval_ms) {
         return;
     }
+    last_video_capture_ms = now;
 
-    last_frame_tick++;
-    if (last_frame_tick % 30 != 0) {
-        return;
-    }
-    last_frame_tick = 0;
-    
     ::painter ctx = this->painter();
     if (!frame_pixels) {
-        frame_pixels = (color*)malloc(sizeof(color) * screen_width() * screen_height());
+        frame_pixels = (color *)malloc(sizeof(color) * screen_width() * screen_height());
+    }
+    if (!frame_pixels) {
+        return;
     }
 
     if (!g_render.save_screen_buffer(ctx, frame_pixels, 0, 0, screen_width(), screen_height(), screen_width())) {
-        free(frame_pixels);
+        logs::error("MovieWriter: save_screen_buffer failed");
         return;
     }
 
-    mvwriter->addFrame((const uint8_t*)frame_pixels);
+    mvwriter->addFrame((const uint8_t *)frame_pixels);
 }
 
 void game_t::reload_objects() {

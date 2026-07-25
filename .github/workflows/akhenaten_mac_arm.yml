@@ -17,6 +17,8 @@ jobs:
 
     - name: Install OpenSSL (for curl)
       run: brew install openssl@3
+    - name: Install meson and ninja
+      run: brew install meson ninja nasm
     - name: update-workspace
       run: |
         export CXXFLAGS=-stdlib=libc++

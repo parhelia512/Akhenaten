@@ -60,7 +60,7 @@ function top_menu_debug_terrain_paint_toggle(p1, p2) {
 	widget_top_menu_clear_state()
 	window_go_back()
 }
-function top_menu_debug_write_video_text(p1, p2) { return game.debug_write_video ? "Write Video ON" : "Write Video OFF" }
+function top_menu_debug_write_video_text(p1, p2) { return game.writing_video ? "Write Video ON" : "Write Video OFF" }
 
 function top_menu_debug_buildings_text(p1, p2) { return game.debug_render_mode == e_debug_render_building ? "Buildings ON" : "Buildings OFF" }
 function top_menu_debug_buildings_toggle(p1, p2) {
@@ -242,7 +242,7 @@ top_menu_widget {
  		make_full_screenshot : menu_item({text: "Make screenshot", onclick: top_menu_make_screenshot })
 
  		write_video     : menu_item({textfn: top_menu_debug_write_video_text
-			                         onclick: game.toggle_video_writing })
+			                         onclick: game.toggle_writing_video })
 
 		show_console    : menu_item({text: "Cheat console", onclick: top_menu_show_console })
 

@@ -78,6 +78,7 @@ struct game_t {
     uint16_t last_frame_tick = 0;
     color *frame_pixels = nullptr;
     bool write_video = false;
+    uint32_t last_video_capture_ms = 0;
     bool system_language_changed = false;
     uint8_t pending_load_type = 0;
     uint8_t pending_save_type = 0;
