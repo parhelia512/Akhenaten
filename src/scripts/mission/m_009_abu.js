@@ -5,6 +5,7 @@ log_info("akhenaten: mission 9 abu started")
 // pak CITY_STATUS subtype=1 Selima (FOREIGN_CITY_CONQUERED) ok→NEW_TRADE city=5=Kyrene.
 
 mission9 { // Abu — The Nubian Border
+	map_file : "data/maps/m_009_abu.map"
 	start_message : "message_history_abu"
 	selection_title : "Abu"
 	env {

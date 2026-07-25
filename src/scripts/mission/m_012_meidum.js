@@ -1,6 +1,7 @@
 log_info("akhenaten: mission 12 meidum started")
 
 mission12 { // Meidum
+	map_file : "data/maps/m_012_meidum.map"
 	start_message : "message_mission_meidum"
 	selection_title : "Meidum"
 	player_rank : 1

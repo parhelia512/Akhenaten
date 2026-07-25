@@ -3,6 +3,7 @@ log_info("akhenaten: mission 4 started")
 // Trade + pharaoh request chains verified vs mission1.pak scenario 4 (2026-07-25 dump).
 
 mission4 {
+	map_file : "data/maps/m_004_mennefer.map"
 	start_message : "message_trade_on_the_water"
 	selection_title : "Mennefer"
 	env {

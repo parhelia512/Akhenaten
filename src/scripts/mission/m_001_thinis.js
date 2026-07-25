@@ -1,6 +1,7 @@
 log_info("akhenaten: mission 1 started")
 
 mission1 {
+	map_file : "data/maps/m_001_thinis.map"
 	start_message : "message_gold_and_crime"
 	selection_title : "Thinis"
 	env {

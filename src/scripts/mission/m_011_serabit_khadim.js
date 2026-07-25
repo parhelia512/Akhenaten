@@ -5,6 +5,7 @@ log_info("akhenaten: mission 11 serabit khadim started")
 // chain events need B2 to fire from the binary; JS proxies timed requests + raids.
 
 mission11 { // Serabit Khadim
+	map_file : "data/maps/m_011_serabit_khadim.map"
 	start_message : "message_mission_serabit_khadim"
 	selection_title : "Serabit Khadim"
 	player_rank : 5

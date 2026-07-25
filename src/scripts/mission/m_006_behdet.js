@@ -3,6 +3,7 @@ log_info("akhenaten: mission 6 behdet started")
 // Empire / requests / invasions verified vs mission1.pak scenario 6 (2026-07-25 dump).
 
 mission6 { // Behdet — The Royal Navy
+	map_file : "data/maps/m_006_behdet.map"
 	start_message : "message_soldiers_and_forts"
 	selection_title : "Behdet"
 	player_rank : 2

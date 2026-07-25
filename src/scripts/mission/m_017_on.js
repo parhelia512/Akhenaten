@@ -1,6 +1,7 @@
 log_info("akhenaten: mission 17 on started")
 
 mission17 { // On (Heliopolis) — Ivory from the East
+	map_file : "data/maps/m_017_on.map"
 	start_message : "message_mission_heliopolis"
 	selection_title : "On"
 	player_rank : 3

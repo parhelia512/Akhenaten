@@ -1,6 +1,7 @@
 log_info("akhenaten: mission 16 iunet started")
 
 mission16 { // Iunet (Dendera) — The Defense of Egypt
+	map_file : "data/maps/m_016_iunet.map"
 	start_message : "message_mission_dendera"
 	selection_title : "Iunet"
 	player_rank : 3

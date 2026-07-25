@@ -4,6 +4,7 @@ log_info("akhenaten: mission 5 timna started")
 // Stub events/attacks/trade_routes removed — they were never wired (enable_scenario_events:false).
 
 mission5 { // Timna
+	map_file : "data/maps/m_005_timna.map"
 	start_message : "message_history_military"
 	selection_title : "Timna"
 	env {

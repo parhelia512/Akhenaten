@@ -1,6 +1,7 @@
 log_info("akhenaten: mission 0 nubt started")
 
 mission0 { // Nubt
+	map_file : "data/maps/m_000_nubt.map"
 	start_message : "message_housing_and_roads"
 	selection_title : "Nubt"
 	env {

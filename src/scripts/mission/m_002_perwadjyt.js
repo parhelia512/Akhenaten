@@ -1,6 +1,7 @@
 log_info("akhenaten: mission 2 started")
 
 mission2 {
+	map_file : "data/maps/m_002_perwadjyt.map"
 	start_message : "message_farming_along_the_nile"
 	selection_title : "Perwadjyt"
 	env {

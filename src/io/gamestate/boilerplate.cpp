@@ -688,8 +688,47 @@ bool GamestateIO::load_mission_pak_raw(const int scenario_id) {
     return true;
 }
 
+bool GamestateIO::load_mission_map_raw(const int scenario_id, pcstr map_path) {
+    if (!map_path || !map_path[0]) {
+        return false;
+    }
+
+    // Same carry/rank preservation as load_mission_pak_raw.
+    const uint16_t saved_carry = g_city.kingdome.campaign_carry_personal_savings;
+    const int32_t saved_rank = g_scenario.campaign_mission_rank;
+
+    pre_load();
+    vfs::path full = vfs::path(map_path).resolve();
+    auto mapfile = vfs::file_open(full);
+    if (!FILEIO.unserialize(mapfile, 0, FILE_FORMAT_MAP_FILE, GamestateIO::read_file_version, file_schema)) {
+        return false;
+    }
+
+    g_city.kingdome.campaign_carry_personal_savings = saved_carry;
+    g_scenario.campaign_mission_rank = saved_rank;
+
+    // Campaign session so post_load() applies JS metadata as a new mission (not custom-map hacks).
+    game.session.last_loaded = e_session_mission;
+    game.session.last_loaded_mission = map_path;
+    g_scenario.campaign_scenario_id = scenario_id;
+    return true;
+}
+
 bool GamestateIO::load_mission(const int scenario_id, bool start_immediately) {
-    if (!load_mission_pak_raw(scenario_id)) {
+    xstring map_file;
+    g_config_arch.r_section(mission_id_t(scenario_id), [&](archive arch) {
+        map_file = arch.r_string("map_file");
+    });
+
+    bool loaded = false;
+    if (!map_file.empty()) {
+        loaded = load_mission_map_raw(scenario_id, map_file.c_str());
+        if (!loaded) {
+            logs::info("Mission %d: map_file '%s' failed, falling back to %s",
+                       scenario_id, map_file.c_str(), MISSION_PACK_FILE);
+        }
+    }
+    if (!loaded && !load_mission_pak_raw(scenario_id)) {
         return false;
     }
 

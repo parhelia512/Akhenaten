@@ -5,6 +5,7 @@ log_info("akhenaten: mission 8 selima started")
 // No EVENT_TYPE_DISTANT_BATTLE in pak — Kerma pressure is CITY_UNDER_SIEGE (+ troop request chain).
 
 mission8 { // Selima — The Road to Africa
+	map_file : "data/maps/m_008_selima.map"
 	start_message : "message_the_finer_things_tutorial"
 	selection_title : "Selima"
 	player_rank : 3

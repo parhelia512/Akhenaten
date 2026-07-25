@@ -1,6 +1,7 @@
 log_info("akhenaten: mission 15 north dahshur started")
 
 mission15 { // North Dahshur — The True Pyramid
+	map_file : "data/maps/m_015_north_dahshur.map"
 	start_message : "message_mission_north_dahshur"
 	selection_title : "North Dahshur"
 	player_rank : 2

@@ -3,6 +3,7 @@ log_info("akhenaten: mission 7 abydos started")
 // Empire / requests / invasions verified vs mission1.pak scenario 7 (2026-07-25 dump).
 
 mission7 { // Abydos / Abedju — The Challenge of the Sea
+	map_file : "data/maps/m_007_abydos.map"
 	start_message : "message_soldiers_and_forts"
 	selection_title : "Abydos"
 	env {

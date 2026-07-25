@@ -1,6 +1,7 @@
 log_info("akhenaten: mission 3 started")
 
 mission3 {
+	map_file : "data/maps/m_003_nekhen.map"
 	start_message : "message_developing_culture"
 	selection_title : "Nekhen"
 	env {
