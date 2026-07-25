@@ -85,6 +85,7 @@
 #include "io/manager.h"
 #include "js/js_game.h"
 #include "dev/debug.h"
+#include "window/popup_dialog.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -721,11 +722,19 @@ bool GamestateIO::load_mission(const int scenario_id, bool start_immediately) {
     });
 
     bool loaded = false;
+    bool map_file_missing = false;
     if (!map_file.empty()) {
-        loaded = load_mission_map_raw(scenario_id, map_file.c_str());
-        if (!loaded) {
-            logs::info("Mission %d: map_file '%s' failed, falling back to %s",
+        const vfs::path map_full = vfs::path(map_file.c_str()).resolve();
+        if (!vfs::file_exists(map_full)) {
+            map_file_missing = true;
+            logs::warn("Mission %d: map file missing: %s (falling back to %s)",
                        scenario_id, map_file.c_str(), MISSION_PACK_FILE);
+        } else {
+            loaded = load_mission_map_raw(scenario_id, map_file.c_str());
+            if (!loaded) {
+                logs::warn("Mission %d: map_file '%s' failed to load, falling back to %s",
+                           scenario_id, map_file.c_str(), MISSION_PACK_FILE);
+            }
         }
     }
     if (!loaded && !load_mission_pak_raw(scenario_id)) {
@@ -745,6 +754,13 @@ bool GamestateIO::load_mission(const int scenario_id, bool start_immediately) {
         // replay mission autosave file
         bstring256 filename("autosave_replay.", saved_game_data_expanded.extension);
         GamestateIO::write_savegame(filename);
+    }
+
+    if (map_file_missing) {
+        bstring512 body;
+        body.printf("Map file not found:\n%s\n\nFalling back to %s.",
+                    map_file.c_str(), MISSION_PACK_FILE);
+        popup_dialog::show_ok(lang_text_from_key("#popup_dialog_map_file_missing"), body.c_str());
     }
 
     return true;

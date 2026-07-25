@@ -261,6 +261,7 @@ localization_hu = [
   {key: "#popup_dialog_delete_fort", text:"Erőd lebontása"}
   {key: "#popup_dialog_delete_bridge", text:"Híd lebontása"}
   {key: "#popup_dialog_quit_without_saving", text:"Kilépés"}
+  {key: "#popup_dialog_map_file_missing", text:"A pályafájl hiányzik"}
   {key: "#exit_without_saving", text:"Kilépés mentés nélkül?"}
   {key: "#popup_dialog_no_festival_square", text:"Ünnepség: nincs ünnepi tér"}
   {key: "#popup_dialog_delete_dynasty", text:"Dinasztia törlése?"}

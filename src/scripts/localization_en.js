@@ -261,6 +261,7 @@ localization_en = [
   {key: "#popup_dialog_delete_fort", text:"Demolishing a Fort" }
   {key: "#popup_dialog_delete_bridge", text:"Demolishing a bridge" }
   {key: "#popup_dialog_quit_without_saving", text:"Quit" }
+  {key: "#popup_dialog_map_file_missing", text:"Map file missing" }
   {key: "#exit_without_saving", text:"Exit without saving?" }
   {key: "#popup_dialog_no_festival_square", text:"Festival: No Festival Square." }
   {key: "#popup_dialog_delete_dynasty", text:"Delete Dynasty?" }

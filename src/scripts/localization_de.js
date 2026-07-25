@@ -229,6 +229,7 @@ localization_de = [
   {key: "#popup_dialog_delete_fort", text:"Abriss eines Forts" }
   {key: "#popup_dialog_delete_bridge", text:"Abriss einer Brücke" }
   {key: "#popup_dialog_quit_without_saving", text:"Beenden" }
+  {key: "#popup_dialog_map_file_missing", text:"Kartendatei fehlt" }
   {key: "#exit_without_saving", text:"Beenden ohne zu speichern?" }
   {key: "#popup_dialog_no_festival_square", text:"Fest: Kein Festplatz." }
   {key: "#popup_dialog_delete_dynasty", text:"Dynastie löschen?" }
