@@ -115,12 +115,7 @@ void city_fishing_points_t::update_month(int points_num) {
     }
 
     int num_fishing_spots = 0;
-    for (int i = 0; i < MAX_FISH_POINTS; i++) {
-        if (g_scenario.fishing_points[i].x() > 0)
-            num_fishing_spots++;
-
-        g_scenario.fishing_points[i] = {-1, -1};
-    }
+    g_scenario.fishing_points.assign(MAX_FISH_POINTS, tile2i::invalid);
 
     if (points_num >= 0) {
         num_fishing_spots = std::min<uint8_t>(MAX_FISH_POINTS, points_num);
@@ -136,9 +131,11 @@ void city_fishing_points_t::update_month(int points_num) {
 
     srand (time(nullptr));
 
-    for (int i = 0; i < num_fishing_spots; i++) {
-        int index = rand() % deep_water.size();
-        g_scenario.fishing_points[i] = tile2i(deep_water[index]);
+    if (!deep_water.empty()) {
+        for (int i = 0; i < num_fishing_spots; i++) {
+            int index = rand() % deep_water.size();
+            g_scenario.fishing_points[i] = tile2i(deep_water[index]);
+        }
     }
 
     create();

@@ -71,6 +71,9 @@ mission14 { // South Dahshur — Snofru's Bent Pyramid
 
 	enable_scenario_events : true
 
+	invasion_points_land [ [43, 28], [94, 113] ]
+	invasion_points_sea [ [54, 17] ]
+
 	// Trade partners are NOT verified against the original .pak. From the briefing
 	// (message_history_south_dahshur): local limestone at Dahshur, plain stone must be
 	// imported; copper from Enkomi; gems from Serabit Khadim (erratic). Export pottery

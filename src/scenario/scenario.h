@@ -243,13 +243,13 @@ struct scenario_data_t {
     tile2i river_exit_point;
 
     tile2i earthquake_point;
-    tile2i herd_points_animals[MAX_PREDATOR_HERD_POINTS];
+    hvector<tile2i, MAX_PREDATOR_HERD_POINTS> herd_points_animals;
     e_figure_type herd_type_animals[MAX_PREDATOR_HERD_POINTS];
-    tile2i herd_points_prey[MAX_PREY_HERD_POINTS];
-    tile2i fishing_points[MAX_FISH_POINTS];
-    tile2i disembark_points[MAX_DISEMBARK_POINTS];
-    svector<tile2i, MAX_INVASION_POINTS_LAND> invasion_points_land;
-    svector<tile2i, MAX_INVASION_POINTS_SEA> invasion_points_sea;
+    hvector<tile2i, MAX_PREY_HERD_POINTS> herd_points_prey;
+    hvector<tile2i, MAX_FISH_POINTS> fishing_points;
+    hvector<tile2i, MAX_DISEMBARK_POINTS> disembark_points;
+    hvector<tile2i, MAX_INVASION_POINTS_LAND> invasion_points_land;
+    hvector<tile2i, MAX_INVASION_POINTS_SEA> invasion_points_sea;
 
     bool allowed_buildings[BUILDING_MAX] = { 0 };
     resource_allow_vec init_resources;

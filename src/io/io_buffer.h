@@ -1,10 +1,12 @@
 #pragma once
 
 #include "core/buffer.h"
+#include "core/hvector.h"
 #include "core/xstring.h"
 #include "grid/point.h"
 #include "grid/grid.h"
 
+#include <cassert>
 #include <cstring>
 
 enum chunk_buffer_access_e {
@@ -158,6 +160,34 @@ public:
         tile.invalidate_offset();
         bind(BIND_SIGNATURE_INT16, tile.private_access(_X));
         bind(BIND_SIGNATURE_INT16, tile.private_access(_Y));
+    }
+
+    // Fixed-slot SoA: all X then all Y. Pads/truncates hvector to `slots`.
+    template<size_t Cap>
+    void bind_hvector_tiles_xy(hvector<tile2i, Cap> &pts, bind_signature_e coord_sig, size_t slots = Cap) {
+        assert(slots <= Cap);
+        if (is_read_access()) {
+            pts.assign(slots, tile2i::invalid);
+        } else {
+            pts.resize(slots, tile2i::invalid);
+        }
+        for (size_t i = 0; i < slots; ++i) {
+            pts[i].invalidate_offset();
+            bind(coord_sig, pts[i].private_access(_X));
+        }
+        for (size_t i = 0; i < slots; ++i) {
+            bind(coord_sig, pts[i].private_access(_Y));
+        }
+    }
+
+    template<size_t Cap>
+    void bind_hvector_tiles_xy_i32(hvector<tile2i, Cap> &pts, size_t slots = Cap) {
+        bind_hvector_tiles_xy(pts, BIND_SIGNATURE_INT32, slots);
+    }
+
+    template<size_t Cap>
+    void bind_hvector_tiles_xy_u16(hvector<tile2i, Cap> &pts, size_t slots = Cap) {
+        bind_hvector_tiles_xy(pts, BIND_SIGNATURE_UINT16, slots);
     }
 
     void bind(bind_signature_e signature, grid_xx *ext) {

@@ -67,6 +67,9 @@ mission17 { // On (Heliopolis) — Ivory from the East
 
 	enable_scenario_events : true
 
+	invasion_points_land [ [112, 97], [53, 18], [30, 41], [23, 91], [69, 137] ]
+	invasion_points_sea [ [106, 103] ]
+
 	// Trade partners are NOT verified against the original .pak. From the briefing
 	// (message_history_on): fine white limestone is the local export; ivory reaches Egypt
 	// as luxury goods via Byblos. Export pottery, papyrus, limestone.

@@ -96,6 +96,8 @@ mission15 { // North Dahshur — The True Pyramid
 
 	enable_scenario_events : true
 
+	invasion_points_land [ [19, 53], [35, 103], [60, 128] ]
+
 	// Trade partners are NOT verified against the original .pak. From the briefing
 	// (message_history_north_dahshur): wood (timber) is imported from Byblos for the
 	// construction ramps. Byblos is overseas (normally sea trade); this inland map is

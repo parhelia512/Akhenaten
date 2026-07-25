@@ -69,20 +69,14 @@ void scenario_editor_create(int map_size) {
     g_scenario.river_entry_point.set(-1);
     g_scenario.river_exit_point.set(-1);
 
-    auto& inv_landp = g_scenario.invasion_points_land;
-    std::fill(inv_landp.begin(), inv_landp.end(), tile2i::invalid);
+    g_scenario.invasion_points_land.assign(MAX_INVASION_POINTS_LAND, tile2i::invalid);
+    g_scenario.invasion_points_sea.assign(MAX_INVASION_POINTS_SEA, tile2i::invalid);
 
-    for (int i = 0; i < MAX_INVASION_POINTS_SEA; i++)
-        g_scenario.invasion_points_sea[i].set(-1);
+    g_scenario.fishing_points.assign(MAX_FISH_POINTS, tile2i::invalid);
 
-    for (int i = 0; i < MAX_FISH_POINTS; i++)
-        g_scenario.fishing_points[i] = tile2i::invalid;
+    g_scenario.herd_points_animals.assign(MAX_PREDATOR_HERD_POINTS, tile2i::invalid);
 
-    for (int i = 0; i < MAX_PREDATOR_HERD_POINTS; i++)
-        g_scenario.herd_points_animals[i] = tile2i::invalid;
-
-    for (int i = 0; i < MAX_PREY_HERD_POINTS; i++)
-        g_scenario.herd_points_prey[i] = tile2i::invalid;
+    g_scenario.herd_points_prey.assign(MAX_PREY_HERD_POINTS, tile2i::invalid);
 
     //for (int i = 0; i < MAX_REQUESTS; i++) {
     //    g_scenario.requests[i].deadline_years = 5;

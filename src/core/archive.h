@@ -104,7 +104,7 @@ struct archive {
     }
 
     template<typename T>
-    inline bool r_stable_array(pcstr name, T &arr) {    
+    inline bool r_stable_array(pcstr name, T &arr) {
         return r_stable_array_impl<false>(name, arr);
     }
 
@@ -115,7 +115,7 @@ struct archive {
     inline void r(pcstr name, svector<xstring, N> &v) { this->r_array_str(name, v); }
 
     template<typename T, std::size_t N>
-    inline void r(pcstr name, hvector<T, N> &v) { r_vector_impl<false>(name, v); }
+    inline void r(pcstr name, hvector<T, N> &v) { r_vector_impl<false>(name, v, (int)N); }
 
     template<typename T>
     void r(T& s);

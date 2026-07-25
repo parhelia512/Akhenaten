@@ -1,9 +1,8 @@
 log_info("akhenaten: mission 11 serabit khadim started")
 
 // Trade / requests / invasions verified vs mission1.pak (scenario 11) via
-// tests/45_mission11_pak_dump.js + __test_mission_pak_dump (D1b, 2026-07-24).
-// Remaining pak EVENT_TYPE_INVASION / chain events need B2 to fire from the binary;
-// JS proxies the timed requests + Libyan raids below.
+// __test_mission_pak_dump (D1b, 2026-07-24). Remaining pak EVENT_TYPE_INVASION /
+// chain events need B2 to fire from the binary; JS proxies timed requests + raids.
 
 mission11 { // Serabit Khadim
 	start_message : "message_mission_serabit_khadim"
@@ -75,6 +74,8 @@ mission11 { // Serabit Khadim
 	}
 
 	enable_scenario_events : true
+
+	invasion_points_land [ [58, 107], [93, 71], [87, 31], [42, 16] ]
 
 	// Empire sells/buys from mission1.pak empire_cities (raw dump, no JS overlay).
 	// Kebet is not a partner on this scenario; Nekhen is. All routes start closed (cost>0).

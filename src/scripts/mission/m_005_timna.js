@@ -71,6 +71,7 @@ mission5 { // Timna
 	// Map points from mission1.pak scenario 5 (no river / disembark / earthquake).
 	entry_point [47, 117]
 	exit_point [41, 28]
+	invasion_points_land [ [62, 9], [105, 35], [21, 51], [41, 109] ]
 
 	stages {
 		tutorial_irrigation { buildings: [BUILDING_WATER_LIFT, BUILDING_IRRIGATION_DITCH, ] }

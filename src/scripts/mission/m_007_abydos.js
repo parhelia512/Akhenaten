@@ -85,6 +85,8 @@ mission7 { // Abydos / Abedju — The Challenge of the Sea
 	river_entry_point [129, 61]
 	river_exit_point [15, 56]
 	disembark_points [ [50, 59], [-1, -1], [44, 59] ]
+	invasion_points_land [ [66, 5], [2, 69] ]
+	invasion_points_sea [ [127, 59] ]
 
 	// Empire from mission1.pak scenario 7 (empire id=0) — full map objects.
 	map_background : {pack:PACK_EMPIRE, id:1}

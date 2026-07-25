@@ -239,6 +239,12 @@ bool city_animals_t::get_roaming_destination(int formation_id, int allow_negativ
 }
 
 void city_animals_t::add_animals_point(int index, int x, int y, e_figure_type ftype, int num) {
+    if (index < 0 || index >= MAX_PREDATOR_HERD_POINTS) {
+        return;
+    }
+    if (g_scenario.herd_points_animals.size() < MAX_PREDATOR_HERD_POINTS) {
+        g_scenario.herd_points_animals.resize(MAX_PREDATOR_HERD_POINTS, tile2i::invalid);
+    }
     g_scenario.herd_points_animals[index] = tile2i{ x, y };
     g_scenario.herd_type_animals[index] = ftype;
     formation* m = create_herd(tile2i{ x, y }, ftype, num);

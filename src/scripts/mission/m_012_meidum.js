@@ -91,6 +91,9 @@ mission12 { // Meidum
 
 	enable_scenario_events : true
 
+	invasion_points_land [ [114, 31], [8, 78] ]
+	invasion_points_sea [ [79, 7] ]
+
 	cities [
 		{
 			name : "Men-nefer"

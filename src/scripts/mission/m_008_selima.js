@@ -54,6 +54,7 @@ mission8 { // Selima — The Road to Africa
 	// Map points from mission1.pak scenario 8 (desert oasis — no river / disembark).
 	entry_point [35, 20]
 	exit_point [90, 77]
+	invasion_points_land [ [99, 65], [8, 62], [69, 13] ]
 
 	enable_scenario_events : true
 

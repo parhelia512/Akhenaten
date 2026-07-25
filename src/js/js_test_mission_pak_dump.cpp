@@ -1,6 +1,6 @@
 // Integral-test helpers: dump mission1.pak scenario data WITHOUT JS mission overlays
-// (see GamestateIO::load_mission_pak_raw). Used by D1b-style verification
-// (tests/45_mission11_pak_dump.js) and ad-hoc mission dumps.
+// (see GamestateIO::load_mission_pak_raw). Call from ad-hoc tests/99_tmp_*.js via
+// __test_mission_pak_dump(scenario_id); do not keep a permanent dump test.
 
 #include "js_game.h"
 
@@ -169,12 +169,12 @@ static void dump_map_points() {
     dump_tile("pak_earthquake", g_scenario.earthquake_point);
 
     int herd_n = 0;
-    for (int i = 0; i < MAX_PREDATOR_HERD_POINTS; i++) {
+    for (int i = 0; i < (int)g_scenario.herd_points_animals.size(); i++) {
         tile2i t = g_scenario.herd_points_animals[i];
         if (!t.valid()) {
             continue;
         }
-        e_figure_type ft = g_scenario.herd_type_animals[i];
+        e_figure_type ft = (i < MAX_PREDATOR_HERD_POINTS) ? g_scenario.herd_type_animals[i] : FIGURE_NONE;
         dump_marker("pak_herd:i=%d|x=%d|y=%d|type=%d(%s)",
             i,
             t.x(),
@@ -186,7 +186,7 @@ static void dump_map_points() {
     dump_marker("pak_herd_count:%d", herd_n);
 
     int prey_n = 0;
-    for (int i = 0; i < MAX_PREY_HERD_POINTS; i++) {
+    for (int i = 0; i < (int)g_scenario.herd_points_prey.size(); i++) {
         tile2i t = g_scenario.herd_points_prey[i];
         if (!t.valid()) {
             continue;
@@ -197,7 +197,7 @@ static void dump_map_points() {
     dump_marker("pak_prey_count:%d", prey_n);
 
     int fish_n = 0;
-    for (int i = 0; i < MAX_FISH_POINTS; i++) {
+    for (int i = 0; i < (int)g_scenario.fishing_points.size(); i++) {
         tile2i t = g_scenario.fishing_points[i];
         if (!t.valid()) {
             continue;
@@ -208,7 +208,7 @@ static void dump_map_points() {
     dump_marker("pak_fish_count:%d", fish_n);
 
     int disembark_n = 0;
-    for (int i = 0; i < MAX_DISEMBARK_POINTS; i++) {
+    for (int i = 0; i < (int)g_scenario.disembark_points.size(); i++) {
         tile2i t = g_scenario.disembark_points[i];
         if (!t.valid()) {
             continue;

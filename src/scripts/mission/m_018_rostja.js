@@ -95,6 +95,14 @@ mission18 { // Rostja (Giza) — The Great Pyramid and Sphinx
 
 	enable_scenario_events : true
 
+	// Sparse land slots 4–6 empty in pak → [-1, -1]
+	invasion_points_land [
+		[138, 115], [126, 126], [162, 90], [50, 37],
+		[-1, -1], [-1, -1], [-1, -1],
+		[107, 145]
+	]
+	invasion_points_sea [ [136, 53] ]
+
 	// Trade partners are NOT verified against the original .pak. From the briefing
 	// (message_history_rostja): some limestone is provided, much must be bought; the
 	// funeral barge needs Lebanese cedar (timber from Byblos); granite for the sarcophagus.

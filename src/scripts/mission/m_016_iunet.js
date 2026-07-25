@@ -69,6 +69,14 @@ mission16 { // Iunet (Dendera) — The Defense of Egypt
 
 	enable_scenario_events : true
 
+	// Sparse land slots 3–5 empty in pak → [-1, -1]
+	invasion_points_land [
+		[128, 79], [91, 115], [65, 133],
+		[-1, -1], [-1, -1], [-1, -1],
+		[95, 27], [43, 29]
+	]
+	invasion_points_sea [ [119, 49], [4, 72] ]
+
 	// Trade partners are NOT verified against the original .pak. From the briefing
 	// (message_history_iunet): routes open to Abu and Men-nefer; ivory reaches Egypt as
 	// luxury goods via Byblos (no dedicated ivory resource in this build). Export copper,

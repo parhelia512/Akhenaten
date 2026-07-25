@@ -82,6 +82,7 @@ mission6 { // Behdet — The Royal Navy
 	river_exit_point [41, 17]
 	// pak slots 0 and 2; slot 1 empty → [-1, -1]
 	disembark_points [ [59, 40], [-1, -1], [68, 42] ]
+	invasion_points_sea [ [97, 67] ]
 
 	// Empire from mission1.pak scenario 6 (empire id=1) — full map objects.
 	map_background : {pack:PACK_EMPIRE, id:1}

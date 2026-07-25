@@ -79,6 +79,8 @@ mission10 { // Saqqara
 		kingdom    {enabled : true, goal : 50 }
 	}
 
+	invasion_points_land [ [69, 17] ]
+
 	cities [
 		{
 			name : "Nubt"

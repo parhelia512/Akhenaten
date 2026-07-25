@@ -64,6 +64,8 @@ mission9 { // Abu — The Nubian Border
 	river_entry_point [41, 28]
 	river_exit_point [42, 27]
 	disembark_points [ [60, 62], [-1, -1], [80, 100] ]
+	invasion_points_land [ [104, 103], [125, 82], [80, 127] ]
+	invasion_points_sea [ [32, 39] ]
 
 	enable_scenario_events : true
 

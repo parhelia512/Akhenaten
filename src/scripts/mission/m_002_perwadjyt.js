@@ -33,6 +33,9 @@ mission2 {
 		housing_level {enabled : true, goal : 6 }
 	}
 
+	// Map invasion points from mission1.pak scenario 2.
+	invasion_points_sea [ [36, 22] ]
+
 	vars {
 		figs_stored : 800
 		pottery_step1_stored : 100

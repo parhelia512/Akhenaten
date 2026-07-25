@@ -70,6 +70,8 @@ mission13 { // Buhen — Expansion to Nubia
 
 	enable_scenario_events : true
 
+	invasion_points_land [ [6, 59], [106, 51], [52, 105] ]
+
 	// Trade partners are NOT verified against the original .pak. Known from the briefing
 	// (message_history_buhen): no granite this far south -> import from Abu; copper from
 	// Enkomi (Cyprus) and, more cheaply, from Serabit Khadim (erratic supply).

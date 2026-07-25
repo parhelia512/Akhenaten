@@ -289,8 +289,7 @@ void figure_fishing_boat::figure_action() {
 
                     bool sticky_valid = false;
                     if (fish_tile.valid()) {
-                        for (int i = 0; i < MAX_FISH_POINTS; i++) {
-                            const tile2i &p = g_scenario.fishing_points[i];
+                        for (const tile2i &p : g_scenario.fishing_points) {
                             if (p.valid() && p == fish_tile) {
                                 sticky_valid = true;
                                 break;
