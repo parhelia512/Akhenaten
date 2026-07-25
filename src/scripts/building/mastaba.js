@@ -8,7 +8,7 @@ building_small_mastaba {
       base_bricks { id:1, offset:0 }
       base_grounded { path:"mastaba/pyramid_phase_one_00013" }
       clear_land { id:2, offset:12 }
-      image_stick { path:"mastaba/pyramid_phase_one_00021" }
+      image_stick { path:"pharaoh_general/plazatiles_00064" }
       empty_land { path:"mastaba/mastaba_00109" }
       enter { id:114 }
     }
@@ -57,9 +57,11 @@ building_small_mastaba {
     ]
   }
 
-  building_small_mastaba_part_side { show_in_debug: false }
-  building_small_mastaba_part_wall { show_in_debug: false }
-  building_small_mastaba_part_entrance { show_in_debug: false }
+  // Parts are 2×2 blocks on the init_tiles grid — without building_size they stay
+  // size 0, claim no map tiles, and only the main-type pieces render (thin strip).
+  building_small_mastaba_part_side { building_size: 2, show_in_debug: false }
+  building_small_mastaba_part_wall { building_size: 2, show_in_debug: false }
+  building_small_mastaba_part_entrance { building_size: 2, show_in_debug: false }
 
   building_medium_mastaba  {
     animations {
@@ -69,7 +71,7 @@ building_small_mastaba {
       base_bricks { id:1, offset:0 }
       base_grounded { path:"mastaba/pyramid_phase_one_00013" }
       clear_land { id:2, offset:12 }
-      image_stick { path:"mastaba/pyramid_phase_one_00021" }
+      image_stick { path:"pharaoh_general/plazatiles_00064" }
       empty_land {path:"mastaba/mastaba_00109"}
       enter {id:114}
     }
@@ -127,6 +129,6 @@ building_small_mastaba {
     ]
   }
 
-  building_medium_mastaba_part_side { show_in_debug: false }
-  building_medium_mastaba_part_wall { show_in_debug: false }
-  building_medium_mastaba_part_entrance { show_in_debug: false }
+  building_medium_mastaba_part_side { building_size: 2, show_in_debug: false }
+  building_medium_mastaba_part_wall { building_size: 2, show_in_debug: false }
+  building_medium_mastaba_part_entrance { building_size: 2, show_in_debug: false }

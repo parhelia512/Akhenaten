@@ -189,11 +189,13 @@ void building_mastaba::preview::ghost_preview(build_planner &planer, painter &ct
 
     vec2i size{ 1, 1 };
     vec2i size_b = base_params.init_tiles;
+    // Must match setup_preview_graphics: orientation 0/2 uses (y,x), 1/3 uses (x,y).
+    // Previously ghost used the opposite swap → green preview was 10×4 while collision was 4×10.
     switch (g_camera.orientation / 2) {
-    case 0: size = { size_b.x, size_b.y }; break;
-    case 1: size = { size_b.y, size_b.x }; break;
-    case 2: size = { size_b.x, size_b.y }; break;
-    case 3: size = { size_b.y, size_b.x }; break;
+    case 0: size = { size_b.y, size_b.x }; break;
+    case 1: size = { size_b.x, size_b.y }; break;
+    case 2: size = { size_b.y, size_b.x }; break;
+    case 3: size = { size_b.x, size_b.y }; break;
     }
 
     for (int i = 0; i < size.x; ++i) {
@@ -269,16 +271,8 @@ void building_mastaba::update_images(building *b, int curr_phase, const vec2i si
     }
 
     while (part) {
-        int image_id = 0;
-            //image_id = get_image(b->data.monuments.orientation, part->tile, main->tile, main->tile.shifted(size_b.y - 1, size_b.x - 1));
-        image_id = building_small_mastabe_get_bricks_image(b->orientation, part->type, part->tile, main->tile, main->tile.shifted(size_b.y - 1, size_b.x - 1), curr_phase - 2);
-        for (int dy = 0; dy < part->size; dy++) {
-            for (int dx = 0; dx < part->size; dx++) {
-                int grid_offset = part->tile.shifted(dx, dy).grid_offset();
-                map_image_set(grid_offset, image_id);
-            }
-        }
-        
+        int image_id = building_small_mastabe_get_bricks_image(b->orientation, part->type, part->tile, main->tile, main->tile.shifted(size_b.y - 1, size_b.x - 1), curr_phase - 2);
+        map_building_tiles_add(part->id, part->tile, part->size, image_id, TERRAIN_BUILDING);
         part = part->has_next() ? part->next() : nullptr;
     }
 }
@@ -315,7 +309,7 @@ void building_small_mastaba::update_day() {
 }
 
 bool building_small_mastaba::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
-    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, current_params().init_tiles);
+    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, get_mastaba_params(BUILDING_SMALL_MASTABA).init_tiles);
 }
 
 void building_mastaba::remove_worker(figure_id fid) {
@@ -373,7 +367,15 @@ int building_mastaba::get_image(int orientation, tile2i tile, tile2i start, tile
 }
 
 int building_small_mastabe_get_bricks_image(int orientation, e_building_type type, tile2i tile, tile2i start, tile2i end, int layer) {
-    int image_base_bricks = building_static_params::get(type).first_img("base_bricks");
+    // Part types (wall/side/entrance) have no animations of their own — bricks live on the
+    // main mastaba static params.
+    e_building_type bricks_type = type;
+    if (building_type_any_of(type, {BUILDING_SMALL_MASTABA_SIDE, BUILDING_SMALL_MASTABA_WALL, BUILDING_SMALL_MASTABA_ENTRANCE})) {
+        bricks_type = BUILDING_SMALL_MASTABA;
+    } else if (building_type_any_of(type, {BUILDING_MEDIUM_MASTABA_SIDE, BUILDING_MEDIUM_MASTABA_WALL, BUILDING_MEDIUM_MASTABA_ENTRANCE})) {
+        bricks_type = BUILDING_MEDIUM_MASTABA;
+    }
+    int image_base_bricks = building_static_params::get(bricks_type).first_img("base_bricks");
 
     int image_id = image_base_bricks + (layer - 1) * 8 + 4;
     int random = (image_base_bricks + 96 + (layer - 1) + (tile.x() + tile.y()) % 1 * 6);
@@ -435,6 +437,10 @@ void building_mastaba::on_place(int orientation, int variant) {
         }
 
         part.b = building_create(part.type, tile().shifted(part.offset), 0);
+        // Part JS configs historically omitted building_size; force 2×2 like the main piece.
+        if (part.b->size <= 0) {
+            part.b->size = base.size > 0 ? base.size : 2;
+        }
         game_undo_add_building(part.b);
         tile2i btile_add = tile().shifted(part.offset);
         map_mastaba_tiles_add(part.b->id, btile_add, part.b->size, -1, TERRAIN_BUILDING);
@@ -813,11 +819,13 @@ bool building_mastaba::target_route_tile_blocked(int grid_offset) const {
 }
 
 int building_small_mastaba::building_image_get() const {
+    // Wall/side/entrance static params have no animations — art lives on the main type.
+    const int base = building_static_params::get(BUILDING_SMALL_MASTABA).base_img();
     switch (runtime_data().phase) {
     case MONUMENT_START:
-        return current_params().base_img();
+        return base;
     default:
-        return current_params().base_img() + 1;
+        return base + 1;
     }
 }
 
@@ -838,7 +846,8 @@ bool building_small_mastaba::draw_ornaments_and_animations_height(painter &ctx, 
         return false;
     }
 
-    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
+    // Parts have empty static params — always use the main mastaba footprint.
+    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, get_mastaba_params(BUILDING_SMALL_MASTABA).init_tiles);
 }
 
 const monument &building_small_mastaba::config() const {
@@ -866,11 +875,12 @@ tile2i building_medium_mastaba::center_point() const {
 }
 
 int building_medium_mastaba::building_image_get() const {
+    const int base = building_static_params::get(BUILDING_MEDIUM_MASTABA).base_img();
     switch (runtime_data().phase) {
     case MONUMENT_START:
-        return current_params().base_img();
+        return base;
     default:
-        return current_params().base_img() + 1;
+        return base + 1;
     }
     return 0;
 }
@@ -887,7 +897,7 @@ tile2i building_medium_mastaba::access_point() const {
 }
 
 bool building_medium_mastaba::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
-    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, current_params().init_tiles);
+    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, get_mastaba_params(BUILDING_MEDIUM_MASTABA).init_tiles);
 }
 
 bool building_medium_mastaba::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
@@ -900,7 +910,7 @@ bool building_medium_mastaba::draw_ornaments_and_animations_height(painter &ctx,
         return false;
     }
 
-    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
+    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, get_mastaba_params(BUILDING_MEDIUM_MASTABA).init_tiles);
 }
 
 void building_medium_mastaba::update_day() {

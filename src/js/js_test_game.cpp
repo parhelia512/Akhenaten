@@ -17,7 +17,9 @@
 #include "building/building.h"
 #include "building/building_static_params.h"
 #include "building/building_storage_yard.h"
+#include "building/monument_mastaba.h"
 #include "building/monuments.h"
+#include "grid/grid.h"
 #include "graphics/view/view.h"
 #include "figure/figure.h"
 #include "figure/figure_impl.h"
@@ -389,8 +391,19 @@ void __test_show_tile_info(int bid) {
 }
 ANK_FUNCTION_1(__test_show_tile_info);
 
-// Force a monument (and all its linked parts) to a given construction phase.
-// Used by tests to walk a monument through its build stages without the delivery loop.
+static e_building_type test_mastaba_params_type(building *head) {
+    switch (head->type) {
+    case BUILDING_MEDIUM_MASTABA:
+    case BUILDING_MEDIUM_MASTABA_SIDE:
+    case BUILDING_MEDIUM_MASTABA_WALL:
+    case BUILDING_MEDIUM_MASTABA_ENTRANCE:
+    case BUILDING_MEDIUM_MASTABA_RESERVED:
+        return BUILDING_MEDIUM_MASTABA;
+    default:
+        return BUILDING_SMALL_MASTABA;
+    }
+}
+
 static void __test_monument_set_phase(int bid, int phase) {
     building *b = building_get(bid);
     building *head = b ? b->main() : nullptr;
@@ -404,8 +417,36 @@ static void __test_monument_set_phase(int bid, int phase) {
             pm->set_phase(phase);
         }
     }
+
+    if (!head->dcast_mastaba()) {
+        return;
+    }
+
+    // Fill every part's tiles so height ornaments use the current layer (progress >= 200).
+    for (building *p = head; p; p = p->has_next() ? p->next() : nullptr) {
+        grid_tiles part_tiles = map_grid_get_tiles(p, 0);
+        for (auto &t : part_tiles) {
+            map_monuments_set_progress(t, 200);
+        }
+    }
+
+    const vec2i tiles = get_mastaba_params(test_mastaba_params_type(head)).init_tiles;
+    if (mm->is_finished() || mm->phase() >= 8 || phase >= 8) {
+        building_mastaba::finalize(head, tiles);
+    } else if (phase >= 2) {
+        building_mastaba::update_images(head, phase, tiles);
+    }
 }
 ANK_FUNCTION_2(__test_monument_set_phase);
+
+static int __test_monument_phase(int bid) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    auto mm = head ? head->dcast_monument() : nullptr;
+    // phase is int8_t (MONUMENT_FINISHED = -1); phase() returns uint8_t and would yield 255.
+    return mm ? (int)mm->runtime_data().phase : -999;
+}
+ANK_FUNCTION_1(__test_monument_phase);
 
 // Deliver resource loads into a monument (updates resources_pct like cart delivery).
 // amount is resource units (same as deliver_resource); returns false if full / not a monument.

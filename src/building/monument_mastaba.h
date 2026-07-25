@@ -46,7 +46,7 @@ public:
         hvector<mastaba_part, 32> config_west;
         vec2i init_tiles;
     };
-    
+
     bool draw_ornaments_and_animations_flat_impl(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
     bool draw_ornaments_and_animations_hight_impl(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
 
@@ -60,6 +60,8 @@ public:
     virtual void remove_worker(figure_id fid) override;
     virtual void add_workers(figure_id fid) override;
 };
+
+const building_mastaba::base_params &get_mastaba_params(e_building_type type);
 
 class building_small_mastaba : public building_mastaba {
 public:
@@ -78,9 +80,9 @@ public:
     virtual const monument &config() const override;
     virtual tile2i center_point() const override;
     virtual tile2i access_point() const override;
-    
+
 };
-ANK_CONFIG_STRUCT(building_small_mastaba::static_params, 
+ANK_CONFIG_STRUCT(building_small_mastaba::static_params,
     init_tiles, config_north, config_east, config_south, config_west);
 
 class building_small_mastaba_part_side : public building_small_mastaba {
@@ -116,7 +118,7 @@ public:
     virtual const monument &config() const override;
     virtual tile2i center_point() const override;
     virtual tile2i access_point() const override;
-        
+
 };
 ANK_CONFIG_STRUCT(building_medium_mastaba::static_params,
     init_tiles, config_north, config_east, config_south, config_west);
