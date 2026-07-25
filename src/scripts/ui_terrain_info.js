@@ -93,6 +93,20 @@ function terrain_info_floodplain_on_init(window) {
 
 }
 
+terrain_info_water = {
+    help_id           : 45
+    open_sounds       : [ "Wavs/WATER1.WAV" ]
+    ui : baseui(terrain_info_window, {
+        title         : text({pos: [0, 16], size: [px(29), 13], text:[70, 13], font:FONT_LARGE_BLACK_ON_LIGHT, align:"center"})
+        describe      : text({pos: [30, 78], text:[70, 39], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
+    })
+}
+
+[es=terrain_info_water_init]
+function terrain_info_water_on_init(window) {
+
+}
+
 terrain_info_tree = {
     help_id           : 44
     open_sounds       : [ ]
