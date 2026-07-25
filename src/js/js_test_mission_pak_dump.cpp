@@ -20,7 +20,9 @@
 #include "game/game_environment.h"
 #include "game/resource.h"
 #include "graphics/image.h"
+#include "grid/grid.h"
 #include "grid/point.h"
+#include "grid/terrain.h"
 #include "io/gamefiles/lang.h"
 #include "io/gamestate/boilerplate.h"
 #include "js/js_defines.h"
@@ -725,6 +727,105 @@ static void dump_legacy_tables() {
     dump_marker("pak_price_change_count:%d", price_n);
 }
 
+static void dump_terrain_stats() {
+    // terrain_grid: uint32 bitmask per cell on the full 228² grid; playable
+    // area is scenario map width×height starting at map.start_offset.
+    struct bit_stat {
+        uint32_t mask;
+        pcstr name;
+    };
+    static const bit_stat bits[] = {
+        {TERRAIN_TREE, "tree"},
+        {TERRAIN_ROCK, "rock"},
+        {TERRAIN_WATER, "water"},
+        {TERRAIN_BUILDING, "building"},
+        {TERRAIN_SHRUB, "shrub"},
+        {TERRAIN_GARDEN, "garden"},
+        {TERRAIN_ROAD, "road"},
+        {TERRAIN_GROUNDWATER, "groundwater"},
+        {TERRAIN_CANAL, "canal"},
+        {TERRAIN_ELEVATION, "elevation"},
+        {TERRAIN_MEADOW, "meadow"},
+        {TERRAIN_RUBBLE, "rubble"},
+        {TERRAIN_WALL, "wall"},
+        {TERRAIN_FLOODPLAIN, "floodplain"},
+        {TERRAIN_FERRY_ROUTE, "ferry_route"},
+        {TERRAIN_MARSHLAND, "marshland"},
+        {TERRAIN_ORE, "ore"},
+        {TERRAIN_DUNE, "dune"},
+        {TERRAIN_DEEPWATER, "deepwater"},
+        {TERRAIN_SHORE, "shore"},
+    };
+
+    const int w = g_scenario.map.width;
+    const int h = g_scenario.map.height;
+    int empty = 0;
+    int non_empty = 0;
+    int bit_counts[sizeof(bits) / sizeof(bits[0])] = {0};
+
+    // Top combo histogram (mask → count), capped.
+    struct combo {
+        uint32_t mask;
+        int n;
+    };
+    combo top[16] = {};
+    int top_n = 0;
+
+    auto push_combo = [&](uint32_t mask) {
+        for (int i = 0; i < top_n; i++) {
+            if (top[i].mask == mask) {
+                top[i].n++;
+                // bubble toward front by count
+                for (int j = i; j > 0 && top[j].n > top[j - 1].n; --j) {
+                    combo tmp = top[j];
+                    top[j] = top[j - 1];
+                    top[j - 1] = tmp;
+                }
+                return;
+            }
+        }
+        if (top_n < 16) {
+            top[top_n++] = {mask, 1};
+        } else if (top[15].n == 1) {
+            // replace rarest of the tail only when tied at 1 — good enough for overview
+            top[15] = {mask, 1};
+        }
+    };
+
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            const int offset = (int)MAP_OFFSET(x, y);
+            const uint32_t t = (uint32_t)map_terrain_get(offset);
+            if (t == 0) {
+                empty++;
+            } else {
+                non_empty++;
+                push_combo(t);
+            }
+            for (int i = 0; i < (int)(sizeof(bits) / sizeof(bits[0])); i++) {
+                if (t & bits[i].mask) {
+                    bit_counts[i]++;
+                }
+            }
+        }
+    }
+
+    dump_marker("pak_terrain:w=%d|h=%d|tiles=%d|empty=%d|non_empty=%d",
+        w, h, w * h, empty, non_empty);
+    for (int i = 0; i < (int)(sizeof(bits) / sizeof(bits[0])); i++) {
+        if (bit_counts[i] <= 0) {
+            continue;
+        }
+        dump_marker("pak_terrain_bit:%s|n=%d|pct=%.1f",
+            bits[i].name,
+            bit_counts[i],
+            100.0 * bit_counts[i] / (double)(w * h));
+    }
+    for (int i = 0; i < top_n; i++) {
+        dump_marker("pak_terrain_combo:rank=%d|mask=0x%08x|n=%d", i + 1, top[i].mask, top[i].n);
+    }
+}
+
 static void dump_starting_buildings() {
     int counts[BUILDING_MAX] = {0};
     int total = 0;
@@ -762,6 +863,22 @@ static void dump_starting_buildings() {
     }
 }
 
+// Export mission map grids (terrain/image/elevation/…) as FILE_FORMAT_MAP_FILE.
+// Returns 1 on success.
+static int __test_export_mission_map(int scenario_id, pcstr path) {
+    if (g_args.no_resource()) {
+        dump_marker("pak_export_skipped:no_resource");
+        return 0;
+    }
+    if (!GamestateIO::export_mission_map(scenario_id, path)) {
+        dump_marker("pak_export_fail:%d|%s", scenario_id, path ? path : "-");
+        return 0;
+    }
+    dump_marker("pak_export_ok:%d|%s", scenario_id, path);
+    return 1;
+}
+ANK_FUNCTION_2(__test_export_mission_map);
+
 // Returns 1 on successful dump, 0 if skipped (--no-resource) or load failed.
 static int __test_mission_pak_dump(int scenario_id) {
     if (g_args.no_resource()) {
@@ -786,6 +903,7 @@ static int __test_mission_pak_dump(int scenario_id) {
     dump_empire_routes();
     dump_scenario_events();
     dump_legacy_tables();
+    dump_terrain_stats();
     dump_starting_buildings();
 
     dump_marker("pak_dump_done:%d", scenario_id);

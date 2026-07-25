@@ -648,6 +648,20 @@ bool GamestateIO::write_map(pcstr filename_short) {
     return FILEIO.serialize(full, 0, FILE_FORMAT_MAP_FILE, 160, file_schema);
 }
 
+bool GamestateIO::write_map_path(pcstr path) {
+    if (!path || !path[0]) {
+        return false;
+    }
+    return FILEIO.serialize(path, 0, FILE_FORMAT_MAP_FILE, 160, file_schema);
+}
+
+bool GamestateIO::export_mission_map(const int scenario_id, pcstr path) {
+    if (!load_mission_pak_raw(scenario_id)) {
+        return false;
+    }
+    return write_map_path(path);
+}
+
 bool GamestateIO::load_mission_pak_raw(const int scenario_id) {
     const int offset = get_campaign_scenario_offset(scenario_id);
     if (offset <= 0) {

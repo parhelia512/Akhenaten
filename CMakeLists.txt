@@ -1573,6 +1573,10 @@ if(DEFINED AKHENATEN_DATA_OUT_DIR)
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory "${AKHENATEN_DATA_OUT_DIR}"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${AKHENATEN_DATA_FILES} "${AKHENATEN_DATA_OUT_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${AKHENATEN_DATA_OUT_DIR}/maps"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${CMAKE_SOURCE_DIR}/data/maps"
+                "${AKHENATEN_DATA_OUT_DIR}/maps"
         COMMENT "Deploy engine data/ next to binary"
     )
 endif()
@@ -1580,4 +1584,5 @@ endif()
 # Linux package install: ship data/ beside the executable.
 if(UNIX AND NOT APPLE AND NOT ANDROID AND NOT EMSCRIPTEN)
     install(FILES ${AKHENATEN_DATA_FILES} DESTINATION bin/data)
+    install(DIRECTORY "${CMAKE_SOURCE_DIR}/data/maps" DESTINATION bin/data)
 endif()

@@ -33,6 +33,10 @@ bool write_mission(const int scenario_id);
 bool write_savegame(pcstr filename_short);
 
 bool write_map(pcstr filename_short);
+/** Write current in-memory map grids as FILE_FORMAT_MAP_FILE to an absolute/relative path. */
+bool write_map_path(pcstr path);
+/** load_mission_pak_raw(scenario_id) then write_map_path(path). */
+bool export_mission_map(const int scenario_id, pcstr path);
 
 bool load_mission(const int scenario_id, bool start_immediately);
 
