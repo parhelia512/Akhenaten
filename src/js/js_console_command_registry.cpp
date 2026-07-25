@@ -16,6 +16,7 @@ static void console_command_wrapper_global(const std::string &funcRefStr, std::i
         return;
     }
 
+    const int baseline = js_gettop(J);
     js_getglobal(J, funcRefStr.c_str());
     if (!J->iscallable(-1)) {
         os << "Error: Console command function not found" << std::endl;
@@ -36,15 +37,13 @@ static void console_command_wrapper_global(const std::string &funcRefStr, std::i
         js_setindex(J, -2, (int)i);
     }
 
-    bool ok = js_vm_trypcall(J, 1);
-    if (!ok) {
-        auto error = js_tostring(J, -1);
-        os << "Error executing console command: " << error->value << std::endl;
-        logs::error("JS console command error: %s", error->value.c_str());
+    if (!js_vm_trypcall(J, 1)) {
+        os << "Error executing console command" << std::endl;
+        logs::error("JS console command error");
+    }
+    while (js_gettop(J) > baseline) {
         js_pop(J, 1);
     }
-
-    js_pop(J, 2);
 }
 
 static void console_command_wrapper_registry(const std::string &funcRefStr, std::istream &is, std::ostream &os) {
@@ -54,6 +53,7 @@ static void console_command_wrapper_registry(const std::string &funcRefStr, std:
         return;
     }
 
+    const int baseline = js_gettop(J);
     js_getregistry(J, js_intern(funcRefStr.c_str()));
     if (!J->iscallable(-1)) {
         os << "Error: Console command function not found" << std::endl;
@@ -74,15 +74,13 @@ static void console_command_wrapper_registry(const std::string &funcRefStr, std:
         js_setindex(J, -2, (int)i);
     }
 
-    bool ok = js_vm_trypcall(J, 1);
-    if (!ok) {
-        auto error = js_tostring(J, -1);
-        os << "Error executing console command: " << error->value << std::endl;
-        logs::error("JS console command error: %s", error->value.c_str());
+    if (!js_vm_trypcall(J, 1)) {
+        os << "Error executing console command" << std::endl;
+        logs::error("JS console command error");
+    }
+    while (js_gettop(J) > baseline) {
         js_pop(J, 1);
     }
-
-    js_pop(J, 2);
 }
 #endif
 
@@ -100,6 +98,7 @@ void js_register_console_command_from_function(pcstr functionName, pcstr command
         js_pop(J, 1);
         return;
     }
+    js_pop(J, 1); // only needed the callable check; keep MuJS stack balanced across hot-reload
 
     std::string funcRefStr(functionName);
     auto wrapper = [funcRefStr](std::istream &is, std::ostream &os) {
@@ -132,10 +131,9 @@ void js_register_console_command(js_State *J) {
 
     auto commandName = js_tostring(J, 1);
 
+    // js_ref() stores the value in the registry and pops it
     js_copy(J, 2);
     auto funcRef = js_ref(J);
-    js_setregistry(J, funcRef);
-    js_pop(J, 1);
 
     std::string funcRefStr = funcRef->value;
     auto wrapper = [funcRefStr](std::istream &is, std::ostream &os) {

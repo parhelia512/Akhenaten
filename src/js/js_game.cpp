@@ -562,8 +562,8 @@ void js_call_function(xstring js_ref) {
         int result = J->pcall(0);
         if (result != 0) {
             logs::error("JS onclick callback error: %s", js_strnode_cstr(js_tostring(J, -1)));
-            js_pop(J, 1);
         }
+        js_pop(J, 1); // result or error
     } else {
         js_pop(J, 1);
     }
@@ -584,8 +584,8 @@ void js_call_function_bool(xstring js_ref, bool param) {
         int result = J->pcall(1);
         if (result != 0) {
             logs::error("JS dialog callback error: %s", js_strnode_cstr(js_tostring(J, -1)));
-            js_pop(J, 1);
         }
+        js_pop(J, 1); // result or error
     } else {
         js_pop(J, 1);
     }

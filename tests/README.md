@@ -87,6 +87,8 @@ C++ smoke checks run first (before JS files): `SDL_strlen`/`strcmp`, `vec2i`, `g
 | `39_enemy_chariot_registered.js` | Every `FIGURE_ENEMY_*_CHARIOT` resolves to a registered enemy class (`__test_enemy_figure_registered`) instead of asserting; Assyrian/Hyksos chariots (missions 32/33) covered (F2) |
 | `40_hippo_spawn.js` | Spawn `FIGURE_HIPPO` on land and water; `update_animation` → `walk` / `swim` (#77) |
 | `41_city_smoke_run.js` | Broad crash smoke (TS1): place ~12 building types via the real planner path, open each info window (`[es=(info_window_*, init)]`), advance the sim; driver's whole-log `!!! TypeError:` scan catches on_place/update/init crashes broadly. Per-type `smoke_ok:*` markers isolate the culprit; `smoke_skip:*` logged loudly |
+| `46_bridge_placement.js` | Low Bridge on synthetic 3-wide channel: place (`WATER\|ROAD` + `bridge_part`/`bridge_type` + sprite dual-write), floodplain reject, max_length reject, citizen `CITIZEN_0_ROAD` |
+| `47_js_hotreload_stack.js` | Hot-reload MuJS stack stability: 20× `js_register_game_handlers` + 20× reload `:console_commands.js` via `js_vm_sync` must not grow the value stack (former `[console_command=…]` getglobal leak → stackoverflow after ~10 mixed saves) |
 | `42_enemy_config_valid.js` | Static validator (V1) for all 13 `enemy_*` configs in `enemies.js`: `percentage_type1+2+3 == 100`, a nonzero share has a non-NONE `figure_types[i]` (F1), and every declared figure type resolves to a registered enemy class via `__test_enemy_figure_registered` (F2) |
 | `43_sphinx_place.js` | C6 Sphinx: planner-place `BUILDING_SPHINX`, assert 3 linked parts (`next_part_building_id`), open info window without TypeError |
 | `44_obelisk_place.js` | C7 Small Obelisk: reject without granite / second unfinished; then staffed SY + 100 granite → place 3×3 (no parts), granite consumed, `__test_monument_add_resource` fills timber; display + full-city screenshots |
@@ -95,6 +97,23 @@ Farm **placement** tests (34/35) cover `can_place` / terrain rules; **37** cover
 When adding more preview draw coverage, follow JS draw conventions in
 [`src/building/CLAUDE.md`](../src/building/CLAUDE.md) (ghost_preview section) and
 [`src/js/CLAUDE.md`](../src/js/CLAUDE.md).
+
+## Canary tests (QA4)
+
+Minimal regressions for a **bug class** — add one before merging a MuJS wave that could
+reintroduce that class.
+
+The integral driver (**HR5**):
+- clears stale MuJS stack slots before each test (`cleared N stale MuJS stack slot(s)`);
+- fails the test if the stack is not idle-empty afterward.
+
+Hot-reload sync logs (**HR7**): `JS: vm_sync done files=N (…) refresh=full elapsed_ms=…`.
+
+| Test | Bug class |
+|------|-----------|
+| `36_house_evolve_text_property.js` | xstring / house `{}` property binding (H1) |
+| `38_color_mask_passing.js` | `color` / `COLOR_MASK_*` > INT_MAX (J1) |
+| `47_js_hotreload_stack.js` | MuJS value-stack leak across hot-reload (HR1) |
 
 Shared helpers for city tests and placement live in [`src/scripts/integral_test.js`](../src/scripts/integral_test.js), imported from `modules.js` (always loaded with the game VM, not via `include()` from test files).
 
@@ -160,6 +179,8 @@ After each test script loads, the driver calls `js_vm_sync({})` so any top-level
 | `__test_yards_stored(resource)` / `__test_yards_stored_staffed(resource)` | int | City granite/etc. in yards (all / staffed only) |
 | `__test_building_current_image(bid)` | int | Monument `building_image_get()` |
 | `__test_camera_center_building(bid)` | undefined | Center camera on building / monument `center_point` |
+| `__test_js_hotreload_handlers_stack_ok(n)` | boolean | Re-run `js_register_game_handlers` `n` times; true if MuJS stack depth unchanged (HR1) |
+| `__test_js_hotreload_file_stack_ok(path, n)` | boolean | `js_vm_reload_file` + `js_vm_sync` `n` times; true if stack depth unchanged (HR1) |
 
 ## JS helpers (`integral_test.js`)
 
@@ -174,6 +195,7 @@ Loaded via `import integral_test` in `modules.js` (after `city_planner`).
 | `test_find_buildable_tile(type)` | `{x,y}` or null | Scan map for a valid tile near center |
 | `test_building_place(type, x, y)` | building id | Full placement via `city_planner`; auto-tile when `x` or `y` is negative; calls `test_log_building_placed` |
 | `test_prepare_shoreline_patch(cx, cy, w, h)` | undefined | Paint water and rebuild shores (land row at `cy - 1`) |
+| `test_prepare_bridge_channel(cx, cy, w, len)` | start tile | Paint a straight N–S water channel (width ≥ 3) for Low Bridge tests |
 | `test_shoreline_building_place(type, size)` | building id | Reload not included; shoreline patch + `test_building_place` at map center |
 | `test_assert_building_placed(bid, type, tag)` | boolean | Type, map tile, and per-bid marker checks |
 | `test_staffed_yard_with_resource(resource, amount, x, y)` | building id | Place SY, set workers, force-stock resource |

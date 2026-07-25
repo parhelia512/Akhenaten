@@ -419,6 +419,13 @@ int run_js_tests() {
         g_app.quit = false;
         SDL_FlushEvent(SDL_USEREVENT);
 
+        // HR5: drop stale slots left by startup / previous tests so we only
+        // fail on leaks introduced by *this* test.
+        const int stale = js_vm_force_idle_stack();
+        if (stale > 0) {
+            logs::info("[test:%s] cleared %d stale MuJS stack slot(s) before test", name.c_str(), stale);
+        }
+
         const int load_baseline = js_gettop(J);
         js_vm_reset_error();
         logs::info("[test:%s] loading script", name.c_str());
@@ -489,18 +496,36 @@ int run_js_tests() {
         pop_to(J, cv_baseline);
         logs::flush();
 
+        bool ok_result = false;
         if (!cv_ok) {
             logs::error("[test:%s] FAIL: check_valid threw", name.c_str());
-            ++failed;
-        } else if (result) {
+        } else if (!result) {
+            logs::error("[test:%s] FAIL (check_valid returned false)", name.c_str());
+        } else {
+            ok_result = true;
+        }
+
+        // HR5: MuJS value stack must be idle-empty between tests (catches hot-reload leaks).
+        const int leaked = js_vm_force_idle_stack();
+        if (leaked > 0) {
+            logs::error("[test:%s] FAIL: MuJS stack not idle after test (leaked %d slot(s))", name.c_str(),
+                        leaked);
+            ok_result = false;
+        }
+
+        if (ok_result) {
             logs::info("[test:%s] PASS", name.c_str());
             ++passed;
         } else {
-            logs::error("[test:%s] FAIL (check_valid returned false)", name.c_str());
             ++failed;
         }
     }
     js_vm_reset_error();
+    const int final_leak = js_vm_force_idle_stack();
+    if (final_leak > 0) {
+        logs::error("[integraltests] FAIL: MuJS stack not idle after suite (leaked %d)", final_leak);
+        ++failed;
+    }
     logs::info("[integraltests] %d passed, %d failed", passed, failed);
     return failed == 0 ? 0 : 1;
 }

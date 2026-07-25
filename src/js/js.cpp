@@ -18,6 +18,7 @@
 #include "core/interlocked.h"
 #include "core/variant.h"
 #include "core/bstring.h"
+#include "core/system_time.h"
 #include "content/mods.h"
 #include "scenario/scenario.h"
 #include "game/mission.h"
@@ -358,6 +359,25 @@ bool js_vm_global_is_callable(js_State *J, const char *name) {
     return ok;
 }
 
+int js_vm_stack_depth_if_idle() {
+    if (!vm.J) {
+        return 0;
+    }
+    if (vm.J->bot != 0) {
+        return -1;
+    }
+    return js_gettop(vm.J);
+}
+
+int js_vm_force_idle_stack() {
+    const int depth = js_vm_stack_depth_if_idle();
+    if (depth <= 0) {
+        return 0;
+    }
+    js_pop(vm.J, depth);
+    return depth;
+}
+
 static void copy_js_value_text(js_State *J, js_Value *v, char *out, size_t outsz) {
     if (!out || !outsz) {
         return;
@@ -665,6 +685,21 @@ bool js_vm_sync(const xstring &mission_id) {
         js_reset_vm_state();
     }
 
+    const int nfiles = (int)vm.files2load.size();
+    bstring512 files_summary;
+    for (int i = 0; i < nfiles; i++) {
+        if (i > 0) {
+            files_summary.append(", ");
+        }
+        // Keep the summary short for the log line.
+        if (files_summary.len() > 400) {
+            files_summary.append("…");
+            break;
+        }
+        files_summary.append(vm.files2load[i].c_str());
+    }
+    const time_millis t0 = time_get_millis();
+
     // Iterate by index so newly appended imports (from js_game_import) are also processed
     for (int i = 0; i < (int)vm.files2load.size(); i++) {
         const std::string key = js_vm_file_key(vm.files2load[i].c_str());
@@ -684,10 +719,35 @@ bool js_vm_sync(const xstring &mission_id) {
     vm.files2load.clear();
     vm.queued_files.clear();
 
+    // Only clear values *this* sync pushed (relative to entry depth). Absolute
+    // pop-to-zero is unsafe when js_vm_sync runs nested under a JS→C call
+    // (BOT != 0); at frame_end BOT is 0 and baseline is the idle top.
+    const int stack_baseline = vm.J ? js_gettop(vm.J) : 0;
+
     js_register_game_handlers(mission_id);
     js_register_entity_systems();
 
+    if (vm.J) {
+        const int top = js_gettop(vm.J);
+        if (top > stack_baseline) {
+            logs::info("JS: clearing leftover stack before config refresh (+%d)", top - stack_baseline);
+            js_pop(vm.J, top - stack_baseline);
+        }
+    }
+
     config::refresh(vm.J);
+
+    if (vm.J) {
+        const int top = js_gettop(vm.J);
+        if (top > stack_baseline) {
+            logs::info("JS: clearing leftover stack after config refresh (+%d)", top - stack_baseline);
+            js_pop(vm.J, top - stack_baseline);
+        }
+    }
+
+    const unsigned elapsed_ms = (unsigned)(time_get_millis() - t0);
+    logs::info("JS: vm_sync done files=%d (%s) refresh=full elapsed_ms=%u", nfiles, files_summary.c_str(),
+               elapsed_ms);
 
     vm.have_error = 0;
     return true;
@@ -753,12 +813,17 @@ int js_vm_exec_function_args(pcstr funcname, const char *szTypes, ...) {
                 logs::info("Error details: %s", error_msg->value.c_str());
             }
         }
+        while (js_gettop(vm.J) > savetop) {
+            js_pop(vm.J, 1);
+        }
         return 0;
     }
 
-    js_pop(vm.J, 2);
-    if( savetop - js_gettop(vm.J) != 0 ) {
-        logs::info( "STACK grow for %s [%d]", funcname, js_gettop(vm.J) );
+    if (js_gettop(vm.J) != savetop) {
+        logs::info("STACK grow for %s [%d]", funcname, js_gettop(vm.J));
+        while (js_gettop(vm.J) > savetop) {
+            js_pop(vm.J, 1);
+        }
     }
     return ok;
 }

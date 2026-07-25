@@ -411,6 +411,52 @@ static void __test_camera_center_building(int bid) {
 }
 ANK_FUNCTION_1(__test_camera_center_building);
 
+// Hot-reload stack regression: each js_vm_sync used to leave ~1 stack slot per
+// [console_command=…] handler (~30). JS_STACKSIZE is 256, so ~10 reloads then
+// crashed in config::refresh / UI archive load (stackoverflow → fatal exit).
+static bool __test_js_hotreload_handlers_stack_ok(int iterations) {
+    js_State *J = js_vm_state();
+    if (!J || iterations < 1) {
+        return false;
+    }
+
+    const int baseline = js_gettop(J);
+    for (int i = 0; i < iterations; ++i) {
+        js_register_game_handlers({});
+    }
+    const int after = js_gettop(J);
+    logs::info("[test-marker] hotreload_handlers_stack baseline=%d after=%d iterations=%d",
+               baseline, after, iterations);
+    if (after != baseline) {
+        logs::info("[hotreload] handlers stack leak delta=%d", after - baseline);
+        return false;
+    }
+    return true;
+}
+ANK_FUNCTION_1(__test_js_hotreload_handlers_stack_ok);
+
+static bool __test_js_hotreload_file_stack_ok(pcstr path, int iterations) {
+    js_State *J = js_vm_state();
+    if (!J || !path || !*path || iterations < 1) {
+        return false;
+    }
+
+    const int baseline = js_gettop(J);
+    for (int i = 0; i < iterations; ++i) {
+        js_vm_reload_file(path);
+        js_vm_sync({});
+    }
+    const int after = js_gettop(J);
+    logs::info("[test-marker] hotreload_file_stack path=%s baseline=%d after=%d iterations=%d",
+               path, baseline, after, iterations);
+    if (after != baseline) {
+        logs::info("[hotreload] file reload stack leak delta=%d", after - baseline);
+        return false;
+    }
+    return true;
+}
+ANK_FUNCTION_2(__test_js_hotreload_file_stack_ok);
+
 ANK_DECLARE_JSFUNCTION_ITERATOR(register_test_js_functions);
 inline void register_test_js_functions(js_State *J) {
 }
