@@ -6,20 +6,24 @@
 Действия по конкретным дефектам живут в **[REMAKE_TASKS_P1.md](REMAKE_TASKS_P1.md)**
 (задачи B5, F1, F2, F3, C1/C3/~~C4~~/~~C6~~/C7, D1b) — здесь только указатели на них.
 
-Последнее обновление: 2026-07-25 (Selima empire/events; PRICE/debt_interest/`int_dcy`;
-route `deviation`; план **B2** — [`REMAKE_B2_INVASION_PLAN.md`](REMAKE_B2_INVASION_PLAN.md);
-§9–10 HR/terrain — без изменений). Заскриптованы миссии 0–18; empire full **4–8**.
+Последнее обновление: 2026-07-25 (Saqqara redefine + `map_file`/`data/maps` `3affd5b21`;
+Abu + map points; **invasion/disembark config-only** + hvector `697a61836`; план очереди —
+[`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md) с **B2-migrate**,
+**FF1**, **AUD1**/hygiene; Selima; PRICE/debt_interest/`int_dcy`; route `deviation`; план **B2** —
+[`REMAKE_B2_INVASION_PLAN.md`](REMAKE_B2_INVASION_PLAN.md); §9–10 HR/terrain — без изменений).
+Заскриптованы миссии 0–18; empire full **4–11**.
 
 ---
 
 ## 1. Playbook: как скриптуется миссия кампании (эталон)
 
-Эталоны: `m_010_saqqara.js` (монумент+choice), `m_008_selima.js` (empire full + Hyksos/
-Kerma/troops; invasions пока poll), `m_016_iunet.js` (полный набор).
+Эталоны: `m_010_saqqara.js` (монумент+choice), `m_009_abu.js` / `m_008_selima.js`
+(empire full; invasions пока poll), `m_016_iunet.js` (полный набор).
 Регистрация — `import` в `src/scripts/missions.js`.
-Полный перевод **empire-карты**: эталон `m_004`…`m_008`, гайд —
+Полный перевод **empire-карты**: эталон `m_004`…`m_009`, гайд —
 **[MISSION_TO_JS.md](MISSION_TO_JS.md)** / handoff **[MISSION_TO_JS_HANDOFF.md](MISSION_TO_JS_HANDOFF.md)** /
-triage **[MISSION_PAK_TRIAGE.md](MISSION_PAK_TRIAGE.md)**.
+triage **[MISSION_PAK_TRIAGE.md](MISSION_PAK_TRIAGE.md)** /
+**очередь работ [REMAKE_EMPIRE_MISSIONS_PLAN.md](REMAKE_EMPIRE_MISSIONS_PLAN.md)**.
 
 Обязательные части (правило D0 в задачнике):
 1. Блок `missionN { ... }`: `start_message`, `player_rank`, **`int_dcy`**
@@ -157,24 +161,29 @@ Distant battle — `city.create_distant_battle({ tag_id, city })` (+ `set_param`
 3. ~~**F1**~~ ✅ — армии вторжений 11/13/15/16 спавнятся полностью.
 
 Осталось из инфраструктуры кампании: **B2** (event-invasions), **B3** (invasion
-warnings), **B4** (phrase_id). Дальше — блок C (монументы) и миссии D6+ / Abu(9).
+warnings), **B4** (phrase_id). Дальше — блок C (монументы) и миссии **D / Serabit(11)+**.
 
 **B2 — план:** [`REMAKE_B2_INVASION_PLAN.md`](REMAKE_B2_INVASION_PLAN.md)
 (spawn + **отложенный** `on_completed`/`on_refusal`, favour, chain-only, tests).
-Кратко в `REMAKE_TASKS_P1.md` § B2. Пока не сделан — миссии 5–8 на JS poll /
+Кратко в `REMAKE_TASKS_P1.md` § B2. Пока не сделан — миссии 5–9 на JS poll /
 `mission_pharaoh_favour_invasion_tick`.
 
 **B2 — расшифровка pak (2026-07-24, m5–7):** крупные amount=40/45 — это
 `EVENT_TRIGGER_BY_FAVOUR` (0x10) + `EVENT_INVADER_PHARAOH` (не distant battle).
-Dump: `semantics=favour_kr_punishment`. Selima favour size **63**.
+Dump: `semantics=favour_kr_punishment`. Selima favour size **63**; Abu **40→20→20**.
 
 **JS proxy:** `mission_pharaoh_favour_invasion_tick(mission, size[, chain])` в
 `missions.js`. Параллельно может жить Caesar-legacy
 `kingdome_relation_t::process_invasion` — при B2b согласовать, иначе двойной спавн.
 
-**Закрыто рядом с Selima (2026-07-25):** `EVENT_TYPE_PRICE_↑/↓` → `trade_price_change`;
-meta `debt_interest` / `initial_funds` / … как `int_dcy`; empire route `deviation`
-в `improve_route`; NEW_TRADE выставляет `is_open`.
+**Закрыто (2026-07-25):** Selima (8); Abu (9) `c10506b5f`; Saqqara (10) + campaign
+`map_file`/`data/maps` `3affd5b21`; `EVENT_TYPE_PRICE_↑/↓`; `debt_interest` / `int_dcy`;
+route `deviation`; NEW_TRADE `is_open`; CITY_STATUS subtype 1; map-point overlays
+(m4–10); disembark + `invasion_points_*` config-only (hvector) `697a61836`.
+
+**Empire track handoff:** [`MISSION_TO_JS_HANDOFF.md`](MISSION_TO_JS_HANDOFF.md)
+— следующий full redefine: **Meidum (12)**.  
+**Очередь A ∥ B2:** [`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md).
 
 ---
 

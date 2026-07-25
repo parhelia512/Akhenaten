@@ -129,6 +129,36 @@ function mission_show_start_message(mission, message_id) {
     mission.start_message_shown = true
 }
 
+// Recurring request cadence (pak): do not start the next cycle while a request for
+// this resource is still active; after it clears, wait ≥1 month before firing again.
+// Call update_idle every month; may_fire at the calendar slot (e.g. month 7).
+// Mission vars (prefix = e.g. "pharaoh_copper_recurring"):
+//   {prefix}_was_busy, {prefix}_idle_since_abs
+function mission_recurring_request_update_idle(mission, resource, prefix, abs_month) {
+    var was_busy_key = prefix + "_was_busy"
+    var idle_key = prefix + "_idle_since_abs"
+    if (city.has_active_request(resource)) {
+        mission[was_busy_key] = true
+        return
+    }
+    if (mission[was_busy_key]) {
+        mission[was_busy_key] = false
+        mission[idle_key] = abs_month
+    }
+}
+
+function mission_recurring_request_may_fire(mission, resource, prefix, abs_month) {
+    mission_recurring_request_update_idle(mission, resource, prefix, abs_month)
+    if (city.has_active_request(resource)) {
+        return false
+    }
+    var idle = mission[prefix + "_idle_since_abs"]
+    if (typeof idle === "number" && idle >= 0 && abs_month <= idle) {
+        return false
+    }
+    return true
+}
+
 function mission_pharaoh_favour_invasion_tick(mission, army_size, chain_army_size) {
     if (typeof chain_army_size === "undefined") {
         chain_army_size = 0

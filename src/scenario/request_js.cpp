@@ -66,6 +66,22 @@ void __city_request_execute(int tag) {
 }
 ANK_FUNCTION_1(__city_request_execute)
 
+// True if any EVENT_TYPE_REQUEST for this resource is currently is_active.
+bool __city_has_active_request(int resource) {
+    const e_resource res = (e_resource)resource;
+    for (int i = 0; i < g_scenario.events.events_count(); ++i) {
+        const event_ph_t *e = g_scenario.events.at(i);
+        if (!e || e->type != EVENT_TYPE_REQUEST || !e->is_active) {
+            continue;
+        }
+        if ((e_resource)e->item.value == res) {
+            return true;
+        }
+    }
+    return false;
+}
+ANK_FUNCTION_1(__city_has_active_request)
+
 // Fire an ONLY_VIA_EVENT master (chain child) from JS — e.g. force troops×4 if luxury late never came.
 void __city_event_fire_chain(int tag) {
     for (int i = 0; i < g_scenario.events.events_count(); ++i) {

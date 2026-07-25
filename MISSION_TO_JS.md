@@ -86,6 +86,15 @@ mission4 {
     buildings [ BUILDING_…, … ]
     sounds { briefing : "Voice/Mission/…", victory : "Voice/Mission/…" }
     win_criteria { population {…} culture {…} … }
+    // map points (load_metadata):
+    // entry/exit/river/earthquake — optional overlay (omit key → keep pak)
+    // entry_point [x, y]   exit_point [x, y]
+    // river_entry_point [x, y]   river_exit_point [x, y]
+    // earthquake_point [x, y]
+    // disembark / invasion — mission config only (omit key → empty; not pak):
+    // disembark_points [ [x, y], [-1, -1], [x, y] ]  // sparse slots
+    // invasion_points_land [ [x, y], … ]   // sparse → [-1,-1]; dump: pak_inv_land
+    // invasion_points_sea  [ [x, y], … ]
     // empire — см. §5
     vars { … }   // флаги прогресса туториала / one-shot событий
 }
@@ -262,11 +271,17 @@ Battle icons рисуются JS drawer’ом
 7. **Лимиты**: `route_limits` из `pak_route_limits` (не путать с `trade_limits`).
 8. **Тексты/объекты**: `hide_pak_objects` + нужные массивы.
 9. **Фон**: `map_background` при необходимости.
-10. **События**: requests (ok/refuse/late + subtypes); PRICE/DEMAND/WAGE — handler
+10. **Map points**: `entry_point` / `exit_point` / river из dump (omit invalid = keep pak).
+    `disembark_points` / `invasion_points_land|sea` — **только из JS** (нет ключа → пусто);
+    sparse → `[-1,-1]`. Entry/exit/river уже в m4–10; invasion points — m2 + m5–18 (где
+    pak не пуст, `697a61836`).
+10b. **`map_file`**: `"data/maps/m_NNN_….map"` — city grids; load prefers map, falls back to pak
+    (`3affd5b21`).
+11. **События**: requests (ok/refuse/late + subtypes); PRICE/DEMAND/WAGE — handler
     **мутирует** state (не только фраза); invasions = poll до B2.
-11. **Старт**: advisors, `set_empire_available`, tutorial flags.
-12. **Wiki** + `missions.js` import + handoff status row.
-13. **Проверка**: empire map, open trade (`is_open`), один shared leaf без double-fire.
+12. **Старт**: advisors, `set_empire_available`, tutorial flags.
+13. **Wiki** + `missions.js` import + handoff status row.
+14. **Проверка**: empire map, open trade (`is_open`), один shared leaf без double-fire.
 
 ---
 
@@ -274,18 +289,20 @@ Battle icons рисуются JS drawer’ом
 
 | Уровень | Миссии | Что сделано |
 |---------|--------|-------------|
-| Full redefine | **4**–**8** (Men-nefer … Selima) | cities+pos, routes (2-pt + `deviation` ok), texts, ornament, map_background, hide_pak_*; wiki: mennefer / timna / behdet / abedju / selima |
-| Patch / cities list | 9–18 | `cities[]` без полного hide routes/objects |
+| Full redefine | **4**–**11** (Men-nefer … Serabit) | cities+pos, routes, texts, ornament, map_background, hide_pak_*, **map points**, **`map_file`**; wiki: … / saqqara / serabit-khadim |
+| Patch / cities list | 12–18 | `cities[]` без полного hide routes/objects |
 | Минимум | 0–3 | туториал, empire map почти из pak |
 
-**Следующий full redefine:** Abu (**9**).
+**Следующий full redefine:** Meidum (**12**).
 
 **Сессионный handoff:** [MISSION_TO_JS_HANDOFF.md](MISSION_TO_JS_HANDOFF.md).  
+**Очередь работ A ∥ B2 → B2-migrate + FF1/D1–D4:** [REMAKE_EMPIRE_MISSIONS_PLAN.md](REMAKE_EMPIRE_MISSIONS_PLAN.md).  
 **Pak triage:** [MISSION_PAK_TRIAGE.md](MISSION_PAK_TRIAGE.md).  
 **B2 invasions:** [REMAKE_B2_INVASION_PLAN.md](REMAKE_B2_INVASION_PLAN.md).
 
-При полном переносе копируй структуру **m_008** (или m_004), данные — из dump.
+При полном переносе копируй структуру **m_009** (или m_008), данные — из dump.
 Цепочки: `ok`/`refuse`/`late` indices + общие leaf’ы через shared `ONLY_VIA`.
+Map points: §4 + `scenario.cpp` `load_metadata`.
 
 ---
 

@@ -36,6 +36,16 @@ B2/B3/B4 по-прежнему открыты (TODO-заглушки на мес
 стека в suite), **HR6** (notes), **HR7** (лог `vm_sync`), **QA4** (canary table).
 Открыты: **HR2** (аудит pcall), **HR3** (диагностика), **HR4** (dirty refresh), **PC5**
 (трек infra/dev). Приоритет: HR2 ≫ HR4.
+Ещё позже 2026-07-25: empire full **4–9** (Abu `c10506b5f`); map-point overlays в
+mission JS; очередь **A (Saqqara→18) ∥ B2 → B2-migrate** + FF1/AUD1 + hygiene D2–D4 —
+[`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md). Синхронизирован
+`REMAKE_TASKS_P1.md` (волна 5 = empire+B2; FF1/AUD1; граф/«Выполнено»).
+Ещё позже 2026-07-25: map-point arrays → **hvector** + `bind_hvector_tiles_xy_*`;
+`disembark` / `invasion_points_*` — только из mission JS (omit → empty); invasion
+координаты из pak dump в m2, m5–18 — `697a61836`.
+Ещё позже 2026-07-25: **Serabit (11)** full redefine + wiki (empire id=8, funds 15k,
+housing 4, shared request leaves, beduin 16 recurring, favour 51). Очередь A:
+**Meidum (12) → 18** ∥ B2.
 
 Приоритеты:
 - **P1** — блокирует прохождение оригинальной кампании;
@@ -99,17 +109,29 @@ B2/B3/B4 по-прежнему открыты (TODO-заглушки на мес
       (`f5a17b591`, `bd1298219`).
 - [ ] **B2. Event-driven вторжения — no-op**: `case EVENT_TYPE_INVASION: // TODO`
       в `scenario_event_manager.cpp`. Спавн есть (`scenario_invasion.cpp`); нет deferred
-      `on_completed`/`on_refusal`. Миссии 5–8 на JS poll/favour helper.
+      `on_completed`/`on_refusal`. Миссии 5–9 на JS poll/favour helper.
       **План:** [`REMAKE_B2_INVASION_PLAN.md`](REMAKE_B2_INVASION_PLAN.md)
-      (B2a → resolve → B2c → B2b → B2d → B2-migrate m5–8; опц. B2.5 JS helper).
+      (B2a → resolve → B2c → B2b → B2d → **B2-migrate** m5–9; опц. B2.5 JS helper).
       Triage/DoD миссий: [`MISSION_PAK_TRIAGE.md`](MISSION_PAK_TRIAGE.md).
+      Очередь A ∥ B2: [`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md).
       **Разблокирует редакторские вторжения — см. ED5.**
-- [x] **B2x (Selima wave):** PRICE↑/↓ mutates prices; `debt_interest`/`int_dcy`;
-      route `deviation`; NEW_TRADE `is_open` — см. `REMAKE_TASKS_P1.md` § B2x.
+- [ ] **B2-migrate.** После B2 Phase 7: убрать/сузить JS favour+invasion poll в m5–9
+      (+10+ по мере redefine). Явный шаг в [`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md);
+      не откладывать «на потом».
+- [x] **B2x (Selima/Abu wave):** PRICE↑/↓; `debt_interest`/`int_dcy`; route `deviation`;
+      NEW_TRADE `is_open`; CITY_STATUS subtype 1; map points m4–9 —
+      см. `REMAKE_TASKS_P1.md` § B2x / [`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md).
+- [ ] **FF1. FAILED_FLOOD recurring (Behdet).** В JS сейчас ONCE, в pak — recurring.
+      DoD в empire-плане; отдельный маленький коммит.
+- [ ] **AUD1 / D1-audit. CITY_STATUS / MESSAGE subtype audit.** Dump m4–18: silent no-op subtypes;
+      engine fix или triage skip. Таблица в handoff / `MISSION_PAK_TRIAGE.md`.
+      (**AUD1** в `REMAKE_TASKS_P1.md` — не путать с миссией 11 / D1.)
 - [ ] **B3. Сериализация invasion warnings** — тело `iob_invasion_warnings` закомментировано
       (`src/scenario/scenario_invasion.cpp:456-477`, `// TODO`). После load предупреждения теряются.
+      После B2 / B2-migrate.
 - [ ] **B4. Подстановка фраз в событийных сообщениях**: `int phrase_id = -1; // TODO`
       в `scenario_event_manager.cpp:607`; там же TODO на строках 545, 788.
+      После B2.
 - [x] **B5. Валидация целей `choice[]`** — путь `choice[]` → `__game_load_mission()` шёл
       без проверки JS-конфига (`__game_mission_is_valid` истинен для всех слотов кампании
       из `campaign.txt`, включая незаскриптованные). Введён `mission_is_playable(id) =
@@ -573,7 +595,10 @@ Pharaoh-only (и Linux case-symlink'ами) получали «Pharaoh data requ
 - [ ] **QA1. Mission golden dumps.** Расширить `mission_pak_dump` / `js_test_mission_pak_dump`
       → baseline vs оригинал для миссий 0–18 (win criteria, empire, requests, starting funds).
       Маркеры + ad-hoc `--integraltest-only 99_tmp_*` (постоянный dump-тест не заводим).
+      **Слайс сейчас (D3 в empire-плане):** после redefine N сверять map points + ключевые
+      event tags из triage log — не ждать полный baseline 0–18.
       **Файлы:** `src/js/js_test_mission_pak_dump.cpp`, wiki Developer Reference.
+      См. [`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md) § D3.
 
 - [ ] **QA2. Deterministic tick harness.** N месяцев на фикс. сейве + hash ключевых гридов /
       finance/population (ловля рассинхрона economy/flood). Не блокер геймплея; полезно
@@ -620,8 +645,10 @@ Pharaoh-only (и Linux case-symlink'ами) получали «Pharaoh data requ
       IDs) из `m_NNN_*.js`. Связано с правилом wiki в `CLAUDE.md`.
 
 - [ ] **PC4. Раздельные треки PR + cmake reconfigure.** (1) Не мешать engine-фичи
-      (мосты/grids) с mission/empire-скриптами в одном PR — handoff уже ловил смешение.
-      (2) В review checklist: новый `.cpp`/`.h` → был `cmake --preset` (GLOB без
+      (мосты/grids) с mission/empire-скриптами в одном PR — handoff уже ловил смешение
+      (hunting в empire stage). (2) Перед коммитом empire: `git status` / stage только
+      файлы задачи (**D4** в [`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md)).
+      (3) В review checklist: новый `.cpp`/`.h` → был `cmake --preset` (GLOB без
       `CONFIGURE_DEPENDS`). Зафиксировать в `CLAUDE.md` / CONTRIBUTING при удобном PR.
 
 - [ ] **PC5. Трек infra/dev vs gameplay parity.** CONTRIBUTING режет PRы, меняющие
@@ -630,6 +657,9 @@ Pharaoh-only (и Linux case-symlink'ами) получали «Pharaoh data requ
       (расширение **PC4**): агентам/ревью — не смешивать «починить стек MuJS» с «дописать
       Selima» в одном PR. Зафиксировать в `CLAUDE.md` при удобном PR.
       **Связано:** HR*, QA4, PC4.
+- [ ] **PC6. Handoff freshness (D2).** В начале empire-сессии сверять handoff
+      «последний коммит / untracked» с `git log -1` / `git status`; иначе снова
+      устаревший статус (волна Abedju/Selima). Чеклист в empire-плане § D2.
 ## P3 — MuJS биндинги и house/farm (после farm preview / evolve_text)
 
 Выявлено 2026-07-18 при переносе farm ghost_preview в JS и фиксе `House.evolve_text`
