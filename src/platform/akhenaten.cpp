@@ -512,11 +512,11 @@ static void run_and_draw() {
 
         {
             NANO_PROFILE_SCOPE("_Present");
+            game.frame_pre_present();
             platform_renderer_render();
         }
 
         game.frame_end();
-        game.write_frame();
     }
 
     game_perfmon_frame_mark_end();

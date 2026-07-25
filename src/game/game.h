@@ -48,9 +48,9 @@ enum e_session_type {
     e_session_custom_map = 2
 };
 
-class MovieWriter;
 struct event_game_mission_pre_load {};
 struct event_game_scripts_was_reloaded {};
+struct event_game_exit_requested { int reserved = 0; };
 struct event_update_game_tick_timer { uint8_t reserved = 0; };
 struct event_debug_properties_draw_mission_info { uint8_t reserved = 0; };
 struct event_report_bug_result { int ok; xstring url; xstring error; };
@@ -76,9 +76,6 @@ struct game_t {
     bool debug_terrain_paint = false;
     uint32_t frame = 0;
     uint16_t last_frame_tick = 0;
-    color *frame_pixels = nullptr;
-    bool write_video = false;
-    uint32_t last_video_capture_ms = 0;
     bool system_language_changed = false;
     uint8_t pending_load_type = 0;
     uint8_t pending_save_type = 0;
@@ -87,7 +84,6 @@ struct game_t {
     int mission_choice_open_scenario_id = 0;
     int tick_timer_ms = 37;
 
-    MovieWriter *mvwriter = nullptr;
     simulation_time_t simtime;
 
     struct {
@@ -111,11 +107,7 @@ struct game_t {
     void animation_timers_init();
     void animation_timers_update();
     bool animation_should_advance(uint32_t speed);
-    void write_frame();
     void reload_objects();
-
-    void set_write_video(bool v);
-    bool get_write_video() const { return write_video; }
 
     void update();
     void update_tick(int simtick);
@@ -143,6 +135,8 @@ struct game_t {
     void reload_language();
     void add_frame_end_event(serial_event_t ev);
     void execute_frame_end_events();
+    void add_frame_pre_present_handler(serial_event_t handler);
+    void frame_pre_present();
     void add_frame_serial_part_handler(serial_event_t handler);
     void frame_serial_part();
 
@@ -151,6 +145,9 @@ struct game_t {
 
     std::mutex frame_end_events_mutex;
     hvector<serial_event_t, 16> frame_end_events;
+
+    std::mutex frame_pre_present_handlers_mutex;
+    hvector<serial_event_t, 8> frame_pre_present_handlers;
 
     std::mutex frame_serial_part_handlers_mutex;
     hvector<serial_event_t, 8> frame_serial_part_handlers;

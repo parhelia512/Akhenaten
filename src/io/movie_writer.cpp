@@ -88,8 +88,6 @@ MovieWriter::MovieWriter(const std::string &filename_, unsigned int width_, unsi
     param.fMaxFrameRate = (float)frameRate;
     param.iPicWidth = width;
     param.iPicHeight = height;
-    // Screen capture needs more bits than camera video; keep a high floor so
-    // low-fps city recordings are not almost entirely frame-skipped.
     param.iTargetBitrate = std::max(2500000, (int)width * (int)height * (int)frameRate / 4);
     param.iMaxBitrate = param.iTargetBitrate * 2;
     param.iRCMode = RC_BITRATE_MODE;

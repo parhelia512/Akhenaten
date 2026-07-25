@@ -32,6 +32,9 @@ class MovieWriter {
 public:
     MovieWriter(const std::string &filename, unsigned int width, unsigned int height, int frameRate = 25);
     void addFrame(const uint8_t *pixels);
+    bool ok() const {
+        return initialized;
+    }
     vec2i frameSize() const {
         return {(int)width, (int)height};
     }
@@ -44,6 +47,9 @@ class MovieWriter {
 public:
     MovieWriter(const std::string &, unsigned int, unsigned int, int) {}
     void addFrame(const uint8_t *) {}
+    bool ok() const {
+        return true;
+    }
     vec2i frameSize() const {
         return {0, 0};
     }

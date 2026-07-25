@@ -30,6 +30,13 @@ else()
     set(WIN_EMSCRIPTEN FALSE)
 endif()
 
+if((WIN32 OR UNIX) AND NOT ANDROID AND NOT EMSCRIPTEN AND NOT WIN_EMSCRIPTEN)
+    option(OPTION_ENABLE_VIDEO_RECORDING "Build OpenH264 screen capture to MP4" ON)
+else()
+    option(OPTION_ENABLE_VIDEO_RECORDING "Build OpenH264 screen capture to MP4" OFF)
+endif()
+message(STATUS "OPTION_ENABLE_VIDEO_RECORDING: ${OPTION_ENABLE_VIDEO_RECORDING}")
+
 if (CMAKE_BUILD_PLATFORM STREQUAL "android" OR ANDROID)
     message(FATAL_ERROR "Platform android should build with gradle project")
     set(PLATFORM_ANDROID TRUE)
@@ -1310,185 +1317,6 @@ endif()
 if(MSVC)
     target_link_libraries(${GAME} "winmm" "imagehlp" "shlwapi" "setupapi" "version")
 
-    set(LIBVPX_DEPS_ROOT "${CMAKE_BINARY_DIR}/_deps")
-    set(LIBVPX_INSTALL_DIR "${LIBVPX_DEPS_ROOT}/libvpx")
-    set(LIBVPX_LIB_DIR "${LIBVPX_INSTALL_DIR}/lib")
-    set(LIBVPX_INCLUDE_DIR "${LIBVPX_INSTALL_DIR}/include")
-
-    message(STATUS "libvpx: Checking for pre-built installation...")
-    set(LIBVPX_FOUND FALSE)
-
-    # Check for existing installation
-    if(EXISTS "${LIBVPX_LIB_DIR}/libvpx.lib" AND EXISTS "${LIBVPX_INCLUDE_DIR}/vpx/vpx_encoder.h")
-        message(STATUS "libvpx: Found pre-built installation")
-        message(STATUS "libvpx: Installation directory: ${LIBVPX_INSTALL_DIR}")
-        set(LIBVPX_FOUND TRUE)
-    endif()
-
-    # Download pre-built library if not found
-    if(NOT LIBVPX_FOUND)
-        message(STATUS "libvpx: Pre-built installation not found, downloading...")
-
-        # Determine architecture
-        if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-            set(LIBVPX_ARCH "x64")
-        else()
-            set(LIBVPX_ARCH "x86")
-        endif()
-
-        set(LIBVPX_VERSION "1.15.1")
-        set(LIBVPX_ZIP_FILE "${LIBVPX_DEPS_ROOT}/libvpx-v${LIBVPX_VERSION}-msvc.zip")
-
-        file(MAKE_DIRECTORY ${LIBVPX_DEPS_ROOT})
-        message(STATUS "libvpx: Dependencies directory: ${LIBVPX_DEPS_ROOT}")
-
-        if(NOT EXISTS "${LIBVPX_ZIP_FILE}")
-            message(STATUS "libvpx: Archive not found, starting download...")
-            message(STATUS "libvpx: Target archive: ${LIBVPX_ZIP_FILE}")
-
-            set(DOWNLOAD_URLS
-                "https://github.com/ShiftMediaProject/libvpx/releases/download/v1.15.1/libvpx_v1.15.1_msvc17.zip"
-            )
-
-            set(DOWNLOAD_SUCCESS FALSE)
-            set(URL_INDEX 0)
-            foreach(DOWNLOAD_URL ${DOWNLOAD_URLS})
-                math(EXPR URL_INDEX "${URL_INDEX} + 1")
-                message(STATUS "libvpx: [${URL_INDEX}] Attempting download from: ${DOWNLOAD_URL}")
-
-                file(DOWNLOAD
-                    ${DOWNLOAD_URL}
-                    ${LIBVPX_ZIP_FILE}
-                    SHOW_PROGRESS
-                    STATUS DOWNLOAD_STATUS
-                    TLS_VERIFY ON
-                )
-                list(GET DOWNLOAD_STATUS 0 STATUS_CODE)
-                if(STATUS_CODE EQUAL 0)
-                    file(SIZE ${LIBVPX_ZIP_FILE} FILE_SIZE)
-                    if(FILE_SIZE GREATER 0)
-                        math(EXPR FILE_SIZE_MB "${FILE_SIZE} / 1048576")
-                        message(STATUS "libvpx: Download successful!")
-                        message(STATUS "libvpx: File size: ${FILE_SIZE} bytes (${FILE_SIZE_MB} MB)")
-                        set(DOWNLOAD_SUCCESS TRUE)
-                        break()
-                    else()
-                        message(WARNING "libvpx: Downloaded file is empty, removing...")
-                        file(REMOVE ${LIBVPX_ZIP_FILE})
-                    endif()
-                else()
-                    list(GET DOWNLOAD_STATUS 1 ERROR_MESSAGE)
-                    message(WARNING "libvpx: Download failed: ${ERROR_MESSAGE}")
-                    if(EXISTS "${LIBVPX_ZIP_FILE}")
-                        file(REMOVE ${LIBVPX_ZIP_FILE})
-                    endif()
-                endif()
-            endforeach()
-
-            if(NOT DOWNLOAD_SUCCESS)
-                message(FATAL_ERROR "libvpx: Failed to download from all sources.\n"
-                    "Please download libvpx manually and extract to: ${LIBVPX_INSTALL_DIR}\n"
-                    "Or install via vcpkg: vcpkg install libvpx:x64-windows")
-            endif()
-        else()
-            file(SIZE ${LIBVPX_ZIP_FILE} FILE_SIZE)
-            math(EXPR FILE_SIZE_MB "${FILE_SIZE} / 1048576")
-            message(STATUS "libvpx: Archive already exists: ${LIBVPX_ZIP_FILE}")
-            message(STATUS "libvpx: Archive size: ${FILE_SIZE} bytes (${FILE_SIZE_MB} MB)")
-        endif()
-
-        # Extract ZIP file
-        message(STATUS "libvpx: Starting extraction process...")
-        message(STATUS "libvpx: Source archive: ${LIBVPX_ZIP_FILE}")
-        message(STATUS "libvpx: Target directory: ${LIBVPX_INSTALL_DIR}")
-
-        set(LIBVPX_EXTRACT_TEMP "${LIBVPX_DEPS_ROOT}/libvpx-temp")
-        file(MAKE_DIRECTORY ${LIBVPX_EXTRACT_TEMP})
-
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -E tar xf ${LIBVPX_ZIP_FILE}
-            WORKING_DIRECTORY ${LIBVPX_EXTRACT_TEMP}
-            RESULT_VARIABLE EXTRACT_RESULT
-            OUTPUT_QUIET
-            ERROR_QUIET
-        )
-
-        if(NOT EXTRACT_RESULT EQUAL 0)
-            message(FATAL_ERROR "libvpx: Extraction failed with exit code ${EXTRACT_RESULT}.\n"
-                "Please extract manually: ${LIBVPX_ZIP_FILE} to ${LIBVPX_INSTALL_DIR}")
-        endif()
-
-        message(STATUS "libvpx: Archive extracted successfully")
-
-        # Move extracted files to install directory
-        file(GLOB EXTRACTED_DIRS "${LIBVPX_EXTRACT_TEMP}/*")
-        list(LENGTH EXTRACTED_DIRS EXTRACTED_COUNT)
-
-        if(EXTRACTED_COUNT EQUAL 1)
-            list(GET EXTRACTED_DIRS 0 EXTRACTED_ROOT)
-            file(MAKE_DIRECTORY ${LIBVPX_INSTALL_DIR})
-            file(GLOB EXTRACTED_CONTENTS "${EXTRACTED_ROOT}/*")
-            foreach(ITEM ${EXTRACTED_CONTENTS})
-                get_filename_component(ITEM_NAME ${ITEM} NAME)
-                set(TARGET_PATH "${LIBVPX_INSTALL_DIR}/${ITEM_NAME}")
-                if(EXISTS ${TARGET_PATH})
-                    file(REMOVE_RECURSE ${TARGET_PATH})
-                endif()
-                file(RENAME ${ITEM} ${TARGET_PATH})
-            endforeach()
-        else()
-            file(MAKE_DIRECTORY ${LIBVPX_INSTALL_DIR})
-            file(GLOB EXTRACTED_CONTENTS "${LIBVPX_EXTRACT_TEMP}/*")
-            foreach(ITEM ${EXTRACTED_CONTENTS})
-                get_filename_component(ITEM_NAME ${ITEM} NAME)
-                set(TARGET_PATH "${LIBVPX_INSTALL_DIR}/${ITEM_NAME}")
-                if(EXISTS ${TARGET_PATH})
-                    file(REMOVE_RECURSE ${TARGET_PATH})
-                endif()
-                file(RENAME ${ITEM} ${TARGET_PATH})
-            endforeach()
-        endif()
-
-        file(REMOVE_RECURSE ${LIBVPX_EXTRACT_TEMP})
-        message(STATUS "libvpx: Extraction completed")
-
-        # Find lib and include directories
-        file(GLOB_RECURSE VPX_LIB "${LIBVPX_INSTALL_DIR}/*/libvpx.lib")
-        file(GLOB_RECURSE VPX_HEADER "${LIBVPX_INSTALL_DIR}/*/vpx/vpx_encoder.h")
-
-        if(VPX_LIB)
-            list(GET VPX_LIB 0 VPX_LIB_FILE)
-            get_filename_component(FOUND_LIB_DIR ${VPX_LIB_FILE} DIRECTORY)
-            set(LIBVPX_LIB_DIR ${FOUND_LIB_DIR})
-            message(STATUS "libvpx: Library directory found: ${LIBVPX_LIB_DIR}")
-        endif()
-
-        if(VPX_HEADER)
-            list(GET VPX_HEADER 0 VPX_HEADER_FILE)
-            get_filename_component(FOUND_INCLUDE_DIR ${VPX_HEADER_FILE} DIRECTORY)
-            get_filename_component(FOUND_INCLUDE_DIR ${FOUND_INCLUDE_DIR} DIRECTORY)
-            set(LIBVPX_INCLUDE_DIR ${FOUND_INCLUDE_DIR})
-            message(STATUS "libvpx: Include directory found: ${LIBVPX_INCLUDE_DIR}")
-        endif()
-
-        # Verify installation
-        if(EXISTS "${LIBVPX_LIB_DIR}/libvpx.lib")
-            if(EXISTS "${LIBVPX_INCLUDE_DIR}/vpx/vpx_encoder.h")
-                set(LIBVPX_FOUND TRUE)
-                message(STATUS "libvpx: Installation verified successfully")
-            endif()
-        endif()
-    endif()
-
-    # Link libvpx if found
-    if(LIBVPX_FOUND)
-        target_link_libraries(${GAME} "${LIBVPX_LIB_DIR}/libvpx.lib")
-        target_include_directories(${GAME} PRIVATE ${LIBVPX_INCLUDE_DIR})
-        message(STATUS "libvpx: Linked from ${LIBVPX_INSTALL_DIR}")
-    else()
-        message(FATAL_ERROR "libvpx: Installation failed or incomplete.\n"
-            "Library or headers not found after download and extraction.")
-    endif()
     if(MSVC)
         set_target_properties(${GAME} PROPERTIES
             LINK_FLAGS "/DELAYLOAD:\"BugTrap-x64.dll\""
@@ -1496,6 +1324,21 @@ if(MSVC)
         target_link_libraries(${GAME} delayimp)
     endif()
     target_link_libraries(${GAME} ${CMAKE_SOURCE_DIR}/ext/bugtrap/BugTrap-x64.lib)
+endif()
+
+if(OPTION_ENABLE_VIDEO_RECORDING)
+    include(${CMAKE_SOURCE_DIR}/cmake/BuildOpenH264.cmake)
+    if(AKHENATEN_HAS_OPENH264)
+        target_link_libraries(${GAME} openh264)
+        target_compile_definitions(${GAME} PRIVATE GAME_HAS_VIDEO_RECORDING=1)
+        target_include_directories(${GAME} PRIVATE
+            "${OPENH264_INCLUDE_DIR}"
+            "${CMAKE_SOURCE_DIR}/ext/minimp4"
+        )
+        message(STATUS "video recording: OpenH264 + minimp4 enabled")
+    else()
+        message(WARNING "video recording: OpenH264 unavailable - GAME_HAS_VIDEO_RECORDING off")
+    endif()
 endif()
 
 if(NOT WIN_EMSCRIPTEN AND NOT MACOS_X64_BUILD)

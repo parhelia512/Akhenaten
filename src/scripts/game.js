@@ -20,7 +20,6 @@ game = extend(__game, {
     @is_integral_tests { get: __game_is_integral_tests }
     @version { get: __game_version }
     @difficulty { get: __game_difficulty }
-    @writing_video { get: __game_writing_video }
     @debug_render_mode { get: __game_debug_render_mode, set: __game_set_debug_render_mode }
     @last_autosave { get: __game_get_last_autosave }
     @session_active { get: __game_session_active }
@@ -33,7 +32,6 @@ game = extend(__game, {
     @gods_enabled { get: __game_gods_enabled }
     @locale_year_before_ad { get: __game_locale_year_before_ad }
 
-    toggle_writing_video: __game_toggle_writing_video
     save_screenshot: __game_save_screenshot
     set_screenshot_dir: __game_set_screenshot_dir
 
@@ -59,6 +57,11 @@ game = extend(__game, {
 screen = extend(__screen, {
     @is_fullscreen_only { get: __game_is_fullscreen_only }
 })
+
+video_capture = {
+    @active { get: __video_capture_active }
+    toggle: function() { emit event_video_capture_toggle{ reserved: 0 } }
+}
 
 game_features {
     __property_getter: function(property) { return __game_feature_get(property) }

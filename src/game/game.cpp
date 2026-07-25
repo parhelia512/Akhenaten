@@ -7,7 +7,6 @@
 #include "core/random.h"
 #include "core/profiler.h"
 #include "core/log.h"
-#include "core/system_time.h"
 #include "grid/vegetation.h"
 #include "grid/trees.h"
 #include "grid/canals.h"
@@ -38,7 +37,7 @@
 #include "input/hotkey.h"
 #include "graphics/view/view.h"
 #include "platform/renderer.h"
-#include "io/movie_writer.h"
+#include "game/video_capture_module.h"
 #include "graphics/screen.h"
 #include "widget/widget_minimap.h"
 #include "city/city.h"
@@ -216,50 +215,8 @@ void game_t::advance_day() {
 }
 
 void game_t::shutdown() {
-    free(frame_pixels);
-}
-
-void game_t::set_write_video(bool v) {
-    if (!write_video && v) {
-        assert(!mvwriter);
-        last_video_capture_ms = 0;
-        mvwriter = new MovieWriter("akhenaten_capture.mp4", screen_width(), screen_height(), 4);
-    } else if (write_video && !v) {
-        assert(mvwriter);
-        delete mvwriter;
-        mvwriter = nullptr;
-        last_video_capture_ms = 0;
-    }
-    write_video = v;
-}
-
-void game_t::write_frame() {
-    if (!write_video || !mvwriter) {
-        return;
-    }
-
-    // Wall-clock throttle (~4 fps), independent of present rate / game speed.
-    const time_millis now = time_get_millis();
-    constexpr time_millis interval_ms = 1000 / 4;
-    if (last_video_capture_ms != 0 && (now - last_video_capture_ms) < interval_ms) {
-        return;
-    }
-    last_video_capture_ms = now;
-
-    ::painter ctx = this->painter();
-    if (!frame_pixels) {
-        frame_pixels = (color *)malloc(sizeof(color) * screen_width() * screen_height());
-    }
-    if (!frame_pixels) {
-        return;
-    }
-
-    if (!g_render.save_screen_buffer(ctx, frame_pixels, 0, 0, screen_width(), screen_height(), screen_width())) {
-        logs::error("MovieWriter: save_screen_buffer failed");
-        return;
-    }
-
-    mvwriter->addFrame((const uint8_t *)frame_pixels);
+    events::emit(event_video_capture_stop{});
+    events::process();
 }
 
 void game_t::reload_objects() {
@@ -292,6 +249,18 @@ void game_t::execute_frame_end_events() {
         ev();
     }
     frame_end_events.clear();
+}
+
+void game_t::add_frame_pre_present_handler(serial_event_t handler) {
+    std::lock_guard<std::mutex> lock(frame_pre_present_handlers_mutex);
+    frame_pre_present_handlers.push_back(std::move(handler));
+}
+
+void game_t::frame_pre_present() {
+    std::lock_guard<std::mutex> lock(frame_pre_present_handlers_mutex);
+    for (auto &handler : frame_pre_present_handlers) {
+        handler();
+    }
 }
 
 void game_t::add_frame_serial_part_handler(serial_event_t handler) {
@@ -512,6 +481,8 @@ void game_t::handle_input_frame() {
 }
 
 void game_t::exit() {
+    events::emit(event_game_exit_requested{});
+    events::process();
     video_shutdown();
     game_features::save();
     g_sound.shutdown();

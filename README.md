@@ -255,6 +255,19 @@ cmake -DOPTION_ENABLE_TRACY=OFF ..
 
 To use the profiler, download and run the Tracy Profiler GUI v0.13.1 from the [Tracy releases page](https://github.com/wolfpld/tracy/releases/tag/v0.13.1). If you need to build the profiler from source (e.g., for older hardware compatibility), make sure to build version v0.13.1.
 
+### Debug screen capture (OpenH264)
+
+Optional in-game screen recording (Debug menu → Write Video) is enabled by default on desktop via `OPTION_ENABLE_VIDEO_RECORDING`. It builds [OpenH264](https://github.com/cisco/openh264) with **meson + ninja + nasm** at configure time and muxes H.264 into `akhenaten_capture.mp4` via vendored [minimp4](https://github.com/lieff/minimp4).
+
+```shell
+# requires meson, ninja, and nasm on PATH (Windows can auto-download nasm)
+cmake -DOPTION_ENABLE_VIDEO_RECORDING=ON ..
+# disable (or auto-disabled if tools/build fail — game still builds)
+cmake -DOPTION_ENABLE_VIDEO_RECORDING=OFF ..
+```
+
+Self-built OpenH264 is BSD-licensed source; Cisco’s binary MPEG-LA patent program does **not** apply to this static build.
+
 ### Command line parameters:
 
 ```

@@ -56,12 +56,6 @@ ANK_FUNCTION(__game_is_fullscreen_only)
 void __editor_tool_deactivate() { editor_tool_deactivate(); }
 ANK_FUNCTION(__editor_tool_deactivate)
 
-bool __game_writing_video() { return game.get_write_video(); }
-ANK_FUNCTION(__game_writing_video)
-
-void __game_toggle_writing_video() { game.set_write_video(!game.get_write_video()); }
-ANK_FUNCTION(__game_toggle_writing_video)
-
 int __game_debug_render_mode() { return debug_render_mode(); }
 ANK_FUNCTION(__game_debug_render_mode)
 
