@@ -661,10 +661,16 @@ generic_button& ui::large_button(pcstr label, vec2i pos, vec2i size, e_font font
     g_state.buttons.push_back(generic_button{offset.x + pos.x, offset.y + pos.y, size.x + 4, size.y + 4, button_none, button_none, 0, 0});
     auto& gbutton = g_state.buttons.back().g_button;
     const bool subdued = !!(flags & (UiFlags_Darkened | UiFlags_Readonly));
-    const int focused = subdued ? 0 : (is_button_hover(gbutton, vec2i{0, 0}) ? 1 : 0);
+    const bool selected = !!(flags & UiFlags_Selected);
+    // type 1 = hover/selected panel chrome; red focus ring matches original Explore History.
+    const int focused = subdued ? 0 : ((selected || is_button_hover(gbutton, vec2i{0, 0})) ? 1 : 0);
 
     push(cmd_t::large_label, Pos{offset + pos}, Size{size}, BoxWidth{size.x / 16}, ImageId{focused}, Font{font},
       Caption{label});
+
+    if (selected && !subdued) {
+        push(cmd_t::button_border, Pos{offset + pos}, Size{size}, ImgFlagsTag{ImgFlag_Alpha});
+    }
 
     if (subdued) {
         push(cmd_t::shade_rect, Pos{offset + pos}, Size{size}, ImageId{0x80});
@@ -2176,6 +2182,9 @@ void ui::egeneric_button::draw(UiFlags gflags) {
         }
         if (readonly) {
             lbflags |= UiFlags_Readonly;
+        }
+        if (_selected) {
+            lbflags |= UiFlags_Selected;
         }
         btn = &ui::large_button(button_text, pos, size, _font, lbflags);
         break;

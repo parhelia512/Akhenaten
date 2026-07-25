@@ -6,6 +6,9 @@
 #include "content/vfs.h"
 #include "io/io.h"
 #include "game/player.h"
+#include "js/js_game.h"
+
+const e_campaign_tokens_t ANK_CONFIG_ENUM(e_campaign_tokens);
 
 struct mission_data_t {
     uint8_t map_names[300][300];

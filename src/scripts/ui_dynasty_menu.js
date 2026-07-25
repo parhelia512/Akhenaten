@@ -15,11 +15,14 @@ function dynasty_menu_btn_resume() {
 
 function dynasty_menu_btn_explore() {
     window_scenario_selection_campaign.period_hover = -1
+    window_scenario_selection_campaign.period_selected = 0
+    window_scenario_selection_campaign.active_tab = 0
+    window_scenario_selection.individual_missions = false
     window_show_by_id("window_scenario_selection_campaign")
 }
 
-function dynasty_menu_btn_load() { 
-    window_file_dialog_load_show(FILE_TYPE_SAVED_GAME) 
+function dynasty_menu_btn_load() {
+    window_file_dialog_load_show(FILE_TYPE_SAVED_GAME)
 }
 
 function dynasty_menu_btn_custom() {

@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include "core/xstring.h"
+#include "core/tokenum.h"
 
 struct event_mission_briefing_show_after_load { int scenario_id; };
 
@@ -106,9 +107,7 @@ enum {
     SCENARIO_MAX = 100
 };
 
-enum {
-    CAMPAIGN_NULL = -1,
-    //
+enum e_campaign {
     CAMPAIGN_PHARAOH_PREDYNASTIC = 0,
     CAMPAIGN_PHARAOH_ARCHAIC = 1,
     CAMPAIGN_PHARAOH_OLD_KINGDOM = 2,
@@ -119,7 +118,14 @@ enum {
     CAMPAIGN_CLEOPATRA_RAMSES_II = 6,
     CAMPAIGN_CLEOPATRA_ANCIENT_CONQUERORS = 7,
     CAMPAIGN_CLEOPATRA_CLEOPATRAS_CAPITAL = 8,
-    //
+    // Explore History period buttons (0..8); exclusive end for token_holder.
+    CAMPAIGN_PERIOD_COUNT,
+};
+using e_campaign_tokens_t = token_holder<e_campaign, CAMPAIGN_PHARAOH_PREDYNASTIC, CAMPAIGN_PERIOD_COUNT>;
+extern const e_campaign_tokens_t e_campaign_tokens;
+
+enum {
+    CAMPAIGN_NULL = -1,
     CAMPAIGN_MAX = MAX_MISSION_CAMPAIGNS
 };
 

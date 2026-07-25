@@ -1,5 +1,20 @@
 log_info("akhenaten: scenario selection window")
 
+function scenario_selection_add_campaign_missions(list, campaign_id, MAX_MANUAL_ENTRIES) {
+    var first_sid = -1
+    for (var i = 0; i < MAX_MANUAL_ENTRIES; i++) {
+        var sid = __game_campaign_mission_step_scenario_id(campaign_id, i)
+        if (sid < 0) {
+            continue
+        }
+        if (first_sid < 0) {
+            first_sid = sid
+        }
+        list.add_item(mission_selection_title(sid), sid)
+    }
+    return first_sid
+}
+
 [es=(window_scenario_selection, init)]
 function window_scenario_selection_on_init(ev) {
     var list = ev.scenario_map_list
@@ -8,24 +23,32 @@ function window_scenario_selection_on_init(ev) {
     list.set_use_file_finder(false)
     list.clear()
 
+    var individual = !!window_scenario_selection.individual_missions
     var sub = window_scenario_selection.campaign_sub_dialog
-    window_scenario_selection.campaign_first_mission = __game_get_first_mission_in_campaign(sub)
-    if (sub !== -1) {
-        for (var i = 0; i < MAX_MANUAL_ENTRIES; i++) {
-            var sid = __game_campaign_mission_step_scenario_id(sub, i)
-            if (sid < 0) {
-                continue
+    var first_sid = -1
+    if (individual) {
+        window_scenario_selection.campaign_first_mission = -1
+        for (var c = 0; c < CAMPAIGN_PERIOD_COUNT; c++) {
+            var sid = scenario_selection_add_campaign_missions(list, c, MAX_MANUAL_ENTRIES)
+            if (first_sid < 0 && sid >= 0) {
+                first_sid = sid
             }
-            list.add_item(mission_selection_title(sid), sid)
+        }
+    } else {
+        window_scenario_selection.campaign_first_mission = __game_get_first_mission_in_campaign(sub)
+        if (sub !== -1) {
+            first_sid = scenario_selection_add_campaign_missions(list, sub, MAX_MANUAL_ENTRIES)
+            if (first_sid < 0) {
+                first_sid = window_scenario_selection.campaign_first_mission
+            }
         }
     }
     window_scenario_selection.scores_or_goals = 0
     window_scenario_selection.selected_mission_index = -1
-    if (list.items_count > 0) {
+    if (list.items_count > 0 && first_sid >= 0) {
         list.select_index(0)
-        var base = window_scenario_selection.campaign_first_mission
-        __game_load_mission(base, 0)
-        window_scenario_selection.selected_mission_index = base
+        __game_load_mission(first_sid, 0)
+        window_scenario_selection.selected_mission_index = first_sid
     }
 
     emit window_scenario_selection.mission_changed { id: scenario.campaign_scenario_id }
@@ -36,7 +59,12 @@ function window_scenario_selection_on_mission_changed(ev) {
     ev.img_scenario_thumb.image = get_image({ pack:PACK_UNLOADED, id:28, offset:scenario.campaign_scenario_id }).tid
 
     var sub = window_scenario_selection.campaign_sub_dialog
-    ev.side_hdr_period.text = __loc(294, sub * 4)
+    if (window_scenario_selection.individual_missions) {
+        var cid = __game_campaign_id_for_scenario(scenario.campaign_scenario_id)
+        ev.side_hdr_period.text = (cid >= 0) ? __loc(294, cid * 4) : __loc(294, 38)
+    } else {
+        ev.side_hdr_period.text = __loc(294, sub * 4)
+    }
     ev.side_mission_title.text = mission_selection_title(scenario.campaign_scenario_id)
     ev.side_subtitle.text = __lang_message_subtitle_text(200 + scenario.campaign_scenario_id)
     ev.side_year.text = scenario_selection_format_start_year(scenario.start_year)
@@ -241,6 +269,7 @@ window_scenario_selection {
     scores_or_goals : 1
     campaign_first_mission : -1
     campaign_sub_dialog : -1
+    individual_missions : false
     pos [(sw(0) - 1024) / 2, (sh(0) - 768) / 2]
 
     ui {

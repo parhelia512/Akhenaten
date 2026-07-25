@@ -1,10 +1,19 @@
 #include "core/profiler.h"
+#include "core/tokenum.h"
 #include "game/game.h"
 #include "game/mission.h"
 #include "game/player.h"
 #include "js/js_game.h"
 #include "scenario/scenario.h"
 #include "scenario/scenario_invasion.h"
+
+enum e_campaign_selection_tab {
+    CAMPAIGN_TAB_CAMPAIGNS = 0,
+    CAMPAIGN_TAB_INDIVIDUAL = 1,
+    CAMPAIGN_TAB_MAX
+};
+using e_campaign_selection_tab_tokens_t = token_holder<e_campaign_selection_tab, CAMPAIGN_TAB_CAMPAIGNS, CAMPAIGN_TAB_MAX>;
+const e_campaign_selection_tab_tokens_t ANK_CONFIG_ENUM(e_campaign_selection_tab_tokens);
 
 int __game_get_first_mission_in_campaign(int campaign_id) {
     return get_first_mission_in_campaign(campaign_id);
