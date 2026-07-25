@@ -15,8 +15,8 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Install meson and ninja
-      run: brew install meson ninja nasm
+    # OpenH264 is skipped on this job: macos-latest is arm64 and meson builds
+    # libopenh264.a for arm64, which fails to link into the x86_64 binary.
     - name: update-workspace
       run: |
         export CXXFLAGS=-stdlib=libc++
@@ -24,6 +24,7 @@ jobs:
           -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
           -DOPTION_SYSTEM_LIBPNG=OFF \
           -DOPTION_BUILD_LIBPNG=ON \
+          -DOPTION_ENABLE_VIDEO_RECORDING=OFF \
           -DCMAKE_INSTALL_PREFIX="$PWD/build/install"
 
     - name: build
