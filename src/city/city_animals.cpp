@@ -381,28 +381,25 @@ void city_animals_t::update_herd_formation(formation *m) {
     int roam_distance;
     int roam_delay;
     int allow_negative_desirability;
-    int terrain_mask = TERRAIN_IMPASSABLE_HYENA;
+    const int terrain_mask = herd_impassable_mask(m->figure_type);
     switch (m->figure_type) {
     case FIGURE_BIRDS:
         roam_distance = 8;
         roam_delay = 20;
         allow_negative_desirability = 0;
         attacking_animals = 0;
-        terrain_mask = TERRAIN_IMPASSABLE_HYENA;
         break;
     case FIGURE_ANTELOPE:
         roam_distance = 20;
         roam_delay = 4;
         allow_negative_desirability = 0;
         attacking_animals = 0;
-        terrain_mask = TERRAIN_IMPASSABLE_HYENA;
         break;
     case FIGURE_OSTRICH:
         roam_distance = 16;
         //            roam_delay = 6;
         roam_delay = 9;
         allow_negative_desirability = 1;
-        terrain_mask = TERRAIN_IMPASSABLE_OSTRICH;
         break;
     default:
         return;
