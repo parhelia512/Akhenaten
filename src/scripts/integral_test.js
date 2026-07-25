@@ -134,6 +134,22 @@ function test_prepare_shoreline_patch(cx, cy, water_width, water_height) {
     __map_water_rebuild_shores()
 }
 
+// Straight N–S channel (width ≥ 3) with land shores — valid Low Bridge span.
+// Returns start tile on the north water row (middle column).
+function test_prepare_bridge_channel(cx, cy, water_width, water_length) {
+    if (water_width < 3) {
+        water_width = 3
+    }
+    var x0 = cx - ((water_width / 2) | 0)
+    for (var dy = 0; dy < water_length; dy++) {
+        for (var dx = 0; dx < water_width; dx++) {
+            terrain.add({ x: x0 + dx, y: cy + dy }, TERRAIN_WATER)
+        }
+    }
+    __map_water_rebuild_shores()
+    return { x: cx, y: cy }
+}
+
 // Paint a square terrain patch centered on (cx, cy). Used for farm meadow/floodplain.
 function test_prepare_terrain_patch(cx, cy, size, terrain_mask) {
     var x0 = cx - ((size / 2) | 0)

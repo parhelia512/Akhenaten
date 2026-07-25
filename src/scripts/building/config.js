@@ -1139,29 +1139,3 @@ building_conservatory {
   fire_risk[4]
   damage_risk[2]
 }
-
-building_low_bridge {
-  animations {
-    _pack { pack:PACK_GENERAL }
-    preview { id:100 }
-    base { id:100 }
-    work { pos [20, -30], id:100, offset:1, max_frames:11 }
-  }
-  flags {
-    is_water_crossing: true
-    is_infrastructure: true
-  }
-}
-
-building_ship_bridge {
-  animations {
-    _pack { pack:PACK_GENERAL }
-    preview { id:100 }
-    base { id:100 }
-    work { pos [20, -30], id:100, offset:1, max_frames:11 }
-  }
-  flags {
-    is_water_crossing: true
-    is_infrastructure: true
-  }
-}

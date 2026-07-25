@@ -1,7 +1,6 @@
 log_info("akhenaten: mission 129 bridges started")
 
 mission129 { // Bridges, custom mission
-	start_message : "message_bridges"
     selection_title : "Bridges"
     selection_text : "Keep an eye on the clock, as Pharaoh will send his hordes if you don't complete his obelisk in time. The region has all the resources needed to complete the monument, and you won't be hounded by any outside distractions like requests for items.  Successful cities will have carefully planned roads and will make skillful use of the available land."
 
@@ -21,7 +20,7 @@ mission129 { // Bridges, custom mission
 	house_tax_multipliers [300, 200, 150, 100, 75]
 
 	buildings [
-		BUILDING_HOUSE_VACANT_LOT, BUILDING_CLEAR_LAND, BUILDING_ROAD
+		BUILDING_HOUSE_VACANT_LOT, BUILDING_CLEAR_LAND, BUILDING_ROAD, BUILDING_LOW_BRIDGE
 	]
 
 	win_criteria {

@@ -107,6 +107,20 @@ function terrain_info_water_on_init(window) {
 
 }
 
+terrain_info_bridge {
+    help_id           : 58
+    open_sounds       : [ "Wavs/empty_land.wav" ]
+    ui : baseui(terrain_info_window, {
+        title         : text({pos: [0, 16], size: [px(29), 13], text:[70, 21], font:FONT_LARGE_BLACK_ON_LIGHT, align:"center"})
+        describe      : text({pos: [30, 78], text:[70, 47], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
+    })
+}
+
+[es=terrain_info_bridge_init]
+function terrain_info_bridge_on_init(window) {
+
+}
+
 terrain_info_tree = {
     help_id           : 44
     open_sounds       : [ ]

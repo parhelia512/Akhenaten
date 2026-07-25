@@ -53,6 +53,7 @@ import building.architect_post
 import building.courthouse
 import building.work_camp
 import building.road
+import building.bridge
 import building.well
 import building.water_lift
 import building.water_supply

@@ -226,6 +226,7 @@ minimap_window {
     terrain_meadow {pack:PACK_GENERAL, id:146},
     terrain_flooplain {pack:PACK_GENERAL, id:146},
     terrain_road  {pack:PACK_GENERAL, id:147},
+    terrain_bridge {pack:PACK_GENERAL, id:149, offset:170},
     terrain_wall  {pack:PACK_GENERAL, id:150},
     terrain_canal {pack:PACK_GENERAL, id:151},
     terrain_dune  {pack:PACK_GENERAL, id:211},

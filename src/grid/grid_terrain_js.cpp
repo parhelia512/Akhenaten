@@ -5,7 +5,10 @@
 #include "grid/grid.h"
 #include "grid/water.h"
 #include "grid/sprite.h"
+#include "grid/bridge.h"
+#include "grid/bridge_grid.h"
 #include "grid/routing/routing.h"
+#include "grid/routing/routing_terrain.h"
 #include "building/building_irrigation_ditch.h"
 #include "graphics/image.h"
 #include "graphics/image_groups.h"
@@ -112,3 +115,48 @@ void __map_sprite_animation_set(tile2i tile, int value) {
     map_sprite_animation_set(tile, value);
 }
 ANK_FUNCTION_2(__map_sprite_animation_set);
+
+bool __map_is_bridge(tile2i tile) {
+    return map_is_bridge(tile);
+}
+ANK_FUNCTION_1(__map_is_bridge);
+
+int __map_bridge_part_at(tile2i tile) {
+    return map_bridge_part_at(tile);
+}
+ANK_FUNCTION_1(__map_bridge_part_at);
+
+int __map_bridge_type_at(tile2i tile) {
+    return map_bridge_type_at(tile);
+}
+ANK_FUNCTION_1(__map_bridge_type_at);
+
+int __map_bridge_calculate_length(tile2i tile, bool is_ship_bridge) {
+    int length = 0;
+    int direction = 0;
+    map_bridge_calculate_length_direction(tile.x(), tile.y(), &length, &direction, is_ship_bridge);
+    return length;
+}
+ANK_FUNCTION_2(__map_bridge_calculate_length);
+
+bool __map_bridge_calculate_valid(tile2i tile, bool is_ship_bridge) {
+    int length = 0;
+    int direction = 0;
+    return map_bridge_calculate_length_direction(tile.x(), tile.y(), &length, &direction, is_ship_bridge) != 0;
+}
+ANK_FUNCTION_2(__map_bridge_calculate_valid);
+
+int __map_bridge_add(tile2i tile, bool is_ship_bridge) {
+    int length = 0;
+    int direction = 0;
+    if (!map_bridge_calculate_length_direction(tile.x(), tile.y(), &length, &direction, is_ship_bridge)) {
+        return 0;
+    }
+    return map_bridge_add(tile.x(), tile.y(), is_ship_bridge);
+}
+ANK_FUNCTION_2(__map_bridge_add);
+
+bool __map_routing_citizen_is_road(tile2i tile) {
+    return map_routing_citizen_is_road(tile);
+}
+ANK_FUNCTION_1(__map_routing_citizen_is_road);
