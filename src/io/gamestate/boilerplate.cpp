@@ -41,6 +41,7 @@
 #include "grid/routing/routing_terrain.h"
 #include "grid/soldier_strength.h"
 #include "grid/sprite.h"
+#include "grid/bridge_grid.h"
 #include "grid/terrain.h"
 #include "grid/tiles.h"
 #include "grid/moisture.h"
@@ -165,6 +166,7 @@ static void pre_load() { // do we NEED this...?
     map_figure_clear();
     map_property_clear();
     map_sprite_clear();
+    map_bridge_grids_clear();
     map_random_clear();
     g_desirability.clear_map();
     map_elevation_clear();
@@ -217,6 +219,7 @@ static void post_load() {
 
     //map
     map_image_fix_icorrect_tiles();
+    map_bridge_migrate_from_sprite();
 
     // building counts / storage
     city_resource_determine_available();
@@ -603,6 +606,10 @@ static void file_schema(e_file_format file_format, const int file_version) {
         }
         if (file_version > 169) {
             FILEIO.push_chunk(16384, false, "iob_enemy_armies_stats", iob_enemy_armies_stats); // actual 15360 + 256 bytes
+        }
+        if (file_version > 170) {
+            FILEIO.push_chunk(103968, false, "bridge_part_grid", iob_bridge_part_grid); // (228²) * 2
+            FILEIO.push_chunk(103968, false, "bridge_type_grid", iob_bridge_type_grid); // (228²) * 2
         }
 
         break;

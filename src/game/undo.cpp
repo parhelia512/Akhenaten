@@ -18,6 +18,7 @@
 #include "grid/property.h"
 #include "grid/routing/routing_terrain.h"
 #include "grid/sprite.h"
+#include "grid/bridge_grid.h"
 #include "grid/terrain.h"
 #include "city/city.h"
 #include "js/js_game.h"
@@ -127,6 +128,7 @@ int game_undo_start_build(int type) {
     map_canal_backup();
     map_property_backup();
     map_sprite_backup();
+    map_bridge_grids_backup();
 
     return 1;
 }
@@ -237,6 +239,7 @@ void game_undo_perform() {
         map_terrain_restore();
         map_canal_restore();
         map_sprite_restore();
+        map_bridge_grids_restore();
         map_image_restore();
         map_property_restore();
         map_property_clear_constructing_and_deleted();
@@ -249,6 +252,7 @@ void game_undo_perform() {
     } else if (data.type == BUILDING_LOW_BRIDGE || data.type == BUILDING_UNUSED_SHIP_BRIDGE_83) {
         map_terrain_restore();
         map_sprite_restore();
+        map_bridge_grids_restore();
         restore_map_images();
 
     } else if (data.type == BUILDING_PLAZA || data.type == BUILDING_GARDENS) {

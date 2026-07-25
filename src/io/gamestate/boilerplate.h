@@ -19,7 +19,8 @@
 //  168 akhenaten: save stone terrain values
 //  169 akhenaten: save golden terrain values
 //  170 akhenaten: save enemy armies props
-constexpr uint32_t latest_save_version = 170;
+//  171 akhenaten: bridge_part / bridge_type grids
+constexpr uint32_t latest_save_version = 171;
 
 vfs::path fullpath_saves(vfs::path filename);
 vfs::path fullpath_maps(char* full, vfs::path filename);

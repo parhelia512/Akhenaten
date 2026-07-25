@@ -33,6 +33,7 @@
 #include "grid/routing/routing_terrain.h"
 #include "grid/soldier_strength.h"
 #include "grid/sprite.h"
+#include "grid/bridge_grid.h"
 #include "grid/terrain.h"
 #include "grid/tiles.h"
 #include "scenario/distant_battle.h"
@@ -78,6 +79,7 @@ static void clear_map_data(void) {
     map_figure_clear();
     map_property_clear();
     map_sprite_clear();
+    map_bridge_grids_clear();
     map_random_clear();
     g_desirability.clear_map();
     map_elevation_clear();
