@@ -228,14 +228,14 @@ void figure_fishing_boat::figure_action() {
                     fishing_time = 50;
                 }
             }
-        
+
             if (base.wait_ticks >= fishing_time) {
                 base.wait_ticks = 0;
                 advance_action(ACTION_195_FISHING_BOAT_RETURNING_WITH_FISH);
                 base.destination_tile = base.source_tile;
                 route_remove();
             }
-        } 
+        }
         break;
 
     case ACTION_193_FISHING_BOAT_GOING_TO_WHARF:
@@ -248,7 +248,7 @@ void figure_fishing_boat::figure_action() {
             route_remove();
         } else if (direction() == DIR_FIGURE_CAN_NOT_REACH) {
             // cannot reach grounds
-            city_message_post_with_message_delay(MESSAGE_CAT_FISHING_BLOCKED, 1, "message_fishing_boat_blocked", 12);
+            city_message_post_with_message_delay(MESSAGE_CAT_FISHING_BLOCKED, 1, "message_fishing_boats_cant_navigate", 12);
             poof();
         }
         break;
@@ -267,13 +267,13 @@ void figure_fishing_boat::figure_action() {
     case ACTION_194_FISHING_BOAT_AT_WHARF: {
             int max_storage = wharf->current_params().max_storage;
             int current_storage = wharf->stored_amount(RESOURCE_FISH);
-            
+
             // Calculate wait time based on worker percentage
             int pct_workers = calc_percentage<int>(wharf->num_workers(), wharf->max_workers());
             int wait_multiplier = wharf->current_params().wait_time_multiplier;
             int wait_base = wharf->current_params().wait_time_base;
             int max_wait_ticks = wait_multiplier * (wait_base - pct_workers);
-            
+
             // Don't send boat if storage is full or if fish >= 100
             if (current_storage >= max_storage || current_storage >= 100) {
                 pct_workers = 0;
