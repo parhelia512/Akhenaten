@@ -59,6 +59,7 @@ void animation_context::setup(const animation_t &anim) {
     can_reverse = is_reverse || anim.can_reverse;
     hashtime = anim.hashtime;
     flags = anim.flags;
+    force_valid = false;
 }
 
 void animation_context::update(bool refresh_only) {
@@ -83,7 +84,7 @@ void animation_context::update(bool refresh_only) {
         }
         tick_updated = true;
         return;
-    } 
+    }
 
     if (is_reverse) {
         frame -= refresh_only ? 0 : 1;

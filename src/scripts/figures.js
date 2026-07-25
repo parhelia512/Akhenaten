@@ -477,8 +477,9 @@ figure_ostrich_hunter {
 	max_damage: 30
 	attack_value: 4
 	missile_attack_value: 4
-	animal_attack_value: 50
-	missile_delay: 50
+	animal_attack_value: 100
+	missile_delay: 25
+	attack_distance: 5
 	terrain_usage : TERRAIN_USAGE_ANIMAL,
   	max_hunting_distance : 15
 }

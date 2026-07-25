@@ -199,6 +199,22 @@ function test_figure_create(type, x, y) {
     return fid
 }
 
+function test_figure_set_home(fid, bid) {
+    __test_figure_set_home(fid, bid)
+}
+
+function test_figure_set_speed(fid, speed) {
+    __test_figure_set_speed(fid, speed)
+}
+
+function test_figure_set_force_valid_animation(fid, enabled) {
+    __test_figure_set_force_valid_animation(fid, enabled ? 1 : 0)
+}
+
+function test_figure_get_damage(fid) {
+    return __test_figure_get_damage(fid)
+}
+
 function test_assert_figure_created(fid, type, tag) {
     if (!fid) {
         __log_info_native('[' + tag + '] no figure id')

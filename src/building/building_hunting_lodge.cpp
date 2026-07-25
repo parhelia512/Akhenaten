@@ -31,26 +31,31 @@ int building_hunting_lodge::spawn_timer() {
     int pct_workers = worker_percentage();
 
     if (pct_workers >= 100) {
-        return params.spawn_delay_100_percent;
+        return params.spawn_delay_100_percent.get();
     } else if (pct_workers >= 75) {
-        return params.spawn_delay_75_percent;
+        return params.spawn_delay_75_percent.get();
     } else if (pct_workers >= 50) {
-        return params.spawn_delay_50_percent;
+        return params.spawn_delay_50_percent.get();
     } else if (pct_workers >= 25) {
-        return params.spawn_delay_25_percent;
+        return params.spawn_delay_25_percent.get();
     } else if (pct_workers >= 1) {
-        return params.spawn_delay_default;
+        return params.spawn_delay_default.get();
     } else {
         return -1;
     }
 }
 
 bool building_hunting_lodge::can_spawn_ostrich_hunter() {
-    if (has_figure_of_type(BUILDING_SLOT_HUNTER, FIGURE_OSTRICH_HUNTER)) {
+    if (stored_amount(RESOURCE_GAMEMEAT) >= 500) {
         return false;
     }
 
-    return (stored_amount(RESOURCE_GAMEMEAT) < 500);
+    const int max_hunters = current_params().max_hunters.get();
+    if (max_hunters <= 0) {
+        return false;
+    }
+
+    return base.get_figures_number(FIGURE_OSTRICH_HUNTER) < max_hunters;
 }
 
 void building_hunting_lodge::spawn_figure() {
@@ -117,5 +122,5 @@ void building_hunting_lodge::update_animation() {
     }
 
     base.play_animation = (stored_amount(RESOURCE_GAMEMEAT) > 0
-        || has_figure_of_type(BUILDING_SLOT_HUNTER, FIGURE_OSTRICH_HUNTER));
+        || base.get_figures_number(FIGURE_OSTRICH_HUNTER) > 0);
 }

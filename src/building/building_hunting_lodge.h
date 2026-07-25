@@ -7,11 +7,12 @@ public:
     BUILDING_METAINFO(BUILDING_HUNTING_LODGE, building_hunting_lodge, building_impl)
 
     struct static_params : public building_static_params {
-        uint8_t spawn_delay_100_percent; 
-        uint8_t spawn_delay_75_percent;
-        uint8_t spawn_delay_50_percent;   
-        uint8_t spawn_delay_25_percent;
-        uint8_t spawn_delay_default;       // default delay for 1-24% workers
+        uint8_dcy spawn_delay_100_percent;
+        uint8_dcy spawn_delay_75_percent;
+        uint8_dcy spawn_delay_50_percent;
+        uint8_dcy spawn_delay_25_percent;
+        uint8_dcy spawn_delay_default;     // default delay for 1-24% workers
+        uint8_dcy max_hunters;             // simultaneous hunters from this lodge
     } BUILDING_STATIC_DATA_T;
 
     virtual void on_create(int orientation) override;
@@ -23,6 +24,6 @@ public:
     int spawn_timer();
     bool can_spawn_ostrich_hunter();
 };
-ANK_CONFIG_STRUCT(building_hunting_lodge::static_params, 
-    spawn_delay_100_percent, spawn_delay_75_percent, spawn_delay_50_percent, 
-    spawn_delay_25_percent, spawn_delay_default)
+ANK_CONFIG_STRUCT(building_hunting_lodge::static_params,
+    spawn_delay_100_percent, spawn_delay_75_percent, spawn_delay_50_percent,
+    spawn_delay_25_percent, spawn_delay_default, max_hunters)

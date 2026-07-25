@@ -14,6 +14,8 @@
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_ostrich);
 
+const e_ostrich_action_tokens_t ANK_CONFIG_ENUM(e_ostrich_action_tokens);
+
 void figure_ostrich::figure_action() {
     const formation* m = formation_get(base.formation_id);
     g_city.figures.add_animal();

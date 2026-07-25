@@ -1,6 +1,7 @@
 
 #include "action.h"
 
+#include "js/js_game.h"
 #include "grid/terrain.h"
 
 #include "city/entertainment.h"
@@ -13,6 +14,8 @@
 #include "grid/road_access.h"
 
 #include <algorithm>
+
+const e_common_action_tokens_t ANK_CONFIG_ENUM(e_common_action_tokens);
 
 bool is_coords_within_range(int x, int y, int b_x, int b_y, int size, int radius) {
     int min_x = b_x - radius;

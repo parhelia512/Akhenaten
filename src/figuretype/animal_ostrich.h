@@ -1,8 +1,10 @@
 #pragma once
 
 #include "figure_animal.h"
+#include "core/tokenum.h"
 
 enum e_ostrich_action {
+    ACTION_0_OSTRICH_NONE = 0,
     ACTION_8_OSTRICH_RECALCULATE = 8,
     ACTION_10_OSTRICH_GOING = 10,
     ACTION_15_OSTRICH_TERRIFIED = 15,
@@ -10,23 +12,27 @@ enum e_ostrich_action {
     ACTION_18_OSTRICH_ROOSTING = 18,
     ACTION_19_OSTRICH_IDLE = 19,
     ACTION_24_OSTRICH_SPAWNED = 24,
-    ACTION_196_OSTRICH_AT_REST = 196
+    ACTION_196_OSTRICH_AT_REST = 196,
+
+    ACTION_197_OSTRICH_MAX
 };
+using e_ostrich_action_tokens_t = token_holder<e_ostrich_action, ACTION_0_OSTRICH_NONE, ACTION_197_OSTRICH_MAX>;
+extern const e_ostrich_action_tokens_t e_ostrich_action_tokens;
 
 /**
  * @class figure_ostrich
  * @brief Represents an ostrich animal figure in the game world.
- * 
+ *
  * This class implements the behavior of wild ostriches that roam the map.
  * Ostriches can wander, roost, eat, and flee when threatened or damaged by arrows.
  * They use pathfinding to navigate around impassable terrain and avoid obstacles.
- * 
+ *
  * Behavioral states include:
  * - Idle and roosting (resting/eating)
  * - Moving between locations
  * - Fleeing when hit by projectiles
  * - Terrified state when threatened
- * 
+ *
  * Ostriches can be hunted by ostrich hunters for resource RESOURCE_GAMEMEAT.
  */
 class figure_ostrich : public figure_animal {

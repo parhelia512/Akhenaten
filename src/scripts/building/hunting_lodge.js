@@ -23,11 +23,13 @@ building_hunting_lodge {
     laborers [6],
     fire_risk [5]
     damage_risk [2]
-    spawn_delay_100_percent : 1
-    spawn_delay_75_percent : 5
-    spawn_delay_50_percent : 10
-    spawn_delay_25_percent : 15
-    spawn_delay_default : 30
+    spawn_delay_100_percent [1]
+    spawn_delay_75_percent [5]
+    spawn_delay_50_percent [10]
+    spawn_delay_25_percent [15]
+    spawn_delay_default [30]
+    // Original lodge fields a hunting party of three.
+    max_hunters [3]
     flags {
         is_food: true
     }

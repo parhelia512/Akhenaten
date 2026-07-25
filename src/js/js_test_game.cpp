@@ -21,6 +21,8 @@
 #include "graphics/view/view.h"
 #include "figure/figure.h"
 #include "figure/figure_impl.h"
+#include "figuretype/figure_missile.h"
+#include "figuretype/figure_ostrich_hunter.h"
 #include "graphics/color.h"
 #include "city/city.h"
 #include "city/city_buildings.h"
@@ -268,6 +270,79 @@ static int __test_figure_create(int type, int x, int y) {
     return f->id;
 }
 ANK_FUNCTION_3(__test_figure_create);
+
+static void __test_figure_set_home(int fid, int bid) {
+    figure *f = figure_get(fid);
+    building *b = building_get(bid);
+    if (!f || !f->is_alive() || !b || !b->is_valid()) {
+        return;
+    }
+    f->set_home(bid);
+}
+ANK_FUNCTION_2(__test_figure_set_home);
+
+static void __test_figure_set_speed(int fid, int speed) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive()) {
+        return;
+    }
+    f->speed_multiplier = (uint8_t)std::clamp(speed, 0, 255);
+}
+ANK_FUNCTION_2(__test_figure_set_speed);
+
+static void __test_figure_set_force_valid_animation(int fid, int enabled) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_valid()) {
+        return;
+    }
+    f->set_force_valid_animation(enabled != 0);
+}
+ANK_FUNCTION_2(__test_figure_set_force_valid_animation);
+
+static int __test_figure_get_damage(int fid) {
+    figure *f = figure_get(fid);
+    if (!f) {
+        return -1;
+    }
+    return f->damage;
+}
+ANK_FUNCTION_1(__test_figure_get_damage);
+
+static int __test_count_figures(int type) {
+    int count = 0;
+    for (int i = 1; i < MAX_FIGURES; i++) {
+        figure *f = figure_get(i);
+        if (f && f->is_valid() && f->type == (e_figure_type)type) {
+            count++;
+        }
+    }
+    return count;
+}
+ANK_FUNCTION_1(__test_count_figures);
+
+// Bypass hunt-animation callback: spawn a hunter arrow at the hunter aimed at its target.
+static int __test_hunter_force_shot(int hunter_fid) {
+    figure *hunter = figure_get(hunter_fid);
+    if (!hunter || !hunter->is_alive() || hunter->type != FIGURE_OSTRICH_HUNTER) {
+        return 0;
+    }
+    if (!hunter->target_figure_id) {
+        return 0;
+    }
+    figure *prey = figure_get(hunter->target_figure_id);
+    if (!prey || !prey->is_alive()) {
+        return 0;
+    }
+
+    const auto &params = figure_ostrich_hunter::current_params();
+    auto missile = figure_missile::create(hunter->id, hunter->tile, prey->tile, FIGURE_HUNTER_ARROW);
+    if (!missile) {
+        return 0;
+    }
+    missile->runtime_data().missile_attack_value = params.animal_attack_value;
+    return missile->id();
+}
+ANK_FUNCTION_1(__test_hunter_force_shot);
 
 static void __test_figure_set_action(int fid, int action) {
     figure *f = figure_get(fid);

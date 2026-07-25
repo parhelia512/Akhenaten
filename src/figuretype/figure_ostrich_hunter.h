@@ -4,11 +4,13 @@
 
 /**
  * @brief Action states for the ostrich hunter figure
- * 
+ *
  * Defines the behavioral states that an ostrich hunter can be in
  * during gameplay, from walking around to actively hunting prey.
+ * ACTION_8_RECALCULATE comes from e_common_action.
  */
-enum e_figure_ostrich_hunber : uint16_t {
+enum e_ostrich_hunter_action : uint16_t {
+    ACTION_0_OSTRICH_HUNTER_NONE = 0,
     ACTION_9_OSTRICH_HUNTER_CHASE_PREY = 9,
     ACTION_10_OSTRICH_HUNTER_PICKUP_ANIMAL = 10,
     ACTION_11_OSTRICH_HUNTER_GOING_TO_PICKUP_POINT = 11,
@@ -19,12 +21,16 @@ enum e_figure_ostrich_hunber : uint16_t {
     ACTION_16_OSTRICH_HUNTER_INVESTIGATE = 16,
     ACTION_12_OSTRICH_HUNTER_MOVE_RANDOM_PACKED = 17,
     ACTION_12_OSTRICH_HUNTER_LOOK_RANDOM_PACKED = 18,
+
+    ACTION_19_OSTRICH_HUNTER_MAX
 };
+using e_ostrich_hunter_action_tokens_t = token_holder<e_ostrich_hunter_action, ACTION_0_OSTRICH_HUNTER_NONE, ACTION_19_OSTRICH_HUNTER_MAX>;
+extern const e_ostrich_hunter_action_tokens_t e_ostrich_hunter_action_tokens;
 
 /**
  * @class figure_ostrich_hunter
  * @brief Represents an ostrich hunter figure in the game
- * 
+ *
  * Ostrich hunters are specialized units that hunt wild ostriches for meat and feathers.
  * They patrol designated areas, track down prey, and deliver resources back to storage.
  */
@@ -35,11 +41,12 @@ public:
 
     /**
      * @brief Static configuration parameters for ostrich hunter behavior
-     * 
+     *
      * These parameters are loaded from config files
      */
     struct static_params : public figure_static_params {
         uint8_t max_hunting_distance;
+        uint8_t attack_distance;
         uint8_t animal_attack_value;
         int8_t missile_delay;
 
@@ -57,4 +64,4 @@ public:
 
 // Register static parameters for config system
 ANK_CONFIG_STRUCT(figure_ostrich_hunter::static_params,
-    max_hunting_distance, missile_delay, animal_attack_value)
+    max_hunting_distance, attack_distance, missile_delay, animal_attack_value)

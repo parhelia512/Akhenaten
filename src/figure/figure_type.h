@@ -28,7 +28,11 @@ enum e_figure_state {
     FIGURE_STATE_ALIVE = 1,
     FIGURE_STATE_DEAD = 2,
     FIGURE_STATE_DYING = 3,
+
+    FIGURE_STATE_MAX
 };
+using e_figure_state_tokens_t = token_holder<e_figure_state, FIGURE_STATE_NONE, FIGURE_STATE_MAX>;
+extern const e_figure_state_tokens_t e_figure_state_tokens;
 
 enum e_terrain_usage {
     TERRAIN_USAGE_ANY = 0,

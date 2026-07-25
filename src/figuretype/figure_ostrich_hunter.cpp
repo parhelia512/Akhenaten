@@ -13,8 +13,11 @@
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_ostrich_hunter)
 
+const e_ostrich_hunter_action_tokens_t ANK_CONFIG_ENUM(e_ostrich_hunter_action_tokens);
+
 void figure_ostrich_hunter::static_params::archive_init() {
-    assert(max_hunting_distance > 0);
+    verify_no_crash(max_hunting_distance > 0);
+    verify_no_crash(attack_distance > 0);
 }
 
 static void scared_animals_in_area(tile2i center, int size) {
@@ -34,16 +37,28 @@ void figure_ostrich_hunter::figure_action() {
 
     const int dist = base.target_figure_id ? calc_maximum_distance(tile(), prey->tile) : 0;
 
-    if (tile() == base.previous_tile) {
-        base.movement_ticks_watchdog++;
+    // Standing still is intentional while aiming/packing/unloading — do not
+    // treat it as a stuck route (that was aborting hunts before pickup).
+    const bool stationary_ok = action_state(
+        ACTION_13_OSTRICH_HUNTER_WAIT_FOR_ACTION,
+        ACTION_15_OSTRICH_HUNTER_HUNT,
+        ACTION_10_OSTRICH_HUNTER_PICKUP_ANIMAL,
+        ACTION_14_OSTRICH_HUNTER_UNLOADING);
+
+    if (!stationary_ok) {
+        if (tile() == base.previous_tile) {
+            base.movement_ticks_watchdog++;
+        } else {
+            base.movement_ticks_watchdog = 0;
+        }
+
+        if (base.movement_ticks_watchdog > 60) {
+            base.movement_ticks_watchdog = 0;
+            route_remove();
+            advance_action(ACTION_8_RECALCULATE);
+        }
     } else {
         base.movement_ticks_watchdog = 0;
-    }
-
-    if (base.movement_ticks_watchdog > 60) {
-        base.movement_ticks_watchdog = 0;
-        route_remove();
-        advance_action(ACTION_8_RECALCULATE);
     }
 
     switch (action_state()) {
@@ -91,7 +106,7 @@ void figure_ostrich_hunter::figure_action() {
             return advance_action(ACTION_8_RECALCULATE);
         }
 
-        if (dist >= 2) {
+        if (dist >= current_params().attack_distance) {
             const bool finished = do_goto(prey->tile, TERRAIN_USAGE_ANIMAL, ACTION_15_OSTRICH_HUNTER_HUNT, ACTION_8_RECALCULATE);
             if (!finished && direction() == DIR_FIGURE_REROUTE) {
                 advance_action(ACTION_16_OSTRICH_HUNTER_INVESTIGATE);
@@ -113,16 +128,17 @@ void figure_ostrich_hunter::figure_action() {
             if (prey->state == FIGURE_STATE_DYING) {
                 advance_action(ACTION_11_OSTRICH_HUNTER_GOING_TO_PICKUP_POINT);
                 scared_animals_in_area(prey->tile, /*dist*/16);
-            } else if (dist >= 2) {
+            } else if (dist >= current_params().attack_distance) {
                 base.wait_ticks = 12;
                 advance_action(ACTION_13_OSTRICH_HUNTER_WAIT_FOR_ACTION);
             } else {
+                const int attack_value = current_params().animal_attack_value;
                 base.direction = calc_missile_shooter_direction(tile(), prey->tile);
-                base.animctx.restart([this] {
+                base.animctx.restart([this, attack_value] {
                     figure *f = figure_get(base.target_figure_id);
                     auto missile = figure_missile::create(id(), tile(), f->tile, FIGURE_HUNTER_ARROW);
                     assert(missile);
-                    missile->runtime_data().missile_attack_value = current_params().animal_attack_value;
+                    missile->runtime_data().missile_attack_value = attack_value;
                 });
             }
         }
