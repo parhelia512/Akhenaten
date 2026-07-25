@@ -68,6 +68,10 @@ mission5 { // Timna
 		housing_level {enabled : true, goal : 10 }
 	}
 
+	// Map points from mission1.pak scenario 5 (no river / disembark / earthquake).
+	entry_point [47, 117]
+	exit_point [41, 28]
+
 	stages {
 		tutorial_irrigation { buildings: [BUILDING_WATER_LIFT, BUILDING_IRRIGATION_DITCH, ] }
 		tutorial_guilds { buildings: [BUILDING_STORAGE_YARD, BUILDING_TAX_COLLECTOR, BUILDING_BOOTH, BUILDING_JUGGLER_SCHOOL] }

@@ -767,6 +767,14 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
             }
 
             switch (event.subtype) {
+            case EVENT_SUBTYPE_FOREIGN_CITY_CONQUERED:
+                // Same subtype value as CITY_ASKS_FOR_TROOPS (requests) / MESSAGE conquered.
+                // Pak uses CITY_STATUS subtype=1 as "foreign city conquered" (e.g. Abu y6 Selima).
+                city_message_post_full(true, "message_template_foreign_city_conquered", &event, caller_event_id,
+                    PHRASE_foreign_city_conquered_title, PHRASE_foreign_city_conquered_initial_announcement,
+                    PHRASE_foreign_city_conquered_reason_A, id, city->name_id);
+                break;
+
             case EVENT_SUBTYPE_NEW_TRADE_ROUTE:
                 // Unlock trading type (e.g. PHARAOH → PHARAOH_TRADING) and open the route.
                 city->set_trade_enabled(true);

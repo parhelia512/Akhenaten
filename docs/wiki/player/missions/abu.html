@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Abedju — The Challenge of the Sea — Akhenaten Wiki</title>
+  <title>Abu — The Nubian Border — Akhenaten Wiki</title>
   <link rel="stylesheet" href="../../../style.css" />
   <style>
     .mission-header-grid {
@@ -202,11 +202,11 @@
         <div class="wiki-sidebar-title"><a href="index.html">← All Missions</a></div>
       </div>
       <div class="wiki-sidebar-section">
-        <div class="wiki-sidebar-title">Early Dynastic</div>
+        <div class="wiki-sidebar-title">Old Kingdom — Dyn. 3</div>
         <ul>
-          <li><a href="timna.html">5 · Timna</a></li>
-          <li><a href="behdet.html">6 · Behdet</a></li>
-          <li><a href="abedju.html" class="active">7 · Abedju</a></li>
+          <li><a href="selima.html">8 · Selima</a></li>
+          <li><a href="abu.html" class="active">9 · Abu</a></li>
+          <li><span style="color:var(--text-muted)">10 · Saqqara</span></li>
         </ul>
       </div>
       <div class="wiki-sidebar-section">
@@ -227,20 +227,20 @@
         <a href="../../index.html">Wiki</a> /
         <a href="../index.html">Player Guide</a> /
         <a href="index.html">Missions</a> /
-        Abedju
+        Abu
       </div>
 
-      <h1>Abedju <span style="color:var(--text-muted);font-weight:normal;font-size:0.65em">— The Challenge of the Sea</span></h1>
+      <h1>Abu <span style="color:var(--text-muted);font-weight:normal;font-size:0.65em">— The Nubian Border</span></h1>
 
       <div class="mission-header-grid">
         <div class="mission-infobox">
           <dl>
             <dt>Mission</dt>
-            <dd>7 of 38 — Choice B (vs Behdet)</dd>
+            <dd>9 of 38 — Choice B (vs Selima)</dd>
             <dt>Era</dt>
-            <dd>Early Dynastic · Dynasty 2 · Pharaoh Khasekhemwy</dd>
+            <dd>Old Kingdom · Dynasty 3 · Pharaoh Nebka</dd>
             <dt>Classical name</dt>
-            <dd>Abydos</dd>
+            <dd>Elephantine (Abu)</dd>
             <dt>Starting funds</dt>
             <dd>
               <div class="funds-row">
@@ -251,14 +251,24 @@
                 <span><strong>Very Hard</strong> 2 000 Db</span>
               </div>
             </dd>
+            <dt>Debt interest</dt>
+            <dd>
+              <div class="funds-row">
+                <span><strong>Very Easy</strong> 10%</span>
+                <span><strong>Easy</strong> 15%</span>
+                <span><strong>Normal</strong> 20% (pak)</span>
+                <span><strong>Hard</strong> 25%</span>
+                <span><strong>Very Hard</strong> 30%</span>
+              </div>
+            </dd>
             <dt>Deities</dt>
-            <dd>Osiris</dd>
+            <dd>Osiris · Ptah</dd>
             <dt>Trade</dt>
-            <dd>Behdet · Byblos · Nubt · Perwadjyt (sea) · Men-nefer · Timna (land); all start closed</dd>
+            <dd>Behdet · Men-nefer (sea) · Abedju · Timna (land); Selima/Kyrene display (y6 NEW_TRADE Kyrene)</dd>
             <dt>Previous mission</dt>
-            <dd><a href="timna.html">Timna — An Expedition to Sinai</a></dd>
+            <dd><a href="behdet.html">Behdet</a> or <a href="abedju.html">Abedju</a> (choice)</dd>
             <dt>Next mission</dt>
-            <dd>Player's choice: <a href="selima.html">Selima (8)</a> or <a href="abu.html">Abu (9)</a></dd>
+            <dd>Saqqara (10)</dd>
             <dt>Status</dt>
             <dd><span class="mission-badge badge-choice">Choice B</span> <span class="mission-badge badge-impl">Implemented</span></dd>
           </dl>
@@ -266,109 +276,96 @@
       </div>
 
       <h2 id="briefing">Briefing</h2>
-      <p>On load the script shows <code>message_soldiers_and_forts</code>. Campaign history is <code>message_history_abedju</code>:</p>
+      <p>On load the script shows <code>message_history_abu</code>:</p>
       <div class="game-quote">
-        <p>Abedju, the burial place of our forefathers, has grown over the years into a sprawling necropolis of sacred tombs. Now, most noble men and women wish to make this their eternal resting place. To honor them, the new Pharaoh Khasekhemwy of the second dynasty has ordered the construction of three sacred mastaba tombs (one of greater size than the other two) for the local nobility. Pharaoh has also ordered the creation of a powerful navy, based at Behdet. Abedju, too must support a modest fleet of combat ships, if our shores are to remain totally secure. This will not be easy, as timber is scarce, and our climate supports only a few sparse areas of forest. Cedar may be imported at great cost from Byblos, in the land of Lebanon to the northeast. Fortunately, exports of our native papyrus will provide a means of offsetting this expense.</p>
+        <p>A new Pharaoh, Nebka, has been proclaimed… Pharaoh wishes to extend the borders of our realm further south, into Nubia. He orders that a city be founded at the first cataract of the Nile, on the island of Abu, that we may take advantage of the abundant deposits of gemstones, granite and sandstone… Once the Selima Oasis outpost has been established, you may look to it as a source of imported ebony.</p>
       </div>
-      <p>Abedju (Abydos) is the necropolis / sea-challenge branch of Dynasty 2: flax and barley industry, modest warship fleet, and three mastabas for the monument rating.</p>
+      <p>Abu is a quarry city on the Nubian border: export granite, sandstone, and gems; import clay/papyrus by sea. Selima Oasis and Kyrene are foreign display cities (pak); year 6 fires NEW_TRADE on Kyrene as in the scenario graph.</p>
 
       <h2 id="objectives">Objectives</h2>
       <ul class="objectives-list">
-        <li><span class="obj-label">Population</span><span class="obj-value">2 500</span></li>
-        <li><span class="obj-label">Culture</span><span class="obj-value">25</span></li>
-        <li><span class="obj-label">Prosperity</span><span class="obj-value">25</span></li>
-        <li><span class="obj-label">Monuments</span><span class="obj-value">17</span></li>
-        <li><span class="obj-label">Kingdom</span><span class="obj-value">60</span></li>
+        <li><span class="obj-label">Population</span><span class="obj-value">4 000</span></li>
+        <li><span class="obj-label">Culture</span><span class="obj-value">30</span></li>
+        <li><span class="obj-label">Prosperity</span><span class="obj-value">30</span></li>
+        <li><span class="obj-label">Kingdom</span><span class="obj-value">50</span></li>
         <li><span class="obj-label">Housing level</span><span class="obj-value">10</span></li>
+        <li><span class="obj-label">Monuments</span><span class="obj-value">none</span></li>
       </ul>
-      <p>Goals match <code>mission1.pak</code> scenario 7. Small and medium mastabas plus bricklayers guild support the monument target.</p>
+      <p>Goals match <code>mission1.pak</code> scenario 9. No monument requirement — ratings and trade dominate.</p>
 
       <h2 id="events">Scripted events</h2>
-      <p>Verified against pak scenario 7 (2026-07-25 dump). Enemy is <strong>Kushite</strong> (<code>ENEMY_6_KUSHITE</code>). Favour-KR Pharaoh army size 40 via shared helper.</p>
+      <p>Verified against pak scenario 9 (2026-07-25 dump). Scenario enemy id is <strong>Hyksos</strong>; timed invasions are Pharaoh favour only (<code>ENEMY_3_EGYPTIAN</code>). Favour chain: 40 → 20 → 20 via shared helper + second-wave poll.</p>
 
       <div class="tutorial-step">
-        <span class="step-tag">Year 2 · month 2</span>
-        <span>Pharaoh requests <strong>9 beer</strong> (12 months). Success → KR <strong>+13</strong> → gift <strong>21 bricks</strong>. Refuse −14 / late −6.</span>
+        <span class="step-tag">Year 2 · month 4</span>
+        <span>Land trade problem (amount 8).</span>
       </div>
       <div class="tutorial-step">
-        <span class="step-tag">Year 2 · month 8</span>
-        <span><strong>Perfect flood</strong> (recurring each year in month 8 from year 2).</span>
+        <span class="step-tag">Year 4 · month 7</span>
+        <span>Pharaoh requests <strong>13 granite</strong> (12 months). KR +6 / refuse −7 / late −3.</span>
       </div>
       <div class="tutorial-step">
-        <span class="step-tag">Year 5 · month 3</span>
-        <span>Contaminated water (health drop).</span>
+        <span class="step-tag">Year 6 · month 4</span>
+        <span>CITY_STATUS Selima conquered (subtype 1) → <strong>NEW_TRADE Kyrene</strong> (pak city_id=5; display).</span>
       </div>
       <div class="tutorial-step">
-        <span class="step-tag">Year 7 · month 7</span>
-        <span>Sea trade problem (48 months disruption).</span>
+        <span class="step-tag">Year 6 · month 9</span>
+        <span>Flax <strong>demand increase</strong> (amount 8); ok → granite REQUEST (pak i=1; already fired → no-op).</span>
       </div>
       <div class="tutorial-step">
-        <span class="step-tag">Year 8</span>
-        <span>Wage increase (kingdom wages rise).</span>
+        <span class="step-tag">Year 7 · month 1</span>
+        <span>Foreign city conquered (Nubt) → linen <strong>demand increase</strong> (amount 9).</span>
       </div>
       <div class="tutorial-step">
-        <span class="step-tag">Year 9 · month 7</span>
-        <span>Linen <strong>demand increase</strong> (trade limits up one tier on open routes).</span>
+        <span class="step-tag">Year 10</span>
+        <span>Construction project: <strong>22 sandstone</strong> (16 months). KR +6 / refuse −11 / late −5.</span>
       </div>
       <div class="tutorial-step">
-        <span class="step-tag">Year 10 · month 11</span>
-        <span>Beer <strong>demand increase</strong> (trade limits up one tier).</span>
+        <span class="step-tag">Year 13 · month 7</span>
+        <span>Contaminated water (amount 6).</span>
       </div>
       <div class="tutorial-step">
-        <span class="step-tag">Year 12 · month 1</span>
-        <span>Pharaoh requests <strong>18 fish</strong> (12 months). KR +10 / −10 / late −9; success also chains to the bricks gift if not already delivered.</span>
+        <span class="step-tag">Year 15 · month 10</span>
+        <span>Sea trade problem (amount 7).</span>
       </div>
       <div class="tutorial-step">
-        <span class="step-tag">Year 14 · month 9</span>
-        <span>Kushite raid size <strong>3</strong>.</span>
-      </div>
-      <div class="tutorial-step">
-        <span class="step-tag">Year 15 · month 4</span>
-        <span>Wage increase (kingdom wages rise).</span>
-      </div>
-      <div class="tutorial-step">
-        <span class="step-tag">Year 18 · month 6</span>
-        <span>Fish <strong>demand decrease</strong> (trade limits down one tier).</span>
-      </div>
-      <div class="tutorial-step">
-        <span class="step-tag">Year 19 · month 8</span>
-        <span>Contaminated water again (health drop).</span>
+        <span class="step-tag">Year 17+ · month 0</span>
+        <span>Gems <strong>demand increase</strong> (amount 7; recurring yearly).</span>
       </div>
       <div class="tutorial-step">
         <span class="step-tag">Favour KR</span>
-        <span>Pharaoh punishment army size <strong>40</strong>; after it clears, chain army size <strong>40</strong> again.</span>
+        <span>Pharaoh punishment army size <strong>40</strong>, then chain <strong>20</strong>, then another <strong>20</strong>.</span>
       </div>
 
       <h2 id="strategy">Strategy</h2>
-      <p>Grow flax / barley for linen and beer exports and Pharaoh’s early beer request. Open Byblos for cedar and keep a modest warship fleet. Use the bricks gift for mastabas toward monument 17.</p>
+      <p>Quarry granite early for the year-4 request and export. Open cheap Behdet (250 Db) for clay/reeds/papyrus; Men-nefer sea route for papyrus/pottery. Keep kingdom rating up — favour punishment is three Pharaoh waves.</p>
 
-      <h3>Phase 1 — Industry and docks</h3>
-      <p>Barley → brewery, flax → weaver, reeds → papyrus. Place Shipwright, Dock, and Warship Wharves on navigable water. Fishing supports the later fish request.</p>
+      <h3>Phase 1 — Quarries and food</h3>
+      <p>Granite / sandstone / gem mines plus floodplain farms. Pottery and papyrus need imports until docks and yards are staffed.</p>
 
       <h3>Phase 2 — Trade</h3>
-      <p>Cheap openers: Nubt (270 Db, sea) and Behdet (400 Db, sea). Byblos (1 000 Db) for timber; Perwadjyt / Men-nefer / Timna for extra goods. Export papyrus and linen to fund cedar.</p>
+      <p>Behdet (250 Db) and Abedju (600 Db) first; Men-nefer sea (1 100 Db); Timna (1 450 Db) for copper/weapons if needed. Year 6 NEW_TRADE Kyrene matches pak (no playable goods).</p>
 
-      <h3>Phase 3 — Defense and monuments</h3>
-      <p>Recruiter + forts before the year-14 Kushite raid. Bricklayers Guild + gifted/produced bricks for small/medium mastabas (monument 17 is steeper than Behdet).</p>
+      <h3>Phase 3 — Ratings</h3>
+      <p>Culture 30 and prosperity 30 need booths/bandstands and steady export income. Stock sandstone before year 10 for the construction request.</p>
 
       <h2 id="buildings">Available buildings</h2>
-      <p>Military, navy, mastabas, Osiris temples, pottery/beer/papyrus/linen/bricks industry, dentist, and standard civic buildings are available from the start (see <code>buildings[]</code> in the script).</p>
+      <p>Quarries and gem mine, jeweler/weaver/papyrus/bricks workshops, Osiris/Ptah temples and complexes, docks/ferry, standard civic entertainment — no military forts in the script list. See <code>buildings[]</code> in the script.</p>
 
       <div class="dev-section">
         <h2 id="dev">Developer reference</h2>
-        <p style="color:var(--text-muted);font-size:0.85rem">Paths relative to repository root. Script file keeps historical name <code>m_007_abydos.js</code>.</p>
+        <p style="color:var(--text-muted);font-size:0.85rem">Paths relative to repository root.</p>
 
         <details>
-          <summary>Mission script — <code>src/scripts/mission/m_007_abydos.js</code></summary>
+          <summary>Mission script — <code>src/scripts/mission/m_009_abu.js</code></summary>
           <div class="details-body">
-            <p>Imported by <span class="file-ref">src/scripts/missions.js</span>. Full empire redefine: <code>hide_pak_cities</code> / <code>hide_pak_routes</code> / <code>hide_pak_objects</code>, <code>map_background</code>, empire id <strong>0</strong>, cities with <code>pos</code>/<code>idx</code>, sea+land <code>empire_routes</code>, region texts, mastaba ornament.</p>
+            <p>Imported by <span class="file-ref">src/scripts/missions.js</span>. Full empire redefine: <code>hide_pak_cities</code> / <code>hide_pak_routes</code> / <code>hide_pak_objects</code>, <code>map_background</code>, empire id <strong>1</strong>, cities with <code>pos</code>/<code>idx</code>, sea/land <code>empire_routes</code>, region texts, ornaments.</p>
             <pre><code><span class="kw">win_criteria</span> {
-  <span class="kw">population</span> <span class="num">2500</span> · <span class="kw">culture</span> <span class="num">25</span> · <span class="kw">prosperity</span> <span class="num">25</span>
-  <span class="kw">monuments</span> <span class="num">17</span> · <span class="kw">kingdom</span> <span class="num">60</span> · <span class="kw">housing_level</span> <span class="num">10</span>
+  <span class="kw">population</span> <span class="num">4000</span> · <span class="kw">culture</span> <span class="num">30</span> · <span class="kw">prosperity</span> <span class="num">30</span>
+  <span class="kw">kingdom</span> <span class="num">50</span> · <span class="kw">housing_level</span> <span class="num">10</span> · monuments off
 }
-<span class="cmt">// Trade: Perwadjyt r1 sea 900 · Behdet r2 sea 400 · Men-nefer r3 land 700</span>
-<span class="cmt">//         Timna r4 land 900 · Byblos r5 sea 1000 · Nubt r6 sea 270</span>
-<span class="cmt">// Display: Nekhen, Thinis, Selima Oasis · approach route 7</span></code></pre>
+<span class="cmt">// Trade: Men-nefer r1 sea 1100 · Behdet r3 sea 250 · Timna r4 1450 · Abedju r5 600</span>
+<span class="cmt">// Display: Selima r2 cost 550 · Nubt 6 / Kyrene 8 / Byblos 10</span></code></pre>
           </div>
         </details>
 
@@ -379,20 +376,20 @@
               <li>
                 <span class="ev-name">event_mission_start</span>
                 <span class="ev-line">~on_start</span>
-                <span class="ev-desc">Kushite sprites; soldiers/forts message; <code>empire.set_id(0)</code> / <code>set_expanded(false)</code>; advisors.</span>
-                <span class="ev-fn">mission7_on_start</span>
+                <span class="ev-desc">Egyptian/Hyksos sprites; history message; <code>empire.set_id(1)</code> / <code>set_expanded(false)</code>; advisors.</span>
+                <span class="ev-fn">mission9_on_start</span>
               </li>
               <li>
                 <span class="ev-name">event_advance_month</span>
-                <span class="ev-line">requests</span>
-                <span class="ev-desc">Beer (+13→bricks gift) y2m2; fish (+10/−10/−9) y12m1; demand linen/beer/fish; perfect flood yearly m8; wage/sea/contaminated with real engine effects.</span>
-                <span class="ev-fn">mission7_pharaoh_request_* / demands / floods</span>
+                <span class="ev-line">requests / trade</span>
+                <span class="ev-desc">Granite +6/−7/−3; sandstone construction +6/−11/−5; Selima CITY_STATUS conquered→NEW_TRADE Kyrene; Nubt MESSAGE→linen demand; flax/gems demand; land/sea trade problems; contaminated water.</span>
+                <span class="ev-fn">mission9_pharaoh_request_* / selima_* / demands</span>
               </li>
               <li>
                 <span class="ev-name">event_advance_month</span>
                 <span class="ev-line">invasions</span>
-                <span class="ev-desc">Kushite size 3 (y14m9); favour army 40 then chain 40 after clear.</span>
-                <span class="ev-fn">mission7_kushite_invasion_1 / favour</span>
+                <span class="ev-desc">Favour 40 → chain 20 → chain 20 (RANDOM target).</span>
+                <span class="ev-fn">mission9_pharaoh_favour_invasion</span>
               </li>
             </ul>
           </div>
@@ -404,9 +401,7 @@
             <table class="msg-table">
               <thead><tr><th>Key</th><th>ID</th><th>When</th></tr></thead>
               <tbody>
-                <tr><td><code>message_history_abedju</code></td><td>207</td><td>History — “The Challenge of the Sea” / Khasekhemwy</td></tr>
-                <tr><td><code>message_mission_abydos</code></td><td>407</td><td>Alternate mission briefing (Abydos naming)</td></tr>
-                <tr><td><code>message_soldiers_and_forts</code></td><td>245</td><td><code>start_message</code> — forts, recruiter, weapons</td></tr>
+                <tr><td><code>message_history_abu</code></td><td>209</td><td><code>start_message</code> — “The Nubian Border” / Nebka</td></tr>
               </tbody>
             </table>
           </div>
@@ -415,14 +410,15 @@
         <details>
           <summary>Save / map</summary>
           <div class="details-body">
-            <p><span class="file-ref">bin_x64/Missions/mission_07.sav</span> · Voice <code>207_mission.mp3</code> / <code>207_victory.mp3</code>.</p>
+            <p><span class="file-ref">bin_x64/Missions/mission_09.sav</span> · Voice <code>209_mission.mp3</code> / <code>209_victory.mp3</code>.</p>
+            <p>Dump helper: <span class="file-ref">src/js/js_test_mission_pak_dump.cpp</span> (<code>__test_mission_pak_dump(9)</code> via ad-hoc <code>tests/99_tmp_*.js</code>).</p>
           </div>
         </details>
       </div>
 
       <div class="mission-nav">
-        <a href="behdet.html" class="nav-prev">6 · Behdet (choice A)</a>
-        <a href="selima.html" class="nav-next">8 · Selima</a>
+        <a href="selima.html" class="nav-prev">8 · Selima</a>
+        <span class="nav-next" style="color:var(--text-muted)">10 · Saqqara</span>
       </div>
     </div>
   </main>

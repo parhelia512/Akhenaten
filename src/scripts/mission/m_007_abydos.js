@@ -79,6 +79,13 @@ mission7 { // Abydos / Abedju — The Challenge of the Sea
 		housing_level {enabled : true, goal : 10 }
 	}
 
+	// Map points from mission1.pak scenario 7.
+	entry_point [3, 66]
+	exit_point [83, 126]
+	river_entry_point [129, 61]
+	river_exit_point [15, 56]
+	disembark_points [ [50, 59], [-1, -1], [44, 59] ]
+
 	// Empire from mission1.pak scenario 7 (empire id=0) — full map objects.
 	map_background : {pack:PACK_EMPIRE, id:1}
 	hide_pak_cities : true

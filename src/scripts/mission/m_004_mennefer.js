@@ -44,6 +44,12 @@ mission4 {
 		housing_level {enabled : true, goal : 10 }
 	}
 
+	// Map points from mission1.pak scenario 4.
+	entry_point [34, 35]
+	exit_point [110, 99]
+	river_entry_point [70, 2]
+	river_exit_point [137, 69]
+
 	// Empire cities from mission1.pak scenario 4 (empire id=1) — full map objects, not pak patch.
 	map_background : {pack:PACK_EMPIRE, id:1}
 	hide_pak_cities : true

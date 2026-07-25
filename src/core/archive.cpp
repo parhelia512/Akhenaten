@@ -273,8 +273,8 @@ std::vector<vec2i> archive::r_array_vec2i(pcstr name, pcstr px, pcstr py) {
             result.push_back(v);
             js_pop(vm, 1);
         }
-        js_pop(vm, 1);
     }
+    js_pop(vm, 1);
     return result;
 }
 

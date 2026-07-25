@@ -51,6 +51,10 @@ mission8 { // Selima — The Road to Africa
 		monuments     {enabled : false }
 	}
 
+	// Map points from mission1.pak scenario 8 (desert oasis — no river / disembark).
+	entry_point [35, 20]
+	exit_point [90, 77]
+
 	enable_scenario_events : true
 
 	// Empire from mission1.pak scenario 8 (empire id=0) — full map objects.

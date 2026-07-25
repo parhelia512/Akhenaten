@@ -75,6 +75,14 @@ mission6 { // Behdet — The Royal Navy
 		housing_level {enabled : true, goal : 10 }
 	}
 
+	// Map points from mission1.pak scenario 6.
+	entry_point [21, 34]
+	exit_point [79, 88]
+	river_entry_point [96, 68]
+	river_exit_point [41, 17]
+	// pak slots 0 and 2; slot 1 empty → [-1, -1]
+	disembark_points [ [59, 40], [-1, -1], [68, 42] ]
+
 	// Empire from mission1.pak scenario 6 (empire id=1) — full map objects.
 	map_background : {pack:PACK_EMPIRE, id:1}
 	hide_pak_cities : true

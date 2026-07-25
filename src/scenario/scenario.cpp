@@ -113,6 +113,34 @@ void scenario_data_t::load_metadata(const mission_id_t &missionid, bool is_new_m
         arch.r("win_criteria", win_criteria);
         arch.r("sounds", sounds);
 
+        // Optional map-point overlays (pak remains if the key is absent).
+        // Accept [x, y] or { x, y }. Missing key keeps the current (pak) value.
+        auto overlay_tile = [&] (pcstr name, tile2i &dest) {
+            vec2i cur{ dest.x(), dest.y() };
+            vec2i v = arch.r_vec2i(name, cur);
+            dest = tile2i(v.x, v.y);
+        };
+        overlay_tile("entry_point", entry_point);
+        overlay_tile("exit_point", exit_point);
+        overlay_tile("river_entry_point", river_entry_point);
+        overlay_tile("river_exit_point", river_exit_point);
+        overlay_tile("earthquake_point", earthquake_point);
+
+        // disembark_points: present array replaces pak slots (max MAX_DISEMBARK_POINTS).
+        arch.getproperty(-1, "disembark_points");
+        const bool has_disembark = arch.isarray(-1);
+        arch.pop(1);
+        if (has_disembark) {
+            for (int i = 0; i < MAX_DISEMBARK_POINTS; ++i) {
+                disembark_points[i] = tile2i();
+            }
+            const auto pts = arch.r_array_vec2i("disembark_points");
+            const size_t n = std::min(pts.size(), (size_t)MAX_DISEMBARK_POINTS);
+            for (size_t i = 0; i < n; ++i) {
+                disembark_points[i] = tile2i(pts[i].x, pts[i].y);
+            }
+        }
+
         settings_vars_t newvars;
         arch.r("vars", newvars);
         vars.insert(newvars);
