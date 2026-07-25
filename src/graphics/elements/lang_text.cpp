@@ -83,8 +83,7 @@ using localization_table = std::unordered_map<xstring_hash, loc_textid>;
 std::unordered_set<loc_base_textid> g_localization_base;
 localization_table g_localization;
 std::unordered_set<loc_message> g_event_messages;
-
-game_languages_vec ANK_VARIABLE(game_languages);
+game_languages_vec game_languages;
 
 #if defined(GAME_PLATFORM_ANDROID)
 namespace {
@@ -207,6 +206,7 @@ bool lang_android_load_localization_base_en_direct(pcstr path) {
 #endif
 
 void ANK_REGISTER_CONFIG_ITERATOR(config_load_localization) {
+    g_config_arch.r("game_languages", game_languages);
     g_localization.clear();
     lang_reload_localized_tables();
 }

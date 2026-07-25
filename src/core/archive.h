@@ -441,7 +441,7 @@ struct g_archive : public archive {
 
     template<typename T>
     inline bool r_vector(pcstr name, T &arr, int max_size = -1) {
-        return r_vector_impl<true>(name, arr);
+        return r_vector_impl<true>(name, arr, max_size);
     }
 
     template<typename T, std::size_t N>
