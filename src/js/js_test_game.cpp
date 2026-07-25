@@ -225,10 +225,10 @@ void __test_process_scenario_events() {
 }
 ANK_FUNCTION(__test_process_scenario_events);
 
-void __test_set_use_native_invasion_events(int enabled) {
-    g_scenario.env.use_native_invasion_events = enabled != 0;
+void __test_process_invasion_binds() {
+    g_invasions.process_bind_resolutions();
 }
-ANK_FUNCTION_1(__test_set_use_native_invasion_events);
+ANK_FUNCTION(__test_process_invasion_binds);
 
 void __test_clear_enemy_formations() {
     for (int fi = 1; fi < MAX_FORMATIONS; ++fi) {
@@ -291,22 +291,6 @@ void __test_set_army_buildings_destroyed(int invasion_id, int count) {
     army->buildings_destroyed = (uint8_t)std::clamp(count, 0, 255);
 }
 ANK_FUNCTION_2(__test_set_army_buildings_destroyed);
-
-int __test_pending_invasion_id_for_tag(int tag) {
-    for (int i = 0; i < g_scenario.events.events_count(); ++i) {
-        event_ph_t *e = g_scenario.events.at(i);
-        if (!e || e->tag_id != tag) {
-            continue;
-        }
-        for (const auto &p : g_invasions.event_pending) {
-            if (p.in_use && p.event_id == e->event_id) {
-                return p.invasion_id;
-            }
-        }
-    }
-    return -1;
-}
-ANK_FUNCTION_1(__test_pending_invasion_id_for_tag);
 
 int __building_static_building_size(int type) {
     if (type <= BUILDING_NONE || type >= BUILDING_MAX) {

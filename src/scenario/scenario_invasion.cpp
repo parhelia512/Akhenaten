@@ -112,121 +112,173 @@ invasion_data_t ANK_VARIABLE_N(g_invasions, "invasions");
 
 void invasion_data_t::clear(void) {
     memset(warnings.data(), 0, warnings.size() * sizeof(invasion_warning_t));
-    for (auto &p : event_pending) {
-        p = {};
+    for (auto &b : binds) {
+        b = {};
+    }
+    for (auto &h : history) {
+        h = {};
+    }
+    history_count = 0;
+    history_next = 0;
+}
+
+// ONLY_VIA masters clone to ACTIVATED_* then return; drain those clones here so KR/siege/request
+// fire the same month (process_bind runs after process_events — without drain, +1 month lag).
+static void drain_activated_events(int from_index) {
+    while (from_index < g_scenario.events.events_count()) {
+        const int end = g_scenario.events.events_count();
+        for (int i = from_index; i < end; ++i) {
+            g_scenario.events.process_event(i, false, -1);
+            g_scenario.events.process_active_request(i);
+        }
+        from_index = end;
     }
 }
 
-int invasion_data_t::alloc_invasion_id() {
-    // Prefer free slots with no live formations linked (formation_id == 0 after clear_formations
-    // is not enough — check pending + whether any formation still references the id).
-    for (int id = FIRST_EVENT_INVASION_SLOT; id < enemy_armies_t::MAX_ENEMY_ARMIES; ++id) {
-        bool pending = false;
-        for (const auto &p : event_pending) {
-            if (p.in_use && p.invasion_id == (uint8_t)id) {
-                pending = true;
-                break;
-            }
+static void fire_chain_by_tag(uint16_t tag) {
+    if (!tag) {
+        return;
+    }
+    for (int i = 0; i < g_scenario.events.events_count(); ++i) {
+        event_ph_t *e = g_scenario.events.at(i);
+        if (!e || e->tag_id != tag) {
+            continue;
         }
-        if (pending) {
+        const int before = g_scenario.events.events_count();
+        g_scenario.events.process_event(e->event_id, true, EVENT_ACTION_COMPLETED, 0);
+        drain_activated_events(before);
+        return;
+    }
+    logs::warn("invasion bind: chain tag %u not found", tag);
+}
+
+void invasion_data_t::record_spawn(const invasion_opts_t &opts, tile2i tile, int size_after_clamp) {
+    const uint16_t seq = (uint16_t)last_internal_invasion_id;
+
+    invasion_history_entry_t &h = history[history_next];
+    h = {};
+    h.seq = seq;
+    h.year = (int16_t)game.simtime.years_since_start();
+    h.month = (int8_t)game.simtime.month;
+    h.invasion_id = (uint8_t)opts.invasion_id;
+    h.enemy_type = (uint8_t)opts.enemy_type;
+    h.mode = (uint8_t)opts.mode;
+    h.attack_type = (uint8_t)opts.attack_type;
+    h.size = (uint16_t)size_after_clamp;
+    h.tile_x = tile.valid() ? (int16_t)tile.x() : (int16_t)-1;
+    h.tile_y = tile.valid() ? (int16_t)tile.y() : (int16_t)-1;
+    h.want_destroy = opts.want_destroy;
+    h.outcome = INVASION_OUTCOME_NONE;
+    history_next = (history_next + 1) % MAX_HISTORY;
+    if (history_count < MAX_HISTORY) {
+        history_count++;
+    }
+
+    const bool want_bind = opts.on_completed_tag || opts.on_refusal_tag || opts.on_defeat_tag;
+    if (!want_bind) {
+        return;
+    }
+
+    // Warn if another active bind already owns this invasion_id (formations share the id).
+    for (const auto &b : binds) {
+        if (b.in_use && b.invasion_id == (uint8_t)opts.invasion_id) {
+            logs::warn("invasion bind: invasion_id %d already has active bind (seq %u); new seq %u",
+                       opts.invasion_id, b.seq, seq);
+            break;
+        }
+    }
+
+    for (auto &b : binds) {
+        if (b.in_use) {
+            continue;
+        }
+        b.in_use = true;
+        b.enemies_seen = false;
+        b.invasion_id = (uint8_t)opts.invasion_id;
+        b.seq = seq;
+        b.on_completed_tag = opts.on_completed_tag;
+        b.on_refusal_tag = opts.on_refusal_tag;
+        b.on_defeat_tag = opts.on_defeat_tag;
+        return;
+    }
+    logs::warn("invasion bind: active table full (max %d)", MAX_ACTIVE_BINDS);
+}
+
+static void history_set_outcome(uint16_t seq, e_invasion_outcome outcome) {
+    for (int i = 0; i < invasion_data_t::MAX_HISTORY; ++i) {
+        auto &h = g_invasions.history[i];
+        if (h.seq == seq && h.seq != 0) {
+            h.outcome = (uint8_t)outcome;
+            return;
+        }
+    }
+}
+
+void invasion_data_t::process_bind_resolutions() {
+    for (auto &b : binds) {
+        if (!b.in_use) {
             continue;
         }
 
-        bool in_use = false;
-        for (int fi = 1; fi < MAX_FORMATIONS; ++fi) {
-            formation *m = formation_get(fi);
-            if (m && m->in_use && !m->is_herd && !m->own_batalion && m->invasion_id == id) {
-                in_use = true;
-                break;
-            }
-        }
-        if (!in_use) {
-            return id;
-        }
-    }
-    logs::warn("scenario_invasion: no free invasion_id slot (< %d)", enemy_armies_t::MAX_ENEMY_ARMIES);
-    return -1;
-}
-
-bool invasion_data_t::register_event_pending(uint8_t invasion_id, int16_t event_id, uint8_t want_destroy) {
-    if (invasion_id == 0 || event_id < 0) {
-        return false;
-    }
-    for (auto &p : event_pending) {
-        if (p.in_use) {
-            continue;
-        }
-        p.in_use = true;
-        p.enemies_seen = false;
-        p.invasion_id = invasion_id;
-        p.event_id = event_id;
-        p.want_destroy = want_destroy;
-        return true;
-    }
-    logs::warn("scenario_invasion: event_pending table full");
-    return false;
-}
-
-bool invasion_data_t::has_pending_for_event(int16_t event_id) const {
-    for (const auto &p : event_pending) {
-        if (p.in_use && p.event_id == event_id) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void invasion_data_t::process_event_resolutions() {
-    for (auto &p : event_pending) {
-        if (!p.in_use) {
-            continue;
-        }
-
-        const int enemies = enemy_army_total_enemy_formations();
-        // Count only formations for this invasion_id (global total can include other waves).
         int this_wave = 0;
         for (int fi = 1; fi < MAX_FORMATIONS; ++fi) {
             formation *m = formation_get(fi);
             if (m && m->in_use && !m->is_herd && !m->own_batalion && m->num_figures > 0
-                && m->invasion_id == p.invasion_id) {
+                && m->invasion_id == b.invasion_id) {
                 this_wave++;
             }
         }
 
         if (this_wave > 0) {
-            p.enemies_seen = true;
+            b.enemies_seen = true;
             continue;
         }
-        if (!p.enemies_seen) {
+        if (!b.enemies_seen) {
             continue;
         }
 
-        // Wave cleared after being seen — fire chain like Selima resolve.
-        const int event_id = p.event_id;
-        const uint8_t invasion_id = p.invasion_id;
-        p = {};
-
-        event_ph_t *event = g_scenario.events.at(event_id);
-        if (!event || event->type != EVENT_TYPE_INVASION) {
-            continue;
-        }
+        const uint8_t invasion_id = b.invasion_id;
+        const uint16_t seq = b.seq;
+        const uint16_t ok_tag = b.on_completed_tag;
+        const uint16_t refuse_tag = b.on_refusal_tag;
+        const uint16_t defeat_tag = b.on_defeat_tag;
+        b = {};
 
         enemy_army *army = enemy_army_get_editable(invasion_id);
         const bool destroy_goal = army && army->buildings_to_destroy > 0
             && army->buildings_destroyed >= army->buildings_to_destroy;
 
-        if (destroy_goal && event->on_refusal_action >= 0) {
-            logs::info("akhenaten: invasion event %d id=%u destroy-goal → REFUSED", event_id, invasion_id);
-            g_scenario.events.process_event(event->on_refusal_action, true, EVENT_ACTION_REFUSED, event_id);
-        } else if (destroy_goal && event->on_defeat_action >= 0) {
-            logs::info("akhenaten: invasion event %d id=%u destroy-goal → DEFEAT", event_id, invasion_id);
-            g_scenario.events.process_event(event->on_defeat_action, true, EVENT_ACTION_DEFEAT, event_id);
-        } else if (event->on_completed_action >= 0) {
-            logs::info("akhenaten: invasion event %d id=%u wiped → COMPLETED", event_id, invasion_id);
-            g_scenario.events.process_event(event->on_completed_action, true, EVENT_ACTION_COMPLETED, event_id);
+        // Ok-only: no refuse/defeat tags → always completed (Behdet), even if destroy-goal met.
+        if (destroy_goal && refuse_tag) {
+            logs::info("akhenaten: invasion seq=%u id=%u destroy-goal → REFUSED tag=%u", seq, invasion_id, refuse_tag);
+            history_set_outcome(seq, INVASION_OUTCOME_REFUSED);
+            fire_chain_by_tag(refuse_tag);
+        } else if (destroy_goal && defeat_tag) {
+            logs::info("akhenaten: invasion seq=%u id=%u destroy-goal → DEFEAT tag=%u", seq, invasion_id, defeat_tag);
+            history_set_outcome(seq, INVASION_OUTCOME_DEFEAT);
+            fire_chain_by_tag(defeat_tag);
+        } else if (ok_tag) {
+            logs::info("akhenaten: invasion seq=%u id=%u wiped → COMPLETED tag=%u", seq, invasion_id, ok_tag);
+            history_set_outcome(seq, INVASION_OUTCOME_COMPLETED);
+            fire_chain_by_tag(ok_tag);
+        } else {
+            history_set_outcome(seq, INVASION_OUTCOME_COMPLETED);
         }
-        (void)enemies;
     }
+}
+
+int invasion_data_t::history_entry_count() const {
+    return history_count;
+}
+
+const invasion_history_entry_t *invasion_data_t::history_at(int index) const {
+    if (index < 0 || index >= history_count) {
+        return nullptr;
+    }
+    // 0 = oldest retained in the ring.
+    const int start = (history_count < MAX_HISTORY) ? 0 : history_next;
+    const int slot = (start + index) % MAX_HISTORY;
+    return &history[slot];
 }
 
 void invasion_data_t::init() {
@@ -466,7 +518,7 @@ tile2i scenario_start_invasion_impl(invasion_opts_t opts) {
         }
     }
 
-    // Apply destroy-goal to the army slot (JS want_destroy_buildings / event heuristic).
+    // Apply destroy-goal to the army slot (JS want_destroy_buildings).
     // Without this, enemy_army_achieved_destroy_goal never returns true.
     if (opts.invasion_id > 0
         && opts.invasion_id < enemy_armies_t::MAX_ENEMY_ARMIES
@@ -474,6 +526,10 @@ tile2i scenario_start_invasion_impl(invasion_opts_t opts) {
         enemy_army *army = enemy_army_get_editable((uint8_t)opts.invasion_id);
         army->buildings_to_destroy = opts.want_destroy;
         army->buildings_destroyed = 0;
+    }
+
+    if (seq > 0 && invasion_tile.valid()) {
+        g_invasions.record_spawn(opts, invasion_tile, opts.size);
     }
 
     return invasion_tile;
@@ -590,77 +646,87 @@ bool scenario_invasion_start_from_kingdome(int size) {
     return false;
 }
 
-void scenario_invasion_start(invasion_opts_t opts) {
+int scenario_invasion_start(invasion_opts_t opts) {
     auto &data = g_invasions;
     switch (opts.mode) {
     case ATTACK_TYPE_ENEMIES: {
-        // Prefer caller attack_type (JS invasion_attack_target / console / defaults).
         tile2i invasion_tile = scenario_start_invasion_impl(opts);
         if (invasion_tile.valid()) {
-            events::emit(event_message{ true, "message_barbarians_attack", data.last_internal_invasion_id, invasion_tile.grid_offset(), SOURCE_LOCATION });
+            // Favour / Pharaoh army uses Egyptian sprites — kingdome message, not barbarians.
+            if (opts.enemy_type == ENEMY_3_EGYPTIAN) {
+                events::emit(event_message{ true, "message_kingdome_army_attack",
+                    data.last_internal_invasion_id, invasion_tile.grid_offset(), SOURCE_LOCATION });
+            } else {
+                events::emit(event_message{ true, "message_barbarians_attack",
+                    data.last_internal_invasion_id, invasion_tile.grid_offset(), SOURCE_LOCATION });
+            }
+            return data.last_internal_invasion_id;
         }
         break;
     }
     case ATTACK_TYPE_KINGDOME: {
+        // Legacy / console path (mission favour uses ENEMIES + Egyptian instead).
         g_city.kingdome.force_attack(opts.size);
-        break;
+        return data.last_internal_invasion_id;
     }
     case ATTACK_TYPE_NATIVES: {
         opts.attack_type = FORMATION_ATTACK_FOOD_CHAIN;
         opts.enemy_type = ENEMY_0_BARBARIAN;
         tile2i invasion_tile = scenario_start_invasion_impl(opts);
-        if (invasion_tile.valid())
-            events::emit(event_message{ true, "message_local_wrath_of_seth", data.last_internal_invasion_id, invasion_tile.grid_offset(), SOURCE_LOCATION });
-
+        if (invasion_tile.valid()) {
+            events::emit(event_message{ true, "message_local_wrath_of_seth",
+                data.last_internal_invasion_id, invasion_tile.grid_offset(), SOURCE_LOCATION });
+            return data.last_internal_invasion_id;
+        }
         break;
     }
     default:
         break;
     }
+    return 0;
 }
 
 io_buffer* iob_invasion_warnings = new io_buffer([](io_buffer* iob, size_t version) {
-    //    data.last_internal_invasion_id = invasion_id->read_u16();
-
-    //    for (int i = 0; i < MAX_INVASION_WARNINGS; i++) {
-    //        invasion_warning *w = &data.warnings[i];
-    //        w->in_use = warnings->read_u8();
-    //        w->handled = warnings->read_u8();
-    //        w->invasion_path_id = warnings->read_u8();
-    //        w->warning_years = warnings->read_u8();
-    //        w->x = warnings->read_i16();
-    //        w->y = warnings->read_i16();
-    //        w->image_id = warnings->read_i16();
-    //        w->empire_object_id = warnings->read_i16();
-    //        w->month_notified = warnings->read_i16();
-    //        w->year_notified = warnings->read_i16();
-    //        w->months_to_go = warnings->read_i32();
-    //        w->invasion_id = warnings->read_u8();
-    //        warnings->skip(11);
-    //    }
-
     // TODO (B3)
 });
 
-// B2 Phase 3: mid-fight invasion↔event pending survives .svx save/load.
-// Layout (272 bytes): flag(4) + 32 × {in_use, enemies_seen, invasion_id, pad, event_id, want_destroy, pad}
+// v172 stub: keep chunk in schema so old saves load; ignore contents.
 io_buffer *iob_invasion_event_pending = new io_buffer([] (io_buffer *iob, size_t version) {
-    int32_t native_flag = g_scenario.env.use_native_invasion_events ? 1 : 0;
-    iob->bind(BIND_SIGNATURE_INT32, &native_flag);
-    if (iob->is_read_access()) {
-        g_scenario.env.use_native_invasion_events = native_flag != 0;
-    }
+    iob->bind____skip(272);
+});
 
-    for (auto &p : g_invasions.event_pending) {
-        iob->bind_bool(p.in_use);
-        iob->bind_bool(p.enemies_seen);
-        iob->bind_u8(p.invasion_id);
+// v173: active binds + history ring (audit/debug; binds are gameplay mid-fight).
+// Layout 1480: header 8 + 16×12 binds + 64×20 history.
+io_buffer *iob_invasion_runtime = new io_buffer([] (io_buffer *iob, size_t version) {
+    auto &data = g_invasions;
+    iob->bind(BIND_SIGNATURE_INT32, &data.history_count);
+    iob->bind(BIND_SIGNATURE_INT32, &data.history_next);
+    for (auto &b : data.binds) {
+        iob->bind_bool(b.in_use);
+        iob->bind_bool(b.enemies_seen);
+        iob->bind_u8(b.invasion_id);
         iob->bind____skip(1);
-        iob->bind(BIND_SIGNATURE_INT16, &p.event_id);
-        iob->bind_u8(p.want_destroy);
-        iob->bind____skip(1);
+        iob->bind_u16(b.seq);
+        iob->bind_u16(b.on_completed_tag);
+        iob->bind_u16(b.on_refusal_tag);
+        iob->bind_u16(b.on_defeat_tag);
     }
-    iob->bind____skip(12); // pad 260 → 272
+    for (auto &h : data.history) {
+        iob->bind_u16(h.seq);
+        iob->bind(BIND_SIGNATURE_INT16, &h.year);
+        iob->bind(BIND_SIGNATURE_INT8, &h.month);
+        iob->bind_u8(h.invasion_id);
+        iob->bind_u8(h.enemy_type);
+        iob->bind_u8(h.mode);
+        iob->bind_u8(h.attack_type);
+        iob->bind____skip(1);
+        iob->bind_u16(h.size);
+        iob->bind(BIND_SIGNATURE_INT16, &h.tile_x);
+        iob->bind(BIND_SIGNATURE_INT16, &h.tile_y);
+        iob->bind_u8(h.want_destroy);
+        iob->bind_u8(h.outcome);
+        iob->bind____skip(2);
+    }
 });
 
 const enemy_properties_t &invasion_data_t::get_prop(e_enemy_type type) {

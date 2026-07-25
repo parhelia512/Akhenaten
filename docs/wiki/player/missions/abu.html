@@ -294,7 +294,7 @@
       <p>Goals match <code>mission1.pak</code> scenario 9. No monument requirement — ratings and trade dominate.</p>
 
       <h2 id="events">Scripted events</h2>
-      <p>Verified against pak scenario 9 (2026-07-25 dump). Scenario enemy id is <strong>Hyksos</strong>; timed invasions are Pharaoh favour only (<code>ENEMY_3_EGYPTIAN</code>). Favour chain: 40 → 20 → 20 via shared helper + second-wave poll.</p>
+      <p>Verified against pak scenario 9 (2026-07-25 dump). Scenario enemy id is <strong>Hyksos</strong>; timed invasions are Pharaoh favour only (<code>ENEMY_3_EGYPTIAN</code>). Favour chain: 40 (attack food) → 20 (random) → 20 (random) via <code>mission9_pharaoh_favour_i15/i18/i19</code>.</p>
 
       <div class="tutorial-step">
         <span class="step-tag">Year 2 · month 4</span>
@@ -334,7 +334,7 @@
       </div>
       <div class="tutorial-step">
         <span class="step-tag">Favour KR</span>
-        <span>Pharaoh punishment army size <strong>40</strong>, then chain <strong>20</strong>, then another <strong>20</strong>.</span>
+        <span>Pharaoh punishment army size <strong>40</strong> (targets food), then chain <strong>20</strong> (random), then another <strong>20</strong> (random).</span>
       </div>
 
       <h2 id="strategy">Strategy</h2>
@@ -388,8 +388,8 @@
               <li>
                 <span class="ev-name">event_advance_month</span>
                 <span class="ev-line">invasions</span>
-                <span class="ev-desc">Favour 40 → chain 20 → chain 20 (RANDOM target).</span>
-                <span class="ev-fn">mission9_pharaoh_favour_invasion</span>
+                <span class="ev-desc">Favour i15 size 40 FOOD → i18 size 20 RANDOM → i19 size 20 RANDOM.</span>
+                <span class="ev-fn">mission9_pharaoh_favour_i15 / i18 / i19 / done</span>
               </li>
             </ul>
           </div>

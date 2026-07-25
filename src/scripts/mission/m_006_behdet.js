@@ -357,8 +357,6 @@ mission6 { // Behdet — The Royal Navy
 		failed_flood_done : false
 		kushite_invasion_1 : false
 		kushite_invasion_2 : false
-		kushite_invasion_2_enemies_seen : false
-		kushite_invasion_2_rewarded : false
 		kushite_invasion_3 : false
 		pharaoh_favour_invasion_done : false
 		start_message_shown : false
@@ -379,8 +377,8 @@ function mission6_fire_request(tag, resource, amount, months, ok_tag, fail_tag, 
 	return ok_ev
 }
 
-function mission6_kushite_raid(invasion_id, size) {
-	city.start_foreign_army_invasion({
+function mission6_kushite_raid(invasion_id, size, on_completed_tag) {
+	var opts = {
 		invasion_id: invasion_id,
 		enemy: ENEMY_6_KUSHITE,
 		size: size,
@@ -388,7 +386,11 @@ function mission6_kushite_raid(invasion_id, size) {
 		tiley: -1,
 		want_destroy_buildings: size,
 		invasion_attack_target: EVENT_ATTACK_TARGET_RANDOM // pak attack=4
-	})
+	}
+	if (on_completed_tag) {
+		opts.on_completed_tag = on_completed_tag
+	}
+	city.start_foreign_army_invasion(opts)
 }
 
 [es=event_mission_start, mission=mission6]
@@ -522,7 +524,7 @@ function mission6_failed_flood(ev) {
 }
 
 // pak invasions (scenario enemy = Kushite). Favour-KR Pharaoh army amount=45.
-// Invasion y15 ok→REPUTATION_INCREASE +8 (polled via enemy formations; B2 not wired).
+// y15 wipe → REPUTATION +8 via on_completed_tag bind (engine resolve).
 [es=event_advance_month, mission=mission6]
 function mission6_kushite_invasion_1(ev) {
 	if (mission.kushite_invasion_1) { return }
@@ -538,35 +540,8 @@ function mission6_kushite_invasion_2(ev) {
 	if (ev.years_since_start < 15) { return }
 	mission.kushite_invasion_2 = true
 	log_info("akhenaten: mission 6 behdet kushite invasion 2 size=16", {ev:ev})
-	mission6_kushite_raid(1, 16)
-}
-
-// pak: invasion y15 on_completed → REPUTATION_INCREASE +8
-[es=event_advance_month, mission=mission6]
-function mission6_kushite_invasion_2_reward(ev) {
-	if (!mission.kushite_invasion_2 || mission.kushite_invasion_2_rewarded) {
-		return
-	}
-	// Wait a month so formation totals update after the spawn.
-	if (ev.years_since_start < 15 || (ev.years_since_start == 15 && ev.month < 1)) {
-		return
-	}
-	var enemies = city.num_enemy_formations
-	if (enemies > 0) {
-		mission.kushite_invasion_2_enemies_seen = true
-		return
-	}
-	if (!mission.kushite_invasion_2_enemies_seen) {
-		return
-	}
-	mission.kushite_invasion_2_rewarded = true
-	log_info("akhenaten: mission 6 behdet kushite invasion 2 cleared → KR +8")
-	city.create_chain_event({
-		tag_id: 701,
-		type: EVENT_TYPE_REPUTATION_INCREASE,
-		amount: 8,
-		trigger: EVENT_TRIGGER_ONCE
-	}).execute()
+	city.create_chain_event({ tag_id: 701, type: EVENT_TYPE_REPUTATION_INCREASE, amount: 8 })
+	mission6_kushite_raid(1, 16, 701)
 }
 
 [es=event_advance_month, mission=mission6]

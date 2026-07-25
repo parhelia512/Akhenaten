@@ -93,7 +93,7 @@ C++ smoke checks run first (before JS files): `SDL_strlen`/`strcmp`, `vec2i`, `g
 | `43_sphinx_place.js` | C6 Sphinx: planner-place `BUILDING_SPHINX`, assert 3 linked parts (`next_part_building_id`), open info window without TypeError |
 | `44_obelisk_place.js` | C7 Small Obelisk: reject without granite / second unfinished; then staffed SY + 100 granite → place 3×3 (no parts), granite consumed, `__test_monument_add_resource` fills timber; display + full-city screenshots |
 | `45_mastaba_place.js` | Small mastaba: planner-place `BUILDING_SMALL_MASTABA`, assert 10 linked parts, `image_stick` resolves (#431), bricks via `__test_monument_add_resource`, phase walk + screenshots |
-| `50_invasion_event_spawn.js` | B2 Phase 1–2: native `EVENT_TYPE_INVASION` spawn + deferred `on_completed` (no sync chain) + dual-spawn gate off |
+| `50_invasion_bind_resolve.js` | Invasion bind: spawn + `on_completed_tag` deferred KR + history ring (JS calendar model; native EVENT_TYPE_INVASION cancelled) |
 
 Farm **placement** tests (34/35) cover `can_place` / terrain rules; **37** covers preview image helpers.
 When adding more preview draw coverage, follow JS draw conventions in

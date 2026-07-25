@@ -5,7 +5,7 @@
 
 **Синхронизация:** 2026-07-25. Статус чекбоксов и backlog — в `REMAKE_TODO.md`.
 **Текущая очередь дня** (empire 12→18 ∥ B2): [`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md)
-— следующий шаг A: **Meidum (12)**; параллельно B2 → B2-migrate; врезки FF1 / AUD1.
+— следующий шаг A: **Meidum (12)**; B2 JS+bind **done**; врезки FF1 / AUD1.
 P2/P3 (bridges, hot-reload, OpenH264/video, …) в этот файл **не** входят.
 
 ## Общие сведения для любой задачи
@@ -208,25 +208,23 @@ Enum кампаний: `CAMPAIGN_CLEOPATRA_*` в `mission.h:118-121`.
 Cleopatra packs (`Data/Expansion.sg3` / `SprMain2.sg3`) — см. **DX2** в
 `REMAKE_TODO.md`; Pharaoh-only install — не критерий приёмки B1b.
 
-### B2. Реализовать EVENT_TYPE_INVASION в менеджере событий
-**Статус:** Phase 1–2 в коде (2026-07-25) · favour/save/migrate открыты · **план:** [`REMAKE_B2_INVASION_PLAN.md`](REMAKE_B2_INVASION_PLAN.md).  
-**Файлы:** `scenario_event_manager.cpp` (`EVENT_TYPE_INVASION`), `scenario_invasion.*`.  
-**Зависимости:** нет. Soft-dep save pending ↔ B3.
-**Проблема:** spawn есть; handler пустой; `on_completed` сейчас синхронный (для invasion
-нужен **отложенный** resolve wipe/destroy-goal). Миссии 5–9 на JS poll.
-**Сделано (Phase 1–2):** handler spawn + `chain_action_next=NONE` + pending allocator
-(`invasion_id` < 120) + month resolve tick; `env.use_native_invasion_events` gate
-(default off); `want_destroy` → `enemy_army`; integral `tests/50_invasion_event_spawn.js`.
-**Подзадачи (детали и фазы PR — в плане):**
-- [x] **B2a** timed spawn + `chain_action_next = NONE` + pending registry (+ dual-spawn gate)
-- [x] **B2-resolve** tick → `on_completed` / `on_refusal` / `on_defeat`
-- [ ] **B2b** favour `EVENT_TRIGGER_BY_FAVOUR` (0x10); убрать dual spawn с legacy/JS
-- [ ] **B2c** chain-only `ONLY_VIA` → `ACTIVATED_*` (clone уже есть; проверить end-to-end)
-- [x] **B2d** partial: integral spawn+resolve+gate (`50_invasion_event_spawn.js`); console ок
-- [ ] **B2-migrate** (после B2d / Phase 7): снять JS poll/favour в **m5–9** (+10+);
-  явный шаг в [`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md), не «когда-нибудь»
-- [ ] **B2.5** (опц.): общий `mission_resolve_invasion` в `missions.js` до native resolve
-**Приёмка / DoD:** см. план §10. Distant battle — **не** B2.
+### B2. Invasions — JS calendar + bind tags (native cancelled)
+**Статус:** **native EVENT_TYPE_INVASION отменён** (2026-07-25). Модель: JS spawn/calendar +
+`on_completed_tag` / `on_refusal_tag` / `on_defeat_tag` на `start_foreign_army_invasion`;
+month tick `g_invasions.process_bind_resolutions()`; history ring save **v173** `invasion_runtime`
+(audit/UI only). Favour: `ATTACK_TYPE_ENEMIES` + `ENEMY_3_EGYPTIAN`.  
+**План (архив + новая модель):** [`REMAKE_B2_INVASION_PLAN.md`](REMAKE_B2_INVASION_PLAN.md).  
+**Файлы:** `scenario_invasion.*`, `request_js.cpp`, `missions.js`, m6/m8 binds.  
+**Подзадачи:**
+- [x] Strip native INVASION handler / favour engine / `use_native` gate / `create_invasion_event`
+- [x] Bind table (16) + resolve (seen → wipe/refuse) + drain ONLY_VIA same month
+- [x] History ring 64 + stub v172 `invasion_event_pending` + v173 chunk
+- [x] Favour helper ENEMIES+Egyptian; message_kingdome_army_attack for Egyptian
+- [x] Behdet y15 +8 / Selima ×9 ok-only + ×22 ok/refuse binds (no JS resolve poll)
+- [x] Integral `tests/50_invasion_bind_resolve.js`
+- [ ] **B3** invasion warnings save (после)
+- [ ] **B4** phrase_id (после)
+**Distant battle — не B2.**
 
 ### B2x. Закрыто рядом с Selima (2026-07-25) — не отдельный эпик
 - [x] `EVENT_TYPE_PRICE_↑/↓` → `trade_price_change` + price phrases

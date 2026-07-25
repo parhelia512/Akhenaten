@@ -220,7 +220,18 @@ city {
         city.kingdome.salary_rank = rank
         city.kingdome.salary_amount = city.rank_salary(rank)
     }
-    start_foreign_army_invasion : __city_start_foreign_army_invasion
+    start_foreign_army_invasion : function(obj) { return __city_start_foreign_army_invasion(obj) }
+    invasion_history_count : __city_invasion_history_count
+    invasion_history_at : function(index) {
+        return {
+            seq: __city_invasion_history_seq(index)
+            year: __city_invasion_history_year(index)
+            month: __city_invasion_history_month(index)
+            invasion_id: __city_invasion_history_invasion_id(index)
+            size: __city_invasion_history_size(index)
+            outcome: __city_invasion_history_outcome(index)
+        }
+    }
     camera_go_to : __city_camera_go_to
     allowed_foods : __city_allowed_foods
 
@@ -434,18 +445,6 @@ city.create_chain_event = function(obj) {
         set_completed_action_tag: function(slave_tag) { __city_request_set_completed_action(this.tag_id, slave_tag) }
         set_refusal_action_tag: function(slave_tag) { __city_request_set_refusal_action(this.tag_id, slave_tag) }
         set_too_late_action_tag: function(slave_tag) { __city_request_set_too_late_action(this.tag_id, slave_tag) }
-        set_sender_faction: function(sender_faction) { __city_request_set_sender_faction(this.tag_id, sender_faction) }
-        set_param: function(param, value) { __city_request_set_param(this.tag_id, param, value) }
-        execute: function() { __city_request_execute(this.tag_id) }
-    }
-}
-
-city.create_invasion_event = function(obj) {
-    __city_create_invasion_event(obj)
-    return {
-        tag_id: obj.tag_id
-        set_completed_action_tag: function(slave_tag) { __city_request_set_completed_action(this.tag_id, slave_tag) }
-        set_refusal_action_tag: function(slave_tag) { __city_request_set_refusal_action(this.tag_id, slave_tag) }
         set_sender_faction: function(sender_faction) { __city_request_set_sender_faction(this.tag_id, sender_faction) }
         set_param: function(param, value) { __city_request_set_param(this.tag_id, param, value) }
         execute: function() { __city_request_execute(this.tag_id) }

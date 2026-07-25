@@ -28,6 +28,7 @@
 #include "figure/formation.h"
 #include "scenario/scenario_event_manager.h"
 #include "scenario/scenario.h"
+#include "scenario/scenario_invasion.h"
 #include "sound/sound_city.h"
 #include "sound/sound.h"
 #include "window/intro_video.h"
@@ -168,6 +169,7 @@ void game_t::advance_month() {
     g_empire.update_month();
     g_scenario.events.process_random_events();
     g_scenario.events.process_events();
+    g_invasions.process_bind_resolutions();
 
     formation_update_monthly_morale_at_rest();
     city_message_decrease_delays();

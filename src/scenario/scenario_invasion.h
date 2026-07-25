@@ -42,19 +42,47 @@ struct invasion_opts_t {
     e_formation_attack_type attack_type = FORMATION_ATTACK_RANDOM;
     tile2i invasion_point;
     uint8_t want_destroy = 0;
+    // Optional resolve branches (JS tags → ONLY_VIA chain events). 0 = none.
+    uint16_t on_completed_tag = 0;
+    uint16_t on_refusal_tag = 0;
+    uint16_t on_defeat_tag = 0;
 };
 
 // Map pak/JS invasion_attack_target (EVENT_ATTACK_TARGET_*) → formation attack_type.
 e_formation_attack_type formation_attack_from_event_target(int invasion_attack_target);
 
-// B2 pending: event-manager invasion awaiting wipe/destroy-goal resolve.
-// invasion_id is an enemy_army slot (< MAX_ENEMY_ARMIES), never pak event_id.
-struct invasion_event_pending_t {
+enum e_invasion_outcome : uint8_t {
+    INVASION_OUTCOME_NONE = 0,       // active / unknown
+    INVASION_OUTCOME_COMPLETED = 1,  // wipe / ok-only
+    INVASION_OUTCOME_REFUSED = 2,    // destroy-goal + refusal tag
+    INVASION_OUTCOME_DEFEAT = 3,
+};
+
+// Active mid-fight bind: fire chain tags after seen → wipe / destroy-goal.
+struct invasion_bind_t {
     bool in_use = false;
     bool enemies_seen = false;
     uint8_t invasion_id = 0;
-    int16_t event_id = -1;
+    uint16_t seq = 0; // last_internal_invasion_id at spawn
+    uint16_t on_completed_tag = 0;
+    uint16_t on_refusal_tag = 0;
+    uint16_t on_defeat_tag = 0;
+};
+
+// Audit / debug / future UI — not gameplay source of truth.
+struct invasion_history_entry_t {
+    uint16_t seq = 0;
+    int16_t year = 0; // years_since_start
+    int8_t month = 0;
+    uint8_t invasion_id = 0;
+    uint8_t enemy_type = 0;
+    uint8_t mode = 0;
+    uint8_t attack_type = 0;
+    uint16_t size = 0;
+    int16_t tile_x = -1;
+    int16_t tile_y = -1;
     uint8_t want_destroy = 0;
+    uint8_t outcome = INVASION_OUTCOME_NONE;
 };
 
 struct enemy_properties_t {
@@ -69,27 +97,30 @@ ANK_CONFIG_STRUCT(enemy_properties_t, percentage_type1, percentage_type2, percen
 
 struct invasion_data_t {
     enum {
-        MAX_PENDING_EVENT_INVASIONS = 32,
-        // Prefer slots away from favour-helper hardcodes (24–26) and console (23).
-        FIRST_EVENT_INVASION_SLOT = 1,
+        MAX_ACTIVE_BINDS = 16,
+        MAX_HISTORY = 64,
     };
 
     int last_internal_invasion_id;
     int min_invasion_amount;
     int max_invasion_amount;
     std::array<invasion_warning_t, 101> warnings;
-    std::array<invasion_event_pending_t, MAX_PENDING_EVENT_INVASIONS> event_pending;
+    std::array<invasion_bind_t, MAX_ACTIVE_BINDS> binds;
+    std::array<invasion_history_entry_t, MAX_HISTORY> history;
+    int history_count = 0; // total ever written (may exceed MAX_HISTORY)
+    int history_next = 0;  // next write index in ring
 
     void clear();
     void init();
 
     const enemy_properties_t &get_prop(e_enemy_type type);
 
-    // Allocate free enemy_army slot in 1..MAX_ENEMY_ARMIES-1; returns -1 if full.
-    int alloc_invasion_id();
-    bool register_event_pending(uint8_t invasion_id, int16_t event_id, uint8_t want_destroy);
-    bool has_pending_for_event(int16_t event_id) const;
-    void process_event_resolutions(); // month tick: seen → wipe/refuse → chain
+    // After successful spawn: history row + optional bind from opts tags.
+    void record_spawn(const invasion_opts_t &opts, tile2i tile, int size_after_clamp);
+    void process_bind_resolutions(); // month tick: seen → wipe/refuse → fire_chain(tag)
+
+    int history_entry_count() const;
+    const invasion_history_entry_t *history_at(int index) const; // 0 = oldest retained
 };
 ANK_CONFIG_STRUCT(invasion_data_t, min_invasion_amount, max_invasion_amount)
 extern invasion_data_t g_invasions;
@@ -105,7 +136,8 @@ int scenario_invasion_count();
 
 bool scenario_invasion_start_from_kingdome(int size);
 
-void scenario_invasion_start(invasion_opts_t opts);
+// Returns last_internal_invasion_id (seq) after successful spawn, or 0 on failure.
+int scenario_invasion_start(invasion_opts_t opts);
 
 void scenario_invasion_process();
 

@@ -160,11 +160,12 @@ function mission_recurring_request_may_fire(mission, resource, prefix, abs_month
 }
 
 function mission_pharaoh_favour_invasion_tick(mission, army_size, chain_army_size) {
+    // Favour-KR Pharaoh army via ENEMIES + Egyptian (no force_attack / KINGDOME path).
     if (typeof chain_army_size === "undefined") {
         chain_army_size = 0
     }
 
-    // pak B2c: by_favour invasion ok→chain_only Pharaoh army. After the first wave clears, fire the child once.
+    // pak: by_favour ok→chain_only Pharaoh army. After the first wave clears, fire the child once.
     if (mission.pharaoh_favour_invasion_done && chain_army_size > 0 && !mission.pharaoh_favour_chain_done) {
         var enemies = city.num_enemy_formations
         if (enemies > 0) {
@@ -178,7 +179,7 @@ function mission_pharaoh_favour_invasion_tick(mission, army_size, chain_army_siz
         log_info("akhenaten: pharaoh favour chain invasion size=" + chain_army_size + " kr=" + city.rating_kingdom)
         __image_request_pak(PACK_ENEMY_EGYPTIAN)
         city.start_foreign_army_invasion({
-            mode: ATTACK_TYPE_KINGDOME,
+            mode: ATTACK_TYPE_ENEMIES,
             enemy: ENEMY_3_EGYPTIAN,
             size: chain_army_size,
             invasion_id: 25,
@@ -204,7 +205,7 @@ function mission_pharaoh_favour_invasion_tick(mission, army_size, chain_army_siz
     log_info("akhenaten: pharaoh favour invasion size=" + army_size + " kr=" + city.rating_kingdom)
     __image_request_pak(PACK_ENEMY_EGYPTIAN)
     city.start_foreign_army_invasion({
-        mode: ATTACK_TYPE_KINGDOME,
+        mode: ATTACK_TYPE_ENEMIES,
         enemy: ENEMY_3_EGYPTIAN,
         size: army_size,
         invasion_id: 24,

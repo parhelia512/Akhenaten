@@ -107,7 +107,10 @@ enum e_event_invader : uint8_t {
     EVENT_INVADER_EGYPT = 2,
     EVENT_INVADER_PHARAOH = 3,
     EVENT_INVADER_BEDUINS = 4,
+    EVENT_INVADER_MAX
 };
+using e_event_invader_tokens_t = token_holder<e_event_invader, EVENT_INVADER_ENEMY, EVENT_INVADER_MAX>;
+extern const e_event_invader_tokens_t e_event_invader_tokens;
 
 enum e_event_attack : uint8_t {
     EVENT_ATTACK_TARGET_FOOD = 0,
@@ -236,10 +239,6 @@ struct event_manager_t {
     void create_chain_event(int tag, e_event_type type, int amount, e_resource resource = RESOURCE_NONE,
                             int8_t subtype = 0, int8_t city_id = -1,
                             e_event_trigger_type trigger = EVENT_TRIGGER_ONLY_VIA_EVENT);
-    // B2: timed/chain invasion event (item = e_event_invader).
-    void create_invasion_event(int tag, int invader, int amount, int attack_target = EVENT_ATTACK_TARGET_RANDOM,
-                               e_event_trigger_type trigger = EVENT_TRIGGER_ONCE,
-                               int tilex = -1, int tiley = -1);
 
     void set_request_location_fields(int tag, int16_t l1, int16_t l2, int16_t l3, int16_t l4);
     void set_request_reasons(int tag, uint16_t r1, uint16_t r2, uint16_t r3, uint16_t r4);

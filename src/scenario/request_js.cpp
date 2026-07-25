@@ -137,7 +137,7 @@ void __city_request_set_too_late_action(int master_tag, int slave_tag) {
 }
 ANK_FUNCTION_2(__city_request_set_too_late_action)
 
-void ANK_FUNCTION_UNIFIED(__city_start_foreign_army_invasion)(const bvariant_map &args) {
+int ANK_FUNCTION_UNIFIED(__city_start_foreign_army_invasion)(const bvariant_map &args) {
     invasion_opts_t opts;
     opts.mode = (e_attack_faction)args.i32("mode", ATTACK_TYPE_ENEMIES);
     opts.enemy_type = (e_enemy_type)args.i32("enemy", ENEMY_0_BARBARIAN);
@@ -145,20 +145,51 @@ void ANK_FUNCTION_UNIFIED(__city_start_foreign_army_invasion)(const bvariant_map
     opts.invasion_point = { args.i32("tilex", -1), args.i32("tiley", -1) };
     opts.invasion_id = args.i32("invasion_id", 0);
     opts.want_destroy = (uint8_t)args.i32("want_destroy_buildings", 0);
-    // pak field attack= / invasion_attack_target (EVENT_ATTACK_TARGET_*, 0..4)
     opts.attack_type = formation_attack_from_event_target(
         args.i32("invasion_attack_target", EVENT_ATTACK_TARGET_RANDOM));
-    scenario_invasion_start(opts);
+    opts.on_completed_tag = (uint16_t)args.i32("on_completed_tag", 0);
+    opts.on_refusal_tag = (uint16_t)args.i32("on_refusal_tag", 0);
+    opts.on_defeat_tag = (uint16_t)args.i32("on_defeat_tag", 0);
+    return scenario_invasion_start(opts);
 }
 
-void ANK_FUNCTION_UNIFIED(__city_create_invasion_event)(const bvariant_map &args) {
-    const e_event_trigger_type trigger = (e_event_trigger_type)args.i32("trigger", EVENT_TRIGGER_ONCE);
-    g_scenario.events.create_invasion_event(
-        args.n("tag_id"),
-        args.i32("invader", args.i32("item", EVENT_INVADER_ENEMY)),
-        args.n("amount"),
-        args.i32("invasion_attack_target", EVENT_ATTACK_TARGET_RANDOM),
-        trigger,
-        args.i32("tilex", -1),
-        args.i32("tiley", -1));
+int __city_invasion_history_count() {
+    return g_invasions.history_entry_count();
 }
+ANK_FUNCTION(__city_invasion_history_count)
+
+int __city_invasion_history_seq(int index) {
+    const invasion_history_entry_t *e = g_invasions.history_at(index);
+    return e ? (int)e->seq : 0;
+}
+ANK_FUNCTION_1(__city_invasion_history_seq)
+
+int __city_invasion_history_year(int index) {
+    const invasion_history_entry_t *e = g_invasions.history_at(index);
+    return e ? (int)e->year : 0;
+}
+ANK_FUNCTION_1(__city_invasion_history_year)
+
+int __city_invasion_history_month(int index) {
+    const invasion_history_entry_t *e = g_invasions.history_at(index);
+    return e ? (int)e->month : 0;
+}
+ANK_FUNCTION_1(__city_invasion_history_month)
+
+int __city_invasion_history_invasion_id(int index) {
+    const invasion_history_entry_t *e = g_invasions.history_at(index);
+    return e ? (int)e->invasion_id : 0;
+}
+ANK_FUNCTION_1(__city_invasion_history_invasion_id)
+
+int __city_invasion_history_size(int index) {
+    const invasion_history_entry_t *e = g_invasions.history_at(index);
+    return e ? (int)e->size : 0;
+}
+ANK_FUNCTION_1(__city_invasion_history_size)
+
+int __city_invasion_history_outcome(int index) {
+    const invasion_history_entry_t *e = g_invasions.history_at(index);
+    return e ? (int)e->outcome : 0;
+}
+ANK_FUNCTION_1(__city_invasion_history_outcome)

@@ -1,7 +1,7 @@
 log_info("akhenaten: mission 9 abu started")
 
 // Empire / requests / events verified vs mission1.pak scenario 9 (2026-07-25 dump).
-// Favour Pharaoh army 40 → chain 20 → chain 20 (B2c) proxied in JS.
+// Favour: pak i=15 by_favour 40 attack=FOOD ok→i=18 chain 20 RANDOM ok→i=19 chain 20 RANDOM.
 // pak CITY_STATUS subtype=1 Selima (FOREIGN_CITY_CONQUERED) ok→NEW_TRADE city=5=Kyrene.
 
 mission9 { // Abu — The Nubian Border
@@ -335,13 +335,39 @@ mission9 { // Abu — The Nubian Border
 		selima_trade_unlock_done : false
 		contaminated_water_done : false
 		sea_trade_problem_done : false
-		pharaoh_favour_invasion_done : false
-		pharaoh_favour_chain_done : false
-		pharaoh_favour_chain2_armed : false
-		pharaoh_favour_chain2_enemies_seen : false
-		pharaoh_favour_chain2_done : false
+		// Favour waves: 0=idle, 1=i15(40) out, 2=i18(20) out, 3=i19(20) out, 4=done
+		pharaoh_favour_wave : 0
+		pharaoh_favour_enemies_seen : false
 		start_message_shown : false
 	}
+}
+
+// pak favour armies: ENEMIES + Egyptian (not KINGDOME / force_attack).
+function mission9_spawn_pharaoh_favour(size, invasion_id, attack_target) {
+	__image_request_pak(PACK_ENEMY_EGYPTIAN)
+	return city.start_foreign_army_invasion({
+		mode: ATTACK_TYPE_ENEMIES,
+		enemy: ENEMY_3_EGYPTIAN,
+		size: size,
+		invasion_id: invasion_id,
+		tilex: -1,
+		tiley: -1,
+		want_destroy_buildings: 0,
+		invasion_attack_target: attack_target
+	})
+}
+
+// True once this favour wave has appeared and then left the map.
+function mission9_favour_wave_cleared() {
+	var enemies = city.num_enemy_formations
+	if (enemies > 0) {
+		mission.pharaoh_favour_enemies_seen = true
+		return false
+	}
+	if (!mission.pharaoh_favour_enemies_seen) {
+		return false
+	}
+	return true
 }
 
 function mission9_fire_request(tag, resource, amount, months, ok_tag, fail_tag, late_tag, ok_amt, fail_amt, late_amt, subtype) {
@@ -552,37 +578,60 @@ function mission9_gems_demand_increase(ev) {
 	}).execute()
 }
 
-// pak favour: size 40 → ok→chain 20 (attack=RANDOM) → ok→chain 20.
+// pak i=15: by_favour amount=40 invader=pharaoh attack=FOOD(0) ok→i=18.
 [es=event_advance_month, mission=mission9]
-function mission9_pharaoh_favour_invasion(ev) {
-	mission_pharaoh_favour_invasion_tick(mission, 40, 20)
+function mission9_pharaoh_favour_i15(ev) {
+	if (mission.pharaoh_favour_wave != 0) {
+		return
+	}
+	if (city.rating_kingdom > 0) {
+		return
+	}
+	mission.pharaoh_favour_wave = 1
+	mission.pharaoh_favour_enemies_seen = false
+	log_info("akhenaten: mission 9 abu favour i15 size=40 attack=FOOD kr=" + city.rating_kingdom, {ev:ev})
+	mission9_spawn_pharaoh_favour(40, 24, EVENT_ATTACK_TARGET_FOOD)
+}
 
-	if (mission.pharaoh_favour_chain_done && !mission.pharaoh_favour_chain2_armed) {
-		mission.pharaoh_favour_chain2_armed = true
-		mission.pharaoh_favour_chain2_enemies_seen = false
-	}
-	if (!mission.pharaoh_favour_chain2_armed || mission.pharaoh_favour_chain2_done) {
+// pak i=18: chain_only amount=20 attack=RANDOM(4) ok→i=19.
+[es=event_advance_month, mission=mission9]
+function mission9_pharaoh_favour_i18(ev) {
+	if (mission.pharaoh_favour_wave != 1) {
 		return
 	}
-	var enemies = city.num_enemy_formations
-	if (enemies > 0) {
-		mission.pharaoh_favour_chain2_enemies_seen = true
+	if (!mission9_favour_wave_cleared()) {
 		return
 	}
-	if (!mission.pharaoh_favour_chain2_enemies_seen) {
+	mission.pharaoh_favour_wave = 2
+	mission.pharaoh_favour_enemies_seen = false
+	log_info("akhenaten: mission 9 abu favour i18 size=20 attack=RANDOM", {ev:ev})
+	mission9_spawn_pharaoh_favour(20, 25, EVENT_ATTACK_TARGET_RANDOM)
+}
+
+// pak i=19: chain_only amount=20 attack=RANDOM(4) (terminal).
+[es=event_advance_month, mission=mission9]
+function mission9_pharaoh_favour_i19(ev) {
+	if (mission.pharaoh_favour_wave != 2) {
 		return
 	}
-	mission.pharaoh_favour_chain2_done = true
-	log_info("akhenaten: mission 9 abu pharaoh favour chain2 invasion size=20 kr=" + city.rating_kingdom)
-	__image_request_pak(PACK_ENEMY_EGYPTIAN)
-	city.start_foreign_army_invasion({
-		mode: ATTACK_TYPE_KINGDOME,
-		enemy: ENEMY_3_EGYPTIAN,
-		size: 20,
-		invasion_id: 26,
-		tilex: -1,
-		tiley: -1,
-		want_destroy_buildings: 0,
-		invasion_attack_target: EVENT_ATTACK_TARGET_RANDOM
-	})
+	if (!mission9_favour_wave_cleared()) {
+		return
+	}
+	mission.pharaoh_favour_wave = 3
+	mission.pharaoh_favour_enemies_seen = false
+	log_info("akhenaten: mission 9 abu favour i19 size=20 attack=RANDOM", {ev:ev})
+	mission9_spawn_pharaoh_favour(20, 26, EVENT_ATTACK_TARGET_RANDOM)
+}
+
+// After i19 leaves the map — chain finished.
+[es=event_advance_month, mission=mission9]
+function mission9_pharaoh_favour_done(ev) {
+	if (mission.pharaoh_favour_wave != 3) {
+		return
+	}
+	if (!mission9_favour_wave_cleared()) {
+		return
+	}
+	mission.pharaoh_favour_wave = 4
+	log_info("akhenaten: mission 9 abu favour chain 40→20→20 finished", {ev:ev})
 }

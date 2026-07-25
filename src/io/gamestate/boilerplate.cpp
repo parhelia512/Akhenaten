@@ -613,8 +613,12 @@ static void file_schema(e_file_format file_format, const int file_version) {
             FILEIO.push_chunk(103968, false, "bridge_type_grid", iob_bridge_type_grid); // (228²) * 2
         }
         if (file_version > 171) {
-            // 32 pending × 8 bytes + 4-byte native-invasion flag = 260, pad to 272
+            // v172 stub — keep schema position for old saves
             FILEIO.push_chunk(272, false, "invasion_event_pending", iob_invasion_event_pending);
+        }
+        if (file_version > 172) {
+            // 8 + 16*12 + 64*20 = 1480
+            FILEIO.push_chunk(1480, false, "invasion_runtime", iob_invasion_runtime);
         }
 
         break;

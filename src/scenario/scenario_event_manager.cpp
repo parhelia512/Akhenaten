@@ -44,6 +44,7 @@ const e_event_type_tokens_t ANK_CONFIG_ENUM(e_event_type_tokens);
 const e_event_state_tokens_t e_event_state_tokens;
 const e_event_trigger_type_tokens_t ANK_CONFIG_ENUM(e_event_trigger_type_tokens);
 const e_event_attack_tokens_t ANK_CONFIG_ENUM(e_event_attack_tokens);
+const e_event_invader_tokens_t ANK_CONFIG_ENUM(e_event_invader_tokens);
 
 struct auto_phrase {
     uint8_t id;
@@ -105,6 +106,8 @@ void event_ph_t::set_param(pcstr name, int param) {
     if (pname == "months_initial") { months_initial = param; return; }
     if (pname == "amount") { amount.value = param; return; }
     if (pname == "subtype") { subtype = (int8_t)param; return; }
+    if (pname == "year") { time.year = (int16_t)param; return; }
+    if (pname == "month") { time.month = (int16_t)param; return; }
 }
 
 void event_ph_t::archive_load(archive arch) {
@@ -264,41 +267,6 @@ void event_manager_t::create_chain_event(int tag, e_event_type type, int amount,
     event.event_trigger_type = trigger;
     event.event_id = event_id;
     event.location_fields = { -1, -1, -1, -1 };
-    event.on_completed_action = -1;
-    event.on_refusal_action = -1;
-    event.on_too_late_action = -1;
-    event.on_defeat_action = -1;
-    g_scenario_events.event_list.front().num_total_header = g_scenario_events.event_list.size();
-}
-
-void event_manager_t::create_invasion_event(int tag, int invader, int amount, int attack_target,
-                                            e_event_trigger_type trigger, int tilex, int tiley) {
-    if (g_scenario_events.event_list.empty()) {
-        g_scenario_events.event_list.push_back({});
-    }
-    auto &event = g_scenario_events.event_list.emplace_back();
-    int event_id = g_scenario_events.event_list.size() - 1;
-    memset(&event, 0, sizeof(event_ph_t));
-    event.type = EVENT_TYPE_INVASION;
-    event.item.value = (int16_t)invader;
-    event.item.f_fixed = (int16_t)invader;
-    event.item.f_max = -1;
-    event.amount.value = (int16_t)amount;
-    event.amount.f_fixed = (int16_t)amount;
-    event.amount.f_max = -1;
-    event.invasion_attack_target = (int8_t)attack_target;
-    event.tag_id = tag;
-    event.time.year = game.simtime.years_since_start();
-    event.time.month = game.simtime.month;
-    event.event_trigger_type = trigger;
-    event.event_id = event_id;
-    // Sentinel location_fields[2]=-2 marks absolute map tile in [0],[1] (JS API).
-    // Pak never uses -2; its loc semantics stay untouched for pak-loaded events.
-    if (tilex >= 0 && tiley >= 0) {
-        event.location_fields = { (int16_t)tilex, (int16_t)tiley, -2, -1 };
-    } else {
-        event.location_fields = { -1, -1, -1, -1 };
-    }
     event.on_completed_action = -1;
     event.on_refusal_action = -1;
     event.on_too_late_action = -1;
@@ -568,11 +536,6 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         return;
     }
 
-    // Dual-spawn gate: JS-proxy missions keep owning invasions until B2-migrate.
-    if (event.type == EVENT_TYPE_INVASION && !g_scenario.env.use_native_invasion_events) {
-        return;
-    }
-
     assert(event.event_id == id);
     if (event.event_trigger_type == EVENT_TRIGGER_ALREADY_FIRED
      || event.event_trigger_type == EVENT_TRIGGER_BY_FAVOUR_IN_USE) {
@@ -606,14 +569,10 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
     // for ACTIVE EVENTS (requests?): ignore specific time of the year IF quest is active.
     // ACTIVATED_8/12 are children spawned by chain propagation — their date copies the master's
     // creation date which is in the past, so fire immediately instead of waiting for date match.
-    // BY_FAVOUR: fire when Kingdom Rating collapses (not on calendar) — B2b.
     const bool activated_child = event.event_trigger_type == EVENT_TRIGGER_ACTIVATED_8
                               || event.event_trigger_type == EVENT_TRIGGER_ACTIVATED_12;
-    const bool favour_ready = event.event_trigger_type == EVENT_TRIGGER_BY_FAVOUR
-                           && g_scenario.env.use_native_invasion_events
-                           && g_city.kingdome.rating <= 0;
     const bool should_handle = !event.is_active
-                            && (activated_child || favour_ready || event.date() == game.simtime.date());
+                            && (activated_child || event.date() == game.simtime.date());
     if (!(should_handle)) {
         return;
     }
@@ -627,99 +586,11 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         chain_action_next = EVENT_ACTION_NONE;
         break;
 
-    case EVENT_TYPE_INVASION: {
-        // Recurring: block second spawn while previous wave still pending resolve.
-        if (g_invasions.has_pending_for_event(event.event_id)) {
-            chain_action_next = EVENT_ACTION_NONE;
-            break;
-        }
-
-        invasion_opts_t opts;
-        opts.size = event.amount.value;
-        opts.attack_type = formation_attack_from_event_target(event.invasion_attack_target);
-        opts.invasion_point = tile2i::invalid;
-        // JS create_invasion_event sentinel: location_fields[2] == -2 → absolute tile.
-        if (event.location_fields[2] == -2
-            && event.location_fields[0] >= 0 && event.location_fields[1] >= 0) {
-            opts.invasion_point = tile2i(event.location_fields[0], event.location_fields[1]);
-        }
-
-        const int invader = event.item.value;
-        switch (invader) {
-        case EVENT_INVADER_PHARAOH:
-            opts.mode = ATTACK_TYPE_ENEMIES;
-            opts.enemy_type = ENEMY_3_EGYPTIAN;
-            opts.want_destroy = 0; // favour/pharaoh: no refuse-via-buildings heuristic
-            break;
-        case EVENT_INVADER_EGYPT:
-            opts.mode = ATTACK_TYPE_ENEMIES;
-            opts.enemy_type = ENEMY_3_EGYPTIAN;
-            // Phase 0 heuristic: destroy-goal ≈ army size (JS missions).
-            opts.want_destroy = (uint8_t)std::clamp(opts.size, 0, 255);
-            break;
-        case EVENT_INVADER_BEDUINS:
-            opts.mode = ATTACK_TYPE_ENEMIES;
-            // Timna: pak BEDUINS but sprites from scenario.enemy_id (often Libian).
-            opts.enemy_type = g_scenario.enemy_id;
-            opts.want_destroy = (uint8_t)std::clamp(opts.size, 0, 255);
-            break;
-        case EVENT_INVADER_ENEMY:
-        default:
-            opts.mode = ATTACK_TYPE_ENEMIES;
-            opts.enemy_type = g_scenario.enemy_id;
-            opts.want_destroy = (uint8_t)std::clamp(opts.size, 0, 255);
-            break;
-        }
-
-        const int slot = g_invasions.alloc_invasion_id();
-        if (slot < 0) {
-            logs::warn("EVENT_TYPE_INVASION: no free invasion_id for event %d", event.event_id);
-            chain_action_next = EVENT_ACTION_NONE;
-            break;
-        }
-        opts.invasion_id = slot;
-
-        tile2i tile = scenario_start_invasion_impl(opts);
-        if (!tile.valid()) {
-            logs::warn("EVENT_TYPE_INVASION: spawn failed event %d size=%d", event.event_id, opts.size);
-            chain_action_next = EVENT_ACTION_NONE;
-            break;
-        }
-
-        // Confirm at least one formation was linked to this invasion_id.
-        int linked = 0;
-        for (int fi = 1; fi < MAX_FORMATIONS; ++fi) {
-            formation *m = formation_get(fi);
-            if (m && m->in_use && m->invasion_id == slot) {
-                linked++;
-            }
-        }
-        if (linked <= 0) {
-            logs::warn("EVENT_TYPE_INVASION: no formations for event %d enemy=%d size=%d",
-                       event.event_id, (int)opts.enemy_type, opts.size);
-            chain_action_next = EVENT_ACTION_NONE;
-            break;
-        }
-
-        g_invasions.register_event_pending((uint8_t)slot, (int16_t)event.event_id, opts.want_destroy);
-        g_formations.calculate_figures();
-
-        if (invader == EVENT_INVADER_PHARAOH || invader == EVENT_INVADER_EGYPT) {
-            events::emit(event_message{ true, "message_kingdome_army_attack",
-                g_invasions.last_internal_invasion_id, tile.grid_offset(), SOURCE_LOCATION });
-        } else {
-            events::emit(event_message{ true, "message_barbarians_attack",
-                g_invasions.last_internal_invasion_id, tile.grid_offset(), SOURCE_LOCATION });
-        }
-
-        if (event.event_trigger_type == EVENT_TRIGGER_BY_FAVOUR) {
-            event.event_trigger_type = EVENT_TRIGGER_BY_FAVOUR_IN_USE;
-        }
-
-        // Deferred: chains fire from invasion_data_t::process_event_resolutions.
+    case EVENT_TYPE_INVASION:
+        // Campaign invasions are JS-driven (start_foreign_army_invasion + bind tags).
+        // Pak EVENT_TYPE_INVASION is intentionally a no-op here.
         chain_action_next = EVENT_ACTION_NONE;
         break;
-    }
 
     case EVENT_TYPE_REPUTATION_INCREASE:
         g_city.kingdome.change(event.amount.value);
@@ -1039,7 +910,7 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
 
 void event_manager_t::process_events() {
     auto& data = g_scenario_events;
-   
+
     // main event update loop/fire events
     for (int i = 0; i < events_count(); i++) {
         process_event(i, false, -1);
@@ -1049,9 +920,6 @@ void event_manager_t::process_events() {
     for (int i = 0; i < events_count(); i++) {
         process_active_request(i);
     }
-
-    // B2: deferred invasion ok/refuse chains (seen → wipe / destroy-goal).
-    g_invasions.process_event_resolutions();
 
     // secondly, update random value fields for recurring events
     for (int i = 0; i < events_count(); i++) {

@@ -57,6 +57,7 @@ extern io_buffer* iob_figure_sequence;
 extern io_buffer* iob_scenario_carry_settings;
 extern io_buffer* iob_invasion_warnings;
 extern io_buffer* iob_invasion_event_pending;
+extern io_buffer* iob_invasion_runtime;
 extern io_buffer* iob_scenario_is_custom;
 extern io_buffer* iob_city_sounds;
 extern io_buffer* iob_building_highest_id;

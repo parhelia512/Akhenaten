@@ -1,7 +1,8 @@
 log_info("akhenaten: mission 8 selima started")
 
 // Empire / requests / invasions verified vs mission1.pak scenario 8 (2026-07-25 dump).
-// Favour Pharaoh army size=63 (trigger=by_favour) proxied in JS until B2b.
+// Favour Pharaoh army size=63 (trigger=by_favour) via mission_pharaoh_favour_invasion_tick.
+// Hyksos wipe/refuse → chain tags on start_foreign_army_invasion (engine bind resolve).
 // No EVENT_TYPE_DISTANT_BATTLE in pak — Kerma pressure is CITY_UNDER_SIEGE (+ troop request chain).
 
 mission8 { // Selima — The Road to Africa
@@ -344,19 +345,14 @@ mission8 { // Selima — The Road to Africa
 		reeds_price_increased : false
 		wage_increase_done : false
 		hyksos_raid_small_last_year : -1
-		hyksos_raid_small_enemies_seen : false
-		hyksos_raid_small_resolved : false
-		hyksos_raid_small_active : false
 		hyksos_invasion_2 : false
-		hyksos_invasion_2_enemies_seen : false
-		hyksos_invasion_2_resolved : false
 		pharaoh_favour_invasion_done : false
 		start_message_shown : false
 	}
 }
 
-function mission8_hyksos_raid(invasion_id, size) {
-	city.start_foreign_army_invasion({
+function mission8_hyksos_raid(invasion_id, size, on_completed_tag, on_refusal_tag) {
+	var opts = {
 		invasion_id: invasion_id,
 		enemy: ENEMY_5_HYKSOS,
 		size: size,
@@ -364,7 +360,14 @@ function mission8_hyksos_raid(invasion_id, size) {
 		tiley: -1,
 		want_destroy_buildings: size,
 		invasion_attack_target: EVENT_ATTACK_TARGET_TROOPS // pak attack=3
-	})
+	}
+	if (on_completed_tag) {
+		opts.on_completed_tag = on_completed_tag
+	}
+	if (on_refusal_tag) {
+		opts.on_refusal_tag = on_refusal_tag
+	}
+	city.start_foreign_army_invasion(opts)
 }
 
 [es=event_mission_start, mission=mission8]
@@ -437,41 +440,8 @@ function mission8_pharaoh_request_luxury(ev) {
 	request.execute()
 }
 
-// Resolve invasion after formations leave: player wipe → ok; want_destroy met → refuse.
-function mission8_resolve_hyksos_invasion(invasion_id, seen_flag, resolved_flag, ok_tag, refuse_tag) {
-	if (mission[resolved_flag]) {
-		return
-	}
-	var enemies = city.num_enemy_formations
-	if (enemies > 0) {
-		mission[seen_flag] = true
-		return
-	}
-	if (!mission[seen_flag]) {
-		return
-	}
-	mission[resolved_flag] = true
-	// Invaders leave after destroying enough buildings → pak refuse chain (if any).
-	if (refuse_tag && city.enemy_army_achieved_destroy_goal(invasion_id)) {
-		log_info("akhenaten: mission 8 selima hyksos invasion " + invasion_id + " destroy goal → KR −2")
-		city.create_chain_event({
-			tag_id: refuse_tag,
-			type: EVENT_TYPE_REPUTATION_DECREASE,
-			amount: 2,
-			trigger: EVENT_TRIGGER_ONCE
-		}).execute()
-		return
-	}
-	log_info("akhenaten: mission 8 selima hyksos invasion " + invasion_id + " cleared → KR +2")
-	city.create_chain_event({
-		tag_id: ok_tag,
-		type: EVENT_TYPE_REPUTATION_INCREASE,
-		amount: 2,
-		trigger: EVENT_TRIGGER_ONCE
-	}).execute()
-}
-
 // pak: year=2 month=4 enemy size=9 recurring (months=12 → yearly m4). ok→KR+2.
+// Bind on_completed_tag; engine fires after wipe (ok-only). Tag 1000+year avoids 801/802.
 [es=event_advance_month, mission=mission8]
 function mission8_hyksos_invasion_1(ev) {
 	if (ev.years_since_start < 2 || ev.month != 4) {
@@ -480,32 +450,22 @@ function mission8_hyksos_invasion_1(ev) {
 	if (mission.hyksos_raid_small_last_year == ev.years_since_start) {
 		return
 	}
-	// Wait out any active army (including the y7 size-22 wave).
 	if (city.num_enemy_formations > 0) {
 		return
 	}
-	if (mission.hyksos_raid_small_active && !mission.hyksos_raid_small_resolved) {
-		return
-	}
 	mission.hyksos_raid_small_last_year = ev.years_since_start
-	mission.hyksos_raid_small_enemies_seen = false
-	mission.hyksos_raid_small_resolved = false
-	mission.hyksos_raid_small_active = true
-	log_info("akhenaten: mission 8 selima hyksos raid size=9 year=" + ev.years_since_start, {ev:ev})
-	mission8_hyksos_raid(0, 9)
-}
-
-[es=event_advance_month, mission=mission8]
-function mission8_hyksos_invasion_1_resolve(ev) {
-	if (!mission.hyksos_raid_small_active) {
-		return
-	}
-	// pak: ok→+2; refuse=-1 (no refuse chain). Tags 1000+year avoid clash with y7 ok/refuse 801/802.
-	mission8_resolve_hyksos_invasion(0, "hyksos_raid_small_enemies_seen", "hyksos_raid_small_resolved", 1000 + ev.years_since_start, 0)
+	var ok_tag = 1000 + ev.years_since_start
+	city.create_chain_event({
+		tag_id: ok_tag,
+		type: EVENT_TYPE_REPUTATION_INCREASE,
+		amount: 2
+	})
+	log_info("akhenaten: mission 8 selima hyksos raid size=9 year=" + ev.years_since_start + " ok_tag=" + ok_tag, {ev:ev})
+	mission8_hyksos_raid(0, 9, ok_tag, 0)
 }
 
 // pak: year=7 month=0 enemy size=22 once.
-// ok→KR+2→CITY_UNDER_SIEGE Kerma→troops×4; refuse→KR−2→troops×4 (i=19 is chain_only, not calendar).
+// ok→KR+2→CITY_UNDER_SIEGE Kerma→troops×4; refuse→KR−2→troops×4.
 [es=event_advance_month, mission=mission8]
 function mission8_hyksos_invasion_2(ev) {
 	if (mission.hyksos_invasion_2) {
@@ -516,53 +476,31 @@ function mission8_hyksos_invasion_2(ev) {
 	}
 	mission.hyksos_invasion_2 = true
 	log_info("akhenaten: mission 8 selima hyksos invasion 2 size=22", {ev:ev})
-	mission8_hyksos_raid(1, 22)
-}
 
-[es=event_advance_month, mission=mission8]
-function mission8_hyksos_invasion_2_resolve(ev) {
-	if (!mission.hyksos_invasion_2 || mission.hyksos_invasion_2_resolved) {
-		return
-	}
-	if (ev.years_since_start < 7 || (ev.years_since_start == 7 && ev.month < 1)) {
-		return
-	}
-	var enemies = city.num_enemy_formations
-	if (enemies > 0) {
-		mission.hyksos_invasion_2_enemies_seen = true
-		return
-	}
-	if (!mission.hyksos_invasion_2_enemies_seen) {
-		return
-	}
-	mission.hyksos_invasion_2_resolved = true
-	var wiped = !city.enemy_army_achieved_destroy_goal(1)
-	if (wiped) {
-		log_info("akhenaten: mission 8 selima hyksos invasion 2 cleared → KR +2 → Kerma siege → troops 4")
-		city.create_chain_event({
-			tag_id: 801,
-			type: EVENT_TYPE_REPUTATION_INCREASE,
-			amount: 2,
-			trigger: EVENT_TRIGGER_ONCE
-		}).execute()
-		city.create_chain_event({
-			tag_id: 710,
-			type: EVENT_TYPE_CITY_STATUS_CHANGE,
-			subtype: 4, // EVENT_SUBTYPE_CITY_UNDER_SIEGE (pak i=1)
-			city: "Kerma",
-			amount: 3,
-			trigger: EVENT_TRIGGER_ONCE
-		}).execute()
-	} else {
-		log_info("akhenaten: mission 8 selima hyksos invasion 2 destroy goal → KR −2 → troops 4")
-		city.create_chain_event({
-			tag_id: 802,
-			type: EVENT_TYPE_REPUTATION_DECREASE,
-			amount: 2,
-			trigger: EVENT_TRIGGER_ONCE
-		}).execute()
-	}
-	mission8_fire_troops_request_4()
+	var ok = city.create_chain_event({
+		tag_id: 801,
+		type: EVENT_TYPE_REPUTATION_INCREASE,
+		amount: 2
+	})
+	var siege = city.create_chain_event({
+		tag_id: 710,
+		type: EVENT_TYPE_CITY_STATUS_CHANGE,
+		subtype: 4, // EVENT_SUBTYPE_CITY_UNDER_SIEGE (pak i=1)
+		city: "Kerma",
+		amount: 3
+	})
+	var refuse = city.create_chain_event({
+		tag_id: 802,
+		type: EVENT_TYPE_REPUTATION_DECREASE,
+		amount: 2
+	})
+	ok.set_completed_action_tag(710)
+	// Troops×4 fires after wipe (via siege) or refuse; luxury late may already wire tag 4.
+	mission8_ensure_troops_request_4(true)
+	siege.set_completed_action_tag(4)
+	refuse.set_completed_action_tag(4)
+
+	mission8_hyksos_raid(1, 22, 801, 802)
 }
 
 // pak: year=7 month=8 CITY_UNDER_SIEGE Kerma once → ok→troops×7 / 12mo (chain_only).
