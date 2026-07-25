@@ -30,38 +30,39 @@ imagepaks = [
   {id: PACK_CAESAREUM_2, name:"caesareum2", index:36360, delayed:true, system:false}, // 36360 --> 36360 + 201 + 9
   {id: PACK_CAESAREUM_3, name:"caesareum3", index:36570, delayed:true, system:false}, // 36570 --> 36570 + 201 + 9
   {id: PACK_CAESAREUM_4, name:"caesareum4", index:36780, delayed:true, system:false}, // 36780 --> 36780 + 201 + 9
-  // Obelisk packs: dense indices after system:false compaction (no SYSTEM slots).
+  // Obelisk/sphinx: dense indices via compact:true (drop SYSTEM.BMP slots). Do not set
+  // compact on classic Pharaoh packs — mission maps store absolute image IDs.
   // EXTRA: 16 entries (id1 = ladder); X3 stages a–d: 1 each; X5 stages a–f: 1 each.
-  {id: PACK_OBELISK_EXTRA, name:"obelisk_extra", index:51000, delayed:true, system:false}, // 16
-  {id: PACK_OBELISK_X3_A, name:"obelisk3x3a", index:51016, delayed:true, system:false},
-  {id: PACK_OBELISK_X3_B, name:"obelisk3x3b", index:51017, delayed:true, system:false},
-  {id: PACK_OBELISK_X3_C, name:"obelisk3x3c", index:51018, delayed:true, system:false},
-  {id: PACK_OBELISK_X3_D, name:"obelisk3x3d", index:51019, delayed:true, system:false},
-  {id: PACK_OBELISK_X5_A, name:"obelisk5x5a", index:51020, delayed:true, system:false},
-  {id: PACK_OBELISK_X5_B, name:"obelisk5x5b", index:51021, delayed:true, system:false},
-  {id: PACK_OBELISK_X5_C, name:"obelisk5x5c", index:51022, delayed:true, system:false},
-  {id: PACK_OBELISK_X5_D, name:"obelisk5x5d", index:51023, delayed:true, system:false},
-  {id: PACK_OBELISK_X5_E, name:"obelisk5x5e", index:51024, delayed:true, system:false},
-  {id: PACK_OBELISK_X5_F, name:"obelisk5x5f", index:51025, delayed:true, system:false},
-  {id: PACK_SPHINX_1_A, name:"sphinx1a", index:53000, delayed:true, system:false}, // 2 textures (no SYSTEM slots)
-  {id: PACK_SPHINX_1_B, name:"sphinx1b", index:53002, delayed:true, system:false},
-  {id: PACK_SPHINX_1_C, name:"sphinx1c", index:53004, delayed:true, system:false},
-  {id: PACK_SPHINX_1_D, name:"sphinx1d", index:53006, delayed:true, system:false}, // broken asset — keep slot
-  {id: PACK_SPHINX_2_A, name:"sphinx2a", index:53008, delayed:true, system:false},
-  {id: PACK_SPHINX_2_B, name:"sphinx2b", index:53010, delayed:true, system:false},
-  {id: PACK_SPHINX_2_C, name:"sphinx2c", index:53012, delayed:true, system:false},
-  {id: PACK_SPHINX_3_A, name:"sphinx3a", index:53014, delayed:true, system:false},
-  {id: PACK_SPHINX_3_B, name:"sphinx3b", index:53016, delayed:true, system:false},
-  {id: PACK_SPHINX_3_C, name:"sphinx3c", index:53018, delayed:true, system:false},
-  {id: PACK_SPHINX_4_A, name:"sphinx4a", index:53020, delayed:true, system:false},
-  {id: PACK_SPHINX_4_B, name:"sphinx4b", index:53022, delayed:true, system:false},
-  {id: PACK_SPHINX_4_C, name:"sphinx4c", index:53024, delayed:true, system:false},
-  {id: PACK_SPHINX_5_A, name:"sphinx5a", index:53026, delayed:true, system:false},
-  {id: PACK_SPHINX_5_B, name:"sphinx5b", index:53028, delayed:true, system:false},
-  {id: PACK_SPHINX_5_C, name:"sphinx5c", index:53030, delayed:true, system:false},
-  {id: PACK_SPHINX_6_A, name:"sphinx6a", index:53032, delayed:true, system:false},
-  {id: PACK_SPHINX_6_B, name:"sphinx6b", index:53034, delayed:true, system:false},
-  {id: PACK_SPHINX_6_C, name:"sphinx6c", index:53036, delayed:true, system:false},
+  {id: PACK_OBELISK_EXTRA, name:"obelisk_extra", index:51000, delayed:true, system:false, compact:true}, // 16
+  {id: PACK_OBELISK_X3_A, name:"obelisk3x3a", index:51016, delayed:true, system:false, compact:true},
+  {id: PACK_OBELISK_X3_B, name:"obelisk3x3b", index:51017, delayed:true, system:false, compact:true},
+  {id: PACK_OBELISK_X3_C, name:"obelisk3x3c", index:51018, delayed:true, system:false, compact:true},
+  {id: PACK_OBELISK_X3_D, name:"obelisk3x3d", index:51019, delayed:true, system:false, compact:true},
+  {id: PACK_OBELISK_X5_A, name:"obelisk5x5a", index:51020, delayed:true, system:false, compact:true},
+  {id: PACK_OBELISK_X5_B, name:"obelisk5x5b", index:51021, delayed:true, system:false, compact:true},
+  {id: PACK_OBELISK_X5_C, name:"obelisk5x5c", index:51022, delayed:true, system:false, compact:true},
+  {id: PACK_OBELISK_X5_D, name:"obelisk5x5d", index:51023, delayed:true, system:false, compact:true},
+  {id: PACK_OBELISK_X5_E, name:"obelisk5x5e", index:51024, delayed:true, system:false, compact:true},
+  {id: PACK_OBELISK_X5_F, name:"obelisk5x5f", index:51025, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_1_A, name:"sphinx1a", index:53000, delayed:true, system:false, compact:true}, // 2 textures
+  {id: PACK_SPHINX_1_B, name:"sphinx1b", index:53002, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_1_C, name:"sphinx1c", index:53004, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_1_D, name:"sphinx1d", index:53006, delayed:true, system:false, compact:true}, // broken asset — keep slot
+  {id: PACK_SPHINX_2_A, name:"sphinx2a", index:53008, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_2_B, name:"sphinx2b", index:53010, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_2_C, name:"sphinx2c", index:53012, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_3_A, name:"sphinx3a", index:53014, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_3_B, name:"sphinx3b", index:53016, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_3_C, name:"sphinx3c", index:53018, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_4_A, name:"sphinx4a", index:53020, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_4_B, name:"sphinx4b", index:53022, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_4_C, name:"sphinx4c", index:53024, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_5_A, name:"sphinx5a", index:53026, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_5_B, name:"sphinx5b", index:53028, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_5_C, name:"sphinx5c", index:53030, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_6_A, name:"sphinx6a", index:53032, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_6_B, name:"sphinx6b", index:53034, delayed:true, system:false, compact:true},
+  {id: PACK_SPHINX_6_C, name:"sphinx6c", index:53036, delayed:true, system:false, compact:true},
   {id: PACK_SUN_TEMPLE_EXTRA, name:"sun_temple_extra", index:55000, delayed:true, system:false}, // 55000 --> 55000 + 201 + 15
   {id: PACK_SUN_TEMPLE_1, name:"suntemple1", index:55220, delayed:true, system:false}, // 55220 --> 55220 + 201 + 2
   {id: PACK_SUN_TEMPLE_2, name:"suntemple2", index:55440, delayed:true, system:false}, // 55440 --> 55440 + 201 + 2

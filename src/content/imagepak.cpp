@@ -341,7 +341,7 @@ static bool convert_image_data(buffer* buf, image_t &img, bool convert_fonts) {
         if (is_font_glyph_in_range(img, FONT_SMALL_PLAIN, FONT_NORMAL_BLACK_ON_LIGHT)
             || is_font_glyph_in_range(img, FONT_SMALL_SHADED, FONT_TYPES_MAX)) {
             convert_to_plain_white(img);
-        
+
         } else if (is_font_glyph_in_range(img, FONT_SMALL_OUTLINED, FONT_NORMAL_BLACK_ON_DARK)) {
             add_edge_to_letter(img);
             img.width += 2;
@@ -357,7 +357,7 @@ static bool convert_image_data(buffer* buf, image_t &img, bool convert_fonts) {
 
 #define MAX_FILE_SCRATCH_SIZE 20000000
 
-imagepak::imagepak(uint8_t ipack, xstring pak_name, int starting_index, bool system_sprites, bool fonts, bool custom) {
+imagepak::imagepak(uint8_t ipack, xstring pak_name, int starting_index, bool system_sprites, bool fonts, bool custom, bool compact_system) {
     //    images = nullptr;
     //    image_data = nullptr;
     entries_num = 0;
@@ -365,6 +365,7 @@ imagepak::imagepak(uint8_t ipack, xstring pak_name, int starting_index, bool sys
     std::memset(group_image_ids, 0, PAK_GROUPS_MAX * sizeof(uint16_t));
     should_load_system_sprites = system_sprites;
     should_convert_fonts = fonts;
+    should_compact_system = compact_system;
     userpack = custom;
 
     if (g_args.is_log_resources()) {
@@ -934,9 +935,10 @@ bool imagepak::load_pak(pcstr pak_name, int starting_index) {
         img.debug.max_frame = 0xff;
     }
 
-    // Drop SYSTEM.BMP slots from the image array / global index range when the pack
-    // was registered with system:false. Fonts keep the classic layout (sgx_index-201).
-    const int system_skip = (has_system_bmp && !should_load_system_sprites && !should_convert_fonts)
+    // Drop SYSTEM.BMP slots only when compact:true (sphinx/obelisk dense packs).
+    // Classic Pharaoh packs (terrain/general/…) keep the 201-slot layout so absolute
+    // image IDs stored in mission maps remain valid. Fonts keep sgx_index-201 layout.
+    const int system_skip = (should_compact_system && has_system_bmp && !should_load_system_sprites && !should_convert_fonts)
         ? (int)(system_img_size + 1)
         : 0;
     if (system_skip > 0 && (int)entries_num > system_skip && (int)images_array.size() >= system_skip) {
@@ -1163,7 +1165,7 @@ void imagepak::update_max_imgid(uint16_t imgid) {
     max_seen_imgid = std::max(max_seen_imgid, imgid);
 }
 
-int imagepak::get_entries_num(xstring pak_name, bool load_system_sprites) {
+int imagepak::get_entries_num(xstring pak_name, bool load_system_sprites, bool compact_system) {
     vfs::path filename_sgx(pak_name.c_str());
     if (!vfs::file_has_extension(filename_sgx, "sgx")) {
         filename_sgx.append(".sgx");
@@ -1177,10 +1179,9 @@ int imagepak::get_entries_num(xstring pak_name, bool load_system_sprites) {
     vfs::path filename_full("Data/", pak_name.c_str());
     vfs::path filename_sg3(filename_full, ".sg3");
     int entries = io_read_sg3_entries_num(filename_sg3);
-    // Match load_pak compaction: system:false drops the 201 SYSTEM.BMP slots from the
-    // global index span (fonts keep the classic layout and are not counted here).
+    // Match load_pak: only compact:true packs drop the 201 SYSTEM.BMP index slots.
     constexpr int system_slots = 201;
-    if (!load_system_sprites && entries > system_slots && io_read_sg3_has_system_bmp(filename_sg3)) {
+    if (compact_system && !load_system_sprites && entries > system_slots && io_read_sg3_has_system_bmp(filename_sg3)) {
         entries -= system_slots;
     }
     return entries;

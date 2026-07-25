@@ -151,7 +151,7 @@ bool image_ensure_pak_loaded(int pak_id) {
     const Uint32 t0 = SDL_GetTicks();
 
     delete pak.handle;
-    pak.handle = new imagepak(static_cast<uint8_t>(pak_id), pak.name, pak.index, pak.system, false, pak.custom);
+    pak.handle = new imagepak(static_cast<uint8_t>(pak_id), pak.name, pak.index, pak.system, false, pak.custom, pak.compact);
 
     if (!image_pak_load_succeeded(pak.handle)) {
         logs::warn("VFS: pak-queue: fail id=%d name=%s", pak_id, pak.name.c_str());
@@ -275,7 +275,7 @@ bool image_load_paks() {
 
         imagepak::useridx_update(pakidx);
 
-        const int pack_entries = imagepak::get_entries_num(imgpak.name, imgpak.system);
+        const int pack_entries = imagepak::get_entries_num(imgpak.name, imgpak.system, imgpak.compact);
         if (pack_entries > 0) {
             imgpak.entries_num = pack_entries;
             imagepak::update_max_imgid(imgpak.index + imgpak.entries_num);
@@ -295,7 +295,7 @@ bool image_load_paks() {
         }
 
         delete imgpak.handle;
-        imgpak.handle = new imagepak(pakidx, imgpak.name, imgpak.index, imgpak.system, false, imgpak.custom);
+        imgpak.handle = new imagepak(pakidx, imgpak.name, imgpak.index, imgpak.system, false, imgpak.custom, imgpak.compact);
         if (image_pak_load_succeeded(imgpak.handle)) {
             imgpak.entries_num = imgpak.handle->get_entry_count();
             imgpak.load_status = IMAGEPAK_LOAD_LOADED;

@@ -21,10 +21,13 @@ struct imagepak_handle {
     bool system = false;
     bool custom = false;
     bool delayed = true;
+    // Drop SYSTEM.BMP index slots when system:false. Only for dense packs (sphinx/obelisk).
+    // Classic Pharaoh packs must keep the 201-slot layout — map absolute image IDs depend on it.
+    bool compact = false;
     imagepak *handle = nullptr;
     e_imagepak_load_status load_status = IMAGEPAK_LOAD_IDLE;
 };
-ANK_CONFIG_STRUCT(imagepak_handle, name, id, index, entries_num, system, custom, delayed)
+ANK_CONFIG_STRUCT(imagepak_handle, name, id, index, entries_num, system, custom, delayed, compact)
 
 template<>
 struct stable_array_max_elements<imagepak_handle> {

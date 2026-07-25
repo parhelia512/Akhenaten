@@ -38,6 +38,7 @@ private:
 
     bool should_load_system_sprites;
     bool should_convert_fonts;
+    bool should_compact_system;
 
     bool load_pak(pcstr pak_name, int starting_index);
     bool load_zip_pak(pcstr folder, int starting_index);
@@ -51,7 +52,7 @@ public:
 
     int global_image_index_offset = 0;
 
-    imagepak(uint8_t ipack, xstring pak_name, int starting_index, bool system_sprites = false, bool fonts = false, bool custom = false);
+    imagepak(uint8_t ipack, xstring pak_name, int starting_index, bool system_sprites = false, bool fonts = false, bool custom = false, bool compact_system = false);
     ~imagepak();
 
     span_const<bmp_name> names();
@@ -72,7 +73,7 @@ public:
 
     static void update_max_imgid(uint16_t imgid);
     static uint16_t get_maxseen_imgid() { return max_seen_imgid; }
-    static int get_entries_num(xstring pak_name, bool load_system_sprites = true);
+    static int get_entries_num(xstring pak_name, bool load_system_sprites = true, bool compact_system = false);
 
     void cleanup_and_destroy();
 };
