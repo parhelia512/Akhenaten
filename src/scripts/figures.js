@@ -283,6 +283,7 @@ figure_ostrich {
 	max_damage: 100
 	corpse_time_delay: 300
 	terrain_usage : TERRAIN_USAGE_ANIMAL
+	scared_ticks: 128
 }
 
 figure_hyena {
@@ -319,6 +320,7 @@ figure_antelope {
 	category: figure_category_animal
 	max_damage: 100
 	terrain_usage : TERRAIN_USAGE_ANIMAL
+	scared_ticks: 128
 }
 
 figure_horses = {

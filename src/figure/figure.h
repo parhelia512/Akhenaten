@@ -72,6 +72,7 @@ enum e_figure_flag {
     e_figure_flag_inattack = 1 << 4,
     e_figure_flag_invisible = 1 << 5,
     e_figure_flag_use_cart = 1 << 6,
+    e_figure_flag_scared = 1 << 7,
 };
 
 class figure {
@@ -240,6 +241,7 @@ public:
     inline bool is_soldier() const { return !!(flags & e_figure_flag_soldier); }
     inline bool in_attack() const { return !!(flags & e_figure_flag_inattack); }
     inline bool is_visible() const { return !(flags & e_figure_flag_invisible); }
+    inline bool is_scared() const { return !!(flags & e_figure_flag_scared); }
 
     inline void set_flag(e_figure_flag fl, bool v = true) {
         if (v) { flags |= fl; }

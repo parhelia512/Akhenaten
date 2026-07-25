@@ -5,6 +5,7 @@
 #include "grid/figure.h"
 #include "grid/routing/routing.h"
 #include "graphics/animkeys.h"
+#include "figuretype/figure_animal.h"
 #include "figuretype/figure_missile.h"
 #include "city/city_figures.h"
 #include "city/city.h"
@@ -23,8 +24,11 @@ void figure_ostrich_hunter::static_params::archive_init() {
 static void scared_animals_in_area(tile2i center, int size) {
     map_grid_area_foreach(center, size, [] (tile2i tile) {
         figure *f = map_figure_get(tile);
-        if (f && f->is_alive() && f->type == FIGURE_OSTRICH) {
-            f->advance_action(ACTION_8_RECALCULATE);
+        if (!f || !f->is_alive()) {
+            return;
+        }
+        if (auto *animal = f->dcast_animal()) {
+            animal->herd_scare();
         }
     });
 }

@@ -20,6 +20,12 @@ ANK_FUNCTION_1(__figure_get_type)
 bool __figure_is_valid(int fid) { return figure_get(fid)->is_valid(); }
 ANK_FUNCTION_1(__figure_is_valid)
 
+bool __figure_is_scared(int fid) {
+    figure *f = figure_get(fid);
+    return f && f->is_valid() && f->is_scared();
+}
+ANK_FUNCTION_1(__figure_is_scared)
+
 int __figure_get_action_state(int fid) { return figure_get(fid)->action_state; }
 ANK_FUNCTION_1(__figure_get_action_state)
 

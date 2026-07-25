@@ -275,6 +275,10 @@ void figure_animal::herd_rest() {
     base.advance_action(196);
 }
 
+void figure_animal::herd_scare() {
+    // no-op: ACTION_16 means different things per animal (e.g. hippo chase)
+}
+
 void figure_animal::moveto(tile2i tile) {
     base.advance_action(16);
 }

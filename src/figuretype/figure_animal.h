@@ -9,6 +9,7 @@ public:
 
     virtual void herd_moved();
     virtual void herd_rest();
+    virtual void herd_scare();
     virtual void moveto(tile2i tile);
 };
 

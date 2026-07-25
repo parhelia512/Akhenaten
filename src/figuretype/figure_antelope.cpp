@@ -13,14 +13,34 @@
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_antelope)
 
+void figure_antelope::static_params::archive_init() {
+    verify_no_crash(scared_ticks > 0);
+}
+
 void figure_antelope::figure_action() {
     const formation* m = formation_get(base.formation_id);
     g_city.figures.add_animal();
 
-    // Check if the antelope has taken damage from arrows
     auto &d = runtime_data();
+    if (d.scared_ticks > 0) {
+        --d.scared_ticks;
+    }
+    if (d.scared_ticks == 0) {
+        base.set_flag(e_figure_flag_scared, false);
+    }
+
     if (d.applied_damage > 0) {
         d.applied_damage = 0;
+        const uint8_t duration = current_params().scared_ticks;
+        if (duration > 0) {
+            base.set_flag(e_figure_flag_scared);
+            d.scared_ticks = duration;
+        }
+        advance_action(ACTION_16_ANTELOPE_FLEEING);
+        return;
+    }
+
+    if (base.is_scared() && !action_state(ACTION_16_ANTELOPE_FLEEING, ACTION_10_ANTELOPE_GOING)) {
         advance_action(ACTION_16_ANTELOPE_FLEEING);
         return;
     }
@@ -58,12 +78,12 @@ void figure_antelope::figure_action() {
             base.wait_ticks = 2;
         }
         break;
-        
+
     case ACTION_10_ANTELOPE_GOING:
         if (do_goto(base.destination_tile, TERRAIN_USAGE_ANIMAL, ACTION_18_ANTELOPE_ROOSTING + (random_byte() & 0x1), ACTION_8_ANTELOPE_RECALCULATE)) {
-            if (map_has_figure_but(base.destination_tile, id())) {
+            if (map_has_figure_but(base.destination_tile, id()) || base.is_scared()) {
                 base.wait_ticks = 1;
-                advance_action(ACTION_8_ANTELOPE_RECALCULATE);
+                advance_action(base.is_scared() ? ACTION_16_ANTELOPE_FLEEING : ACTION_8_ANTELOPE_RECALCULATE);
             } else {
                 base.wait_ticks = 50;
             }
@@ -133,6 +153,18 @@ void figure_antelope::apply_damage(int hit_dmg, figure_id attacker_id) {
 
 void figure_antelope::herd_moved() {
     advance_action(ACTION_8_ANTELOPE_RECALCULATE);
+}
+
+void figure_antelope::herd_scare() {
+    const uint8_t duration = current_params().scared_ticks;
+    if (duration == 0) {
+        return;
+    }
+    base.set_flag(e_figure_flag_scared);
+    runtime_data().scared_ticks = duration;
+    if (!action_state(ACTION_16_ANTELOPE_FLEEING)) {
+        advance_action(ACTION_16_ANTELOPE_FLEEING);
+    }
 }
 
 void figure_antelope::moveto(tile2i tile) {

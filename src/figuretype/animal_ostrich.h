@@ -41,8 +41,15 @@ public:
     figure_ostrich(figure *f) : figure_animal(f) {}
     virtual figure_ostrich *dcast_ostrich() override { return this; }
 
+    struct static_params : public figure_static_params {
+        uint8_t scared_ticks;
+
+        void archive_init();
+    } FIGURE_STATIC_DATA_T;
+
     struct runtime_data_t {
         int8_t applied_damage;
+        uint8_t scared_ticks;
     } FIGURE_RUNTIME_DATA_T;
 
     virtual void figure_action() override;
@@ -53,7 +60,9 @@ public:
 
     virtual void herd_moved() override;
     virtual void herd_rest() override;
+    virtual void herd_scare() override;
     virtual void moveto(tile2i tile) override;
 
     virtual e_minimap_figure_color minimap_color() const override { return FIGURE_COLOR_ANIMAL; }
 };
+ANK_CONFIG_STRUCT(figure_ostrich::static_params, scared_ticks)

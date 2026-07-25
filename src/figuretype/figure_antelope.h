@@ -16,17 +16,17 @@ enum e_antelope_action {
 /**
  * @class figure_antelope
  * @brief Represents an antelope animal figure in the game world.
- * 
+ *
  * This class implements the behavior of wild antelopes that roam the map.
  * Antelopes can wander, roost, eat, and flee when threatened or damaged by arrows.
  * They use pathfinding to navigate around impassable terrain and avoid obstacles.
- * 
+ *
  * Behavioral states include:
  * - Idle and roosting (resting/eating)
  * - Moving between locations
  * - Fleeing when hit by projectiles
  * - Terrified state when threatened
- * 
+ *
  * Antelopes can be hunted for resource RESOURCE_GAMEMEAT.
  */
 class figure_antelope : public figure_animal {
@@ -35,8 +35,15 @@ public:
     figure_antelope(figure *f) : figure_animal(f) {}
     virtual figure_antelope *dcast_antelope() override { return this; }
 
+    struct static_params : public figure_static_params {
+        uint8_t scared_ticks;
+
+        void archive_init();
+    } FIGURE_STATIC_DATA_T;
+
     struct runtime_data_t {
         int8_t applied_damage;
+        uint8_t scared_ticks;
     } FIGURE_RUNTIME_DATA_T;
 
     virtual void figure_action() override;
@@ -46,7 +53,9 @@ public:
     virtual void apply_damage(int hit_dmg, figure_id attacker_id) override;
 
     virtual void herd_moved() override;
+    virtual void herd_scare() override;
     virtual void moveto(tile2i tile) override;
 
     virtual e_minimap_figure_color minimap_color() const override { return FIGURE_COLOR_ANIMAL; }
 };
+ANK_CONFIG_STRUCT(figure_antelope::static_params, scared_ticks)
