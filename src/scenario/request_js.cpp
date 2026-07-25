@@ -11,13 +11,19 @@
 #include <algorithm>
 
 void ANK_FUNCTION_UNIFIED(__city_create_good_request)(const bvariant_map &args) {
+    int8_t city_id = (int8_t)args.i32("city_id", -1);
+    const xstring city_name = args.s("city");
+    if (city_id < 0 && !city_name.empty()) {
+        city_id = (int8_t)g_empire.find_city_name_id(city_name.c_str());
+    }
     g_scenario.events.create_good_request(
         args.n("tag_id"),
         (e_resource)args.n("resource"),
         args.n("amount"),
         args.n("months_initial"),
         (int8_t)args.i32("subtype", 0),
-        (e_event_trigger_type)args.i32("trigger", EVENT_TRIGGER_ONCE)
+        (e_event_trigger_type)args.i32("trigger", EVENT_TRIGGER_ONCE),
+        city_id
     );
 }
 
@@ -136,6 +142,11 @@ void __city_request_set_too_late_action(int master_tag, int slave_tag) {
     g_scenario.events.set_request_too_late_action(master_tag, slave_tag);
 }
 ANK_FUNCTION_2(__city_request_set_too_late_action)
+
+void __city_request_set_defeat_action(int master_tag, int slave_tag) {
+    g_scenario.events.set_request_defeat_action(master_tag, slave_tag);
+}
+ANK_FUNCTION_2(__city_request_set_defeat_action)
 
 int ANK_FUNCTION_UNIFIED(__city_start_foreign_army_invasion)(const bvariant_map &args) {
     invasion_opts_t opts;

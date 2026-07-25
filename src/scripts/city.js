@@ -428,6 +428,7 @@ city.create_good_request = function(obj) {
         set_completed_action_tag: function(slave_tag) { __city_request_set_completed_action(this.tag_id, slave_tag) }
         set_refusal_action_tag: function(slave_tag) { __city_request_set_refusal_action(this.tag_id, slave_tag) }
         set_too_late_action_tag: function(slave_tag) { __city_request_set_too_late_action(this.tag_id, slave_tag) }
+        set_defeat_action_tag: function(slave_tag) { __city_request_set_defeat_action(this.tag_id, slave_tag) }
         set_sender_faction: function(sender_faction) { __city_request_set_sender_faction(this.tag_id, sender_faction) }
         set_param: function(param, value) { __city_request_set_param(this.tag_id, param, value) }
         execute: function() { __city_request_execute(this.tag_id) }
@@ -445,6 +446,7 @@ city.create_chain_event = function(obj) {
         set_completed_action_tag: function(slave_tag) { __city_request_set_completed_action(this.tag_id, slave_tag) }
         set_refusal_action_tag: function(slave_tag) { __city_request_set_refusal_action(this.tag_id, slave_tag) }
         set_too_late_action_tag: function(slave_tag) { __city_request_set_too_late_action(this.tag_id, slave_tag) }
+        set_defeat_action_tag: function(slave_tag) { __city_request_set_defeat_action(this.tag_id, slave_tag) }
         set_sender_faction: function(sender_faction) { __city_request_set_sender_faction(this.tag_id, sender_faction) }
         set_param: function(param, value) { __city_request_set_param(this.tag_id, param, value) }
         execute: function() { __city_request_execute(this.tag_id) }

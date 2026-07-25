@@ -61,23 +61,29 @@ enum e_event_state : uint8_t {
 using e_event_state_tokens_t = token_holder<e_event_state, e_event_state_initial, e_event_state_max>;
 extern const e_event_state_tokens_t e_event_state_tokens;
 
+// Aliases share numeric ids across REQUEST / MESSAGE / CITY_STATUS. token_holder
+// exposes the *first* name at each value to JS; other aliases are registered
+// separately in scenario_event_manager.cpp.
 enum e_event_subtype : uint8_t {
-    EVENT_SUBTYPE_GENERIC_REQUEST = 0,
-    EVENT_SUBTYPE_CITY_FELL_TO_ENEMY = 0,
-    EVENT_SUBTYPE_MSG_CITY_SAVED = 0,
-    EVENT_SUBTYPE_CITY_ASKS_FOR_TROOPS = 1,
+    EVENT_SUBTYPE_MSG_CITY_SAVED = 0,       // MESSAGE (JS primary for 0)
+    EVENT_SUBTYPE_CITY_FELL_TO_ENEMY = 0,   // CITY_STATUS
+    EVENT_SUBTYPE_GENERIC_REQUEST = 0,      // REQUEST
     EVENT_SUBTYPE_FOREIGN_CITY_CONQUERED = 1,
+    EVENT_SUBTYPE_CITY_ASKS_FOR_TROOPS = 1,
+    EVENT_SUBTYPE_MSG_DISTANT_BATTLE_LOST = 2,
     EVENT_SUBTYPE_DISTANT_BATTLE = 2,
     EVENT_SUBTYPE_NEW_TRADE_ROUTE = 2,
-    EVENT_SUBTYPE_MSG_DISTANT_BATTLE_LOST = 2,
+    EVENT_SUBTYPE_MSG_ACKNOWLEDGEMENT = 3,
     EVENT_SUBTYPE_REQ_FOR_FESTIVAL = 3,
     EVENT_SUBTYPE_LOST_TRADE_ROUTE = 3,
-    EVENT_SUBTYPE_MSG_ACKNOWLEDGEMENT = 3,
-    EVENT_SUBTYPE_CONSTRUCTION_PROJECT = 4,
     EVENT_SUBTYPE_CITY_UNDER_SIEGE = 4,
+    EVENT_SUBTYPE_CONSTRUCTION_PROJECT = 4,
     EVENT_SUBTYPE_FAMINE = 5,
     EVENT_SUBTYPE_CITY_GENERIC_TROUBLE = 6,
+    EVENT_SUBTYPE_MAX
 };
+using e_event_subtype_tokens_t = token_holder<e_event_subtype, EVENT_SUBTYPE_MSG_CITY_SAVED, EVENT_SUBTYPE_MAX>;
+extern const e_event_subtype_tokens_t e_event_subtype_tokens;
 
 enum e_event_faction_request {
     EVENT_FACTION_REQUEST_FROM_CITY = 0,
@@ -230,7 +236,7 @@ struct event_manager_t {
     void load_mission_metadata(const mission_id_t &missionid);
 
     void create_good_request(int tag, e_resource r, int amount, int months_initial, int8_t subtype = 0,
-                             e_event_trigger_type trigger = EVENT_TRIGGER_ONCE);
+                             e_event_trigger_type trigger = EVENT_TRIGGER_ONCE, int8_t city_id = -1);
     void create_pharaoh_gift(int tag, e_resource r, int amount);
     void create_trade_city_under_siege(int tag, int months_initial);
     void create_foreign_army_attack_warning(int tag, int8_t sender_faction);
@@ -248,4 +254,5 @@ struct event_manager_t {
     void set_request_completed_action(int master_tag, int slave_tag);
     void set_request_refusal_action(int master_tag, int slave_tag);
     void set_request_too_late_action(int master_tag, int slave_tag);
+    void set_request_defeat_action(int master_tag, int slave_tag);
 };

@@ -12,7 +12,10 @@
 #include "scenario_event_manager.h"
 #include "game/resource.h"
 #include "scenario/scenario.h"
+#include "scenario/distant_battle.h"
 #include "event_phrases.h"
+
+#include <algorithm>
 
 void scenario_request_init() {
     //for (int i = 0; i < MAX_REQUESTS; i++) {
@@ -150,6 +153,35 @@ void scenario_request_handle(event_ph_t &event, int caller_event_id, e_event_act
 void scenario_request_dispatch(int id) {
     scenario_request request = scenario_request_get_visible(id);
     if (!request.is_valid()) {
+        return;
+    }
+
+    event_ph_t *ev = g_scenario.events.at(request.event_id);
+    if (!ev) {
+        return;
+    }
+
+    // Troop asks with a defeat chain: defer ok/defeat to distant-battle resolution.
+    // Requests without on_defeat_action keep the old immediate finished → completed path
+    // (Selima and earlier missions).
+    if (request.resource == RESOURCE_TROOPS && ev->on_defeat_action >= 0) {
+        g_city.population.remove_for_troop_request(request.amount);
+        events::emit(event_storageyards_remove_resource{ RESOURCE_WEAPONS, request.amount });
+
+        ev->is_active = false; // hide from advisor; awaiting fight_distant_battle
+
+        const int strength = std::min(255, std::max(1, request.amount));
+        g_distant_battle.init_distant_battle(strength);
+        if (ev->city_id > 0) {
+            g_distant_battle.battle.city = (uint8_t)ev->city_id;
+        } else {
+            g_distant_battle.determine_distant_battle_city();
+        }
+        g_distant_battle.source_request_event_id = (int16_t)ev->event_id;
+        // Abstract fulfill: full requested strength, arrive on time next month.
+        g_distant_battle.battle.egyptian_strength = (uint8_t)strength;
+        g_distant_battle.battle.egyptian_months_to_travel_forth = 1;
+        g_distant_battle.battle.months_until_battle = 1;
         return;
     }
 

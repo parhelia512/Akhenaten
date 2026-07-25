@@ -64,6 +64,10 @@ struct distant_battles_t {
     battle_state_t battle;
     dispatched_army_t dispatched_army;
 
+    // Runtime link from a RESOURCE_TROOPS request that deferred ok/defeat to battle
+    // resolution. Not part of the original save blob (cleared on load / clear()).
+    int16_t source_request_event_id = -1;
+
     void init_distant_battle(int enemy_strength);
     int kingdome_army_is_traveling();
     int enemy_months_traveled();

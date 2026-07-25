@@ -539,7 +539,7 @@ function mission8_kerma_siege_and_troops(ev) {
 	var ok_msg = city.create_chain_event({
 		tag_id: 310,
 		type: EVENT_TYPE_MESSAGE,
-		subtype: 0, // EVENT_SUBTYPE_MSG_CITY_SAVED
+		subtype: EVENT_SUBTYPE_MSG_CITY_SAVED
 		city: "Nubt",
 		amount: 2
 	})

@@ -16,12 +16,14 @@
 #include "empire/empire.h"
 #include "city/city.h"
 #include "scenario/scenario.h"
+#include "scenario/scenario_event_manager.h"
 
 distant_battles_t g_distant_battle;
 
 void distant_battles_t::clear() {
     battle.clear();
     dispatched_army.clear();
+    source_request_event_id = -1;
 }
 
 void distant_battles_t::battle_state_t::clear() {
@@ -396,38 +398,73 @@ bool distant_battles_t::player_has_won() {
 }
 
 void distant_battles_t::fight_distant_battle() {
+    const int16_t req_id = source_request_event_id;
+    source_request_event_id = -1;
+    // Request-linked troop asks: chain leaves own the KR / status fallout — suppress the
+    // hardcoded ±kingdom swings and ad-hoc win_distant_battle event so they don't stack.
+    const bool request_linked = req_id >= 0;
+
+    bool won = false;
     if (battle.egyptian_months_to_travel_forth <= 0) {
         events::emit(event_message{ true, "message_distant_battle_lost_no_troops", 0, 0, SOURCE_LOCATION });
         dispatched_army.state = dispatched_army_t::state_returning;
-        g_city.kingdome.change(-50);
+        if (!request_linked) {
+            g_city.kingdome.change(-50);
+        }
         set_city_foreign();
     } else if (battle.egyptian_months_to_travel_forth > 2) {
         events::emit(event_message{ true, "message_distant_battle_lost_too_late", 0, 0, SOURCE_LOCATION });
-        g_city.kingdome.change(-25);
+        if (!request_linked) {
+            g_city.kingdome.change(-25);
+        }
         set_city_foreign();
         battle.egyptian_months_to_travel_back = battle.egyptian_months_traveled;
         dispatched_army.state = dispatched_army_t::state_returning;
     } else if (!player_has_won()) {
         events::emit(event_message{ true, "message_distant_battle_lost_too_weak", 0, 0, SOURCE_LOCATION });
-        g_city.kingdome.change(-10);
+        if (!request_linked) {
+            g_city.kingdome.change(-10);
+        }
         set_city_foreign();
         battle.egyptian_months_traveled = 0;
         dispatched_army.state = dispatched_army_t::state_returning_destroyed;
         // no return: all soldiers killed
     } else {
-        const auto city = g_empire.city(battle.city);
-        uint16_t rtag = rand() % 0xffff;
+        won = true;
         dispatched_army.state = dispatched_army_t::state_returning_win;
 
-        g_scenario.events.win_distant_battle(rtag, city->name_str.c_str(), city->get_empire_object()->pos);
-        g_scenario.events.execute_event(rtag);
-
-        g_city.kingdome.change(25);
-        city_buildings_earn_triumphal_obelisk();
+        if (!request_linked) {
+            const auto city = g_empire.city(battle.city);
+            if (city && city->get_empire_object()) {
+                uint16_t rtag = rand() % 0xffff;
+                g_scenario.events.win_distant_battle(rtag, city->name_str.c_str(), city->get_empire_object()->pos);
+                g_scenario.events.execute_event(rtag);
+            }
+            g_city.kingdome.change(25);
+            city_buildings_earn_triumphal_obelisk();
+        }
 
         battle.won_count++;
         battle.city_foreign_months_left = 0;
         battle.egyptian_months_to_travel_back = 0;
+    }
+
+    if (request_linked) {
+        event_ph_t *ev = g_scenario.events.at(req_id);
+        if (ev) {
+            ev->is_active = false;
+            if (won) {
+                ev->event_state = e_event_state_received;
+                if (ev->on_completed_action >= 0) {
+                    g_scenario.events.process_event(ev->on_completed_action, true, EVENT_ACTION_COMPLETED, ev->event_id);
+                }
+            } else {
+                ev->event_state = e_event_state_failed;
+                if (ev->on_defeat_action >= 0) {
+                    g_scenario.events.process_event(ev->on_defeat_action, true, EVENT_ACTION_DEFEAT, ev->event_id);
+                }
+            }
+        }
     }
 
     battle.months_until_battle = 0;

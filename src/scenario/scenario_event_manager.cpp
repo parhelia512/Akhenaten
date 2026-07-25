@@ -45,6 +45,25 @@ const e_event_state_tokens_t e_event_state_tokens;
 const e_event_trigger_type_tokens_t ANK_CONFIG_ENUM(e_event_trigger_type_tokens);
 const e_event_attack_tokens_t ANK_CONFIG_ENUM(e_event_attack_tokens);
 const e_event_invader_tokens_t ANK_CONFIG_ENUM(e_event_invader_tokens);
+const e_event_subtype_tokens_t ANK_CONFIG_ENUM(e_event_subtype_tokens);
+
+// Alias names that share numeric ids with the token_holder primaries (first name at
+// each value). js_register_token allows multiple globals → same int.
+void register_event_subtype_aliases(config::type_enum);
+namespace config {
+int ANK_CONFIG_PULL_VAR_NAME(register_event_subtype_aliases) = 1;
+}
+static config::EnumIterator ANK_CONFIG_CC1(config_handler, __LINE__)(register_event_subtype_aliases);
+void register_event_subtype_aliases(config::type_enum) {
+    js_register_token(EVENT_SUBTYPE_CITY_FELL_TO_ENEMY, "EVENT_SUBTYPE_CITY_FELL_TO_ENEMY");
+    js_register_token(EVENT_SUBTYPE_GENERIC_REQUEST, "EVENT_SUBTYPE_GENERIC_REQUEST");
+    js_register_token(EVENT_SUBTYPE_CITY_ASKS_FOR_TROOPS, "EVENT_SUBTYPE_CITY_ASKS_FOR_TROOPS");
+    js_register_token(EVENT_SUBTYPE_DISTANT_BATTLE, "EVENT_SUBTYPE_DISTANT_BATTLE");
+    js_register_token(EVENT_SUBTYPE_NEW_TRADE_ROUTE, "EVENT_SUBTYPE_NEW_TRADE_ROUTE");
+    js_register_token(EVENT_SUBTYPE_REQ_FOR_FESTIVAL, "EVENT_SUBTYPE_REQ_FOR_FESTIVAL");
+    js_register_token(EVENT_SUBTYPE_LOST_TRADE_ROUTE, "EVENT_SUBTYPE_LOST_TRADE_ROUTE");
+    js_register_token(EVENT_SUBTYPE_CONSTRUCTION_PROJECT, "EVENT_SUBTYPE_CONSTRUCTION_PROJECT");
+}
 
 struct auto_phrase {
     uint8_t id;
@@ -144,7 +163,7 @@ void event_manager_t::load_mission_metadata(const mission_id_t &missionid) {
 }
 
 void event_manager_t::create_good_request(int tag, e_resource r, int amount, int months_initial, int8_t subtype,
-                                          e_event_trigger_type trigger) {
+                                          e_event_trigger_type trigger, int8_t city_id) {
     auto& request = g_scenario_events.event_list.emplace_back();
     int event_id = g_scenario_events.event_list.size() - 1;
     memset(&request, 0, sizeof(event_ph_t));
@@ -157,11 +176,14 @@ void event_manager_t::create_good_request(int tag, e_resource r, int amount, int
     request.subtype = subtype;
     request.event_trigger_type = trigger;
     request.tag_id = tag;
+    request.city_id = city_id;
     request.location_fields = { -1, -1, -1, -1 };
     request.months_initial = months_initial;
     request.event_id = event_id;
-    //process_event(event_id, false, -1);
-    //process_active_request(event_id);
+    request.on_completed_action = -1;
+    request.on_refusal_action = -1;
+    request.on_too_late_action = -1;
+    request.on_defeat_action = -1;
     g_scenario_events.event_list.front().num_total_header = g_scenario_events.event_list.size();
 }
 
@@ -301,6 +323,14 @@ void event_manager_t::set_request_too_late_action(int master_tag, int slave_tag)
     event_ph_t *slave = find_event_by_tag(slave_tag);
     if (master && slave) {
         master->on_too_late_action = slave->event_id;
+    }
+}
+
+void event_manager_t::set_request_defeat_action(int master_tag, int slave_tag) {
+    event_ph_t *master = find_event_by_tag(master_tag);
+    event_ph_t *slave = find_event_by_tag(slave_tag);
+    if (master && slave) {
+        master->on_defeat_action = slave->event_id;
     }
 }
 
@@ -787,6 +817,20 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
             }
 
             switch (event.subtype) {
+            case EVENT_SUBTYPE_CITY_FELL_TO_ENEMY:
+                // Pak CITY_STATUS subtype=0 — Egyptian city falls (Buhen troops refuse/defeat
+                // chains i=34 Dahshur / i=36 Enkomi). Close trade like a lost route and mark
+                // the city foreign-occupied (same type flip as distant_battle::set_city_foreign).
+                city->is_open = false;
+                if (full_empire_object *full = g_empire.ref_full_object(city->empire_object_id)) {
+                    full->trade_route_open = 0;
+                }
+                city->set_foreign();
+                city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                    PHRASE_eg_city_falls_title, PHRASE_eg_city_falls_initial_announcement,
+                    PHRASE_eg_city_falls_reason_A, id, city->name_id);
+                break;
+
             case EVENT_SUBTYPE_FOREIGN_CITY_CONQUERED:
                 // Same subtype value as CITY_ASKS_FOR_TROOPS (requests) / MESSAGE conquered.
                 // Pak uses CITY_STATUS subtype=1 as "foreign city conquered" (e.g. Abu y6 Selima).
@@ -860,6 +904,11 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
             city_message_post_full(true, "message_template_general", &event, caller_event_id,
                                    PHRASE_acknowledgement_title, PHRASE_acknowledgement_initial_announcement, PHRASE_acknowledgement_no_reason_A,
                                    id, 0);
+            break;
+
+        default:
+            logs::debug("EVENT_TYPE_MESSAGE: unhandled subtype=%d city=%d",
+                (int)event.subtype, (int)event.city_id);
             break;
         }
         break;
