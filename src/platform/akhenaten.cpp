@@ -165,12 +165,25 @@ bool pre_init_dir_attempt(const xstring& data_dir, pcstr lmsg) {
     }
 
     if (!g_args.no_resource() && !g_args.no_data_check()) {
-        // Minimum: Pharaoh campaign tree. Cleopatra packs are preferred but optional.
-        if (!innoextract::has_pharaoh_data(data_dir.c_str())) {
+        if (platform.is_android()) {
+            if (!vfs::file_exists("campaign.txt")) {
+                logs::info("%s: no Pharaoh data (campaign.txt via VFS)", data_dir.c_str());
+                return false;
+            }
+            const bool has_cleo = vfs::file_exists("Data/Expansion.sg3")
+                                  || vfs::file_exists("Data/SprMain2.sg3")
+                                  || vfs::file_exists("data/Expansion.sg3")
+                                  || vfs::file_exists("data/SprMain2.sg3");
+            if (!has_cleo) {
+                if (!confirm_continue_without_cleopatra(data_dir.c_str())) {
+                    logs::info("User declined Pharaoh-only startup");
+                    exit(0);
+                }
+            }
+        } else if (!innoextract::has_pharaoh_data(data_dir.c_str())) {
             logs::info("%s: no Pharaoh data (campaign.txt)", data_dir.c_str());
             return false;
-        }
-        if (!innoextract::has_required_game_files(data_dir.c_str())) {
+        } else if (!innoextract::has_required_game_files(data_dir.c_str())) {
             if (!confirm_continue_without_cleopatra(data_dir.c_str())) {
                 logs::info("User declined Pharaoh-only startup");
                 exit(0);
