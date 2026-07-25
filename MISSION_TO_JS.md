@@ -293,7 +293,7 @@ Battle icons рисуются JS drawer’ом
 | Patch / cities list | 12–18 | `cities[]` без полного hide routes/objects |
 | Минимум | 0–3 | туториал, empire map почти из pak |
 
-**Следующий full redefine:** Meidum (**12**).
+**Следующий full redefine:** Buhen / South Dahshur (**13/14**). Meidum (**12**) done (working tree).
 
 **Сессионный handoff:** [MISSION_TO_JS_HANDOFF.md](MISSION_TO_JS_HANDOFF.md).  
 **Очередь работ A ∥ B2 → B2-migrate + FF1/D1–D4:** [REMAKE_EMPIRE_MISSIONS_PLAN.md](REMAKE_EMPIRE_MISSIONS_PLAN.md).  

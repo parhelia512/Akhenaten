@@ -1,6 +1,6 @@
 # План: empire-миссии → JS + B2 (2026-07-25)
 
-Рабочий план трека после **Saqqara (10)** (`3affd5b21`; Abu `c10506b5f`).  
+Рабочий план трека после **Meidum (12)** (working tree, **не закоммичено**; Serabit `9ac84fd3f`; Saqqara `3affd5b21`; Abu `c10506b5f`).  
 Не смешивать с bridges / hunting / OpenH264 / video — отдельные PR (**PC4**).
 
 | Документ | Роль |
@@ -9,7 +9,7 @@
 | [MISSION_TO_JS.md](MISSION_TO_JS.md) | playbook переноса |
 | [MISSION_TO_JS_HANDOFF.md](MISSION_TO_JS_HANDOFF.md) | сессионный статус / API |
 | [MISSION_PAK_TRIAGE.md](MISSION_PAK_TRIAGE.md) | copy / remap / skip |
-| [REMAKE_B2_INVASION_PLAN.md](REMAKE_B2_INVASION_PLAN.md) | native invasions |
+| [REMAKE_B2_INVASION_PLAN.md](REMAKE_B2_INVASION_PLAN.md) | invasions: JS+bind (native cancelled) |
 | [REMAKE_NOTES.md](REMAKE_NOTES.md) | грабли кампании |
 | [REMAKE_TODO.md](REMAKE_TODO.md) | QA1 / PC4 / B2–B4 в общем backlog |
 
@@ -17,8 +17,8 @@
 
 ## Цель
 
-1. Full redefine empire + events для миссий **11 → 18** (затем Cleopatra при необходимости).
-2. Параллельно (или врезкой) закрыть **B2**, затем **B2-migrate** (снять JS poll).
+1. Full redefine empire + events для миссий **13 → 18** (11 Serabit, 12 Meidum done; затем Cleopatra при необходимости).
+2. Параллельно: invasions = **JS + bind tags** (native B2 cancelled); B3/B4 после.
 3. Каждая миссия закрывается только с wiki + handoff-строкой + triage decision log.
 
 ---
@@ -30,14 +30,14 @@
 | # | Миссия | Эталон каркаса | Примечание |
 |---|--------|----------------|------------|
 | **10** | Saqqara | `m_009_abu.js` | **done** `3affd5b21` + `map_file`/`data/maps` |
-| **11** | Serabit Khadim | m_010 / m_009 | **done** (2026-07-25 full redefine) |
-| **12** | Meidum | m_010 / m_011 | **next** |
-| 13 / 14 | Buhen / S. Dahshur | m_009 | ветка; `next_mission:15` явно |
-| 15 | N. Dahshur | m_009 | choice host |
-| 16 / 17 | Iunet / On | m_009 | |
-| 18 | Rostja | m_009 | |
+| **11** | Serabit Khadim | m_010 / m_009 | **done** `9ac84fd3f` (2026-07-25 full redefine) |
+| **12** | Meidum | m_011 / m_010 | **done** (2026-07-25, working tree — **не закоммичено**) |
+| 13 / 14 | Buhen / S. Dahshur | m_012 / m_011 | **next**; ветка; `next_mission:15` явно |
+| 15 | N. Dahshur | m_012 / m_011 | choice host |
+| 16 / 17 | Iunet / On | m_012 / m_011 | |
+| 18 | Rostja | m_012 / m_011 | |
 
-**Следующий шаг прямо сейчас:** dump scenario **12** → triage → redefine `m_012_meidum.js` + wiki.
+**Следующий шаг прямо сейчас:** коммит Meidum (12); затем dump scenario **13** (Buhen) / **14** (S. Dahshur) → triage → redefine + wiki.
 
 ### DoD одной миссии (чекбокс)
 
@@ -68,20 +68,19 @@
 
 | ID | Задача | Блокирует | Статус |
 |----|--------|-----------|--------|
-| **B2** | Native `EVENT_TYPE_INVASION` + deferred on_completed/refuse | poll в m5–9+; editor | план готов |
-| **B2-migrate** | После B2 Phase 7: убрать/сузить JS favour+invasion poll в **m5–9** (+10+ по мере redefine) | fidelity campaigns | **явный шаг, не «когда-нибудь»** |
-| B3 | Invasion warnings save | long campaigns | TODO; после B2 |
-| B4 | phrase_id | event messages | TODO; после B2 |
+| **B2** | JS invasions + bind tags + history v173 (native cancelled) | — | **done** 2026-07-25 |
+| B3 | Invasion warnings save | long campaigns | TODO |
+| B4 | phrase_id | event messages | TODO |
 | **FF1** | FAILED_FLOOD recurring (Behdet) | fidelity m6 | small; см. DoD ниже |
 
-**B2 gate:** код B2 → **сразу** B2-migrate m5–9 → только потом B3/B4, если нет spare bandwidth.
+**B2:** native calendar отменён; m5–9 на JS+bind. Далее B3/B4 при bandwidth.
 
 ### FF1 — FAILED_FLOOD recurring (DoD)
 
 - [ ] Dump Behdet: подтвердить recurring vs ONCE
 - [ ] Engine/JS: recurring как в pak (не один ONCE)
 - [ ] Wiki Behdet + handoff note
-- [ ] Отдельный маленький коммит (не смешивать с Serabit / empire PR)
+- [ ] Отдельный маленький коммит (не смешивать с empire-миссией / Buhen-Dahshur PR)
 
 ---
 
@@ -89,7 +88,7 @@
 
 | ID | Задача | Когда |
 |----|--------|-------|
-| **AUD1** | **CITY_STATUS / MESSAGE subtype audit** (= «D1» в старых заметках; не миссия 11) — dump m4–18: какие subtypes silent no-op; чинить handlers или явно skip в triage | врезка 1 сессия или по мере миссий 10+ |
+| **AUD1** | **CITY_STATUS / MESSAGE subtype audit** (= «D1» в старых заметках; не миссия 11) — dump m4–18: какие subtypes silent no-op; чинить handlers или явно skip в triage | врезка 1 сессия или по мере миссий 13+ |
 | **D2** | **Handoff freshness** — в начале сессии: `git log -1` / `git status` vs handoff «последний коммит / untracked»; править до работы | каждая сессия |
 | **D3** | **QA1 canary slice** — не полный golden dump: после redefine миссии N маркеры map points + ключевые event tags (ad-hoc `99_tmp_*`) | опционально после каждой миссии; см. REMAKE_TODO QA1 |
 | **D4** | **PC4 commit hygiene** — stage только файлы задачи; reject hunting/bridges/video в empire PR | каждый коммит |
@@ -119,7 +118,7 @@ pak_disembark / pak_inv_land / pak_inv_sea  == JS config (omit → empty)
 ключевые tag_id REQUEST/DEMAND/NEW_TRADE/CITY_STATUS из triage log
 ```
 
-Полный baseline 0–18 — отдельная задача **QA1** в `REMAKE_TODO.md`, не блокер Saqqara.
+Полный baseline 0–18 — отдельная задача **QA1** в `REMAKE_TODO.md`, не блокер Buhen/Dahshur.
 
 ---
 
@@ -128,19 +127,19 @@ pak_disembark / pak_inv_land / pak_inv_sea  == JS config (omit → empty)
 - Bridges (BR*), hunting/ostrich, OpenH264/video
 - Генерация тайлов / стартовых зданий из JS
 - Слепое копирование всего dump без triage
-- Full redefine 10–18 одним PR
-- Cleopatra empire full — после 10–18
-- B3/B4 параллельно с Saqqara — только при spare bandwidth
+- Full redefine 13–18 одним PR
+- Cleopatra empire full — после 13–18
+- B3/B4 параллельно с empire redefine — только при spare bandwidth
 
 ---
 
 ## Каденция
 
 1. **Session start:** D2 (handoff freshness).
-2. **Session default:** одна миссия из очереди A (сейчас Meidum).
-3. **Когда B2 готов к коду:** врезка → B2 phases → **B2-migrate** → снова A.
+2. **Session default:** одна миссия из очереди A (сейчас Buhen / S. Dahshur, 13/14).
+3. **Поток B:** B2 Phase 1–5 уже в коде → врезка **B2-migrate** (Phase 7) → снова A; B3/B4 после.
 4. **После каждой миссии:** triage decision log, handoff «следующий = N+1», wiki, опц. D3 canary, D4 stage check.
-5. **Врезки:** FF1 или AUD1 — отдельный маленький коммит, не внутри Serabit / empire PR.
+5. **Врезки:** FF1 или AUD1 — отдельный маленький коммит, не внутри empire-миссии / Buhen/Dahshur PR.
 
 ### Verification (шаблон)
 
@@ -161,11 +160,11 @@ git status: no foreign tracks in stage
 
 | Done | Next |
 |------|------|
-| **4–10** Men-nefer … Saqqara (`3affd5b21`) | **11** Serabit Khadim |
+| **4–12** Men-nefer … Meidum (Serabit `9ac84fd3f`; Saqqara `3affd5b21`; Meidum working tree — не закоммичено) | **13/14** Buhen / S. Dahshur |
 | `map_file` → `data/maps` (0–18); pak fallback | — |
-| Map-point API + values m4–10; **invasion_points** JS m2, m5–18 (`697a61836`) | entry/exit/river/disembark для 11+ где есть |
+| Map-point API + values m4–12; **invasion_points** JS m2, m5–18 (`697a61836`) | entry/exit/river/disembark для 13+ где есть |
 | CITY_STATUS subtype 1 | **AUD1** audit остальных subtypes |
 | PRICE / debt_interest / NEW_TRADE is_open | — |
-| — | **B2** → **B2-migrate**; **FF1** Behdet |
+| B2 Phase 1–5 (`340f7d29d`) | **B2-migrate**; **FF1** Behdet |
 
-Handoff-детали Saqqara / API: [MISSION_TO_JS_HANDOFF.md](MISSION_TO_JS_HANDOFF.md).
+Handoff-детали Meidum / Serabit / Saqqara / API: [MISSION_TO_JS_HANDOFF.md](MISSION_TO_JS_HANDOFF.md).

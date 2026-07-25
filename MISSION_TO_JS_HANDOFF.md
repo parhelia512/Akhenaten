@@ -7,8 +7,10 @@ Pak triage (skip/ladder/shared chain): **[MISSION_PAK_TRIAGE.md](MISSION_PAK_TRI
 Кампания / favour / грабли: **[REMAKE_NOTES.md](REMAKE_NOTES.md)**.  
 B2 (event invasions): **[REMAKE_B2_INVASION_PLAN.md](REMAKE_B2_INVASION_PLAN.md)**.
 
-**HEAD (до Serabit redefine):** `918d6559e` — video capture try/catch.  
-**Saqqara + map_file:** `3affd5b21`. **Maps assets:** `b63b7c218`. **Abu:** `c10506b5f`.
+**HEAD:** Meidum (12) redefine is done in the working tree — **not yet committed**.  
+**Serabit Khadim (11):** `9ac84fd3f`. **B2 native invasion (Phase 1–5):** `340f7d29d`.  
+**Saqqara + map_file:** `3affd5b21`. **Maps assets:** `b63b7c218`. **Abu:** `c10506b5f`.  
+**Next:** Buhen / South Dahshur (13/14).
 
 ---
 
@@ -18,8 +20,8 @@ B2 (event invasions): **[REMAKE_B2_INVASION_PLAN.md](REMAKE_B2_INVASION_PLAN.md)
 (через `__test_mission_pak_dump(N)`) в `src/scripts/mission/m_NNN_*.js`, плюс wiki
 `docs/wiki/player/missions/`.
 
-Эталон структуры: **`m_011_serabit_khadim.js`** / **`m_010_saqqara.js`**.  
-Цепочки запросов/подарков: **m_004 … m_011**.
+Эталон структуры: **`m_012_meidum.js`** / **`m_011_serabit_khadim.js`**.  
+Цепочки запросов/подарков: **m_004 … m_012**.
 
 ---
 
@@ -36,11 +38,29 @@ B2 (event invasions): **[REMAKE_B2_INVASION_PLAN.md](REMAKE_B2_INVASION_PLAN.md)
 | **9** | Abu | **да** | **да** | favour 40→20→20 | `abu.html` | **committed** `c10506b5f` |
 | **10** | Saqqara | **да** | **да** | favour 69 | `saqqara.html` | **`3affd5b21`**; `map_file`; oil×501 |
 | **11** | Serabit | **да** | **да** | Libyan + beduin16 rec + favour 51 | `serabit-khadim.html` | empire id=8; funds 15k; housing 4 |
+| **12** | Meidum | **да** | **да** | Hyksos y7m6+ size17 rec + favour 25→60 | `meidum.html` | empire id=1; funds 10k (pak); housing 11; monuments TEMP 58; **uncommitted** |
 
 Миссии 0–2: wiki есть, empire почти из pak.  
-12–18: скрипты есть, empire patch/частичный. **Следующий кандидат:** Meidum (12).
+13–18: скрипты есть, empire patch/частичный. **Следующий кандидат:** Buhen / S. Dahshur (13/14).
 
 ---
+
+## Meidum (12) — сделано (2026-07-25, uncommitted)
+
+| Тема | Статус |
+|------|--------|
+| Full empire redefine (`hide_pak_*`, pos/idx, texts, ornaments) | ✅ |
+| Empire id=1; land routes 1 (Men-nefer, display) / 2 (Serabit Khadim) / 5 (Saqqara); sea routes 4 (Abu) / 6 (Nekhen) / 9 (Behdet) | ✅ |
+| funds 20000/13300/**10000 (pak)**/6700/5300; debt_interest 4/6/8/10/12 (Normal 8% pak); housing_level 11 | ✅ |
+| Once requests: timber×10/6mo y3m4; reeds×8/4mo y5m7; wage decrease 5 y5m3 | ✅ |
+| Recurring chains: clay (from pottery i7 y8m1+); timber (i19 y16m7+); grain (i41 y56m11+); papyrus (i53 y78m2+) | ✅ |
+| Gift chains: stone→luxury×25 (i49 y69m7); grain→luxury×28 (i60 y85m9+ rec); stone→oil×21 (i63 y95m7+ rec) | ✅ |
+| Shared ONLY_VIA KR leaves 1027/1028/1029/1030 reused by most requests | ✅ |
+| Hyksos (`ENEMY_5_HYKSOS`, not Libyan) recurring raid size=17 y7m6+; favour Pharaoh 25→chain 60 | ✅ |
+| Map: entry [111,141] exit [32,54] river [130,122]/[78,8]; invasion land [114,79] sea [31,7] | ✅ |
+| Triage: skip route 47 (orphan, no city); skip map_obj idx=7 (empty stub); skip y≥98 junk (i65/66/67/68/69); skip orphan chain-only leaves i46/i58 | ✅ |
+| Monuments goal TEMP=58 (pak goal 39; C1 stepped-pyramid-complex not implemented) | ✅ (tracked C1/F3) |
+| Wiki `meidum.html` refresh | ✅ |
 
 ## Serabit Khadim (11) — сделано (2026-07-25)
 
@@ -70,9 +90,10 @@ B2 (event invasions): **[REMAKE_B2_INVASION_PLAN.md](REMAKE_B2_INVASION_PLAN.md)
 
 ## Состояние рабочей копии
 
-**Serabit (11) full redefine** — `m_011_serabit_khadim.js` + wiki + handoff/plan docs (эта сессия).  
-**Следующий full redefine:** Meidum (**12**).  
-Параллельно WIP: B2 invasion engine, UI scenario selection, video — **не** мешать в empire PR.
+**Meidum (12) full redefine** — `m_012_meidum.js` + wiki + handoff/plan docs, **в рабочем дереве, не закоммичено**.  
+**Серабит (11)** committed: `9ac84fd3f`.  
+**Следующий full redefine:** Buhen / South Dahshur (**13/14**).  
+Параллельно WIP: B2 invasion engine (Phase 1–5 в коде, `340f7d29d`), UI scenario selection, video — **не** мешать в empire PR.
 
 ---
 
@@ -142,7 +163,7 @@ Favour: `mission_pharaoh_favour_invasion_tick(mission, size[, chain])`.
 | empire route `deviation` | `improve_route` | ✅ |
 | `EVENT_TYPE_FAILED_FLOOD` | Behdet y10 | handler есть; JS пока **ONCE** (**FF1**) |
 | **`EVENT_TYPE_INVASION` + deferred on_completed** | engine | **TODO — [B2](REMAKE_B2_INVASION_PLAN.md)** |
-| Invasion poll / favour | m5–11 JS | proxy до B2 |
+| Invasion poll / favour | m5–12 JS | proxy до B2 |
 | Orphan LOST_TRADE / broken editor links | pak junk | skip |
 | B3 invasion warnings / B4 phrase_id | engine | TODO |
 
@@ -167,24 +188,24 @@ function check_valid() { return true }
 
 ---
 
-## Чеклист следующей миссии (**12 Meidum**)
+## Чеклист следующей миссии (**13/14 Buhen / S. Dahshur**)
 
 **Старт сессии:** handoff freshness (D2) — `git log -1` / `git status` vs этот файл.  
 Полный DoD: [`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md) +
 [`MISSION_TO_JS.md`](MISSION_TO_JS.md) §6 + [`MISSION_PAK_TRIAGE.md`](MISSION_PAK_TRIAGE.md).
 
-1. Дамп scenario **12** → ключевые `pak_*` (+ map points).
+1. Дамп scenario **13** (Buhen) и/или **14** (S. Dahshur) → ключевые `pak_*` (+ map points).
 2. Triage: orphan/broken skip; shared leaf → один `ONLY_VIA`; funds = `int_dcy`.
 3. **Triage decision log** (`copy`/`remap`/`skip` + почему) в скрипте и/или wiki.
-4. Каркас empire из `m_011` / `m_010`.
+4. Каркас empire из `m_012` / `m_011`.
 5. `hide_pak_*` + города `pos`/`idx` (ours + display `route`).
 6. `empire_routes` (2-pt + `deviation` если пусто) + `route_limits` + texts/ornaments.
 7. Map points: entry/exit/river (overlay); `disembark_points` /
    `invasion_points_land|sea` из dump в JS (config-only).
 8. Requests: `ok/refuse/late` + subtypes; PRICE/DEMAND — мутация state.
 9. Invasions: poll до **B2-migrate**; favour из `by_favour` — **не** снимать JS proxy.
-10. Wiki `meidum.html` refresh + index/nav + эта таблица + `MISSION_TO_JS.md` §7.
-11. Stage check (D4): только файлы этой задачи.
+10. Wiki `buhen.html` / `south-dahshur.html` refresh + index/nav + эта таблица + `MISSION_TO_JS.md` §7.
+11. Stage check (D4): только файлы этой задачи. **Не коммитить** Meidum (12) в тот же PR — отдельный коммит.
 
 **Позже / врезки:** B2→B2-migrate; FF1 FAILED_FLOOD Behdet; AUD1 subtype audit.
 
@@ -192,22 +213,32 @@ function check_valid() { return true }
 
 ## Wiki
 
-- Есть: mennefer / timna / behdet / abedju / selima / abu / saqqara / **serabit-khadim** / nekhen (+ earlier)
-- **Следующий refresh:** `meidum.html` (mission 12 full redefine)
+- Есть: mennefer / timna / behdet / abedju / selima / abu / saqqara / serabit-khadim / **meidum** / nekhen (+ earlier)
+- **Следующий refresh:** `buhen.html` / `south-dahshur.html` (mission 13/14 full redefine)
 
 ---
 
 ## Файлы
 
 ```
-src/scripts/mission/m_011_serabit_khadim.js  ← Serabit done (this session)
-src/scripts/mission/m_012_meidum.js          ← next
-docs/wiki/player/missions/serabit-khadim.html
+src/scripts/mission/m_012_meidum.js          ← Meidum done (this session, uncommitted)
+src/scripts/mission/m_013_buhen.js           ← next
+src/scripts/mission/m_014_south_dahshur.js   ← next
+docs/wiki/player/missions/meidum.html
 MISSION_TO_JS.md / MISSION_TO_JS_HANDOFF.md / MISSION_PAK_TRIAGE.md
 REMAKE_EMPIRE_MISSIONS_PLAN.md / REMAKE_B2_INVASION_PLAN.md
 ```
 
 ---
+
+## Verification (Meidum)
+
+- Hot-reload JS: `--mixed src/scripts`.
+- Empire id=1; trade Abu/Behdet/Nekhen sea (650–1050 closed), Saqqara/Serabit Khadim land (200/350 closed); Men-nefer display-only pharaoh route.
+- Funds Normal 10000 (pak) / loan 3000 / debt 8%; win pop 3000 / culture 25 / prosperity 25 / monuments TEMP 58 / KR 40 / housing 11.
+- y3m4 timber×10/6mo; y5m3 wage decrease 5; y5m7 reeds×8/4mo; y7m6+ Hyksos raid size 17 recurring; favour 25→chain 60.
+- Map: entry [111,141] exit [32,54] river [130,122]/[78,8]; invasion land [114,79] sea [31,7].
+- Choice → Buhen (13) / Dahshur (14).
 
 ## Verification (Serabit)
 
