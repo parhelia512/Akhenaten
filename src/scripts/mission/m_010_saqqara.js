@@ -1,7 +1,7 @@
 log_info("akhenaten: mission 10 saqqara started")
 
 // Empire / requests / events verified vs mission1.pak scenario 10 (2026-07-25 dump).
-// Favour Pharaoh army size=69 (by_favour) proxied in JS until B2.
+// Favour Pharaoh army size=69 (by_favour, attack=RANDOM) via mission_pharaoh_favour_invasion_tick.
 
 mission10 { // Saqqara â€” The First Pyramid
 	map_file : "data/maps/m_010_saqqara.map"
@@ -785,7 +785,7 @@ function mission10_pharaoh_request_luxury_y46(ev) {
 	request.execute()
 }
 
-// pak favour: Pharaoh army size 69 (by_favour).
+// pak i=30: by_favour amount=69 invader=pharaoh attack=RANDOM(4) ok=-1 (no chain).
 [es=event_advance_month, mission=mission10]
 function mission10_pharaoh_favour_invasion(ev) {
 	mission_pharaoh_favour_invasion_tick(mission, 69)
