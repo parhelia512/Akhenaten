@@ -222,12 +222,16 @@ void event_manager_t::win_distant_battle(int tag, pcstr city, vec2i pos) {
     g_scenario_events.event_list.front().num_total_header = g_scenario_events.event_list.size();
 }
 
-void event_manager_t::create_chain_event(int tag, e_event_type type, int amount) {
+void event_manager_t::create_chain_event(int tag, e_event_type type, int amount, e_resource resource,
+                                         int8_t subtype, int8_t city_id) {
     auto& event = g_scenario_events.event_list.emplace_back();
     int event_id = g_scenario_events.event_list.size() - 1;
     memset(&event, 0, sizeof(event_ph_t));
     event.type = type;
     event.amount.value = amount;
+    event.item.value = resource;
+    event.subtype = subtype;
+    event.city_id = city_id;
     event.tag_id = tag;
     event.event_trigger_type = EVENT_TRIGGER_ONLY_VIA_EVENT;
     event.event_id = event_id;
@@ -600,7 +604,42 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
                                id, 0);
         break;
 
-    case EVENT_TYPE_CITY_STATUS_CHANGE:
+    case EVENT_TYPE_CITY_STATUS_CHANGE: {
+            empire_city *city = nullptr;
+            if (event.city_id >= 0) {
+                city = g_empire.city(event.city_id);
+            }
+            if (!city || !city->in_use) {
+                logs::debug("EVENT_TYPE_CITY_STATUS_CHANGE: no city for id=%d subtype=%d",
+                    (int)event.city_id, (int)event.subtype);
+                break;
+            }
+
+            switch (event.subtype) {
+            case EVENT_SUBTYPE_NEW_TRADE_ROUTE:
+                city->set_trade_enabled(true);
+                city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                    PHRASE_route_opened_title, PHRASE_route_opened_initial_announcement, PHRASE_route_opened_reason_A,
+                    id, city->name_id);
+                break;
+
+            case EVENT_SUBTYPE_LOST_TRADE_ROUTE:
+                city->set_trade_enabled(false);
+                city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                    PHRASE_route_closed_title, PHRASE_route_closed_initial_announcement, PHRASE_route_closed_reason_A,
+                    id, city->name_id);
+                break;
+
+            case EVENT_SUBTYPE_CITY_UNDER_SIEGE:
+                process_event_city_under_siege(event, via_event_trigger, chain_action_parent, caller_event_id, caller_event_var);
+                break;
+
+            default:
+                logs::debug("EVENT_TYPE_CITY_STATUS_CHANGE: unhandled subtype=%d city=%d",
+                    (int)event.subtype, (int)event.city_id);
+                break;
+            }
+        }
         break;
 
     case EVENT_TYPE_MESSAGE: {

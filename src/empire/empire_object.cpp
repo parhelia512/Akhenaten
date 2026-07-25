@@ -40,12 +40,10 @@ void empire_t::foreach_object(std::function<void(int object_index, const empire_
 }
 
 void empire_t::hide_non_city_objects() {
-    // Replace pak ornaments/texts/armies from script, but keep cities and trade routes.
+    // Clear all non-city map objects so mission JS can fully redefine them
+    // (texts, ornaments, battle icons, land/sea route markers, armies).
     for (int i = 0; i < MAX_OBJECTS; i++) {
-        const int type = g_empire_objects[i].obj.type;
-        if (type == EMPIRE_OBJECT_CITY
-            || type == EMPIRE_OBJECT_LAND_TRADE_ROUTE
-            || type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
+        if (g_empire_objects[i].obj.type == EMPIRE_OBJECT_CITY) {
             continue;
         }
         g_empire_objects[i].in_use = 0;
@@ -389,9 +387,30 @@ static full_empire_object *begin_script_map_object(archive arch, e_empire_object
     }
     full->obj.type = type;
     full->obj.pos = arch.r_vec2i("pos", full->obj.pos);
-    full->obj.image_id = arch.r_int("image", full->obj.image_id);
+
+    // image: raw tid, or image_desc ({pack,id} / {path} / "path")
+    image_desc img_desc;
+    if (arch.r_desc("image", img_desc) && img_desc.valid()) {
+        full->obj.image_id = img_desc.tid();
+    } else {
+        full->obj.image_id = arch.r_int("image", full->obj.image_id);
+    }
+
     full->obj.expanded.pos = arch.r_vec2i("expanded_pos", full->obj.expanded.pos);
-    full->obj.expanded.image_id = arch.r_int("expanded_image", full->obj.expanded.image_id);
+    if (full->obj.expanded.pos.x == 0 && full->obj.expanded.pos.y == 0) {
+        full->obj.expanded.pos = full->obj.pos;
+    }
+
+    image_desc expanded_img;
+    if (arch.r_desc("expanded_image", expanded_img) && expanded_img.valid()) {
+        full->obj.expanded.image_id = expanded_img.tid();
+    } else {
+        full->obj.expanded.image_id = arch.r_int("expanded_image", full->obj.expanded.image_id);
+    }
+    if (full->obj.expanded.image_id <= 0) {
+        full->obj.expanded.image_id = full->obj.image_id;
+    }
+
     full->obj.text_align = arch.r_int("text_align", full->obj.text_align);
     return full;
 }

@@ -466,8 +466,6 @@ function empire_window_draw_trader(ev) {
 
 [es=(empire_window, draw_map, EMPIRE_OBJECT_BATTLE_ICON)]
 function empire_window_draw_battle_icon(ev) {
-    // Pak image_id is a raw tid; get_image(n) treats n as pack. Use the Cleopatra bits sprite
-    // (same as distant-battle icon). Mission scripts can later override via custom handlers.
     var img = get_image("pharaoh_general/empire_bits_00001")
     if (!img) {
         return

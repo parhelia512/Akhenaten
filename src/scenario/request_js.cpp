@@ -3,6 +3,7 @@
 #include "js/js_game.h"
 #include "scenario/scenario.h"
 #include "scenario/scenario_invasion.h"
+#include "empire/empire.h"
 #include "core/variant.h"
 #include "core/profiler.h"
 
@@ -63,7 +64,21 @@ void __city_request_set_param(int tag, pcstr name, int param1) {
 ANK_FUNCTION_3(__city_request_set_param)
 
 void ANK_FUNCTION_UNIFIED(__city_create_chain_event)(const bvariant_map &args) {
-    g_scenario.events.create_chain_event(args.n("tag_id"), (e_event_type)args.n("type"), args.n("amount"));
+    int8_t city_id = (int8_t)args.i32("city_id", -1);
+    const xstring city_name = args.s("city");
+    if (city_id < 0 && !city_name.empty()) {
+        city_id = (int8_t)g_empire.find_city_name_id(city_name.c_str());
+    }
+
+    const e_resource resource = (e_resource)args.i32("resource", args.i32("item", RESOURCE_NONE));
+    g_scenario.events.create_chain_event(
+        args.n("tag_id"),
+        (e_event_type)args.n("type"),
+        args.n("amount"),
+        resource,
+        (int8_t)args.i32("subtype", 0),
+        city_id
+    );
 }
 
 void __city_request_set_completed_action(int master_tag, int slave_tag) {

@@ -229,7 +229,8 @@ struct event_manager_t {
     void create_foreign_army_attack_warning(int tag, int8_t sender_faction);
     void create_distant_battle(int tag, pcstr city, vec2i pos);
     void win_distant_battle(int tag, pcstr city, vec2i pos);
-    void create_chain_event(int tag, e_event_type type, int amount);
+    void create_chain_event(int tag, e_event_type type, int amount, e_resource resource = RESOURCE_NONE,
+                            int8_t subtype = 0, int8_t city_id = -1);
 
     void set_request_location_fields(int tag, int16_t l1, int16_t l2, int16_t l3, int16_t l4);
     void set_request_reasons(int tag, uint16_t r1, uint16_t r2, uint16_t r3, uint16_t r4);

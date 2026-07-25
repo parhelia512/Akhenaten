@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timna — An Expedition to Sinai — Akhenaten Wiki</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .mission-header-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      align-items: start;
+      margin-bottom: 2rem;
+    }
+    .mission-infobox {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.9rem 1.1rem;
+    }
+    .mission-infobox dl {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.25rem 1rem;
+      margin: 0;
+    }
+    .mission-infobox dt {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      white-space: nowrap;
+      padding-top: 0.1rem;
+    }
+    .mission-infobox dd {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+    .mission-infobox .funds-row {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .mission-infobox .funds-row span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .mission-infobox .funds-row span strong {
+      color: var(--text);
+    }
+    .dev-section { margin-top: 2.5rem; }
+    .dev-section h2 { color: var(--text-muted); font-size: 1rem; letter-spacing: 0.04em; text-transform: uppercase; border-color: rgba(255,255,255,0.08); }
+    details {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+    }
+    summary {
+      padding: 0.7rem 1rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      user-select: none;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::before {
+      content: "▶";
+      font-size: 0.6rem;
+      color: var(--gold);
+      transition: transform 0.15s;
+      flex-shrink: 0;
+    }
+    details[open] > summary::before { transform: rotate(90deg); }
+    details[open] > summary { border-bottom: 1px solid var(--border); }
+    .details-body {
+      padding: 1rem 1.1rem;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    .details-body pre {
+      background: #0a0905;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.75rem 1rem;
+      overflow-x: auto;
+      font-size: 0.78rem;
+      line-height: 1.55;
+      margin: 0.6rem 0;
+    }
+    .details-body pre code { color: #c8c0a8; }
+    .details-body .kw  { color: #c9a84c; }
+    .details-body .num { color: #9ecbff; }
+    .details-body .str { color: #7ec87e; }
+    .details-body .cmt { color: #5a5650; font-style: italic; }
+    .details-body .fn  { color: #8aabdc; }
+    .file-ref {
+      display: inline-block;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      background: rgba(201,168,76,0.07);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 2px;
+      padding: 0.05rem 0.45rem;
+      color: var(--gold);
+      margin: 0 0.1rem;
+    }
+    .msg-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+    .msg-table th, .msg-table td { padding: 0.3rem 0.6rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.8rem; }
+    .msg-table th { color: var(--text-muted); font-weight: normal; }
+    .msg-table code { font-size: 0.75rem; }
+    .event-list { list-style: none; padding: 0; margin: 0; }
+    .event-list li { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem 1rem; padding: 0.35rem 0; border-bottom: 1px solid var(--border); align-items: baseline; }
+    .event-list li:last-child { border-bottom: none; }
+    .event-list .ev-name { font-family: 'Consolas', 'Courier New', monospace; font-size: 0.78rem; color: #d0a0e0; }
+    .event-list .ev-fn   { font-family: 'Consolas', 'Courier New', monospace; font-size: 0.75rem; color: #8aabdc; }
+    .event-list .ev-line { font-size: 0.72rem; color: var(--text-muted); text-align: right; white-space: nowrap; }
+    .event-list .ev-desc { grid-column: 1 / -1; color: var(--text-muted); font-size: 0.8rem; padding-bottom: 0.2rem; }
+    .mission-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .mission-nav a { color: var(--gold); }
+    .mission-nav .nav-prev::before { content: "← "; }
+    .mission-nav .nav-next::after  { content: " →"; }
+    .tutorial-step {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.3rem;
+      margin-bottom: 1rem;
+    }
+    .tutorial-step .step-tag {
+      flex-shrink: 0;
+      font-size: 0.7rem;
+      font-family: 'Consolas', 'Courier New', monospace;
+      background: rgba(201,168,76,0.08);
+      border: 1px solid rgba(201,168,76,0.25);
+      color: var(--gold);
+      border-radius: 2px;
+      padding: 0.1rem 0.4rem;
+      white-space: nowrap;
+    }
+    .game-quote {
+      background: var(--surface);
+      border-left: 3px solid var(--gold);
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0;
+      font-style: italic;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      border-radius: 0 3px 3px 0;
+    }
+    .game-quote p { margin: 0 0 0.6rem; }
+    .game-quote p:last-child { margin-bottom: 0; }
+    .objectives-list {
+      list-style: none;
+      padding: 0;
+      margin: 0.75rem 0;
+    }
+    .objectives-list li {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      padding: 0.3rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .objectives-list li:last-child { border-bottom: none; }
+    .obj-label {
+      font-weight: 600;
+      color: var(--text);
+      min-width: 8rem;
+    }
+    .obj-value { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">Akhenaten</a>
+      <ul>
+        <li><a href="../../../about.html">About</a></li>
+        <li><a href="../../../devblog.html">Devblog</a></li>
+        <li><a href="../../index.html" class="active">Wiki</a></li>
+        <li><a href="../../../screenshots.html">Screenshots</a></li>
+        <li><a href="../../../downloads.html">Downloads</a></li>
+        <li><a href="../../../contributors.html">Contributors</a></li>
+        <li><a href="../../../contact.html">Join us</a></li>
+        <li><a href="../../../reportbug.html">Report Bug</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="wiki-layout">
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title"><a href="index.html">← All Missions</a></div>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Early Dynastic</div>
+        <ul>
+          <li><a href="index.html#early-dynastic">4 · Men-nefer</a></li>
+          <li><a href="timna.html" class="active">5 · Timna</a></li>
+          <li><a href="index.html#early-dynastic">6 · Behdet</a></li>
+          <li><a href="index.html#early-dynastic">7 · Abedju</a></li>
+        </ul>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">On this page</div>
+        <ul>
+          <li><a href="#briefing">Briefing</a></li>
+          <li><a href="#objectives">Objectives</a></li>
+          <li><a href="#events">Scripted events</a></li>
+          <li><a href="#strategy">Strategy</a></li>
+          <li><a href="#buildings">Available buildings</a></li>
+          <li><a href="#dev">Developer reference</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <div class="wiki-content">
+      <div class="wiki-breadcrumb">
+        <a href="../../index.html">Wiki</a> /
+        <a href="../index.html">Player Guide</a> /
+        <a href="index.html">Missions</a> /
+        Timna
+      </div>
+
+      <h1>Timna <span style="color:var(--text-muted);font-weight:normal;font-size:0.65em">— An Expedition to Sinai</span></h1>
+
+      <div class="mission-header-grid">
+        <div class="mission-infobox">
+          <dl>
+            <dt>Mission</dt>
+            <dd>5 of 38 — Early Dynastic · Dynasty 1</dd>
+            <dt>Era</dt>
+            <dd>Early Dynastic · ~3000 BC · Pharaoh Den</dd>
+            <dt>Classical name</dt>
+            <dd>Timna (southern Arabah / Sinai copper district)</dd>
+            <dt>Starting funds</dt>
+            <dd>
+              <div class="funds-row">
+                <span><strong>Very Easy</strong> 7 500 Db</span>
+                <span><strong>Easy</strong> 5 000 Db</span>
+                <span><strong>Normal</strong> 3 750 Db</span>
+                <span><strong>Hard</strong> 2 500 Db</span>
+                <span><strong>Very Hard</strong> 2 000 Db</span>
+              </div>
+            </dd>
+            <dt>Deity</dt>
+            <dd>Seth</dd>
+            <dt>Trade</dt>
+            <dd>Nekhen · Nubt · Thinis (land; start closed)</dd>
+            <dt>Previous mission</dt>
+            <dd>Men-nefer — A Capital is Founded</dd>
+            <dt>Next mission</dt>
+            <dd>Player's choice: Behdet (6) or Abydos / Abedju (7)</dd>
+            <dt>Status</dt>
+            <dd><span class="mission-badge badge-impl">Implemented</span></dd>
+          </dl>
+        </div>
+      </div>
+
+      <h2 id="briefing">Briefing</h2>
+      <p>On load the script shows the military history panel (<code>message_history_military</code>). The Timna campaign text lives in <code>message_history_timna</code> / <code>message_mission_timna</code>:</p>
+      <div class="game-quote">
+        <p>A new Pharaoh, Den, has taken the throne of Egypt. Pharaoh is deeply concerned, as enemies have begun to threaten our borders, and our nation lacks adequate supplies of valuable copper needed to create weapons with which to equip our troops. Pharaoh Den has ordered a mining expedition into the unforgiving land of Sinai, beyond our borders and deep within Bedouin territory. The area known as Timna is rich in gold and copper ore, as well as precious turquoise gemstones, but it is otherwise barren. Conditions there will be harsh, and you'll need to import many amenities, perhaps even additional food and fine linen, from Egypt. Pharaoh will demand frequent shipments from Sinai and will ask you for money, copper, gemstones and weapons. You can use any surplus of these items to help support the expedition. Be always on your guard, for the Bedouin of the Sinai desert are formidable adversaries, and they will not willingly allow foreigners to occupy their land, let alone plunder their mineral wealth.</p>
+        <p>To lighten the burden that such living conditions impose on your city's people, build a Pavilion at some busy intersection. Citizens can relax at the Pavilion's juggling and music stages, and, if you also build a Dance School, this new type of performance will provide great entertainment.</p>
+      </div>
+      <p>Timna Valley in the southern Arabah was a major copper-mining district used by Egyptians and neighbouring peoples. In the campaign this is the first full military + mining mission: desert climate, no Nilometer, fortifications and forts available from the start, and a kingdom rating of 70 that rewards prompt deliveries to Pharaoh.</p>
+
+      <h2 id="objectives">Objectives</h2>
+      <ul class="objectives-list">
+        <li>
+          <span class="obj-label">Population</span>
+          <span class="obj-value">2 000 citizens</span>
+        </li>
+        <li>
+          <span class="obj-label">Prosperity</span>
+          <span class="obj-value">15</span>
+        </li>
+        <li>
+          <span class="obj-label">Kingdom rating</span>
+          <span class="obj-value">70</span>
+        </li>
+        <li>
+          <span class="obj-label">Housing level</span>
+          <span class="obj-value">Level 10 (culture / monuments disabled)</span>
+        </li>
+      </ul>
+      <p>Goals match <code>mission1.pak</code> scenario 5. Culture and monument ratings are off — the pressure is on population, prosperity, and kingdom favour through copper, gems, deben, and weapons shipments.</p>
+
+      <h2 id="events">Scripted events</h2>
+      <p>Schedule verified against <code>mission1.pak</code> scenario 5. Scenario <code>enemy_id</code> is <strong>Libyan</strong> (<code>ENEMY_7_LIBIAN</code>); invasion event fields label Bedouins. Favour-KR Pharaoh army (size 45) is handled by the shared helper.</p>
+
+      <div class="tutorial-step">
+        <span class="step-tag">Year 0 · month 8</span>
+        <span>Pharaoh requests <strong>5 copper</strong> (9 months). Reputation +4 / −2.</span>
+      </div>
+      <div class="tutorial-step">
+        <span class="step-tag">Year 2 · month 4</span>
+        <span>Pharaoh requests <strong>15 gems</strong> (12 months). +4 / −3.</span>
+      </div>
+      <div class="tutorial-step">
+        <span class="step-tag">Year 2 · month 7</span>
+        <span>Libyan raid, size <strong>9</strong>.</span>
+      </div>
+      <div class="tutorial-step">
+        <span class="step-tag">Year 2 · month 8</span>
+        <span>Pharaoh requests <strong>885 deben</strong> (12 months). Pak item id 31 (money slot). +4 / −2.</span>
+      </div>
+      <div class="tutorial-step">
+        <span class="step-tag">Year 3 · month 9</span>
+        <span>Libyan raid, size <strong>16</strong>.</span>
+      </div>
+      <div class="tutorial-step">
+        <span class="step-tag">Year 5</span>
+        <span>Libyan raid, size <strong>24</strong>.</span>
+      </div>
+      <div class="tutorial-step">
+        <span class="step-tag">Year 7 · month 3</span>
+        <span>Pharaoh requests <strong>11 weapons</strong> (12 months). +4 / −3.</span>
+      </div>
+      <div class="tutorial-step">
+        <span class="step-tag">Favour KR</span>
+        <span>If kingdom rating collapses, Pharaoh's punishment army (size <strong>45</strong>) via <code>mission_pharaoh_favour_invasion_tick</code>.</span>
+      </div>
+
+      <h2 id="strategy">Strategy</h2>
+      <p>Timna is a desert mining outpost: hide the Nilometer, import food and amenities, export ore products, and keep forts ready before year 2.</p>
+
+      <h3>Phase 1 — Camp and food</h3>
+      <p>Food comes from Hunting Lodges (game meat). Keep housing compact with Water Supply, Firehouse, Architect's Post, and Police Station. Build a Granary and Bazaar early. Stages can unlock irrigation and guild tutorial buildings when those tutorials fire.</p>
+
+      <h3>Phase 2 — Mines and workshops</h3>
+      <p>Copper, gold, and gemstone mines are the point of the expedition. Feed a Weaponsmith and keep Storage Yards for copper, gems, and weapons ahead of Pharaoh's schedule. Clay / pottery and a Weaver support housing and trade.</p>
+
+      <h3>Phase 3 — Defense</h3>
+      <p>Raids begin year 2 month 7 (size 9), then 16 and 24. Recruiter, Weaponsmith, Infantry and Archers forts should be online before then. Seth temples fit the desert setting.</p>
+
+      <h3>Phase 4 — Trade</h3>
+      <p>Land routes start closed: Nekhen (1 020 Db), Nubt (850), Thinis (800). Men-nefer starts display-only (Pharaoh city) and becomes openable for 460 Db after a successful gems or weapons request. Perwadjyt stays display-only. Import fish, beer, linen, papyrus; sell clay, pottery, beer, flax, linen, game meat, chickpeas, copper as partners allow.</p>
+
+      <h3>Tips</h3>
+      <ul>
+        <li>Stock 5 copper before year 0 month 8 — the first request is early and only allows 9 months.</li>
+        <li>Deben request (885) is treasury money, not oil — keep cash on hand in year 2.</li>
+        <li>Pavilion + Dance School are called out in the briefing for entertainment in a harsh climate.</li>
+        <li>After victory, choose Behdet (navy) or Abydos / Abedju (sea challenge).</li>
+      </ul>
+
+      <h2 id="buildings">Available buildings</h2>
+      <p>Listed in <code>mission5.buildings</code> (plus stage unlocks for irrigation / guild tutorials):</p>
+      <div class="wiki-table-wrap">
+        <table class="wiki-table">
+          <thead>
+            <tr><th>Category</th><th>Buildings</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Municipal</td><td>Roadblock · Firehouse · Architect's Post · Police Station · Village Palace · Tax Collector · Courthouse · Personal Mansion</td></tr>
+            <tr><td>Health</td><td>Water Supply · Apothecary · Physician · Mortuary</td></tr>
+            <tr><td>Food &amp; storage</td><td>Hunting Lodge · Bazaar · Granary · Storage Yard</td></tr>
+            <tr><td>Industry</td><td>Clay Pit · Pottery Workshop · Weaver · <strong>Gemstone Mine</strong> · <strong>Gold Mine</strong> · <strong>Copper Mine</strong> · Weaponsmith · Stonemason / Carpenter guilds</td></tr>
+            <tr><td>Military</td><td>Recruiter · Infantry Fort · Archers Fort</td></tr>
+            <tr><td>Religion</td><td>Temple &amp; Shrine of Seth · Festival Square</td></tr>
+            <tr><td>Entertainment</td><td>Booth · Juggler School · Bandstand · Conservatory · Pavilion · Dance School</td></tr>
+            <tr><td>Education</td><td>Scribal School</td></tr>
+            <tr><td>Beautification</td><td>Small / Medium / Large Statue · Gardens · Plaza</td></tr>
+            <tr><td>Stage unlocks</td><td>Water Lift · Irrigation Ditch (irrigation tutorial); Storage Yard / Tax / Booth / Juggler (guilds tutorial)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="dev-section">
+        <h2 id="dev">Developer reference</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem">Paths relative to the repository root. Empire map for this mission is a full JS redefine (see <span class="file-ref">docs/MISSION_TO_JS.md</span>).</p>
+
+        <details>
+          <summary>Mission script — <code>src/scripts/mission/m_005_timna.js</code></summary>
+          <div class="details-body">
+            <p><span class="file-ref">src/scripts/mission/m_005_timna.js</span> imported from <span class="file-ref">src/scripts/missions.js</span>.</p>
+            <pre><code><span class="cmt">// m_005_timna.js — mission5 config (excerpt)</span>
+<span class="kw">mission5</span> {
+  <span class="kw">start_message</span> : <span class="str">"message_history_military"</span>
+  <span class="kw">player_rank</span> : <span class="num">2</span>
+  <span class="kw">env</span> { <span class="kw">hide_nilometer</span> : <span class="num">true</span> }
+
+  <span class="kw">choice</span> [
+    { <span class="kw">name</span> : <span class="str">"Behdet"</span>, <span class="kw">id</span> : <span class="num">6</span> }
+    { <span class="kw">name</span> : <span class="str">"Abydos"</span>, <span class="kw">id</span> : <span class="num">7</span> }
+  ]
+
+  <span class="kw">win_criteria</span> {
+    <span class="kw">population</span>    { enabled : <span class="num">true</span>, goal : <span class="num">2000</span> }
+    <span class="kw">prosperity</span>    { enabled : <span class="num">true</span>, goal : <span class="num">15</span> }
+    <span class="kw">kingdom</span>       { enabled : <span class="num">true</span>, goal : <span class="num">70</span> }
+    <span class="kw">housing_level</span> { enabled : <span class="num">true</span>, goal : <span class="num">10</span> }
+  }
+
+  <span class="kw">hide_pak_cities</span> : <span class="num">true</span>
+  <span class="kw">hide_pak_routes</span> : <span class="num">true</span>
+  <span class="kw">hide_pak_objects</span> : <span class="num">true</span>
+  <span class="kw">map_background</span> : { <span class="kw">pack</span>:PACK_EMPIRE, <span class="kw">id</span>:<span class="num">1</span> }
+  <span class="cmt">// cities[] / empire_routes[] / empire_ornaments[] / empire_texts[] from pak dump</span>
+}</code></pre>
+            <p>Trade partners (pak): Nekhen route 4 cost 1020; Nubt route 1 cost 850; Thinis route 2 cost 800 — all closed land. Men-nefer: locked Pharaoh city (route 5, cost 460) unlocked by chain <code>CITY_STATUS_CHANGE</code> / <code>NEW_TRADE_ROUTE</code> after gems or weapons success. Perwadjyt display-only. Ornament: mastaba <code>pharaoh_general/empire_bits_00120</code> at [522, 492].</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Event handlers — <code>m_005_timna.js</code></summary>
+          <div class="details-body">
+            <ul class="event-list">
+              <li>
+                <span class="ev-name">event_mission_start</span>
+                <span class="ev-line">~299</span>
+                <span class="ev-desc">Military history message; <code>empire.set_id(1)</code> / <code>set_expanded(false)</code>; empire map + advisors; loads <code>PACK_ENEMY_LIBIAN</code>.</span>
+                <span class="ev-fn">mission5_on_start</span>
+              </li>
+              <li>
+                <span class="ev-name">event_advance_month</span>
+                <span class="ev-line">~312–361</span>
+                <span class="ev-desc">Pharaoh requests: copper 5@y0m8/9mo → gems 15@y2m4/12mo (ok→Men-nefer trade unlock) → deben 885@y2m8/12mo (ok→chickpeas gift ×16) → weapons 11@y7m3/12mo (ok→Men-nefer unlock again).</span>
+                <span class="ev-fn">mission5_pharaoh_request_*</span>
+              </li>
+              <li>
+                <span class="ev-name">event_advance_month</span>
+                <span class="ev-line">~366–391</span>
+                <span class="ev-desc">Libyan raids sizes 9 / 16 / 24 at y2m7, y3m9, y5.</span>
+                <span class="ev-fn">mission5_libyan_invasion_*</span>
+              </li>
+              <li>
+                <span class="ev-name">event_advance_month</span>
+                <span class="ev-line">~393</span>
+                <span class="ev-desc">Favour-KR Pharaoh army size 45.</span>
+                <span class="ev-fn">mission5_pharaoh_favour_invasion</span>
+              </li>
+            </ul>
+            <p>Pak dump: <span class="file-ref">src/js/js_test_mission_pak_dump.cpp</span> (<code>__test_mission_pak_dump(5)</code>).</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Game messages — <code>src/scripts/game_messages_en.js</code></summary>
+          <div class="details-body">
+            <table class="msg-table">
+              <thead><tr><th>Key</th><th>ID</th><th>Line</th><th>When shown</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>message_history_military</code></td>
+                  <td>184</td>
+                  <td>2125</td>
+                  <td><code>start_message</code> / <code>mission5_on_start</code> — military history panel</td>
+                </tr>
+                <tr>
+                  <td><code>message_history_timna</code></td>
+                  <td>205</td>
+                  <td>2509</td>
+                  <td>Campaign history — "An Expedition to Sinai"</td>
+                </tr>
+                <tr>
+                  <td><code>message_mission_timna</code></td>
+                  <td>405</td>
+                  <td>4775</td>
+                  <td>Mission briefing duplicate of the Timna history text</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="margin-top:0.75rem">Audio: <span class="file-ref">Voice/Mission/205_mission.mp3</span>, <span class="file-ref">Voice/Mission/205_victory.mp3</span>.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Save file and map data</summary>
+          <div class="details-body">
+            <p>Terrain, ore, and entry points: <span class="file-ref">mission1.pak</span> scenario 5. Empire overlay is fully replaced from JS (<code>hide_pak_cities</code> / <code>hide_pak_routes</code> / <code>hide_pak_objects</code>). Import path: <span class="file-ref">src/scripts/missions.js</span> → <code>mission/m_005_timna</code>.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="mission-nav">
+        <a href="index.html#early-dynastic" class="nav-prev">4 · Men-nefer</a>
+        <a href="index.html#early-dynastic" class="nav-next">6 / 7 · Behdet or Abedju (choice)</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Akhenaten is an open-source, non-commercial project. All rights to Pharaoh, its mechanics and setting belong to their respective copyright owners.</p>
+    <p><a href="https://github.com/dalerank/Akhenaten" target="_blank">github.com/dalerank/Akhenaten</a></p>
+  </footer>
+  <script src="../../../lightbox.js"></script>
+</body>
+</html>

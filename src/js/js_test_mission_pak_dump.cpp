@@ -19,6 +19,7 @@
 #include "figure/figure_type.h"
 #include "game/game_environment.h"
 #include "game/resource.h"
+#include "graphics/image.h"
 #include "grid/point.h"
 #include "io/gamefiles/lang.h"
 #include "io/gamestate/boilerplate.h"
@@ -448,6 +449,16 @@ static void dump_empire_objects() {
             city_name,
             obj.invasion_path_id,
             obj.invasion_years);
+
+        if (obj.type == EMPIRE_OBJECT_ORNAMENT) {
+            const full_empire_object* full = g_empire.get_full_object(object_index);
+            dump_marker("pak_ornament_meta:idx=%d|img=%d|exp_img=%d|w=%d|h=%d",
+                object_index,
+                obj.image_id,
+                full ? full->obj.expanded.image_id : -1,
+                full ? full->obj.width : -1,
+                full ? full->obj.height : -1);
+        }
     });
 
     dump_marker("pak_map_obj_count:total=%d|ornament=%d|city=%d|text=%d|battle=%d|land_route=%d|sea_route=%d|army=%d|enemy_army=%d|distant=%d",

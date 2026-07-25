@@ -106,23 +106,26 @@ void empire_city::set_trade_enabled(bool enabled) {
         default:
             break;
         }
-        return;
+    } else {
+        switch (type) {
+        case EMPIRE_CITY_PHARAOH_TRADING:
+            type = EMPIRE_CITY_PHARAOH;
+            break;
+        case EMPIRE_CITY_EGYPTIAN_TRADING:
+            type = EMPIRE_CITY_EGYPTIAN;
+            break;
+        case EMPIRE_CITY_FOREIGN_TRADING:
+            type = EMPIRE_CITY_FOREIGN;
+            break;
+        default:
+            break;
+        }
+        clear_trade_resources();
     }
 
-    switch (type) {
-    case EMPIRE_CITY_PHARAOH_TRADING:
-        type = EMPIRE_CITY_PHARAOH;
-        break;
-    case EMPIRE_CITY_EGYPTIAN_TRADING:
-        type = EMPIRE_CITY_EGYPTIAN;
-        break;
-    case EMPIRE_CITY_FOREIGN_TRADING:
-        type = EMPIRE_CITY_FOREIGN;
-        break;
-    default:
-        break;
+    if (full_empire_object *full = g_empire.ref_full_object(empire_object_id)) {
+        full->city_type = type;
     }
-    clear_trade_resources();
 }
 
 bool empire_city::shows_as_trade_city_on_map() const {
@@ -189,11 +192,27 @@ void empire_city::archive_load(archive arch) {
         }
     }
 
-    // trade: false → display-only on empire map; true / omitted with sells/buys → trading.
+    // trade: false → display-only / locked on empire map; true / omitted with sells/buys → trading.
+    // When trade is explicitly false but sells/buys are listed, keep the goods for a later
+    // CITY_STATUS_CHANGE (NEW_TRADE_ROUTE) unlock — only demote the city type.
     const bool has_trade_lists = !sells.empty() || !buys.empty();
     if (arch.r_bool("trade", has_trade_lists || can_trade())) {
         if (has_trade_lists) {
             set_trade_enabled(true);
+        }
+    } else if (has_trade_lists) {
+        switch (type) {
+        case EMPIRE_CITY_PHARAOH_TRADING:
+            type = EMPIRE_CITY_PHARAOH;
+            break;
+        case EMPIRE_CITY_EGYPTIAN_TRADING:
+            type = EMPIRE_CITY_EGYPTIAN;
+            break;
+        case EMPIRE_CITY_FOREIGN_TRADING:
+            type = EMPIRE_CITY_FOREIGN;
+            break;
+        default:
+            break;
         }
     } else {
         set_trade_enabled(false);
