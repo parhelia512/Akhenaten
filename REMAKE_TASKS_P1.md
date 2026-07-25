@@ -3,6 +3,11 @@
 Разбивка раздела P1 из `REMAKE_TODO.md`. Каждая задача самодостаточна: контекст, шаги,
 критерии приёмки, способ проверки. Задачи можно выдавать независимо, зависимости указаны явно.
 
+**Синхронизация:** 2026-07-25. Статус чекбоксов и backlog — в `REMAKE_TODO.md`.
+**Текущая очередь дня** (empire 12→18 ∥ B2): [`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md)
+— следующий шаг A: **Meidum (12)**; параллельно B2 → B2-migrate; врезки FF1 / AUD1.
+P2/P3 (bridges, hot-reload, OpenH264/video, …) в этот файл **не** входят.
+
 ## Общие сведения для любой задачи
 
 - Сборка: `cmake --preset win-msvc-debug-vs2022 && cmake --build --preset win-msvc-debug-vs2022`
@@ -87,14 +92,19 @@ runtime-ID (реальная регистрация METAINFO):
 | 2 | D1 — миссия 11 Serabit Khadim | `fa91fa687` |
 | 3 | D2 — миссия 12 Meidum (врем. monument goal, сейчас 58 после F3, до C1) | `289614336` |
 | 3 | D3a — миссия 13 Buhen (обелиск→мастаба до C7, goal 9) | `5f24d2a93` |
-| 3 | D3b — миссия 14 South Dahshur (bent→medium stepped, сейчас 40 после F3, до C4) | `5f24d2a93` |
+| 3 | D3b — миссия 14 South Dahshur (врем. stepped; после C4 — bent, цель 21) | `5f24d2a93` |
 | 3 | D4 — миссия 15 North Dahshur (true→2×stepped, сейчас 58 после F3, до C3) | `9be082753` |
-| 3 | D5 — миссии 16 Iunet / 17 On / 18 Rostja (18: sphinx+pyramid→stepped+mastaba, сейчас 67 после F3, до C3/C6) | `24aee4783` |
+| 3 | D5 — миссии 16 Iunet / 17 On / 18 Rostja (18: врем. stepped+mastaba до C3; C6 код ✅) | `24aee4783` |
 | 3 | F3 (частично) — форма формулы рейтинга: sqrt→аддитивная `2.25·Σ+4.5`; цели 12/14/15/18 пересчитаны, 17 On→оригинал 18. Калибровка весов по типам — осталась | `26bb0d1c1` |
 | 3 | F1 — `enemies.js`: доля type3 у 5 наций (canaanite/kushite/nubian/phoenician/seapeople) сложена в type2; армии 11/13/15/16 спавнятся полностью | `915653ec0` |
 | 3 | B5 — валидация `choice[]`: предикат `mission_is_playable`, фильтр неиграбельных целей, `compute_next` и guard хоста; тупик 18→19/20 закрыт | `d0bdd2d21` |
+| 3 | B6 — choice-хост через `next_mission` не пропускается (вариант B: choice только при `host == completed`) | — |
+| 3 | D1b — сверка миссии 11 с pak (торговля, враг, запросы, timed-raid; wiki) | — |
 | 3 | F2 — вражеские колесницы: `figure_enemy_chariot` + METAINFO на все 12 `FIGURE_ENEMY_*_CHARIOT`; миссии 32/33 разблокированы; тест 39 | `3e8db22c8` |
 | 4 | C4 — bent pyramid (small/medium + parts, реальный `PACK_BENT_PYRAMID` арт, веса, меню); миссия 14 → цель 21; 41/41 тестов | `412b7bc9b` |
+| 4 | C6 — сфинкс (3 части 6×6, паки, info, `43_sphinx_place`); Rostja goal 53 ждёт C3 | — |
+| 4 | B2x — PRICE↑/↓, `debt_interest`/`int_dcy`, route `deviation`, NEW_TRADE `is_open`, CITY_STATUS subtype 1, map points m4–9 | (волна Selima/Abu) |
+| 4 | Empire full redefine **4–10** (Men-nefer … Saqqara) + `map_file` | `3affd5b21` (Saqqara); Abu `c10506b5f` |
 
 ---
 
@@ -199,19 +209,23 @@ Cleopatra packs (`Data/Expansion.sg3` / `SprMain2.sg3`) — см. **DX2** в
 `REMAKE_TODO.md`; Pharaoh-only install — не критерий приёмки B1b.
 
 ### B2. Реализовать EVENT_TYPE_INVASION в менеджере событий
-**Статус:** открыт · **план:** [`REMAKE_B2_INVASION_PLAN.md`](REMAKE_B2_INVASION_PLAN.md) (2026-07-25).  
-**Файлы:** `scenario_event_manager.cpp` (`EVENT_TYPE_INVASION` TODO), `scenario_invasion.*`.  
+**Статус:** Phase 1–2 в коде (2026-07-25) · favour/save/migrate открыты · **план:** [`REMAKE_B2_INVASION_PLAN.md`](REMAKE_B2_INVASION_PLAN.md).  
+**Файлы:** `scenario_event_manager.cpp` (`EVENT_TYPE_INVASION`), `scenario_invasion.*`.  
 **Зависимости:** нет. Soft-dep save pending ↔ B3.
 **Проблема:** spawn есть; handler пустой; `on_completed` сейчас синхронный (для invasion
-нужен **отложенный** resolve wipe/destroy-goal). Миссии 5–8 на JS poll.
+нужен **отложенный** resolve wipe/destroy-goal). Миссии 5–9 на JS poll.
+**Сделано (Phase 1–2):** handler spawn + `chain_action_next=NONE` + pending allocator
+(`invasion_id` < 120) + month resolve tick; `env.use_native_invasion_events` gate
+(default off); `want_destroy` → `enemy_army`; integral `tests/50_invasion_event_spawn.js`.
 **Подзадачи (детали и фазы PR — в плане):**
-- **B2a** timed spawn + `chain_action_next = NONE` + pending registry
-- **B2-resolve** tick → `on_completed` / `on_refusal` / `on_defeat`
-- **B2b** favour `EVENT_TRIGGER_BY_FAVOUR` (0x10); убрать dual spawn с legacy/JS
-- **B2c** chain-only `ONLY_VIA` → `ACTIVATED_*`
-- **B2d** integral tests + console `start_invasion`
-- **B2-migrate** (после B2d): снять JS poll/favour в m5–8 по одной миссии
-- **B2.5** (опц.): общий `mission_resolve_invasion` в `missions.js` до native resolve
+- [x] **B2a** timed spawn + `chain_action_next = NONE` + pending registry (+ dual-spawn gate)
+- [x] **B2-resolve** tick → `on_completed` / `on_refusal` / `on_defeat`
+- [ ] **B2b** favour `EVENT_TRIGGER_BY_FAVOUR` (0x10); убрать dual spawn с legacy/JS
+- [ ] **B2c** chain-only `ONLY_VIA` → `ACTIVATED_*` (clone уже есть; проверить end-to-end)
+- [x] **B2d** partial: integral spawn+resolve+gate (`50_invasion_event_spawn.js`); console ок
+- [ ] **B2-migrate** (после B2d / Phase 7): снять JS poll/favour в **m5–9** (+10+);
+  явный шаг в [`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md), не «когда-нибудь»
+- [ ] **B2.5** (опц.): общий `mission_resolve_invasion` в `missions.js` до native resolve
 **Приёмка / DoD:** см. план §10. Distant battle — **не** B2.
 
 ### B2x. Закрыто рядом с Selima (2026-07-25) — не отдельный эпик
@@ -219,10 +233,29 @@ Cleopatra packs (`Data/Expansion.sg3` / `SprMain2.sg3`) — см. **DX2** в
 - [x] meta `debt_interest` / funds / loans / tax как `int_dcy`; finance читает rate
 - [x] empire route `deviation` в `improve_route`
 - [x] NEW_TRADE выставляет `is_open`; triage/DoD — `MISSION_PAK_TRIAGE.md`
+- [x] CITY_STATUS subtype 1; map points m4–9 — см. empire-план
+- [x] `invasion_points_land|sea` + disembark config-only / hvector; inv dump → m2, m5–18
+  (`697a61836`)
+
+### FF1. FAILED_FLOOD recurring (Behdet)
+**Статус:** открыт · DoD в [`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md) § FF1.  
+**Файлы:** `src/scripts/mission/m_006_behdet.js` (и/или engine flood event), wiki Behdet.  
+**Зависимости:** нет (врезка; **не** смешивать с Saqqara PR).  
+**Проблема:** в JS сейчас ONCE, в pak — recurring.  
+**Сделать:** dump подтверждает recurring → engine/JS как в pak → wiki + handoff note → отдельный маленький коммит.  
+**Приёмка:** Behdet FAILED_FLOOD повторяется по правилам оригинала; wiki/handoff обновлены.
+
+### AUD1. CITY_STATUS / MESSAGE subtype audit
+**Статус:** открыт · **не** путать с миссией 11 (D1). DoD — empire-план § AUD1.  
+**Файлы:** dump m4–18, `MISSION_PAK_TRIAGE.md` / handoff, handlers `scenario_event_manager.*`.  
+**Зависимости:** нет (врезка по мере redefine 10+ или одной сессией).  
+**Проблема:** неизвестные subtypes silently no-op.  
+**Сделать:** таблица `type`+`subtype`+миссии+handler?; чинить (как subtype 1) или triage `skip`+wiki.  
+**Приёмка:** таблица в handoff/triage; новые no-op не «угадываются».
 
 ### B3. Сериализация invasion warnings
 **Файлы:** `src/scenario/scenario_invasion.cpp:456-477` (`iob_invasion_warnings`).
-**Зависимости:** нет.
+**Зависимости:** после B2 / **B2-migrate** (не параллельно с Saqqara без spare bandwidth).
 **Проблема:** тело io_buffer полностью закомментировано; после load предупреждения теряются.
 **Подзадачи:**
 - **B3a. `.svx` round-trip:** восстановить bind-логику по образцу соседних `iob_*`
@@ -515,8 +548,16 @@ Temple of Luxor — сознательно не разбиты: нужны то�
 
 ## Блок D — скриптование миссий 11–37
 
+> **Empire full redefine 11→18 (после Saqqara `3affd5b21`):** рабочая очередь —
+> [`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md).
+> - **Поток A (сейчас):** dump → triage → redefine **11 Serabit Khadim**, затем 12–18 (full empire+events+map points+wiki).
+> - **Поток B (∥):** B2 → **сразу** B2-migrate m5–9 → потом B3/B4.
+> - **Врезки:** FF1, AUD1 (subtype audit).
+> DoD миссии: dump → triage decision log → empire+events+map points → wiki.
+> Не смешивать с bridges / hunting / OpenH264 / video (**PC4**).
+
 ### D0. Шаблон задачи «заскриптовать миссию N» (прочитать исполнителю первым)
-**Эталоны:** `src/scripts/mission/m_008_selima.js`, `m_010_saqqara.js`, `m_004_mennefer.js`.
+**Эталоны:** `src/scripts/mission/m_009_abu.js`, `m_008_selima.js`, `m_010_saqqara.js`, `m_004_mennefer.js`.
 Регистрация — import в `src/scripts/missions.js`.
 
 **Каждая миссия должна содержать:**
@@ -744,9 +785,8 @@ ivory отсутствует как ресурс (заменён luxury_goods); 
 консистентных Libyan/Roman. Пропорция первичного типа сохранена:
 Canaanite 50/50, Kushite 50/50, Nubian 60/40, Phoenician 80/20, Seapeople 80/20.
 Все 13 наций теперь консистентны (сумма 100; `type3>0` только там, где `figure_types[2]` —
-реальный тип). У каждой исправленной нации `TODO(F2)`: восстановить колесничный контингент,
-если оригинал его содержит. Assyrian/Hyksos (`CHARIOT`, 10%) не тронуты — их данные верны,
-ждут класса колесницы (**F2**).
+реальный тип). Assyrian/Hyksos (`CHARIOT`, 10%) оставлены как есть — класс колесницы
+закрыт в **F2**; возврат долей у наций из F1 — data-решение по `.pak` (не блокер).
 **Приёмка:** ✅ у всех наций сумма percentage соответствует реально спавнящимся типам.
 **Проверка:** структурная сверка всех блоков (сделана); при доступном рантайме —
 `start_invasion` каждой нации из консоли и подсчёт состава; вторжения в миссиях 11/13/15/16.
@@ -812,40 +852,50 @@ control + hyksos + assyrian + все 12 — PASS; полный прогон `--i
 
 | Волна | Задачи | Комментарий |
 |-------|--------|-------------|
-| ~~1~~ | ~~A1–A4, E1, E2~~ | выполнено — см. «Выполнено» выше |
-| ~~2~~ | B1, ~~D1~~ | B1 и D1 выполнены; осталось B2, B3 |
-| 3 (тек.) | B2, B3, **~~B5~~, ~~F1~~, ~~F3~~(форма), ~~D1b~~** | event-invasions, save warnings; хотфиксы: ~~валидация choice~~ (B5), ~~enemies.js~~ (F1), ~~формула рейтинга~~ (форма), ~~сверка миссии 11~~ (D1b: pak dump + m_011/wiki) |
-| 4 | C3, ~~C4~~, ~~C6~~, ~~D2, D3, D4, D5~~ | true pyramid; bent/sphinx **код ✅** (D2–D5 досрочно с врем. целями; C3→вернуть 15/18, C4→14 закрыто, C6→18 ждёт C3, C7→обелиск 13) |
-| 5 | C1, C2, C5, C8, ~~D5~~, D6 | large stepped/mastaba, mudbrick, Sun Temple, OK (D5 выполнена в волне 3) |
-| 6 | D7, D8, C7, C9, C10, B4, **F2** | Middle Kingdom, obelisks, mausoleum, phrase_id, вражеские колесницы (к D9) |
-| 7 | D9 | New Kingdom 32–37 (Rowarty требует E3; 32/33 требуют F2) |
+| ~~1~~ | ~~A1–A4, E1, E2~~ | выполнено — см. «Выполнено» |
+| ~~2~~ | ~~B1, D1~~ | выполнено |
+| ~~3~~ | ~~B5, B6, F1, F2, F3(форма), D1b, D2–D5~~ | хотфиксы + скрипты 12–18 (врем. monument goals) |
+| ~~4~~ | ~~C4, C6, B2x, empire 4–9~~ | bent/sphinx код; Selima/Abu wave |
+| **5 (тек.)** | **Empire A: 11 Serabit → 18** ∥ **B2 → B2-migrate**; врезки **FF1**, **AUD1** | очередь дня — empire-план; B3/B4 после migrate |
+| 6 | C3 (+вернуть goals 15/18), C1, C2, C5, C7(хвост), C8; F3 калибровка | монументы / fidelity goals |
+| 7 | D6–D8, C9, C10, B4 | OK / Middle Kingdom; phrase_id |
+| 8 | D9, E3, B1b | New Kingdom 32–37 (Rowarty ← E3); Cleopatra 38–52 |
 
-> Внимание: **E3 (вражеский флот)** из волны 1 **не реализован** — только E1/E2. Морские
-> вторжения и миссия 36 (Rowarty) остаются заблокированными до E3.
+> **E3** (вражеский флот) не сделан — блокирует миссию 36 (Rowarty). **F2** закрыт — 32/33 разблокированы.
+> Скрипты D1–D5 уже есть; волна 5 — **full empire redefine** поверх них, не «написать с нуля».
 
-**Минимальная единица выдачи — подзадача** (B2a, C3a, D5c, E3b, …): составные задачи
-разбиты внутри своих описаний. Одиночные задачи без подзадач (C1, C2, C4, C6, C7, C8,
-D2, D4) выдаются целиком. D-подзадачи одной волны и подзадачи B1b независимы —
-можно выдавать параллельно разным исполнителям; подзадачи C3 и E3 — последовательны
-(a → b → c → d). Для миссий достаточно ранних подзадач монументов: D4 ждёт только C3a,
-D7e — только C5a.
+**Минимальная единица выдачи — подзадача** (B2a, C3a, E3b, …) или **одна миссия** из
+потока A empire-плана. Одиночные без подзадач (C1, C2, C8, FF1, AUD1) — целиком.
+Подзадачи C3 и E3 последовательны (a → b → …). Для возврата оригинальных целей:
+D4/D5 ждут C3; обелиск Buhen — хвост C7; D7 mudbrick — C5a.
 
 ## Граф зависимостей
 
 ```mermaid
 flowchart TD
-  E3 --> D9
-  F2 --> D9
-  F1 -.-> F2
-  B5 --> D2
-  B2 --> D1
-  B1 --> D3
-  B1 --> D6
-  C3 --> D4
-  C3 --> D5
-  C3 --> D9
-  C4 --> D3
-  C6 --> D5
+  subgraph done [Сделано]
+    B1 --> D3done[D3 scripts]
+    B5 --> D2done[D2 scripts]
+    C4 --> D3done
+    F1 -.-> F2
+    F2 --> D9ready[D9 32/33 ready]
+  end
+
+  subgraph now [Волна 5 — тек.]
+    EmpA[Empire A: 10→18] 
+    B2 --> B2mig[B2-migrate]
+    B2mig --> B3
+    B2mig --> B4
+    FF1
+    AUD1
+  end
+
+  EmpA -.-> B2
+  C3 --> D4goal[D4/D5 orig goals]
+  C3 --> D5goal[Rostja 53]
+  C6 -.-> D5goal
   C5 --> D7
   C8 --> D6
+  E3 --> D9
+  D9ready -.-> D9
 ```

@@ -96,6 +96,11 @@ void randomize_event_fields(int16_t field[4], int32_t* seed) {
     unsigned long long random_broche = g_random_data.random1_15bit; //_DAT_00d3a360
     if (f_fixed < 0) {
         int field_range = f_max - f_min;
+        // Guard: pak/JS often leave min=max=-1 (or equal) → range 0. Original would
+        // integer-divide-by-zero when cloning ONLY_VIA chain events (B2).
+        if (field_range <= 0) {
+            return;
+        }
         *seed = (uint32_t)(random_broche / field_range);
         field[0] = (random_broche % field_range) + f_min;
         return;

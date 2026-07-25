@@ -150,3 +150,15 @@ void ANK_FUNCTION_UNIFIED(__city_start_foreign_army_invasion)(const bvariant_map
         args.i32("invasion_attack_target", EVENT_ATTACK_TARGET_RANDOM));
     scenario_invasion_start(opts);
 }
+
+void ANK_FUNCTION_UNIFIED(__city_create_invasion_event)(const bvariant_map &args) {
+    const e_event_trigger_type trigger = (e_event_trigger_type)args.i32("trigger", EVENT_TRIGGER_ONCE);
+    g_scenario.events.create_invasion_event(
+        args.n("tag_id"),
+        args.i32("invader", args.i32("item", EVENT_INVADER_ENEMY)),
+        args.n("amount"),
+        args.i32("invasion_attack_target", EVENT_ATTACK_TARGET_RANDOM),
+        trigger,
+        args.i32("tilex", -1),
+        args.i32("tiley", -1));
+}

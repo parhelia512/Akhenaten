@@ -20,7 +20,8 @@
 //  169 akhenaten: save golden terrain values
 //  170 akhenaten: save enemy armies props
 //  171 akhenaten: bridge_part / bridge_type grids
-constexpr uint32_t latest_save_version = 171;
+//  172 akhenaten: B2 invasion event pending registry (mid-fight chain)
+constexpr uint32_t latest_save_version = 172;
 
 vfs::path fullpath_saves(vfs::path filename);
 vfs::path fullpath_maps(char* full, vfs::path filename);

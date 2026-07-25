@@ -293,6 +293,10 @@ struct scenario_data_t {
         bool hide_nilometer;
         vegetation_opt marshland_grow;
         vegetation_opt tree_grow;
+        // B2: when false (default), EVENT_TYPE_INVASION is ignored so JS proxy
+        // missions (m5–9) do not dual-spawn. Enable per mission after B2-migrate
+        // or in integral tests / stubs.
+        bool use_native_invasion_events = false;
     } env;
 
     struct meta_t {
@@ -343,7 +347,7 @@ struct scenario_data_t {
     }
 };
 ANK_CONFIG_STRUCT(scenario_data_t::meta_t, start_message, hide_won_screen, initial_funds, rescue_loans, house_tax_multipliers, debt_interest)
-ANK_CONFIG_STRUCT(scenario_data_t::env_t, flotsam_enabled, has_animals, gods_least_mood, hide_nilometer, marshland_grow, tree_grow)
+ANK_CONFIG_STRUCT(scenario_data_t::env_t, flotsam_enabled, has_animals, gods_least_mood, hide_nilometer, marshland_grow, tree_grow, use_native_invasion_events)
 ANK_CONFIG_STRUCT(scenario_data_t::sounds_t, briefing, victory)
 ANK_CONFIG_STRUCT(scenario_data_t::win_criterias_t, population, culture, prosperity, monuments, kingdom, housing_count, housing_level, next_mission)
 

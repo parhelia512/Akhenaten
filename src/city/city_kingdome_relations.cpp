@@ -142,6 +142,12 @@ void kingdome_relation_t::update_debt_state() {
 }
 
 void kingdome_relation_t::process_invasion() {
+    // Caesar-legacy favour invasion. Pharaoh campaigns use EVENT_TRIGGER_BY_FAVOUR
+    // (B2b) when env.use_native_invasion_events is on — skip to avoid dual-spawn.
+    if (g_scenario.env.use_native_invasion_events) {
+        return;
+    }
+
     if (g_city.figures.kingdome_soldiers && !cheated_invasion) {
         // nomes invasion in progress
         invasion.duration_day_countdown--;

@@ -612,6 +612,10 @@ static void file_schema(e_file_format file_format, const int file_version) {
             FILEIO.push_chunk(103968, false, "bridge_part_grid", iob_bridge_part_grid); // (228²) * 2
             FILEIO.push_chunk(103968, false, "bridge_type_grid", iob_bridge_type_grid); // (228²) * 2
         }
+        if (file_version > 171) {
+            // 32 pending × 8 bytes + 4-byte native-invasion flag = 260, pad to 272
+            FILEIO.push_chunk(272, false, "invasion_event_pending", iob_invasion_event_pending);
+        }
 
         break;
     }

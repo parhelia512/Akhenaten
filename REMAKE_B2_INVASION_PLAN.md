@@ -1,9 +1,11 @@
 # B2 — EVENT_TYPE_INVASION + отложенный on_completed
 
-**Статус:** план готов, код не начат (2026-07-25).  
-**Трекер:** `REMAKE_TASKS_P1.md` § B2 · `REMAKE_TODO.md` § B2 · handoff `MISSION_TO_JS_HANDOFF.md`.
+**Статус:** Phase 1–2 в коде (2026-07-25); favour/save/migrate ещё нет.  
+**Трекер:** `REMAKE_TASKS_P1.md` § B2 · `REMAKE_TODO.md` § B2 · handoff `MISSION_TO_JS_HANDOFF.md`.  
+**Очередь с empire:** [`REMAKE_EMPIRE_MISSIONS_PLAN.md`](REMAKE_EMPIRE_MISSIONS_PLAN.md)
+(B2 → **B2-migrate** m5–9 → снова A; B3/B4 после).
 
-План инфраструктуры кампании. Не точечный фикс под Selima: миссии 5–8 уже
+План инфраструктуры кампании. Не точечный фикс под Selima: миссии 5–9 уже
 закрывают timed/favour poll’ом в JS. Цель — чтобы **pak / editor / JS chain**
 вторжения жили в event manager с честным spawn и исходом.
 
@@ -12,10 +14,13 @@
 - Кратко в трекере: `REMAKE_TASKS_P1.md` § B2 (B2a–d)
 - Контекст favour: `REMAKE_NOTES.md` §6
 - JS proxy: `src/scripts/missions.js` → `mission_pharaoh_favour_invasion_tick`
-- Примеры poll: `m_006_behdet.js` (y15 → KR+8), `m_008_selima.js` (Hyksos → KR / siege / troops)
+- Примеры poll: `m_006_behdet.js` (y15 wipe → KR+8, ok-only),
+  `m_008_selima.js` (Hyksos seen/wipe/destroy-goal → KR / siege / troops)
+- Post-B2 cleanup: **B2-migrate** в `REMAKE_EMPIRE_MISSIONS_PLAN.md` (явный шаг)
 
 **Вне скоупа B2:** distant battle (отдельный тип), B3 (сериализация warnings), B4 (phrase_id).  
-Selima request/PRICE/debt/routes — **не** часть B2 (уже закрыты отдельно).
+Selima request/PRICE/debt/routes — **не** часть B2 (уже закрыты отдельно).  
+**Сразу после B2 Phase 7:** B2-migrate — снять/сузить JS poll в m5–9 (+10+), не откладывать.
 
 ---
 
@@ -24,9 +29,9 @@ Selima request/PRICE/debt/routes — **не** часть B2 (уже закрыт
 | Слой | Сейчас |
 |------|--------|
 | `case EVENT_TYPE_INVASION` | пустой `// TODO` |
-| После любого handler | сразу `process_event(on_completed_action, …)` |
+| После любого handler | `chain_action_next` default = `COMPLETED` → сразу `process_event(on_completed_action, …)` |
 | Спавн | работает (`scenario_invasion.cpp`, `start_foreign_army_invasion`) |
-| Миссии 5–8 | календарь + poll в JS; favour через helper |
+| Миссии 5–9 (+10 favour) | календарь + poll в JS; favour через helper |
 
 Для invasion исход (wipe / destroy-goal) известен **позже**. Синхронный
 `on_completed` ломает pak-цепочки вроде:
@@ -36,6 +41,9 @@ invasion ok → REPUTATION_INCREASE → CITY_UNDER_SIEGE → REQUEST troops
 invasion refuse → REPUTATION_DECREASE → REQUEST troops
 ```
 
+Тот же default `COMPLETED` стоит и у `EVENT_TYPE_REQUEST` при activate — смежный
+риск (см. §9); в B2 чинить обязательно для INVASION, REQUEST — по возможности рядом.
+
 ---
 
 ## 2. Цель
@@ -44,8 +52,9 @@ invasion refuse → REPUTATION_DECREASE → REQUEST troops
 2. Цепочки **не** стреляют в момент спавна.
 3. После разрешения боя движок вызывает `on_completed` / `on_refusal` / `on_defeat`
    (как request, но отложенно).
-4. Favour-KR и chain-only работают без JS-proxy (proxy можно снять позже).
+4. Favour-KR и chain-only работают без JS-proxy (proxy снимается в Phase 7).
 5. Консоль `start_invasion` / существующие JS spawn API не ломаются.
+6. До Phase 7 **нет dual-spawn**: engine не спавнит ту же волну, что ещё ведёт JS proxy.
 
 ---
 
@@ -57,50 +66,56 @@ invasion refuse → REPUTATION_DECREASE → REQUEST troops
 [calendar / favour / parent chain]
         │
         ▼
- process_event(INVASION)
+ process_event(INVASION)   ← только если миссия не на JS invasion-proxy
         │
+        ├─ выделить invasion_id (слот < MAX_ENEMY_ARMIES=120), НЕ = event_id
         ├─ spawn army (scenario_invasion)
-        ├─ связать invasion_id ↔ event_id
+        ├─ pending: invasion_id ↔ event_id (+ enemies_seen)
         ├─ chain_action_next = NONE   ← не propagate сразу
-        └─ (опц.) trigger → BY_FAVOUR_IN_USE / ALREADY_FIRED по правилам pak
+        └─ trigger: ONCE→ALREADY_FIRED; BY_FAVOUR→BY_FAVOUR_IN_USE (явно!);
+           RECURRING: держать pending/is_active, не второй spawn до resolve
         │
         … армия на карте …
         │
         ▼
- invasion_resolve_tick (месяц / день)
+ invasion_resolve_tick (месяц/день **event manager**, не scenario_invasion_process)
         │
         ├─ wipe, destroy-goal не выполнен → EVENT_ACTION_COMPLETED
         ├─ destroy-goal выполнен / «провал» → EVENT_ACTION_REFUSED или DEFEAT
         └─ process_event(on_*_action, via=true, parent=event_id)
 ```
 
-Эталон логики исхода — текущий JS poll:
+**Эталон полного resolve** — Selima (`mission8_resolve_hyksos_invasion`):
 
 - `city.num_enemy_formations` / seen flag (армия успела появиться)
 - `city.enemy_army_achieved_destroy_goal(invasion_id)` → refuse path
 - иначе wipe → ok path
 
-### 3.2 Связь invasion ↔ event
+**Behdet y15** — урезанный ok-only (wipe → KR+8, без refuse/destroy-goal check).
+Не смешивать с эталоном Selima×22.
 
-Нужна таблица (или поля на invasion/warning), переживает save:
+### 3.2 Связь invasion ↔ event (pending registry)
+
+Отдельная таблица (не «event_id как invasion_id»):
 
 | Поле | Смысл |
 |------|--------|
-| `invasion_id` | id волны (`invasion_opts_t.invasion_id`) |
+| `invasion_id` | слот `enemy_army` / `invasion_opts_t.invasion_id` (**0…119**, uint8) |
 | `event_id` | индекс `event_ph_t` в scenario events |
 | `pending` | ждёт resolve |
-| (опц.) `enemies_seen` | как JS seen-flag |
+| `enemies_seen` | как JS seen-flag |
+| (опц.) `want_destroy` | снимок цели на момент spawn |
 
-Минимум: при spawn записать `event_id` в структуру армии/warning; при clear —
-найти pending event и fire chain.
+`enemy_army` / formation хранят `invasion_id` как `uint8_t`, массив
+`MAX_ENEMY_ARMIES = 120`. Индекс события в pak часто ≥15 и легко ≥120 —
+**нельзя** писать `opts.invasion_id = event.event_id`. Аллоцировать свободный
+слот (или стабильный малый id из pending allocator); связь только через registry.
 
 **Save:** либо расширить существующий invasion chunk (рядом с B3), либо отдельный
 маленький chunk + bump `latest_save_version`. Без сериализации mid-fight load
 потеряет chain — для `.svx` это блокер приёмки.
 
 ### 3.3 Не стрелять on_completed синхронно
-
-В `process_event` после `switch (type)`:
 
 ```cpp
 case EVENT_TYPE_INVASION:
@@ -109,12 +124,39 @@ case EVENT_TYPE_INVASION:
     break;
 ```
 
-`EVENT_ACTION_NONE` уже есть в enum — убедиться, что `switch (chain_action_next)`
-его игнорирует (сейчас default отсутствует: только COMPLETED/REFUSED/TOOLATE/DEFEAT).
+`EVENT_ACTION_NONE` уже в enum — `switch (chain_action_next)` его игнорирует
+(нет `default`; только COMPLETED/REFUSED/TOOLATE/DEFEAT).
 
-Помечать event `ALREADY_FIRED` / `BY_FAVOUR_IN_USE` **после spawn**, не после
-resolve (иначе календарь/favour могут перезапустить). Chain child клонируется
-как у REQUEST (`ONLY_VIA` → `ACTIVATED_8/12`).
+Помечать event **после spawn**, не после resolve:
+
+| Trigger до | После spawn |
+|------------|-------------|
+| `ONCE` / `ACTIVATED_*` | `ALREADY_FIRED` (уже делает хвост `process_event`) |
+| `BY_FAVOUR` (0x10) | **явно** `BY_FAVOUR_IN_USE` (0x14) — хвост ONCE-логики на favour **не** срабатывает |
+| `RECURRING` | не ALREADY_FIRED; блок повторного входа пока `pending` |
+
+### 3.4 Dual-spawn gate (обязателен с Phase 1)
+
+Пока миссия на JS proxy (`start_foreign_army_invasion` + month poll), engine
+**не** должен спавнить те же волны.
+
+Варианты (выбрать один в Phase 1):
+
+1. **Mission flag / config:** `use_native_invasion_events: false` в mission JS до migrate.
+2. **Stub missions only:** Phase 1–2 гонять на тестовой карте / mission stub без proxy;
+   live m5–9 не подключать handler’ом до Phase 7 per-mission.
+3. **Per-event:** JS не создаёт timed/favour invasion events, только poll — тогда
+   engine может читать pak; сейчас миссии **сами** спавнят, поэтому (1) или (2).
+
+Favour: кроме JS helper — ещё Caesar-legacy `kingdome_relation_t::process_invasion`
+(§ B2b). Три источника → оставить один.
+
+### 3.5 Chain-only clone (уже почти есть)
+
+`ONLY_VIA` + не-REQUEST уже идёт в `create(..., EVENT_TRIGGER_ACTIVATED_12)`
+(`scenario_event_manager.cpp`). Для INVASION **clone path есть**; дыра —
+пустой handler + sync `COMPLETED`. B2c = убедиться, что ACTIVATED child
+проходит B2a spawn+pending, а не «добавить clone с нуля».
 
 ---
 
@@ -124,70 +166,71 @@ resolve (иначе календарь/favour могут перезапусти�
 
 **Файлы:** `scenario_event_manager.cpp/.h`, `scenario_invasion.cpp/.h`
 
-1. Маппинг `e_event_invader` → `e_attack_faction` / `e_enemy_type` / kingdome.
-2. Прочитать `amount` (size), `invasion_attack_target` → `formation_attack_from_event_target`,
-   `location_fields` / invasion point.
-3. Вызвать `scenario_invasion_start` / `scenario_start_invasion_impl` с уникальным
-   `invasion_id` (или стабильным из event).
-4. Зарегистрировать pending; `chain_action_next = NONE`.
-5. Триггеры: `ONCE`, `RECURRING` (дата как у других events).
+1. Маппинг `e_event_invader` → mode / enemy (см. §5); dual-spawn gate.
+2. Прочитать `amount` (size), `invasion_attack_target` →
+   `formation_attack_from_event_target`, `location_fields` / invasion point,
+   **`want_destroy`** (см. §5 / Phase 0).
+3. Аллоцировать `invasion_id` < 120; `scenario_invasion_start` /
+   `scenario_start_invasion_impl`.
+4. Pending registry; `chain_action_next = NONE`.
+5. Триггеры: `ONCE`, `RECURRING` (+ pending guard).
 
-**Приёмка:** pak timed invasion (без JS) спавнит армию; `on_completed` **не**
-вызывается в тот же тик.
+**Приёмка:** на stub/тесте без JS proxy — spawn; `on_completed` **не** в тот же тик;
+live m5–9 без dual army.
 
 ### B2-resolve — Отложенный исход (критический кусок)
 
-Вынести из миссий в движок.
-
-1. Хук в `scenario_invasion_process` или месяц/день тик event manager.
-2. Условия как в `mission8_resolve_hyksos_invasion` / Behdet y15.
-3. Fire `on_completed_action` / `on_refusal_action` / `on_defeat_action` через
-   `process_event(..., via_event_trigger=true, caller_event_id)`.
+1. Хук: **месяц/день тик event manager** (рядом с `process_active_request`).
+   **Не** `scenario_invasion_process` — тот обслуживает classic
+   `g_scenario.invasions[]` warnings, не event-manager волны.
+2. Условия как Selima resolve (seen / wipe / destroy-goal). Behdet-style ok-only —
+   когда в pak `on_refusal` / `on_defeat` пустые.
+3. Fire `on_*_action` через `process_event(..., via_event_trigger=true, caller_event_id)`.
 4. Снять pending; не double-fire.
 
-**Семантика исходов (зафиксировать по pak dump m5–8):**
+**Семантика исходов (зафиксировать Phase 0 по pak dump m5–9):**
 
-| Исход | Action | Пример Selima Hyksos×22 |
-|-------|--------|-------------------------|
-| Армия уничтожена, destroy-goal нет | `COMPLETED` | +2 → siege → troops×4 |
-| Destroy-goal выполнен, армия ушла | `REFUSED` (или DEFEAT) | −2 → troops×4 |
+| Исход | Action | Пример |
+|-------|--------|--------|
+| Wipe, destroy-goal нет | `COMPLETED` | Selima Hyksos×22 → +2 → siege → troops×4 |
+| Destroy-goal выполнен, армия ушла | `REFUSED` (или DEFEAT) | Selima×22 → −2 → troops×4 |
+| Wipe, refuse/defeat в pak = −1 | `COMPLETED` only | Behdet y15 → +8 |
 | (если есть в pak) timeout / special | `TOOLATE` / `DEFEAT` | уточнить dump’ом |
 
 Перед кодом — сверить 1–2 pak event’а с ненулевыми `on_refusal` / `on_defeat`.
 
 ### B2b — Favour Kingdom Rating
 
-1. В `process_events` / отдельном тике: для `EVENT_TRIGGER_BY_FAVOUR`, если
-   `rating_kingdom <= 0` (или порог оригинала) → `process_event` как via/global
-   по правилам pak.
-2. После fire: `BY_FAVOUR_IN_USE` / `ALREADY_FIRED` (как editor 0x10 / 0x14).
-3. Отключить или заглушить Caesar-legacy `kingdome_relation_t::process_invasion`,
-   иначе двойной спавн с JS helper.
-4. Размеры из pak: Timna/Behdet 45, Abedju 40, Selima 63 — остаются в event.amount,
-   не в хардкоде helper’а.
+1. Отдельный тик: `EVENT_TRIGGER_BY_FAVOUR`, если `rating_kingdom <= 0`
+   (как JS helper) → `process_event` по правилам pak.
+2. После spawn: **явно** `BY_FAVOUR_IN_USE` (0x14); не полагаться на ONCE-хвост.
+3. Отключить Caesar-legacy `kingdome_relation_t::process_invasion` + JS helper
+   на миссиях с native favour (иначе 2–3 спавна).
+4. Размеры из `event.amount` (не хардкод): Timna/Behdet 45, Abedju 40, Selima 63,
+   Abu 40 (+ chain 20, 20), Saqqara 69.
 
-**Приёмка:** KR→0 без JS helper → одна Pharaoh army нужного size; chain child
-(B2c) если есть в pak.
+**Приёмка:** KR→0 → одна Pharaoh army нужного size; chain child (B2c) если в pak.
 
 ### B2c — Chain-only invasions
 
-1. `ONLY_VIA_EVENT` + type INVASION: `create(..., ACTIVATED_*)` как REQUEST
-   (уже есть ветка для REQUEST; расширить или унифицировать).
-2. Activated child в свой тик → spawn + pending (B2a path).
-3. Родитель может быть request refusal / invasion completed / etc.
+1. Подтвердить: `ONLY_VIA` INVASION → `ACTIVATED_12` (уже else-ветка; REQUEST → `ACTIVATED_8`).
+2. Activated child → B2a spawn + pending (не sync COMPLETED).
+3. Родитель: request refusal / invasion completed / favour ok / etc.
 
-**Приёмка:** parent `on_refusal` → child invasion спавнится без календарной даты.
+**Приёмка:** parent `on_refusal` → child invasion без календарной даты (Abu favour chains).
 
 ### B2d — Тесты
 
 | Тест | Что проверяет |
 |------|----------------|
-| Integral: timed spawn | event ONCE → formations > 0 |
+| Integral: timed spawn | event ONCE → formations > 0; нет sync chain |
 | Integral: resolve ok | wipe → child REPUTATION/tag fired |
 | Integral: resolve refuse | destroy-goal → refusal chain |
 | Integral: favour | KR=0 → Pharaoh army once |
-| Console | `start_invasion` по-прежнему работает |
+| Integral: no dual-spawn | proxy mission + engine off / stub only |
+| Console | `start_invasion` ок |
 | Dump | `__test_mission_pak_dump` → `semantics=favour_kr_punishment` для 0x10 |
+| Bounds | `invasion_id` всегда < 120 |
 
 Файлы: `tests/NN_invasion_event_*.js` + при необходимости C++ helpers в
 `js_test_*.cpp`.
@@ -198,53 +241,68 @@ resolve (иначе календарь/favour могут перезапусти�
 
 | `event_ph_t` | `invasion_opts_t` / spawn |
 |--------------|---------------------------|
-| `item` (`e_event_invader`) | mode + enemy_type |
+| `item` (`e_event_invader`) | mode + enemy_type (§5.1) |
 | `amount` | size |
 | `invasion_attack_target` | `formation_attack_from_event_target` |
 | `location_fields` / point | `invasion_point` |
-| event index / tag | `invasion_id` (стабильный) |
-| (warnings) path / years | B3; spawn может игнорировать warning UI сначала |
+| **pending allocator** | `invasion_id` (слот < 120) — **не** event_id/tag |
+| `want_destroy` | см. Phase 0 (§5.2) |
+| `months_initial` | скорее warning duration → **B3**; spawn UI может игнорировать сначала |
 
-Invader mapping (черновик — сверить с существующим JS/`start_foreign_army_invasion`):
+### 5.1 Invader mapping
+
+Сверить с JS / dump; черновик:
 
 | Invader | mode | enemy |
 |----------|------|--------|
-| `ENEMY` | `ATTACK_TYPE_ENEMIES` | `g_scenario.enemy_id` |
-| `EGYPT` | enemies / egypt | Egyptian |
-| `PHARAOH` | `ATTACK_TYPE_KINGDOME` | Egyptian |
-| `BEDUINS` | natives / barbarian | как в m11 |
+| `ENEMY` | `ATTACK_TYPE_ENEMIES` | `g_scenario.enemy_id` (миссия: Hyksos/Kushite/…) |
+| `EGYPT` | уточнить Phase 0 (не путать с Pharaoh) | обычно Egyptian / scenario |
+| `PHARAOH` | `ATTACK_TYPE_KINGDOME` | `ENEMY_3_EGYPTIAN` (как favour helper) |
+| `BEDUINS` | `ATTACK_TYPE_ENEMIES` (не native blindly) | часто **`g_scenario.enemy_id`**: Timna pak=BEDUINS, sprites=`ENEMY_7_LIBIAN` (`m_005_timna.js`) |
+
+### 5.2 want_destroy (Phase 0 — эвристика)
+
+В `event_ph_t` **нет** явного поля. Engine (B2a) пишет:
+- `ENEMY` / `BEDUINS` / `EGYPT` → `want_destroy = amount` (как JS missions)
+- `PHARAOH` → `0`
+
+`scenario_start_invasion_impl` применяет `opts.want_destroy` → `enemy_army.buildings_to_destroy`
+(раньше поле игнорировалось — destroy-goal в JS был мёртвым).
+
+`months_initial` у favour часто `9` — warning / B3, не want_destroy.
 
 ---
 
 ## 6. Порядок внедрения
 
 ```
-Phase 0  Спека исходов по pak (1–2 дня dump)
+Phase 0  Спека: исходы ok/refuse/defeat; want_destroy; EGYPT vs PHARAOH; dump m5–9
     │
-Phase 1  B2a spawn + chain_action_next=NONE + pending registry (без save)
+Phase 1  B2a: spawn + NONE + pending allocator + dual-spawn gate (stub / flag)
     │
-Phase 2  B2-resolve tick + fire on_completed/refusal
+Phase 2  B2-resolve: event-manager tick + fire on_completed/refusal
     │
 Phase 3  Save pending (или совместить с B3)
     │
-Phase 4  B2c chain-only clone
+Phase 4  B2c: ACTIVATED child → B2a path (clone уже есть)
     │
-Phase 5  B2b favour + убрать dual spawn (legacy/JS)
+Phase 5  B2b: favour tick + BY_FAVOUR_IN_USE + выключить legacy/JS dual
     │
 Phase 6  B2d tests
     │
-Phase 7  B2-migrate: снять JS poll/favour helper в m5–8 (по одной миссии)
+Phase 7  B2-migrate: снять JS poll/favour в m5–9 (+10 по готовности), по одной миссии
 ```
 
-**Не** начинать Phase 7 до стабильного resolve: иначе регрессии Selima/Behdet.
+**Не** начинать Phase 7 до стабильного resolve и dual-spawn gate.
 
-Рекомендуемый первый PR: Phase 1–2 + минимальный integral (spawn + ok chain на
-тестовой карте / mission stub). Favour и save — вторым PR.
+Рекомендуемый первый PR: Phase 0 заметки + Phase 1–2 на **stub** + минимальный
+integral (spawn + ok chain). Favour/save — вторым PR. Live m5–9 — только с Phase 7.
 
 ### B2.5 (опционально, до/параллельно Phase 1)
 
 Общий JS helper `mission_resolve_invasion(mission, opts)` в `missions.js` —
-вынести копипасту Selima/Behdet poll (seen / wipe / destroy-goal → fire tags).
+вынести копипасту Selima poll (seen / wipe / destroy-goal → fire tags).
+Behdet ok-only может звать тот же helper с `refuse_tag=0`.
 Не блокирует B2a; упрощает Phase 7.
 
 ---
@@ -253,13 +311,17 @@ Phase 7  B2-migrate: снять JS poll/favour helper в m5–8 (по одной
 
 | Миссия | Сейчас | После B2 |
 |--------|--------|----------|
-| Timna (5) | JS raids + favour tick | pak events / JS create invasion event |
-| Behdet (6) | JS + poll y15 KR+8 | event on_completed → +8 |
-| Abedju (7) | JS + favour chain | B2b+c |
+| Timna (5) | JS raids + favour 45 | pak/native events; BEDUINS→Libian via enemy_id |
+| Behdet (6) | JS + wipe poll y15 → +8 | event on_completed → +8 (ok-only) |
+| Abedju (7) | JS + favour 40 + chain 40 | B2b+c |
 | Selima (8) | JS Hyksos poll → siege/troops | event chains; luxury-late troops уже ONLY_VIA |
+| Abu (9) | favour 40 → chain 20 → chain2 20 | B2b+c; снять custom chain2 poll |
+| Saqqara (10+) | favour 69 (по мере redefine) | B2b; не блокирует m5–9 |
 
-Пока engine не готов — **не удалять** JS proxy. После B2d — по одной миссии PR,
-сверка с dump; favour helper убирать только когда B2b закрыт для всех.
+Пока engine не готов / gate off — **не удалять** JS proxy. После B2d — по одной
+миссии PR, сверка с dump; favour helper убирать только когда B2b закрыт для
+мигрируемых миссий. На мигрированной миссии выключить proxy **в том же PR**,
+что включает native (иначе dual-spawn).
 
 ---
 
@@ -267,11 +329,12 @@ Phase 7  B2-migrate: снять JS poll/favour helper в m5–8 (по одной
 
 | Файл | Роль |
 |------|------|
-| `src/scenario/scenario_event_manager.h/.cpp` | handler INVASION; NONE propagate; favour tick |
-| `src/scenario/scenario_invasion.h/.cpp` | spawn opts; pending link; resolve tick |
+| `src/scenario/scenario_event_manager.h/.cpp` | handler INVASION; NONE; favour tick; resolve tick |
+| `src/scenario/scenario_invasion.h/.cpp` | spawn opts; pending registry/allocator |
 | `src/city/city_kingdome_relations.cpp` | отключить/согласовать legacy invasion |
-| `src/scripts/missions.js` | позже: упростить/удалить favour helper |
-| `src/scripts/mission/m_005…m_008_*.js` | Phase 7 миграция |
+| `src/figure/enemy_army.*` | границы invasion_id / слоты |
+| `src/scripts/missions.js` | Phase 7: убрать favour helper; опц. B2.5 resolve helper |
+| `src/scripts/mission/m_005…m_009_*.js` (+10) | Phase 7 миграция + gate flag |
 | `src/io/gamestate/boilerplate.cpp` / chunks | save pending (Phase 3) |
 | `tests/…` | B2d |
 | `REMAKE_TASKS_P1.md` | отметить ✅ по подзадачам |
@@ -282,25 +345,31 @@ Phase 7  B2-migrate: снять JS poll/favour helper в m5–8 (по одной
 
 | Риск | Митигация |
 |------|-----------|
-| Двойной спавн favour (legacy + event + JS) | один источник; выключить два других |
-| Неверная семантика REFUSED vs DEFEAT | Phase 0 dump |
+| **Dual-spawn** engine + JS (+ legacy favour) | gate с Phase 1; Phase 7 снимает proxy в том же PR; выключить legacy в B2b |
+| `invasion_id = event_id` → OOB (≥120) | pending allocator, слоты < `MAX_ENEMY_ARMIES` |
+| Нет поля want_destroy в event | Phase 0: найти или зафиксировать эвристику |
+| Неверная семантика REFUSED vs DEFEAT | Phase 0 dump; Selima×22 vs Behdet ok-only |
 | Save mid-invasion | Phase 3 обязателен для `.svx` |
-| `improve`/ALREADY_FIRED слишком рано | fire chain только из resolve; spawn помечает отдельно |
-| Регрессия Selima troops×4 chain | не трогать JS until Phase 7; integral на Hyksos×22 graph |
+| `BY_FAVOUR` не становится ALREADY_FIRED сам | явный `BY_FAVOUR_IN_USE` после spawn |
+| RECURRING + pending | не второй spawn до resolve |
+| REQUEST activate тоже default COMPLETED | смежно; по возможности `NONE` как у invasion |
+| Регрессия Selima troops×4 | JS until Phase 7; integral на Hyksos×22 graph |
+| `scenario_invasion_process` как resolve hook | не использовать; только event-manager tick |
 
 ---
 
 ## 10. Критерии готовности (Definition of Done)
 
-- [ ] Pak/editor `EVENT_TYPE_INVASION` спавнит армию без JS.
+- [ ] Pak/editor `EVENT_TYPE_INVASION` спавнит армию без JS (на stub / после migrate).
 - [ ] `on_completed` / `on_refusal` стреляют **после** исхода, не в тик спавна.
-- [ ] Favour 0x10: одна армия при KR collapse; dump semantics ок.
-- [ ] Chain-only child invasion работает.
+- [ ] `invasion_id` всегда < 120; pending registry переживает mid-fight (или documented defer).
+- [ ] want_destroy: поле найдено **или** эвристика задокументирована + тест refuse.
+- [ ] Favour 0x10: одна армия при KR collapse; `BY_FAVOUR_IN_USE`; dump semantics ок.
+- [ ] Chain-only child invasion работает (Abu-style).
+- [ ] Dual-spawn gate: live proxy-миссии не получают вторую армию от engine.
 - [ ] `start_invasion` console ок.
 - [ ] Integral tests зелёные.
-- [ ] Mid-fight save/load сохраняет pending (или явно documented defer → B3+chunk).
-- [ ] `REMAKE_TASKS_P1.md` B2a–d обновлены; миссии 5–8 ещё могут быть на proxy
-      до Phase 7.
+- [ ] `REMAKE_TASKS_P1.md` B2a–d обновлены; m5–9 на proxy до Phase 7 per mission.
 
 ---
 
@@ -308,12 +377,12 @@ Phase 7  B2-migrate: снять JS poll/favour helper в m5–8 (по одной
 
 | Фаза | Объём |
 |------|--------|
-| Phase 0 dump/спека | S |
-| Phase 1–2 spawn+resolve | M–L |
+| Phase 0 dump/спека (исходы + want_destroy + invader) | S–M |
+| Phase 1–2 spawn+resolve + gate | M–L |
 | Phase 3 save | S–M |
 | Phase 4–5 chain+favour | M |
 | Phase 6 tests | S–M |
-| Phase 7 per mission | S each |
+| Phase 7 per mission (m5–9) | S each |
 
-Эпик именно из‑за **отложенного resolve + save + согласование favour**, не из‑за
+Эпик именно из‑за **отложенного resolve + save + favour + dual-spawn gate**, не из‑за
 вызова spawn.

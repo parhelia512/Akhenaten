@@ -32,6 +32,10 @@
 #include "io/gamestate/boilerplate.h"
 #include "game/game_events.h"
 #include "scenario/scenario.h"
+#include "scenario/scenario_event_manager.h"
+#include "scenario/scenario_invasion.h"
+#include "figure/enemy_army.h"
+#include "figure/formation.h"
 #include "window/window_info.h"
 #include "empire/empire.h"
 
@@ -215,6 +219,94 @@ void __test_process_events() {
     events::process();
 }
 ANK_FUNCTION(__test_process_events);
+
+void __test_process_scenario_events() {
+    g_scenario.events.process_events();
+}
+ANK_FUNCTION(__test_process_scenario_events);
+
+void __test_set_use_native_invasion_events(int enabled) {
+    g_scenario.env.use_native_invasion_events = enabled != 0;
+}
+ANK_FUNCTION_1(__test_set_use_native_invasion_events);
+
+void __test_clear_enemy_formations() {
+    for (int fi = 1; fi < MAX_FORMATIONS; ++fi) {
+        formation *m = formation_get(fi);
+        if (!m || !m->in_use || m->is_herd || m->own_batalion) {
+            continue;
+        }
+        for (int fig = 0; fig < m->num_figures; ++fig) {
+            if (m->figures[fig] > 0) {
+                figure *f = figure_get(m->figures[fig]);
+                if (f) {
+                    f->poof();
+                }
+            }
+        }
+        g_formations.clear(fi);
+    }
+    // Also poof enemy figures that still reference a formation (pre-calculate state).
+    for (int i = 1; i < MAX_FIGURES; ++i) {
+        figure *f = figure_get(i);
+        if (!f || !f->is_alive() || f->formation_id <= 0) {
+            continue;
+        }
+        formation *m = formation_get(f->formation_id);
+        if (m && !m->own_batalion && !m->is_herd) {
+            f->poof();
+        }
+    }
+    g_formations.calculate_figures();
+}
+ANK_FUNCTION(__test_clear_enemy_formations);
+
+int __test_count_enemy_figures() {
+    g_formations.calculate_figures();
+    int n = 0;
+    for (int i = 1; i < MAX_FIGURES; ++i) {
+        figure *f = figure_get(i);
+        if (!f || !f->is_alive() || f->formation_id <= 0) {
+            continue;
+        }
+        formation *m = formation_get(f->formation_id);
+        if (m && m->in_use && !m->own_batalion && !m->is_herd) {
+            ++n;
+        }
+    }
+    return n;
+}
+ANK_FUNCTION(__test_count_enemy_figures);
+
+void __test_set_scenario_enemy_id(int enemy_id) {
+    g_scenario.enemy_id = (e_enemy_type)enemy_id;
+}
+ANK_FUNCTION_1(__test_set_scenario_enemy_id);
+
+void __test_set_army_buildings_destroyed(int invasion_id, int count) {
+    if (invasion_id <= 0 || invasion_id >= enemy_armies_t::MAX_ENEMY_ARMIES) {
+        return;
+    }
+    enemy_army *army = enemy_army_get_editable((uint8_t)invasion_id);
+    army->buildings_destroyed = (uint8_t)std::clamp(count, 0, 255);
+}
+ANK_FUNCTION_2(__test_set_army_buildings_destroyed);
+
+int __test_pending_invasion_id_for_tag(int tag) {
+    for (int i = 0; i < g_scenario.events.events_count(); ++i) {
+        event_ph_t *e = g_scenario.events.at(i);
+        if (!e || e->tag_id != tag) {
+            continue;
+        }
+        for (const auto &p : g_invasions.event_pending) {
+            if (p.in_use && p.event_id == e->event_id) {
+                return p.invasion_id;
+            }
+        }
+    }
+    return -1;
+}
+ANK_FUNCTION_1(__test_pending_invasion_id_for_tag);
 
 int __building_static_building_size(int type) {
     if (type <= BUILDING_NONE || type >= BUILDING_MAX) {

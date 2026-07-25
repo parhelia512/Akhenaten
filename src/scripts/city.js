@@ -440,6 +440,18 @@ city.create_chain_event = function(obj) {
     }
 }
 
+city.create_invasion_event = function(obj) {
+    __city_create_invasion_event(obj)
+    return {
+        tag_id: obj.tag_id
+        set_completed_action_tag: function(slave_tag) { __city_request_set_completed_action(this.tag_id, slave_tag) }
+        set_refusal_action_tag: function(slave_tag) { __city_request_set_refusal_action(this.tag_id, slave_tag) }
+        set_sender_faction: function(sender_faction) { __city_request_set_sender_faction(this.tag_id, sender_faction) }
+        set_param: function(param, value) { __city_request_set_param(this.tag_id, param, value) }
+        execute: function() { __city_request_execute(this.tag_id) }
+    }
+}
+
 city.create_pharaoh_gift = function(obj) {
     __city_create_pharaoh_gift(obj)
     return {

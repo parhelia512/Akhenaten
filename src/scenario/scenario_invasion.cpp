@@ -22,6 +22,8 @@
 #include "core/log.h"
 #include "empire/empire.h"
 #include "js/js_game.h"
+#include "figure/enemy_army.h"
+#include "scenario/scenario_event_manager.h"
 
 const e_attack_faction_tokens_t ANK_CONFIG_ENUM(e_attack_faction_tokens);
 
@@ -110,6 +112,121 @@ invasion_data_t ANK_VARIABLE_N(g_invasions, "invasions");
 
 void invasion_data_t::clear(void) {
     memset(warnings.data(), 0, warnings.size() * sizeof(invasion_warning_t));
+    for (auto &p : event_pending) {
+        p = {};
+    }
+}
+
+int invasion_data_t::alloc_invasion_id() {
+    // Prefer free slots with no live formations linked (formation_id == 0 after clear_formations
+    // is not enough — check pending + whether any formation still references the id).
+    for (int id = FIRST_EVENT_INVASION_SLOT; id < enemy_armies_t::MAX_ENEMY_ARMIES; ++id) {
+        bool pending = false;
+        for (const auto &p : event_pending) {
+            if (p.in_use && p.invasion_id == (uint8_t)id) {
+                pending = true;
+                break;
+            }
+        }
+        if (pending) {
+            continue;
+        }
+
+        bool in_use = false;
+        for (int fi = 1; fi < MAX_FORMATIONS; ++fi) {
+            formation *m = formation_get(fi);
+            if (m && m->in_use && !m->is_herd && !m->own_batalion && m->invasion_id == id) {
+                in_use = true;
+                break;
+            }
+        }
+        if (!in_use) {
+            return id;
+        }
+    }
+    logs::warn("scenario_invasion: no free invasion_id slot (< %d)", enemy_armies_t::MAX_ENEMY_ARMIES);
+    return -1;
+}
+
+bool invasion_data_t::register_event_pending(uint8_t invasion_id, int16_t event_id, uint8_t want_destroy) {
+    if (invasion_id == 0 || event_id < 0) {
+        return false;
+    }
+    for (auto &p : event_pending) {
+        if (p.in_use) {
+            continue;
+        }
+        p.in_use = true;
+        p.enemies_seen = false;
+        p.invasion_id = invasion_id;
+        p.event_id = event_id;
+        p.want_destroy = want_destroy;
+        return true;
+    }
+    logs::warn("scenario_invasion: event_pending table full");
+    return false;
+}
+
+bool invasion_data_t::has_pending_for_event(int16_t event_id) const {
+    for (const auto &p : event_pending) {
+        if (p.in_use && p.event_id == event_id) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void invasion_data_t::process_event_resolutions() {
+    for (auto &p : event_pending) {
+        if (!p.in_use) {
+            continue;
+        }
+
+        const int enemies = enemy_army_total_enemy_formations();
+        // Count only formations for this invasion_id (global total can include other waves).
+        int this_wave = 0;
+        for (int fi = 1; fi < MAX_FORMATIONS; ++fi) {
+            formation *m = formation_get(fi);
+            if (m && m->in_use && !m->is_herd && !m->own_batalion && m->num_figures > 0
+                && m->invasion_id == p.invasion_id) {
+                this_wave++;
+            }
+        }
+
+        if (this_wave > 0) {
+            p.enemies_seen = true;
+            continue;
+        }
+        if (!p.enemies_seen) {
+            continue;
+        }
+
+        // Wave cleared after being seen — fire chain like Selima resolve.
+        const int event_id = p.event_id;
+        const uint8_t invasion_id = p.invasion_id;
+        p = {};
+
+        event_ph_t *event = g_scenario.events.at(event_id);
+        if (!event || event->type != EVENT_TYPE_INVASION) {
+            continue;
+        }
+
+        enemy_army *army = enemy_army_get_editable(invasion_id);
+        const bool destroy_goal = army && army->buildings_to_destroy > 0
+            && army->buildings_destroyed >= army->buildings_to_destroy;
+
+        if (destroy_goal && event->on_refusal_action >= 0) {
+            logs::info("akhenaten: invasion event %d id=%u destroy-goal → REFUSED", event_id, invasion_id);
+            g_scenario.events.process_event(event->on_refusal_action, true, EVENT_ACTION_REFUSED, event_id);
+        } else if (destroy_goal && event->on_defeat_action >= 0) {
+            logs::info("akhenaten: invasion event %d id=%u destroy-goal → DEFEAT", event_id, invasion_id);
+            g_scenario.events.process_event(event->on_defeat_action, true, EVENT_ACTION_DEFEAT, event_id);
+        } else if (event->on_completed_action >= 0) {
+            logs::info("akhenaten: invasion event %d id=%u wiped → COMPLETED", event_id, invasion_id);
+            g_scenario.events.process_event(event->on_completed_action, true, EVENT_ACTION_COMPLETED, event_id);
+        }
+        (void)enemies;
+    }
 }
 
 void invasion_data_t::init() {
@@ -263,20 +380,40 @@ tile2i scenario_start_invasion_impl(invasion_opts_t opts) {
 
     // determine orientation
     int orientation = DIR_4_BOTTOM_LEFT;
-    // if (y == 0)
-    //     orientation = DIR_4_BOTTOM_LEFT;
-    // else if (y >= g_scenario.map.height - 1)
-    //     orientation = DIR_0_TOP_RIGHT;
-    // else if (x == 0)
-    //     orientation = DIR_2_BOTTOM_RIGHT;
-    // else if (x >= g_scenario.map.width - 1)
-    //     orientation = DIR_6_TOP_LEFT;
-    // else {
-    //     orientation = DIR_4_BOTTOM_LEFT;
-    // }
     
-    // check terrain    
-    if (map_terrain_is(invasion_tile, TERRAIN_ELEVATION | TERRAIN_ROCK | TERRAIN_TREE)) {
+    // check terrain — try entry / a few edge candidates if the primary tile is blocked
+    auto tile_ok = [] (tile2i t) {
+        if (!t.valid()) {
+            return false;
+        }
+        if (map_terrain_is(t, TERRAIN_ELEVATION | TERRAIN_ROCK | TERRAIN_TREE)) {
+            return false;
+        }
+        if (map_terrain_is(t, TERRAIN_WATER) && !map_terrain_is(t, TERRAIN_ROAD)) {
+            return false;
+        }
+        return true;
+    };
+
+    if (!tile_ok(invasion_tile)) {
+        tile2i candidates[] = {
+            scenario_map_entry(),
+            scenario_map_exit(),
+            tile2i(1, g_scenario.map.height / 2),
+            tile2i(g_scenario.map.width - 2, g_scenario.map.height / 2),
+            tile2i(g_scenario.map.width / 2, 1),
+            tile2i(g_scenario.map.width / 2, g_scenario.map.height - 2),
+        };
+        invasion_tile = tile2i::invalid;
+        for (tile2i c : candidates) {
+            if (tile_ok(c)) {
+                invasion_tile = c;
+                break;
+            }
+        }
+    }
+
+    if (!invasion_tile.valid()) {
         return tile2i::invalid;
     }
 
@@ -327,6 +464,16 @@ tile2i scenario_start_invasion_impl(invasion_opts_t opts) {
             }
             seq++;
         }
+    }
+
+    // Apply destroy-goal to the army slot (JS want_destroy_buildings / event heuristic).
+    // Without this, enemy_army_achieved_destroy_goal never returns true.
+    if (opts.invasion_id > 0
+        && opts.invasion_id < enemy_armies_t::MAX_ENEMY_ARMIES
+        && seq > 0) {
+        enemy_army *army = enemy_army_get_editable((uint8_t)opts.invasion_id);
+        army->buildings_to_destroy = opts.want_destroy;
+        army->buildings_destroyed = 0;
     }
 
     return invasion_tile;
@@ -492,7 +639,28 @@ io_buffer* iob_invasion_warnings = new io_buffer([](io_buffer* iob, size_t versi
     //        warnings->skip(11);
     //    }
 
-    // TODO
+    // TODO (B3)
+});
+
+// B2 Phase 3: mid-fight invasion↔event pending survives .svx save/load.
+// Layout (272 bytes): flag(4) + 32 × {in_use, enemies_seen, invasion_id, pad, event_id, want_destroy, pad}
+io_buffer *iob_invasion_event_pending = new io_buffer([] (io_buffer *iob, size_t version) {
+    int32_t native_flag = g_scenario.env.use_native_invasion_events ? 1 : 0;
+    iob->bind(BIND_SIGNATURE_INT32, &native_flag);
+    if (iob->is_read_access()) {
+        g_scenario.env.use_native_invasion_events = native_flag != 0;
+    }
+
+    for (auto &p : g_invasions.event_pending) {
+        iob->bind_bool(p.in_use);
+        iob->bind_bool(p.enemies_seen);
+        iob->bind_u8(p.invasion_id);
+        iob->bind____skip(1);
+        iob->bind(BIND_SIGNATURE_INT16, &p.event_id);
+        iob->bind_u8(p.want_destroy);
+        iob->bind____skip(1);
+    }
+    iob->bind____skip(12); // pad 260 → 272
 });
 
 const enemy_properties_t &invasion_data_t::get_prop(e_enemy_type type) {

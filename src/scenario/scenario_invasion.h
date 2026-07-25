@@ -47,6 +47,16 @@ struct invasion_opts_t {
 // Map pak/JS invasion_attack_target (EVENT_ATTACK_TARGET_*) → formation attack_type.
 e_formation_attack_type formation_attack_from_event_target(int invasion_attack_target);
 
+// B2 pending: event-manager invasion awaiting wipe/destroy-goal resolve.
+// invasion_id is an enemy_army slot (< MAX_ENEMY_ARMIES), never pak event_id.
+struct invasion_event_pending_t {
+    bool in_use = false;
+    bool enemies_seen = false;
+    uint8_t invasion_id = 0;
+    int16_t event_id = -1;
+    uint8_t want_destroy = 0;
+};
+
 struct enemy_properties_t {
     int percentage_type1;
     int percentage_type2;
@@ -58,15 +68,28 @@ struct enemy_properties_t {
 ANK_CONFIG_STRUCT(enemy_properties_t, percentage_type1, percentage_type2, percentage_type3, figure_types, army_title, layout)
 
 struct invasion_data_t {
+    enum {
+        MAX_PENDING_EVENT_INVASIONS = 32,
+        // Prefer slots away from favour-helper hardcodes (24–26) and console (23).
+        FIRST_EVENT_INVASION_SLOT = 1,
+    };
+
     int last_internal_invasion_id;
     int min_invasion_amount;
     int max_invasion_amount;
     std::array<invasion_warning_t, 101> warnings;
+    std::array<invasion_event_pending_t, MAX_PENDING_EVENT_INVASIONS> event_pending;
 
     void clear();
     void init();
 
     const enemy_properties_t &get_prop(e_enemy_type type);
+
+    // Allocate free enemy_army slot in 1..MAX_ENEMY_ARMIES-1; returns -1 if full.
+    int alloc_invasion_id();
+    bool register_event_pending(uint8_t invasion_id, int16_t event_id, uint8_t want_destroy);
+    bool has_pending_for_event(int16_t event_id) const;
+    void process_event_resolutions(); // month tick: seen → wipe/refuse → chain
 };
 ANK_CONFIG_STRUCT(invasion_data_t, min_invasion_amount, max_invasion_amount)
 extern invasion_data_t g_invasions;
