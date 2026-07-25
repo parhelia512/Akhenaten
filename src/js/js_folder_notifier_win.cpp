@@ -12,10 +12,10 @@ int js_vm_notifier_watch_directory(const char *lpDir) {
     DWORD dwWaitStatus;
     HANDLE dwChangeHandles[2];
 
-    // Watch the directory for file creation and deletion.
+    // Watch the directory tree for file size changes.
     dwChangeHandles[0] = FindFirstChangeNotification(
                              lpDir,                         // directory to watch
-                             FALSE,                         // do not watch subtree
+                             TRUE,                          // include subdirectories (building/*.js etc.)
                              FILE_NOTIFY_CHANGE_SIZE); // watch file modify
 
     if (dwChangeHandles[0] == INVALID_HANDLE_VALUE) {
@@ -23,10 +23,10 @@ int js_vm_notifier_watch_directory(const char *lpDir) {
         return 0;
     }
 
-    // Watch the subtree for directory creation and deletion.
+    // Watch the subtree for last-write (save/overwrite).
     dwChangeHandles[1] = FindFirstChangeNotification(
                              lpDir,                         // directory to watch
-                             FALSE,                          // watch the subtree
+                             TRUE,                          // include subdirectories
                              FILE_NOTIFY_CHANGE_LAST_WRITE);  // watch file size change
 
     if (dwChangeHandles[1] == INVALID_HANDLE_VALUE) {

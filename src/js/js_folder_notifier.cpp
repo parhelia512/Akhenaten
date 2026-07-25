@@ -5,6 +5,7 @@
 #include "core/log.h"
 #include "core/svector.h"
 #include "core/bstring.h"
+#include "core/hvector.h"
 #include "js/js.h"
 
 #include <time.h>
@@ -18,6 +19,7 @@
 #include <SDL.h>
 #include <SDL_thread.h>
 #include <filesystem>
+#include <string>
 
 #ifndef _WIN32
 #define MAX_PATH 260
@@ -26,12 +28,12 @@
 namespace fs = std::filesystem;
 
 struct FileInfo {
-    vfs::path path;
+    vfs::path path; // relative to watched scripts root, forward slashes
     int hashtime;
 };
 
 struct notifier_data_t {
-    hvector<FileInfo, 256> files;
+    hvector<FileInfo, 512> files;
     vfs::path dir;
     SDL_Thread *thread;
     int finished;
@@ -71,48 +73,83 @@ static int get_time_modified(const char *path, struct tm *ftime) {
     return 0;
 }
 
-void js_vm_notifier_create_snapshot(const char *folder) {
-    struct tm ftime;
-    for (auto &p: g_script_notifier.files) {
-        p.path.clear();
+static vfs::path resolve_script_abspath(const vfs::path &rel_or_abs) {
+    if (rel_or_abs.empty()) {
+        return {};
     }
+    // Absolute: Windows "X:..." or Unix "/..."
+    const char *p = rel_or_abs.c_str();
+    if (p[0] == '/' || (p[0] && p[1] == ':')) {
+        return rel_or_abs;
+    }
+    vfs::path abs;
+    abs.printf("%s/%s", g_script_notifier.dir.c_str(), p);
+    return abs;
+}
 
-    svector<vfs::path, 256> js_files;
-    for (const auto &entry : fs::directory_iterator(folder)) {
-        if (entry.path().extension().string() == ".js") {
-            js_files.push_back(entry.path().string().c_str());
+void js_vm_notifier_create_snapshot(const char *folder) {
+    g_script_notifier.files.clear();
+
+    hvector<vfs::path, 64> js_files;
+    const fs::path root(folder);
+    std::error_code ec;
+    for (fs::recursive_directory_iterator it(root, ec), end; it != end; it.increment(ec)) {
+        if (ec) {
+            logs::info("JS watcher: skip entry (%s)", ec.message().c_str());
+            ec.clear();
+            continue;
+        }
+        if (!it->is_regular_file(ec) || ec) {
+            ec.clear();
+            continue;
+        }
+        if (it->path().extension() != ".js") {
+            continue;
+        }
+
+        std::error_code rel_ec;
+        fs::path rel = fs::relative(it->path(), root, rel_ec);
+        if (rel_ec) {
+            js_files.push_back(it->path().generic_string().c_str());
+        } else {
+            js_files.push_back(rel.generic_string().c_str());
         }
     }
 
-    for (auto &js_path: js_files) {
-        //vfs::path abspath = js_vm_get_absolute_path(js_path);
-        get_time_modified(js_path, &ftime);
+    struct tm ftime;
+    for (auto &js_path : js_files) {
+        vfs::path abspath = resolve_script_abspath(js_path);
+        if (get_time_modified(abspath.c_str(), &ftime) != 0) {
+            continue;
+        }
 
         int hashtime = ftime.tm_hour * 1000 + ftime.tm_min * 100 + ftime.tm_sec;
         g_script_notifier.files.push_back({js_path, hashtime});
     }
+
+    logs::info("JS watcher: tracking %d script(s) under %s", (int)g_script_notifier.files.size(), folder);
 }
 
 void js_vm_notifier_check_snapshot(void) {
-    const char *js_path;
-    vfs::path abspath, filepath;
     struct tm ftime;
 
-    for (auto &note: g_script_notifier.files) {
-        js_path = note.path;
-        if (!*js_path) {
-            return;
+    for (auto &note : g_script_notifier.files) {
+        if (note.path.empty()) {
+            continue;
         }
 
-        vfs::path abspath = js_vm_get_absolute_path(js_path);
-        get_time_modified(abspath, &ftime);
+        vfs::path abspath = resolve_script_abspath(note.path);
+        if (get_time_modified(abspath.c_str(), &ftime) != 0) {
+            continue;
+        }
 
         unsigned int newTime = ftime.tm_hour * 1000 + ftime.tm_min * 100 + ftime.tm_sec;
         unsigned int oldTime = note.hashtime;
-        if( newTime != oldTime ) {
+        if (newTime != oldTime) {
             note.hashtime = newTime;
-            filepath.printf(":%s", js_path);
-            js_vm_reload_file(filepath);
+            vfs::path filepath;
+            filepath.printf(":%s", note.path.c_str());
+            js_vm_reload_file(filepath.c_str());
         }
     }
 }
