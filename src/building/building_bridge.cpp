@@ -1,16 +1,46 @@
 #include "building_bridge.h"
 
+#include "building_ship_bridge.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
+#include "grid/bridge_grid.h"
 #include "grid/property.h"
 #include "grid/sprite.h"
 #include "grid/terrain.h"
+#include "js/js_game.h"
+
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_low_bridge);
+
+int bridge_span_max_length(bool is_ship_bridge) {
+    if (is_ship_bridge) {
+        const uint8_t v = building_ship_bridge::current_params().max_length;
+        return v > 0 ? v : 40;
+    }
+    const uint8_t v = building_low_bridge::current_params().max_length;
+    return v > 0 ? v : 40;
+}
+
+int bridge_span_min_length(bool is_ship_bridge) {
+    if (is_ship_bridge) {
+        const uint8_t v = building_ship_bridge::current_params().min_length;
+        return v > 0 ? v : 5;
+    }
+    const uint8_t v = building_low_bridge::current_params().min_length;
+    return v > 0 ? v : 2;
+}
+
+static void enqueue_bridge_image(painter &ctx, int image_id, vec2i pixel, color color_mask) {
+    auto &command = ImageDraw::create_command(ctx, render_command_t::ert_generic);
+    command.image_id = image_id;
+    command.pixel = pixel;
+    command.mask = color_mask;
+    command.scale = 1.f;
+}
 
 void city_draw_bridge(vec2i pixel, tile2i point, painter &ctx) {
     int grid_offset = point.grid_offset();
-    int x = pixel.x;
-    int y = pixel.y;
     if (!map_terrain_is(grid_offset, TERRAIN_WATER)) {
+        map_bridge_tile_clear(grid_offset);
         map_sprite_clear_tile(grid_offset);
         return;
     }
@@ -20,54 +50,22 @@ void city_draw_bridge(vec2i pixel, tile2i point, painter &ctx) {
     if (map_property_is_deleted(grid_offset))
         color_mask = COLOR_MASK_RED;
 
-    city_draw_bridge_tile(ctx, x, y, map_sprite_animation_at(grid_offset) + 1, color_mask);
+    city_draw_bridge_tile(ctx, pixel.x, pixel.y, map_bridge_part_at(grid_offset), color_mask,
+                          map_bridge_type_at(grid_offset));
 }
 
-void city_draw_bridge_tile(painter &ctx, int x, int y, int bridge_sprite_id, color color_mask) {
-    int image_id = image_id_from_group(GROUP_BUILDING_BRIDGE);
-    switch (bridge_sprite_id) {
-    case 1:
-        ctx.img_generic(image_id + 5, { x, y - 20 }, color_mask);
-        break;
-    case 2:
-        ctx.img_generic(image_id, { x - 1, y - 8 }, color_mask);
-        break;
-    case 3:
-        ctx.img_generic(image_id + 3, { x, y - 8 }, color_mask);
-        break;
-    case 4:
-        ctx.img_generic(image_id + 2, { x + 7, y - 20 }, color_mask);
-        break;
-    case 5:
-        ctx.img_generic(image_id + 4, { x, y - 21 }, color_mask);
-        break;
-    case 6:
-        ctx.img_generic(image_id + 1, { x + 5, y - 21 }, color_mask);
-        break;
-    case 7:
-        ctx.img_generic(image_id + 11, { x - 3, y - 50 }, color_mask);
-        break;
-    case 8:
-        ctx.img_generic(image_id + 6, { x - 1, y - 12 }, color_mask);
-        break;
-    case 9:
-        ctx.img_generic(image_id + 9, { x - 30, y - 12 }, color_mask);
-        break;
-    case 10:
-        ctx.img_generic(image_id + 8, { x - 23, y - 53 }, color_mask);
-        break;
-    case 11:
-        ctx.img_generic(image_id + 10, { x, y - 37 }, color_mask);
-        break;
-    case 12:
-        ctx.img_generic(image_id + 7, { x + 7, y - 38 }, color_mask);
-        break;
-        // Note: no nr 13
-    case 14:
-        ctx.img_generic(image_id + 13, { x, y - 38 }, color_mask);
-        break;
-    case 15:
-        ctx.img_generic(image_id + 12, { x + 7, y - 38 }, color_mask);
-        break;
+void city_draw_bridge_tile(painter &ctx, int x, int y, int bridge_sprite_id, color color_mask, uint16_t bridge_type) {
+    if (bridge_sprite_id >= 7) {
+        city_draw_ship_bridge_tile(ctx, x, y, bridge_sprite_id, color_mask);
+        return;
     }
+
+    int img_offset = 0;
+    vec2i pos;
+    if (!bridge_style_part_draw(bridge_type, bridge_sprite_id, img_offset, pos)) {
+        return;
+    }
+
+    const int image_id = bridge_style_image_base(bridge_type) + img_offset;
+    enqueue_bridge_image(ctx, image_id, {x + pos.x, y + pos.y}, color_mask);
 }

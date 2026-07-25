@@ -3,7 +3,7 @@
 #include "city/object_info.h"
 #include "graphics/elements/lang_text.h"
 #include "graphics/elements/panel.h"
-#include "grid/sprite.h"
+#include "grid/bridge.h"
 #include "grid/terrain.h"
 #include "grid/property.h"
 #include "grid/canals.h"
@@ -81,15 +81,12 @@ void terrain_info_window::init(object_info &c) {
     case terrain_info_garden:
     case terrain_info_water:
     case terrain_info_rubble:
+    case terrain_info_bridge:
         break;
 
     case terrain_info_canal:
         c.help_id = 60;
         window_building_draw_canal(&c);
-        break;
-
-    case terrain_info_bridge:
-        c.help_id = 58;
         break;
     }
 
@@ -106,12 +103,8 @@ void terrain_info_window::init(object_info &c) {
 
 bool terrain_info_window::check(object_info &c) {
     tile2i tile(c.grid_offset);
-    if (!c.bid && map_sprite_animation_at(c.grid_offset) > 0) {
-        if (map_terrain_is(c.grid_offset, TERRAIN_WATER)) {
-            c.terrain_type = terrain_info_bridge;
-        } else {
-            c.terrain_type = terrain_info_empty;
-        }
+    if (!c.bid && map_is_bridge(c.grid_offset)) {
+        c.terrain_type = terrain_info_bridge;
         return true;
     } else if (map_property_is_plaza_or_earthquake(tile)) {
         if (map_terrain_is(c.grid_offset, TERRAIN_ROAD)) {

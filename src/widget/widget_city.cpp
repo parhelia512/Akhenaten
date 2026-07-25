@@ -10,6 +10,7 @@
 #include "widget/city/building_ghost.h"
 #include "overlays/city_overlay.h"
 #include "building/construction/build_planner.h"
+#include "building/building_bridge.h"
 #include "city/city_finance.h"
 #include "city/city_warnings.h"
 #include "core/calc.h"
@@ -18,6 +19,7 @@
 #include "game/cheats.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
+#include "grid/bridge.h"
 #include "grid/building.h"
 #include "grid/figure.h"
 #include "grid/image.h"
@@ -763,6 +765,13 @@ void screen_city_t::draw_isometric_terrain_height(vec2i pixel, tile2i tile, pain
 void screen_city_t::draw_ornaments_and_animations_height(vec2i point, tile2i tile, painter &ctx) {
     OZZY_PROFILER_FUNCTION();
     int grid_offset = tile.grid_offset();
+
+    // Bridges are terrain+sprite (no building_id); draw before the building early-out.
+    if (map_is_bridge(grid_offset)) {
+        city_draw_bridge(point, tile, ctx);
+        return;
+    }
+
     // tile must contain image draw data
     if (!map_property_is_draw_tile(grid_offset)) {
         return;

@@ -4,6 +4,7 @@
 #include "core/profiler.h"
 #include "graphics/graphics.h"
 #include "graphics/view/lookup.h"
+#include "grid/bridge.h"
 #include "grid/figure.h"
 #include "grid/property.h"
 #include "grid/random.h"
@@ -53,6 +54,7 @@ void minimap_window::archive_load(archive arch) {
     arch.r_anim("terrain_rock", terrain_rock);
     arch.r_anim("terrain_elevation", terrain_elevation);
     arch.r_anim("terrain_road", terrain_road);
+    arch.r_anim("terrain_bridge", terrain_bridge);
     arch.r_anim("terrain_wall", terrain_wall);
     arch.r_anim("terrain_meadow", terrain_meadow);
     arch.r_anim("terrain_flooplain", terrain_flooplain);
@@ -293,7 +295,9 @@ void minimap_window::draw_minimap_tile(vec2i screen, tile2i point) {
     } else {
         int rand = map_random_get(grid_offset);
         int image_id;
-        if (terrain & TERRAIN_WATER) {
+        if (map_is_bridge(grid_offset)) {
+            image_id = terrain_bridge.first_img();
+        } else if (terrain & TERRAIN_WATER) {
             image_id = terrain_water.first_img() + (rand & 3);
         } else if (terrain & TERRAIN_SHRUB)
             image_id = terrain_shrub.first_img() + (rand & 3);

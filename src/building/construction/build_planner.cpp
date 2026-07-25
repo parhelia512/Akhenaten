@@ -38,6 +38,7 @@
 #include "game/undo.h"
 #include "graphics/image.h"
 #include "graphics/image_groups.h"
+#include "graphics/graphics.h"
 #include "graphics/window.h"
 #include "grid/bridge.h"
 #include "grid/building.h"
@@ -499,7 +500,6 @@ void build_planner::setup_build_flags() {
 
     case BUILDING_LOW_BRIDGE:
     case BUILDING_UNUSED_SHIP_BRIDGE_83:
-        set_flag(e_planner_rule::ShoreLine, 1);
         set_flag(e_planner_rule::Bridge);
         break;
 
@@ -1012,9 +1012,14 @@ void build_planner::construction_update(tile2i tile) {
         break;
 
     case BUILDING_LOW_BRIDGE:
-    case BUILDING_UNUSED_SHIP_BRIDGE_83:
+    case BUILDING_UNUSED_SHIP_BRIDGE_83: {
+        const bool is_ship = (build_type == BUILDING_UNUSED_SHIP_BRIDGE_83);
+        int length = 0;
+        int direction = 0;
+        map_bridge_calculate_length_direction(end.x(), end.y(), &length, &direction, is_ship);
         items_placed = map_bridge_building_length();
         break;
+    }
 
     case BUILDING_HOUSE_VACANT_LOT:
         items_placed = place_houses(true, start.x(), start.y(), end.x(), end.y());
@@ -1155,10 +1160,26 @@ void build_planner::update_preview(tile2i cursor_tile) {
     immediate_warning = "";
     extra_warning = "";
     can_place = CAN_PLACE;
-    update_obstructions_check();
+    if (!needBridge()) {
+        update_obstructions_check();
+    }
     update_requirements_check();
     update_special_case_orientations_check();
     update_unique_only_one_check();
+
+    if (needBridge()) {
+        const bool is_ship = (build_type == BUILDING_UNUSED_SHIP_BRIDGE_83);
+        int length = 0;
+        int direction = 0;
+        int end_offset = map_bridge_calculate_length_direction(end.x(), end.y(), &length, &direction, is_ship);
+        const auto &params = building_static_params::get(build_type);
+        const int min_length = bridge_span_min_length(is_ship);
+        const int max_length = bridge_span_max_length(is_ship);
+        const bool blocked = !end_offset || length < min_length || length > max_length
+            || g_city.finance.is_out_of_money();
+        can_place = blocked ? CAN_NOT_PLACE : CAN_PLACE;
+        total_cost = blocked ? 0 : (int)params.get_cost() * length;
+    }
 }
 
 void build_planner::update_hover(tile2i cursor_tile) {
@@ -1178,19 +1199,27 @@ void build_planner::update(tile2i cursor_tile) {
 }
 
 void build_planner::draw_flat_tile(vec2i pos, color color_mask, painter &ctx) {
-    ctx.img_generic(image_id_from_group(GROUP_TERRAIN_OVERLAY_COLORED), pos, color_mask);
+    auto &command = ImageDraw::create_command(ctx, render_command_t::ert_generic);
+    command.image_id = image_id_from_group(GROUP_TERRAIN_OVERLAY_COLORED);
+    command.pixel = pos;
+    command.mask = color_mask;
+    command.scale = 1.f;
 }
 
 void build_planner::draw_bridge(tile2i tile, vec2i pixel, int type, painter &ctx) {
+    const bool is_ship = (type == BUILDING_UNUSED_SHIP_BRIDGE_83);
     int length, direction;
-    int end_grid_offset = map_bridge_calculate_length_direction(tile.x(), tile.y(), &length, &direction);
+    int end_grid_offset = map_bridge_calculate_length_direction(tile.x(), tile.y(), &length, &direction, is_ship);
 
     int dir = direction - g_camera.orientation;
     if (dir < 0)
         dir += 8;
 
+    const int min_length = bridge_span_min_length(is_ship);
+    const int max_length = bridge_span_max_length(is_ship);
+
     bool blocked = false;
-    if (type == BUILDING_UNUSED_SHIP_BRIDGE_83 && length < 5)
+    if (length < min_length || length > max_length)
         blocked = true;
     else if (!end_grid_offset)
         blocked = true;
@@ -1275,6 +1304,12 @@ void build_planner::draw_flat_tile(painter &ctx, vec2i pixel, color color_mask) 
 
 void build_planner::draw(painter &ctx) {
     OZZY_PROFILER_FUNCTION();
+    if (needBridge()) {
+        vec2i pixel = pixel_coords_cache[0][0];
+        draw_bridge(end, pixel, build_type, ctx);
+        return;
+    }
+
     // empty building
     if (size.x < 1 || size.y < 1) {
         return;
@@ -1367,9 +1402,14 @@ bool build_planner::place() {
         break;
 
     case BUILDING_LOW_BRIDGE:
-    case BUILDING_UNUSED_SHIP_BRIDGE_83:
-        placement_cost *= map_bridge_add(end.x(), end.y(), build_type == BUILDING_UNUSED_SHIP_BRIDGE_83);
+    case BUILDING_UNUSED_SHIP_BRIDGE_83: {
+        const bool is_ship = (build_type == BUILDING_UNUSED_SHIP_BRIDGE_83);
+        int length = 0;
+        int direction = 0;
+        map_bridge_calculate_length_direction(end.x(), end.y(), &length, &direction, is_ship);
+        placement_cost *= map_bridge_add(end.x(), end.y(), is_ship);
         break;
+    }
 
     case BUILDING_HOUSE_VACANT_LOT:
         placement_cost *= place_houses(false, start.x(), start.y(), end.x(), end.y());

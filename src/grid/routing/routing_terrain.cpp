@@ -13,6 +13,7 @@
 #include "grid/property.h"
 #include "grid/random.h"
 #include "grid/sprite.h"
+#include "grid/bridge_grid.h"
 #include "grid/terrain.h"
 #include "grid/water.h"
 #include "routing_grids.h"
@@ -198,7 +199,8 @@ int map_routing_tile_check(int routing_type, int grid_offset) {
                 return CITIZEN_N1_BLOCKED;
             }
 
-            if (!!(terrain & TERRAIN_ROAD) && !(terrain & TERRAIN_WATER)) {
+            // Roads include bridges (WATER|ROAD). Ferry routes stay passable without a road flag.
+            if (!!(terrain & TERRAIN_ROAD)) {
                 return CITIZEN_0_ROAD;
             }
 
@@ -206,7 +208,7 @@ int map_routing_tile_check(int routing_type, int grid_offset) {
                 return CITIZEN_0_ROAD;
             }
 
-            // Block pure water tiles (lakes, rivers) - citizens cannot build roads through water
+            // Block pure water tiles (lakes, rivers) - citizens cannot walk through water
             if (!!(terrain & TERRAIN_WATER) && !(terrain & TERRAIN_FERRY_ROUTE)) {
                 return CITIZEN_N1_BLOCKED;
             }
@@ -289,7 +291,7 @@ int map_routing_tile_check(int routing_type, int grid_offset) {
 
             if (terrain & TERRAIN_WATER && is_surrounded_by_water(grid_offset)) {
                 if (x > 0 && x < scenario_map_data()->width - 1 && y > 0 && y < scenario_map_data()->height - 1) {
-                    switch (map_sprite_animation_at(grid_offset)) {
+                    switch (map_bridge_part_at(grid_offset)) {
                     case 5:
                     case 6: // low bridge middle section
                         return AMPHIBIA_N3_LOW_BRIDGE;
@@ -308,7 +310,7 @@ int map_routing_tile_check(int routing_type, int grid_offset) {
     case ROUTING_TYPE_WATER: {
             if ((terrain & TERRAIN_WATER) && !(terrain & TERRAIN_FLOODPLAIN) && is_surrounded_by_water(grid_offset) && !has_land_corner(grid_offset)) {
                 if (x > 0 && x < scenario_map_data()->width - 1 && y > 0 && y < scenario_map_data()->height - 1) {
-                    switch (map_sprite_animation_at(grid_offset)) {
+                    switch (map_bridge_part_at(grid_offset)) {
                     case 5:
                     case 6: // low bridge middle section
                         return WATER_N3_LOW_BRIDGE;

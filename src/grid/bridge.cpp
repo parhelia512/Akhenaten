@@ -1,7 +1,9 @@
 ﻿#include "bridge.h"
 
+#include "building/building_bridge.h"
 #include "core/direction.h"
 #include "graphics/view/view.h"
+#include "grid/bridge_grid.h"
 #include "grid/figure.h"
 #include "grid/grid.h"
 #include "grid/property.h"
@@ -27,7 +29,7 @@ void map_bridge_reset_building_length(void) {
     g_bridge.length = 0;
 }
 
-int map_bridge_calculate_length_direction(int x, int y, int* length, int* direction) {
+int map_bridge_calculate_length_direction(int x, int y, int* length, int* direction, bool is_ship_bridge) {
     int grid_offset = MAP_OFFSET(x, y);
     g_bridge.end_grid_offset = 0;
     g_bridge.direction_grid_delta = 0;
@@ -35,6 +37,10 @@ int map_bridge_calculate_length_direction(int x, int y, int* length, int* direct
     g_bridge.direction = *direction = 0;
 
     if (!map_terrain_is(grid_offset, TERRAIN_WATER))
+        return 0;
+
+    // Floodplain water is not a valid bridge span (Nile channel without floodplain is OK).
+    if (map_terrain_is(grid_offset, TERRAIN_FLOODPLAIN))
         return 0;
 
     if (map_terrain_is(grid_offset, TERRAIN_ROAD | TERRAIN_BUILDING))
@@ -60,14 +66,23 @@ int map_bridge_calculate_length_direction(int x, int y, int* length, int* direct
     }
     *direction = g_bridge.direction;
     g_bridge.length = 1;
-    for (int i = 0; i < 40; i++) {
+    const int max_length = bridge_span_max_length(is_ship_bridge);
+    for (int i = 0; i < max_length; i++) {
         grid_offset += g_bridge.direction_grid_delta;
         g_bridge.length++;
+        if (map_terrain_is(grid_offset, TERRAIN_FLOODPLAIN))
+            break;
+
         int next_offset = grid_offset + g_bridge.direction_grid_delta;
         if (map_terrain_is(next_offset, TERRAIN_TREE))
             break;
 
         if (!map_terrain_is(next_offset, TERRAIN_WATER)) {
+            // length includes the start tile; reject spans longer than configured max
+            if (g_bridge.length > max_length) {
+                break;
+            }
+
             g_bridge.end_grid_offset = grid_offset;
             if (map_terrain_count_directly_adjacent_with_type(grid_offset, TERRAIN_WATER) != 3)
                 g_bridge.end_grid_offset = 0;
@@ -187,8 +202,9 @@ int map_bridge_get_sprite_id(int index, int length, int direction, bool is_ship_
 }
 
 int map_bridge_add(int x, int y, bool is_ship_bridge) {
-    int min_length = is_ship_bridge ? 5 : 2;
-    if (g_bridge.end_grid_offset <= 0 || g_bridge.length < min_length) {
+    int min_length = bridge_span_min_length(is_ship_bridge);
+    if (g_bridge.end_grid_offset <= 0 || g_bridge.length < min_length
+        || g_bridge.length > bridge_span_max_length(is_ship_bridge)) {
         g_bridge.length = 0;
         return g_bridge.length;
     }
@@ -201,6 +217,9 @@ int map_bridge_add(int x, int y, bool is_ship_bridge) {
     for (int i = 0; i < g_bridge.length; i++) {
         map_terrain_add(grid_offset, TERRAIN_ROAD);
         int value = map_bridge_get_sprite_id(i, g_bridge.length, g_bridge.direction, is_ship_bridge);
+        map_bridge_part_set(grid_offset, value);
+        map_bridge_type_set(grid_offset, 0);
+        // Dual-write so original Pharaoh can still show the bridge from sprite_grid.
         map_sprite_animation_set(grid_offset, value);
         grid_offset += g_bridge.direction_grid_delta;
     }
@@ -212,7 +231,7 @@ int map_bridge_add(int x, int y, bool is_ship_bridge) {
 }
 
 int map_is_bridge(int grid_offset) {
-    return map_terrain_is(grid_offset, TERRAIN_WATER) && map_sprite_animation_at(grid_offset);
+    return map_terrain_is(grid_offset, TERRAIN_WATER) && map_bridge_part_at(grid_offset) != 0;
 }
 
 static int get_y_bridge_tiles(int grid_offset) {
@@ -265,6 +284,7 @@ void map_bridge_remove(int grid_offset, int mark_deleted) {
     if (mark_deleted)
         map_property_mark_deleted(grid_offset);
     else {
+        map_bridge_tile_clear(grid_offset);
         map_sprite_clear_tile(grid_offset);
         map_terrain_remove(grid_offset, TERRAIN_ROAD);
     }
@@ -273,6 +293,7 @@ void map_bridge_remove(int grid_offset, int mark_deleted) {
         if (mark_deleted)
             map_property_mark_deleted(grid_offset);
         else {
+            map_bridge_tile_clear(grid_offset);
             map_sprite_clear_tile(grid_offset);
             map_terrain_remove(grid_offset, TERRAIN_ROAD);
         }
@@ -310,7 +331,7 @@ void map_bridge_update_after_rotate(int counter_clockwise) {
         for (int x = 0; x < scenario_map_data()->width; x++, grid_offset++) {
             if (map_is_bridge(grid_offset)) {
                 int new_value;
-                switch (map_sprite_animation_at(grid_offset)) {
+                switch (map_bridge_part_at(grid_offset)) {
                 case 1:
                     new_value = counter_clockwise ? 2 : 4;
                     break;
@@ -357,8 +378,9 @@ void map_bridge_update_after_rotate(int counter_clockwise) {
                     new_value = 14;
                     break;
                 default:
-                    new_value = map_sprite_animation_at(grid_offset);
+                    new_value = map_bridge_part_at(grid_offset);
                 }
+                map_bridge_part_set(grid_offset, new_value);
                 map_sprite_animation_set(grid_offset, new_value);
             }
         }
@@ -366,7 +388,7 @@ void map_bridge_update_after_rotate(int counter_clockwise) {
 }
 
 int map_bridge_height(int grid_offset) {
-    int sprite = map_sprite_animation_at(grid_offset);
+    int sprite = map_bridge_part_at(grid_offset);
     if (sprite <= 6) {
         // low bridge
         switch (sprite) {

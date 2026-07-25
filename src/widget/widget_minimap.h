@@ -23,6 +23,7 @@ struct minimap_window : public autoconfig_window_t<minimap_window> {
     animation_t terrain_rock;
     animation_t terrain_elevation;
     animation_t terrain_road;
+    animation_t terrain_bridge;
     animation_t terrain_wall;
     animation_t terrain_meadow;
     animation_t terrain_flooplain;
@@ -45,7 +46,7 @@ struct minimap_window : public autoconfig_window_t<minimap_window> {
     virtual void archive_load(archive arch) override;
     virtual void init() override;
     virtual void on_mission_start() override;
-    
+
     bool is_in_minimap(const mouse *m);
     bool draw_figure(vec2i screen, tile2i point);
     vec2i get_mouse_relative_pos(const mouse *m, float &xx, float &yy);
