@@ -7,7 +7,7 @@ Pak triage (skip/ladder/shared chain): **[MISSION_PAK_TRIAGE.md](MISSION_PAK_TRI
 Кампания / favour / грабли: **[REMAKE_NOTES.md](REMAKE_NOTES.md)**.  
 B2 (event invasions): **[REMAKE_B2_INVASION_PLAN.md](REMAKE_B2_INVASION_PLAN.md)**.
 
-**HEAD:** Meidum (12) redefine is done in the working tree — **not yet committed**.  
+**HEAD:** Meidum (12) redefine committed as `db5dd9310`.  
 **Serabit Khadim (11):** `9ac84fd3f`. **B2 native invasion (Phase 1–5):** `340f7d29d`.  
 **Saqqara + map_file:** `3affd5b21`. **Maps assets:** `b63b7c218`. **Abu:** `c10506b5f`.  
 **Next:** Buhen / South Dahshur (13/14).
@@ -38,14 +38,14 @@ B2 (event invasions): **[REMAKE_B2_INVASION_PLAN.md](REMAKE_B2_INVASION_PLAN.md)
 | **9** | Abu | **да** | **да** | favour 40→20→20 | `abu.html` | **committed** `c10506b5f` |
 | **10** | Saqqara | **да** | **да** | favour 69 | `saqqara.html` | **`3affd5b21`**; `map_file`; oil×501 |
 | **11** | Serabit | **да** | **да** | Libyan + beduin16 rec + favour 51 | `serabit-khadim.html` | empire id=8; funds 15k; housing 4 |
-| **12** | Meidum | **да** | **да** | Hyksos y7m6+ size17 rec + favour 25→60 | `meidum.html` | empire id=1; funds 10k (pak); housing 11; monuments TEMP 58; **uncommitted** |
+| **12** | Meidum | **да** | **да** | Hyksos y7m6+ size17 rec + favour 25→60 | `meidum.html` | empire id=1; funds 10k (pak); housing 11; monuments TEMP 58; **`db5dd9310`** |
 
 Миссии 0–2: wiki есть, empire почти из pak.  
 13–18: скрипты есть, empire patch/частичный. **Следующий кандидат:** Buhen / S. Dahshur (13/14).
 
 ---
 
-## Meidum (12) — сделано (2026-07-25, uncommitted)
+## Meidum (12) — сделано (`db5dd9310`)
 
 | Тема | Статус |
 |------|--------|
@@ -90,7 +90,7 @@ B2 (event invasions): **[REMAKE_B2_INVASION_PLAN.md](REMAKE_B2_INVASION_PLAN.md)
 
 ## Состояние рабочей копии
 
-**Meidum (12) full redefine** — `m_012_meidum.js` + wiki + handoff/plan docs, **в рабочем дереве, не закоммичено**.  
+**Meidum (12) full redefine** — `m_012_meidum.js` + wiki + handoff/plan docs, **committed** `db5dd9310`.  
 **Серабит (11)** committed: `9ac84fd3f`.  
 **Следующий full redefine:** Buhen / South Dahshur (**13/14**).  
 Параллельно WIP: B2 invasion engine (Phase 1–5 в коде, `340f7d29d`), UI scenario selection, video — **не** мешать в empire PR.
@@ -221,7 +221,7 @@ function check_valid() { return true }
 ## Файлы
 
 ```
-src/scripts/mission/m_012_meidum.js          ← Meidum done (this session, uncommitted)
+src/scripts/mission/m_012_meidum.js          ← Meidum done `db5dd9310`
 src/scripts/mission/m_013_buhen.js           ← next
 src/scripts/mission/m_014_south_dahshur.js   ← next
 docs/wiki/player/missions/meidum.html

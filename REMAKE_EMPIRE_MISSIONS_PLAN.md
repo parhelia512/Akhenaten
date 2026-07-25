@@ -1,6 +1,6 @@
 # План: empire-миссии → JS + B2 (2026-07-25)
 
-Рабочий план трека после **Meidum (12)** (working tree, **не закоммичено**; Serabit `9ac84fd3f`; Saqqara `3affd5b21`; Abu `c10506b5f`).  
+Рабочий план трека после **Meidum (12)** (`db5dd9310`; Serabit `9ac84fd3f`; Saqqara `3affd5b21`; Abu `c10506b5f`).  
 Не смешивать с bridges / hunting / OpenH264 / video — отдельные PR (**PC4**).
 
 | Документ | Роль |
@@ -31,7 +31,7 @@
 |---|--------|----------------|------------|
 | **10** | Saqqara | `m_009_abu.js` | **done** `3affd5b21` + `map_file`/`data/maps` |
 | **11** | Serabit Khadim | m_010 / m_009 | **done** `9ac84fd3f` (2026-07-25 full redefine) |
-| **12** | Meidum | m_011 / m_010 | **done** (2026-07-25, working tree — **не закоммичено**) |
+| **12** | Meidum | m_011 / m_010 | **done** `db5dd9310` |
 | 13 / 14 | Buhen / S. Dahshur | m_012 / m_011 | **next**; ветка; `next_mission:15` явно |
 | 15 | N. Dahshur | m_012 / m_011 | choice host |
 | 16 / 17 | Iunet / On | m_012 / m_011 | |
@@ -160,7 +160,7 @@ git status: no foreign tracks in stage
 
 | Done | Next |
 |------|------|
-| **4–12** Men-nefer … Meidum (Serabit `9ac84fd3f`; Saqqara `3affd5b21`; Meidum working tree — не закоммичено) | **13/14** Buhen / S. Dahshur |
+| **4–12** Men-nefer … Meidum (Serabit `9ac84fd3f`; Saqqara `3affd5b21`; Meidum `db5dd9310`) | **13/14** Buhen / S. Dahshur |
 | `map_file` → `data/maps` (0–18); pak fallback | — |
 | Map-point API + values m4–12; **invasion_points** JS m2, m5–18 (`697a61836`) | entry/exit/river/disembark для 13+ где есть |
 | CITY_STATUS subtype 1 | **AUD1** audit остальных subtypes |
