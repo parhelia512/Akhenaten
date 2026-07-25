@@ -158,10 +158,10 @@ window_scenario_selection_campaign {
 
         // Exit / Play along the bottom edge of the dialog.
         btn_exit : image_button({ pos[215, 590], size[31, 20], pack:PACK_GENERAL, id:90, offset:8, onclick: window_go_back })
-        lbl_exit : text({ pos[250, 612], text[44, 217], font:FONT_NORMAL_BLACK_ON_LIGHT })
+        lbl_exit : text({ pos[250, 592], text[44, 217], font:FONT_NORMAL_BLACK_ON_LIGHT })
         btn_exit_hit : button({ pos[215, 605], size[110, 30], text:"", hbody:false, border:false, onclick: window_go_back })
 
-        lbl_play : text({ pos[735, 618], text[294, 37], font:FONT_NORMAL_BLACK_ON_LIGHT })
+        lbl_play : text({ pos[735, 590], text[294, 37], font:FONT_NORMAL_BLACK_ON_LIGHT })
         btn_play : image_button({ pos[780, 585], size[27, 27], pack:PACK_GENERAL, id:193, offset:4, onclick: campaign_btn_play })
     }
 }

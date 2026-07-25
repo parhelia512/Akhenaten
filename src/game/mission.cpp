@@ -48,12 +48,12 @@ const uint8_t* game_mission_get_name(int scenario_id) {
 }
 
 const mission_step_t* get_campaign_mission_step_data(int campaign_id, int step_index) {
-    if (campaign_id < -1 || campaign_id >= g_mission_data.num_campaigns)
+    if (campaign_id < 0 || campaign_id >= g_mission_data.num_campaigns)
         return nullptr;
     auto campaign = &g_mission_data.campaigns[campaign_id];
-    if (step_index < -1 || step_index > campaign->num_steps)
+    if (step_index < 0 || step_index >= campaign->num_steps)
         return nullptr;
-    return &g_mission_data.campaigns[campaign_id].steps[step_index];
+    return &campaign->steps[step_index];
 }
 
 const mission_step_t* get_scenario_step_data(int scenario_id) {

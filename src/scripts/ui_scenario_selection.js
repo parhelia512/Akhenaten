@@ -5,7 +5,7 @@ function scenario_selection_add_campaign_missions(list, campaign_id, MAX_MANUAL_
     for (var i = 0; i < MAX_MANUAL_ENTRIES; i++) {
         var sid = __game_campaign_mission_step_scenario_id(campaign_id, i)
         if (sid < 0) {
-            continue
+            break
         }
         if (first_sid < 0) {
             first_sid = sid

@@ -745,6 +745,11 @@ bool GamestateIO::load_mission(const int scenario_id, bool start_immediately) {
         return false;
     }
 
+    // Scenario selection loads with start_immediately=false, so start_loaded_file()
+    // (which also calls init_cities) never runs. post_load() needs EMPIRE_CITY_OURS via
+    // update_allowed_foods() — rebuild cities from empire objects first.
+    g_empire.init_cities();
+
     post_load();
 
     g_empire.fix_trade_routes();
