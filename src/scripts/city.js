@@ -7,6 +7,7 @@ city {
     @player_rank { get: __city_player_rank }
     @rating_kingdom { get: __city_rating_kingdom }
     @num_forts { get: __formation_get_num_forts }
+    @num_enemy_formations { get: __enemy_army_total_enemy_formations }
     @current_overlay { get: __city_get_current_overlay, set: __city_set_current_overlay }
 
     figures {
@@ -423,6 +424,7 @@ city.create_chain_event = function(obj) {
     return {
         tag_id: obj.tag_id
         set_completed_action_tag: function(slave_tag) { __city_request_set_completed_action(this.tag_id, slave_tag) }
+        execute: function() { __city_request_execute(this.tag_id) }
     }
 }
 

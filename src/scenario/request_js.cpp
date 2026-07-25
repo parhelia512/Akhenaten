@@ -2,6 +2,7 @@
 
 #include "js/js_game.h"
 #include "scenario/scenario.h"
+#include "scenario/scenario_event_manager.h"
 #include "scenario/scenario_invasion.h"
 #include "empire/empire.h"
 #include "core/variant.h"
@@ -71,13 +72,16 @@ void ANK_FUNCTION_UNIFIED(__city_create_chain_event)(const bvariant_map &args) {
     }
 
     const e_resource resource = (e_resource)args.i32("resource", args.i32("item", RESOURCE_NONE));
+    const e_event_trigger_type trigger = (e_event_trigger_type)args.i32(
+        "trigger", EVENT_TRIGGER_ONLY_VIA_EVENT);
     g_scenario.events.create_chain_event(
         args.n("tag_id"),
         (e_event_type)args.n("type"),
         args.n("amount"),
         resource,
         (int8_t)args.i32("subtype", 0),
-        city_id
+        city_id,
+        trigger
     );
 }
 
@@ -104,5 +108,8 @@ void ANK_FUNCTION_UNIFIED(__city_start_foreign_army_invasion)(const bvariant_map
     opts.invasion_point = { args.i32("tilex", -1), args.i32("tiley", -1) };
     opts.invasion_id = args.i32("invasion_id", 0);
     opts.want_destroy = (uint8_t)args.i32("want_destroy_buildings", 0);
+    // pak field attack= / invasion_attack_target (EVENT_ATTACK_TARGET_*, 0..4)
+    opts.attack_type = formation_attack_from_event_target(
+        args.i32("invasion_attack_target", EVENT_ATTACK_TARGET_RANDOM));
     scenario_invasion_start(opts);
 }

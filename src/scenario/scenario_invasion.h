@@ -34,14 +34,18 @@ struct invasion_warning_t {
 };
 
 struct invasion_opts_t {
-    e_attack_faction mode;
-    e_enemy_type enemy_type;
-    int size;
-    int invasion_id;
-    e_formation_attack_type attack_type;
+    e_attack_faction mode = ATTACK_TYPE_ENEMIES;
+    e_enemy_type enemy_type = ENEMY_0_BARBARIAN;
+    int size = 0;
+    int invasion_id = 0;
+    // FORMATION_ATTACK_*; pak EVENT_ATTACK_TARGET_RANDOM(4) maps to FORMATION_ATTACK_RANDOM(5)
+    e_formation_attack_type attack_type = FORMATION_ATTACK_RANDOM;
     tile2i invasion_point;
-    uint8_t want_destroy;
+    uint8_t want_destroy = 0;
 };
+
+// Map pak/JS invasion_attack_target (EVENT_ATTACK_TARGET_*) → formation attack_type.
+e_formation_attack_type formation_attack_from_event_target(int invasion_attack_target);
 
 struct enemy_properties_t {
     int percentage_type1;

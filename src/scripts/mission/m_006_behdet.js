@@ -342,8 +342,13 @@ mission6 { // Behdet — The Royal Navy
 		pharaoh_fish_requested : false
 		pharaoh_beer_requested : false
 		pharaoh_beer_late_requested : false
+		papyrus_demand_increased : false
+		clay_pit_flood_done : false
+		failed_flood_done : false
 		kushite_invasion_1 : false
 		kushite_invasion_2 : false
+		kushite_invasion_2_enemies_seen : false
+		kushite_invasion_2_rewarded : false
 		kushite_invasion_3 : false
 		pharaoh_favour_invasion_done : false
 		start_message_shown : false
@@ -371,7 +376,8 @@ function mission6_kushite_raid(invasion_id, size) {
 		size: size,
 		tilex: -1,
 		tiley: -1,
-		want_destroy_buildings: size
+		want_destroy_buildings: size,
+		invasion_attack_target: EVENT_ATTACK_TARGET_RANDOM // pak attack=4
 	})
 }
 
@@ -385,6 +391,25 @@ function mission6_on_start(ev) {
 	for (var i = ADVISOR_NONE + 1; i <= ADVISOR_DIPLOMACY; i++) {
 		city.set_advisor_available(i, 1)
 	}
+}
+
+// pak: year=1 month=0 DEMAND_INCREASE papyrus amount=6 (once)
+[es=event_advance_month, mission=mission6]
+function mission6_papyrus_demand_increase(ev) {
+	if (mission.papyrus_demand_increased) {
+		return
+	}
+	if (ev.years_since_start < 1) {
+		return
+	}
+	mission.papyrus_demand_increased = true
+	city.create_chain_event({
+		tag_id: 601,
+		type: EVENT_TYPE_DEMAND_INCREASE,
+		resource: RESOURCE_PAPYRUS,
+		amount: 6,
+		trigger: EVENT_TRIGGER_ONCE
+	}).execute()
 }
 
 // pak: year=1 month=7 pottery 14 / 9mo; ok→+6, refuse→−6, late→−4
@@ -450,8 +475,44 @@ function mission6_pharaoh_request_beer_late(ev) {
 	mission6_fire_request(5, RESOURCE_BEER, 21, 16, 501, 502, 503, 12, 7, 3)
 }
 
+// pak: year=8 month=6 CLAY_PIT_FLOOD once — rubble one clay pit
+[es=event_advance_month, mission=mission6]
+function mission6_clay_pit_flood(ev) {
+	if (mission.clay_pit_flood_done) {
+		return
+	}
+	if (ev.years_since_start < 8 || (ev.years_since_start == 8 && ev.month < 6)) {
+		return
+	}
+	mission.clay_pit_flood_done = true
+	city.create_chain_event({
+		tag_id: 801,
+		type: EVENT_TYPE_CLAY_PIT_FLOOD,
+		amount: 8,
+		trigger: EVENT_TRIGGER_ONCE
+	}).execute()
+}
+
+// pak: year=10 month=0 FAILED_FLOOD recurring — force next inundation quality to 0
+[es=event_advance_month, mission=mission6]
+function mission6_failed_flood(ev) {
+	if (mission.failed_flood_done) {
+		return
+	}
+	if (ev.years_since_start < 10) {
+		return
+	}
+	mission.failed_flood_done = true
+	city.create_chain_event({
+		tag_id: 802,
+		type: EVENT_TYPE_FAILED_FLOOD,
+		amount: 8,
+		trigger: EVENT_TRIGGER_ONCE
+	}).execute()
+}
+
 // pak invasions (scenario enemy = Kushite). Favour-KR Pharaoh army amount=45.
-// CLAY_PIT_FLOOD / FAILED_FLOOD / DEMAND_INCREASE exist in pak but engine handlers are stubs — not wired.
+// Invasion y15 ok→REPUTATION_INCREASE +8 (polled via enemy formations; B2 not wired).
 [es=event_advance_month, mission=mission6]
 function mission6_kushite_invasion_1(ev) {
 	if (mission.kushite_invasion_1) { return }
@@ -468,6 +529,34 @@ function mission6_kushite_invasion_2(ev) {
 	mission.kushite_invasion_2 = true
 	log_info("akhenaten: mission 6 behdet kushite invasion 2 size=16", {ev:ev})
 	mission6_kushite_raid(1, 16)
+}
+
+// pak: invasion y15 on_completed → REPUTATION_INCREASE +8
+[es=event_advance_month, mission=mission6]
+function mission6_kushite_invasion_2_reward(ev) {
+	if (!mission.kushite_invasion_2 || mission.kushite_invasion_2_rewarded) {
+		return
+	}
+	// Wait a month so formation totals update after the spawn.
+	if (ev.years_since_start < 15 || (ev.years_since_start == 15 && ev.month < 1)) {
+		return
+	}
+	var enemies = city.num_enemy_formations
+	if (enemies > 0) {
+		mission.kushite_invasion_2_enemies_seen = true
+		return
+	}
+	if (!mission.kushite_invasion_2_enemies_seen) {
+		return
+	}
+	mission.kushite_invasion_2_rewarded = true
+	log_info("akhenaten: mission 6 behdet kushite invasion 2 cleared → KR +8")
+	city.create_chain_event({
+		tag_id: 701,
+		type: EVENT_TYPE_REPUTATION_INCREASE,
+		amount: 8,
+		trigger: EVENT_TRIGGER_ONCE
+	}).execute()
 }
 
 [es=event_advance_month, mission=mission6]

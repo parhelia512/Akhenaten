@@ -25,6 +25,23 @@
 
 const e_attack_faction_tokens_t ANK_CONFIG_ENUM(e_attack_faction_tokens);
 
+e_formation_attack_type formation_attack_from_event_target(int invasion_attack_target) {
+    // Pak EVENT_ATTACK_TARGET_* is 0..4; FORMATION_ATTACK_RANDOM is 5 (SIMPLE sits at 4).
+    switch (invasion_attack_target) {
+    case 0: // EVENT_ATTACK_TARGET_FOOD
+        return FORMATION_ATTACK_FOOD_CHAIN;
+    case 1: // EVENT_ATTACK_TARGET_VAULTS
+        return FORMATION_ATTACK_GOLD_STORES;
+    case 2: // EVENT_ATTACK_TARGET_BEST_BUILDINGS
+        return FORMATION_ATTACK_BEST_BUILDINGS;
+    case 3: // EVENT_ATTACK_TARGET_TROOPS
+        return FORMATION_ATTACK_TROOPS;
+    case 4: // EVENT_ATTACK_TARGET_RANDOM
+    default:
+        return FORMATION_ATTACK_RANDOM;
+    }
+}
+
 declare_console_command_p(start_invasion) {
     invasion_opts_t opts;
     opts.mode = ATTACK_TYPE_ENEMIES;
@@ -430,7 +447,7 @@ void scenario_invasion_start(invasion_opts_t opts) {
     auto &data = g_invasions;
     switch (opts.mode) {
     case ATTACK_TYPE_ENEMIES: {
-        opts.attack_type = FORMATION_ATTACK_RANDOM;
+        // Prefer caller attack_type (JS invasion_attack_target / console / defaults).
         tile2i invasion_tile = scenario_start_invasion_impl(opts);
         if (invasion_tile.valid()) {
             events::emit(event_message{ true, "message_barbarians_attack", data.last_internal_invasion_id, invasion_tile.grid_offset(), SOURCE_LOCATION });

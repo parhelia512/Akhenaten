@@ -1,12 +1,21 @@
 #include "scenario_event_manager.h"
 
+#include "building/building.h"
+#include "building/building_type.h"
+#include "city/city_buildings.h"
+#include "city/city_finance.h"
+#include "city/city_floods.h"
 #include "city/city_message.h"
+#include "city/city_population.h"
+#include "city/city_trade.h"
 #include "core/string.h"
 #include "core/log.h"
 #include "core/variant.h"
 #include "event_phrases.h"
 #include "io/gamefiles/lang.h"
 #include "empire/empire.h"
+#include "empire/empire_city.h"
+#include "empire/trade_route.h"
 #include "io/io.h"
 #include "io/io_buffer.h"
 #include "core/random.h"
@@ -18,6 +27,7 @@
 #include "city/city_resource.h"
 #include "dev/debug.h"
 #include "scenario/distant_battle.h"
+#include "scenario/scenario.h"
 #include "graphics/elements/lang_text.h"
 
 constexpr int MAX_EVENTS = 150;
@@ -25,7 +35,8 @@ constexpr int NUM_AUTO_PHRASE_VARIANTS = 54;
 
 const e_event_type_tokens_t ANK_CONFIG_ENUM(e_event_type_tokens);
 const e_event_state_tokens_t e_event_state_tokens;
-const e_event_trigger_type_tokens_t e_event_trigger_type_tokens;
+const e_event_trigger_type_tokens_t ANK_CONFIG_ENUM(e_event_trigger_type_tokens);
+const e_event_attack_tokens_t ANK_CONFIG_ENUM(e_event_attack_tokens);
 
 struct auto_phrase {
     uint8_t id;
@@ -223,7 +234,7 @@ void event_manager_t::win_distant_battle(int tag, pcstr city, vec2i pos) {
 }
 
 void event_manager_t::create_chain_event(int tag, e_event_type type, int amount, e_resource resource,
-                                         int8_t subtype, int8_t city_id) {
+                                         int8_t subtype, int8_t city_id, e_event_trigger_type trigger) {
     auto& event = g_scenario_events.event_list.emplace_back();
     int event_id = g_scenario_events.event_list.size() - 1;
     memset(&event, 0, sizeof(event_ph_t));
@@ -233,7 +244,9 @@ void event_manager_t::create_chain_event(int tag, e_event_type type, int amount,
     event.subtype = subtype;
     event.city_id = city_id;
     event.tag_id = tag;
-    event.event_trigger_type = EVENT_TRIGGER_ONLY_VIA_EVENT;
+    event.time.year = game.simtime.years_since_start();
+    event.time.month = game.simtime.month;
+    event.event_trigger_type = trigger;
     event.event_id = event_id;
     event.location_fields = { -1, -1, -1, -1 };
     event.on_completed_action = -1;
@@ -557,19 +570,135 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         break;
 
     case EVENT_TYPE_SEA_TRADE_PROBLEM:
+        // Same duration as random_events sea disruption.
+        if (city_trade_has_sea_trade_route()) {
+            city_trade_start_sea_trade_problems(48);
+        }
+        city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                               PHRASE_stormy_seas_title, PHRASE_stormy_seas_initial_announcement,
+                               PHRASE_stormy_seas_no_reason_A, id, 0);
+        break;
+
     case EVENT_TYPE_LAND_TRADE_PROBLEM:
+        if (city_trade_has_land_trade_route()) {
+            city_trade_start_land_trade_problems(48);
+        }
+        if (g_scenario.climate == CLIMATE_DESERT) {
+            city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                                   PHRASE_sandstorm_title, PHRASE_sandstorm_initial_announcement,
+                                   PHRASE_sandstorm_no_reason_A, id, 0);
+        } else {
+            city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                                   PHRASE_landslide_title, PHRASE_landslide_initial_announcement,
+                                   PHRASE_landslide_no_reason_A, id, 0);
+        }
+        break;
+
     case EVENT_TYPE_WAGE_INCREASE:
+        g_city.finance.raise_wages_kingdome();
+        city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                               PHRASE_wage_change_title_I, PHRASE_wage_change_initial_announcement_I,
+                               PHRASE_wage_change_no_reason_I_A, id, 0);
+        break;
+
     case EVENT_TYPE_WAGE_DECREASE:
-    case EVENT_TYPE_CONTAMINATED_WATER:
-    case EVENT_TYPE_GOLD_MINE_COLLAPSE:
-    case EVENT_TYPE_CLAY_PIT_FLOOD:
+        g_city.finance.lower_wages_kingdome();
+        city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                               PHRASE_wage_change_title_D, PHRASE_wage_change_initial_announcement_D,
+                               PHRASE_wage_change_no_reason_D_A, id, 0);
+        break;
+
+    case EVENT_TYPE_CONTAMINATED_WATER: {
+            const int city_population = g_city.population.current;
+            if (city_population > 200) {
+                const int health_rate = g_city.health.value;
+                int change = -25;
+                if (health_rate > 80) {
+                    change = -50;
+                } else if (health_rate > 60) {
+                    change = -40;
+                }
+                g_city.health.change(change);
+            }
+            city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                                   PHRASE_bad_water_title, PHRASE_bad_water_initial_announcement,
+                                   PHRASE_bad_water_no_reason_A, id, 0);
+        }
+        break;
+
     case EVENT_TYPE_DEMAND_INCREASE:
-    case EVENT_TYPE_DEMAND_DECREASE:
+    case EVENT_TYPE_DEMAND_DECREASE: {
+            const e_resource resource = (e_resource)event.item.value;
+            const bool is_rise = (event.type == EVENT_TYPE_DEMAND_INCREASE);
+            int touched_city_id = 0;
+            for (auto &city : g_empire.get_cities()) {
+                if (!city.in_use || !city.is_open || city.route_id <= 0) {
+                    continue;
+                }
+                if (!city.buys_resource[resource] && !city.sells_resource[resource]) {
+                    continue;
+                }
+                auto &route = g_empire.get_route(city.route_id);
+                const bool changed = is_rise ? route.increase_limit(resource) : route.decrease_limit(resource);
+                if (changed && !touched_city_id) {
+                    touched_city_id = city.name_id;
+                }
+            }
+            if (is_rise) {
+                city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                                       PHRASE_demand_change_title_I, PHRASE_demand_change_initial_announcement_I,
+                                       PHRASE_demand_change_no_reason_I_A, id, touched_city_id);
+            } else {
+                city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                                       PHRASE_demand_change_title_D, PHRASE_demand_change_initial_announcement_D,
+                                       PHRASE_demand_change_no_reason_D_A, id, touched_city_id);
+            }
+        }
+        break;
+
     case EVENT_TYPE_PRICE_INCREASE:
     case EVENT_TYPE_PRICE_DECREASE:
         city_message_post_full(true, "message_template_general", &event, caller_event_id,
                                PHRASE_rating_change_title_I, PHRASE_rating_change_initial_announcement_I, PHRASE_rating_change_reason_I_A,
                                id, 0);
+        break;
+
+    case EVENT_TYPE_GOLD_MINE_COLLAPSE: {
+            building_id bid = building_id_random(BUILDING_GOLD_MINE);
+            building *b = building_get(bid);
+            if (b && b->is_valid()) {
+                b->destroy_by_collapse();
+                city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                                       PHRASE_goldmine_cavein_title, PHRASE_goldmine_cavein_initial_announcement,
+                                       PHRASE_goldmine_cavein_no_reason_A, id, b->tile.grid_offset());
+            }
+        }
+        break;
+
+    case EVENT_TYPE_CLAY_PIT_FLOOD: {
+            // Same effect as random_events clay-pit flood: rubble one working pit.
+            building_id bid = building_id_random(BUILDING_CLAY_PIT);
+            building *b = building_get(bid);
+            if (b && b->is_valid()) {
+                b->destroy_by_flooded();
+                messages::popup("message_tutorial_flooded_clay_pit", 0, b->tile.grid_offset());
+            }
+        }
+        break;
+
+    case EVENT_TYPE_FAILED_FLOOD:
+        // Force next inundation prediction to fail (nilometer + flood season quality).
+        g_floods.quality_next = 0;
+        city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                               PHRASE_flood_fails_title, PHRASE_flood_fails_initial_announcement,
+                               PHRASE_flood_fails_no_reason_A, id, 0);
+        break;
+
+    case EVENT_TYPE_PERFECT_FLOOD:
+        g_floods.quality_next = 100;
+        city_message_post_full(true, "message_template_general", &event, caller_event_id,
+                               PHRASE_perfect_flood_title, PHRASE_perfect_flood_initial_announcement,
+                               PHRASE_perfect_flood_no_reason_A, id, 0);
         break;
 
     case EVENT_TYPE_FOREIGN_ARMY_ATTACK_WARNING: {
@@ -669,8 +798,6 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         }
         break;
     }
-    case EVENT_TYPE_FAILED_FLOOD:
-    case EVENT_TYPE_PERFECT_FLOOD:
     case EVENT_TYPE_LOCUSTS:
     case EVENT_TYPE_FROGS:
     case EVENT_TYPE_HAILSTORM:

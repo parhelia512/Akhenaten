@@ -129,7 +129,37 @@ function mission_show_start_message(mission, message_id) {
     mission.start_message_shown = true
 }
 
-function mission_pharaoh_favour_invasion_tick(mission, army_size) {
+function mission_pharaoh_favour_invasion_tick(mission, army_size, chain_army_size) {
+    if (typeof chain_army_size === "undefined") {
+        chain_army_size = 0
+    }
+
+    // pak B2c: by_favour invasion ok→chain_only Pharaoh army. After the first wave clears, fire the child once.
+    if (mission.pharaoh_favour_invasion_done && chain_army_size > 0 && !mission.pharaoh_favour_chain_done) {
+        var enemies = city.num_enemy_formations
+        if (enemies > 0) {
+            mission.pharaoh_favour_enemies_seen = true
+            return
+        }
+        if (!mission.pharaoh_favour_enemies_seen) {
+            return
+        }
+        mission.pharaoh_favour_chain_done = true
+        log_info("akhenaten: pharaoh favour chain invasion size=" + chain_army_size + " kr=" + city.rating_kingdom)
+        __image_request_pak(PACK_ENEMY_EGYPTIAN)
+        city.start_foreign_army_invasion({
+            mode: ATTACK_TYPE_KINGDOME,
+            enemy: ENEMY_3_EGYPTIAN,
+            size: chain_army_size,
+            invasion_id: 25,
+            tilex: -1,
+            tiley: -1,
+            want_destroy_buildings: 0,
+            invasion_attack_target: EVENT_ATTACK_TARGET_RANDOM
+        })
+        return
+    }
+
     if (mission.pharaoh_favour_invasion_done) {
         return
     }
@@ -137,6 +167,10 @@ function mission_pharaoh_favour_invasion_tick(mission, army_size) {
         return
     }
     mission.pharaoh_favour_invasion_done = true
+    if (chain_army_size > 0) {
+        mission.pharaoh_favour_enemies_seen = false
+        mission.pharaoh_favour_chain_done = false
+    }
     log_info("akhenaten: pharaoh favour invasion size=" + army_size + " kr=" + city.rating_kingdom)
     __image_request_pak(PACK_ENEMY_EGYPTIAN)
     city.start_foreign_army_invasion({
@@ -146,7 +180,8 @@ function mission_pharaoh_favour_invasion_tick(mission, army_size) {
         invasion_id: 24,
         tilex: -1,
         tiley: -1,
-        want_destroy_buildings: 0
+        want_destroy_buildings: 0,
+        invasion_attack_target: EVENT_ATTACK_TARGET_RANDOM
     })
 }
 

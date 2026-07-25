@@ -15,6 +15,7 @@
 #include "scenario/scenario_invasion.h"
 #include "scenario/distant_battle.h"
 #include "scenario/request.h"
+#include "figure/enemy_army.h"
 
 #include "city/city_population.h"
 #include "city/city_victory.h"
@@ -54,6 +55,9 @@ ANK_FUNCTION(__city_player_name)
 
 int __formation_get_num_forts() { return formation_get_num_forts(); }
 ANK_FUNCTION(__formation_get_num_forts)
+
+int __enemy_army_total_enemy_formations() { return enemy_army_total_enemy_formations(); }
+ANK_FUNCTION(__enemy_army_total_enemy_formations)
 
 std::optional<bvariant> __city_get_battalion_property(int fid, pcstr property) {
     const auto form = formation_get(g_formations.get_battalion_id_from_index(fid + 1));
