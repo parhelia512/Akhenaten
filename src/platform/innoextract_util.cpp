@@ -800,7 +800,15 @@ bool has_required_game_files(pcstr dir) {
         return false;
     }
     std::error_code ec;
-    const fs::path data = fs::path(root.c_str()) / "Data";
+    const fs::path root_path(root.c_str());
+    fs::path data = root_path / "Data";
+    if (!fs::is_directory(data, ec)) {
+        data = root_path / "data";
+    }
+    if (!fs::is_directory(data, ec)) {
+        logs::warn("install check: missing Data/ folder under %s", root.c_str());
+        return false;
+    }
     // Pharaoh_Fonts.sg3 is optional — image_load_paks falls back to TTF/GLCD.
     const bool cleopatra = fs::is_regular_file(data / "Expansion.sg3", ec)
                            || fs::is_regular_file(data / "Expansion.SG3", ec)

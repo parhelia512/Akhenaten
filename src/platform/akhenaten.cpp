@@ -116,25 +116,27 @@ static bool confirm_continue_without_cleopatra(pcstr data_dir) {
 
 // Engine assets shipped with Akhenaten (not from the original Pharaoh install).
 static const char *const ENGINE_DATA_FILES[] = {
-    "data/neucha.ttf",
-    "data/pharaoh_fonts_pack.sgx",
-    "data/pharaoh_custom_pack.sgx",
-    "data/pharaoh_houses_pack.sgx",
+    "neucha.ttf",
+    "pharaoh_fonts_pack.sgx",
+    "pharaoh_custom_pack.sgx",
+    "pharaoh_houses_pack.sgx",
 };
 
-// Abort when build/deploy data/ is missing (common if only the binary was copied into the Pharaoh folder).
+// Abort when engine packs are missing from Data/ (or data/ on case-sensitive FS).
 static bool check_engine_data_files() {
     bstring512 missing;
     int missing_count = 0;
     for (pcstr file : ENGINE_DATA_FILES) {
-        if (!vfs::file_exists(file)) {
+        const bool ok = vfs::file_exists(vfs::path("Data/", file))
+                        || vfs::file_exists(vfs::path("data/", file));
+        if (!ok) {
             if (missing_count > 0) {
                 missing.append("\n");
             }
-            missing.append("- ");
+            missing.append("- Data/");
             missing.append(file);
             ++missing_count;
-            logs::error("engine data missing: %s", file);
+            logs::error("engine data missing: Data/%s", file);
         }
     }
 
@@ -145,8 +147,8 @@ static bool check_engine_data_files() {
     bstring2048 message;
     message.printf(
         "Akhenaten engine data files are missing (%d):\n\n%s\n\n"
-        "Copy the \"data\" folder from the Akhenaten build next to the akhenaten "
-        "executable, or into the Pharaoh Data/ folder.",
+        "Copy these files from the Akhenaten build \"data\" folder into the "
+        "Pharaoh Data/ folder (data/ is also accepted on Linux).",
         missing_count,
         missing.c_str());
 
