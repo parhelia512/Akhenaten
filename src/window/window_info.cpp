@@ -37,6 +37,7 @@
 #include "window/window_building_info.h"
 #include "window/window_terrain_info.h"
 #include "window/window_figure_info.h"
+#include "window/window_batalion_info.h"
 #include "window/window_city.h"
 #include "window/message_dialog.h"
 #include "widget/widget_sidebar.h"
@@ -132,6 +133,12 @@ void window_info_update(bool avoid_mouse) {
             }
         }
     };
+
+    // Own company figures (standard / soldiers) open battalion orders, not the
+    // generic figure panel — must run before figure handlers claim the tile.
+    if (!context.nfigure.ids.empty() && batalion_infow.check(context)) {
+        context.ui = &batalion_infow;
+    }
 
     if (!context.nfigure.ids.empty()) {
         find_handler(*g_window_figure_handlers, context);

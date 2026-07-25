@@ -239,9 +239,27 @@ void batalion_info_window::window_info_background(object_info &c) {
 //}
 
 bool batalion_info_window::check(object_info &c) {
-    // Fort buildings use info_window_fort. Company-orders routing for this
-    // window will be wired separately later.
-    return false;
+    // Fort buildings use info_window_fort. Company orders open when the player
+    // right-clicks the standard bearer or any soldier in an own battalion
+    // (same routing as Julius BUILDING_INFO_LEGION).
+    if (c.nfigure.ids.empty()) {
+        return false;
+    }
+
+    figure *f = c.figure_get();
+    if (!f || f->formation_id <= 0) {
+        return false;
+    }
+
+    const formation *m = formation_get(f->formation_id);
+    if (!m || !m->in_use || !m->own_batalion) {
+        return false;
+    }
+
+    if (m->building_id) {
+        c.bid = m->building_id;
+    }
+    return true;
 }
 
 void batalion_info_window::update_describe_layout(object_info &c) {
