@@ -194,15 +194,10 @@ bool video_writer_t::start() {
 
     std::vector<color> new_slots[k_slot_count];
     std::vector<color> new_scratch;
-    try {
-        for (int i = 0; i < k_slot_count; ++i) {
-            new_slots[i].resize(size_t(sw) * sh);
-        }
-        new_scratch.resize(size_t(dw) * dh);
-    } catch (...) {
-        logs::error("VideoCapture: failed to allocate frame buffers");
-        return false;
+    for (int i = 0; i < k_slot_count; ++i) {
+        new_slots[i].resize(size_t(sw) * sh);
     }
+    new_scratch.resize(size_t(dw) * dh);
 
     MovieWriter *mw = new MovieWriter("akhenaten_capture.mp4", dw, dh, k_capture_fps);
     if (!mw->ok()) {
