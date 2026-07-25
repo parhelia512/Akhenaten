@@ -317,7 +317,7 @@
 
       <!-- ─── Scripted events ───────────────────────────────── -->
       <h2 id="events">Scripted events</h2>
-      <p>Full empire redefine + event schedule verified against pak scenario 11 (2026-07-25 dump). Empire id <strong>8</strong>. Scenario enemy is <strong>Libyan</strong> (<code>ENEMY_7_LIBIAN</code>). No land/sea invasion spawn points in pak. Favour-KR Pharaoh army size <strong>51</strong> via JS helper until B2. Timed raids proxied in JS.</p>
+      <p>Full empire redefine + event schedule verified against pak scenario 11 (2026-07-25 dump). Empire id <strong>8</strong>. Scenario enemy is <strong>Libyan</strong> (<code>ENEMY_7_LIBIAN</code>). No land/sea invasion spawn points in pak. Favour-KR Pharaoh army size <strong>51</strong> (attack random). Timed raids use pak attack targets (vaults / food / best buildings / random).</p>
 
       <div class="tutorial-step">
         <span class="step-tag">Year 1+ · month 0</span>
@@ -442,7 +442,7 @@
         <details>
           <summary>Event handlers — all functions in <code>m_011_serabit_khadim.js</code></summary>
           <div class="details-body">
-            <p>Handlers fire only while <code>mission=mission11</code> is active. Timed invasions use <code>city.start_foreign_army_invasion</code> with <code>ENEMY_7_LIBIAN</code>; native <code>EVENT_TYPE_INVASION</code> awaits B2 / B2-migrate.</p>
+            <p>Handlers fire only while <code>mission=mission11</code> is active. Timed invasions use <code>city.start_foreign_army_invasion</code> with <code>ENEMY_7_LIBIAN</code> and per-wave <code>invasion_attack_target</code> from pak.</p>
             <ul class="event-list">
               <li>
                 <span class="ev-name">event_mission_start</span>
@@ -461,7 +461,7 @@
               </li>
               <li>
                 <span class="ev-name">raids + favour</span>
-                <span class="ev-desc">Libyan 8/12/20/28/28/32; beduin 16 recurring y2m4+; favour Pharaoh 51.</span>
+                <span class="ev-desc">Libyan 8 VAULTS / 12 BEST / 20 FOOD / 28 VAULTS / 28 RANDOM / 32 BEST; beduin 16 RANDOM y2m4+; favour 51 RANDOM.</span>
                 <span class="ev-fn">mission11_libyan_* / beduin_* / favour</span>
               </li>
             </ul>

@@ -1,7 +1,7 @@
 log_info("akhenaten: mission 11 serabit khadim started")
 
 // Empire / requests / invasions verified vs mission1.pak scenario 11 (2026-07-25 dump).
-// Favour Pharaoh army size=51 (by_favour) proxied in JS until B2.
+// Favour Pharaoh army size=51 (by_favour, attack=RANDOM) via mission_pharaoh_favour_invasion_tick.
 // Triage: skip year=100 CLAY_PIT_FLOOD junk; skip broken ok→99 after KR+6;
 // omit invasion/disembark (pak count 0); routes 3/5/9/11 orphan skip.
 // Clay floods i=16–20: copy (+ BUILDING_CLAY_PIT).
@@ -670,29 +670,33 @@ function mission11_pharaoh_request_weapons2(ev) {
 	mission11_fire_request(5, RESOURCE_WEAPONS, 21, 12, 26, 27, 25, 0) // pak sender=0 city
 }
 
-function mission11_libyan_raid(invasion_id, size) {
+function mission11_libyan_raid(invasion_id, size, attack_target) {
 	// Scenario enemy_id in pak is ENEMY_7_LIBIAN. No invasion land points in pak → auto tile.
+	if (typeof attack_target === "undefined") {
+		attack_target = EVENT_ATTACK_TARGET_RANDOM
+	}
 	city.start_foreign_army_invasion({
 		invasion_id: invasion_id,
 		enemy: ENEMY_7_LIBIAN,
 		size: size,
 		tilex: -1,
 		tiley: -1,
-		want_destroy_buildings: size
+		want_destroy_buildings: size,
+		invasion_attack_target: attack_target
 	})
 }
 
-// pak: year=1 month=10 enemy size=8 once
+// pak i=6: year=1 month=10 enemy size=8 once attack=VAULTS(1)
 [es=event_advance_month, mission=mission11]
 function mission11_libyan_invasion_1(ev) {
 	if (mission.libyan_invasion_1) { return }
 	if (ev.years_since_start < 1 || (ev.years_since_start == 1 && ev.month < 10)) { return }
 	mission.libyan_invasion_1 = true
-	log_info("akhenaten: mission 11 libyan invasion 1 size=8", {ev:ev})
-	mission11_libyan_raid(0, 8)
+	log_info("akhenaten: mission 11 libyan invasion 1 size=8 attack=VAULTS", {ev:ev})
+	mission11_libyan_raid(0, 8, EVENT_ATTACK_TARGET_VAULTS)
 }
 
-// pak: year=2+ month=4 beduins size=16 recurring (sprites = Libyan enemy_id)
+// pak i=5: year=2+ month=4 beduins size=16 recurring attack=RANDOM(4) (sprites = Libyan)
 [es=event_advance_month, mission=mission11]
 function mission11_beduin_raid_recurring(ev) {
 	if (ev.years_since_start < 2 || ev.month != 4) {
@@ -712,7 +716,7 @@ function mission11_beduin_raid_recurring(ev) {
 	mission.beduin_raid_resolved = false
 	mission.beduin_raid_active = true
 	log_info("akhenaten: mission 11 beduin raid size=16 year=" + ev.years_since_start, {ev:ev})
-	mission11_libyan_raid(1, 16)
+	mission11_libyan_raid(1, 16, EVENT_ATTACK_TARGET_RANDOM)
 }
 
 [es=event_advance_month, mission=mission11]
@@ -732,57 +736,57 @@ function mission11_beduin_raid_resolve(ev) {
 	mission.beduin_raid_active = false
 }
 
-// pak: year=3 month=3 enemy size=12 once
+// pak i=8: year=3 month=3 enemy size=12 once attack=BEST_BUILDINGS(2)
 [es=event_advance_month, mission=mission11]
 function mission11_libyan_invasion_3(ev) {
 	if (mission.libyan_invasion_3) { return }
 	if (ev.years_since_start < 3 || (ev.years_since_start == 3 && ev.month < 3)) { return }
 	mission.libyan_invasion_3 = true
-	log_info("akhenaten: mission 11 libyan invasion 3 size=12", {ev:ev})
-	mission11_libyan_raid(2, 12)
+	log_info("akhenaten: mission 11 libyan invasion 3 size=12 attack=BEST_BUILDINGS", {ev:ev})
+	mission11_libyan_raid(2, 12, EVENT_ATTACK_TARGET_BEST_BUILDINGS)
 }
 
-// pak: year=4 month=8 enemy size=20 once
+// pak i=9: year=4 month=8 enemy size=20 once attack=FOOD(0)
 [es=event_advance_month, mission=mission11]
 function mission11_libyan_invasion_4(ev) {
 	if (mission.libyan_invasion_4) { return }
 	if (ev.years_since_start < 4 || (ev.years_since_start == 4 && ev.month < 8)) { return }
 	mission.libyan_invasion_4 = true
-	log_info("akhenaten: mission 11 libyan invasion 4 size=20", {ev:ev})
-	mission11_libyan_raid(3, 20)
+	log_info("akhenaten: mission 11 libyan invasion 4 size=20 attack=FOOD", {ev:ev})
+	mission11_libyan_raid(3, 20, EVENT_ATTACK_TARGET_FOOD)
 }
 
-// pak: year=6 month=0 enemy size=28 once
+// pak i=12: year=6 month=0 enemy size=28 once attack=VAULTS(1)
 [es=event_advance_month, mission=mission11]
 function mission11_libyan_invasion_5(ev) {
 	if (mission.libyan_invasion_5) { return }
 	if (ev.years_since_start < 6) { return }
 	mission.libyan_invasion_5 = true
-	log_info("akhenaten: mission 11 libyan invasion 5 size=28", {ev:ev})
-	mission11_libyan_raid(4, 28)
+	log_info("akhenaten: mission 11 libyan invasion 5 size=28 attack=VAULTS", {ev:ev})
+	mission11_libyan_raid(4, 28, EVENT_ATTACK_TARGET_VAULTS)
 }
 
-// pak: year=8 month=6 enemy size=28 once
+// pak i=14: year=8 month=6 enemy size=28 once attack=RANDOM(4)
 [es=event_advance_month, mission=mission11]
 function mission11_libyan_invasion_6(ev) {
 	if (mission.libyan_invasion_6) { return }
 	if (ev.years_since_start < 8 || (ev.years_since_start == 8 && ev.month < 6)) { return }
 	mission.libyan_invasion_6 = true
-	log_info("akhenaten: mission 11 libyan invasion 6 size=28", {ev:ev})
-	mission11_libyan_raid(5, 28)
+	log_info("akhenaten: mission 11 libyan invasion 6 size=28 attack=RANDOM", {ev:ev})
+	mission11_libyan_raid(5, 28, EVENT_ATTACK_TARGET_RANDOM)
 }
 
-// pak: year=10 month=1 enemy size=32 once
+// pak i=15: year=10 month=1 enemy size=32 once attack=BEST_BUILDINGS(2)
 [es=event_advance_month, mission=mission11]
 function mission11_libyan_invasion_7(ev) {
 	if (mission.libyan_invasion_7) { return }
 	if (ev.years_since_start < 10 || (ev.years_since_start == 10 && ev.month < 1)) { return }
 	mission.libyan_invasion_7 = true
-	log_info("akhenaten: mission 11 libyan invasion 7 size=32", {ev:ev})
-	mission11_libyan_raid(6, 32)
+	log_info("akhenaten: mission 11 libyan invasion 7 size=32 attack=BEST_BUILDINGS", {ev:ev})
+	mission11_libyan_raid(6, 32, EVENT_ATTACK_TARGET_BEST_BUILDINGS)
 }
 
-// pak: by_favour Pharaoh army size=51
+// pak i=31: by_favour amount=51 invader=pharaoh attack=RANDOM(4) ok=-1
 [es=event_advance_month, mission=mission11]
 function mission11_pharaoh_favour_invasion(ev) {
 	mission_pharaoh_favour_invasion_tick(mission, 51)
