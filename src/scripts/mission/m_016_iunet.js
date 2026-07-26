@@ -436,12 +436,6 @@ mission16 { // Iunet (Dendera) — The Defense of Egypt
 		event13_hittite_done : false
 		event14_limestone_done : false
 		event17_hittite_done : false
-		meat_req_seen : false
-		meat_outcome_handled : false
-		meat_kr_snap : 0
-		limestone_req_seen : false
-		limestone_outcome_handled : false
-		limestone_kr_snap : 0
 		limestone_egypt_done : false
 
 		pharaoh_favour_invasion_done : false
@@ -549,7 +543,7 @@ function mission16_ensure_fish_leaves() {
 
 // pak i=4 meat: ok→5 KR+10 →6 NEW_TRADE; late→7 KR−5→8 hittite×10; refuse→2.
 // pak i=6 city=Iunet junk → remap Abu (egyptian + route 4).
-// i=7→i=8 is EVENT_TYPE_INVASION no-op — JS mission16_meat_late_hittite (+ calendar i=8).
+// i=7→i=8 INVASION no-op — JS hittite via event_request_cleared (late) + calendar i=8.
 function mission16_ensure_meat_leaves() {
 	if (mission.meat_leaves_wired) {
 		return
@@ -575,7 +569,7 @@ function mission16_ensure_pottery_leaves() {
 }
 
 // pak i=14 limestone: ok→15 meat gift×15; refuse→18 KR−40→16 egypt×24; late→2.
-// i=16 is EVENT_TYPE_INVASION no-op — egypt raid fired from mission16_limestone_refuse_egypt.
+// i=16 INVASION no-op — egypt raid via event_request_cleared (refuse).
 function mission16_ensure_limestone_leaves() {
 	if (mission.limestone_leaves_wired) {
 		return
@@ -634,36 +628,9 @@ function mission16_event_i4_meat(ev) {
 		return
 	}
 	mission.event4_meat_done = true
-	mission.meat_req_seen = false
-	mission.meat_outcome_handled = false
 	mission16_ensure_meat_leaves()
 	log_info("akhenaten: mission 16 iunet meat×2", {ev:ev})
 	mission16_fire_request(2004, RESOURCE_MEAT, 2, 12, 1005, 1002, 1007, 0, 0)
-}
-
-// pak i=7→i=8: meat late KR−5 chains hittite×10. Detect late via KR drop ~5 after request clears
-// (ok≈+10 / refuse≈−10 / late≈−5). Shares once-flag with calendar i=8.
-[es=event_advance_month, mission=mission16]
-function mission16_meat_late_hittite(ev) {
-	if (mission.event8_hittite_done || !mission.event4_meat_done || mission.meat_outcome_handled) {
-		return
-	}
-	if (city.has_active_request(RESOURCE_MEAT)) {
-		mission.meat_req_seen = true
-		mission.meat_kr_snap = city.rating_kingdom
-		return
-	}
-	if (!mission.meat_req_seen) {
-		return
-	}
-	mission.meat_outcome_handled = true
-	var drop = mission.meat_kr_snap - city.rating_kingdom
-	if (drop < 3 || drop > 7) {
-		return
-	}
-	mission.event8_hittite_done = true
-	log_info("akhenaten: mission 16 iunet hittite×10 after meat late (kr drop=" + drop + ")", {ev:ev})
-	mission16_hittite_raid(0, 10, EVENT_ATTACK_TARGET_RANDOM)
 }
 
 // pak i=8: Hittite×10 once y4m0 (also meat/pottery late chain target via i=7).
@@ -756,37 +723,29 @@ function mission16_event_i14_limestone(ev) {
 		return
 	}
 	mission.event14_limestone_done = true
-	mission.limestone_req_seen = false
-	mission.limestone_outcome_handled = false
 	mission16_ensure_limestone_leaves()
 	log_info("akhenaten: mission 16 iunet limestone×15", {ev:ev})
 	mission16_fire_request(2014, RESOURCE_LIMESTONE, 15, 12, 1015, 1018, 1002, 4, 1)
 }
 
-// pak i=16: egypt×24 chain after limestone refuse KR−40 (i=18 ok→i=16).
-// Detect refuse after request clears: ok≈0 / late≈−10 / refuse=−40 (or floor to KR 0).
-[es=event_advance_month, mission=mission16]
-function mission16_limestone_refuse_egypt(ev) {
-	if (mission.limestone_egypt_done || !mission.event14_limestone_done || mission.limestone_outcome_handled) {
+// B13: factual request close — invasions from JS (no KR-snap).
+// Leaf KR still via wired on_* tags in C++ storage path.
+[es=event_request_cleared, mission=mission16]
+function mission16_on_request_cleared(ev) {
+	var outcome = mission_request_outcome(ev)
+	// pak i=16 egypt×24 after limestone refuse (tag 2014 → KR−40 leaf 1018).
+	if (ev.tag_id == 2014 && outcome == "refuse" && !mission.limestone_egypt_done) {
+		mission.limestone_egypt_done = true
+		log_info("akhenaten: mission 16 iunet egypt×24 after limestone refuse", {ev:ev})
+		mission16_egypt_raid(10, 24, EVENT_ATTACK_TARGET_FOOD)
 		return
 	}
-	if (city.has_active_request(RESOURCE_LIMESTONE)) {
-		mission.limestone_req_seen = true
-		mission.limestone_kr_snap = city.rating_kingdom
-		return
+	// pak i=7→i=8 hittite×10 after meat (2004) or pottery (2010) late; share calendar once-flag.
+	if ((ev.tag_id == 2004 || ev.tag_id == 2010) && outcome == "late" && !mission.event8_hittite_done) {
+		mission.event8_hittite_done = true
+		log_info("akhenaten: mission 16 iunet hittite×10 after request late tag=" + ev.tag_id, {ev:ev})
+		mission16_hittite_raid(0, 10, EVENT_ATTACK_TARGET_RANDOM)
 	}
-	if (!mission.limestone_req_seen) {
-		return
-	}
-	mission.limestone_outcome_handled = true
-	var drop = mission.limestone_kr_snap - city.rating_kingdom
-	// Full −40, or KR floored at 0 with drop > late (−10).
-	if (drop < 35 && !(city.rating_kingdom <= 0 && drop > 12)) {
-		return
-	}
-	mission.limestone_egypt_done = true
-	log_info("akhenaten: mission 16 iunet egypt×24 after limestone refuse (kr drop=" + drop + ")", {ev:ev})
-	mission16_egypt_raid(10, 24, EVENT_ATTACK_TARGET_FOOD)
 }
 
 // pak i=17: Hittite×48 once y16m10. ok→11 KR+10; refuse→2 KR−10 (shared leaves).
