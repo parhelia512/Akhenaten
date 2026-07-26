@@ -9,7 +9,7 @@ mission15 { // North Dahshur — The True Pyramid
 	choice_background {pack:PACK_UNLOADED, id:12}
 	choice_image1 {pack:PACK_UNLOADED, id:13}
 	choice_image1_pos [192, 144]
-	choice_title [144, 34]
+	choice_title [144, 37]
 
 	// Convergence of Buhen/S. Dahshur fork → choice Iunet (16) / On (17) → Rostja (18).
 	choice [
@@ -17,7 +17,7 @@ mission15 { // North Dahshur — The True Pyramid
 			name : "Iunet"
 			id : 16
 			image {pack:PACK_UNLOADED, id:20, offset:0}
-			tooltip [144, 35]
+			tooltip [144, 38]
 			pos [620, 420]
 		}
 
@@ -25,7 +25,7 @@ mission15 { // North Dahshur — The True Pyramid
 			name : "On"
 			id : 17
 			image {pack:PACK_UNLOADED, id:20}
-			tooltip [144, 36]
+			tooltip [144, 39]
 			pos [640, 480]
 		}
 	]
