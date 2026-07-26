@@ -98,6 +98,10 @@ C++ smoke checks run first (before JS files): `SDL_strlen`/`strcmp`, `vec2i`, `g
 | `56_medium_stepped_first_stone.js` | Medium stepped first brick tier screenshots (companion/regress for large) |
 | `57_request_cleared.js` | B13 `event_request_cleared`: ok fulfill, overdue fulfill → late, grace expire → refuse |
 | `58_large_stepped_first_tier.js` | C1a first brick tier: place 20×20 large stepped, assert part layout (100 / 3 corners / 32 walls), walk phases →11, screenshot |
+| `60_large_stepped_second_tier.js` | C1a second brick tier screenshots for large stepped pyramid |
+| `61_large_stepped_third_tier.js` | C1a third brick tier screenshots for large stepped pyramid |
+| `62_large_stepped_fourth_tier.js` | C1a fourth brick tier screenshots for large stepped pyramid |
+| `63_large_stepped_fifth_tier.js` | C1a fifth brick tier screenshots for large stepped pyramid |
 | `60_thinis_protect_nonrebuild.js` | Thinis (23): Osiris temple complex + mansions are map-only (not rebuildable); altar/oracle upgrades stay allowed |
 | `65_zoo_place.js` | Cleopatra Zoo: place 6×6, stock straw+gamemeat, spawn `FIGURE_ZOOKEEPER`, animals-present timer, no spawn without stock (Z5) |
 

@@ -18,9 +18,11 @@
 #include "building/building_static_params.h"
 #include "building/building_storage_yard.h"
 #include "building/monument_mastaba.h"
+#include "building/monument_pyramid.h"
 #include "building/monuments.h"
 #include "grid/grid.h"
 #include "graphics/view/view.h"
+#include "graphics/view/zoom.h"
 #include "figure/figure.h"
 #include "figure/figure_impl.h"
 #include "figuretype/figure_missile.h"
@@ -41,6 +43,7 @@
 #include "figure/formation.h"
 #include "window/window_info.h"
 #include "empire/empire.h"
+#include "widget/widget_sidebar.h"
 
 #include <SDL.h>
 #include <algorithm>
@@ -692,24 +695,79 @@ static int __test_building_current_image(int bid) {
 }
 ANK_FUNCTION_1(__test_building_current_image);
 
-// Center the camera on a building: monuments use center_point() (footprint centre),
-// other buildings use the footprint middle tile.
+// Center the camera on a building. For tall pyramids the on-screen mass sits well
+// above the footprint, so we aim the footprint below mid-viewport. Caller must
+// pump ≥1 frame after this before SCREENSHOT_DISPLAY (framebuffer is otherwise stale).
 static void __test_camera_center_building(int bid) {
     building *b = building_get(bid);
     if (!b || !b->is_valid()) {
         return;
     }
-    tile2i c = b->tile.shifted(b->size / 2, b->size / 2);
-    if (auto m = b->dcast_monument()) {
+    building *head = b->main();
+    tile2i c = head->tile.shifted(head->size / 2, head->size / 2);
+    int height_layers = 0;
+    if (auto *pyr = head->dcast_pyramid()) {
+        const vec2i foot = pyr->pyramid_params().init_tiles;
+        c = head->tile.shifted(foot.x / 2, foot.y / 2);
+        // Aim by *built* height, not max monument size — otherwise a 2-tier shot
+        // is framed as a 5-tier stack and looks like a tight close-up.
+        const int max_layers = std::max(1, foot.x / 4);
+        const int phase = pyr->phase();
+        int built = 1;
+        if (phase >= 6) {
+            built = 1 + (phase - 6) / 6;
+        }
+        height_layers = std::clamp(built, 1, max_layers);
+    } else if (auto *m = head->dcast_monument()) {
         c = m->center_point();
     }
     if (!c.valid()) {
         return;
     }
-    vec2i screen = g_camera.tile_to_screen(c);
-    g_camera.go_to_screen_tile(screen, true);
+
+    // Instant collapse — animated widget_sidebar_expanded_collapse() leaves the
+    // expanded chrome on screen until the slide finishes (and screenshots skip that).
+    g_camera.toggle_sidebar(1);
+
+    // Zoom OUT = higher percentage (zoom_min=25 is close-up, zoom_max=250 is far).
+    // 180 fits a 20×20 two-tier stepped pyramid in a ~1200×770 collapsed viewport.
+    g_zoom.set_scale(180.f);
+    g_camera.set_extra_scroll_margin(120);
+
+    // Tall brick courses draw upward from the footprint. Aim slightly NW of the
+    // geometric centre so the on-screen mass (not the SE tip) lands mid-viewport.
+    // Do not use lookup_tile_to_pixel: that cache is only filled during a city draw.
+    if (height_layers > 1) {
+        const int aim = height_layers - 1;
+        c = c.shifted(-aim, -aim);
+    }
+    g_camera.go_to_mappoint(c);
+
+    logs::info("[test-camera] tile=%d,%d cam=%d,%d zoom=%.0f layers=%d collapsed=%d vp=%d,%d",
+        c.x(), c.y(),
+        g_camera.camera_position.x, g_camera.camera_position.y,
+        g_zoom.get_percentage(),
+        height_layers,
+        (int)g_camera.sidebar_collapsed,
+        g_camera.size_pixels.x, g_camera.size_pixels.y);
 }
 ANK_FUNCTION_1(__test_camera_center_building);
+
+static void __camera_scroll(int dx, int dy) {
+    // Unclamped nudge for screenshot framing.
+    g_camera.camera_position.x += dx;
+    g_camera.camera_position.y += dy;
+    g_camera.tile_internal.x = g_camera.camera_position.x / TILE_WIDTH_PIXELS;
+    g_camera.tile_internal.y = g_camera.camera_position.y / HALF_TILE_HEIGHT_PIXELS;
+    g_camera.tile_internal.y &= ~1;
+    g_camera.update_derived_camera_state();
+}
+ANK_FUNCTION_2(__camera_scroll);
+
+static void __camera_sidebar_collapsed(int collapsed) {
+    g_camera.toggle_sidebar(collapsed ? 1 : 0);
+}
+ANK_FUNCTION_1(__camera_sidebar_collapsed);
 
 // Hot-reload stack regression: each js_vm_sync used to leave ~1 stack slot per
 // [console_command=…] handler (~30). JS_STACKSIZE is 256, so ~10 reloads then

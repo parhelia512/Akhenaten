@@ -147,10 +147,12 @@ struct monument_large_stepped_pyramid : public monument {
         phases.push_back({ 4, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 1600}, {RESOURCE_STONE, 3200} });
         phases.push_back({ 5, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 1200}, {RESOURCE_STONE, 2400} });
         phases.push_back({ 6, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 800}, {RESOURCE_STONE, 1600} });
-        for (int p = 7; p <= 31; ++p) {
+        // 20×20 = 5 layers × 6 brick courses after phase 6 → finish at 36
+        // (medium still finishes at 32; shared height draw handles both).
+        for (int p = 7; p <= 35; ++p) {
             phases.push_back({ (uint8_t)p, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 400}, {RESOURCE_STONE, 800} });
         }
-        phases.push_back({ 32, monument_phase_resource{RESOURCE_NONE, 0} });
+        phases.push_back({ 36, monument_phase_resource{RESOURCE_NONE, 0} });
     }
 } g_monument_large_stepped_pyramid;
 
@@ -511,6 +513,7 @@ int building_stepped_pyramid::get_channel_image(int orientation, tile2i tile, ti
 }
 
 void building_stepped_pyramid::on_create(int orientation) {
+    runtime_data().stair_index = 0xff;
 }
 
 void building_stepped_pyramid::assign_stair() {
@@ -518,7 +521,7 @@ void building_stepped_pyramid::assign_stair() {
     tile2i btile = tile();
     auto it = std::find_if(pyramid_params().stairs.begin(), pyramid_params().stairs.end(), [&] (auto &it) { return mtile.shifted(it.part) == btile; });
     runtime_data().stair_index = (it != pyramid_params().stairs.end())
-                                    ? std::distance(pyramid_params().stairs.begin(), it)
+                                    ? (uint8_t)std::distance(pyramid_params().stairs.begin(), it)
                                     : 0xff;
 }
 
@@ -857,11 +860,12 @@ int building_stepped_pyramid::get_bricks_image(int orientation, tile2i tile, til
 
 void building_stepped_pyramid::draw_ornaments_and_animations_stairs_impl(painter &ctx, vec2i point, tile2i tile, color color_mask, const vec2i tiles_size) {
     auto &d = runtime_data();
-    if (d.stair_index == 0xff) {
+    const auto &stairs = pyramid_params().stairs;
+    if (d.stair_index == 0xff || d.stair_index >= stairs.size()) {
         return;
     }
 
-    const auto &stair = pyramid_params().stairs[d.stair_index];
+    const auto &stair = stairs[d.stair_index];
     if (phase() >= stair.phase) {
         auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
         command.image_id = stair.tex.first_img();
@@ -989,7 +993,7 @@ bool building_stepped_pyramid::draw_ornaments_and_animations_hight_impl(painter 
             }
         }
         draw_ornaments_and_animations_stairs_impl(ctx, point, tile, color_mask, tiles_size);
-    } else if (phase() >= 24 && phase() < 32) {
+    } else if (phase() >= 24 && phase() < 30) {
         uint32_t progress = map_monuments_get_progress(tile);
         if (d.layer == 0) {
             auto layer_area = get_layer_area(0);
@@ -1025,17 +1029,18 @@ bool building_stepped_pyramid::draw_ornaments_and_animations_hight_impl(painter 
 
             fill_tiles_height(ctx, tile, img);
         } else {
+            // Building layer 3 (fourth tier): underlay at L2 height, bricks at L3.
             int layer_img = current_params().first_img("base_bricks") + 5;
             vec2i offset = g_camera.lookup_tile_to_pixel(tile);
 
             auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
             command.image_id = layer_img;
-            command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 3 };
+            command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 6 };
             command.mask = color_mask;
 
             int base_level = (phase() - 24) + ((progress >= 200) ? 1 : 0);
             if (base_level > 0) {
-                auto layer_area = get_layer_area(2);
+                auto layer_area = get_layer_area(3);
 
                 int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, base_level - 1);
                 auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
@@ -1045,11 +1050,13 @@ bool building_stepped_pyramid::draw_ornaments_and_animations_hight_impl(painter 
             }
         }
         draw_ornaments_and_animations_stairs_impl(ctx, point, tile, color_mask, tiles_size);
-    } else if (phase() == 32) {
+    } else if (phase() >= 30 && phase() < 36) {
+        // Large apex (layer 4 / fifth tier). Medium never sets layer≥3 here — its
+        // parts stay on 0..2 and draw as finished lower tiers through phase 31.
+        uint32_t progress = map_monuments_get_progress(tile);
         if (d.layer == 0) {
             auto layer_area = get_layer_area(0);
             int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
-            vec2i offset = g_camera.lookup_tile_to_pixel(tile);
 
             auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
             command.image_id = img;
@@ -1060,7 +1067,6 @@ bool building_stepped_pyramid::draw_ornaments_and_animations_hight_impl(painter 
         } else if (d.layer == 1) {
             auto layer_area = get_layer_area(1);
             int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
-            vec2i offset = g_camera.lookup_tile_to_pixel(tile);
 
             auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
             command.image_id = img;
@@ -1071,7 +1077,6 @@ bool building_stepped_pyramid::draw_ornaments_and_animations_hight_impl(painter 
         } else if (d.layer == 2) {
             auto layer_area = get_layer_area(2);
             int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
-            vec2i offset = g_camera.lookup_tile_to_pixel(tile);
 
             auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
             command.image_id = img;
@@ -1082,11 +1087,83 @@ bool building_stepped_pyramid::draw_ornaments_and_animations_hight_impl(painter 
         } else if (d.layer == 3) {
             auto layer_area = get_layer_area(3);
             int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
-            vec2i offset = g_camera.lookup_tile_to_pixel(tile);
 
             auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
             command.image_id = img;
             command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 9 };
+            command.mask = color_mask;
+
+            fill_tiles_height(ctx, tile, img);
+        } else {
+            // Building layer 4: underlay at L3 height, bricks at L4 (*12).
+            int layer_img = current_params().first_img("base_bricks") + 5;
+
+            auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
+            command.image_id = layer_img;
+            command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 9 };
+            command.mask = color_mask;
+
+            int base_level = (phase() - 30) + ((progress >= 200) ? 1 : 0);
+            if (base_level > 0) {
+                auto layer_area = get_layer_area(4);
+
+                int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, base_level - 1);
+                auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
+                command.image_id = img;
+                command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 12 };
+                command.mask = color_mask;
+            }
+        }
+        draw_ornaments_and_animations_stairs_impl(ctx, point, tile, color_mask, tiles_size);
+    } else if (phase() == 32 || phase() == 36) {
+        // Medium finishes at 32; large at 36 (full 5 tiers).
+        if (d.layer == 0) {
+            auto layer_area = get_layer_area(0);
+            int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
+
+            auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
+            command.image_id = img;
+            command.pixel = point;
+            command.mask = color_mask;
+
+            fill_tiles_height(ctx, tile, img);
+        } else if (d.layer == 1) {
+            auto layer_area = get_layer_area(1);
+            int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
+
+            auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
+            command.image_id = img;
+            command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 3 };
+            command.mask = color_mask;
+
+            fill_tiles_height(ctx, tile, img);
+        } else if (d.layer == 2) {
+            auto layer_area = get_layer_area(2);
+            int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
+
+            auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
+            command.image_id = img;
+            command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 6 };
+            command.mask = color_mask;
+
+            fill_tiles_height(ctx, tile, img);
+        } else if (d.layer == 3) {
+            auto layer_area = get_layer_area(3);
+            int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
+
+            auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
+            command.image_id = img;
+            command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 9 };
+            command.mask = color_mask;
+
+            fill_tiles_height(ctx, tile, img);
+        } else if (d.layer == 4) {
+            auto layer_area = get_layer_area(4);
+            int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
+
+            auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
+            command.image_id = img;
+            command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 12 };
             command.mask = color_mask;
 
             fill_tiles_height(ctx, tile, img);
@@ -1313,9 +1390,12 @@ void building_stepped_pyramid::change_parts_types_in_layer(tile2i begin, const v
             // Calculate tile offset for this block (top-left corner of 2x2 block)
             int tile_x = block_x * part_size;
             int tile_y = block_y * part_size;
+            tile2i part_tile = begin.shifted(tile_x, tile_y);
 
-            // Skip the main building position (top-left block)
-            if (block_x == 0 && block_y == 0) {
+            // Skip only the real main building (NW of layer 0). Inner layers' NW
+            // corner is a normal part — skipping it leaves the apex 4×4 with a
+            // stale filler at layer-1 and a hollow/L-shaped top.
+            if (part_tile == main()->tile()) {
                 continue;
             }
 
@@ -1333,7 +1413,6 @@ void building_stepped_pyramid::change_parts_types_in_layer(tile2i begin, const v
                 part_type = pi_params.filler_type;
             }
 
-            tile2i part_tile = begin.shifted(tile_x, tile_y);
             parts.push_back({ part_type, {tile_x, tile_y}, building_at(part_tile) });
         }
     }
@@ -1341,7 +1420,16 @@ void building_stepped_pyramid::change_parts_types_in_layer(tile2i begin, const v
     for (auto &part : parts) {
         part.b->clear_impl();
         part.b->type = part.type;
-        part.b->dcast_monument()->runtime_data().layer = layer;
+        auto *mon = part.b->dcast_monument();
+        mon->runtime_data().layer = layer;
+        mon->runtime_data().stair_index = 0xff;
+    }
+
+    // clear_impl resets stair_index — rebind ramps for the new ring types.
+    for (building *b = base.main(); b; b = b->has_next() ? b->next() : nullptr) {
+        if (building_pyramid *pyr = b->dcast_pyramid()) {
+            static_cast<building_stepped_pyramid *>(pyr)->assign_stair();
+        }
     }
 }
 
@@ -1429,6 +1517,14 @@ void building_stepped_pyramid::on_place(int orientation, int variant) {
         }
         prev_part = part.b;
     }
+
+    // Bind ramp sprites to the matching 2×2 parts. Without this, stair_index stays 0
+    // and every part draws stairs[0] at ground level along the edge.
+    for (auto &part : parts) {
+        if (building_pyramid *pyr = part.b->dcast_pyramid()) {
+            static_cast<building_stepped_pyramid *>(pyr)->assign_stair();
+        }
+    }
 }
 
 void building_stepped_pyramid::on_phase_changed(int old, int current) {
@@ -1458,6 +1554,13 @@ void building_stepped_pyramid::on_phase_changed(int old, int current) {
     if (current == 24 && is_main()) {
         auto area = get_layer_area(3);
         change_parts_types_in_layer(area.begin, area.size, 3);
+    }
+
+    if (current == 30 && is_main()) {
+        auto area = get_layer_area(4);
+        if (area.size.x > 0 && area.size.y > 0) {
+            change_parts_types_in_layer(area.begin, area.size, 4);
+        }
     }
 
     if (current != MONUMENT_FINISHED) {

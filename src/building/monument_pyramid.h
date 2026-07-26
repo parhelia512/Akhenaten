@@ -33,7 +33,7 @@ public:
 
         vec2i init_tiles;
         vec2i enter_offset;
-        hvector<stair_t, 16> stairs;
+        hvector<stair_t, 48> stairs;
     };
 
     virtual const base_params &pyramid_params() const = 0;
@@ -110,7 +110,7 @@ public:
 
     virtual const monument &config() const override;
 };
-ANK_CONFIG_STRUCT(building_small_stepped_pyramid::static_params, 
+ANK_CONFIG_STRUCT(building_small_stepped_pyramid::static_params,
     init_tiles, corner_type, wall_type, cone_type, filler_type, enter_offset, stairs);
 
 class building_small_stepped_pyramid_corner : public building_small_stepped_pyramid {

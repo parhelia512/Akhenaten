@@ -61,6 +61,11 @@ float __zoom_percentage() {
 }
 ANK_FUNCTION(__zoom_percentage);
 
+void __zoom_set(float percentage) {
+    g_zoom.set_scale(percentage);
+}
+ANK_FUNCTION_1(__zoom_set);
+
 float __zoom_scale() {
     return g_zoom.get_scale();
 }

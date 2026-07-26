@@ -226,9 +226,8 @@ building_small_stepped_pyramid {
   building_medium_stepped_pyramid_cone = building_medium_stepped_pyramid
 
   // Large stepped pyramid (20x20, id 250). Same PACK_STEPPED_PYRAMID render pipeline as
-  // small/medium; only footprint (init_tiles) differs. The `stairs` entries below are the
-  // medium placeholders — the wooden-ramp positions and the top-down polish stage are a
-  // follow-up visual pass (see REMAKE_LARGE_PYRAMID_IMPL.md).
+  // small/medium; only footprint (init_tiles) differs. Stairs: ascending ramp from
+  // enter_offset up the south face to the tier-1 ledge (one layer ≈ TILE_HEIGHT*3 = 90px).
   building_large_stepped_pyramid {
     animations {
       _pack { pack:PACK_STEPPED_PYRAMID }
@@ -264,26 +263,296 @@ building_small_stepped_pyramid {
 
     enter_offset : [2, 20]
 
+    // Medium-style L-ramp: short approach on south from enter, SE corner, then
+    // climb the east face (decreasing y) up to the tier-1 ledge. Sprites 00114+
+    // are the ascending ramp pieces; offset.y rises ~+28 → -110 (≈ one tier).
     stairs [
       {
         phase : 7
-        part : [2, 10]
+        part : [2, 18]
         tex { path:"stepped_pyramid/stepped_pyramid_00110" }
-        offset : [-15, 25]
+        offset : [-20, 28]
       }
 
       {
         phase : 8
-        part : [4, 10]
+        part : [4, 18]
         tex { path:"stepped_pyramid/stepped_pyramid_00111" }
-        offset : [-15, 25]
+        offset : [-15, 20]
       }
 
       {
         phase : 9
-        part : [6, 10]
+        part : [6, 18]
         tex { path:"stepped_pyramid/stepped_pyramid_00112" }
-        offset : [-15, 25]
+        offset : [-10, 8]
+      }
+
+      {
+        phase : 10
+        part : [8, 18]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [5, -10]
+      }
+
+      {
+        phase : 10
+        part : [10, 18]
+        tex { path:"stepped_pyramid/stepped_pyramid_00111" }
+        offset : [10, -28]
+      }
+
+      {
+        phase : 11
+        part : [12, 18]
+        tex { path:"stepped_pyramid/stepped_pyramid_00112" }
+        offset : [12, -45]
+      }
+
+      {
+        phase : 11
+        part : [14, 18]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [15, -58]
+      }
+
+      {
+        phase : 11
+        part : [16, 18]
+        tex { path:"stepped_pyramid/stepped_pyramid_00111" }
+        offset : [15, -68]
+      }
+
+      {
+        phase : 11
+        part : [18, 18]
+        tex { path:"stepped_pyramid/stepped_pyramid_00122" }
+        offset : [18, -78]
+      }
+
+      {
+        phase : 12
+        part : [18, 16]
+        tex { path:"stepped_pyramid/stepped_pyramid_00114" }
+        offset : [25, -88]
+      }
+
+      {
+        phase : 12
+        part : [18, 14]
+        tex { path:"stepped_pyramid/stepped_pyramid_00115" }
+        offset : [22, -98]
+      }
+
+      {
+        phase : 13
+        part : [18, 12]
+        tex { path:"stepped_pyramid/stepped_pyramid_00113" }
+        offset : [10, -108]
+      }
+
+      {
+        phase : 13
+        part : [18, 10]
+        tex { path:"stepped_pyramid/stepped_pyramid_00124" }
+        offset : [5, -115]
+      }
+
+      // --- Layer 1 (second tier): south of L1 (y=16) → SE [16,16] → east climb.
+      // Offsets sit ~one tier higher than L0 (≈ -90..-180).
+      {
+        phase : 14
+        part : [4, 16]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [-20, -100]
+      }
+
+      {
+        phase : 14
+        part : [6, 16]
+        tex { path:"stepped_pyramid/stepped_pyramid_00111" }
+        offset : [-12, -112]
+      }
+
+      {
+        phase : 15
+        part : [8, 16]
+        tex { path:"stepped_pyramid/stepped_pyramid_00112" }
+        offset : [-2, -128]
+      }
+
+      {
+        phase : 15
+        part : [10, 16]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [8, -142]
+      }
+
+      {
+        phase : 16
+        part : [12, 16]
+        tex { path:"stepped_pyramid/stepped_pyramid_00111" }
+        offset : [12, -155]
+      }
+
+      {
+        phase : 16
+        part : [14, 16]
+        tex { path:"stepped_pyramid/stepped_pyramid_00114" }
+        offset : [15, -165]
+      }
+
+      {
+        phase : 17
+        part : [16, 16]
+        tex { path:"stepped_pyramid/stepped_pyramid_00122" }
+        offset : [18, -172]
+      }
+
+      {
+        phase : 17
+        part : [16, 14]
+        tex { path:"stepped_pyramid/stepped_pyramid_00115" }
+        offset : [22, -180]
+      }
+
+      {
+        phase : 17
+        part : [16, 12]
+        tex { path:"stepped_pyramid/stepped_pyramid_00113" }
+        offset : [10, -188]
+      }
+
+      // --- Layer 2 (third tier): L2 south y=14 (begin+4, size 12) → SE [14,14].
+      // Offsets ~two tiers up (≈ -180..-270).
+      {
+        phase : 18
+        part : [4, 14]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [-20, -190]
+      }
+
+      {
+        phase : 18
+        part : [6, 14]
+        tex { path:"stepped_pyramid/stepped_pyramid_00111" }
+        offset : [-12, -202]
+      }
+
+      {
+        phase : 19
+        part : [8, 14]
+        tex { path:"stepped_pyramid/stepped_pyramid_00112" }
+        offset : [-2, -218]
+      }
+
+      {
+        phase : 19
+        part : [10, 14]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [8, -232]
+      }
+
+      {
+        phase : 20
+        part : [12, 14]
+        tex { path:"stepped_pyramid/stepped_pyramid_00114" }
+        offset : [12, -245]
+      }
+
+      {
+        phase : 21
+        part : [14, 14]
+        tex { path:"stepped_pyramid/stepped_pyramid_00122" }
+        offset : [18, -255]
+      }
+
+      {
+        phase : 22
+        part : [14, 12]
+        tex { path:"stepped_pyramid/stepped_pyramid_00115" }
+        offset : [22, -265]
+      }
+
+      {
+        phase : 23
+        part : [14, 10]
+        tex { path:"stepped_pyramid/stepped_pyramid_00113" }
+        offset : [10, -272]
+      }
+
+      // --- Layer 3 (fourth tier): L3 south y=12 (begin+6, size 8) → SE [12,12].
+      // Offsets ~three tiers up (≈ -270..-360).
+      {
+        phase : 24
+        part : [6, 12]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [-20, -280]
+      }
+
+      {
+        phase : 25
+        part : [8, 12]
+        tex { path:"stepped_pyramid/stepped_pyramid_00111" }
+        offset : [-8, -298]
+      }
+
+      {
+        phase : 26
+        part : [10, 12]
+        tex { path:"stepped_pyramid/stepped_pyramid_00112" }
+        offset : [5, -318]
+      }
+
+      {
+        phase : 27
+        part : [12, 12]
+        tex { path:"stepped_pyramid/stepped_pyramid_00122" }
+        offset : [18, -335]
+      }
+
+      {
+        phase : 28
+        part : [12, 10]
+        tex { path:"stepped_pyramid/stepped_pyramid_00114" }
+        offset : [22, -348]
+      }
+
+      {
+        phase : 29
+        part : [12, 8]
+        tex { path:"stepped_pyramid/stepped_pyramid_00115" }
+        offset : [15, -358]
+      }
+
+      // --- Layer 4 (fifth / apex tier): L4 south y=10 (begin+8, size 4) → SE [10,10].
+      // Offsets ~four tiers up (≈ -360..-430).
+      {
+        phase : 30
+        part : [8, 10]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [-15, -370]
+      }
+
+      {
+        phase : 31
+        part : [10, 10]
+        tex { path:"stepped_pyramid/stepped_pyramid_00122" }
+        offset : [18, -395]
+      }
+
+      {
+        phase : 32
+        part : [10, 8]
+        tex { path:"stepped_pyramid/stepped_pyramid_00114" }
+        offset : [22, -410]
+      }
+
+      {
+        phase : 33
+        part : [8, 8]
+        tex { path:"stepped_pyramid/stepped_pyramid_00115" }
+        offset : [10, -420]
       }
     ]
 

@@ -1,8 +1,8 @@
 // C1a first-tier pipeline: place Large Stepped Pyramid (20x20), verify the part
-// ring (corners/walls/fillers), walk foundation → first brick tier (phase 11 =
-// full course height of layer 0), then take a single end-of-tier screenshot.
+// ring (corners/walls/fillers), walk foundation → first brick tier + ramp climb
+// (phase 13 = SE turn + east-face ascent), then take end screenshots.
 //
-// Phase advance walks 0→1→…→11 so on_phase_changed hooks fire (setup_phase_6 etc.).
+// Phase advance walks 0→1→…→13 so on_phase_changed hooks fire (setup_phase_6 etc.).
 // Run WITH Pharaoh data + writable screenshot dir:
 //   build\Debug\akhenaten.exe --integraltests --integraltest-only 58_large_stepped_first_tier ^
 //     --nointro --nomouse --no-logo --nosound --nocrashdlg --window --size 1000x750 ^
@@ -39,19 +39,12 @@ function run_test() {
     var tile = __building_tile(bid)
     __log_marker('first_tier_placed_ok:' + bid + ':' + tile.x + ',' + tile.y)
 
-    // Count linked parts by type. 20x20 → 10x10 blocks of 2x2:
-    //   4 corners (1 = main type 250, 3 = CORNER 334)
-    //   32 walls (WALL 335)
-    //   64 fillers (type 250)
-    // Total linked buildings reachable from main depends on list head, so count
-    // every part in the chain and classify by __building_type.
-    var n_mainish = 0   // BUILDING_LARGE_STEPPED_PYRAMID (main + fillers)
+    var n_mainish = 0
     var n_corner = 0
     var n_wall = 0
     var n_other = 0
     var parts = 0
     var cur = city.get_building(bid)
-    // Walk both directions from bid so we don't miss the list head.
     var seen = {}
     function count_part(b) {
         if (!b || !b.id || seen[b.id]) { return }
@@ -63,13 +56,11 @@ function run_test() {
         else if (t == BUILDING_LARGE_STEPPED_PYRAMID_WALL) { n_wall++ }
         else { n_other++ }
     }
-    // forward from bid
     var walk = cur
     while (walk) {
         count_part(walk)
         walk = walk.next_part_building_id ? city.get_building(walk.next_part_building_id) : null
     }
-    // backward from bid to list head, then forward again (idempotent via seen)
     walk = cur
     while (walk && walk.prev_part_building_id) {
         walk = city.get_building(walk.prev_part_building_id)
@@ -81,7 +72,6 @@ function run_test() {
     }
 
     __log_marker('first_tier_parts:' + parts + ':mainish=' + n_mainish + ':corner=' + n_corner + ':wall=' + n_wall + ':other=' + n_other)
-    // Expected: 100 total, 65 mainish (1 main + 64 fillers), 3 corner parts, 32 walls.
     if (parts == 100 && n_corner == 3 && n_wall == 32 && n_mainish == 65 && n_other == 0) {
         __log_marker('first_tier_layout_ok')
     } else {
@@ -89,7 +79,6 @@ function run_test() {
         __log_marker('first_tier_layout_fail')
     }
 
-    // Four corner tiles of the footprint must resolve to main or CORNER (not filler/wall).
     var corners = [
         {x: tile.x, y: tile.y},
         {x: tile.x + 18, y: tile.y},
@@ -106,21 +95,18 @@ function run_test() {
     }
     __log_marker(corners_ok ? 'first_tier_corners_ok' : 'first_tier_corners_fail')
 
-    // Let async pak-queue resolve stepped_pyramid pack.
     __test_pump_frames(30)
 
-    // Walk foundation (0..5) into first brick tier. Phase 11 = full course height
-    // of layer 0 (courses 0..5 across phases 6..11). Sequential advance is inside
-    // __test_monument_set_phase now.
-    __test_monument_set_phase(bid, 11)
+    // Phase 13: first tier complete and ramp has turned SE + climbed east face.
+    __test_monument_set_phase(bid, 13)
     __test_pump_frames(4)
 
     var got_phase = __test_monument_phase(bid)
-    if (got_phase != 11) {
-        __log_info_native('[test:58] expected phase 11, got ' + got_phase)
+    if (got_phase != 13) {
+        __log_info_native('[test:58] expected phase 13, got ' + got_phase)
         __log_marker('first_tier_phase_fail:' + got_phase)
     } else {
-        __log_marker('first_tier_phase_ok:11')
+        __log_marker('first_tier_phase_ok:13')
     }
 
     if (__test_building_current_image(bid) <= 0) {
