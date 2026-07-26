@@ -454,7 +454,7 @@ void figure_docker::figure_action() {
         auto ship = figure_get<figure_trade_ship>(dock.trade_ship);
         if (ship->base.state != FIGURE_STATE_ALIVE || ship->type() != FIGURE_TRADE_SHIP) {
             dock.trade_ship = 0;
-        } else if (ship->empire_trader().has_traded_max()) {
+        } else if (ship->empire_trader().has_traded_max(ship->max_capacity())) {
             dock.trade_ship = 0;
         } else if (ship->action_state() == ACTION_115_TRADE_SHIP_LEAVING) {
             dock.trade_ship = 0;

@@ -47,6 +47,7 @@ public:
         uint8_t failed_dock_attempts;
         uint16_t amount_bought;
         visit_budget_slot import_budgets[VISIT_BUDGET_SLOTS];
+        uint16_t capacity; // trip snapshot at spawn (flag mid-game does not retarget live ships)
     } FIGURE_RUNTIME_DATA_T;
 
     void populate_import_budgets();
@@ -73,6 +74,6 @@ public:
     int is_trading() const;
     uint16_t total_bought() const { return runtime_data().amount_bought; }
 
-    int max_capacity() const { return current_params().max_capacity; }
+    int max_capacity() const;
 };
 ANK_CONFIG_STRUCT(figure_trade_ship::static_params, max_capacity)

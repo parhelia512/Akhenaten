@@ -16,7 +16,7 @@ struct empire_trader_handle {
     int sold_resources(e_resource resource);
 
     bool has_traded();
-    bool has_traded_max();
+    bool has_traded_max(int capacity);
 
     bool valid() { return handle != 0; }
     void back_to_city();

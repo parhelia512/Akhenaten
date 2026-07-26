@@ -104,6 +104,7 @@ game_features {
     @gameplay_fix_editor_events {}
     @gameopt_disable_victory {}
     @gameui_show_water_structure_range {}
+    @gameplay_change_trader_capacity_1600 {}
     @count { get: __game_features_count }
 }
 

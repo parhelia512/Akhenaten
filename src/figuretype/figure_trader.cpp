@@ -19,7 +19,7 @@ bool figure_trader::can_buy(building* b, empire_city_handle city) const {
         return false;
     }
 
-    if (total_bought() >= 800) {
+    if (total_bought() >= max_capacity()) {
         return false;
     }
 
@@ -44,7 +44,7 @@ bool figure_trader::can_sell(building* b, empire_city_handle city) const {
         return false;
     }
 
-    if (base.trader_total_sold() >= 800) {
+    if (base.trader_total_sold() >= max_capacity()) {
         return false;
     }
 

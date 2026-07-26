@@ -34,6 +34,7 @@ localization_hu = [
   {key:"#TR_CONFIG_PROMPT_SAVE_ON_EXIT", text:"Kilépéskor mentés felajánlása (Alt+F4)"}
   {key:"#TR_CONFIG_SMOOTH_SCROLLING", text:"Folyamatos görgetés engedélyezése"}
   {key:"#TR_CONFIG_SMOOTH_ZOOM", text:"Folyamatos nagyítás engedélyezése"}
+  {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Nagyobb kereskedőkapacitás (1600/látogatás; nem éves birodalmi limit)"}
   {key:"#TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE", text:"Területrendezés vizuális visszajelzésének javítása"}
   {key:"#TR_CONFIG_ALLOW_CYCLING_TEMPLES", text:"Templomok egymás utáni építésének engedélyezése"}
   {key:"#TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE", text:"Víztározók, szökőkutak és kutak hatótávolságának megjelenítése építéskor"}

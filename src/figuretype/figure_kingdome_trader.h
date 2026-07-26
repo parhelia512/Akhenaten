@@ -31,7 +31,7 @@ public:
         uint16_t wait_ticks_after_create;
         uint16_t min_capacity;
         uint16_t max_capacity;
-        uint8_t capacity_random;
+        uint16_t capacity_random;
     } FIGURE_STATIC_DATA_T;
 
     virtual void on_create() override;

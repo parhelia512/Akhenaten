@@ -26,6 +26,7 @@
 #include "grid/road_access.h"
 #include "scenario/map.h"
 #include "game/game.h"
+#include "game/game_config.h"
 #include "widget/debug_console.h"
 #include "core/object_property.h"
 #include "js/js_game.h"
@@ -99,9 +100,17 @@ void figure_trade_caravan::debug_show_properties() {
 void figure_trade_caravan::on_create() {
     figure_trader::on_create();
     auto &d = runtime_data();
-    const uint16_t max_capacity = (current_params().capacity_random == 0) ? 800 : current_params().capacity_random;
-    const uint16_t capacity = current_params().min_capacity + rand() % max_capacity;
-    d.capacity = std::clamp(capacity, current_params().min_capacity, current_params().max_capacity);
+    const auto &params = current_params();
+    const uint16_t min_cap = params.min_capacity;
+    const uint16_t max_cap = game_features::gameplay_change_trader_capacity_1600.to_bool()
+        ? 1600
+        : params.max_capacity;
+    uint16_t range = params.capacity_random;
+    if (game_features::gameplay_change_trader_capacity_1600.to_bool() || range == 0) {
+        range = (max_cap >= min_cap) ? (uint16_t)(max_cap - min_cap + 1) : 1;
+    }
+    const uint16_t capacity = min_cap + (range > 0 ? (rand() % range) : 0);
+    d.capacity = std::clamp(capacity, min_cap, max_cap);
 }
 
 void figure_trade_caravan::on_destroy() {
@@ -112,7 +121,7 @@ void figure_trade_caravan::on_destroy() {
 void figure_trade_caravan::figure_action() {
     int last_action_state = action_state();
     auto& d = runtime_data();
-    
+
     if (g_city.figures.enemies > 0) {
         switch (action_state()) {
         default:
@@ -122,7 +131,7 @@ void figure_trade_caravan::figure_action() {
             break;
         }
     }
-    
+
     switch (action_state()) {
     default:
     case ACTION_100_TRADE_CARAVAN_CREATED:

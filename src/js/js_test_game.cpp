@@ -47,6 +47,10 @@
 #include <cstring>
 #include <fstream>
 #include <string>
+#include "figuretype/figure_kingdome_trader.h"
+#include "figuretype/figure_trader_ship.h"
+#include "empire/trader_handler.h"
+#include "empire/empire_traders.h"
 
 // SDL_main.h does `#define main SDL_main`; undo it here so building::main() etc.
 // are not macro-mangled (this TU is not the program entry point).
@@ -716,6 +720,87 @@ static int __test_autosave_pick(int slots, int exists_mask, int m0, int m1, int 
     return autosave_module_t::pick_slot(slots, exists, mtime);
 }
 ANK_FUNCTION_5(__test_autosave_pick);
+
+static int __test_trader_capacity(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_valid()) {
+        return -1;
+    }
+    if (auto *caravan = f->dcast<figure_trade_caravan>()) {
+        return caravan->max_capacity();
+    }
+    if (auto *ship = f->dcast<figure_trade_ship>()) {
+        return ship->max_capacity();
+    }
+    return -1;
+}
+ANK_FUNCTION_1(__test_trader_capacity);
+
+static int __test_trader_static_max_capacity(int type) {
+    if (type == FIGURE_TRADE_CARAVAN) {
+        const auto &p = (const figure_trade_caravan::static_params &)figure_static_params::get(FIGURE_TRADE_CARAVAN);
+        return p.max_capacity;
+    }
+    if (type == FIGURE_TRADE_SHIP) {
+        const auto &p = (const figure_trade_ship::static_params &)figure_static_params::get(FIGURE_TRADE_SHIP);
+        return p.max_capacity;
+    }
+    return -1;
+}
+ANK_FUNCTION_1(__test_trader_static_max_capacity);
+
+static int __test_trader_static_capacity_random(int type) {
+    if (type != FIGURE_TRADE_CARAVAN) {
+        return -1;
+    }
+    const auto &p = (const figure_trade_caravan::static_params &)figure_static_params::get(FIGURE_TRADE_CARAVAN);
+    return p.capacity_random;
+}
+ANK_FUNCTION_1(__test_trader_static_capacity_random);
+
+static void __test_trader_set_bought(int fid, int amount) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_valid()) {
+        return;
+    }
+    if (auto *caravan = f->dcast<figure_trade_caravan>()) {
+        caravan->runtime_data().amount_bought = (uint16_t)std::max(0, amount);
+        return;
+    }
+    if (auto *ship = f->dcast<figure_trade_ship>()) {
+        ship->runtime_data().amount_bought = (uint16_t)std::max(0, amount);
+    }
+}
+ANK_FUNCTION_2(__test_trader_set_bought);
+
+static int __test_trader_buy_under_capacity(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_valid()) {
+        return -1;
+    }
+    if (auto *caravan = f->dcast<figure_trade_caravan>()) {
+        return caravan->total_bought() < caravan->max_capacity() ? 1 : 0;
+    }
+    if (auto *ship = f->dcast<figure_trade_ship>()) {
+        return ship->total_bought() < ship->max_capacity() ? 1 : 0;
+    }
+    return -1;
+}
+ANK_FUNCTION_1(__test_trader_buy_under_capacity);
+
+static int __test_empire_trader_has_traded_max(int bought, int sold, int capacity) {
+    empire_trader_handle h = empire_create_trader();
+    if (!h.valid()) {
+        return -1;
+    }
+    auto &t = g_empire_traders.traders[h.handle];
+    t.bought_amount = (uint16_t)std::max(0, bought);
+    t.sold_amount = (uint16_t)std::max(0, sold);
+    const int result = h.has_traded_max(capacity) ? 1 : 0;
+    t.is_active = false;
+    return result;
+}
+ANK_FUNCTION_3(__test_empire_trader_has_traded_max);
 
 ANK_DECLARE_JSFUNCTION_ITERATOR(register_test_js_functions);
 inline void register_test_js_functions(js_State *J) {

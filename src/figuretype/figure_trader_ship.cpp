@@ -6,6 +6,7 @@
 #include "figure_shipwreck.h"
 #include "building/building_dock.h"
 #include "game/game.h"
+#include "game/game_config.h"
 #include "empire/empire.h"
 #include "game/game_events.h"
 #include "city/city_message.h"
@@ -22,6 +23,15 @@
 #include <iostream>
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_trade_ship);
+
+int figure_trade_ship::max_capacity() const {
+    const uint16_t snap = runtime_data().capacity;
+    if (snap > 0) {
+        return snap;
+    }
+    // Legacy / unset runtime: do not follow live flag (spawn-only policy).
+    return current_params().max_capacity;
+}
 
 // Days a moored/anchored ship will tolerate idle dockers before giving up the visit.
 // Bumped from 10 to 25 so a temporarily-blocked dock doesn't truncate a trade run.
@@ -187,6 +197,9 @@ void figure_trade_ship::consume_import_budget(e_resource r) {
 
 void figure_trade_ship::on_create() {
     figure_carrier::on_create();
+    runtime_data().capacity = game_features::gameplay_change_trader_capacity_1600.to_bool()
+        ? 1600
+        : current_params().max_capacity;
 }
 
 void figure_trade_ship::on_destroy() {
@@ -216,7 +229,7 @@ void figure_trade_ship::figure_action() {
     auto& d = runtime_data();
     switch (action_state()) {
     case ACTION_110_TRADE_SHIP_CREATED:
-        load_resource(base.resource_id, 1200);
+        load_resource(base.resource_id, max_capacity());
         d.amount_bought = 0;
         //            is_ghost = true;
         base.wait_ticks++;
@@ -363,20 +376,20 @@ sound_key figure_trade_ship::phrase_key() const {
     if (action_state() == ACTION_115_TRADE_SHIP_LEAVING) {
         if (!empire_trader().has_traded())
             return "barge_no_trade";
- 
+
         return "barge_good_trade";
-    } 
-    
+    }
+
     if (action_state() == ACTION_112_TRADE_SHIP_MOORED) {
         int state = is_trading();
         if (state == TRADE_SHIP_BUYING)
             return "barge_waiting_for_cargo";
-        
+
         if (state == TRADE_SHIP_SELLING)
             return "barge_looking_for_unload";
 
         return "barge_no_trade";
-    } 
+    }
 
     return "barge_beatiful_journey";
 }
@@ -436,9 +449,8 @@ void figure_trade_ship::update_day() {
 }
 
 bvariant figure_trade_ship::get_property(const xstring& domain, const xstring& name) const {
-    auto& d = runtime_data();
     if (domain == tags().figure && name == tags().capacity) {
-        return bvariant(current_params().max_capacity);
+        return bvariant(max_capacity());
     }
 
     return figure_impl::get_property(domain, name);

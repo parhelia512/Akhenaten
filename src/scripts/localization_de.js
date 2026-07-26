@@ -30,6 +30,7 @@ localization_de = [
   {key:"#TR_CONFIG_SIDEBAR_INFO", text:"Zusätzliche Informationen im Bedienfeld"}
   {key:"#TR_CONFIG_SMOOTH_SCROLLING", text:"Sanftes Scrollen aktivieren"}
   {key:"#TR_CONFIG_SMOOTH_ZOOM", text:"Sanften Zoom aktivieren"}
+  {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Größere Händlerkapazität (1600 pro Besuch; kein Jahreslimit der Handelsroute)"}
   {key:"#TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE", text:"Visuelle Rückmeldung beim Räumen von Land verbessern"}
   {key:"#TR_CONFIG_ALLOW_CYCLING_TEMPLES", text:"Bau jedes Tempels nacheinander erlauben"}
   {key:"#TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE", text:"Reichweite beim Bau von Reservoirs, Brunnen und Quellen anzeigen"}

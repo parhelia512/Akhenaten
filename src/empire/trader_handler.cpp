@@ -45,9 +45,12 @@ bool empire_trader_handle::has_traded() {
     return traders[handle].bought_amount || traders[handle].sold_amount;
 }
 
-bool empire_trader_handle::has_traded_max() { 
+bool empire_trader_handle::has_traded_max(int capacity) {
+    if (capacity <= 0) {
+        return false;
+    }
     auto& traders = g_empire_traders.traders;
-    return traders[handle].bought_amount >= 1200 || traders[handle].sold_amount >= 1200;
+    return traders[handle].bought_amount >= capacity || traders[handle].sold_amount >= capacity;
 }
 
 empire_trader_handle empire_create_trader() {
