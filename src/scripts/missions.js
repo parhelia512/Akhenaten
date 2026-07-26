@@ -244,6 +244,7 @@ import mission.m_024_waset
 import mission.m_025_kebet
 import mission.m_026_menat_khufu
 import mission.m_027_itjtawy
+import mission.m_028_iken
 import mission.m_128_alexandria
 import mission.m_129_bridges
 import mission.m_130_sandbox
