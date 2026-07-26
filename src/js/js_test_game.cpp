@@ -1,4 +1,4 @@
-// Native JS bindings used only by the integraltests driver (see
+﻿// Native JS bindings used only by the integraltests driver (see
 // src/platform/integral_tests.cpp and tests/*.js). Split out from js_game.cpp
 // to keep the test-only surface in one place and make it easy to audit /
 // disable later without touching the main game bindings.
@@ -576,6 +576,24 @@ static int __test_yards_stored_staffed(int resource) {
 }
 ANK_FUNCTION_1(__test_yards_stored_staffed);
 
+static void __test_burial_provisions_clear() {
+    for (int r = 0; r < RESOURCES_MAX; r++) {
+        g_scenario.monuments.burial_provisions[r].required = 0;
+        g_scenario.monuments.burial_provisions[r].dispatched = 0;
+    }
+}
+ANK_FUNCTION(__test_burial_provisions_clear);
+
+static bool __test_burial_provisions_set(int resource, int required) {
+    if (resource <= RESOURCE_NONE || resource >= RESOURCES_MAX || required < 0) {
+        return false;
+    }
+    g_scenario.monuments.burial_provisions[resource].required = required;
+    g_scenario.monuments.burial_provisions[resource].dispatched = 0;
+    return true;
+}
+ANK_FUNCTION_2(__test_burial_provisions_set);
+
 // Return the current resolved image id for a monument building (per phase + variant + camera).
 static int __test_building_current_image(int bid) {
     building *b = building_get(bid);
@@ -604,8 +622,8 @@ static void __test_camera_center_building(int bid) {
 ANK_FUNCTION_1(__test_camera_center_building);
 
 // Hot-reload stack regression: each js_vm_sync used to leave ~1 stack slot per
-// [console_command=…] handler (~30). JS_STACKSIZE is 256, so ~10 reloads then
-// crashed in config::refresh / UI archive load (stackoverflow → fatal exit).
+// [console_command=ÔÇª] handler (~30). JS_STACKSIZE is 256, so ~10 reloads then
+// crashed in config::refresh / UI archive load (stackoverflow ÔåÆ fatal exit).
 static bool __test_js_hotreload_handlers_stack_ok(int iterations) {
     js_State *J = js_vm_state();
     if (!J || iterations < 1) {

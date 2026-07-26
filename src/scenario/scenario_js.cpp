@@ -1,13 +1,20 @@
 #include "scenario/scenario.h"
 
+#include "building/building.h"
+#include "building/building_storage_yard.h"
 #include "building/building_type.h"
+#include "city/city.h"
+#include "city/city_buildings.h"
+#include "city/city_resource.h"
 #include "core/encoding.h"
 #include "game/game_environment.h"
+#include "game/resource.h"
 #include "scenario/criteria.h"
 
 #include "js/js_game.h"
 
 #include "core/profiler.h"
+#include <algorithm>
 
 ANK_GLOBAL_OBJECT(g_scenario, __scenario,
     start_year,
@@ -40,6 +47,115 @@ ANK_GLOBAL_OBJECT(g_scenario.monuments, __scenario_monuments,
     second,
     third
     );
+
+static int burial_yards_available(e_resource resource) {
+    int total = 0;
+    buildings_valid_do([&](building &b) {
+        building_storage_yard *yard = b.dcast_storage_yard();
+        if (yard && yard->is_valid()) {
+            total += yard->amount(resource);
+        }
+    });
+    return total;
+}
+
+int __scenario_burial_provisions_count() {
+    int n = 0;
+    for (int r = RESOURCES_MIN; r < RESOURCES_MAX; r++) {
+        if (g_scenario.monuments.burial_provisions[r].required > 0) {
+            n++;
+        }
+    }
+    return n;
+}
+ANK_FUNCTION(__scenario_burial_provisions_count)
+
+int __scenario_burial_provisions_resource_at(int index) {
+    if (index < 0) {
+        return RESOURCE_NONE;
+    }
+    int n = 0;
+    for (int r = RESOURCES_MIN; r < RESOURCES_MAX; r++) {
+        if (g_scenario.monuments.burial_provisions[r].required <= 0) {
+            continue;
+        }
+        if (n == index) {
+            return r;
+        }
+        n++;
+    }
+    return RESOURCE_NONE;
+}
+ANK_FUNCTION_1(__scenario_burial_provisions_resource_at)
+
+int __scenario_burial_provisions_required(int resource) {
+    if (resource <= RESOURCE_NONE || resource >= RESOURCES_MAX) {
+        return 0;
+    }
+    return g_scenario.monuments.burial_provisions[resource].required;
+}
+ANK_FUNCTION_1(__scenario_burial_provisions_required)
+
+int __scenario_burial_provisions_dispatched(int resource) {
+    if (resource <= RESOURCE_NONE || resource >= RESOURCES_MAX) {
+        return 0;
+    }
+    return g_scenario.monuments.burial_provisions[resource].dispatched;
+}
+ANK_FUNCTION_1(__scenario_burial_provisions_dispatched)
+
+int __scenario_burial_provisions_remaining(int resource) {
+    if (resource <= RESOURCE_NONE || resource >= RESOURCES_MAX) {
+        return 0;
+    }
+    const auto &bp = g_scenario.monuments.burial_provisions[resource];
+    return std::max(0, bp.required - bp.dispatched);
+}
+ANK_FUNCTION_1(__scenario_burial_provisions_remaining)
+
+bool __scenario_burial_provisions_complete() {
+    for (int r = RESOURCES_MIN; r < RESOURCES_MAX; r++) {
+        const auto &bp = g_scenario.monuments.burial_provisions[r];
+        if (bp.dispatched < bp.required) {
+            return false;
+        }
+    }
+    return true;
+}
+ANK_FUNCTION(__scenario_burial_provisions_complete)
+
+// Returns amount actually dispatched, or negative:
+//   -1 not enough goods in storage yards
+//   -2 commodity already fulfilled / nothing required
+//   -3 invalid args
+int __scenario_burial_provisions_dispatch(int resource, int amount) {
+    if (resource <= RESOURCE_NONE || resource >= RESOURCES_MAX || amount <= 0) {
+        return -3;
+    }
+    auto &bp = g_scenario.monuments.burial_provisions[resource];
+    const int remaining = bp.required - bp.dispatched;
+    if (remaining <= 0) {
+        return -2;
+    }
+
+    const e_resource res = static_cast<e_resource>(resource);
+    const int available = burial_yards_available(res);
+    if (available <= 0) {
+        return -1;
+    }
+
+    const int take = std::min({amount, remaining, available});
+    event_storageyards_remove_resource ev{res, take, /*staffed_only*/ false};
+    city_storageyards_remove_resource(ev);
+    const int removed = take - ev.amount;
+    if (removed <= 0) {
+        return -1;
+    }
+    bp.dispatched += removed;
+    g_city.resource.calculate_stocks();
+    return removed;
+}
+ANK_FUNCTION_2(__scenario_burial_provisions_dispatch)
 
 int __scenario_criteria_max_year() {
     return scenario_criteria_max_year();

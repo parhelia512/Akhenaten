@@ -70,6 +70,11 @@ function city_victory_determine_state() {
         if (city.rating.monument < city.winning.monuments.goal) {
             state = 0
         }
+        // Burial provisions (scenario.monuments.burial_provisions) must be fully
+        // dispatched before the monument win criterion can pass.
+        if (!__scenario_burial_provisions_complete()) {
+            state = 0
+        }
     }
 
     if (city.winning.kingdom.enabled) {
