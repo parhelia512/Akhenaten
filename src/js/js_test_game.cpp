@@ -36,6 +36,7 @@
 #include "scenario/scenario.h"
 #include "scenario/scenario_event_manager.h"
 #include "scenario/scenario_invasion.h"
+#include "scenario/request.h"
 #include "figure/enemy_army.h"
 #include "figure/formation.h"
 #include "window/window_info.h"
@@ -230,6 +231,66 @@ void __test_process_scenario_events() {
     g_scenario.events.process_events();
 }
 ANK_FUNCTION(__test_process_scenario_events);
+
+int __test_request_cleared_seq() {
+    return scenario_request_last_cleared().seq;
+}
+ANK_FUNCTION(__test_request_cleared_seq);
+
+int __test_request_cleared_tag_id() {
+    return scenario_request_last_cleared().tag_id;
+}
+ANK_FUNCTION(__test_request_cleared_tag_id);
+
+int __test_request_cleared_resource() {
+    return scenario_request_last_cleared().resource;
+}
+ANK_FUNCTION(__test_request_cleared_resource);
+
+int __test_request_cleared_fulfilled() {
+    return scenario_request_last_cleared().fulfilled;
+}
+ANK_FUNCTION(__test_request_cleared_fulfilled);
+
+int __test_request_cleared_was_overdue() {
+    return scenario_request_last_cleared().was_overdue;
+}
+ANK_FUNCTION(__test_request_cleared_was_overdue);
+
+static event_ph_t *__test_find_request_by_tag(int tag) {
+    for (int i = 0; i < g_scenario.events.events_count(); ++i) {
+        event_ph_t *e = g_scenario.events.at(i);
+        if (e && e->type == EVENT_TYPE_REQUEST && e->tag_id == tag) {
+            return e;
+        }
+    }
+    return nullptr;
+}
+
+// Force overdue grace with months_left months remaining (for late-fulfill tests).
+void __test_request_force_overdue(int tag, int months_left) {
+    event_ph_t *e = __test_find_request_by_tag(tag);
+    if (!e || !e->is_active) {
+        return;
+    }
+    e->event_state = e_event_state_overdue;
+    e->is_overdue = true;
+    e->quest_months_left = (uint8_t)std::max(0, months_left);
+}
+ANK_FUNCTION_2(__test_request_force_overdue);
+
+// Expire grace immediately → refuse path on next process_active_request.
+void __test_request_force_refuse_now(int tag) {
+    event_ph_t *e = __test_find_request_by_tag(tag);
+    if (!e || !e->is_active) {
+        return;
+    }
+    e->event_state = e_event_state_overdue;
+    e->is_overdue = true;
+    e->quest_months_left = 0;
+    g_scenario.events.process_active_request(e->event_id);
+}
+ANK_FUNCTION_1(__test_request_force_refuse_now);
 
 void __test_process_invasion_binds() {
     g_invasions.process_bind_resolutions();

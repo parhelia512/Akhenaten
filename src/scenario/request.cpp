@@ -17,6 +17,29 @@
 
 #include <algorithm>
 
+namespace {
+request_cleared_snapshot_t g_last_request_cleared;
+
+void emit_request_cleared(const event_ph_t &event, bool fulfilled) {
+    const int tag_id = (int)event.tag_id;
+    const int resource = (int)event.item.value;
+    const int fulfilled_i = fulfilled ? 1 : 0;
+    const int was_overdue_i = event.is_overdue ? 1 : 0;
+
+    g_last_request_cleared.tag_id = tag_id;
+    g_last_request_cleared.resource = resource;
+    g_last_request_cleared.fulfilled = fulfilled_i;
+    g_last_request_cleared.was_overdue = was_overdue_i;
+    g_last_request_cleared.seq += 1;
+
+    events::emit(event_request_cleared{ tag_id, resource, fulfilled_i, was_overdue_i });
+}
+} // namespace
+
+const request_cleared_snapshot_t &scenario_request_last_cleared() {
+    return g_last_request_cleared;
+}
+
 void scenario_request_init() {
     //for (int i = 0; i < MAX_REQUESTS; i++) {
     //    random_generate_next();
@@ -69,10 +92,11 @@ void scenario_request_handle(event_ph_t &event, int caller_event_id, e_event_act
         if (event.on_completed_action >= 0) {
             g_scenario.events.process_event(event.on_completed_action, true, EVENT_ACTION_COMPLETED, event.event_id);
         }
+        emit_request_cleared(event, true);
         break;
 
     case e_event_state_finished_late:
-        assert(!event.is_overdue);
+        // Overdue-grace fulfill uses this path (B13): was_overdue stays true for JS facts.
         messages::popup("message_request_received_late", event.event_id, 0);
         g_city.kingdome.increase_success_request(1);
         event.event_state = e_event_state_received;
@@ -80,6 +104,7 @@ void scenario_request_handle(event_ph_t &event, int caller_event_id, e_event_act
         if (event.on_too_late_action >= 0) {
             g_scenario.events.process_event(event.on_too_late_action, true, EVENT_ACTION_TOOLATE, event.event_id);
         }
+        emit_request_cleared(event, true);
         break;
 
     case e_event_state_initial:
@@ -145,6 +170,7 @@ void scenario_request_handle(event_ph_t &event, int caller_event_id, e_event_act
             if (event.on_refusal_action >= 0) {
                 g_scenario.events.process_event(event.on_refusal_action, true, EVENT_ACTION_REFUSED, event.event_id);
             }
+            emit_request_cleared(event, false);
         }
         break;
     }
@@ -185,9 +211,15 @@ void scenario_request_dispatch(int id) {
         return;
     }
 
-    e_event_state new_state = (request.months_to_comply > 0)
-                                    ? e_event_state_finished
-                                    : e_event_state_finished_late;
+    // B13: overdue-grace fulfill is late (on_too_late), not ok (on_completed).
+    e_event_state new_state;
+    if (ev->is_overdue) {
+        new_state = e_event_state_finished_late;
+    } else if (request.months_to_comply > 0) {
+        new_state = e_event_state_finished;
+    } else {
+        new_state = e_event_state_finished_late;
+    }
 
     scenario_request_set_state(request, new_state);
 

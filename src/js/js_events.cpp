@@ -18,6 +18,7 @@
 #include "city/city_religion.h"
 #include "city/city_resource.h"
 #include "scenario/scenario.h"
+#include "scenario/request.h"
 #include "city/city_kingdome_relations.h"
 #include "city/city_population.h"
 #include "dev/debug.h"
@@ -53,6 +54,7 @@ ANK_SCRIPT_EVENT(event_update_victory_state, population)
 ANK_SCRIPT_EVENT(event_advance_day, year, month, mday, abdday, years_since_start)
 ANK_SCRIPT_EVENT(event_advance_week, year, month, mday, abdday, years_since_start)
 ANK_SCRIPT_EVENT(event_advance_month, year, month, mday, abdday, years_since_start)
+ANK_SCRIPT_EVENT(event_request_cleared, tag_id, resource, fulfilled, was_overdue)
 ANK_SCRIPT_EVENT(event_building_create, bid)
 ANK_SCRIPT_EVENT(event_city_disease, absday)
 ANK_SCRIPT_EVENT(event_warehouse_filled, bid)

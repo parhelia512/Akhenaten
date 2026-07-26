@@ -4,6 +4,15 @@
 #include "scenario/scenario_event_manager.h"
 #include <functional>
 
+// Factual request close signal for JS (B13). C++ stores/emits facts only —
+// ok/late/refuse policy and chain reactions live in scripts.
+struct event_request_cleared {
+    int tag_id = 0;
+    int resource = 0;
+    int fulfilled = 0;   // 1 = player dispatched goods/troops/deben
+    int was_overdue = 0; // 1 = past initial deadline (grace or refuse)
+};
+
 struct scenario_request {
     int event_id = -1;
     int state = 0;
@@ -14,6 +23,17 @@ struct scenario_request {
     bool is_valid() const { return event_id >= 0; }
     int resource_amount() const { return resource == RESOURCE_DEBEN ? amount : amount * 100; }
 };
+
+// Last cleared snapshot for integral tests / debug (updated on every emit).
+struct request_cleared_snapshot_t {
+    int tag_id = 0;
+    int resource = 0;
+    int fulfilled = 0;
+    int was_overdue = 0;
+    int seq = 0;
+};
+
+const request_cleared_snapshot_t &scenario_request_last_cleared();
 
 void scenario_request_init();
 
