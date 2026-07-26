@@ -220,7 +220,8 @@ void event_manager_t::create_trade_city_under_siege(int tag, int months_initial)
     g_scenario_events.event_list.front().num_total_header = g_scenario_events.event_list.size();
 }
 
-void event_manager_t::create_foreign_army_attack_warning(int tag, int8_t sender_faction) {
+void event_manager_t::create_foreign_army_attack_warning(int tag, int8_t sender_faction, int months_initial,
+                                                         int invader) {
     auto& event = g_scenario_events.event_list.emplace_back();
     int event_id = g_scenario_events.event_list.size() - 1;
     memset(&event, 0, sizeof(event_ph_t));
@@ -230,6 +231,9 @@ void event_manager_t::create_foreign_army_attack_warning(int tag, int8_t sender_
     event.tag_id = tag;
     event.location_fields = { -1, -1, -1, -1 };
     event.sender_faction = sender_faction;
+    event.months_initial = (uint8_t)(months_initial > 0 ? months_initial : 0);
+    event.quest_months_left = event.months_initial;
+    event.item.value = invader;
     event.event_id = event_id;
     event.event_state = e_event_state_initial;
     g_scenario_events.event_list.front().num_total_header = g_scenario_events.event_list.size();
@@ -774,11 +778,19 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         break;
 
     case EVENT_TYPE_FOREIGN_ARMY_ATTACK_WARNING: {
-            const int annoucement = event.reasons[0];
-            const int reason = event.reasons[1];
+            const bool bedouin = event.item.value == EVENT_INVADER_BEDUINS;
+            const int title = bedouin ? PHRASE_bedouin_attacks_you_title
+                                      : PHRASE_foreign_army_attacks_you_title;
+            const int announcement = event.reasons[0]
+                ? event.reasons[0]
+                : (bedouin ? PHRASE_bedouin_attacks_you_initial_announcement
+                           : PHRASE_foreign_army_attacks_you_initial_announcement);
+            const int reason = event.reasons[1]
+                ? event.reasons[1]
+                : (bedouin ? PHRASE_bedouin_attacks_you_no_reason_A
+                           : PHRASE_foreign_army_attacks_you_no_reason_A);
             city_message_post_full(true, "message_template_general", &event, caller_event_id,
-                PHRASE_foreign_army_attacks_you_title, annoucement, reason,
-                id, 0);
+                title, announcement, reason, id, 0);
         }
         break;
 

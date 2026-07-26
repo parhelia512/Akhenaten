@@ -239,7 +239,8 @@ struct event_manager_t {
                              e_event_trigger_type trigger = EVENT_TRIGGER_ONCE, int8_t city_id = -1);
     void create_pharaoh_gift(int tag, e_resource r, int amount);
     void create_trade_city_under_siege(int tag, int months_initial);
-    void create_foreign_army_attack_warning(int tag, int8_t sender_faction);
+    void create_foreign_army_attack_warning(int tag, int8_t sender_faction, int months_initial = 0,
+                                            int invader = 0);
     void create_distant_battle(int tag, pcstr city, vec2i pos);
     void win_distant_battle(int tag, pcstr city, vec2i pos);
     void create_chain_event(int tag, e_event_type type, int amount, e_resource resource = RESOURCE_NONE,

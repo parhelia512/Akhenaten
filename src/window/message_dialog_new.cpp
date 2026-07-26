@@ -204,7 +204,7 @@ void ui::message_dialog_base::eventmsg_template_combine(pcstr template_ptr, T& b
       {"[amount_granted]", ""}, // TODO
       {"[item]", (pcstr)lang_get_string(23, 54 + (phrase_modifier ? msg.req_resource_past : msg.req_resource))},
       {"[time_allotted]", time.c_str()},
-      {"[time_until_attack]", ""}, // TODO
+      {"[time_until_attack]", time.c_str()},
       {"[travel_time]", ""},       // TODO
       {"[god]", ""},               // TODO
     };

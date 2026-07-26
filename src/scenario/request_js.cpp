@@ -34,7 +34,11 @@ void ANK_FUNCTION_UNIFIED(__city_create_pharaoh_gift)(const bvariant_map &args) 
 }
 
 void ANK_FUNCTION_UNIFIED(__city_event_create_foreign_army_attack_warning)(const bvariant_map &args) {
-    g_scenario.events.create_foreign_army_attack_warning(args.n("tag_id"), args.n("sender_faction"));
+    g_scenario.events.create_foreign_army_attack_warning(
+        args.n("tag_id"),
+        (int8_t)args.i32("sender_faction", 0),
+        args.i32("months", args.i32("months_initial", 0)),
+        args.i32("invader", args.i32("item", 0)));
 }
 
 void ANK_FUNCTION_UNIFIED(__city_event_create_distant_battle)(const bvariant_map &args) {
