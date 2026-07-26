@@ -90,7 +90,7 @@ int scenario_data_t::debt_interest() const {
 }
 
 void scenario_data_t::load_metadata(const mission_id_t &missionid, bool is_new_mission) {
-    g_config_arch.r_section(missionid, [this] (archive arch) {
+    g_config_arch.r_section(missionid, [this, is_new_mission] (archive arch) {
         arch.r(meta);
         arch.r("env", env);
 
@@ -127,6 +127,32 @@ void scenario_data_t::load_metadata(const mission_id_t &missionid, bool is_new_m
         overlay_tile("earthquake_point", earthquake_point);
         // disembark_points: mission config only (pak discarded). Absent key → empty.
         arch.r_vector("disembark_points", disembark_points, MAX_DISEMBARK_POINTS);
+
+        // fishing / herd points: mission config only (map/pak discarded). Absent key → empty.
+        arch.r("fishing_points", fishing_points);
+        arch.r("herd_points_animals", herd_points_animals);
+
+        // Burial provisions: omit keys → keep pak. hide_pak_burial clears then JS list
+        // replaces. On save load, required is overwritten from JS; dispatched is kept.
+        if (arch.r_bool("hide_pak_burial", false)) {
+            for (int r = 0; r < RESOURCES_MAX; r++) {
+                monuments.burial_provisions[r].required = 0;
+                if (is_new_mission) {
+                    monuments.burial_provisions[r].dispatched = 0;
+                }
+            }
+        }
+        arch.r_array("burial_provisions", [&] (archive entry) {
+            const e_resource res = entry.r_type<e_resource>("resource", RESOURCE_NONE);
+            const int required = entry.r_int("required", 0);
+            if (res <= RESOURCE_NONE || res >= RESOURCES_MAX || required <= 0) {
+                return;
+            }
+            monuments.burial_provisions[res].required = required;
+            if (is_new_mission) {
+                monuments.burial_provisions[res].dispatched = 0;
+            }
+        });
 
         settings_vars_t newvars;
         arch.r("vars", newvars);
