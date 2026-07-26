@@ -5,11 +5,13 @@ log_info("akhenaten: mission 128 alexandria started")
 // Monuments (group 198): 24 Sun Temple, 17 Grand Pyramid Complex, 15 Large Pyramid.
 // Allowed structures (scenario reserved[0..46]): all 47 editor flags ON.
 // Triage: SKIP map_obj idx=11 empty; SKIP orphan routes 19 (no polyline), 22, 25.
-// Remap Byblos→route 21, Qadesh→route 20 (pak city.route=19 missing polyline).
+// Remap Byblos→route 21, Qadesh→route 20 (pak city.route=19 missing polyline;
+// pak sea=0 discarded — polylines 20/21 are type=2 sea).
 // Tyre foreign non-trade display. Invasion points SoA-misread as empty in dump —
 // interleaved file values land[93,210] sea[203,125] restored in JS.
+// fishing_points / herd_points_animals: config-only (omit → empty), like invasion_points.
 // Events: bricks×11/12mo recurring y1m4+; clay flood y6m5+; gold collapse y6m4+;
-// contaminated water y3m9+; beduin×19 y8m0+ recurring.
+// contaminated water y3m9+; beduin×19 y8m0+ recurring (18mo warning, Libyan sprites).
 //
 // Tag_id scheme:
 //   1000 + i               chain-only ONLY_VIA leaves
@@ -89,6 +91,13 @@ mission128 { // Alexandria.map — An Alexandrian Affair
 	// File stores land/sea as interleaved xy; engine SoA bind drops them — restore here.
 	invasion_points_land [ [93, 210] ]
 	invasion_points_sea [ [203, 125] ]
+	// Map dump: 6 fish + 4 herd points (herd types FIGURE_NONE; animals=0).
+	fishing_points [
+		[41, 98], [83, 47], [145, 90], [157, 139], [133, 150], [49, 157]
+	]
+	herd_points_animals [
+		[113, 159], [142, 146], [143, 122], [149, 80]
+	]
 
 	enable_scenario_events : true
 
@@ -389,7 +398,8 @@ mission128 { // Alexandria.map — An Alexandrian Affair
 		}
 
 		{
-			// Remap from missing pak route 19 → polyline 20 (near Qadesh).
+			// Remap: pak sea=0 + route=19 (no polyline). Nearby polyline 20 is
+			// sea type=2 at Qadesh — keep is_sea_trade true (triage A).
 			name : "Qadesh"
 			idx : 14
 			pos : [962, 10]
@@ -412,7 +422,8 @@ mission128 { // Alexandria.map — An Alexandrian Affair
 		}
 
 		{
-			// Remap from missing pak route 19 → polyline 21 (near Byblos/Tyre).
+			// Remap: pak sea=0 + route=19 (no polyline). Nearby polyline 21 is
+			// sea type=2 at Byblos — keep is_sea_trade true (triage A).
 			name : "Byblos"
 			idx : 35
 			pos : [873, 72]
@@ -604,6 +615,7 @@ mission128 { // Alexandria.map — An Alexandrian Affair
 		gold_collapse_last_year : -1
 		contaminated_last_year : -1
 		beduin_raid_last_year : -1
+		beduin_raid_warning_months : 0
 		beduin_raid_active : false
 		beduin_raid_enemies_seen : false
 		beduin_raid_resolved : false
@@ -657,12 +669,26 @@ function mission128_beduin_raid(invasion_id, size) {
 	})
 }
 
+function mission128_beduin_warning(tag, months, announcement) {
+	var warn = city.create_foreign_army_attack_warning({
+		tag_id: tag,
+		sender_faction: 0,
+		months: months,
+		invader: EVENT_INVADER_BEDUINS
+	})
+	if (announcement !== undefined) {
+		warn.set_reasons(announcement, PHRASE_bedouin_attacks_you_no_reason_A, 0, 0)
+	}
+	warn.execute()
+}
+
 [es=event_mission_start, mission=mission128]
 function mission128_on_start(ev) {
 	__image_request_pak(PACK_ENEMY_LIBIAN)
 	empire.set_id(0)
 	empire.set_expanded(false)
 	city.set_empire_available(1)
+	city.set_scenario_enemy_id(ENEMY_0_BARBARIAN)
 	for (var i = ADVISOR_NONE + 1; i <= ADVISOR_DIPLOMACY; i++) {
 		city.set_advisor_available(i, 1)
 	}
@@ -723,7 +749,9 @@ function mission128_gold_collapse_recurring(ev) {
 	}).execute()
 }
 
-// pak i=5: CONTAMINATED_WATER amount=8 recurring y3m9+
+// pak i=5: CONTAMINATED_WATER amount=8 recurring y3m9+.
+// Triage: omit pak subtype=1 / city / months — unused for this type (editor has
+// no Contaminated subtype; engine effect is fixed health drop). amount dump-only.
 [es=event_advance_month, mission=mission128]
 function mission128_contaminated_water_recurring(ev) {
 	if (ev.years_since_start < 3 || ev.month != 9) {
@@ -741,13 +769,17 @@ function mission128_contaminated_water_recurring(ev) {
 	}).execute()
 }
 
-// pak i=6: beduin size=19 recurring from y8m0, attack=RANDOM (sprites = Libyan)
+// pak i=6: beduin size=19 recurring from y8m0, attack=RANDOM, months=18 warning.
+// Sprites = Libyan (Serabit/N.Dahshur beduin pattern). Scenario enemy_id = BARBARIAN.
 [es=event_advance_month, mission=mission128]
 function mission128_beduin_raid_recurring(ev) {
 	if (ev.years_since_start < 8 || ev.month != 0) {
 		return
 	}
 	if (mission.beduin_raid_last_year == ev.years_since_start) {
+		return
+	}
+	if (mission.beduin_raid_warning_months > 0) {
 		return
 	}
 	if (city.num_enemy_formations > 0) {
@@ -757,11 +789,38 @@ function mission128_beduin_raid_recurring(ev) {
 		return
 	}
 	mission.beduin_raid_last_year = ev.years_since_start
-	mission.beduin_raid_enemies_seen = false
-	mission.beduin_raid_resolved = false
-	mission.beduin_raid_active = true
-	log_info("akhenaten: mission 128 beduin raid size=19 year=" + ev.years_since_start, {ev:ev})
-	mission128_beduin_raid(2 + ev.years_since_start, 19)
+	mission.beduin_raid_warning_months = 18
+	log_info("akhenaten: mission 128 beduin warning 18mo year=" + ev.years_since_start, {ev:ev})
+	mission128_beduin_warning(3400 + ev.years_since_start, 18)
+}
+
+// Countdown pak months=18; milestones at 12 / 6 / 1; spawn at 0.
+[es=event_advance_month, mission=mission128]
+function mission128_beduin_raid_warning_tick(ev) {
+	if (mission.beduin_raid_warning_months <= 0) {
+		return
+	}
+	// Same month as the calendar warning start — leave months at 18.
+	if (mission.beduin_raid_last_year == ev.years_since_start && ev.month == 0) {
+		return
+	}
+	mission.beduin_raid_warning_months = mission.beduin_raid_warning_months - 1
+	var left = mission.beduin_raid_warning_months
+	var tag = 3500 + ev.years_since_start * 12 + ev.month
+	if (left == 12) {
+		mission128_beduin_warning(tag, 12, PHRASE_bedouin_attacks_you_1year_reminder)
+	} else if (left == 6) {
+		mission128_beduin_warning(tag, 6, PHRASE_bedouin_attacks_you_6month_warning)
+	} else if (left == 1) {
+		mission128_beduin_warning(tag, 1, PHRASE_bedouin_attacks_you_1month_warning)
+	} else if (left == 0) {
+		mission.beduin_raid_enemies_seen = false
+		mission.beduin_raid_resolved = false
+		mission.beduin_raid_active = true
+		mission128_beduin_warning(tag, 0, PHRASE_bedouin_attacks_you_city_attacked_alert)
+		log_info("akhenaten: mission 128 beduin raid size=19 year=" + ev.years_since_start, {ev:ev})
+		mission128_beduin_raid(2 + ev.years_since_start, 19)
+	}
 }
 
 [es=event_advance_month, mission=mission128]
