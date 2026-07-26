@@ -238,6 +238,7 @@ import mission.m_018_rostja
 import mission.m_019_bahariya
 import mission.m_020_djedu
 import mission.m_021_dunqul
+import mission.m_022_dakhla
 import mission.m_026_menat_khufu
 import mission.m_128_alexandria
 import mission.m_129_bridges
