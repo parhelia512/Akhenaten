@@ -8,6 +8,7 @@
 #include "content/vfs.h"
 #include "panel.h"
 #include <cstring>
+#include <cstdlib>
 #include <functional>
 
 #include <algorithm>
@@ -132,6 +133,56 @@ void scrollable_list::change_file_path(xstring dir, xstring ext) {
 void scrollable_list::append_files_with_extension(xstring dir, xstring extension) {
     file_finder = vfs::dir_append_files_with_extension(dir.c_str(), extension.c_str());
     _items_count = file_finder->num_files;
+    refresh_scrollbar();
+}
+
+static int filename_startswith_ci(pcstr name, pcstr prefix) {
+    if (!name || !prefix) {
+        return 0;
+    }
+    while (*prefix) {
+        char a = *name;
+        char b = *prefix;
+        if (a >= 'A' && a <= 'Z') {
+            a = (char)(a - 'A' + 'a');
+        }
+        if (b >= 'A' && b <= 'Z') {
+            b = (char)(b - 'A' + 'a');
+        }
+        if (!a || a != b) {
+            return 0;
+        }
+        ++name;
+        ++prefix;
+    }
+    return 1;
+}
+
+static int compare_prefix_then_lower(const void *va, const void *vb, pcstr prefix) {
+    const char *a = *(const char *const *)va;
+    const char *b = *(const char *const *)vb;
+    const int pa = filename_startswith_ci(a, prefix);
+    const int pb = filename_startswith_ci(b, prefix);
+    if (pa != pb) {
+        return pb - pa;
+    }
+    return string_compare_case_insensitive(a, b);
+}
+
+// qsort comparator needs static prefix for call duration.
+static pcstr g_prioritize_prefix = nullptr;
+static int compare_prioritize_prefix(const void *va, const void *vb) {
+    return compare_prefix_then_lower(va, vb, g_prioritize_prefix ? g_prioritize_prefix : "");
+}
+
+void scrollable_list::prioritize_files_prefix(pcstr prefix) {
+    if (!file_finder || !prefix || !*prefix || file_finder->num_files <= 1) {
+        return;
+    }
+    dir_listing *listing = const_cast<dir_listing *>(file_finder);
+    g_prioritize_prefix = prefix;
+    qsort(listing->files, listing->num_files, sizeof(char *), compare_prioritize_prefix);
+    g_prioritize_prefix = nullptr;
     refresh_scrollbar();
 }
 

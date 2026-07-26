@@ -375,6 +375,7 @@ localization_hu = [
   {key: "#army_has_full_complement_of_forts", group:19, id:50}
   {key: "#monthly_autosave_on", group:19, id:51}
   {key: "#monthly_autosave_off", group:19, id:52}
+  {key: "#autosave_slots", text: "Autosave slotok"}
   {key: "#cannot_demolish_bridge_with_people", group:19, id:53}
   {key: "#inland_lake_has_no_sea_access", group:19, id:54}
   {key: "#cannot_set_windows_mode", group:19, id:55}

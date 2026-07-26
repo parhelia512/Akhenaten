@@ -125,6 +125,7 @@ namespace game_features {
     game_feature gameplay_change_cartpushers_yield_by_id{ "gameplay_change_cartpushers_yield_by_id", "#TR_CONFIG_CARTPUSHERS_YIELD_BY_ID", true };
     game_feature gameplay_rebalance_workshop_output{ "gameplay_rebalance_workshop_output", "#TR_CONFIG_REBALANCE_WORKSHOP_OUTPUT", true };
     game_feature gameopt_monthly_autosave{ "gameopt_monthly_autosave", "", true };
+    game_feature gameopt_autosave_slots{ "gameopt_autosave_slots", "", 1.0f };
     game_feature gameopt_tooltips_mode{ "gameopt_tooltips_mode", "", 2.0f };
     game_feature gameopt_warnings{ "gameopt_warnings", "", true };
     game_feature gameopt_gods_enabled{ "gameopt_gods_enabled", "", true };

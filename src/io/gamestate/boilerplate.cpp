@@ -5,6 +5,7 @@
 #include "building/building_wall.h"
 #include "building/monuments.h"
 #include "game/game_config.h"
+#include "game/autosave_module.h"
 #include "city/city.h"
 #include "city/map.h"
 #include "city/city_message.h"
@@ -639,9 +640,11 @@ bool GamestateIO::write_savegame(pcstr filename_short) {
     assert(format == FILE_FORMAT_SAVE_FILE_EXT);
     bool save_ok = FILEIO.serialize(full, 0, format, latest_save_version, file_schema);
     if (save_ok) {
-        game_features::gameopt_last_save_filename = full.c_str();
-        game_features::gameopt_last_player = game_features::gameopt_player_name.to_string();
-        game_features::save();
+        if (!autosave_module_t::is_monthly_filename(filename_short)) {
+            game_features::gameopt_last_save_filename = full.c_str();
+            game_features::gameopt_last_player = game_features::gameopt_player_name.to_string();
+            game_features::save();
+        }
         logs::info("Save game: OK %s", full.c_str());
     } else {
         logs::error("Save game: FAILED %s", full.c_str());

@@ -70,6 +70,7 @@ game_features {
     @gameui_hide_new_game_top_menu {}
     @gameui_empire_city_old_names {}
     @gameopt_monthly_autosave {}
+    @gameopt_autosave_slots {}
     @gameopt_tooltips_mode {}
     @gameopt_warnings {}
     @gameopt_gods_enabled {}

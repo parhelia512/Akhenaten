@@ -1970,6 +1970,11 @@ void ui::escrollable_list::append_files_with_extension(pcstr dir, pcstr ext) {
     panel->append_files_with_extension(dir, ext);
 }
 
+void ui::escrollable_list::prioritize_files_prefix(pcstr prefix) {
+    ensure_panel();
+    panel->prioritize_files_prefix(prefix);
+}
+
 void ui::escrollable_list::scroll_to_selected() {
     ensure_panel();
     const int idx = panel->get_selected_entry_idx();

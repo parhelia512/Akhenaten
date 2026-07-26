@@ -28,6 +28,8 @@
 #include "graphics/color.h"
 #include "city/city.h"
 #include "city/city_buildings.h"
+#include "game/autosave_module.h"
+#include "core/bstring.h"
 #include "game/game.h"
 #include "io/gamestate/boilerplate.h"
 #include "game/game_events.h"
@@ -689,6 +691,31 @@ static bool __test_js_hotreload_file_stack_ok(pcstr path, int iterations) {
     return true;
 }
 ANK_FUNCTION_2(__test_js_hotreload_file_stack_ok);
+
+static pcstr __test_autosave_format(int slots, int slot) {
+    static bstring256 buf;
+    buf = autosave_module_t::format_monthly_filename(slots, slot, "svx");
+    return buf.c_str();
+}
+ANK_FUNCTION_2(__test_autosave_format);
+
+static int __test_autosave_pick(int slots, int exists_mask, int m0, int m1, int m2) {
+    bool exists[10] = {};
+    uint64_t mtime[10] = {};
+    if (slots < 1) {
+        slots = 1;
+    }
+    if (slots > 10) {
+        slots = 10;
+    }
+    const int mtimes_in[] = {m0, m1, m2};
+    for (int i = 0; i < slots; ++i) {
+        exists[i] = (exists_mask & (1 << i)) != 0;
+        mtime[i] = exists[i] ? (uint64_t)(i < 3 ? mtimes_in[i] : (100 + i)) : UINT64_MAX;
+    }
+    return autosave_module_t::pick_slot(slots, exists, mtime);
+}
+ANK_FUNCTION_5(__test_autosave_pick);
 
 ANK_DECLARE_JSFUNCTION_ITERATOR(register_test_js_functions);
 inline void register_test_js_functions(js_State *J) {

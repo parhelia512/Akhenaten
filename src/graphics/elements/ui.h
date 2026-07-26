@@ -800,6 +800,7 @@ namespace ui {
         void set_use_file_finder(bool use);
         void change_file_path(const xstring& dir, const xstring& ext);
         void append_files_with_extension(pcstr dir, pcstr ext);
+        void prioritize_files_prefix(pcstr prefix);
         void scroll_to_selected();
         xstring selected_entry_text(int filename_syntax = 0) const;
         int items_count() const;

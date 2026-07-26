@@ -660,6 +660,7 @@ localization_ru = [
     { key: "#top_menu_file_tooltip", text: "Загрузить, сохранить, начать новую игру и выйти" }
     { key: "#top_menu_options", text: "Параметры" }
     { key: "#top_menu_options_tooltip", text: "Настройки экрана, звука, скорости и сложности" }
+    { key: "#autosave_slots", text: "Слоты автосохранения" }
     { key: "#top_menu_help", text: "Помощь" }
     { key: "#top_menu_help_tooltip", text: "Справка, подсказки и сведения об игре" }
     { key: "#top_menu_overseers", text: "Советники" }

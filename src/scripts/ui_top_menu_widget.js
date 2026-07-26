@@ -3,6 +3,35 @@ log_info("akhenaten: ui top menu config started")
 function top_menu_autosave_options_text(p1, p2) { return __loc(19, game_features.gameopt_monthly_autosave ? 51 : 52) }
 function top_menu_autosave_options_toggle(p1, p2) { game_features.gameopt_monthly_autosave = !game_features.gameopt_monthly_autosave }
 
+function top_menu_autosave_slots_clamp(n) {
+	n = Math.round(n)
+	if (n < 1) return 1
+	if (n > 10) return 10
+	return n
+}
+
+function top_menu_autosave_slots_text(p1, p2) {
+	var n = top_menu_autosave_slots_clamp(game_features.gameopt_autosave_slots)
+	return __loc("#autosave_slots") + ": " + n
+}
+
+function top_menu_autosave_slots_cycle(p1, p2) {
+	var cur = top_menu_autosave_slots_clamp(game_features.gameopt_autosave_slots)
+	var opts = [1, 3, 5, 10]
+	var next = opts[0]
+	for (var i = 0; i < opts.length; i++) {
+		if (cur === opts[i]) {
+			next = opts[(i + 1) % opts.length]
+			break
+		}
+		if (cur < opts[i]) {
+			next = opts[i]
+			break
+		}
+	}
+	game_features.gameopt_autosave_slots = next
+}
+
 function top_menu_tooltip_text(p1, p2) { return __loc(3, game_features.gameopt_tooltips_mode + 2) }
 function top_menu_tooltip_toggle(p1, p2) { game_features.gameopt_tooltips_mode = (game_features.gameopt_tooltips_mode + 1) % 3 }
 
@@ -199,6 +228,8 @@ top_menu_widget {
 
 		autosave_options: menu_item({textfn: top_menu_autosave_options_text
 									 onclick: top_menu_autosave_options_toggle })
+		autosave_slots: menu_item({textfn: top_menu_autosave_slots_text
+								   onclick: top_menu_autosave_slots_cycle })
 
 		hotkeys_options : menu_item({text: "Hotkeys options", onclick: top_menu_show_window_by_id("window_hotkey_config") })
 		enhanced_options: menu_item({text: "Enhanced options", onclick: top_menu_features })

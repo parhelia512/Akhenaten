@@ -47,7 +47,6 @@
 #include "city/city_desirability.h"
 #include "city/city_message.h"
 #include "city/city_industry.h"
-#include "io/gamestate/boilerplate.h"
 #include "scenario/distant_battle.h"
 #include "scenario/empire.h"
 #include "empire/empire.h"
@@ -56,7 +55,6 @@
 #include "grid/tiles.h"
 #include "content/mods.h"
 #include "undo.h"
-#include "window/file_dialog_common.h"
 
 #include "dev/debug.h"
 #include <iostream>
@@ -181,11 +179,6 @@ void game_t::advance_month() {
 
     if (simtime.advance_month()) {
         advance_year();
-    }
-
-    if (game_features::gameopt_monthly_autosave.to_bool()) {
-        bstring256 autosave_file("autosave_month.", saved_game_data_expanded.extension);
-        GamestateIO::write_savegame(autosave_file);
     }
 
     events::emit(event_advance_month::from_simtime(game.simtime));

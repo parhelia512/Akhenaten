@@ -122,6 +122,18 @@ static void ui_proxy_append_files_with_extension(js_State* J) {
     J->pushundefined();
 }
 
+static void ui_proxy_prioritize_files_prefix(js_State* J) {
+    ui::element* elem = ui::GET_ELEM(J);
+    if (elem) {
+        auto* list = elem->dcast_scrollable_list();
+        if (list) {
+            xstring prefix = js_toxstring(J, 1);
+            list->prioritize_files_prefix(prefix.c_str());
+        }
+    }
+    J->pushundefined();
+}
+
 void ui_proxy_get_items_count(js_State* J) {
     ui::element* elem = ui::GET_ELEM(J);
     auto* list = elem ? elem->dcast_scrollable_list() : nullptr;
@@ -181,6 +193,7 @@ void js_register_ui_element_scrollable_list(js_State *J) {
     def_function(J, ui_proxy_set_use_file_finder, "set_use_file_finder", 1);
     def_function(J, ui_proxy_change_file_path, "change_file_path", 2);
     def_function(J, ui_proxy_append_files_with_extension, "append_files_with_extension", 2);
+    def_function(J, ui_proxy_prioritize_files_prefix, "prioritize_files_prefix", 1);
     def_function(J, ui_proxy_scroll_to_selected, "scroll_to_selected", 0);
     def_function(J, ui_proxy_get_selected_text, "selected_text", 1);
 
