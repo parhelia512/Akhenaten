@@ -159,6 +159,17 @@ function mission_recurring_request_may_fire(mission, resource, prefix, abs_month
     return true
 }
 
+// B13: derive ok/late/refuse from factual event_request_cleared (no KR read).
+function mission_request_outcome(ev) {
+	if (!ev || !ev.fulfilled) {
+		return "refuse"
+	}
+	if (ev.was_overdue) {
+		return "late"
+	}
+	return "ok"
+}
+
 function mission_pharaoh_favour_invasion_tick(mission, army_size, chain_army_size) {
     // Favour-KR Pharaoh army via ENEMIES + Egyptian (no force_attack / KINGDOME path).
     if (typeof chain_army_size === "undefined") {
