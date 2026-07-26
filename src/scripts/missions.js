@@ -235,6 +235,7 @@ import mission.m_015_north_dahshur
 import mission.m_016_iunet
 import mission.m_017_on
 import mission.m_018_rostja
+import mission.m_026_menat_khufu
 import mission.m_128_alexandria
 import mission.m_129_bridges
 import mission.m_130_sandbox
