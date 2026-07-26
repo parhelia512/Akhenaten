@@ -89,6 +89,16 @@ mission17 { // On (Heliopolis) — Ivory from the East
 	invasion_points_land [ [112, 106] ]
 	invasion_points_sea [ [97, 103] ]
 
+	// pak burial_provisions (scenario 17 dump).
+	hide_pak_burial : true
+	burial_provisions [
+		{ resource: RESOURCE_LINEN, required: 8 }
+		{ resource: RESOURCE_LUXURY_GOODS, required: 8 }
+		{ resource: RESOURCE_TIMBER, required: 8 }
+		{ resource: RESOURCE_LIMESTONE, required: 32 }
+		{ resource: RESOURCE_GRANITE, required: 32 }
+	]
+
 	enable_scenario_events : true
 
 	map_background : {pack:PACK_EMPIRE, id:1}
