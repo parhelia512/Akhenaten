@@ -8,7 +8,7 @@ log_info("akhenaten: mission 18 rostja started")
 // Kyrene route 7 / Men-nefer route 19 — no polyline → 2-pt stubs + deviation.
 // NEW_TRADE i=20 copy Men-nefer; i=32/42/43 Nekhen→remap Iunet (route 3).
 // EVENT_TYPE_INVASION chain leaves no-op → gems crisis refuse JS Hyksos×11;
-// troops refuse i=35 skip → re-arm 1034 directly (ND henna pattern).
+// troops refuse/defeat i=35 → JS Hyksos×9 then on_completed → re-arm ×47.
 // Monuments TEMP 67 (pak 53 Sphinx+complex+medium pyramid; C3/F3).
 //
 // Tag_id scheme:
@@ -26,20 +26,20 @@ mission18 { // Rostja (Giza) — The Great Pyramid and Sphinx
 	choice_background {pack:PACK_UNLOADED, id:12}
 	choice_image1 {pack:PACK_UNLOADED, id:13}
 	choice_image1_pos [192, 144]
-	choice_title [144, 37]
+	choice_title [144, 43]
 	choice [
 		{
 			name : "Bahariya"
 			id : 19
 			image {pack:PACK_UNLOADED, id:20, offset:0}
-			tooltip [144, 38]
+			tooltip [144, 44]
 			pos [620, 420]
 		}
 		{
 			name : "Djedu"
 			id : 20
 			image {pack:PACK_UNLOADED, id:20}
-			tooltip [144, 39]
+			tooltip [144, 45]
 			pos [640, 480]
 		}
 	]
@@ -107,6 +107,16 @@ mission18 { // Rostja (Giza) — The Great Pyramid and Sphinx
 	disembark_points [ [-1, -1], [-1, -1], [110, 43] ]
 	invasion_points_land [ [138, 136] ]
 	invasion_points_sea [ [115, 53] ]
+
+	// pak burial_provisions (scenario 18 dump).
+	hide_pak_burial : true
+	burial_provisions [
+		{ resource: RESOURCE_BEER, required: 6 }
+		{ resource: RESOURCE_GEMS, required: 6 }
+		{ resource: RESOURCE_LUXURY_GOODS, required: 3 }
+		{ resource: RESOURCE_TIMBER, required: 18 }
+		{ resource: RESOURCE_GRANITE, required: 12 }
+	]
 
 	enable_scenario_events : true
 
@@ -412,6 +422,9 @@ mission18 { // Rostja (Giza) — The Great Pyramid and Sphinx
 		gems_crisis_raid_done : false
 		gems_crisis_kr_snap : 0
 
+		troops_req_seen : false
+		troops_kr_snap : 0
+
 		pharaoh_favour_invasion_done : false
 		pharaoh_favour_wave2_done : false
 		pharaoh_favour_wave3_done : false
@@ -556,7 +569,7 @@ function mission18_ensure_pharaoh_gift_leaves() {
 }
 
 // Troops chain: ok→31 KR+3→32 NEW_TRADE Iunet; late→33 SEA→34 troops×47;
-// refuse/defeat: pak i=35 Hyksos×9 is EVENT_TYPE_INVASION no-op → wire straight to 1034 re-arm.
+// refuse/defeat→1035 KR−2 sentinel → JS Hyksos×9 (pak i=35) → on_completed→1034.
 function mission18_ensure_troops_chain_leaves() {
 	if (mission.troops_chain_leaves_wired) {
 		return
@@ -566,14 +579,17 @@ function mission18_ensure_troops_chain_leaves() {
 	mission18_make_leaf(1032, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 7, 2,
 		EVENT_SUBTYPE_NEW_TRADE_ROUTE, "Iunet")
 	var sea = mission18_make_leaf(1033, EVENT_TYPE_SEA_TRADE_PROBLEM, undefined, 5, 2)
+	// Sentinel for refuse/defeat (EVENT_TYPE_INVASION i=35 is engine no-op).
+	mission18_make_leaf(1035, EVENT_TYPE_REPUTATION_DECREASE, undefined, 2, 2)
 	var troops2 = city.create_good_request({
 		tag_id: 1034, resource: RESOURCE_TROOPS, amount: 47, months_initial: 8, subtype: 1,
 		trigger: EVENT_TRIGGER_ONLY_VIA_EVENT, city: "Men-nefer"
 	})
 	troops2.set_sender_faction(0)
 	troops2.set_completed_action_tag(1032)
+	troops2.set_refusal_action_tag(1035)
 	troops2.set_too_late_action_tag(1033)
-	// refuse/defeat of re-arm: pak loops via invasion i=35 (no-op) → skip further chain
+	troops2.set_defeat_action_tag(1035)
 	kr_ok.set_completed_action_tag(1032)
 	sea.set_completed_action_tag(1034)
 }
@@ -874,7 +890,7 @@ function mission18_gems_crisis_refuse_raid(ev) {
 }
 
 // pak i=30: troops×40/12mo once y8m3 subtype=1 city=Men-nefer;
-// ok→31; late→33; refuse/defeat→1034 (skip no-op invasion i=35).
+// ok→31; late→33; refuse/defeat→1035 → JS Hyksos×9 → 1034 re-arm.
 [es=event_advance_month, mission=mission18]
 function mission18_event_i30_troops(ev) {
 	if (mission.event30_troops_done) {
@@ -884,9 +900,36 @@ function mission18_event_i30_troops(ev) {
 		return
 	}
 	mission.event30_troops_done = true
+	mission.troops_req_seen = false
 	mission18_ensure_troops_chain_leaves()
 	log_info("akhenaten: mission 18 rostja troops×40", {ev:ev})
-	mission18_fire_request(2030, RESOURCE_TROOPS, 40, 12, 1031, 1034, 1033, 1, 0, 1034, "Men-nefer")
+	mission18_fire_request(2030, RESOURCE_TROOPS, 40, 12, 1031, 1035, 1033, 1, 0, 1035, "Men-nefer")
+}
+
+// pak i=35: Hyksos×9 after troops refuse/defeat (EVENT_TYPE_INVASION no-op).
+// Detect via KR−2 sentinel 1035; on wipe re-arm troops×47 (1034). Also covers
+// troops2 refuse/defeat (pak loops i=35→34).
+[es=event_advance_month, mission=mission18]
+function mission18_troops_refuse_raid(ev) {
+	if (!mission.event30_troops_done) {
+		return
+	}
+	if (city.has_active_request(RESOURCE_TROOPS)) {
+		mission.troops_req_seen = true
+		mission.troops_kr_snap = city.rating_kingdom
+		return
+	}
+	if (!mission.troops_req_seen) {
+		return
+	}
+	mission.troops_req_seen = false
+	var drop = mission.troops_kr_snap - city.rating_kingdom
+	// Sentinel −2, or KR floored at 0 with a clear drop past ok (+3) / late (0).
+	if (drop < 2 && !(city.rating_kingdom <= 0 && drop >= 1)) {
+		return
+	}
+	log_info("akhenaten: mission 18 rostja hyksos×9 after troops refuse/defeat (kr drop=" + drop + ")", {ev:ev})
+	mission18_hyksos_raid(2, 9, EVENT_ATTACK_TARGET_FOOD, 1034)
 }
 
 // pak i=36: gamemeat×15/8mo recurring y12m8+ sender=city; ok→1 refuse→2 late→3.
