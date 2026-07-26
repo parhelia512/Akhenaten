@@ -9,6 +9,7 @@ import overlays.bazaar_access
 import overlays.brewery
 import overlays.entertainment
 import overlays.senet_house
+import overlays.zoo
 import overlays.mortuary
 import overlays.dentist
 import overlays.damage

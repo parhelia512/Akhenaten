@@ -60,6 +60,7 @@ city {
         @bandstand {}
         @pavilion {}
         @senet_house {}
+        @zoo {}
         @physician {}
         @dentist {}
         @apothecary {}

@@ -9,6 +9,7 @@ struct city_coverage_t {
     int bandstand;
     int pavilion;
     int senet_house;
+    int zoo;
     uint8_t physician;
     uint8_t dentist;
     uint8_t apothecary;
@@ -24,7 +25,7 @@ struct city_coverage_t {
 };
 
 ANK_CONFIG_PROPERTY(city_coverage_t,
-    booth, bandstand, pavilion, senet_house, physician, dentist, apothecary, mortuary, school, academy, library, oracle)
+    booth, bandstand, pavilion, senet_house, zoo, physician, dentist, apothecary, mortuary, school, academy, library, oracle)
 
 struct city_average_coverage_t {
     int32_t average_entertainment;

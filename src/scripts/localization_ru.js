@@ -600,6 +600,14 @@ localization_ru = [
     { key: "#senet_access_medium", text: "У этого дома есть доступ к дому сенета" }
     { key: "#senet_access_low", text: "Мимо этого дома давно не проходил мастер сенета. Он скоро потеряет доступ к дому сенета" }
 
+    // zoo overlay
+    { key: "#zoo_access_none", text: "У этого дома нет доступа к зоопарку" }
+    { key: "#zoo_access_high", text: "Мимо этого дома недавно проходил смотритель зоопарка. У него будет доступ к зоопарку надолго" }
+    { key: "#zoo_access_medium", text: "У этого дома есть доступ к зоопарку" }
+    { key: "#zoo_access_low", text: "Мимо этого дома давно не проходил смотритель зоопарка. Он скоро потеряет доступ к зоопарку" }
+    { key: "#building_removed_zoo", text: "Зоопарк не может работать и был удалён. Город не может производить или импортировать солому либо дичь." }
+    { key: "#building_needs_game_meat", text: "Этому зданию нужна дичь" }
+
     // pavilion overlay
     { key: "#pavilion_access_none", text: "У этого дома нет доступа к танцевальной сцене" }
     { key: "#pavilion_access_high", text: "Мимо этого дома недавно проходил танцор. У него будет доступ к танцевальной сцене надолго" }
@@ -748,6 +756,7 @@ localization_ru = [
     { key: "#overlay_bandstand", text: "Музыкант" }
     { key: "#overlay_pavilion", text: "Танцор" }
     { key: "#overlay_senet_house", text: "Игроки в сенет" }
+    { key: "#overlay_zoo", text: "Зоопарк" }
     { key: "#overlay_education", text: "Образование" }
     { key: "#overlay_scribal_school", text: "Школы писцов" }
     { key: "#overlay_library", text: "Библиотека" }

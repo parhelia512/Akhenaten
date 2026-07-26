@@ -53,7 +53,7 @@ void city_coverage_t::save(buffer *buf) {
     buf->write_u8(0);
     buf->write_i32(senet_house);
 
-    buf->write_i32(0);
+    buf->write_i32(zoo);
     buf->write_i32(0);
     buf->write_i32(0);
     buf->write_i32(0);
@@ -78,7 +78,9 @@ void city_coverage_t::load(buffer *buf) {
     int tmp = buf->read_u8();
     senet_house = buf->read_i32();
 
-    buf->skip(5);
+    // First reserved i32 is zoo; remaining 4 i32s stay unused (20 bytes total reserved).
+    zoo = buf->read_i32();
+    buf->skip(16);
 
     oracle = buf->read_i32();
     school = buf->read_i32();
@@ -99,6 +101,7 @@ void city_coverage_t::update() {
     bandstand = std::min(calc_percentage(700 * g_city.buildings.count_active(BUILDING_BANDSTAND), pop), 100);
     pavilion = std::min(calc_percentage(1200 * g_city.buildings.count_active(BUILDING_PAVILLION), pop), 100);
     senet_house = g_city.buildings.count_active(BUILDING_SENET_HOUSE) <= 0 ? 0 : 100;
+    zoo = std::min(calc_percentage(7500 * g_city.buildings.count_active(BUILDING_ZOO), pop), 100);
 
     // education
     population.calculate_educational_age();
@@ -118,5 +121,5 @@ void city_coverage_t::update() {
 
 int city_average_coverage_t::calc_average_entertainment() {
     const auto &coverage = g_city.coverage;
-    return (coverage.senet_house + coverage.pavilion + coverage.bandstand + coverage.booth) / 4;
+    return (coverage.senet_house + coverage.pavilion + coverage.bandstand + coverage.booth + coverage.zoo) / 5;
 }

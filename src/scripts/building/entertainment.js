@@ -262,16 +262,41 @@ building_bullfight_school = {
 
 building_zoo {
   animations {
-    preview : { pos : [30, 28], pack:PACK_GENERAL, id:49 },
-    base : { pos : [30, 28], pack:PACK_GENERAL, id:49 },
-    work : { pos : [25, -12], pack:PACK_GENERAL, id:49, offset:1, max_frames:19, can_reverse:true, duration:3 },
+    // Dump: base frame 358×218 → isometric_size (360/60)=6. Ref: tmp/zoo_sprite/base_frame.png
+    // Work frames = pack offsets 1+ (animals/water); count not in single export — verify in-game.
+    preview : { pack:PACK_EXPANSION, id:6 },
+    base : { pack:PACK_EXPANSION, id:6 },
+    work : { pack:PACK_EXPANSION, id:6, offset:1, max_frames:19, can_reverse:true, duration:3 },
+    // Stack icons near courtyard pots (SE of main building / by water cage)
+    gamemeat : { pos:[90, 70], pack:PACK_GENERAL, id:205 },
+    straw : { pos:[100, 78], pack:PACK_GENERAL, id:206 },
   }
-  meta : { help_id:75, text_id:79 }
-  building_size : 3
-  cost : [ 100, 200, 300, 500, 800 ]
+  input : {
+    resource : RESOURCE_GAMEMEAT
+    resource_second : RESOURCE_STRAW
+  }
+  meta : { text_id:308, help_link:"message_building_zoo" }
+  building_size : 6
+  labor_category : LABOR_CATEGORY_ENTERTAINMENT
+  cost : [ 500, 1500, 2000, 2200, 2600 ]
   desirability : { value:[-6], step:[1], step_size:[1], range: [3] }
-  laborers:[20], fire_risk:[4], damage_risk: [3]
+  laborers:[30], fire_risk:[4], damage_risk: [3]
   flags {
     is_entertainment: true
+  }
+}
+
+[es=(building_zoo, on_place_checks)]
+function building_zoo_on_place_checks(ev) {
+  var straw = city.resources.straw
+  var meat = city.resources.gamemeat
+  var straw_ok = straw.can_produce || straw.can_import || straw.could_import
+  var meat_ok = meat.can_produce || meat.can_import || meat.could_import
+
+  // Soft warnings when either supply path exists for both inputs.
+  // C++ removes the building if either input is unavailable (and shows #building_removed_zoo).
+  if (straw_ok && meat_ok) {
+    city.warnings.show_if_not(straw.yards_stored > 0 || straw.count_active_industry > 0, "#building_needs_straw")
+    city.warnings.show_if_not(meat.yards_stored > 0 || meat.count_active_industry > 0, "#building_needs_game_meat")
   }
 }

@@ -195,6 +195,12 @@ info_window_senet_house = {
     })
 }
 
+info_window_zoo = {
+    ui : baseui(building_info_window, {
+        advice        : text({pos: [36, 164], wrap:400, font : FONT_NORMAL_BLACK_ON_DARK, multiline:true }),
+    })
+}
+
 info_window_bullfight = {
     ui : baseui(building_info_window, {
 

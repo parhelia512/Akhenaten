@@ -563,8 +563,8 @@ localization_en = [
   {key: "#minor_god_blessing", group:19, id:226}
   {key: "#festival_starting", group:19, id:227}
   {key: "#goods_auto_dispatched", group:19, id:228}
-  {key: "#building_removed_zoo", group:19, id:229}
-  {key: "#building_needs_game_meat", group:19, id:230}
+  {key: "#building_removed_zoo", group:19, id:234}
+  {key: "#building_needs_game_meat", group:19, id:235}
   {key: "#build_hunting_lodge", group:19, id:231}
   {key: "#build_hunting_lodge_or_import", group:19, id:232}
   {key: "#monument_needs_copper", group:19, id:233}
@@ -1355,6 +1355,12 @@ localization_en = [
   { key: "#senet_access_high", text: "This house was recently passed by a senet master. It will have Senet House access for a long time" }
   { key: "#senet_access_medium", text: "This house has Senet House access" }
   { key: "#senet_access_low", text: "This house has not been passed by a senet master for a while. It will soon lose Senet House access" }
+  // zoo overlay (group 66 ids 168–171)
+  { key: "#zoo_access_none", group:66, id:168 }
+  { key: "#zoo_access_high", group:66, id:169 }
+  { key: "#zoo_access_medium", group:66, id:170 }
+  { key: "#zoo_access_low", group:66, id:171 }
+  { key: "#overlay_zoo", text: "Zoo" }
 
   // pavilion overlay
   { key: "#pavilion_access_none", text: "This house has no access to a dance stage" }

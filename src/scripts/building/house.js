@@ -30,6 +30,7 @@ House.property.mortuary = { }
 House.property.physician = { }
 House.property.booth_juggler = { }
 House.property.senet_player = { }
+House.property.zookeeper = { }
 House.property.bandstand_juggler = { }
 House.property.bandstand_musician = { }
 House.property.pavillion_musician = { }

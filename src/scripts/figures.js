@@ -306,6 +306,28 @@ figure_hyena {
 	chase_speed_mult : 2
 }
 
+// Cleopatra SprMain2 bmp "Lion": group 5 = SprMain2_00391.
+// Group 9 = sit (used as rest via anim key "death" slot — no free anim key for sit).
+// Corpse uses stand idle until a real lying-death strip is found.
+figure_lion {
+	animations {
+		walk { pack:PACK_EXPANSION_SPR, id:5, max_frames:11 }
+		attack { pack:PACK_EXPANSION_SPR, id:6, max_frames:11 }
+		idle { pack:PACK_EXPANSION_SPR, id:7, max_frames:6 }
+		eating { pack:PACK_EXPANSION_SPR, id:8, max_frames:10 }
+		death { pack:PACK_EXPANSION_SPR, id:9, max_frames:4 } // sit/rest frames (not corpse)
+		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_LION }
+	}
+
+	category: figure_category_animal
+	max_damage: 150
+	attack_value: 8
+	terrain_usage: TERRAIN_USAGE_ANIMAL
+	max_hungry: 30
+	max_hunting_distance: 12
+	chase_speed_mult: 2
+}
+
 figure_antelope {
 	animations {
 		_pack { pack:PACK_SPR_AMBIENT }
@@ -1031,8 +1053,9 @@ figure_cartpusher {
 
 figure_zookeeper {
 	animations {
-		walk { pack:PACK_SPR_MAIN, id:155, max_frames:12 }
-		death { pack:PACK_SPR_MAIN, id:156, max_frames:8, loop:false }
+		// Cleopatra SprMain2: bmp "zookeeper", group 35 starts at entry 1616 (SprMain2_01616).
+		walk { pack:PACK_EXPANSION_SPR, id:35, max_frames:12 }
+		death { pack:PACK_EXPANSION_SPR, id:36, max_frames:7, loop:false }
 		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_ZOOKEEPER }
 	}
 
@@ -1048,6 +1071,12 @@ figure_zookeeper {
 		zookeeper_city_is_ok : { sound: "zookeeper_e09.wav"},
 		zookeeper_city_is_amazing : { sound: "zookeeper_e10.wav"}
 	}
+
+	category: figure_category_citizen
+	max_damage : 20
+	terrain_usage : TERRAIN_USAGE_ROADS
+	max_roam_length: 640
+	permission : epermission_entertainer
 }
 
 figure_docker {

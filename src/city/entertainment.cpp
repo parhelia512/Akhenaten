@@ -12,6 +12,8 @@ void city_entertainment_t::calculate_shows() {
     pavilion_no_shows_weighted = 0;
     senet_house_plays = 0;
     senet_house_no_shows_weighted = 0;
+    zoo_shows = 0;
+    zoo_no_shows_weighted = 0;
     venue_needing_shows = 0;
 
     for (int i = 1; i < MAX_BUILDINGS; i++) {
@@ -55,6 +57,11 @@ void city_entertainment_t::calculate_shows() {
             if (d.juggler_visited) senet_house_plays++;
             else senet_house_no_shows_weighted += 100;
 
+            break;
+
+        case BUILDING_ZOO:
+            if (d.juggler_visited) zoo_shows++;
+            else zoo_no_shows_weighted += 100;
             break;
         }
     }

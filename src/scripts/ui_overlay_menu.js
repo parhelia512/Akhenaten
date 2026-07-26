@@ -36,6 +36,7 @@ overlay_menu {
 				OVERLAY_BANDSTAND,
 				OVERLAY_PAVILION,
 				OVERLAY_SENET_HOUSE,
+				OVERLAY_ZOO,
 	    	]
 	    }
 

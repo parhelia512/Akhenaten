@@ -148,7 +148,7 @@ void city_t::house_service_calculate_culture_aggregates() {
         housed.entertainment = base_entertainment;
         const int jugglers_value = std::max<int>(housed.booth_juggler, housed.bandstand_juggler);
         housed.entertainment += (jugglers_value * 10) / model.entertainment_juggler_divider;
- 
+
         const int musicians_value = std::max<int>(housed.bandstand_musician, housed.pavillion_musician);
         housed.entertainment += (musicians_value * 10) / model.entertainment_musician_divider;
 
@@ -157,6 +157,10 @@ void city_t::house_service_calculate_culture_aggregates() {
 
         const int senet_value = housed.senet_player;
         housed.entertainment += (senet_value * 10) / model.entertainment_senet_divider;
+
+        // Zoo points match senet (+40 at full coverage with divider 25).
+        const int zoo_value = housed.zookeeper;
+        housed.entertainment += (zoo_value * 10) / model.entertainment_senet_divider;
 
         housed.entertainment = std::min<int>(housed.entertainment, 100);
 

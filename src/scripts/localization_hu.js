@@ -558,8 +558,8 @@ localization_hu = [
   {key: "#minor_god_blessing", group:19, id:226}
   {key: "#festival_starting", group:19, id:227}
   {key: "#goods_auto_dispatched", group:19, id:228}
-  {key: "#building_removed_zoo", group:19, id:229}
-  {key: "#building_needs_game_meat", group:19, id:230}
+  {key: "#building_removed_zoo", group:19, id:234}
+  {key: "#building_needs_game_meat", group:19, id:235}
   {key: "#build_hunting_lodge", group:19, id:231}
   {key: "#build_hunting_lodge_or_import", group:19, id:232}
   {key: "#monument_needs_copper", group:19, id:233}
@@ -1348,6 +1348,12 @@ localization_hu = [
   { key: "#senet_access_high", text: "Ezt a házat nemrég meglátogatta egy szenetmester. Sokáig lesz hozzáférése Szenet-házhoz" }
   { key: "#senet_access_medium", text: "Ennek a háznak van hozzáférése Szenet-házhoz" }
   { key: "#senet_access_low", text: "Ezt a házat egy ideje nem látogatta szenetmester. Hamarosan elveszíti a Szenet-házhoz való hozzáférést" }
+  // zoo overlay (group 66 ids 168–171)
+  { key: "#zoo_access_none", group:66, id:168 }
+  { key: "#zoo_access_high", group:66, id:169 }
+  { key: "#zoo_access_medium", group:66, id:170 }
+  { key: "#zoo_access_low", group:66, id:171 }
+  { key: "#overlay_zoo", text: "Állatkert" }
 // pavilion overlay
   { key: "#pavilion_access_none", text: "Ennek a háznak nincs hozzáférése táncszínpadhoz" }
   { key: "#pavilion_access_high", text: "Ezt a házat nemrég meglátogatta egy táncos. Sokáig lesz hozzáférése táncszínpadhoz" }

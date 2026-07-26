@@ -86,6 +86,7 @@ C++ smoke checks run first (before JS files): `SDL_strlen`/`strcmp`, `vec2i`, `g
 | `38_color_mask_passing.js` | Full `COLOR_MASK_*` (> INT_MAX) survive MuJS→C++ as `color` (uint32): `__test_color_roundtrip` for GREEN/RED/BLUE + `draw_flat_tile` with a full mask without TypeError (J1) |
 | `39_enemy_chariot_registered.js` | Every `FIGURE_ENEMY_*_CHARIOT` resolves to a registered enemy class (`__test_enemy_figure_registered`) instead of asserting; Assyrian/Hyksos chariots (missions 32/33) covered (F2) |
 | `40_hippo_spawn.js` | Spawn `FIGURE_HIPPO` on land and water; `update_animation` → `walk` / `swim` (#77) |
+| `66_lion_spawn.js` | Cleopatra `FIGURE_LION`: spawn + type + `update_animation` → `walk` (SprMain2 group 5; CF3b) |
 | `41_city_smoke_run.js` | Broad crash smoke (TS1): place ~12 building types via the real planner path, open each info window (`[es=(info_window_*, init)]`), advance the sim; driver's whole-log `!!! TypeError:` scan catches on_place/update/init crashes broadly. Per-type `smoke_ok:*` markers isolate the culprit; `smoke_skip:*` logged loudly |
 | `46_bridge_placement.js` | Low Bridge on synthetic 3-wide channel: place (`WATER\|ROAD` + `bridge_part`/`bridge_type` + sprite dual-write), floodplain reject, max_length reject, citizen `CITIZEN_0_ROAD` |
 | `47_js_hotreload_stack.js` | Hot-reload MuJS stack stability: 20× `js_register_game_handlers` + 20× reload `:console_commands.js` via `js_vm_sync` must not grow the value stack (former `[console_command=…]` getglobal leak → stackoverflow after ~10 mixed saves) |
@@ -98,6 +99,7 @@ C++ smoke checks run first (before JS files): `SDL_strlen`/`strcmp`, `vec2i`, `g
 | `57_request_cleared.js` | B13 `event_request_cleared`: ok fulfill, overdue fulfill → late, grace expire → refuse |
 | `58_large_stepped_first_tier.js` | C1a first brick tier: place 20×20 large stepped, assert part layout (100 / 3 corners / 32 walls), walk phases →11, screenshot |
 | `60_thinis_protect_nonrebuild.js` | Thinis (23): Osiris temple complex + mansions are map-only (not rebuildable); altar/oracle upgrades stay allowed |
+| `65_zoo_place.js` | Cleopatra Zoo: place 6×6, stock straw+gamemeat, spawn `FIGURE_ZOOKEEPER`, animals-present timer, no spawn without stock (Z5) |
 
 Farm **placement** tests (34/35) cover `can_place` / terrain rules; **37** covers preview image helpers.
 When adding more preview draw coverage, follow JS draw conventions in

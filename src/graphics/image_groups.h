@@ -605,7 +605,8 @@ extern const e_pack_tokens_t e_pack_type_tokens;
 #define GROUP_FIGURE_MAGISTRATE_DEATH PACK_SPR_MAIN, 213 // 10317
 
 //#define GROUP_FIGURE_IMMIGRANT_CART PACK_SPR_MAIN, 52      // 131
-#define GROUP_FIGURE_LION PACK_SPR_MAIN, 161               // 163
+// Cleopatra SprMain2 bmp Lion — walk group 5 (was Caesar leftover PackMain 161 = hyena).
+#define GROUP_FIGURE_LION PACK_EXPANSION_SPR, 5
 //#define GROUP_FIGURE_SHIP PACK_SPR_MAIN, 34                // 165
 //#define GROUP_FIGURE_TOWER_SENTRY PACK_SPR_MAIN, 194       // TODO
 //#define GROUP_FIGURE_MISSILE PACK_SPR_MAIN, 198            // TODO

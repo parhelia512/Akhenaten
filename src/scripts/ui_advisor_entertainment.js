@@ -38,7 +38,7 @@ function advisor_entertainment_row_descriptor(row) {
 		case 3:
 			return { rowType: 3, venue: BUILDING_SENET_HOUSE, shows: ent.senet_house_plays, coverage: cov.senet_house, coeff: 0 }
 		case 4:
-			return { rowType: 9, venue: BUILDING_ZOO, shows: 0, coverage: 0, coeff: 0 }
+			return { rowType: 9, venue: BUILDING_ZOO, shows: ent.zoo_shows, coverage: cov.zoo, coeff: 7500 }
 		default:
 			return null
 	}

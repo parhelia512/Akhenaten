@@ -579,6 +579,51 @@ storage_worker_task building_storageyard_deliver_beer_to_senet_house(building *b
     return { STORAGEYARD_TASK_NONE };
 }
 
+storage_worker_task building_storageyard_deliver_resource_to_zoo(building *b) {
+    if (g_city.buildings.count_active(BUILDING_ZOO) <= 0) {
+        return { STORAGEYARD_TASK_NONE };
+    }
+
+    auto warehouse = b->dcast_storage_yard();
+    if (!warehouse) {
+        return { STORAGEYARD_TASK_NONE };
+    }
+
+    const e_resource resources[] = { RESOURCE_GAMEMEAT, RESOURCE_STRAW };
+    for (e_resource resource : resources) {
+        if (g_city.resource.is_stockpiled(resource)) {
+            continue;
+        }
+
+        auto result = building_get_asker_for_resource(warehouse->tile(), BUILDING_ZOO, resource, warehouse->road_network(), warehouse->distance_from_entry());
+        building *zoo = building_get(result.building_id);
+        if (!zoo || zoo->type != BUILDING_ZOO) {
+            continue;
+        }
+
+        const int want = zoo->need_resource_amount(resource);
+        if (want <= 0 || warehouse->road_network() != zoo->road_network_id) {
+            continue;
+        }
+
+        int available = 0;
+        auto space = warehouse->room();
+        while (space) {
+            if (space->stored_first().value > 0 && space->resource() == resource) {
+                available += space->stored_first().value;
+            }
+            space = space->next_room();
+        }
+
+        if (available > 0) {
+            int amount = std::min(available, want);
+            return { STORAGEYARD_TASK_DELIVERING, &warehouse->base, amount, resource };
+        }
+    }
+
+    return { STORAGEYARD_TASK_NONE };
+}
+
 storage_worker_task building_storageyard_deliver_papyrus_to_scribal_school(building *b) {
     if (g_city.buildings.count_active(BUILDING_SCRIBAL_SCHOOL) <= 0 || g_city.resource.is_stockpiled(RESOURCE_PAPYRUS)) {
         return { STORAGEYARD_TASK_NONE };
@@ -771,10 +816,11 @@ storage_worker_task building_storage_yard::determine_worker_task() {
         &building_storage_yard_determine_getting_up_resources,      // getting up resources
         &building_storageyard_deliver_weapons_to_police_stations,   // deliver weapons to police stations
         &building_storageyard_deliver_weapons,                      // deliver weapons to barracks
+        &building_storageyard_deliver_resource_to_zoo,              // straw / game meat to zoo (before workshops — straw contested)
         &building_storageyard_deliver_resource_to_workshop,         // deliver raw materials to workshops
         &building_storageyard_deliver_papyrus_to_scribal_school,    // deliver papyrus materials to scribal school
-        &building_storageyard_deliver_beer_to_senet_house,          // deliver raw materials to workshops
-        &building_storageyard_deliver_timber_to_shipyard_school,    // deliver raw materials to workshops
+        &building_storageyard_deliver_beer_to_senet_house,          // deliver beer to senet house
+        &building_storageyard_deliver_timber_to_shipyard_school,    // deliver timber to shipyard
         &building_storage_yard::deliver_food_to_gettingup_granary,  // deliver food to getting granary
         &building_storageyard_deliver_food_to_accepting_granary,    // deliver food to accepting granary
         &building_storage_yard_deliver_emptying_resources,          // emptying resource

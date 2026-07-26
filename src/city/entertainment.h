@@ -11,6 +11,8 @@ struct city_entertainment_t {
     int32_t pavilion_no_shows_weighted;
     int32_t senet_house_plays;
     int32_t senet_house_no_shows_weighted;
+    int32_t zoo_shows;
+    int32_t zoo_no_shows_weighted;
     int32_t venue_needing_shows;
     bool senet_house_has_plays;
     bool senet_house_message_shown;
@@ -21,4 +23,4 @@ struct city_entertainment_t {
     int show_message_senet_house();
 };
 
-ANK_CONFIG_PROPERTY(city_entertainment_t, booth_shows, bandstand_shows, pavilion_shows, senet_house_plays, venue_needing_shows)
+ANK_CONFIG_PROPERTY(city_entertainment_t, booth_shows, bandstand_shows, pavilion_shows, senet_house_plays, zoo_shows, venue_needing_shows)

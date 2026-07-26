@@ -201,6 +201,12 @@ void building_house::bind_dynamic(io_buffer *iob, size_t version) {
     iob->bind_u8(d.toothache_probability);
     iob->bind_u8(d.fade_alpha);
     iob->bind_xstr<8>(d.image_key);
+    // Cleopatra Zoo house coverage — appended in the 186-byte house pad (save v174+).
+    if (version >= 174) {
+        iob->bind_u8(d.zookeeper);
+    } else {
+        d.zookeeper = 0;
+    }
 }
 
 int building_house::get_fire_risk(int value) const {
@@ -788,6 +794,7 @@ void building_house::decay_services() {
     decay_service(housed.bandstand_musician);
     decay_service(housed.pavillion_musician);
     decay_service(housed.senet_player);
+    decay_service(housed.zookeeper);
     decay_service(housed.magistrate);
     decay_service(housed.bullfighter);
     decay_service(housed.school);
