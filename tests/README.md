@@ -97,6 +97,7 @@ C++ smoke checks run first (before JS files): `SDL_strlen`/`strcmp`, `vec2i`, `g
 | `56_medium_stepped_first_stone.js` | Medium stepped first brick tier screenshots (companion/regress for large) |
 | `57_request_cleared.js` | B13 `event_request_cleared`: ok fulfill, overdue fulfill → late, grace expire → refuse |
 | `58_large_stepped_first_tier.js` | C1a first brick tier: place 20×20 large stepped, assert part layout (100 / 3 corners / 32 walls), walk phases →11, screenshot |
+| `60_thinis_protect_nonrebuild.js` | Thinis (23): Osiris temple complex + mansions are map-only (not rebuildable); altar/oracle upgrades stay allowed |
 
 Farm **placement** tests (34/35) cover `can_place` / terrain rules; **37** covers preview image helpers.
 When adding more preview draw coverage, follow JS draw conventions in
