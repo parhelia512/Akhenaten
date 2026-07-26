@@ -94,6 +94,8 @@ C++ smoke checks run first (before JS files): `SDL_strlen`/`strcmp`, `vec2i`, `g
 | `44_obelisk_place.js` | C7 Small Obelisk: reject without granite / second unfinished; then staffed SY + 100 granite → place 3×3 (no parts), granite consumed, `__test_monument_add_resource` fills timber; display + full-city screenshots |
 | `45_mastaba_place.js` | Small mastaba: planner-place `BUILDING_SMALL_MASTABA`, assert 10 linked parts, `image_stick` resolves (#431), bricks via `__test_monument_add_resource`, phase walk + screenshots |
 | `50_invasion_bind_resolve.js` | Invasion bind: spawn + `on_completed_tag` deferred KR + history ring (JS calendar model; native EVENT_TYPE_INVASION cancelled) |
+| `56_medium_stepped_first_stone.js` | Medium stepped first brick tier screenshots (companion/regress for large) |
+| `58_large_stepped_first_tier.js` | C1a first brick tier: place 20×20 large stepped, assert part layout (100 / 3 corners / 32 walls), walk phases →11, screenshot |
 
 Farm **placement** tests (34/35) cover `can_place` / terrain rules; **37** covers preview image helpers.
 When adding more preview draw coverage, follow JS draw conventions in

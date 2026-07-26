@@ -47,9 +47,11 @@ building_small_stepped_pyramid {
     // todo
   }
 
-  // Pyramid part buildings - all parts use same config as main pyramid
-  building_small_stepped_pyramid_corner { show_in_debug: false }
-  building_small_stepped_pyramid_wall { show_in_debug: false }
+  // Parts are 2×2 blocks on the init_tiles grid — without building_size they stay
+  // size 0 and never claim map tiles (edges/corners missing). Alias main so they
+  // also inherit brick animations used by get_bricks_image.
+  building_small_stepped_pyramid_corner = building_small_stepped_pyramid
+  building_small_stepped_pyramid_wall = building_small_stepped_pyramid
   building_small_stepped_pyramid_cone = building_small_stepped_pyramid
 
   building_medium_stepped_pyramid {
@@ -219,8 +221,8 @@ building_small_stepped_pyramid {
     // todo
   }
 
-  building_medium_stepped_pyramid_corner { show_in_debug: false }
-  building_medium_stepped_pyramid_wall { show_in_debug: false }
+  building_medium_stepped_pyramid_corner = building_medium_stepped_pyramid
+  building_medium_stepped_pyramid_wall = building_medium_stepped_pyramid
   building_medium_stepped_pyramid_cone = building_medium_stepped_pyramid
 
   // Large stepped pyramid (20x20, id 250). Same PACK_STEPPED_PYRAMID render pipeline as
@@ -295,8 +297,8 @@ building_small_stepped_pyramid {
     filler_type : BUILDING_LARGE_STEPPED_PYRAMID
   }
 
-  building_large_stepped_pyramid_corner { show_in_debug: false }
-  building_large_stepped_pyramid_wall { show_in_debug: false }
+  building_large_stepped_pyramid_corner = building_large_stepped_pyramid
+  building_large_stepped_pyramid_wall = building_large_stepped_pyramid
   building_large_stepped_pyramid_cone = building_large_stepped_pyramid
 
   // --- Bent pyramids (Snofru's, mission 14 South Dahshur) --------------------
@@ -351,8 +353,8 @@ building_small_stepped_pyramid {
     filler_type : BUILDING_SMALL_BENT_PYRAMID
   }
 
-  building_small_bent_pyramid_corner { show_in_debug: false }
-  building_small_bent_pyramid_wall { show_in_debug: false }
+  building_small_bent_pyramid_corner = building_small_bent_pyramid
+  building_small_bent_pyramid_wall = building_small_bent_pyramid
   building_small_bent_pyramid_cone = building_small_bent_pyramid
 
   building_medium_bent_pyramid {
@@ -521,6 +523,6 @@ building_small_stepped_pyramid {
     filler_type : BUILDING_MEDIUM_BENT_PYRAMID
   }
 
-  building_medium_bent_pyramid_corner { show_in_debug: false }
-  building_medium_bent_pyramid_wall { show_in_debug: false }
+  building_medium_bent_pyramid_corner = building_medium_bent_pyramid
+  building_medium_bent_pyramid_wall = building_medium_bent_pyramid
   building_medium_bent_pyramid_cone = building_medium_bent_pyramid

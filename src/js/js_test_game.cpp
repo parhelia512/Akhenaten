@@ -480,10 +480,8 @@ static e_building_type test_mastaba_params_type(building *head) {
     }
 }
 
-static void __test_monument_set_phase(int bid, int phase) {
-    building *b = building_get(bid);
-    building *head = b ? b->main() : nullptr;
-    auto mm = head ? head->dcast_monument() : nullptr;
+static void test_monument_apply_phase(building *head, int phase) {
+    auto mm = head->dcast_monument();
     if (!mm) {
         return;
     }
@@ -492,6 +490,27 @@ static void __test_monument_set_phase(int bid, int phase) {
         if (auto pm = p->dcast_monument()) {
             pm->set_phase(phase);
         }
+    }
+}
+
+// Force a monument to `phase`. When advancing forward, walks one phase at a time so
+// per-phase hooks (pyramid setup_phase_6, layer type changes, …) all fire — a direct
+// jump used to skip them and left the first brick ring with missing edge textures.
+static void __test_monument_set_phase(int bid, int phase) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    auto mm = head ? head->dcast_monument() : nullptr;
+    if (!mm) {
+        return;
+    }
+
+    const int cur = (int)mm->runtime_data().phase;
+    if (cur >= 0 && phase > cur) {
+        for (int p = cur + 1; p <= phase; ++p) {
+            test_monument_apply_phase(head, p);
+        }
+    } else {
+        test_monument_apply_phase(head, phase);
     }
 
     const bool is_mastaba = head->dcast_mastaba();

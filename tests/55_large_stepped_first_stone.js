@@ -8,7 +8,7 @@
 // WRITABLE Pharaoh copy (d:/Work/Cleop) so full_city_*.png screenshots actually save.
 
 function run_test() {
-    __log_info_native('[test:53] large stepped pyramid — first stone stage render')
+    __log_info_native('[test:55] large stepped pyramid — first stone stage render')
     test_ensure_city_session('data/default.map')
 
     if (!__scenario_building_allowed(BUILDING_LARGE_STEPPED_PYRAMID)) {
@@ -28,7 +28,7 @@ function run_test() {
     }
     if (!bid) { bid = test_building_place(BUILDING_LARGE_STEPPED_PYRAMID, -1, -1) }
     if (!bid) {
-        __log_info_native('[test:53] failed to place BUILDING_LARGE_STEPPED_PYRAMID')
+        __log_info_native('[test:55] failed to place BUILDING_LARGE_STEPPED_PYRAMID')
         __log_marker('first_stone_place_fail')
         __test_signal_ready()
         return
@@ -41,7 +41,7 @@ function run_test() {
     __test_monument_set_phase(bid, 6)
     __test_pump_frames(4)
     if (__test_building_current_image(bid) <= 0) {
-        __log_info_native('[test:53] art packs not loaded (--no-resource) — skipping')
+        __log_info_native('[test:55] art packs not loaded (--no-resource) — skipping')
         __log_marker('first_stone_art_skipped:no_resource')
         __test_signal_ready()
         return
@@ -57,7 +57,7 @@ function run_test() {
         var img = __test_building_current_image(bid)
         if (img <= 0) {
             all_ok = false
-            __log_info_native('[test:53] phase ' + phases[p] + ' img=' + img)
+            __log_info_native('[test:55] phase ' + phases[p] + ' img=' + img)
         }
         __test_camera_center_building(bid)
         __test_process_events()
@@ -75,7 +75,7 @@ function run_test() {
 
 function check_valid() {
     if (!__test_find_inlog('first_stone_placed_ok')) {
-        __log_info_native('[test:53] missing marker: first_stone_placed_ok')
+        __log_info_native('[test:55] missing marker: first_stone_placed_ok')
         return false
     }
     if (__test_find_inlog('first_stone_art_skipped:no_resource')) {
@@ -84,7 +84,7 @@ function check_valid() {
     var required = ['first_stone_art_ok', 'first_stone_screenshot_done']
     for (var i = 0; i < required.length; i++) {
         if (!__test_find_inlog(required[i])) {
-            __log_info_native('[test:53] missing marker: ' + required[i])
+            __log_info_native('[test:55] missing marker: ' + required[i])
             return false
         }
     }
