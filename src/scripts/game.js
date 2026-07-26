@@ -99,13 +99,13 @@ game_features {
     @gameopt_clouds_speed {}
     @gameplay_change_random_mine_or_pit_collapses_take_money {}
     @gameplay_change_disaster_events_use_amount {}
+    @gameplay_change_trader_capacity_1600 {}
     @gameopt_display_size {}
     @gameplay_change_multiple_temple_complexes {}
     @gameplay_change_work_camp_one_worker_per_month {}
     @gameplay_fix_editor_events {}
     @gameopt_disable_victory {}
     @gameui_show_water_structure_range {}
-    @gameplay_change_trader_capacity_1600 {}
     @count { get: __game_features_count }
 }
 

@@ -35,7 +35,6 @@ localization_en = [
   {key:"#TR_CONFIG_PROMPT_SAVE_ON_EXIT", text:"Prompt to save when closing the game (Alt+F4)"}
   {key:"#TR_CONFIG_SMOOTH_SCROLLING", text:"Enable smooth scrolling"}
   {key:"#TR_CONFIG_SMOOTH_ZOOM", text:"Enable smooth zoom"}
-  {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Larger trader capacity (1600 per visit; not yearly empire limit)"}
   {key:"#TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE", text:"Improve visual feedback when clearing land"}
   {key:"#TR_CONFIG_ALLOW_CYCLING_TEMPLES", text:"Allow building each temple in succession"}
   {key:"#TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE", text:"Show range when building reservoirs, fountains and wells"}
@@ -64,6 +63,7 @@ localization_en = [
   {key:"#TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD", text:"Cart pushers from getting granaries can go offroad"}
   {key:"#TR_CONFIG_GRANARIES_GET_DOUBLE", text:"Double the capacity of cart pushers from getting granaries"}
   {key:"#TR_CONFIG_DOCK_DOUBLE_HAUL", text:"Double the haul amount of dockers (200 per trip)"}
+  {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Larger trader capacity (1600 per visit; not yearly empire limit)"}
   {key:"#TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD", text:"Tower sentries don't need road access from barracks"}
   {key:"#TR_CONFIG_FARMS_DELIVER_CLOSE", text:"Farms and wharves deliver only to nearby granaries"}
   {key:"#TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES", text:"Food isn't delivered to getting granaries"}
