@@ -24,6 +24,11 @@
 void __city_ratings_set_monument(int new_value) { g_city.ratings.monument = new_value; }
 ANK_FUNCTION_1(__city_ratings_set_monument)
 
+void __city_set_scenario_enemy_id(int enemy_id) {
+    g_scenario.enemy_id = (e_enemy_type)enemy_id;
+}
+ANK_FUNCTION_1(__city_set_scenario_enemy_id)
+
 int __city_rating_kingdom() { return g_city.kingdome.rating; }
 ANK_FUNCTION(__city_rating_kingdom)
 
