@@ -98,6 +98,7 @@ game_features {
     @gameopt_middle_mouse_pan_speed {}
     @gameopt_clouds_speed {}
     @gameplay_change_random_mine_or_pit_collapses_take_money {}
+    @gameplay_change_disaster_events_use_amount {}
     @gameopt_display_size {}
     @gameplay_change_multiple_temple_complexes {}
     @gameplay_change_work_camp_one_worker_per_month {}

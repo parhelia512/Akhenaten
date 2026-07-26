@@ -34,8 +34,11 @@
 #include "graphics/elements/lang_text.h"
 #include "figure/enemy_army.h"
 #include "figure/formation.h"
+#include "game/game_config.h"
+#include "core/svector.h"
 
 #include <algorithm>
+#include <cstdlib>
 
 constexpr int MAX_EVENTS = 150;
 constexpr int NUM_AUTO_PHRASE_VARIANTS = 54;
@@ -495,6 +498,58 @@ void event_manager_t::process_active_request(int id) {
     scenario_request_handle(event, -1, chain_action_next);
 }
 
+enum class e_disaster_destroy_mode {
+    collapse,
+    flood,
+};
+
+// Fidelity default: one random building. Enhanced: up to event.amount.
+static building *destroy_disaster_buildings(e_building_type type, int amount, e_disaster_destroy_mode mode) {
+    int want = 1;
+    if (!!game_features::gameplay_change_disaster_events_use_amount && amount > 1) {
+        want = amount;
+    }
+
+    svector<building_id, 256> candidates;
+    for (int i = 1; i < MAX_BUILDINGS; ++i) {
+        building *b = building_get(i);
+        if (b->state == BUILDING_STATE_VALID && b->type == type) {
+            if (candidates.full()) {
+                break;
+            }
+            candidates.push_back(b->id);
+        }
+    }
+
+    if (candidates.empty()) {
+        return nullptr;
+    }
+
+    const int destroy_n = std::min<int>(want, (int)candidates.size());
+    // Fisher–Yates partial shuffle for first destroy_n picks.
+    for (int i = 0; i < destroy_n; ++i) {
+        const int j = i + (std::rand() % ((int)candidates.size() - i));
+        std::swap(candidates[i], candidates[j]);
+    }
+
+    building *first = nullptr;
+    for (int i = 0; i < destroy_n; ++i) {
+        building *b = building_get(candidates[i]);
+        if (!b || !b->is_valid()) {
+            continue;
+        }
+        if (mode == e_disaster_destroy_mode::flood) {
+            b->destroy_by_flooded();
+        } else {
+            b->destroy_by_collapse();
+        }
+        if (!first) {
+            first = b;
+        }
+    }
+    return first;
+}
+
 void event_manager_t::process_event_distant_battle(const event_ph_t &event, bool via_event_trigger, int chain_action_parent, int caller_event_id, int caller_event_var) {
     const int template_str = event.reasons[0];
     const int reason = event.reasons[1];
@@ -740,10 +795,9 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         break;
 
     case EVENT_TYPE_GOLD_MINE_COLLAPSE: {
-            building_id bid = building_id_random(BUILDING_GOLD_MINE);
-            building *b = building_get(bid);
-            if (b && b->is_valid()) {
-                b->destroy_by_collapse();
+            building *b = destroy_disaster_buildings(BUILDING_GOLD_MINE, event.amount.value,
+                                                     e_disaster_destroy_mode::collapse);
+            if (b) {
                 city_message_post_full(true, "message_template_general", &event, caller_event_id,
                                        PHRASE_goldmine_cavein_title, PHRASE_goldmine_cavein_initial_announcement,
                                        PHRASE_goldmine_cavein_no_reason_A, id, b->tile.grid_offset());
@@ -752,11 +806,10 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         break;
 
     case EVENT_TYPE_CLAY_PIT_FLOOD: {
-            // Same effect as random_events clay-pit flood: rubble one working pit.
-            building_id bid = building_id_random(BUILDING_CLAY_PIT);
-            building *b = building_get(bid);
-            if (b && b->is_valid()) {
-                b->destroy_by_flooded();
+            // Fidelity: rubble one working pit. Feature: up to event.amount distinct pits.
+            building *b = destroy_disaster_buildings(BUILDING_CLAY_PIT, event.amount.value,
+                                                     e_disaster_destroy_mode::flood);
+            if (b) {
                 messages::popup("message_tutorial_flooded_clay_pit", 0, b->tile.grid_offset());
             }
         }

@@ -70,6 +70,7 @@ localization_en = [
   {key:"#TR_CONFIG_ALL_HOUSES_MERGE", text:"All houses merge"}
   {key:"#TR_CONFIG_WINE_COUNTS_IF_OPEN_TRADE_ROUTE", text:"Open trade route count as providing different wine type"}
   {key:"#TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY", text:"Randomly collapsing clay pits and iron mines take some money instead"}
+  {key:"#TR_CONFIG_DISASTER_EVENTS_USE_AMOUNT", text:"Clay flood / gold collapse destroy amount buildings from event"}
   {key:"#TR_CONFIG_MULTIPLE_BARRACKS", text:"Allow building multiple barracks."}
   {key:"#TR_CONFIG_NOT_ACCEPTING_WAREHOUSES", text:"Warehouses don't accept anything when built"}
   {key:"#TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS", text:"Houses don't expand into gardens"}

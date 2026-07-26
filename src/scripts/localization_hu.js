@@ -69,6 +69,7 @@ localization_hu = [
   {key:"#TR_CONFIG_ALL_HOUSES_MERGE", text:"Minden ház összevonható"}
   {key:"#TR_CONFIG_WINE_COUNTS_IF_OPEN_TRADE_ROUTE", text:"A megnyitott kereskedelmi útvonal külön borfajtának számít"}
   {key:"#TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY", text:"A véletlen bányaomlások pénzveszteséget okoznak"}
+  {key:"#TR_CONFIG_DISASTER_EVENTS_USE_AMOUNT", text:"Agyagárvíz / aranybánya-omlás az esemény amount épületét rombolja"}
   {key:"#TR_CONFIG_MULTIPLE_BARRACKS", text:"Több laktanya építésének engedélyezése"}
   {key:"#TR_CONFIG_NOT_ACCEPTING_WAREHOUSES", text:"Az új raktárak kezdetben semmit sem fogadnak"}
   {key:"#TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS", text:"A házak nem terjeszkednek a kertekre"}

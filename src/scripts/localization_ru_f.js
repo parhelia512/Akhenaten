@@ -63,6 +63,7 @@ localization_ru_f = [
     { key:"#TR_CONFIG_ALL_HOUSES_MERGE", text:"Разрешить слияние всех домов"}
     { key:"#TR_CONFIG_WINE_COUNTS_IF_OPEN_TRADE_ROUTE", text:"Торговые пути увеличивают разнообразие вина"}
     { key:"#TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY", text:"Вместо разрушения, разрушающаяся шахта заберет часть денег"}
+    { key:"#TR_CONFIG_DISASTER_EVENTS_USE_AMOUNT", text:"Затопление глины / обвал золота ломают amount зданий из события"}
     { key:"#TR_CONFIG_MULTIPLE_BARRACKS", text:"Разрешить постройку нескольких казарм"}
     { key:"#TR_HOTKEY_TITLE", text:"Настройки горячих клавиш Ozzy"}
     { key:"#TR_HOTKEY_LABEL", text:"Основная"}

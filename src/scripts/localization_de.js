@@ -64,6 +64,7 @@ localization_de = [
   {key:"#TR_CONFIG_ALL_HOUSES_MERGE", text:"Alle Häuser verschmelzen"}
   {key:"#TR_CONFIG_WINE_COUNTS_IF_OPEN_TRADE_ROUTE", text:"Offene Handelsroute zählt als Bereitstellung verschiedener Weintypen"}
   {key:"#TR_CONFIG_RANDOM_COLLAPSES_TAKE_MONEY", text:"Zufällig einstürzende Tongruben und Eisenminen nehmen stattdessen etwas Geld"}
+  {key:"#TR_CONFIG_DISASTER_EVENTS_USE_AMOUNT", text:"Tongrubenflut / Goldminen-Einsturz zerstören amount Gebäude aus dem Event"}
   {key:"#TR_CONFIG_MULTIPLE_BARRACKS", text:"Bau mehrerer Kasernen erlauben."}
   {key:"#TR_CONFIG_NOT_ACCEPTING_WAREHOUSES", text:"Lagerhäuser nehmen beim Bau nichts an"}
   {key:"#TR_CONFIG_HOUSES_DONT_EXPAND_INTO_GARDENS", text:"Häuser dehnen sich nicht in Gärten aus"}
