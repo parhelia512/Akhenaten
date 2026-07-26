@@ -81,7 +81,6 @@ public:
     void add_entry(xstring entry_text, uintptr_t user_data = 0);
     void change_file_path(xstring dir, xstring ext);
     void append_files_with_extension(xstring dir, xstring ext);
-    /** Stable sort: names starting with prefix (case-insensitive) first, then alpha. */
     void prioritize_files_prefix(pcstr prefix);
     void refresh_file_finder();
     void refresh_scrollbar();

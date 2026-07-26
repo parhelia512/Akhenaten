@@ -85,6 +85,7 @@ C++ smoke checks run first (before JS files): `SDL_strlen`/`strcmp`, `vec2i`, `g
 | `37_farm_preview_images.js` | Farm preview smoke: crops ≠ 0, get_image meadow/floodplain routing, `draw_from_below` |
 | `38_color_mask_passing.js` | Full `COLOR_MASK_*` (> INT_MAX) survive MuJS→C++ as `color` (uint32): `__test_color_roundtrip` for GREEN/RED/BLUE + `draw_flat_tile` with a full mask without TypeError (J1) |
 | `39_enemy_chariot_registered.js` | Every `FIGURE_ENEMY_*_CHARIOT` resolves to a registered enemy class (`__test_enemy_figure_registered`) instead of asserting; Assyrian/Hyksos chariots (missions 32/33) covered (F2) |
+| `53_enemy_warship_registered.js` | Every `FIGURE_ENEMY_*_WAR_SHIP` (+ galera / generic 93) resolves to a registered enemy class (`__test_enemy_figure_registered`); E3a enemy fleet start |
 | `40_hippo_spawn.js` | Spawn `FIGURE_HIPPO` on land and water; `update_animation` → `walk` / `swim` (#77) |
 | `66_lion_spawn.js` | Cleopatra `FIGURE_LION`: spawn + type + `update_animation` → `walk` (SprMain2 group 5; CF3b) |
 | `41_city_smoke_run.js` | Broad crash smoke (TS1): place ~12 building types via the real planner path, open each info window (`[es=(info_window_*, init)]`), advance the sim; driver's whole-log `!!! TypeError:` scan catches on_place/update/init crashes broadly. Per-type `smoke_ok:*` markers isolate the culprit; `smoke_skip:*` logged loudly |
@@ -103,6 +104,8 @@ C++ smoke checks run first (before JS files): `SDL_strlen`/`strcmp`, `vec2i`, `g
 | `62_large_stepped_fourth_tier.js` | C1a fourth brick tier screenshots for large stepped pyramid |
 | `63_large_stepped_fifth_tier.js` | C1a fifth brick tier screenshots for large stepped pyramid |
 | `60_thinis_protect_nonrebuild.js` | Thinis (23): Osiris temple complex + mansions are map-only (not rebuildable); altar/oracle upgrades stay allowed |
+| `59_autosave_slots.js` | Autosave slot filename format + pick missing/oldest (`__test_autosave_*`; AS4) |
+| `64_trader_capacity.js` | Trade capacity: OG roll to 800 (`uint16` random), flag 1600, buy gate, `has_traded_max(cap)` (TC*) |
 | `65_zoo_place.js` | Cleopatra Zoo: place 6×6, stock straw+gamemeat, spawn `FIGURE_ZOOKEEPER`, animals-present timer, no spawn without stock (Z5) |
 
 Farm **placement** tests (34/35) cover `can_place` / terrain rules; **37** covers preview image helpers.
@@ -193,6 +196,10 @@ After each test script loads, the driver calls `js_vm_sync({})` so any top-level
 | `__test_camera_center_building(bid)` | undefined | Center camera on building / monument `center_point` |
 | `__test_js_hotreload_handlers_stack_ok(n)` | boolean | Re-run `js_register_game_handlers` `n` times; true if MuJS stack depth unchanged (HR1) |
 | `__test_js_hotreload_file_stack_ok(path, n)` | boolean | `js_vm_reload_file` + `js_vm_sync` `n` times; true if stack depth unchanged (HR1) |
+| `__test_trader_capacity(fid)` | int | Caravan runtime / ship effective max capacity (TC*) |
+| `__test_trader_static_max_capacity(type)` / `__test_trader_static_capacity_random(type)` | int | Static caravan/ship params |
+| `__test_trader_set_bought(fid, amount)` / `__test_trader_buy_under_capacity(fid)` | void / 0\|1 | Buy-capacity gate without warehouse |
+| `__test_empire_trader_has_traded_max(bought, sold, capacity)` | 0\|1 | `has_traded_max(capacity)` |
 
 ## JS helpers (`integral_test.js`)
 

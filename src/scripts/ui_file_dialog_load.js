@@ -251,6 +251,7 @@ function file_dialog_load_on_init(window) {
     window.files.change_file_path(dir, exts[0])
     for (var i = 1; i < exts.length; i++)
         window.files.append_files_with_extension(dir, exts[i])
+
     if (window.file_type !== FILE_TYPE_SCENARIO)
         window.files.prioritize_files_prefix("autosave")
 

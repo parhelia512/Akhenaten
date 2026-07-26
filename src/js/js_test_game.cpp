@@ -51,10 +51,6 @@
 #include <cstring>
 #include <fstream>
 #include <string>
-#include "figuretype/figure_kingdome_trader.h"
-#include "figuretype/figure_trader_ship.h"
-#include "empire/trader_handler.h"
-#include "empire/empire_traders.h"
 
 // SDL_main.h does `#define main SDL_main`; undo it here so building::main() etc.
 // are not macro-mangled (this TU is not the program entry point).
@@ -839,6 +835,12 @@ static int __test_autosave_pick(int slots, int exists_mask, int m0, int m1, int 
     return autosave_module_t::pick_slot(slots, exists, mtime);
 }
 ANK_FUNCTION_5(__test_autosave_pick);
+
+#include "figuretype/figure_kingdome_trader.h"
+#include "figuretype/figure_trader_ship.h"
+#include "empire/trader_handler.h"
+#include "empire/empire_traders.h"
+#include "game/game_config.h"
 
 static int __test_trader_capacity(int fid) {
     figure *f = figure_get(fid);
