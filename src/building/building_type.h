@@ -304,6 +304,12 @@ enum e_building_type : uint16_t {
 	BUILDING_MEDIUM_BENT_PYRAMID_WALL = 332,
 	BUILDING_MEDIUM_BENT_PYRAMID_CONE = 333,
 
+	// Large stepped pyramid (20x20) part runtime-ids. Main type is 250 above.
+	// Appended before BUILDING_MAX to keep savegame compatibility.
+	BUILDING_LARGE_STEPPED_PYRAMID_CORNER = 334,
+	BUILDING_LARGE_STEPPED_PYRAMID_WALL = 335,
+	BUILDING_LARGE_STEPPED_PYRAMID_CONE = 336,
+
 	BUILDING_MAX,
 };
 extern const token_holder<e_building_type, BUILDING_NONE, BUILDING_MAX> e_building_type_tokens;

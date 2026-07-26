@@ -1,4 +1,4 @@
-﻿// Native JS bindings used only by the integraltests driver (see
+// Native JS bindings used only by the integraltests driver (see
 // src/platform/integral_tests.cpp and tests/*.js). Split out from js_game.cpp
 // to keep the test-only surface in one place and make it easy to audit /
 // disable later without touching the main game bindings.
@@ -494,7 +494,9 @@ static void __test_monument_set_phase(int bid, int phase) {
         }
     }
 
-    if (!head->dcast_mastaba()) {
+    const bool is_mastaba = head->dcast_mastaba();
+    const bool is_pyramid = head->dcast_pyramid();
+    if (!is_mastaba && !is_pyramid) {
         return;
     }
 
@@ -506,11 +508,13 @@ static void __test_monument_set_phase(int bid, int phase) {
         }
     }
 
-    const vec2i tiles = get_mastaba_params(test_mastaba_params_type(head)).init_tiles;
-    if (mm->is_finished() || mm->phase() >= 8 || phase >= 8) {
-        building_mastaba::finalize(head, tiles);
-    } else if (phase >= 2) {
-        building_mastaba::update_images(head, phase, tiles);
+    if (is_mastaba) {
+        const vec2i tiles = get_mastaba_params(test_mastaba_params_type(head)).init_tiles;
+        if (mm->is_finished() || mm->phase() >= 8 || phase >= 8) {
+            building_mastaba::finalize(head, tiles);
+        } else if (phase >= 2) {
+            building_mastaba::update_images(head, phase, tiles);
+        }
     }
 }
 ANK_FUNCTION_2(__test_monument_set_phase);
@@ -622,8 +626,8 @@ static void __test_camera_center_building(int bid) {
 ANK_FUNCTION_1(__test_camera_center_building);
 
 // Hot-reload stack regression: each js_vm_sync used to leave ~1 stack slot per
-// [console_command=ÔÇª] handler (~30). JS_STACKSIZE is 256, so ~10 reloads then
-// crashed in config::refresh / UI archive load (stackoverflow ÔåÆ fatal exit).
+// [console_command=…] handler (~30). JS_STACKSIZE is 256, so ~10 reloads then
+// crashed in config::refresh / UI archive load (stackoverflow → fatal exit).
 static bool __test_js_hotreload_handlers_stack_ok(int iterations) {
     js_State *J = js_vm_state();
     if (!J || iterations < 1) {

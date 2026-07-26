@@ -863,6 +863,37 @@ static void dump_starting_buildings() {
     }
 }
 
+static void dump_allowed_buildings() {
+    int n = 0;
+    for (int t = 1; t < BUILDING_MAX; t++) {
+        if (!g_scenario.allowed_buildings[t]) {
+            continue;
+        }
+        dump_marker("pak_allowed:type=%d(%s)",
+            t,
+            safe_token(e_building_type_tokens.name((e_building_type)t)));
+        n++;
+    }
+    dump_marker("pak_allowed_count:%d", n);
+}
+
+static void dump_loaded_scenario(int scenario_id) {
+    dump_scenario_header(scenario_id);
+    dump_win_criteria();
+    dump_map_points();
+    dump_invasion_points();
+    dump_monuments();
+    dump_gods();
+    dump_empire_cities();
+    dump_empire_objects();
+    dump_empire_routes();
+    dump_scenario_events();
+    dump_legacy_tables();
+    dump_terrain_stats();
+    dump_starting_buildings();
+    dump_allowed_buildings();
+}
+
 // Export mission map grids (terrain/image/elevation/…) as FILE_FORMAT_MAP_FILE.
 // Returns 1 on success.
 static int __test_export_mission_map(int scenario_id, pcstr path) {
@@ -892,21 +923,34 @@ static int __test_mission_pak_dump(int scenario_id) {
         return 0;
     }
 
-    dump_scenario_header(scenario_id);
-    dump_win_criteria();
-    dump_map_points();
-    dump_invasion_points();
-    dump_monuments();
-    dump_gods();
-    dump_empire_cities();
-    dump_empire_objects();
-    dump_empire_routes();
-    dump_scenario_events();
-    dump_legacy_tables();
-    dump_terrain_stats();
-    dump_starting_buildings();
-
+    dump_loaded_scenario(scenario_id);
     dump_marker("pak_dump_done:%d", scenario_id);
     return 1;
 }
 ANK_FUNCTION_1(__test_mission_pak_dump);
+
+// Dump a .map file WITHOUT JS mission overlay (load_mission_map_raw, no post_load).
+// scenario_id is only for markers / campaign_scenario_id (e.g. 129 for Bridges.map).
+static int __test_mission_map_dump(int scenario_id, pcstr map_path) {
+    if (g_args.no_resource()) {
+        dump_marker("pak_dump_skipped:no_resource");
+        return 0;
+    }
+    if (!map_path || !map_path[0]) {
+        dump_marker("map_dump_fail:%d|-", scenario_id);
+        return 0;
+    }
+
+    if (!GamestateIO::load_mission_map_raw(scenario_id, map_path)) {
+        logs::info("[test] load_mission_map_raw(%d, %s) failed", scenario_id, map_path);
+        dump_marker("map_dump_fail:%d|%s", scenario_id, map_path);
+        return 0;
+    }
+
+    g_empire.init_cities();
+    dump_marker("map_dump_ok:%d|%s", scenario_id, map_path);
+    dump_loaded_scenario(scenario_id);
+    dump_marker("map_dump_done:%d", scenario_id);
+    return 1;
+}
+ANK_FUNCTION_2(__test_mission_map_dump);

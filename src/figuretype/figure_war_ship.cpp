@@ -6,6 +6,7 @@
 #include "figure/movement.h"
 #include "figuretype/figure_missile.h"
 #include "figuretype/figure_transport_ship.h"
+#include "figuretype/figure_enemy_warship.h"
 #include "grid/water.h"
 #include "grid/figure.h"
 #include "grid/terrain.h"
@@ -48,6 +49,10 @@ bool is_enemy_warship_target(figure *f) {
         return false;
     }
 
+    if (smart_cast<figure_enemy_warship>(f)) {
+        return true;
+    }
+
     return is_water_figure(f) || f->type == FIGURE_WARSHIP || f->type == FIGURE_ENEMY_WARSHIP;
 }
 
@@ -68,17 +73,17 @@ int warship_target_priority(figure *f) {
         return 0;
     }
 
-    if (f->type == FIGURE_TRANSPORT_SHIP || f->type == FIGURE_ENEMY_WARSHIP) {
+    if (f->type == FIGURE_TRANSPORT_SHIP) {
         if (auto transport = smart_cast<figure_transport_ship>(f)) {
             if (transport->has_troops()) {
                 return 40;
             }
             return 10;
         }
-        return 30;
+        return 10;
     }
 
-    if (is_enemy_warship_target(f) && is_water_figure(f)) {
+    if (smart_cast<figure_enemy_warship>(f) || (is_enemy_warship_target(f) && is_water_figure(f))) {
         return 30;
     }
 

@@ -47,6 +47,25 @@ enemy_attack_rules = {
     }
 }
 
+// Generic enemy warship (FIGURE_ENEMY_WARSHIP = 93). Fallback for barbarian /
+// console spawn when a nation has no dedicated warship enum.
+figure_enemy_warship_generic = {
+    animations : {
+        swim : { pack:PACK_ENEMY_HITTITE, id:10, max_frames:4 }
+        death : { pack:PACK_ENEMY_HITTITE, id:11, max_frames:11, loop:false }
+        idle : { pack:PACK_ENEMY_HITTITE, id:12, max_frames:1 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 290
+    attack_value : 17
+    missile_defense_value : 3
+    terrain_usage : TERRAIN_USAGE_ANY
+    is_enemy : true
+    max_amount : 25
+}
+
 // barbarian
 figure_barbarian_archer = {
     animations : {

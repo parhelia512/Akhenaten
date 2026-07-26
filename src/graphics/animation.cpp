@@ -23,14 +23,27 @@ int animation_t::first_img() const {
         return cached_imgid;
     }
 
+    int result;
     if (!path.empty()) {
         image_desc desc = image_desc_from_name(path);
-        cached_imgid = desc.tid();
-        return cached_imgid;
+        result = desc.tid();
+    } else {
+        int base = image_id_from_group(pack, id);
+        // A negative base means the imagepak is not resolved yet (it may still
+        // be loading asynchronously via the pak-queue). Return the invalid id
+        // without caching so a later call re-resolves once the pak is ready.
+        result = (base < 0) ? base : (base + offset);
     }
 
-    cached_imgid = image_id_from_group(pack, id) + offset;
-    return cached_imgid;
+    // Do not cache a failed lookup (0xFFFF / negative sentinel). cached_imgid is
+    // uint16_t, so a -1 sentinel would be stored as 65535 and the `> 0` guard
+    // above would then return that poisoned value forever — breaking any
+    // monument whose pak loads after first_img() is first called (e.g. a
+    // freshly placed large stepped pyramid). Cache only a valid image id.
+    if (result > 0 && result < 0xFFFF) {
+        cached_imgid = (uint16_t)result;
+    }
+    return result;
 }
 
 void animation_context::setup(const animation_t &anim) {

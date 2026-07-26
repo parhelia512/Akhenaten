@@ -223,6 +223,82 @@ building_small_stepped_pyramid {
   building_medium_stepped_pyramid_wall { show_in_debug: false }
   building_medium_stepped_pyramid_cone = building_medium_stepped_pyramid
 
+  // Large stepped pyramid (20x20, id 250). Same PACK_STEPPED_PYRAMID render pipeline as
+  // small/medium; only footprint (init_tiles) differs. The `stairs` entries below are the
+  // medium placeholders — the wooden-ramp positions and the top-down polish stage are a
+  // follow-up visual pass (see REMAKE_LARGE_PYRAMID_IMPL.md).
+  building_large_stepped_pyramid {
+    animations {
+      _pack { pack:PACK_STEPPED_PYRAMID }
+      preview { pack:PACK_STEPPED_PYRAMID, id:2, offset:7 }
+      base { id:2, offset:7 }
+      base_bricks { path:"stepped_pyramid/stepped_pyramid_00103" }
+      corner_bricks { path:"stepped_pyramid/stepped_pyramid_00001" }
+      wall_bricks { path:"stepped_pyramid/stepped_pyramid_00005" }
+      base_grounded { path:"stepped_pyramid/pyramid_phase_one_00013" }
+      clear_land { id:2, offset:12 }
+      image_stick { path:"stepped_pyramid/pyramid_phase_one_00021" }
+      empty_land {path:"stepped_pyramid/stepped_pyramid_00109"}
+      ditches_phase_1 { path:"stepped_pyramid/pyramid_phase_one_00022" }
+      ditches_phase_2 { path:"stepped_pyramid/pyramid_phase_one_00031" }
+      ditches_phase_3 { path:"stepped_pyramid/pyramid_phase_one_00040" }
+      ditches_phase_4 { path:"stepped_pyramid/pyramid_phase_one_00049" }
+      ground_phase_0 { path:"stepped_pyramid/pyramid_phase_one_00013" }
+      basement { path:"stepped_pyramid/pyramid_phase_one_00058" }
+      enter { path:"pharaoh_general/plazatiles_00064"}
+      stair_0_2 { path:"stepped_pyramid/stepped_pyramid_00112" }
+      stair_0_4 { path:"stepped_pyramid/stepped_pyramid_00110" }
+      stair_0_4_corner { path:"stepped_pyramid/stepped_pyramid_00122" }
+      stair_0_5 { path:"stepped_pyramid/stepped_pyramid_00114" }
+      stair_0_6 { path:"stepped_pyramid/stepped_pyramid_00115" }
+    }
+    build_menu_text : "Large Stepped Pyramid"
+    building_size : 2
+    info_title_id [198, 18]
+    fire_proof :  true
+    damage_proof : true
+    meta { help_id:375, text_id:178 }
+    init_tiles [20, 20]
+
+    enter_offset : [2, 20]
+
+    stairs [
+      {
+        phase : 7
+        part : [2, 10]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [-15, 25]
+      }
+
+      {
+        phase : 8
+        part : [4, 10]
+        tex { path:"stepped_pyramid/stepped_pyramid_00111" }
+        offset : [-15, 25]
+      }
+
+      {
+        phase : 9
+        part : [6, 10]
+        tex { path:"stepped_pyramid/stepped_pyramid_00112" }
+        offset : [-15, 25]
+      }
+    ]
+
+    flags {
+        is_monument: true
+    }
+
+    corner_type : BUILDING_LARGE_STEPPED_PYRAMID_CORNER
+    wall_type : BUILDING_LARGE_STEPPED_PYRAMID_WALL
+    cone_type : BUILDING_LARGE_STEPPED_PYRAMID_CONE
+    filler_type : BUILDING_LARGE_STEPPED_PYRAMID
+  }
+
+  building_large_stepped_pyramid_corner { show_in_debug: false }
+  building_large_stepped_pyramid_wall { show_in_debug: false }
+  building_large_stepped_pyramid_cone = building_large_stepped_pyramid
+
   // --- Bent pyramids (Snofru's, mission 14 South Dahshur) --------------------
   // The bent_pyramid image pack is structurally identical to stepped_pyramid
   // (159 "Bent_pyramid_*" main sprites at the same indices as "stepped_pyramid_*",

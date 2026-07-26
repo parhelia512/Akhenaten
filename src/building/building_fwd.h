@@ -78,6 +78,7 @@ class building_mortuary;
 class building_pyramid;
 class building_small_stepped_pyramid;
 class building_medium_stepped_pyramid;
+class building_large_stepped_pyramid;
 class building_small_bent_pyramid;
 class building_medium_bent_pyramid;
 class building_sphinx;
