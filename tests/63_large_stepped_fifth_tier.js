@@ -1,6 +1,7 @@
 // Large stepped — fifth / apex tier (layer 4). Phase 30 retargets the inner 4×4
 // to layer=4; phase 35 = full apex brick tier.
 //
+// Zoom: higher % = farther out. Mirror camera plumbing from test 60.
 //   build\Debug\akhenaten.exe --integraltests --integraltest-only 63_large_stepped_fifth_tier ^
 //     --nointro --nomouse --no-logo --nosound --nocrashdlg --window --size 1000x750 ^
 //     --screenshot-dir d:/Work/Akhenaten/tmp/fifth_tier_shot "d:/Work/Cleop"
@@ -14,10 +15,16 @@ function run_test() {
     }
     __test_set_treasury(500000)
 
-    // Place so the 20×20 footprint is centered on the map (not NW-biased).
     var foot = 20
     var cx = ((__scenario_map.width - foot) / 2) | 0
     var cy = ((__scenario_map.height - foot) / 2) | 0
+
+    __camera_sidebar_collapsed(1)
+    __zoom_set(180)
+    __test_pump_frames(20)
+    city.camera_go_to({x: cx + (foot / 2) | 0, y: cy + (foot / 2) | 0})
+    __test_pump_frames(20)
+
     var bid = test_building_place(BUILDING_LARGE_STEPPED_PYRAMID, cx, cy)
     if (!bid) {
         bid = test_building_place(BUILDING_LARGE_STEPPED_PYRAMID, -1, -1)
@@ -32,7 +39,7 @@ function run_test() {
     var tile = __building_tile(bid)
     __log_marker('fifth_tier_placed_ok:' + bid + ':' + tile.x + ',' + tile.y)
 
-    __test_pump_frames(20)
+    __test_pump_frames(30)
 
     // Level 5 = layer 4 apex, full brick course at phase 35.
     __test_monument_set_phase(bid, 35)
@@ -63,10 +70,16 @@ function run_test() {
 
     __test_process_events()
     window_go_back()
+    __zoom_set(180)
+    __test_pump_frames(10)
     __test_camera_center_building(bid)
-    // Must redraw after camera move — SCREENSHOT_DISPLAY captures the last frame.
-    __test_pump_frames(3)
+    __test_pump_frames(8)
     __game_save_screenshot(SCREENSHOT_DISPLAY)
+    __log_marker('fifth_tier_screenshot_display_done')
+
+    __test_pump_frames(2)
+    __game_save_screenshot(SCREENSHOT_FULL_CITY)
+    __log_marker('fifth_tier_screenshot_fullcity_done')
     __log_marker('fifth_tier_screenshot_done')
 
     __test_signal_ready()

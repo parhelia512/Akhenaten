@@ -1,6 +1,7 @@
 // Large stepped — fourth tier (layer 3). Phase 24 retargets the inner 8×8 to
 // layer=3; phase 29 = full fourth brick tier. Screenshot at end.
 //
+// Zoom: higher % = farther out. Mirror camera plumbing from test 60.
 //   build\Debug\akhenaten.exe --integraltests --integraltest-only 62_large_stepped_fourth_tier ^
 //     --nointro --nomouse --no-logo --nosound --nocrashdlg --window --size 1000x750 ^
 //     --screenshot-dir d:/Work/Akhenaten/tmp/fourth_tier_shot "d:/Work/Cleop"
@@ -14,14 +15,24 @@ function run_test() {
     }
     __test_set_treasury(500000)
 
-    var cx = (__scenario_map.width / 2) | 0
-    var cy = (__scenario_map.height / 2) | 0
-    var bid = 0
-    var candidates = [
-        {x: cx - 10, y: cy - 10}, {x: cx, y: cy}, {x: 40, y: 40}, {x: 30, y: 30}, {x: 60, y: 40}
-    ]
-    for (var i = 0; i < candidates.length && !bid; i++) {
-        bid = test_building_place(BUILDING_LARGE_STEPPED_PYRAMID, candidates[i].x, candidates[i].y)
+    var foot = 20
+    var cx = ((__scenario_map.width - foot) / 2) | 0
+    var cy = ((__scenario_map.height - foot) / 2) | 0
+
+    __camera_sidebar_collapsed(1)
+    __zoom_set(180)
+    __test_pump_frames(20)
+    city.camera_go_to({x: cx + (foot / 2) | 0, y: cy + (foot / 2) | 0})
+    __test_pump_frames(20)
+
+    var bid = test_building_place(BUILDING_LARGE_STEPPED_PYRAMID, cx, cy)
+    if (!bid) {
+        var candidates = [
+            {x: cx, y: cy}, {x: 40, y: 40}, {x: 30, y: 30}, {x: 60, y: 40}
+        ]
+        for (var i = 0; i < candidates.length && !bid; i++) {
+            bid = test_building_place(BUILDING_LARGE_STEPPED_PYRAMID, candidates[i].x, candidates[i].y)
+        }
     }
     if (!bid) {
         bid = test_building_place(BUILDING_LARGE_STEPPED_PYRAMID, -1, -1)
@@ -65,15 +76,18 @@ function run_test() {
     }
     __log_marker('fourth_tier_art_ok')
 
-    __test_camera_center_building(bid)
     __test_process_events()
     window_go_back()
-    __test_pump_frames(6)
-
-    __game_save_screenshot(SCREENSHOT_FULL_CITY)
-    __test_pump_frames(2)
+    __zoom_set(180)
+    __test_pump_frames(10)
+    __test_camera_center_building(bid)
+    __test_pump_frames(8)
     __game_save_screenshot(SCREENSHOT_DISPLAY)
+    __log_marker('fourth_tier_screenshot_display_done')
+
     __test_pump_frames(2)
+    __game_save_screenshot(SCREENSHOT_FULL_CITY)
+    __log_marker('fourth_tier_screenshot_fullcity_done')
     __log_marker('fourth_tier_screenshot_done')
 
     __test_signal_ready()
