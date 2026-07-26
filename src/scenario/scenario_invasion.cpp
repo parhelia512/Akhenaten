@@ -408,21 +408,20 @@ tile2i scenario_start_invasion_impl(invasion_opts_t opts) {
 
     // determine invasion point
     tile2i invasion_tile;
-    if (opts.enemy_type == ENEMY_3_EGYPTIAN) {
+    if (opts.invasion_point.valid()) {
+        // Explicit JS/pak loc wins (incl. Egyptian — map entry only when tile unset).
+        invasion_tile = opts.invasion_point;
+    } else if (opts.enemy_type == ENEMY_3_EGYPTIAN) {
         invasion_tile = scenario_map_entry();
     } else {
-        if (!opts.invasion_point.valid()) {
-            auto &lands = g_scenario.invasion_points_land;
-            svector<tile2i, 8> points;
-            std::copy_if(lands.begin(), lands.end(), std::back_inserter(points), [] (auto &p) { return p.valid(); });
-            if (points.empty()) {
-                logs::warn("scenario_invasion: no valid land invasion points, falling back to map exit");
-                invasion_tile = tile2i::invalid;
-            } else {
-                invasion_tile = points.at(rand() % points.size());
-            }
+        auto &lands = g_scenario.invasion_points_land;
+        svector<tile2i, 8> points;
+        std::copy_if(lands.begin(), lands.end(), std::back_inserter(points), [] (auto &p) { return p.valid(); });
+        if (points.empty()) {
+            logs::warn("scenario_invasion: no valid land invasion points, falling back to map exit");
+            invasion_tile = tile2i::invalid;
         } else {
-            invasion_tile = opts.invasion_point;
+            invasion_tile = points.at(rand() % points.size());
         }
     }
 
