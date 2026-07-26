@@ -274,8 +274,11 @@ building* building::main() {
         return this;
     }
 
+    // Large stepped pyramid is 20×20 / 2×2 = 100 parts; grand is 144. The old
+    // guard of 99 made late parts (SE corner) fall through to building_get(0),
+    // so get_bricks_image picked the wrong corner sprite.
     building* b = this;
-    for (int guard = 0; guard < 99; guard++) {
+    for (int guard = 0; guard < (int)MAX_BUILDINGS; guard++) {
         if (b->prev_part_building_id <= 0) {
             return b;
         }
@@ -545,7 +548,7 @@ void building::destroy_by_fire() {
 
 void building::destroy_linked_parts(bool on_fire) {
     building *part = this;
-    for (int i = 0; i < 99; i++) {
+    for (int i = 0; i < (int)MAX_BUILDINGS; i++) {
         if (part->prev_part_building_id <= 0) {
             break;
         }
@@ -561,7 +564,7 @@ void building::destroy_linked_parts(bool on_fire) {
     }
 
     part = this;
-    for (int i = 0; i < 99; i++) {
+    for (int i = 0; i < (int)MAX_BUILDINGS; i++) {
         part = part->next();
         if (part->id <= 0) {
             break;

@@ -837,7 +837,7 @@ int building_stepped_pyramid::get_bricks_image(int orientation, tile2i tile, til
         const bool at_max_y = (tile.y() == end.y());
         if (at_min_x && at_min_y) return image_corner_bricks + 0;
         if (at_min_x && at_max_y) return image_corner_bricks + 1;
-        if (at_max_x && at_max_y) return image_corner_bricks + 2;
+        if (at_max_x && at_max_y) return image_corner_bricks + 2; // visual bottom → stepped_pyramid_00043 at layer 5
         if (at_max_x && at_min_y) return image_corner_bricks + 3;
         return image_corner_bricks;
     }
