@@ -281,6 +281,13 @@ static void create_full_city_screenshot() {
     }
     vec2i original_camera_pixels = g_camera.camera_position;
 
+    // Extra scroll margin (test framing) expands scroll_min into values that make
+    // go_to_pixel(…, false) hit OOB screentile lookup — clear for the stitch pass.
+    const int saved_margin = g_camera.extra_scroll_margin_tiles;
+    if (saved_margin != 0) {
+        g_camera.set_extra_scroll_margin(0);
+    }
+
     auto mm_view = g_camera.get_scrollable_pixel_limits();
 
     vec2i view_size = g_camera.size_pixels;
@@ -294,6 +301,9 @@ static void create_full_city_screenshot() {
 
     if (!image_create(city_canvas_pixels, 0, canvas_height)) {
         logs::error("Unable to set memory for full city screenshot", 0, 0);
+        if (saved_margin != 0) {
+            g_camera.set_extra_scroll_margin(saved_margin);
+        }
         return;
     }
 
@@ -301,17 +311,24 @@ static void create_full_city_screenshot() {
     if (!image_begin_io(filename) || !image_write_header()) {
         logs::error("Unable to write screenshot to:", filename, 0);
         image_free();
+        if (saved_margin != 0) {
+            g_camera.set_extra_scroll_margin(saved_margin);
+        }
         return;
     }
 
     color *canvas = (color*)malloc(sizeof(color) * city_canvas_pixels.x * canvas_height);
     if (!canvas) {
         image_free();
+        if (saved_margin != 0) {
+            g_camera.set_extra_scroll_margin(saved_margin);
+        }
         return;
     }
     memset(canvas, 0, sizeof(color) * city_canvas_pixels.x * canvas_height);
 
-    int old_scale = g_zoom.get_scale() * 100;
+    // set_scale takes zoom *percentage* (same units as get_percentage), not get_scale().
+    const float old_zoom = g_zoom.get_percentage();
 
     int error = 0;
     int base_height = image_set_loop_height_limits(mm_view.min.y, mm_view.max.y);
@@ -356,10 +373,13 @@ static void create_full_city_screenshot() {
     }
 
     g_camera.set_screen_size(viewport_size.x + widget_sidebar_city_offset_max(), viewport_size.y + TOP_MENU_HEIGHT);
-    g_zoom.set_scale(old_scale);
+    g_zoom.set_scale(old_zoom);
 
     graphics_reset_clip_rectangle();
     g_camera.go_to_pixel(original_camera_pixels, true);
+    if (saved_margin != 0) {
+        g_camera.set_extra_scroll_margin(saved_margin);
+    }
 
     if (!error) {
         image_finish();
@@ -367,6 +387,7 @@ static void create_full_city_screenshot() {
         show_saved_notice(filename);
     }
 
+    free(canvas);
     image_free();
 }
 
