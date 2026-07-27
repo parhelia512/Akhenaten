@@ -48,7 +48,8 @@ int building_hunting_lodge::spawn_timer() {
 
 e_figure_type building_hunting_lodge::resolve_hunter_type() const {
     const e_figure_type override_type = current_params().hunter_type;
-    if (override_type == FIGURE_OSTRICH_HUNTER || override_type == FIGURE_ANTELOPE_HUNTER) {
+    if (override_type == FIGURE_OSTRICH_HUNTER || override_type == FIGURE_ANTELOPE_HUNTER
+        || override_type == FIGURE_BIRDS_HUNTER) {
         return override_type;
     }
     return hunting_lodge_default_hunter_type();
@@ -56,7 +57,8 @@ e_figure_type building_hunting_lodge::resolve_hunter_type() const {
 
 int building_hunting_lodge::active_hunters_count() const {
     return base.get_figures_number(FIGURE_OSTRICH_HUNTER)
-        + base.get_figures_number(FIGURE_ANTELOPE_HUNTER);
+        + base.get_figures_number(FIGURE_ANTELOPE_HUNTER)
+        + base.get_figures_number(FIGURE_BIRDS_HUNTER);
 }
 
 bool building_hunting_lodge::can_spawn_hunter() {

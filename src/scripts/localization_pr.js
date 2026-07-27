@@ -32,6 +32,18 @@ localization_pr = [
      { key: "#TR_CONFIG_FIX_IMMIGRATION_BUG", text:"Consertar falha durante a imigração na dificuldade máxima"},
      { key: "#TR_CONFIG_FIX_100_YEAR_GHOSTS", text:"Consertar falha dos 'fantasmas' de 100 anos"},
      { key: "#TR_CONFIG_FIX_EDITOR_EVENTS", text:"Consertar falha na mudança de Imperador e tempo de sobrevivência"},
+     { key: "#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Auto-resolver invasões: congelar na entrada, batalha rápida em 8 dias"},
+     { key: "#warning_auto_resolve_orders_blocked", text:"Não é possível marchar companhias sobre uma onda de invasão congelada"},
+     { key: "#warning_auto_resolve_queue_full", text:"Demasiadas invasões pendentes — esta onda combate no mapa"},
+     { key: "#invasion_quick_battle_title", text:"Batalha rápida"},
+     { key: "#invasion_quick_battle_hint", text:"Os invasores aguardam na entrada. Recrute se precisar. Combata agora ou espere o temporizador."},
+     { key: "#invasion_quick_battle_resolve", text:"Combater"},
+     { key: "#invasion_quick_battle_wait", text:"Esperar"},
+     { key: "#invasion_quick_battle_strength", text:"Suas forças: {player}   Inimigo: {enemy}"},
+     { key: "#invasion_quick_battle_days", text:"Batalha em {days} dias"},
+     { key: "#invasion_quick_battle_queue", text:"({n} na fila)"},
+     { key: "#invasion_quick_battle_head", text:"Onda #{id} ({i}/{n})"},
+     { key: "#invasion_quick_battle_none", text:"Sem batalha pendente"},
      { key: "#TR_HOTKEY_TITLE", text:"Configurações de teclas de atalho"},
      { key: "#TR_HOTKEY_LABEL", text:"Teclas de atalho"},
      { key: "#TR_HOTKEY_ALTERNATIVE_LABEL", text:"Alternativa"},
@@ -148,7 +160,10 @@ localization_pr = [
      { key: "#TR_PALACE_TOOLTIP_KINGDOM_RATING", text: "Avaliação do reino" }
      { key: "#figure_antelope_hunter", text: "Caçador de antílopes" }
      { key: "#figure_antelope_hunter_javelin", text: "Dardo do caçador" }
+     { key: "#figure_birds_hunter", text: "Caçador de aves" }
      { key: "#antelope_hunter_hunting", text: "Antílopes não são páreo para nós!" }
      { key: "#antelope_hunter_back", text: "Esta noite haverá bifes para todos." }
      { key: "#antelope_hunter_city_is_good", text: "Esta cidade é boa!" }
+     { key: "#hunt_bird_birds_are_wily", text: "Estas aves são astutas!" }
+     { key: "#hunt_bird_birds_ready_for_roasting", text: "Estas aves estão prontas para assar!" }
 ]

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "figure_animal.h"
+#include "figure/figure.h"
 
 enum e_birds_action {
     ACTION_8_BIRDS_RECALCULATE = 8,
@@ -8,6 +8,7 @@ enum e_birds_action {
     ACTION_16_BIRDS_FLEEING = 16,
     ACTION_15_BIRDS_TERRIFIED = 15,
     ACTION_18_BIRDS_ROOSTING = 18,
+    ACTION_19_BIRDS_IDLE = 19,
     ACTION_24_BIRDS_SPAWNED = 24,
 };
 

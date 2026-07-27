@@ -1,12 +1,12 @@
 #include "figure_birds.h"
 
 #include "figure/figure.h"
+#include "figure/formation.h"
+#include "figuretype/figure_animal.h"
 #include "city/city.h"
 #include "grid/terrain.h"
 #include "grid/figure.h"
 #include "core/random.h"
-#include "graphics/image_groups.h"
-#include "graphics/image.h"
 #include "sound/sound.h"
 #include "graphics/animation.h"
 #include "js/js_game.h"
@@ -14,21 +14,22 @@
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_birds);
 
 void figure_birds::figure_action() {
-    const formation* m = formation_get(base.formation_id);
+    const formation *m = formation_get(base.formation_id);
     g_city.figures.add_animal();
 
     switch (base.action_state) {
-    case ACTION_24_BIRDS_SPAWNED:     // spawning
+    case ACTION_24_BIRDS_SPAWNED:
         base.wait_ticks--;
         if (base.wait_ticks <= 0) {
-            advance_action(ACTION_8_RECALCULATE);
+            advance_action(ACTION_8_BIRDS_RECALCULATE);
         }
         break;
 
     case ACTION_8_BIRDS_RECALCULATE:
         base.wait_ticks--;
         if (base.wait_ticks <= 0) {
-            if (figure_herd_roost( &base, /*step*/4, /*bias*/8, /*max_dist*/32, TERRAIN_IMPASSABLE_OSTRICH)) {
+            const int research_radius = (m && m->reseach_radius > 0) ? m->reseach_radius : 16;
+            if (figure_herd_roost(&base, /*step*/4, /*bias*/8, /*max_dist*/research_radius, TERRAIN_IMPASSABLE_OSTRICH)) {
                 base.wait_ticks = 0;
                 advance_action(ACTION_10_BIRDS_GOING);
             } else {
@@ -37,15 +38,40 @@ void figure_birds::figure_action() {
         }
         break;
 
-    case ACTION_16_BIRDS_FLEEING: // fleeing
-        if (do_goto(base.destination_tile, TERRAIN_USAGE_ANIMAL, ACTION_18_BIRDS_ROOSTING + (random_byte() & 0x1), ACTION_8_RECALCULATE)) {
+    case ACTION_16_BIRDS_FLEEING:
+        // BH0b: rewrite like ostrich (roost → ACTION_10). Left as-is for v1.
+        if (do_goto(base.destination_tile, TERRAIN_USAGE_ANIMAL, ACTION_18_BIRDS_ROOSTING + (random_byte() & 0x1), ACTION_8_BIRDS_RECALCULATE)) {
             if (map_has_figure_but(base.destination_tile, id())) {
                 base.wait_ticks = 1;
-                advance_action(ACTION_8_RECALCULATE);
+                advance_action(ACTION_8_BIRDS_RECALCULATE);
             } else {
                 base.wait_ticks = 50;
             }
         }
+        break;
+
+    case ACTION_10_BIRDS_GOING:
+        if (do_goto(base.destination_tile, TERRAIN_USAGE_ANIMAL, ACTION_18_BIRDS_ROOSTING + (random_byte() & 0x1), ACTION_8_BIRDS_RECALCULATE)) {
+            if (map_has_figure_but(base.destination_tile, id())) {
+                base.wait_ticks = 1;
+                advance_action(ACTION_8_BIRDS_RECALCULATE);
+            } else {
+                base.wait_ticks = 50;
+            }
+        }
+        break;
+
+    case ACTION_15_BIRDS_TERRIFIED:
+    case ACTION_18_BIRDS_ROOSTING:
+    case ACTION_19_BIRDS_IDLE:
+        base.wait_ticks--;
+        if (base.wait_ticks <= 0) {
+            advance_action(ACTION_8_BIRDS_RECALCULATE);
+        }
+        break;
+
+    default:
+        advance_action(ACTION_8_BIRDS_RECALCULATE);
         break;
     }
 }
@@ -53,18 +79,20 @@ void figure_birds::figure_action() {
 void figure_birds::update_animation() {
     switch (action_state()) {
     case ACTION_8_BIRDS_RECALCULATE:
+    case ACTION_19_BIRDS_IDLE:
         image_set_animation(animkeys().idle);
         break;
 
-    case ACTION_18_BIRDS_ROOSTING: // roosting
+    case ACTION_18_BIRDS_ROOSTING:
         image_set_animation(animkeys().eating);
         break;
 
-    case ACTION_16_BIRDS_FLEEING: // fleeing
+    case ACTION_16_BIRDS_FLEEING:
+    case ACTION_10_BIRDS_GOING:
         image_set_animation(animkeys().walk);
         break;
 
-    case ACTION_15_BIRDS_TERRIFIED: // terrified
+    case ACTION_15_BIRDS_TERRIFIED:
         image_set_animation(animkeys().idle);
         base.animctx.frame = 0;
         break;
@@ -73,23 +101,13 @@ void figure_birds::update_animation() {
         image_set_animation(animkeys().death);
         break;
 
-    //case FIGURE_ACTION_150_ATTACK:
-        // TODO: dalerank ostrich want to attack anybody
-        //advance_action(ACTION_8_RECALCULATE);
-        //image_set_animation(GROUP_FIGURE_OSTRICH_ATTACK, 0, 8);
-    //    break;
-
     default:
-        // In any strange situation load eating/roosting animation
         image_set_animation(animkeys().eating);
         break;
     }
-
-    base.main_image_id = anim(animkeys().walk).first_img() + base.animctx.frame / 16;
 }
 
 void figure_birds::before_poof() {
-
 }
 
 bool figure_birds::play_die_sound() {

@@ -32,6 +32,18 @@ localization_po = [
  { key:"#TR_CONFIG_FIX_IMMIGRATION_BUG", text:"Napraw błąd z imigrację na najwyższym poziomie trudności"},
  { key:"#TR_CONFIG_FIX_100_YEAR_GHOSTS", text:"Napraw 100-letnie duchy"},
  { key:"#TR_CONFIG_FIX_EDITOR_EVENTS", text:"Napraw zmianę imperatora i czas przetrwania w konstruktorze miast"},
+ { key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Auto-rozstrzyganie inwazji: zamrożenie przy wejściu, szybka bitwa w 8 dni"},
+ { key:"#warning_auto_resolve_orders_blocked", text:"Nie można prowadzić kompanii na zamrożoną falę inwazji"},
+ { key:"#warning_auto_resolve_queue_full", text:"Za dużo oczekujących inwazji — ta fala walczy na mapie"},
+ { key:"#invasion_quick_battle_title", text:"Szybka bitwa"},
+ { key:"#invasion_quick_battle_hint", text:"Najeźdźcy czekają przy wejściu. Rekrutuj w razie potrzeby. Walcz teraz lub poczekaj na timer."},
+ { key:"#invasion_quick_battle_resolve", text:"Walcz"},
+ { key:"#invasion_quick_battle_wait", text:"Czekaj"},
+ { key:"#invasion_quick_battle_strength", text:"Twoje siły: {player}   Wróg: {enemy}"},
+ { key:"#invasion_quick_battle_days", text:"Bitwa za {days} dni"},
+ { key:"#invasion_quick_battle_queue", text:"({n} w kolejce)"},
+ { key:"#invasion_quick_battle_head", text:"Fala #{id} ({i}/{n})"},
+ { key:"#invasion_quick_battle_none", text:"Brak oczekującej bitwy"},
  { key:"#TR_HOTKEY_TITLE", text:"Konfiguracja skrótów klawiszowych"},
  { key:"#TR_HOTKEY_LABEL", text:"Skrót klawiszowy"},
  { key:"#TR_HOTKEY_ALTERNATIVE_LABEL", text:"Alternatywny"},
@@ -179,7 +191,10 @@ localization_po = [
  { key: "#TR_PALACE_TOOLTIP_KINGDOM_RATING", text: "Ocena królestwa" }
  { key: "#figure_antelope_hunter", text: "Myśliwy na antylopy" }
  { key: "#figure_antelope_hunter_javelin", text: "Oszczep myśliwego" }
+ { key: "#figure_birds_hunter", text: "Myśliwy na ptaki" }
  { key: "#antelope_hunter_hunting", text: "Antylopy nam nie dorównają!" }
  { key: "#antelope_hunter_back", text: "Dziś wieczorem będą steki dla wszystkich." }
  { key: "#antelope_hunter_city_is_good", text: "To dobre miasto!" }
+ { key: "#hunt_bird_birds_are_wily", text: "Te ptaki są przebiegłe!" }
+ { key: "#hunt_bird_birds_ready_for_roasting", text: "Te ptaki są gotowe do pieczenia!" }
 ]

@@ -414,13 +414,16 @@ figure_ballista {
 
 figure_birds = {
 	animations : {
-		flying : { pack:PACK_SPR_MAIN, id:114, max_frames:25, loop:true }
+		walk : { pack:PACK_SPR_MAIN, id:114, max_frames:25, loop:true }
+		idle : { pack:PACK_SPR_MAIN, id:114, max_frames:1, loop:false }
 		eating : { pack:PACK_SPR_MAIN, id:115, max_frames:25 }
+		death : { pack:PACK_SPR_MAIN, id:115, max_frames:25, loop:false }
 		big_image : { pack:PACK_UNLOADED, id:25, offset:FIGURE_BIRDS }
 	}
 
 	category: figure_category_inactive
 	max_damage: 100
+	corpse_time_delay: 300
 	terrain_usage : TERRAIN_USAGE_ANIMAL
 }
 
@@ -447,12 +450,30 @@ figure_crocodile = {
 
 figure_birds_hunter {
 	animations {
+		walk { pack:PACK_SPR_MAIN, id:184, max_frames:12 }
+		death { pack:PACK_SPR_MAIN, id:185, max_frames:8, loop:false }
+		fight { pack:PACK_SPR_MAIN, id:186, max_frames:12 }
+		hunt { pack:PACK_SPR_MAIN, id:186, max_frames:12, loop:false }
+		pack { pack:PACK_SPR_MAIN, id:186, max_frames:12, loop:false }
+		unpack { pack:PACK_SPR_MAIN, id:186, max_frames:12, loop:false, start_frame:11, reverse:true }
+		move_pack { pack:PACK_SPR_MAIN, id:184, max_frames:12 }
+		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_OSTRICH_HUNTER }
 	}
 
 	sounds {
-		hunt_bird_birds_are_wily { sound:"hunt_bird_e01.wav" }
-		hunt_bird_birds_ready_for_roasting { sound:"hunt_bird_e02.wav" }
+		hunt_bird_birds_are_wily { sound:"hunt_bird_e01.wav", text: "#hunt_bird_birds_are_wily" }
+		hunt_bird_birds_ready_for_roasting { sound:"hunt_bird_e02.wav", text: "#hunt_bird_birds_ready_for_roasting" }
 	}
+
+	category: figure_category_armed
+	max_damage: 30
+	attack_value: 4
+	missile_attack_value: 4
+	animal_attack_value: 100
+	missile_delay: 25
+	attack_distance: 5
+	terrain_usage : TERRAIN_USAGE_ANIMAL
+	max_hunting_distance : 15
 }
 
 figure_hippo = {
@@ -863,8 +884,8 @@ figure_dentist {
 
 figure_embalmer {
 	animations {
-		walk { pack:PACK_SPR_MAIN, id:184, max_frames:12 }
-		death { pack:PACK_SPR_MAIN, id:185, max_frames:8, loop:false }
+		walk { pack:PACK_SPR_MAIN, id:195, max_frames:12 }
+		death { pack:PACK_SPR_MAIN, id:196, max_frames:8, loop:false }
 		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_EMBALMER }
 	}
 

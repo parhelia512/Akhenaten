@@ -38,9 +38,9 @@ function run_test() {
     }
 
     __test_set_scenario_climate(CLIMATE_NORTHERN)
-    // Birds leaf deferred → ostrich interim.
-    if (__test_hunting_lodge_default_hunter_type() != FIGURE_OSTRICH_HUNTER) {
-        test74_fail('Northern+prey → ostrich interim, got '
+    // Birds hunter leaf: Northern+prey → birds hunter.
+    if (__test_hunting_lodge_default_hunter_type() != FIGURE_BIRDS_HUNTER) {
+        test74_fail('Northern+prey → birds hunter, got '
             + __test_hunting_lodge_default_hunter_type())
         return
     }

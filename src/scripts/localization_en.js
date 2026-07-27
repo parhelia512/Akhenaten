@@ -690,6 +690,7 @@ localization_en = [
   {key: "#figure_hunter_arrow", group:64, id:74 }
   {key: "#figure_antelope_hunter", text: "Antelope Hunter" }
   {key: "#figure_antelope_hunter_javelin", text: "Hunter Javelin" }
+  {key: "#figure_birds_hunter", text: "Bird Hunter" }
   {key: "#figure_lumberjack", group:64, id:75 }
   {key: "#figure_ferry_boat", group:64, id:76 }
   {key: "#figure_transport_ship", group:64, id:77 }
@@ -1124,6 +1125,8 @@ localization_en = [
   { key: "#antelope_hunter_hunting", text: "Antelopes are no match for us!" }
   { key: "#antelope_hunter_back", text: "There will be steaks for everyone tonight." }
   { key: "#antelope_hunter_city_is_good", text: "This city is good!" }
+  { key: "#hunt_bird_birds_are_wily", text: "These birds are wily!" }
+  { key: "#hunt_bird_birds_ready_for_roasting", text: "These birds are ready for roasting!" }
 
   { key: "#mission2_pottery_step1", text: "Fill a Storage Yard with pottery" }
   { key: "#mission2_pottery_step2", text: "Beautify your city, then review the Mission Briefing" }

@@ -32,6 +32,18 @@ localization_it = [
      {key:"#TR_CONFIG_FIX_IMMIGRATION_BUG", text:"Corregge il bug dell'immigrazione al livello molto difficile"},
      {key:"#TR_CONFIG_FIX_100_YEAR_GHOSTS", text:"Corregge il bug dei centenari"},
      {key:"#TR_CONFIG_FIX_EDITOR_EVENTS", text:"Elimina le complicazioni al cambio di Imperatore"},
+     {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Risoluzione auto invasioni: gelo all'ingresso, battaglia rapida in 8 giorni"},
+     {key:"#warning_auto_resolve_orders_blocked", text:"Non si possono far marciare le compagnie su un'onda d'invasione congelata"},
+     {key:"#warning_auto_resolve_queue_full", text:"Troppe invasioni in coda — questa onda combatte sulla mappa"},
+     {key:"#invasion_quick_battle_title", text:"Battaglia rapida"},
+     {key:"#invasion_quick_battle_hint", text:"Gli invasori attendono all'ingresso. Recluta se serve. Combatti ora o attendi il timer."},
+     {key:"#invasion_quick_battle_resolve", text:"Combatti"},
+     {key:"#invasion_quick_battle_wait", text:"Attendi"},
+     {key:"#invasion_quick_battle_strength", text:"Le tue forze: {player}   Nemico: {enemy}"},
+     {key:"#invasion_quick_battle_days", text:"Battaglia tra {days} giorni"},
+     {key:"#invasion_quick_battle_queue", text:"({n} in coda)"},
+     {key:"#invasion_quick_battle_head", text:"Onda #{id} ({i}/{n})"},
+     {key:"#invasion_quick_battle_none", text:"Nessuna battaglia in attesa"},
      {key:"#TR_HOTKEY_TITLE", text:"Configurazione delle scorciatoie da tastiera"},
      {key:"#TR_HOTKEY_LABEL", text:"Tasto"},
      {key:"#TR_HOTKEY_ALTERNATIVE_LABEL", text:"Alternativa"},
@@ -149,7 +161,10 @@ localization_it = [
      { key: "#TR_PALACE_TOOLTIP_KINGDOM_RATING", text: "Valutazione del regno" }
      { key: "#figure_antelope_hunter", text: "Cacciatore di antilopi" }
      { key: "#figure_antelope_hunter_javelin", text: "Giavellotto del cacciatore" }
+     { key: "#figure_birds_hunter", text: "Cacciatore di uccelli" }
      { key: "#antelope_hunter_hunting", text: "Le antilopi non sono alla nostra altezza!" }
      { key: "#antelope_hunter_back", text: "Stasera ci saranno bistecche per tutti." }
      { key: "#antelope_hunter_city_is_good", text: "Questa città è buona!" }
+     { key: "#hunt_bird_birds_are_wily", text: "Questi uccelli sono furbi!" }
+     { key: "#hunt_bird_birds_ready_for_roasting", text: "Questi uccelli sono pronti per l'arrosto!" }
 ]

@@ -677,6 +677,7 @@ localization_hu = [
   {key: "#figure_hunter_arrow", group:64, id:74 }
   {key: "#figure_antelope_hunter", text: "Antilopvadász" }
   {key: "#figure_antelope_hunter_javelin", text: "Vadász gerely" }
+  {key: "#figure_birds_hunter", text: "Madárvadász" }
   {key: "#figure_lumberjack", group:64, id:75 }
   {key: "#figure_ferry_boat", group:64, id:76 }
   {key: "#figure_transport_ship", group:64, id:77 }
@@ -1110,6 +1111,8 @@ localization_hu = [
   { key: "#antelope_hunter_hunting", text: "Az antilopok nem ellenfeleink!" }
   { key: "#antelope_hunter_back", text: "Ma este mindenkinek jut majd pecsenye." }
   { key: "#antelope_hunter_city_is_good", text: "Ez a város jó!" }
+  { key: "#hunt_bird_birds_are_wily", text: "Ezek a madarak ravaszak!" }
+  { key: "#hunt_bird_birds_ready_for_roasting", text: "Ezek a madarak készen állnak a sütésre!" }
 
   { key: "#mission2_pottery_step1", text: "Tölts meg egy raktárudvart kerámiával" }
   { key: "#mission2_pottery_step2", text: "Szépítsd a várost, majd tekintsd át a küldetés ismertetőjét" }

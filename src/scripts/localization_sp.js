@@ -31,6 +31,18 @@ localization_sp = [
      {key:"#TR_CONFIG_FIX_IMMIGRATION_BUG", text:"Corregir bug impidiendo immigración en Muy Difícil"},
      {key:"#TR_CONFIG_FIX_100_YEAR_GHOSTS", text:"Corregir bug creando fantasmas con 100 años"},
      {key:"#TR_CONFIG_FIX_EDITOR_EVENTS", text:"Corregir cambio de Emperador y supervivencia en misiones del editor"},
+     {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Auto-resolver invasiones: congelar en la entrada, batalla rápida en 8 días"},
+     {key:"#warning_auto_resolve_orders_blocked", text:"No se puede marchar compañías sobre una oleada de invasión congelada"},
+     {key:"#warning_auto_resolve_queue_full", text:"Demasiadas invasiones pendientes — esta oleada combate en el mapa"},
+     {key:"#invasion_quick_battle_title", text:"Batalla rápida"},
+     {key:"#invasion_quick_battle_hint", text:"Los invasores esperan en la entrada. Recluta si hace falta. Combate ahora o espera el temporizador."},
+     {key:"#invasion_quick_battle_resolve", text:"Combatir"},
+     {key:"#invasion_quick_battle_wait", text:"Esperar"},
+     {key:"#invasion_quick_battle_strength", text:"Tus fuerzas: {player}   Enemigo: {enemy}"},
+     {key:"#invasion_quick_battle_days", text:"Batalla en {days} días"},
+     {key:"#invasion_quick_battle_queue", text:"({n} en cola)"},
+     {key:"#invasion_quick_battle_head", text:"Oleada #{id} ({i}/{n})"},
+     {key:"#invasion_quick_battle_none", text:"Sin batalla pendiente"},
      {key:"#TR_HOTKEY_TITLE", text:"Configuración de atajos de teclado de Akhenaten"},
      {key:"#TR_HOTKEY_LABEL", text:"Tecla"},
      {key:"#TR_HOTKEY_ALTERNATIVE_LABEL", text:"Alternativa"},
@@ -147,7 +159,10 @@ localization_sp = [
      { key: "#TR_PALACE_TOOLTIP_KINGDOM_RATING", text: "Valoración del reino" }
      { key: "#figure_antelope_hunter", text: "Cazador de antílopes" }
      { key: "#figure_antelope_hunter_javelin", text: "Jabalina de cazador" }
+     { key: "#figure_birds_hunter", text: "Cazador de aves" }
      { key: "#antelope_hunter_hunting", text: "¡Los antílopes no son rival para nosotros!" }
      { key: "#antelope_hunter_back", text: "Esta noche habrá filetes para todos." }
      { key: "#antelope_hunter_city_is_good", text: "¡Esta ciudad es buena!" }
+     { key: "#hunt_bird_birds_are_wily", text: "¡Estas aves son astutas!" }
+     { key: "#hunt_bird_birds_ready_for_roasting", text: "¡Estas aves están listas para asar!" }
 ]

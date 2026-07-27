@@ -72,8 +72,7 @@ e_figure_type hunting_lodge_default_hunter_type() {
     case FIGURE_OSTRICH:
         return FIGURE_OSTRICH_HUNTER;
     case FIGURE_BIRDS:
-        // Birds hunter leaf deferred (art gate) — ostrich interim.
-        return FIGURE_OSTRICH_HUNTER;
+        return FIGURE_BIRDS_HUNTER;
     default:
         // Legacy Northern crocodile etc. — keep ostrich interim.
         return FIGURE_OSTRICH_HUNTER;

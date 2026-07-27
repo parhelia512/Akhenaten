@@ -455,8 +455,11 @@ localization_ru = [
     { key: "#antelope_hunter_hunting", text: "Антилопы нам не соперники!" }
     { key: "#antelope_hunter_back", text: "Сегодня вечером будут стейки для всех." }    
     { key: "#antelope_hunter_city_is_good", text: "Этот город - хорошее место для жизни." }
+    { key: "#hunt_bird_birds_are_wily", text: "Эти птицы хитрые!" }
+    { key: "#hunt_bird_birds_ready_for_roasting", text: "Эти птицы готовы к жарке!" }
     { key: "#figure_antelope_hunter", text: "Охотник на антилоп" }
     { key: "#figure_antelope_hunter_javelin", text: "Дротик охотника" }
+    { key: "#figure_birds_hunter", text: "Охотник на птиц" }
 
     { key:"#goods_are_finished", text: "Мои припасы продались как горячие пирожки! Я возвращаюсь на базар за ещё." }
     { key:"#we_are_selling_goods", text: "Я стараюсь изо всех сил давать людям то, что они хотят." }

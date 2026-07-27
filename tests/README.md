@@ -125,7 +125,9 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `70_artisans_guild.js` | Artisans' Guild: Sphinx phase 6 + stock paint/clay → spawn `FIGURE_TOMB_ARTISAN`; no spawn without paint/clay (AG6) |
 | `72_antelope_hunter_registered.js` | `FIGURE_ANTELOPE_HUNTER` / javelin METAINFO + `dcast_hunter` force_shot (AH2/AH4) |
 | `73_antelope_hunt.js` | Antelope hunter prey filter (ignore ostrich) → kill → gamemeat (AH4) |
-| `74_hunter_climate_resolve.js` | Lodge default hunter: Central→antelope, Desert→ostrich, Northern→ostrich interim; prey vs legacy (AH3) |
+| `74_hunter_climate_resolve.js` | Lodge default hunter: Central→antelope, Desert→ostrich, Northern+prey→birds, legacy Northern→ostrich interim (BH3) |
+| `79_birds_hunter_registered.js` | `FIGURE_BIRDS_HUNTER` METAINFO + `dcast_hunter` force_shot (BH2/BH3) |
+| `80_birds_hunt.js` | Birds hunter prey filter (ignore ostrich/antelope) → kill → gamemeat (BH3) |
 
 Farm **placement** tests (34/35) cover `can_place` / terrain rules; **37** covers preview image helpers.
 When adding more preview draw coverage, follow JS draw conventions in
