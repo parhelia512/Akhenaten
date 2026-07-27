@@ -56,6 +56,14 @@ void scenario_map_foreach_herd_point(std::function<void(tile2i)> callback) {
     }
 }
 
+void scenario_map_foreach_prey_point(std::function<void(tile2i)> callback) {
+    for (const tile2i &tile : g_scenario.herd_points_prey) {
+        if (tile.valid()) {
+            callback(tile);
+        }
+    }
+}
+
 void scenario_map_foreach_fishing_point(void (*callback)(tile2i)) {
     for (const tile2i &fish_tile : g_scenario.fishing_points) {
         if (fish_tile.valid()) {

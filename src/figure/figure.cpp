@@ -156,7 +156,8 @@ static int get_nearest_enemy(int x, int y, int *distance) {
             dist = calc_maximum_distance(tile2i(x, y), f->tile);
         else if (f->is_enemy())
             dist = 3 * calc_maximum_distance(tile2i(x, y), f->tile);
-        else if (f->type == FIGURE_HYENA)
+        else if (f->type == FIGURE_HYENA || f->type == FIGURE_SCORPION || f->type == FIGURE_LION
+                 || f->type == FIGURE_CROCODILE || f->type == FIGURE_HIPPO || f->type == FIGURE_ASP)
             dist = 4 * calc_maximum_distance(tile2i(x, y), f->tile);
         else
             continue;

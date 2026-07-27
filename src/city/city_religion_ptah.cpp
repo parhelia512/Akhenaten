@@ -21,15 +21,15 @@ void god_ptah_t::perform_major_curse() {
         // destroys some industrial buildings
         bool success = perform_industry_destruction();
         if (success) {
-            messages::popup("message_wrath_of_ptah", 0, 0);
+            messages::popup("message_wrath_of_ptah_2", 0, 0);
         } else {
-            // no yard found
-            messages::popup("message_wrath_of_ptah_no_effect", 0, 0);
+            // no industry to punish (msg 141 text)
+            messages::popup("message_wrath_of_ptah", 0, 0);
         }
     } else {
-        // frogs
+        // frogs — canonical creature curse (msg 148)
         perform_frogs();
-        messages::popup("message_wrath_of_ptah_2", 0, 0);
+        messages::popup("message_wrath_of_ptah_4", 0, 0);
     }
 }
 
@@ -42,7 +42,7 @@ void god_ptah_t::perform_minor_curse() {
     bool success = perform_warehouse_destruction();
     if (success) {
         events::emit(event_message_god{ GOD_PTAH, "message_ptah_is_upset" });
-    } else { // no yard found 
+    } else { // no yard found
         events::emit(event_message_god{ GOD_PTAH, "message_curse_ptah_noeffect" });
     }
 }

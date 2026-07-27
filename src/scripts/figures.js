@@ -328,6 +328,28 @@ figure_lion {
 	chase_speed_mult: 2
 }
 
+// Cleopatra SprMain2 bmp "scorpion": group 10 = SprMain2_00727 (after Lion 5–9).
+// Group 13 is a short 6-frame strip (not 8-dir) — used as corpse via "death".
+// TEMP: attack/params not dumped from exe; walker-only prey (arid wildlife hypothesis).
+figure_scorpion {
+	animations {
+		walk { pack:PACK_EXPANSION_SPR, id:10, max_frames:12 }
+		attack { pack:PACK_EXPANSION_SPR, id:11, max_frames:6 }
+		idle { pack:PACK_EXPANSION_SPR, id:12, max_frames:6 }
+		eating { pack:PACK_EXPANSION_SPR, id:14, max_frames:6 }
+		death { pack:PACK_EXPANSION_SPR, id:13, max_frames:6, loop:false }
+		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_SCORPION }
+	}
+
+	category: figure_category_animal
+	max_damage: 80
+	attack_value: 5
+	terrain_usage: TERRAIN_USAGE_ANIMAL
+	max_hungry: 30
+	max_hunting_distance: 10
+	chase_speed_mult: 2
+}
+
 figure_antelope {
 	animations {
 		_pack { pack:PACK_SPR_AMBIENT }

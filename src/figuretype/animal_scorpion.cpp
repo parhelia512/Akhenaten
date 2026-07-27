@@ -1,4 +1,4 @@
-#include "animal_lion.h"
+#include "animal_scorpion.h"
 
 #include "city/city.h"
 #include "core/profiler.h"
@@ -10,27 +10,25 @@
 #include "grid/terrain.h"
 #include "js/js_game.h"
 
-REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_lion);
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_scorpion);
 
 namespace {
 
-bool is_lion_prey(figure *f, int self_id) {
+bool is_scorpion_prey(figure *f, int self_id) {
     if (!f || !f->is_valid() || f->is_dead() || !f->type || f->id == self_id) {
         return false;
     }
 
-    // Wildlife prey (herd animals + hyena).
+    // Prefer city walkers; skip other predators / wildlife herds.
     switch (f->type) {
-    case FIGURE_ANTELOPE:
-    case FIGURE_OSTRICH:
-    case FIGURE_HYENA:
-        return true;
-
+    case FIGURE_SCORPION:
+    case FIGURE_ASP:
     case FIGURE_LION:
+    case FIGURE_HYENA:
     case FIGURE_HIPPO:
     case FIGURE_CROCODILE:
-    case FIGURE_ASP:
-    case FIGURE_SCORPION:
+    case FIGURE_ANTELOPE:
+    case FIGURE_OSTRICH:
     case FIGURE_FROG:
     case FIGURE_LOCUST:
     case FIGURE_BIRDS:
@@ -55,7 +53,6 @@ bool is_lion_prey(figure *f, int self_id) {
         break;
     }
 
-    // Passing people / city walkers (not invasion troops).
     if (f->is_enemy() || f->is_herd()) {
         return false;
     }
@@ -70,7 +67,7 @@ bool is_lion_prey(figure *f, int self_id) {
 
 } // namespace
 
-void figure_lion::on_create() {
+void figure_scorpion::on_create() {
     figure_impl::on_create();
     auto &d = runtime_data();
     const uint16_t max_h = current_params().max_hungry;
@@ -78,29 +75,29 @@ void figure_lion::on_create() {
     base.allow_move_type = EMOVE_TERRAIN;
 }
 
-void figure_lion::on_post_load() {
+void figure_scorpion::on_post_load() {
     base.allow_move_type = EMOVE_TERRAIN;
 }
 
-void figure_lion::herd_rest() {
-    advance_action(ACTION_196_LION_AT_REST);
+void figure_scorpion::herd_rest() {
+    advance_action(ACTION_196_SCORPION_AT_REST);
 }
 
-void figure_lion::herd_moved() {
-    advance_action(ACTION_8_LION_RECALCULATE);
+void figure_scorpion::herd_moved() {
+    advance_action(ACTION_8_SCORPION_RECALCULATE);
 }
 
-void figure_lion::moveto(tile2i tile) {
-    advance_action(ACTION_10_LION_MOVING, tile);
+void figure_scorpion::moveto(tile2i tile) {
+    advance_action(ACTION_10_SCORPION_MOVING, tile);
 }
 
-int figure_lion::find_prey() {
+int figure_scorpion::find_prey() {
     int min_figure_id = 0;
     int min_distance = 10000;
     const int max_distance = current_params().max_hunting_distance;
 
     for (figure *f : map_figures()) {
-        if (!is_lion_prey(f, id())) {
+        if (!is_scorpion_prey(f, id())) {
             continue;
         }
         int distance = calc_maximum_distance(tile(), f->tile);
@@ -119,8 +116,7 @@ int figure_lion::find_prey() {
     return 0;
 }
 
-bool figure_lion::pick_roost_destination() {
-    // Herd path requires formation_id; debug spawn has none — fall back to local roam.
+bool figure_scorpion::pick_roost_destination() {
     if (figure_herd_roost(&base, /*step*/4, /*bias*/8, /*max_dist*/32, TERRAIN_IMPASSABLE_OSTRICH)) {
         return true;
     }
@@ -138,7 +134,7 @@ bool figure_lion::pick_roost_destination() {
     return true;
 }
 
-void figure_lion::figure_action() {
+void figure_scorpion::figure_action() {
     OZZY_PROFILER_FUNCTION();
     g_city.figures.add_animal();
 
@@ -156,83 +152,83 @@ void figure_lion::figure_action() {
         : 999;
 
     switch (action_state()) {
-    case ACTION_24_LION_CREATED:
-    case ACTION_19_LION_IDLE:
-    case ACTION_196_LION_AT_REST:
+    case ACTION_24_SCORPION_CREATED:
+    case ACTION_19_SCORPION_IDLE:
+    case ACTION_196_SCORPION_AT_REST:
         base.wait_ticks--;
         if (base.wait_ticks <= 0) {
-            advance_action(ACTION_8_LION_RECALCULATE);
+            advance_action(ACTION_8_SCORPION_RECALCULATE);
         }
         if (d.hungry <= 0) {
-            advance_action(ACTION_25_LION_LOOKING_FOR_ATTACK);
+            advance_action(ACTION_25_SCORPION_LOOKING_FOR_ATTACK);
         }
         break;
 
-    case ACTION_9_LION_CHASE_PREY:
+    case ACTION_9_SCORPION_CHASE_PREY:
         base.speed_multiplier = current_params().chase_speed_mult;
-        if (!base.target_figure_id || !prey || prey->is_dead() || !is_lion_prey(prey, id())) {
+        if (!base.target_figure_id || !prey || prey->is_dead() || !is_scorpion_prey(prey, id())) {
             base.target_figure_id = 0;
-            return advance_action(ACTION_8_LION_RECALCULATE);
+            return advance_action(ACTION_8_SCORPION_RECALCULATE);
         }
 
         if (maxdist == 0) {
-            advance_action(ACTION_20_LION_ATTACK);
+            advance_action(ACTION_20_SCORPION_ATTACK);
             base.wait_ticks = 30 + (random_byte() % 20);
         } else {
-            do_goto(prey->tile, TERRAIN_USAGE_ANIMAL, ACTION_25_LION_LOOKING_FOR_ATTACK, ACTION_8_LION_RECALCULATE);
+            do_goto(prey->tile, TERRAIN_USAGE_ANIMAL, ACTION_25_SCORPION_LOOKING_FOR_ATTACK, ACTION_8_SCORPION_RECALCULATE);
             if (direction() == DIR_FIGURE_CAN_NOT_REACH || direction() == DIR_FIGURE_REROUTE) {
                 base.direction = DIR_0_TOP_RIGHT;
-                advance_action(ACTION_8_LION_RECALCULATE);
+                advance_action(ACTION_8_SCORPION_RECALCULATE);
             }
         }
         break;
 
-    case ACTION_25_LION_LOOKING_FOR_ATTACK: {
+    case ACTION_25_SCORPION_LOOKING_FOR_ATTACK: {
         int target_id = find_prey();
         base.target_figure_id = target_id;
         if (base.target_figure_id) {
             figure_get(base.target_figure_id)->targeted_by_figure_id = id();
-            advance_action(ACTION_9_LION_CHASE_PREY);
+            advance_action(ACTION_9_SCORPION_CHASE_PREY);
         } else {
-            advance_action(ACTION_12_LION_INVESTIGATE);
+            advance_action(ACTION_12_SCORPION_INVESTIGATE);
             base.destination_tile = random_around_point(roost_base, tile(), /*step*/4, /*bias*/8, /*max_dist*/32);
         }
         break;
     }
 
-    case ACTION_12_LION_INVESTIGATE:
-        do_goto(base.destination_tile, TERRAIN_USAGE_ANIMAL, ACTION_8_LION_RECALCULATE, ACTION_8_LION_RECALCULATE);
+    case ACTION_12_SCORPION_INVESTIGATE:
+        do_goto(base.destination_tile, TERRAIN_USAGE_ANIMAL, ACTION_8_SCORPION_RECALCULATE, ACTION_8_SCORPION_RECALCULATE);
         if (direction() == DIR_FIGURE_CAN_NOT_REACH || direction() == DIR_FIGURE_REROUTE) {
             base.direction = DIR_0_TOP_RIGHT;
-            advance_action(ACTION_8_LION_RECALCULATE);
+            advance_action(ACTION_8_SCORPION_RECALCULATE);
         }
         break;
 
-    case ACTION_18_LION_EATING:
+    case ACTION_18_SCORPION_EATING:
         base.wait_ticks--;
         if (base.wait_ticks <= 0) {
             if (d.hungry <= 0) {
-                advance_action(ACTION_8_LION_RECALCULATE);
+                advance_action(ACTION_8_SCORPION_RECALCULATE);
             } else {
                 route_remove();
                 base.destination_tile = random_around_point(roost_base, roost_base, /*step*/4, /*bias*/4, /*max_dist*/0);
                 base.direction = calc_general_direction(tile(), base.destination_tile);
-                advance_action(ACTION_196_LION_AT_REST);
+                advance_action(ACTION_196_SCORPION_AT_REST);
             }
         }
         break;
 
-    case ACTION_21_LION_SUCCESS_KILL:
+    case ACTION_21_SCORPION_SUCCESS_KILL:
         base.wait_ticks--;
         if (base.wait_ticks <= 0) {
-            advance_action(ACTION_18_LION_EATING);
+            advance_action(ACTION_18_SCORPION_EATING);
             base.wait_ticks = 30 + (random_byte() % 20);
         }
         break;
 
-    case ACTION_20_LION_ATTACK: {
+    case ACTION_20_SCORPION_ATTACK: {
         if (base.target_figure_id == INVALID_FIGURE_ID || !prey || prey->is_dead()) {
-            return advance_action(ACTION_8_LION_RECALCULATE);
+            return advance_action(ACTION_8_SCORPION_RECALCULATE);
         }
         base.direction = calc_general_direction_safe(base.tile, prey->tile);
         auto prey_impl = prey->dcast();
@@ -242,7 +238,7 @@ void figure_lion::figure_action() {
                 if (prey->is_dead()) {
                     base.target_figure_id = 0;
                     route_remove();
-                    advance_action(ACTION_21_LION_SUCCESS_KILL);
+                    advance_action(ACTION_21_SCORPION_SUCCESS_KILL);
                     const uint16_t max_h = current_params().max_hungry;
                     d.hungry = max_h ? (rand() % max_h) : 0;
                     base.wait_ticks = 30 + (random_byte() % 20);
@@ -251,78 +247,73 @@ void figure_lion::figure_action() {
                 }
             } else {
                 base.wait_ticks = 12;
-                advance_action(ACTION_9_LION_CHASE_PREY);
+                advance_action(ACTION_9_SCORPION_CHASE_PREY);
             }
         }
         break;
     }
 
-    case ACTION_8_LION_RECALCULATE:
+    case ACTION_8_SCORPION_RECALCULATE:
         base.wait_ticks--;
         if (d.hungry <= 0) {
-            advance_action(ACTION_25_LION_LOOKING_FOR_ATTACK);
+            advance_action(ACTION_25_SCORPION_LOOKING_FOR_ATTACK);
             break;
         }
 
         if (base.wait_ticks <= 0) {
             if (pick_roost_destination()) {
                 base.wait_ticks = 0;
-                advance_action(ACTION_10_LION_MOVING);
-                const int arrive = (random_byte() & 1) ? ACTION_19_LION_IDLE : ACTION_196_LION_AT_REST;
-                do_goto(base.destination_tile, TERRAIN_USAGE_ANIMAL, arrive, ACTION_8_LION_RECALCULATE);
+                advance_action(ACTION_10_SCORPION_MOVING);
+                const int arrive = (random_byte() & 1) ? ACTION_19_SCORPION_IDLE : ACTION_196_SCORPION_AT_REST;
+                do_goto(base.destination_tile, TERRAIN_USAGE_ANIMAL, arrive, ACTION_8_SCORPION_RECALCULATE);
             } else {
                 base.wait_ticks = 5;
             }
         }
         break;
 
-    case ACTION_10_LION_MOVING:
-        // Arrive action was chosen when the route started (idle vs at_rest).
-        if (do_goto(base.destination_tile, TERRAIN_USAGE_ANIMAL, ACTION_19_LION_IDLE, ACTION_8_LION_RECALCULATE)) {
+    case ACTION_10_SCORPION_MOVING:
+        if (do_goto(base.destination_tile, TERRAIN_USAGE_ANIMAL, ACTION_19_SCORPION_IDLE, ACTION_8_SCORPION_RECALCULATE)) {
             if (random_byte() & 1) {
-                advance_action(ACTION_196_LION_AT_REST);
+                advance_action(ACTION_196_SCORPION_AT_REST);
             }
             base.wait_ticks = 50;
         }
         break;
 
     default:
-        advance_action(ACTION_8_LION_RECALCULATE);
+        advance_action(ACTION_8_SCORPION_RECALCULATE);
         break;
     }
 }
 
-void figure_lion::update_animation() {
+void figure_scorpion::update_animation() {
     xstring anim_key = animkeys().walk;
     switch (action_state()) {
-    case ACTION_8_LION_RECALCULATE:
-    case ACTION_19_LION_IDLE:
-    case ACTION_24_LION_CREATED:
-        anim_key = animkeys().idle; // stand, group 7
+    case ACTION_8_SCORPION_RECALCULATE:
+    case ACTION_19_SCORPION_IDLE:
+    case ACTION_24_SCORPION_CREATED:
+    case ACTION_196_SCORPION_AT_REST:
+        anim_key = animkeys().idle;
         break;
 
-    case ACTION_196_LION_AT_REST:
-        // Sit = SprMain2 group 9, stored under anim key "death" (no dedicated sit key).
-        anim_key = animkeys().death;
-        break;
-
-    case ACTION_18_LION_EATING:
+    case ACTION_18_SCORPION_EATING:
         anim_key = animkeys().eating;
         break;
 
-    case ACTION_12_LION_INVESTIGATE:
-    case ACTION_10_LION_MOVING:
-    case ACTION_9_LION_CHASE_PREY:
+    case ACTION_12_SCORPION_INVESTIGATE:
+    case ACTION_10_SCORPION_MOVING:
+    case ACTION_9_SCORPION_CHASE_PREY:
         anim_key = animkeys().walk;
         break;
 
     case FIGURE_ACTION_149_CORPSE:
-        // No lying-death strip yet — freeze stand rather than sitting "alive".
-        anim_key = animkeys().idle;
+        // Group 13 is a short non-8-dir strip — use it as lying death.
+        anim_key = animkeys().death;
         break;
 
-    case ACTION_20_LION_ATTACK:
-    case ACTION_21_LION_SUCCESS_KILL:
+    case ACTION_20_SCORPION_ATTACK:
+    case ACTION_21_SCORPION_SUCCESS_KILL:
         anim_key = animkeys().attack;
         break;
 
@@ -334,7 +325,7 @@ void figure_lion::update_animation() {
     image_set_animation(anim_key);
 }
 
-void figure_lion::update_day() {
+void figure_scorpion::update_day() {
     figure_impl::update_day();
 
     auto &d = runtime_data();

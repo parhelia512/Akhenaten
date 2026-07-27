@@ -16,6 +16,8 @@
 #include "game/game_config.h"
 #include "figure/figure.h"
 #include "figure/formation_enemy.h"
+#include "scenario/map.h"
+#include "scenario/scenario.h"
 #include "dev/debug.h"
 
 declare_console_var_bool(allow_span_ostrich, true)
@@ -25,14 +27,97 @@ namespace {
 int herd_impassable_mask(e_figure_type herd_type) {
     switch (herd_type) {
     case FIGURE_OSTRICH:
+    case FIGURE_BIRDS:
+    // Cleopatra editor: scorpions / lions / asps / ostriches / antelopes → plain/meadow.
+    case FIGURE_SCORPION:
+    case FIGURE_LION:
+    case FIGURE_ASP:
         return TERRAIN_IMPASSABLE_OSTRICH;
     case FIGURE_ANTELOPE:
         return TERRAIN_IMPASSABLE_ANTELOPE;
     case FIGURE_CROCODILE:
     case FIGURE_HIPPO:
         return TERRAIN_IMPASSABLE_HIPPO;
+    case FIGURE_HYENA:
     default:
+        // Hyenas: sand dunes (editor); mask matches historical hyena impassable set.
         return TERRAIN_IMPASSABLE_HYENA;
+    }
+}
+
+e_figure_type climate_prey_type() {
+    switch (g_scenario.climate) {
+    case CLIMATE_CENTRAL:
+        return FIGURE_ANTELOPE;
+    case CLIMATE_NORTHERN:
+        return FIGURE_BIRDS;
+    case CLIMATE_DESERT:
+        return FIGURE_OSTRICH;
+    default:
+        return FIGURE_NONE;
+    }
+}
+
+// Cleopatra Killer Type: climate pair + alt_predator_type flag.
+// Arid: hyena | scorpion; Normal: crocodile | lion; Humid: hippo | asp.
+// Asp class not ready yet — humid alt falls back to hippo.
+e_figure_type climate_predator_type() {
+    const bool alt = g_scenario.alt_predator_type;
+    switch (g_scenario.climate) {
+    case CLIMATE_CENTRAL:
+        return alt ? FIGURE_LION : FIGURE_CROCODILE;
+    case CLIMATE_NORTHERN:
+        // Humid pair: hippo | asp. Asp METAINFO not ready (CF3a) — keep hippo.
+        (void)alt;
+        return FIGURE_HIPPO;
+    case CLIMATE_DESERT:
+        return alt ? FIGURE_SCORPION : FIGURE_HYENA;
+    default:
+        return FIGURE_NONE;
+    }
+}
+
+// Pre-Cleopatra / maps without prey points: one climate animal on killer-point slots.
+e_figure_type climate_legacy_animal_type() {
+    switch (g_scenario.climate) {
+    case CLIMATE_CENTRAL:
+        return FIGURE_ANTELOPE;
+    case CLIMATE_NORTHERN:
+        return FIGURE_CROCODILE;
+    case CLIMATE_DESERT:
+        return FIGURE_OSTRICH;
+    default:
+        return FIGURE_NONE;
+    }
+}
+
+bool scenario_has_prey_points() {
+    for (const tile2i &tile : g_scenario.herd_points_prey) {
+        if (tile.valid()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int climate_herd_count(e_figure_type type) {
+    switch (type) {
+    case FIGURE_ANTELOPE:
+        return rand() % 10;
+    case FIGURE_BIRDS:
+        return rand() % 8;
+    case FIGURE_OSTRICH:
+        return rand() % 12;
+    case FIGURE_CROCODILE:
+    case FIGURE_HIPPO:
+        return rand() % 8;
+    case FIGURE_HYENA:
+    case FIGURE_SCORPION:
+    case FIGURE_LION:
+    case FIGURE_ASP:
+        return 2 + (rand() % 5);
+    default:
+        return rand() % 8;
     }
 }
 
@@ -110,31 +195,30 @@ formation* city_animals_t::create_herd(tile2i tile, e_figure_type herd_type, int
 void city_animals_t::create_herds() {
     map_routing_update_land();
 
-    scenario_map_foreach_herd_point([this] (tile2i p) {
-        e_figure_type herd_type;
-        int num_animals;
-        switch (g_scenario.climate) {
-        case CLIMATE_CENTRAL:
-            herd_type = FIGURE_ANTELOPE;
-            num_animals = rand() % 10;
-            break;
-
-        case CLIMATE_NORTHERN:
-            herd_type = FIGURE_CROCODILE;
-            num_animals = rand() % 8;
-            break;
-
-        case CLIMATE_DESERT:
-            herd_type = FIGURE_OSTRICH;
-            num_animals = rand() % 12;
-            break;
-
-        default:
-            return;
+    // Cleopatra maps: prey points + killer (predator) points, Killer Type = alt_predator_type.
+    // Legacy maps: only herd_points_animals → keep pre-Cleopatra climate animal (ostrich/…).
+    if (scenario_has_prey_points()) {
+        const e_figure_type prey = climate_prey_type();
+        if (prey != FIGURE_NONE) {
+            scenario_map_foreach_prey_point([this, prey](tile2i p) {
+                this->create_herd(p, prey, climate_herd_count(prey));
+            });
         }
 
-        this->create_herd(p, herd_type, num_animals);
-    });
+        const e_figure_type predator = climate_predator_type();
+        if (predator != FIGURE_NONE) {
+            scenario_map_foreach_herd_point([this, predator](tile2i p) {
+                this->create_herd(p, predator, climate_herd_count(predator));
+            });
+        }
+    } else {
+        const e_figure_type herd_type = climate_legacy_animal_type();
+        if (herd_type != FIGURE_NONE) {
+            scenario_map_foreach_herd_point([this, herd_type](tile2i p) {
+                this->create_herd(p, herd_type, climate_herd_count(herd_type));
+            });
+        }
+    }
 
     emit(esid(__func__));
 }
@@ -446,7 +530,8 @@ void city_animals_t::remove_all() {
     // them. Sweep by figure type to actually clear the world.
     figure_valid_do([] (figure &f) {
         f.poof();
-    }, make_array(FIGURE_CROCODILE, FIGURE_OSTRICH, FIGURE_ANTELOPE, FIGURE_HYENA, FIGURE_BIRDS));
+    }, make_array(FIGURE_CROCODILE, FIGURE_OSTRICH, FIGURE_ANTELOPE, FIGURE_HYENA, FIGURE_BIRDS,
+                  FIGURE_HIPPO, FIGURE_LION, FIGURE_SCORPION, FIGURE_ASP));
 }
 
 void city_animals_t::update() {
