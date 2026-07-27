@@ -2,6 +2,7 @@
 
 #include "building/construction/build_planner.h"
 #include "building/building_granary.h"
+#include "building/building_storage.h"
 #include "building/building_wall.h"
 #include "building/monuments.h"
 #include "game/game_config.h"
@@ -620,6 +621,11 @@ static void file_schema(e_file_format file_format, const int file_version) {
         if (file_version > 172) {
             // 8 + 16*12 + 64*20 = 1480
             FILEIO.push_chunk(1480, false, "invasion_runtime", iob_invasion_runtime);
+        }
+        if (file_version > 174) {
+            FILEIO.push_chunk(BUILDING_STORAGE_EMPTY_ALL_BACKUP_CHUNK_SIZE, false,
+                              "building_storages_empty_all_backup",
+                              iob_building_storages_empty_all_backup);
         }
 
         break;

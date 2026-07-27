@@ -70,6 +70,7 @@ extern io_buffer* iob_building_list_large;
 extern io_buffer* iob_junk7a;
 extern io_buffer* iob_junk7b;
 extern io_buffer* iob_building_storages;
+extern io_buffer* iob_building_storages_empty_all_backup;
 
 extern io_buffer* iob_trade_routes_limits;
 extern io_buffer* iob_trade_routes_traded;

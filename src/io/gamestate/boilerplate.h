@@ -23,7 +23,8 @@
 //  172 akhenaten: B2 invasion event pending (deprecated stub)
 //  173 akhenaten: invasion_runtime — bind resolve + history ring
 //  174 akhenaten: house zookeeper coverage (Cleopatra Zoo)
-constexpr uint32_t latest_save_version = 174;
+//  175 akhenaten: storage Empty All order snapshot
+constexpr uint32_t latest_save_version = 175;
 
 vfs::path fullpath_saves(vfs::path filename);
 vfs::path fullpath_maps(char* full, vfs::path filename);

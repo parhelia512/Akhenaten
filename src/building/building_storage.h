@@ -56,6 +56,11 @@ struct storage_t {
     int permissions;
 } ;
 
+// Save chunk for Empty All order snapshot (v175+): slots * RESOURCES_MAX * 2 bytes.
+constexpr int BUILDING_STORAGE_EMPTY_ALL_BACKUP_SLOTS = 400;
+constexpr int BUILDING_STORAGE_EMPTY_ALL_BACKUP_CHUNK_SIZE =
+    BUILDING_STORAGE_EMPTY_ALL_BACKUP_SLOTS * RESOURCES_MAX * 2;
+
 void building_storage_clear_all();
 int building_storage_create(int building_type);
 

@@ -9,9 +9,18 @@
 #include "window/window_city.h"
 #include "window/popup_dialog.h"
 
+#include <cstring>
+
 e_storage_state_tokens_t ANK_CONFIG_ENUM(storage_state_tokens);
 
 constexpr int MAX_STORAGES = 200;
+
+struct empty_all_backup_slot_t {
+    uint8_t resource_state[RESOURCES_MAX];
+    uint8_t has_flag;
+    uint8_t pad[RESOURCES_MAX * 2 - RESOURCES_MAX - 1];
+};
+static_assert(sizeof(empty_all_backup_slot_t) == RESOURCES_MAX * 2, "empty-all backup slot size");
 
 struct city_storage_t {
     int in_use;
@@ -20,9 +29,21 @@ struct city_storage_t {
 };
 
 city_storage_t g_storages[MAX_STORAGES];
+// Save blob (v175+) — also runtime Empty All snapshot.
+static empty_all_backup_slot_t g_empty_all_backups[BUILDING_STORAGE_EMPTY_ALL_BACKUP_SLOTS];
+static_assert(sizeof(g_empty_all_backups) == BUILDING_STORAGE_EMPTY_ALL_BACKUP_CHUNK_SIZE,
+              "empty-all backup blob size");
+
+static void building_storage_clear_empty_all_backup(int storage_id) {
+    if (storage_id <= 0 || storage_id >= MAX_STORAGES) {
+        return;
+    }
+    memset(&g_empty_all_backups[storage_id], 0, sizeof(g_empty_all_backups[storage_id]));
+}
 
 void building_storage_clear_all(void) {
     memset(g_storages, 0, sizeof(g_storages));
+    memset(g_empty_all_backups, 0, sizeof(g_empty_all_backups));
 }
 
 void building_storage_reset_building_ids(void) {
@@ -52,6 +73,7 @@ int building_storage_create(int building_type) {
     for (int i = 1; i < MAX_STORAGES; i++) {
         if (!g_storages[i].in_use) {
             memset(&g_storages[i], 0, sizeof(g_storages[i]));
+            memset(&g_empty_all_backups[i], 0, sizeof(g_empty_all_backups[i]));
             g_storages[i].in_use = 1;
 
             // default settings for Pharaoh
@@ -147,13 +169,35 @@ void building_storage_toggle_empty_all(int storage_id) {
         return;
     }
 
-    auto &storage = g_storages[storage_id].storage;
-    storage.empty_all = 1 - storage.empty_all;
+    auto &slot = g_storages[storage_id];
+    auto &storage = slot.storage;
 
-    // START → all Empty; STOP → all Accept (issue #608: STOP used to leave Empty).
-    const int state = storage.empty_all ? STORAGE_STATE_EMPTY : STORAGE_STATE_ACCEPT;
-    for (auto &resource_state : storage.resource_state) {
-        resource_state = state;
+    auto &backup = g_empty_all_backups[storage_id];
+
+    if (!storage.empty_all) {
+        // START: snapshot current orders, then empty everything.
+        for (int r = 0; r < RESOURCES_MAX; r++) {
+            backup.resource_state[r] = (uint8_t)storage.resource_state[r];
+        }
+        backup.has_flag = 1;
+        storage.empty_all = 1;
+        for (auto &resource_state : storage.resource_state) {
+            resource_state = STORAGE_STATE_EMPTY;
+        }
+        return;
+    }
+
+    // STOP: restore snapshot (or Accept-all fallback for old mid-empty saves).
+    storage.empty_all = 0;
+    if (backup.has_flag) {
+        for (int r = 0; r < RESOURCES_MAX; r++) {
+            storage.resource_state[r] = backup.resource_state[r];
+        }
+        building_storage_clear_empty_all_backup(storage_id);
+    } else {
+        for (auto &resource_state : storage.resource_state) {
+            resource_state = STORAGE_STATE_ACCEPT;
+        }
     }
 }
 
@@ -162,13 +206,29 @@ void building_storage_accept_none(int storage_id) {
         return;
     }
 
-    for (auto &state : g_storages[storage_id].storage.resource_state) {
+    auto &slot = g_storages[storage_id];
+    if (slot.storage.empty_all) {
+        slot.storage.empty_all = 0;
+        building_storage_clear_empty_all_backup(storage_id);
+    }
+
+    for (auto &state : slot.storage.resource_state) {
         state = STORAGE_STATE_REFUSE;
     }
 }
 
 void building_storage_cycle_resource_state(int storage_id, int resource_id, bool backwards) {
-    int state = g_storages[storage_id].storage.resource_state[resource_id];
+    if (storage_id <= 0 || storage_id >= MAX_STORAGES) {
+        return;
+    }
+
+    auto &slot = g_storages[storage_id];
+    if (slot.storage.empty_all) {
+        slot.storage.empty_all = 0;
+        building_storage_clear_empty_all_backup(storage_id);
+    }
+
+    int state = slot.storage.resource_state[resource_id];
     if (!backwards) {
         if (state == STORAGE_STATE_ACCEPT)
             state = STORAGE_STATE_GET;
@@ -189,7 +249,7 @@ void building_storage_cycle_resource_state(int storage_id, int resource_id, bool
             state = STORAGE_STATE_ACCEPT;
     }
 
-    g_storages[storage_id].storage.resource_state[resource_id] = state;
+    slot.storage.resource_state[resource_id] = state;
 }
 
 void building_storage::set_permission(int p) {
@@ -273,6 +333,11 @@ io_buffer* iob_building_storages = new io_buffer([](io_buffer* iob, size_t versi
         }
         //        iob->bind____skip(144); // ?????
     }
+});
+
+// Empty All order snapshot — appended chunk (save v175+), raw blob.
+io_buffer* iob_building_storages_empty_all_backup = new io_buffer([](io_buffer* iob, size_t version) {
+    iob->bind(BIND_SIGNATURE_RAW, g_empty_all_backups, sizeof(g_empty_all_backups));
 });
 
 const storage_t *building_storage::storage() const {
