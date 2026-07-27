@@ -47,14 +47,9 @@
       <div class="wiki-sidebar-section">
         <div class="wiki-sidebar-title">Mechanics</div>
         <ul>
-          <li><a href="desirability.html">Desirability</a></li>
           <li><a href="labor.html" class="active">Labor</a></li>
-          <li><a href="floods.html">Nile Floods</a></li>
-          <li><a href="gods.html">Gods &amp; Religion</a></li>
-          <li><a href="housing-evolution.html">Housing Evolution</a></li>
-          <li><a href="trade.html">Trade</a></li>
-          <li><a href="military.html">Military</a></li>
         </ul>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin:0.4rem 0 0;padding:0 0.2rem;">More mechanics pages TBD (desirability, floods, religion, …).</p>
       </div>
       <div class="wiki-sidebar-section">
         <div class="wiki-sidebar-title">On this page</div>
@@ -108,14 +103,14 @@
         <div class="details-body">
           <p>Flags: <span class="file-ref">gameplay_change_fixed_workers</span>, <span class="file-ref">gameplay_fixed_worker_percent</span> (default 38), <span class="file-ref">gameplay_change_global_labour</span>.</p>
           <p>Pool calc: <span class="file-ref">src/city/city_labor.cpp</span> (<code>calc_fixed_workers_available</code>, <code>calculate_workers</code>).</p>
-          <p>Info staffing / tooltip: <span class="file-ref">src/window/window_building_info.cpp</span>, <span class="file-ref">src/window/window_info.cpp</span> (<code>draw_tooltip</code>), image hover in <span class="file-ref">src/graphics/elements/ui.cpp</span> (<code>eimg</code>).</p>
+          <p>Info staffing / tooltip: <span class="file-ref">src/window/window_building_info.cpp</span>, <span class="file-ref">src/window/window_info.cpp</span> (<code>draw_tooltip</code>), image hover in <span class="file-ref">src/graphics/elements/ui.cpp</span> (<code>eimg</code>; hit-box must match fit/centering — WR9).</p>
           <p>Tests: <span class="file-ref">tests/67_fixed_workers.js</span>, <span class="file-ref">tests/70_workers_staffing_ui.js</span>.</p>
+          <p>Open follow-ups (tracker): map/ghost staffing (WR5), chrome ids (WR6), percent UI (WR7), RE 40% check (WR8), eimg hit-box (WR9), integral restore (IT1).</p>
         </div>
       </details>
 
       <div class="bld-nav">
-        <a href="desirability.html">← Desirability</a>
-        <a href="floods.html">Nile Floods →</a>
+        <a href="../index.html">← Player Guide</a>
       </div>
     </div>
   </main>

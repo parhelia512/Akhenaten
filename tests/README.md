@@ -50,6 +50,13 @@ Results are written to `akhenaten-log.txt` as lines like `[test:tests/11_work_ca
 
 C++ smoke checks run first (before JS files): `SDL_strlen`/`strcmp`, `vec2i`, `get_version`, `bstring::cat`, `es_hash_str`, and `archive_helper::coerce`/`set`/`get` for `xstring` (and `vec2i`) property binding.
 
+### Mutating city / features state
+
+Tests share one process. If you change census ages (`population_stats.set_at_age`),
+`game_features`, or other globals, restore them in `done()` (snapshot + restore) or call
+`test_reload_city_session` before signaling ready. Pattern: `67_fixed_workers.js`.
+See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
+
 ## Test files (current)
 
 | File | What it checks |
@@ -111,6 +118,7 @@ C++ smoke checks run first (before JS files): `SDL_strlen`/`strcmp`, `vec2i`, `g
 | `59_autosave_slots.js` | Autosave slot filename format + pick missing/oldest (`__test_autosave_*`; AS4) |
 | `64_trader_capacity.js` | Trade capacity: OG roll to 800 (`uint16` random), flag 1600, buy gate, `has_traded_max(cap)` (TC*) |
 | `65_zoo_place.js` | Cleopatra Zoo: place 6×6, stock straw+gamemeat, spawn `FIGURE_ZOOKEEPER`, animals-present timer, no spawn without stock (Z5) |
+| `70_artisans_guild.js` | Artisans' Guild: Sphinx phase 6 + stock paint/clay → spawn `FIGURE_TOMB_ARTISAN`; no spawn without paint/clay (AG6) |
 
 Farm **placement** tests (34/35) cover `can_place` / terrain rules; **37** covers preview image helpers.
 When adding more preview draw coverage, follow JS draw conventions in
