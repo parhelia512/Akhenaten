@@ -27,6 +27,7 @@
 #include "figure/figure_impl.h"
 #include "figuretype/figure_missile.h"
 #include "figuretype/figure_hunter.h"
+#include "figuretype/animal_lion.h"
 #include "city/city_animals.h"
 #include "graphics/color.h"
 #include "city/city.h"
@@ -465,6 +466,35 @@ static int __test_count_figures(int type) {
     return count;
 }
 ANK_FUNCTION_1(__test_count_figures);
+
+static int __test_lion_setup_curse_raid(int fid, int days) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive() || f->type != FIGURE_LION) {
+        return 0;
+    }
+    figure_lion_setup_curse_raid(*f, days);
+    return 1;
+}
+ANK_FUNCTION_2(__test_lion_setup_curse_raid);
+
+static int __test_lion_is_curse_raid(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || f->type != FIGURE_LION) {
+        return 0;
+    }
+    return figure_lion(f).is_curse_raid() ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_lion_is_curse_raid);
+
+static void __test_figure_update_day(int fid) {
+    figure *f = figure_get(fid);
+    auto *impl = f ? f->dcast() : nullptr;
+    if (!impl) {
+        return;
+    }
+    impl->update_day();
+}
+ANK_FUNCTION_1(__test_figure_update_day);
 
 // Bypass hunt-animation callback: spawn the hunter's missile at its target.
 static int __test_hunter_force_shot(int hunter_fid) {

@@ -2,13 +2,20 @@
 // Markers:
 //   [test-marker] bast_lion_feature_on_spawn_ok
 //   [test-marker] bast_lion_feature_off_no_spawn_ok
+//   [test-marker] bast_lion_no_temple_fallback_ok
 //   [test-marker] bast_lion_houses_smash_no_lions_ok
+//   [test-marker] bast_lion_raid_prey_ok
+//   [test-marker] bast_lion_raid_timer_poof_ok
 
 var GOD_BAST = 4
+var ACTION_25_LION_LOOKING_FOR_ATTACK = 25
 var __test75_feat_prev = false
 var __test75_on_ok = false
 var __test75_off_ok = false
+var __test75_fallback_ok = false
 var __test75_smash_ok = false
+var __test75_prey_ok = false
+var __test75_timer_ok = false
 
 function test75_remove_lions() {
     city.figures.remove_figures(FIGURE_LION)
@@ -74,8 +81,26 @@ function run_test() {
     __log_marker('bast_lion_feature_off_no_spawn_ok')
     __test75_off_ok = true
 
-    // --- Feature ON + house present → smash, not lions ---
+    // --- Feature ON, no houses, no temple/zoo → fallback (wrath_2 path): no lions ---
+    test_reload_city_session('data/default.map')
+    __test_set_treasury(50000)
+    game.paused = false
+    game_features.set('gameplay_bast_lion_raid', false)
+    __test_run_console_command('god_major_curse ' + GOD_BAST)
+    test75_remove_lions()
+
     game_features.set('gameplay_bast_lion_raid', true)
+    __test_run_console_command('god_major_curse ' + GOD_BAST)
+    lions = test75_count_lions()
+    if (lions != 0) {
+        __log_info_native('[test:75] no-temple fallback expected 0 lions, got ' + lions)
+        __test_signal_ready()
+        return
+    }
+    __log_marker('bast_lion_no_temple_fallback_ok')
+    __test75_fallback_ok = true
+
+    // --- Feature ON + house present → smash, not lions ---
     test75_remove_lions()
     var house = __test_building_create(BUILDING_HOUSE_CRUDE_HUT, -1, -1)
     if (!house) {
@@ -97,11 +122,91 @@ function run_test() {
     __log_marker('bast_lion_houses_smash_no_lions_ok')
     __test75_smash_ok = true
 
+    // --- Raid prey: skip closer ostrich, target invasion enemy ---
+    test_reload_city_session('data/default.map')
+    __test_set_treasury(50000)
+    game.paused = false
+    test75_remove_lions()
+
+    var land = test_find_buildable_tile(BUILDING_HOUSE_CRUDE_HUT)
+    if (!land) {
+        land = { x: 40, y: 40 }
+    }
+    var ostrich = test_figure_create(FIGURE_OSTRICH, land.x + 1, land.y)
+    var enemy = test_figure_create(FIGURE_ENEMY_HYKSOS_SWORDMAN, land.x + 3, land.y)
+    var lion = test_figure_create(FIGURE_LION, land.x + 2, land.y)
+    if (!ostrich || !enemy || !lion) {
+        __log_info_native('[test:75] raid prey spawn failed')
+        __test_signal_ready()
+        return
+    }
+    if (!__test_lion_setup_curse_raid(lion, 8)) {
+        __log_info_native('[test:75] setup_curse_raid failed')
+        __test_signal_ready()
+        return
+    }
+    if (!__test_lion_is_curse_raid(lion)) {
+        __log_info_native('[test:75] curse_raid flag not set')
+        __test_signal_ready()
+        return
+    }
+
+    test_figure_set_speed(ostrich, 0)
+    test_figure_set_speed(enemy, 0)
+    test_figure_set_speed(lion, 0)
+    __test_figure_set_action(lion, ACTION_25_LION_LOOKING_FOR_ATTACK)
+
+    var prey_ok = false
+    for (var i = 0; i < 40; i++) {
+        test_figure_set_speed(ostrich, 0)
+        test_figure_set_speed(enemy, 0)
+        test_figure_set_speed(lion, 0)
+        __test_pump_frames(15)
+
+        if (!__figure_is_valid(lion) || !__figure_is_valid(ostrich) || !__figure_is_valid(enemy)) {
+            break
+        }
+        var target = __figure_get_target_figure_id(lion)
+        if (target == ostrich) {
+            __log_info_native('[test:75] raid lion targeted ostrich (wildlife leak)')
+            __test_signal_ready()
+            return
+        }
+        if (target == enemy) {
+            prey_ok = true
+            break
+        }
+    }
+    if (!prey_ok) {
+        __log_info_native('[test:75] raid lion never targeted enemy')
+        __test_signal_ready()
+        return
+    }
+    __log_marker('bast_lion_raid_prey_ok')
+    __test75_prey_ok = true
+
+    // --- Duration: days=1 → first update_day poofs ---
+    test75_remove_lions()
+    var timer_lion = test_figure_create(FIGURE_LION, land.x + 2, land.y)
+    if (!timer_lion || !__test_lion_setup_curse_raid(timer_lion, 1)) {
+        __log_info_native('[test:75] timer lion setup failed')
+        __test_signal_ready()
+        return
+    }
+    __test_figure_update_day(timer_lion)
+    if (test75_count_lions() != 0) {
+        __log_info_native('[test:75] expected 0 lions after timer poof, got ' + test75_count_lions())
+        __test_signal_ready()
+        return
+    }
+    __log_marker('bast_lion_raid_timer_poof_ok')
+    __test75_timer_ok = true
+
     __test_signal_ready()
 }
 
 function check_valid() {
-    if (!__test75_on_ok || !__test75_off_ok || !__test75_smash_ok) {
+    if (!__test75_on_ok || !__test75_off_ok || !__test75_fallback_ok || !__test75_smash_ok || !__test75_prey_ok || !__test75_timer_ok) {
         __log_info_native('[test:75] one or more phases failed')
         return false
     }
@@ -109,7 +214,10 @@ function check_valid() {
     var markers = [
         'bast_lion_feature_on_spawn_ok',
         'bast_lion_feature_off_no_spawn_ok',
-        'bast_lion_houses_smash_no_lions_ok'
+        'bast_lion_no_temple_fallback_ok',
+        'bast_lion_houses_smash_no_lions_ok',
+        'bast_lion_raid_prey_ok',
+        'bast_lion_raid_timer_poof_ok'
     ]
     for (var i = 0; i < markers.length; i++) {
         var marker = '[test-marker] ' + markers[i]

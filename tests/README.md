@@ -95,6 +95,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `53_enemy_warship_registered.js` | Every `FIGURE_ENEMY_*_WAR_SHIP` (+ galera / generic 93) resolves to a registered enemy class (`__test_enemy_figure_registered`); E3a enemy fleet start |
 | `40_hippo_spawn.js` | Spawn `FIGURE_HIPPO` on land and water; `update_animation` → `walk` / `swim` (#77) |
 | `66_lion_spawn.js` | Cleopatra `FIGURE_LION`: spawn + type + `update_animation` → `walk` (SprMain2 group 5; CF3b) |
+| `75_bast_lion_curse.js` | Bast lion raid (CF5): feature ON spawn at temple; OFF / smash / no-temple fallback → no lions; raid prey skips ostrich; 1-day timer poof |
 | `69_scorpion_spawn.js` | Cleopatra `FIGURE_SCORPION`: spawn + type + `update_animation` → `walk` (SprMain2 group 10; CF3c) |
 | `70_asp_spawn.js` | Cleopatra `FIGURE_ASP`: spawn + type + `update_animation` → `walk` (SprMain2 group 0; CF3a) |
 | `67_fixed_workers.js` | Fixed worker ratio: `gameplay_fixed_worker_percent` (default 38% plebs), advisor % of total, age-skew ON/OFF (WR1/WR4) |
@@ -198,6 +199,9 @@ After each test script loads, the driver calls `js_vm_sync({})` so any top-level
 | `__test_figure_create(type, x, y)` | figure id | Fast spawn via `figure_create` (no herd/formation); center tile when `x` or `y` is negative |
 | `__test_figure_set_action(fid, action)` | undefined | Set figure `action_state` via `advance_action` |
 | `__test_figure_update_animation(fid)` | undefined | Call `figure_impl::update_animation()` |
+| `__test_figure_update_day(fid)` | undefined | Call `figure_impl::update_day()` (e.g. curse-raid timer) |
+| `__test_lion_setup_curse_raid(fid, days)` | 0\|1 | Mark `FIGURE_LION` as Bast curse raid with duration days |
+| `__test_lion_is_curse_raid(fid)` | 0\|1 | Whether lion has curse-raid flag |
 | `__figure_get_anim_key(fid)` | string | Current `animctx.key` (e.g. `walk`, `swim`) |
 | `__test_show_tile_info(bid)` | undefined | Open building info window for `bid` |
 | `__test_info_ui_text(element_id)` | string | Text of a named element on the current building/terrain info window (e.g. `workers_text`) |
