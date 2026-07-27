@@ -135,6 +135,12 @@ static void add_definition(const hotkey_mapping& mapping, bool alt) {
     case HOTKEY_SAVE_FILE:
         def->callback = [action = mapping.action] { events::emit(event_save_city{ action }); };
         break;
+    case HOTKEY_QUICKSAVE:
+        def->callback = [action = mapping.action] { events::emit(event_quicksave{ action }); };
+        break;
+    case HOTKEY_QUICKLOAD:
+        def->callback = [action = mapping.action] { events::emit(event_quickload{ action }); };
+        break;
     case HOTKEY_ROTATE_BUILDING:
         def->callback = [action = mapping.action] { events::emit(event_rotate_building{ action }); };
         break;

@@ -73,6 +73,8 @@ namespace game_hotkeys {
     hotkey_mapping editor_toggle_battle_info ("editor_toggle_battle_info", KEY_A, KEY_MOD_CTRL, HOTKEY_EDITOR_TOGGLE_BATTLE_INFO);
     hotkey_mapping load_file ("load_file", KEY_O, KEY_MOD_CTRL, HOTKEY_LOAD_FILE);
     hotkey_mapping save_file ("save_file", KEY_S, KEY_MOD_CTRL, HOTKEY_SAVE_FILE);
+    hotkey_mapping quicksave ("quicksave", KEY_F5, KEY_MOD_NONE, HOTKEY_QUICKSAVE);
+    hotkey_mapping quickload ("quickload", KEY_F9, KEY_MOD_NONE, HOTKEY_QUICKLOAD);
     hotkey_mapping rotate_building ("rotate_building", KEY_R, KEY_MOD_NONE, HOTKEY_ROTATE_BUILDING);
     hotkey_mapping change_building_variant ("change_building_variant", KEY_R, KEY_MOD_CTRL, HOTKEY_CHANGE_BUILDING_VARIANT);
     hotkey_mapping go_to_bookmark_1 ("go_to_bookmark_1", KEY_F1, KEY_MOD_NONE, HOTKEY_GO_TO_BOOKMARK_1);
@@ -83,7 +85,7 @@ namespace game_hotkeys {
     hotkey_mapping set_bookmark_2 ("set_bookmark_2", KEY_F2, KEY_MOD_CTRL, HOTKEY_SET_BOOKMARK_2);
     hotkey_mapping set_bookmark_3 ("set_bookmark_3", KEY_F3, KEY_MOD_CTRL, HOTKEY_SET_BOOKMARK_3);
     hotkey_mapping set_bookmark_4 ("set_bookmark_4", KEY_F4, KEY_MOD_CTRL, HOTKEY_SET_BOOKMARK_4);
-    hotkey_mapping center_screen ("center_screen", KEY_F5, KEY_MOD_NONE, HOTKEY_CENTER_WINDOW);
+    hotkey_mapping center_screen ("center_screen", KEY_F5, KEY_MOD_CTRL, HOTKEY_CENTER_WINDOW);
     hotkey_mapping toggle_fullscreen ("toggle_fullscreen", KEY_ENTER, KEY_MOD_ALT, HOTKEY_TOGGLE_FULLSCREEN);
     hotkey_mapping toggle_fullscreen_alt ("toggle_fullscreen_alt", KEY_F6, KEY_MOD_NONE, HOTKEY_TOGGLE_FULLSCREEN);
 

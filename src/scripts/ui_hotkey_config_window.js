@@ -129,6 +129,8 @@ window_hotkey_config {
         { action: HOTKEY_SAVE_CITY_SCREENSHOT, text: "#TR_HOTKEY_SAVE_CITY_SCREENSHOT" },
         { action: HOTKEY_LOAD_FILE, text: "#TR_HOTKEY_LOAD_FILE" },
         { action: HOTKEY_SAVE_FILE, text: "#TR_HOTKEY_SAVE_FILE" },
+        { action: HOTKEY_QUICKSAVE, text: "#TR_HOTKEY_QUICKSAVE" },
+        { action: HOTKEY_QUICKLOAD, text: "#TR_HOTKEY_QUICKLOAD" },
         { action: -1, text: "#TR_HOTKEY_HEADER_CITY" },
         { action: HOTKEY_INCREASE_GAME_SPEED, text: "#TR_HOTKEY_INCREASE_GAME_SPEED" },
         { action: HOTKEY_DECREASE_GAME_SPEED, text: "#TR_HOTKEY_DECREASE_GAME_SPEED" },

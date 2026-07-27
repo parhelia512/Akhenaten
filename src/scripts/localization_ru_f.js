@@ -88,6 +88,13 @@ localization_ru_f = [
     { key:"#TR_HOTKEY_SAVE_CITY_SCREENSHOT", text:"Сохранить скриншот всего города"}
     { key:"#TR_HOTKEY_LOAD_FILE", text:"Загрузить файл"}
     { key:"#TR_HOTKEY_SAVE_FILE", text:"Сохранить файл"}
+    { key:"#TR_HOTKEY_QUICKSAVE", text:"Быстрое сохранение"}
+    { key:"#TR_HOTKEY_QUICKLOAD", text:"Быстрая загрузка"}
+    { key:"#quicksave_ok", text:"Сохранено"}
+    { key:"#quickload_ok", text:"Загружено"}
+    { key:"#quicksave_missing", text:"Нет быстрого сохранения"}
+    { key:"#quicksave_failed", text:"Ошибка быстрого сохранения"}
+    { key:"#quickload_failed", text:"Ошибка быстрой загрузки"}
     { key:"#TR_HOTKEY_INCREASE_GAME_SPEED", text:"Увеличить скорость игры"}
     { key:"#TR_HOTKEY_DECREASE_GAME_SPEED", text:"Уменьшить скорость игры"}
     { key:"#TR_HOTKEY_TOGGLE_PAUSE", text:"Пауза"}

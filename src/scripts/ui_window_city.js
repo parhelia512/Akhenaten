@@ -37,6 +37,60 @@ function window_city_on_save_city(ev) {
     window_file_dialog_save_show(FILE_TYPE_SAVED_GAME)
 }
 
+[es=event_load_city]
+function window_city_on_load_city(ev) {
+    if (!ui.window_is("window_city")) {
+        return
+    }
+    window_file_dialog_load_show(FILE_TYPE_SAVED_GAME)
+}
+
+// N=1 quicksave (QS2). Ironwill: route through can_save_now() when IW lands.
+var QUICKSAVE_FILENAME = "quicksave.svx"
+
+function quicksave_fullpath() {
+    return "Save/" + game.dynasty_name + "/" + QUICKSAVE_FILENAME
+}
+
+[es=event_quicksave]
+function window_city_on_quicksave(ev) {
+    if (!ui.window_is("window_city")) {
+        return
+    }
+
+    if (!game.write_savegame(QUICKSAVE_FILENAME)) {
+        log_warning("Quicksave failed: " + QUICKSAVE_FILENAME)
+        city.warnings.show("#quicksave_failed")
+        return
+    }
+
+    city.warnings.show("#quicksave_ok")
+}
+
+[es=event_quickload]
+function window_city_on_quickload(ev) {
+    if (!ui.window_is("window_city")) {
+        return
+    }
+
+    // load_savegame calls pre_load() before open — must not call if missing.
+    var path = quicksave_fullpath()
+    if (!game.file_exists(path)) {
+        log_warning("Quickload: no file " + path)
+        city.warnings.show("#quicksave_missing")
+        return
+    }
+
+    if (!game.load_savegame(QUICKSAVE_FILENAME)) {
+        log_warning("Quickload failed: " + QUICKSAVE_FILENAME)
+        city.warnings.show("#quickload_failed")
+        return
+    }
+
+    // After load: city window is shown; warning must run post-load.
+    city.warnings.show("#quickload_ok")
+}
+
 [es=event_set_bookmark]
 function window_city_on_set_bookmark(ev) {
     city.bookmarks.set(ev.value, __camera.view_center)

@@ -148,6 +148,13 @@ localization_en = [
   {key:"#TR_HOTKEY_SAVE_CITY_SCREENSHOT", text:"Save full city screenshot"}
   {key:"#TR_HOTKEY_LOAD_FILE", text:"Load file"}
   {key:"#TR_HOTKEY_SAVE_FILE", text:"Save file"}
+  {key:"#TR_HOTKEY_QUICKSAVE", text:"Quicksave"}
+  {key:"#TR_HOTKEY_QUICKLOAD", text:"Quickload"}
+  {key:"#quicksave_ok", text:"Quicksaved"}
+  {key:"#quickload_ok", text:"Quickloaded"}
+  {key:"#quicksave_missing", text:"No quicksave"}
+  {key:"#quicksave_failed", text:"Quicksave failed"}
+  {key:"#quickload_failed", text:"Quickload failed"}
   {key:"#TR_HOTKEY_INCREASE_GAME_SPEED", text:"Increase game speed"}
   {key:"#TR_HOTKEY_DECREASE_GAME_SPEED", text:"Decrease game speed"}
   {key:"#TR_HOTKEY_TOGGLE_PAUSE", text:"Toggle pause"}
