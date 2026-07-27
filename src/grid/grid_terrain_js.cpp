@@ -7,6 +7,7 @@
 #include "grid/sprite.h"
 #include "grid/bridge.h"
 #include "grid/bridge_grid.h"
+#include "grid/wall_material.h"
 #include "grid/routing/routing.h"
 #include "grid/routing/routing_terrain.h"
 #include "building/building_irrigation_ditch.h"
@@ -160,3 +161,13 @@ bool __map_routing_citizen_is_road(tile2i tile) {
     return map_routing_citizen_is_road(tile);
 }
 ANK_FUNCTION_1(__map_routing_citizen_is_road);
+
+int __map_wall_building_type(tile2i tile) {
+    return (int)wall_building_type_from_material(map_wall_material_at(tile));
+}
+ANK_FUNCTION_1(__map_wall_building_type);
+
+int __map_wall_material(tile2i tile) {
+    return (int)map_wall_material_at(tile);
+}
+ANK_FUNCTION_1(__map_wall_material);

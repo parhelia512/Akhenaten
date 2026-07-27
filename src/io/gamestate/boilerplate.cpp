@@ -46,6 +46,7 @@
 #include "grid/bridge_grid.h"
 #include "grid/terrain.h"
 #include "grid/tiles.h"
+#include "grid/wall_material.h"
 #include "grid/moisture.h"
 #include "grid/floodplain.h"
 #include "grid/water.h"
@@ -223,6 +224,7 @@ static void post_load() {
     //map
     map_image_fix_icorrect_tiles();
     map_bridge_migrate_from_sprite();
+    map_wall_material_migrate_from_terrain();
 
     // building counts / storage
     city_resource_determine_available();
@@ -626,6 +628,9 @@ static void file_schema(e_file_format file_format, const int file_version) {
             FILEIO.push_chunk(BUILDING_STORAGE_EMPTY_ALL_BACKUP_CHUNK_SIZE, false,
                               "building_storages_empty_all_backup",
                               iob_building_storages_empty_all_backup);
+        }
+        if (file_version > 175) {
+            FILEIO.push_chunk(51984, false, "wall_material_grid", iob_wall_material_grid); // (228²) * 1
         }
 
         break;

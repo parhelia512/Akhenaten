@@ -24,7 +24,8 @@
 //  173 akhenaten: invasion_runtime — bind resolve + history ring
 //  174 akhenaten: house zookeeper coverage (Cleopatra Zoo)
 //  175 akhenaten: storage Empty All order snapshot
-constexpr uint32_t latest_save_version = 175;
+//  176 akhenaten: wall_material_grid (mud/brick terrain walls)
+constexpr uint32_t latest_save_version = 176;
 
 vfs::path fullpath_saves(vfs::path filename);
 vfs::path fullpath_maps(char* full, vfs::path filename);

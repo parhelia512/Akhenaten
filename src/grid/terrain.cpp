@@ -11,6 +11,7 @@
 #include "grid/tiles.h"
 #include "grid/trees.h"
 #include "grid/routing/routing.h"
+#include "grid/wall_material.h"
 #include "scenario/map.h"
 #include "vegetation.h"
 #include "water.h"
@@ -38,13 +39,22 @@ int map_terrain_get(int grid_offset) {
     return map_grid_get(g_terrain_grid, grid_offset);
 }
 void map_terrain_set(int grid_offset, int terrain) {
+    const int old_terrain = map_grid_get(g_terrain_grid, grid_offset);
     map_grid_set(g_terrain_grid, grid_offset, terrain);
+    if ((old_terrain & TERRAIN_WALL) && !(terrain & TERRAIN_WALL)) {
+        map_wall_material_clear(grid_offset);
+    }
 }
 void map_terrain_add(int grid_offset, int terrain) {
     map_grid_or(g_terrain_grid, grid_offset, terrain);
 }
 void map_terrain_remove(int grid_offset, int terrain) {
+    const int old_terrain = map_grid_get(g_terrain_grid, grid_offset);
     map_grid_and(g_terrain_grid, grid_offset, ~terrain);
+    const int now_terrain = map_grid_get(g_terrain_grid, grid_offset);
+    if ((old_terrain & TERRAIN_WALL) && !(now_terrain & TERRAIN_WALL)) {
+        map_wall_material_clear(grid_offset);
+    }
 }
 
 void map_terrain_add_in_area(tile2i pmin, tile2i pmax, int terrain) {
@@ -71,6 +81,9 @@ void map_terrain_remove_with_radius(tile2i c, int size, int radius, int terrain)
 }
 
 void map_terrain_remove_all(int terrain) {
+    if (terrain & TERRAIN_WALL) {
+        map_wall_material_clear_all();
+    }
     map_grid_and_all(g_terrain_grid, ~terrain);
 }
 

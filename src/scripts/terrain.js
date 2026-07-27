@@ -13,6 +13,14 @@ terrain = {
         __map_terrain_add(tile, mask)
     }
 
+    wall_building_type: function(tile) {
+        return __map_wall_building_type(tile)
+    }
+
+    wall_material: function(tile) {
+        return __map_wall_material(tile)
+    }
+
     has_adjacent_x: function(tile, type) {
         return __map_terrain_has_adjacent_x_with_type(tile, type)
     }

@@ -27,7 +27,8 @@ static const int direction_indices[8][4] = {
     {6, 0, 4, 2}
 };
 
-routed_building_result place_routed_building(tile2i start, tile2i end, e_routed_mode type) {
+routed_building_result place_routed_building(tile2i start, tile2i end, e_routed_mode type,
+    e_building_type wall_type, bool write_wall_material) {
     int items = 0;
     int grid_offset = end.grid_offset();
     int guard = 0;
@@ -49,7 +50,7 @@ routed_building_result place_routed_building(tile2i start, tile2i end, e_routed_
             break;
 
         case ROUTED_BUILDING_WALL:
-            items += (building_mud_wall::set_wall(end) ? 1 : 0);
+            items += (building_mud_wall::set_wall(end, wall_type, write_wall_material) ? 1 : 0);
             break;
 
         case ROUTED_BUILDING_CANALS:

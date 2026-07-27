@@ -125,7 +125,7 @@ function window_city_copy_build_type_from_tile(tile) {
         return BUILDING_MUD_GATEHOUSE
     }
     if (terrain.is(tile, TERRAIN_WALL)) {
-        return BUILDING_MUD_WALL
+        return terrain.wall_building_type(tile)
     }
     if (terrain.is(tile, TERRAIN_ROAD)) {
         return terrain.is_plaza_or_earthquake(tile) ? BUILDING_PLAZA : BUILDING_ROAD

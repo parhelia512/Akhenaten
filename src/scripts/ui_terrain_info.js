@@ -38,6 +38,34 @@ function terrain_info_wall_on_init(window) {
 
 }
 
+terrain_info_mud_wall = {
+    help_id           : 85
+    open_sounds       : [ "Wavs/wall.wav" ]
+    ui : baseui(terrain_info_window, {
+        title         : text({pos: [0, 16], size: [px(29), 13], text:[139, 0], font:FONT_LARGE_BLACK_ON_LIGHT, align:"center"})
+        describe      : text({pos: [30, 78], text:[139, 1], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
+    })
+}
+
+[es=terrain_info_mud_wall_init]
+function terrain_info_mud_wall_on_init(window) {
+
+}
+
+terrain_info_brick_wall = {
+    help_id           : 85
+    open_sounds       : [ "Wavs/wall.wav" ]
+    ui : baseui(terrain_info_window, {
+        title         : text({pos: [0, 16], size: [px(29), 13], text:[28, 168], font:FONT_LARGE_BLACK_ON_LIGHT, align:"center"})
+        describe      : text({pos: [30, 78], text:[70, 59], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
+    })
+}
+
+[es=terrain_info_brick_wall_init]
+function terrain_info_brick_wall_on_init(window) {
+
+}
+
 terrain_info_plaza = {
     help_id           : 80
     open_sounds       : [ ]

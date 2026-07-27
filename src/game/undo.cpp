@@ -23,6 +23,7 @@
 #include "city/city.h"
 #include "js/js_game.h"
 #include "scenario/earthquake.h"
+#include "grid/wall_material.h"
 
 #include <string.h>
 
@@ -129,6 +130,7 @@ int game_undo_start_build(int type) {
     map_property_backup();
     map_sprite_backup();
     map_bridge_grids_backup();
+    map_wall_material_backup();
 
     return 1;
 }
@@ -162,6 +164,7 @@ static void restore_map_images(void) {
 void game_undo_restore_map(int include_properties) {
     map_terrain_restore();
     map_canal_restore();
+    map_wall_material_restore();
     if (include_properties)
         map_property_restore();
     restore_map_images();
@@ -238,19 +241,22 @@ void game_undo_perform() {
         }
         map_terrain_restore();
         map_canal_restore();
+        map_wall_material_restore();
         map_sprite_restore();
         map_bridge_grids_restore();
         map_image_restore();
         map_property_restore();
         map_property_clear_constructing_and_deleted();
 
-    } else if (building_type_any_of((e_building_type)data.type, make_array(BUILDING_IRRIGATION_DITCH, BUILDING_ROAD, BUILDING_MUD_WALL))) {
+    } else if (building_type_any_of((e_building_type)data.type, make_array(BUILDING_IRRIGATION_DITCH, BUILDING_ROAD, BUILDING_MUD_WALL, BUILDING_BRICK_WALL))) {
         map_terrain_restore();
         map_canal_restore();
+        map_wall_material_restore();
         restore_map_images();
 
     } else if (data.type == BUILDING_LOW_BRIDGE || data.type == BUILDING_UNUSED_SHIP_BRIDGE_83) {
         map_terrain_restore();
+        map_wall_material_restore();
         map_sprite_restore();
         map_bridge_grids_restore();
         restore_map_images();
@@ -258,6 +264,7 @@ void game_undo_perform() {
     } else if (data.type == BUILDING_PLAZA || data.type == BUILDING_GARDENS) {
         map_terrain_restore();
         map_canal_restore();
+        map_wall_material_restore();
         map_property_restore();
         restore_map_images();
 
@@ -265,6 +272,7 @@ void game_undo_perform() {
         if (data.type == BUILDING_WATER_LIFT) {
             map_terrain_restore();
             map_canal_restore();
+            map_wall_material_restore();
             restore_map_images();
         }
 
@@ -315,6 +323,7 @@ void game_undo_reduce_time_available(void) {
     case BUILDING_IRRIGATION_DITCH:
     case BUILDING_ROAD:
     case BUILDING_MUD_WALL:
+    case BUILDING_BRICK_WALL:
     case BUILDING_LOW_BRIDGE:
     case BUILDING_UNUSED_SHIP_BRIDGE_83:
     case BUILDING_PLAZA:

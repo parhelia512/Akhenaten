@@ -190,13 +190,15 @@ static int clear_land_confirmed(bool measure_only, clear_confirm_t confirm) {
                 if (map_terrain_is(grid_offset, TERRAIN_ROAD))
                     map_property_clear_plaza_or_earthquake(grid_offset);
 
+                const bool cleared = map_terrain_is(grid_offset, TERRAIN_CLEARABLE);
                 map_terrain_remove(grid_offset, TERRAIN_CLEARABLE);
-                if (map_terrain_is(grid_offset, TERRAIN_CLEARABLE))
+                if (cleared) {
                     items_placed++;
+                }
             }
         }
     }
-    
+
     if (!measure_only || !visual_feedback_on_delete) {
         int radius;
         if (area.tmax_x - area.tmin_x <= area.tmax_y - area.tmin_y) {

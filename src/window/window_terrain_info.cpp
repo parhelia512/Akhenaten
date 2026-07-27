@@ -8,6 +8,7 @@
 #include "grid/property.h"
 #include "grid/canals.h"
 #include "grid/image.h"
+#include "grid/wall_material.h"
 #include "sound/sound.h"
 #include "building/building_garden.h"
 #include "building/building_plaza.h"
@@ -74,6 +75,8 @@ void terrain_info_window::init(object_info &c) {
 
     case terrain_info_road:
     case terrain_info_wall:
+    case terrain_info_mud_wall:
+    case terrain_info_brick_wall:
     case terrain_info_plaza:
     case terrain_info_ore_rock:
     case terrain_info_rock:
@@ -161,7 +164,8 @@ bool terrain_info_window::check(object_info &c) {
         c.terrain_type = terrain_info_canal;
 
     } else if (map_terrain_is(c.grid_offset, TERRAIN_WALL)) {
-        c.terrain_type = terrain_info_wall;
+        const e_wall_material material = map_wall_material_at(c.grid_offset);
+        c.terrain_type = (material == WALL_MATERIAL_BRICK) ? terrain_info_brick_wall : terrain_info_mud_wall;
 
     } else if (!c.bid && map_terrain_is(c.grid_offset, TERRAIN_RUBBLE)) {
         c.terrain_type = terrain_info_rubble;

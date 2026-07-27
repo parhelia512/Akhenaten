@@ -1048,20 +1048,20 @@ building_decorative_gatehouse = {
   }
 }
 
-building_brick_wall {
-  animations {
-    preview { pack:PACK_GENERAL, id:138, offset:27 },
-    base { pack:PACK_GENERAL, id:138 },
+building_brick_wall = {
+  animations : {
+    preview : { pack:PACK_GENERAL, id:138, offset:27 },
+    base : { pack:PACK_GENERAL, id:138 },
   }
   building_size : 1
-  planner_update_rule {
+  planner_update_rule : {
     is_draggable : true
   }
-  cost [7, 12, 25, 40, 70]
-  desirability { value[-3], step[3], step_size[3], range[3] }
-  laborers[0]
-  fire_risk[0]
-  damage_risk[0]
+  cost : [ 7, 12, 25, 40, 70 ]
+  desirability : { value:[-3], step:[3], step_size:[3], range:[3] }
+  laborers : [0]
+  fire_risk : [0]
+  damage_risk : [0]
   flags {
     is_wall: true
     is_defense: true
