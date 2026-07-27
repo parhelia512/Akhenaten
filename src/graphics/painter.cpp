@@ -4,8 +4,10 @@
 #include "core/profiler.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
+#include "graphics/residency_atlas.h"
 #include "platform/renderer.h"
 
+#include <cmath>
 #include <string>
 #include <unordered_map>
 
@@ -228,6 +230,10 @@ void painter::draw_impl(SDL_Texture *texture, vec2i pos, vec2i offset, vec2i siz
         return;
     }
 
+    // Record the full (unclipped) source region for the add-only residency-atlas
+    // debug tool (no-op unless enabled via the `residency_atlas` console command).
+    res_atlas::on_draw(texture, offset, size);
+
     if (!color) {
         color = COLOR_MASK_NONE;
     }
@@ -279,6 +285,77 @@ void painter::draw_impl(SDL_Texture *texture, vec2i pos, vec2i offset, vec2i siz
                          pos.y * this->global_render_scale,
                          size.x * x_scale_factor,
                          size.y * y_scale_factor};
+    }
+
+    // Manually clip src+dst against the active clip rect. SDL's clip alone can
+    // leave a 1px vertical smear on the left when tall atlas sprites (pyramid
+    // tiers, stairs) cross the city viewport with dest.x < clip.x.
+    {
+        SDL_Rect clip{};
+        SDL_RenderGetClipRect(this->renderer, &clip);
+        if (clip.w > 0 && clip.h > 0) {
+            const float clip_l = (float)clip.x;
+            const float clip_t = (float)clip.y;
+            const float clip_r = (float)(clip.x + clip.w);
+            const float clip_b = (float)(clip.y + clip.h);
+
+            if (screen_coords.x + screen_coords.w <= clip_l || screen_coords.x >= clip_r
+                || screen_coords.y + screen_coords.h <= clip_t || screen_coords.y >= clip_b
+                || screen_coords.w <= 0.f || screen_coords.h <= 0.f) {
+                return;
+            }
+
+            const bool mirrored = !!(flags & ImgFlag_Mirrored);
+            float src_x = (float)texture_coords.x;
+            float src_y = (float)texture_coords.y;
+            float src_w = (float)texture_coords.w;
+            float src_h = (float)texture_coords.h;
+
+            if (screen_coords.x < clip_l) {
+                const float cut = clip_l - screen_coords.x;
+                const float cut_src = cut * (src_w / screen_coords.w);
+                if (!mirrored) {
+                    src_x += cut_src;
+                }
+                src_w -= cut_src;
+                screen_coords.x = clip_l;
+                screen_coords.w -= cut;
+            }
+            if (screen_coords.w > 0.f && screen_coords.x + screen_coords.w > clip_r) {
+                const float cut = screen_coords.x + screen_coords.w - clip_r;
+                const float cut_src = cut * (src_w / screen_coords.w);
+                if (mirrored) {
+                    src_x += cut_src;
+                }
+                src_w -= cut_src;
+                screen_coords.w -= cut;
+            }
+            if (screen_coords.h > 0.f && screen_coords.y < clip_t) {
+                const float cut = clip_t - screen_coords.y;
+                const float cut_src = cut * (src_h / screen_coords.h);
+                src_y += cut_src;
+                src_h -= cut_src;
+                screen_coords.y = clip_t;
+                screen_coords.h -= cut;
+            }
+            if (screen_coords.h > 0.f && screen_coords.y + screen_coords.h > clip_b) {
+                const float cut = screen_coords.y + screen_coords.h - clip_b;
+                const float cut_src = cut * (src_h / screen_coords.h);
+                src_h -= cut_src;
+                screen_coords.h -= cut;
+            }
+
+            // Keep src/dst aspect matched: round src after float clip, then drop
+            // draws that would leave a sub-pixel garbage column at the edge.
+            texture_coords.x = (int)std::lround(src_x);
+            texture_coords.y = (int)std::lround(src_y);
+            texture_coords.w = (int)std::lround(src_w);
+            texture_coords.h = (int)std::lround(src_h);
+            if (texture_coords.w <= 0 || texture_coords.h <= 0
+                || screen_coords.w < 0.5f || screen_coords.h < 0.5f) {
+                return;
+            }
+        }
     }
 
     if (!!(flags & ImgFlag_Mirrored)) {

@@ -13,6 +13,7 @@ bool animation_t::archive_load(archive arch) {
     duration = std::max<int16_t>(1, duration);
     loop = arch.r_bool("loop", true);
     hashtime = global_hashtime;
+    cached_imgid = 0;
     bool internal_offset = arch.r_bool("internal_offset", false);
     flags = (internal_offset ? ImgFlag_InternalOffset : 0);
     return true;
