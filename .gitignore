@@ -44,6 +44,10 @@ doc
 
 *.lnk
 
+# Local remake / mission planning docs (keep on disk, do not track)
+/REMAKE_*.md
+/MISSION_*.md
+
 # Tools
 /tools/*
 !/tools/*.zip
