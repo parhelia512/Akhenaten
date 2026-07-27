@@ -227,62 +227,26 @@ void city_maintenance_t::check_kingdome_access() {
                 city_buildings_set_trade_center(b.id);
             }
 
-            b.distance_from_entry = 0;
-            const bool closest_road = !!game_features::gameplay_building_road_closest;
-            tile2i road = map_road_to_largest_network_rotation(b.orientation, b.tile, 3, closest_road);
-            if (road.x() >= 0) {
-                b.road_network_id = map_road_network_get(road);
-                b.distance_from_entry = map_routing_distance(road);
-                b.road_access = road;
-                b.has_road_access = true;
-            } else {
-                b.road_access = map_get_road_access_tile(b.tile, 3);
-                b.has_road_access = b.road_access.valid();
-            }
+            apply_building_road_access(b,
+                resolve_building_road_access(b.tile, b.type, 3, b.orientation, 0, road_access_resolve_mode::Commit));
         } else if (b.type == BUILDING_STORAGE_ROOM) {
             OZZY_PROFILER_SECTION(_, "Game/Run/Tick/Check Road Access/Storageyard Space");
-            b.distance_from_entry = 0;
-            building *main_building = b.main();
-            b.road_network_id = main_building->road_network_id;
-            b.distance_from_entry = main_building->distance_from_entry;
-            b.road_access = main_building->road_access;
-
+            apply_building_road_access_from_main(b);
         } else if (b.type == BUILDING_SENET_HOUSE) {
             OZZY_PROFILER_SECTION(_, "Game/Run/Tick/Check Road Access/Senet");
-            b.distance_from_entry = 0;
-            const bool closest_road = !!game_features::gameplay_building_road_closest;
-            tile2i road = map_road_to_largest_network(b.tile, b.size, closest_road);
-            if (road.valid()) {
-                b.road_network_id = map_road_network_get(road);
-                b.distance_from_entry = map_routing_distance(road);
-                b.road_access = road;
-                b.has_road_access = true;
-            } else {
-                b.road_access = map_get_road_access_tile(b.tile, b.size);
-                b.has_road_access = b.road_access.valid();
-            }
+            apply_building_road_access(b,
+                resolve_building_road_access(b.tile, b.type, b.size, 0, 0, road_access_resolve_mode::Commit));
         } else if (building_type_any_of(b, { BUILDING_TEMPLE_COMPLEX_OSIRIS, BUILDING_TEMPLE_COMPLEX_RA, BUILDING_TEMPLE_COMPLEX_PTAH, BUILDING_TEMPLE_COMPLEX_SETH, BUILDING_TEMPLE_COMPLEX_BAST })) {
             if (b.is_main()) {
                 auto complex = b.dcast_temple_complex();
-                int orientation = (5 - (complex->runtime_data().variant / 2)) % 4;
-                b.has_road_access = map_has_road_access_temple_complex(b.tile, orientation, false, &b.road_access);
-                b.road_network_id = map_road_network_get(b.road_access);
-                b.distance_from_entry = map_routing_distance(b.road_access);
+                const int variant = complex ? complex->runtime_data().variant : 0;
+                apply_building_road_access(b,
+                    resolve_building_road_access(b.tile, b.type, b.size, 0, variant, road_access_resolve_mode::Commit));
             }
         } else { // other building
             OZZY_PROFILER_SECTION(_, "Game/Run/Tick/Check Road Access/Other");
-            b.distance_from_entry = 0;
-            bool closest_road = !!game_features::gameplay_building_road_closest;
-            tile2i road = map_road_to_largest_network(b.tile, b.size, closest_road);
-            if (road.valid()) {
-                b.road_network_id = map_road_network_get(road);
-                b.distance_from_entry = map_routing_distance(road);
-                b.road_access = road;
-                b.has_road_access = true;
-            } else {
-                b.road_access = map_get_road_access_tile(b.tile, b.size);
-                b.has_road_access = b.road_access.valid();
-            }
+            apply_building_road_access(b,
+                resolve_building_road_access(b.tile, b.type, b.size, 0, 0, road_access_resolve_mode::Commit));
         }
     });
 

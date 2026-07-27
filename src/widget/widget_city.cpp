@@ -9,8 +9,11 @@
 #include "grid/grid.h"
 #include "widget/city/building_ghost.h"
 #include "overlays/city_overlay.h"
-#include "building/construction/build_planner.h"
+#include "graphics/image_groups.h"
+#include "building/building_static_params.h"
 #include "building/building_bridge.h"
+#include "building/building_temple_complex.h"
+#include "building/construction/build_planner.h"
 #include "city/city_finance.h"
 #include "city/city_warnings.h"
 #include "core/calc.h"
@@ -24,11 +27,14 @@
 #include "grid/figure.h"
 #include "grid/image.h"
 #include "grid/terrain.h"
+#include "grid/road_access.h"
+#include "grid/routing/routing.h"
 #include "input/scroll.h"
 #include "game/game_config.h"
 #include "io/gamefiles/lang.h"
 #include "platform/renderer.h"
 #include "scenario/scenario.h"
+#include "scenario/invasion_auto_resolve.h"
 #include "sound/sound_city.h"
 #include "sound/effect.h"
 #include "sound/sound.h"
@@ -46,6 +52,7 @@
 #include "game/game.h"
 #include "core/threading.h"
 #include "building/building.h"
+#include "city/city_buildings.h"
 #include "dev/debug.h"
 #include "graphics/elements/tooltip.h"
 #include <future>
@@ -213,6 +220,51 @@ void screen_city_t::draw_postrender_building_effects(vec2i pixel, tile2i tile, p
         building_impl *bi = b->dcast();
         bi->draw_postrender_effects(ctx, pixel, tile, color_mask);
     }
+}
+
+void screen_city_t::draw_building_road_access_marker(painter &ctx) {
+    if (!game_features::gameui_show_building_road_access.to_bool()) {
+        return;
+    }
+
+    // Ghost placement draws its own marker; info window already highlights via waypoints.
+    if (g_city_planner.build_type != BUILDING_NONE) {
+        return;
+    }
+    if (g_window_manager.window_is("window_building_info")) {
+        return;
+    }
+    if (!current_tile.valid()) {
+        return;
+    }
+
+    building *b = building_at(current_tile);
+    if (!b || !b->is_valid()) {
+        return;
+    }
+
+    building *m = b->main();
+    if (!m || !building_type_hover_road_access(m->type)) {
+        return;
+    }
+
+    building_road_ports ports = building_road_ports_stored(*m);
+    if (!ports.valid) {
+        int variant = 0;
+        if (building_static_params::get(m->type).flags.is_temple_complex) {
+            auto complex = m->dcast_temple_complex();
+            variant = complex ? complex->runtime_data().variant : 0;
+        }
+        const bool assume = building_type_ghost_assume_occupied(m->type);
+        ports = building_road_ports_preview(m->tile, m->type, m->size, m->orientation, variant, assume);
+    }
+    if (!ports.valid) {
+        return;
+    }
+
+    const color mask = map_routing_distance(ports.tile) > 0 ? COLOR_MASK_AMBER : COLOR_MASK_AMBER_40;
+    vec2i pixel = g_camera.lookup_tile_to_pixel(ports.tile);
+    build_planner::draw_building_ghost(ctx, image_id_from_group(GROUP_TERRAIN_OVERLAY_COLORED) + 23, pixel, mask);
 }
 
 void screen_city_t::draw_figures(vec2i pixel, tile2i tile, painter &ctx, [[maybe_unused]] bool force) {
@@ -462,6 +514,8 @@ void screen_city_t::draw_without_overlay(painter &ctx, int selected_figure_id) {
         g_city_planner.update(city_planner_cursor_tile_from_mouse());
         g_city_planner.draw(ctx);
     }
+
+    draw_building_road_access_marker(ctx);
 
     // PHASE 5: post-processing of tiles that require special handling after all main elements are drawn
     g_camera.foreach_valid_map_tile(ctx,
@@ -854,6 +908,8 @@ void screen_city_t::draw_with_overlay(painter &ctx) {
     g_city_planner.update(city_planner_cursor_tile_from_mouse());
     g_city_planner.draw(ctx);
 
+    draw_building_road_access_marker(ctx);
+
     ImageDraw::apply_render_commands(ctx, "draw_city_planer_overlay");
 
     // finally, draw these on top of everything else
@@ -1176,6 +1232,9 @@ void screen_city_t::military_map_click(int legion_formation_id, tile2i tile) {
     int other_formation_id = formation_batalion_at_building(tile.grid_offset());
     if (other_formation_id && other_formation_id == legion_formation_id) {
         formation_batalion_return_home(m);
+    } else if (invasion_auto_resolve_target_blocked(tile)) {
+        // March onto a frozen pending wave — blocked; reposition elsewhere OK.
+        events::emit(event_city_warning{ "#warning_auto_resolve_orders_blocked" });
     } else {
         formation_batalion_move_to(m, tile);
         g_sound.speech_play_file("Wavs/cohort5.wav", 255);

@@ -19,6 +19,7 @@
 #include "building/building_granary.h"
 #include "building/building_static_params.h"
 #include "building/building_storage_yard.h"
+#include "building/building_temple_complex.h"
 #include "building/monument_mastaba.h"
 #include "building/monument_pyramid.h"
 #include "building/monuments.h"
@@ -35,6 +36,8 @@
 #include "graphics/color.h"
 #include "city/city.h"
 #include "city/city_buildings.h"
+#include "city/city_maintenance.h"
+#include "grid/road_access.h"
 #include "game/autosave_module.h"
 #include "core/bstring.h"
 #include "game/game.h"
@@ -729,6 +732,7 @@ static int __test_monument_resource_pct(int bid, int resource) {
 }
 ANK_FUNCTION_2(__test_monument_resource_pct);
 
+// Force-stock a storage yard (bypasses accepting/getting rules). Yard must already exist.
 // Force-remove from a storage yard. Returns true when the resource is fully gone.
 static bool __test_storage_yard_remove_resource(int bid, int resource, int amount) {
     building *b = building_get(bid);
@@ -741,7 +745,6 @@ static bool __test_storage_yard_remove_resource(int bid, int resource, int amoun
 }
 ANK_FUNCTION_3(__test_storage_yard_remove_resource);
 
-// Force-stock a storage yard (bypasses accepting/getting rules). Yard must already exist.
 static bool __test_storage_yard_add_resource(int bid, int resource, int amount) {
     building *b = building_get(bid);
     auto *yard = b ? b->dcast_storage_yard() : nullptr;
@@ -1191,6 +1194,82 @@ static int __test_granary_add_allowed_food(int bid, int food_index, int amount) 
     return granary->add_resource(res, amount, /*force*/true) >= 0 ? 1 : 0;
 }
 ANK_FUNCTION_3(__test_granary_add_allowed_food);
+
+static int __test_resolve_building_road_access(int type, int x, int y, int size, int orientation) {
+    if (type <= BUILDING_NONE || type >= BUILDING_MAX) {
+        return 0;
+    }
+    tile2i tile(x, y);
+    if (!tile.valid()) {
+        return 0;
+    }
+    building_road_access_result r = resolve_building_road_access(tile, (e_building_type)type, size, orientation, 0,
+        road_access_resolve_mode::Preview, false);
+    return r.valid ? 1 : 0;
+}
+ANK_FUNCTION_5(__test_resolve_building_road_access);
+
+static int __test_building_road_access_tile(int bid) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return -1;
+    }
+    building *m = b->main();
+    if (!m || !m->road_access.valid()) {
+        return -1;
+    }
+    return m->road_access.grid_offset();
+}
+ANK_FUNCTION_1(__test_building_road_access_tile);
+
+static int __test_building_road_access_match_preview(int bid) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return 0;
+    }
+    building *m = b->main();
+    if (!m) {
+        return 0;
+    }
+    int variant = 0;
+    if (building_static_params::get(m->type).flags.is_temple_complex) {
+        auto complex = m->dcast_temple_complex();
+        variant = complex ? complex->runtime_data().variant : 0;
+    }
+    const bool assume = building_type_ghost_assume_occupied(m->type);
+    building_road_ports stored = building_road_ports_stored(*m);
+    building_road_ports preview = building_road_ports_preview(m->tile, m->type, m->size, m->orientation, variant, assume);
+    if (!stored.valid || !preview.valid) {
+        return 0;
+    }
+    return (stored.tile == preview.tile) ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_building_road_access_match_preview);
+
+static void __test_check_kingdome_access() {
+    g_city.maintenance.check_kingdome_access();
+}
+ANK_FUNCTION(__test_check_kingdome_access);
+
+static void __test_update_road_network() {
+    g_city.map.update_road_network();
+}
+ANK_FUNCTION(__test_update_road_network);
+
+static int __test_building_type_ghost_road_access(int type) {
+    return building_type_ghost_road_access((e_building_type)type) ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_building_type_ghost_road_access);
+
+static int __test_building_type_ghost_assume_occupied(int type) {
+    return building_type_ghost_assume_occupied((e_building_type)type) ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_building_type_ghost_assume_occupied);
+
+static int __test_building_type_hover_road_access(int type) {
+    return building_type_hover_road_access((e_building_type)type) ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_building_type_hover_road_access);
 
 ANK_DECLARE_JSFUNCTION_ITERATOR(register_test_js_functions);
 inline void register_test_js_functions(js_State *J) {

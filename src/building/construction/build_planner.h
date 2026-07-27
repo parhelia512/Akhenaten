@@ -95,6 +95,7 @@ class build_planner {
 
     void update_coord_caches();
     void draw_graphics(painter &ctx);
+    void draw_road_access_marker(painter &ctx);
     int place_houses(bool measure_only, int x_start, int y_start, int x_end, int y_end);
 
 public:

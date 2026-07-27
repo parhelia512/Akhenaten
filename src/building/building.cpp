@@ -267,7 +267,7 @@ building_impl *building::dcast() {
 building::building() {
 }
 
-building* building::main() {
+const building* building::main() const {
     OZZY_PROFILER_SECTION(_, "building_main")
 
     if (prev_part_building_id <= 0) {
@@ -277,7 +277,7 @@ building* building::main() {
     // Large stepped pyramid is 20×20 / 2×2 = 100 parts; grand is 144. The old
     // guard of 99 made late parts (SE corner) fall through to building_get(0),
     // so get_bricks_image picked the wrong corner sprite.
-    building* b = this;
+    const building* b = this;
     for (int guard = 0; guard < (int)MAX_BUILDINGS; guard++) {
         if (b->prev_part_building_id <= 0) {
             return b;
@@ -286,6 +286,10 @@ building* building::main() {
     }
 
     return building_get(0);
+}
+
+building* building::main() {
+    return const_cast<building*>(static_cast<const building*>(this)->main());
 }
 
 building* building::top_xy() {

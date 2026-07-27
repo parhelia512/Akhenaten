@@ -2,6 +2,7 @@
 
 #include "editor/tool.h"
 #include "graphics/view/lookup.h"
+#include "graphics/view/view.h"
 #include "grid/floodplain.h"
 #include "core/log.h"
 #include "widget/widget_sidebar.h"
@@ -51,6 +52,8 @@
 #include "grid/tiles.h"
 #include "grid/water.h"
 #include "grid/figure.h"
+#include "grid/road_access.h"
+#include "grid/routing/routing.h"
 #include "game/game_config.h"
 #include "routed.h"
 #include "city/city.h"
@@ -489,6 +492,7 @@ void build_planner::setup_build_flags() {
         break;
 
     case BUILDING_MUD_TOWER:
+    case BUILDING_BRICK_TOWER:
         set_flag(e_planner_rule::Walls);
         break;
 
@@ -903,10 +907,10 @@ void build_planner::update_orientations(bool check_if_changed) {
     const auto &preview = building_planer_renderer::get(build_type);
 
     relative_orientation = preview.update_relative_orientation(*this, end, relative_orientation);
-    building_variant = preview.update_building_variant(*this);
-
     relative_orientation = relative_orientation % 4;
+    // Absolute must be fresh before variant: temple (and others) derive variant from it.
     absolute_orientation = g_camera.absolute_orientation(relative_orientation);
+    building_variant = preview.update_building_variant(*this);
 
     // do not refresh graphics if nothing changed
     if (check_if_changed && relative_orientation == prev_orientation && building_variant == prev_variant) {
@@ -1089,7 +1093,7 @@ void build_planner::construction_finalize() { // confirm final placement
     // attempt placing, restore terrain data on failure
     if (!place()) {
         map_property_clear_constructing_and_deleted();
-        if (building_type_any_of(build_type, { BUILDING_MUD_WALL, BUILDING_ROAD, BUILDING_IRRIGATION_DITCH })) {
+        if (building_type_any_of(build_type, { BUILDING_MUD_WALL, BUILDING_BRICK_WALL, BUILDING_ROAD, BUILDING_IRRIGATION_DITCH })) {
             game_undo_restore_map(0);
         } else if (build_type == BUILDING_PLAZA || build_type == BUILDING_GARDENS) {
             game_undo_restore_map(1);
@@ -1323,9 +1327,11 @@ void build_planner::draw(painter &ctx) {
     } else if (tiles_blocked_total > 0) {
         // draw green blueprint with red (blocked) tiles
         preview.ghost_blocked(*this, ctx, start, end, pixel, /*fully_blocked*/false);
+        draw_road_access_marker(ctx);
     } else if (!draw_as_constructing) {
         // draw normal building ghost (green)
         draw_graphics(ctx);
+        draw_road_access_marker(ctx);
     }
 }
 
@@ -1372,6 +1378,29 @@ void build_planner::draw_graphics(painter &ctx) {
     preview.ghost_preview(*this, ctx, start, end, pixel);
 }
 
+void build_planner::draw_road_access_marker(painter &ctx) {
+    if (!game_features::gameui_show_building_road_access.to_bool()) {
+        return;
+    }
+    if (!building_type_ghost_road_access(build_type)) {
+        return;
+    }
+
+    const auto &params = building_static_params::get(build_type);
+    const int bsize = params.building_size > 0 ? params.building_size : size.x;
+    const bool assume = building_type_ghost_assume_occupied(build_type);
+    building_road_ports ports = building_road_ports_preview(end, build_type, bsize, absolute_orientation,
+        building_variant, assume);
+    if (!ports.valid) {
+        return;
+    }
+
+    // Dim when the access tile has no route to kingdom entry (last-tick distances).
+    const color mask = map_routing_distance(ports.tile) > 0 ? COLOR_MASK_AMBER : COLOR_MASK_AMBER_40;
+    vec2i access_pixel = g_camera.lookup_tile_to_pixel(ports.tile);
+    draw_building_ghost(ctx, image_id_from_group(GROUP_TERRAIN_OVERLAY_COLORED) + 23, access_pixel, mask);
+}
+
 bool build_planner::place() {
     if (end == tile2i(-1, -1)) {
         return false;
@@ -1398,8 +1427,10 @@ bool build_planner::place() {
                 items_placed = last_items_cleared;
             placement_cost *= items_placed;
             map_property_clear_constructing_and_deleted();
+            total_cost = placement_cost;
+            // Unit cost may be 0 in config; still finish undo when something was cleared.
+            return items_placed > 0;
         }
-        break;
 
     case BUILDING_LOW_BRIDGE:
     case BUILDING_UNUSED_SHIP_BRIDGE_83: {

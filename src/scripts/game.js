@@ -109,6 +109,7 @@ game_features {
     @gameplay_fix_editor_events {}
     @gameopt_disable_victory {}
     @gameui_show_water_structure_range {}
+    @gameui_show_building_road_access {}
     @count { get: __game_features_count }
 }
 

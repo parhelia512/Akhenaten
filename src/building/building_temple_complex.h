@@ -25,7 +25,7 @@ public:
         virtual int setup_orientation(int orientation) const override;
         virtual void setup_preview_graphics(build_planner &planer) const override;
         virtual int update_relative_orientation(build_planner &p, tile2i tile, int global_rotation) const override;
-        virtual int update_building_variant(build_planner &planer) const override { return 0; }
+        virtual int update_building_variant(build_planner &planer) const override;
     };
 
     // Static configuration that is populated from configs for each specific complex

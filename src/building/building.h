@@ -251,6 +251,7 @@ public:
 
     building();
     building* main();
+    const building* main() const;
     inline building *next() { return building_get(next_part_building_id); }
     inline const building *next() const { return building_get(next_part_building_id); }
     inline bool has_next() const { return next_part_building_id > 0; }

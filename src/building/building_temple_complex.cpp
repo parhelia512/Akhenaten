@@ -42,6 +42,11 @@ int building_temple_complex::preview::update_relative_orientation(build_planner 
     return global_rotation + 1;
 }
 
+int building_temple_complex::preview::update_building_variant(build_planner &planer) const {
+    // Match on_create: variant = (10 - 2*orientation) % 8 so resolve ? same complex orientation.
+    return (10 - (2 * planer.absolute_orientation)) % 8;
+}
+
 void building_temple_complex::preview::setup_preview_graphics(build_planner &planer) const {
     const auto &params = building_static_params::get(planer.build_type);
 
@@ -413,13 +418,6 @@ void building_temple_complex::build_upgrade(e_temple_compex_upgrade upgrade_para
     map_tiles_add_temple_complex_parts(&base);
 }
 
-// Walk the next_part_building_id chain looking for a part whose type is in
-// `allowed`. building_get() does no bounds checking (g_all_buildings is a fixed
-// 5000-slot array), so a missing/garbage linkage — e.g. a temple complex loaded
-// from an original Pharaoh mission pack that has no Akhenaten-style sub-buildings
-// — would otherwise dereference an out-of-range pointer and crash. Validate each
-// id is in (0, MAX_BUILDINGS) before following it, and cap the walk length to
-// guard against a corrupt cyclic chain.
 static building* temple_complex_find_part(const building& base, const svector<e_building_type, 4>& allowed) {
     int next_id = base.next_part_building_id;
     for (int guard = 0; next_id > 0 && next_id < (int)MAX_BUILDINGS && guard < (int)MAX_BUILDINGS; ++guard) {
@@ -444,11 +442,11 @@ building* building_temple_complex::get_oracle() const {
 building *building_temple_complex::get_upgrade(e_temple_compex_upgrade type) const {
     if (type == etc_upgrade_altar) {
         return get_altar();
-    } 
-    
+    }
+
     if (type == etc_upgrade_oracle) {
         return get_oracle();
-    } 
+    }
 
     return &base;
 }
@@ -581,7 +579,7 @@ void building_temple_complex::on_destroy() {
     auto &tiles = *runtime_data().decorative_tiles;
     if (is_main() && !tiles.empty()) {
         // Per-tile reset matches what map_building_tiles_remove() does for a
-        // building's footprint — without it the decorative sprites stay drawn
+        // building's footprint ï¿½ without it the decorative sprites stay drawn
         // and the cursor-to-building grid keeps stale ids on those tiles.
         for (auto &t : tiles) {
             map_building_tile_clear_at(t, /*building_type*/ 0);
