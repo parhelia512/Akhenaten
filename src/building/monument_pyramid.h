@@ -55,6 +55,7 @@ public:
     virtual void on_place(int orientation, int variant) override;
     virtual void on_create(int orientation) override;
     virtual void on_post_load() override;
+    virtual void on_config_reload() override;
     virtual void on_place_checks() override;
     virtual void update_count() const override;
     virtual void update_month() override;
@@ -155,7 +156,7 @@ public:
 
 // Large stepped pyramid (20×20, id 250). Same shared stepped machinery as small/medium,
 // only the footprint (init_tiles) and phase schedule differ. Height render + polish stage
-// for the extra layers are a follow-up visual pass (see REMAKE_LARGE_PYRAMID_IMPL.md).
+// for the extra layers are a follow-up visual pass (see REMAKE_LARGE_PYRAMID_LAYER2.md).
 class building_large_stepped_pyramid : public building_stepped_pyramid {
 public:
     BUILDING_METAINFO(BUILDING_LARGE_STEPPED_PYRAMID, building_large_stepped_pyramid, building_stepped_pyramid)

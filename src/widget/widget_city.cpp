@@ -789,6 +789,19 @@ void screen_city_t::draw_ornaments_and_animations_height(vec2i point, tile2i til
         color_mask = COLOR_MASK_RED;
     }
 
+    // Anchor for create_subcommand (pyramid bricks/stairs, plague skull, …).
+    // draw_isometric_nonterrain_height often creates no parent (non-tall map
+    // image) — then subcommands attach to the *previous* tile and sort with its
+    // pixel. That shows up as crushed/mis-layered sprites on the left viewport
+    // edge when a tall monument is partially off-screen. ert_none draws nothing.
+    {
+        auto &anchor = ImageDraw::create_command(ctx, render_command_t::ert_none);
+        anchor.pixel = point;
+        anchor.use_sort_pixel = true;
+        anchor.sort_pixel = point;
+        anchor.location = SOURCE_LOCATION;
+    }
+
     b->dcast()->draw_ornaments_and_animations_height(ctx, point, tile, color_mask);
 }
 

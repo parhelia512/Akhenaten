@@ -137,7 +137,7 @@ struct monument_medium_stepped_pyramid : public monument {
 // Large stepped pyramid (20×20). First-cut schedule mirrors the medium cadence
 // (foundation phases 0–6, then flat brick phases) so it builds/finishes/save-loads.
 // The extra layers of the taller 20×20 and the top-down polish stage are a follow-up
-// visual pass — extend the schedule together with the render (REMAKE_LARGE_PYRAMID_IMPL.md).
+// visual pass — extend the schedule together with the render (REMAKE_LARGE_PYRAMID_LAYER2.md).
 struct monument_large_stepped_pyramid : public monument {
     monument_large_stepped_pyramid() : monument{ BUILDING_LARGE_STEPPED_PYRAMID } {
         phases.push_back({ 0, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
@@ -531,6 +531,13 @@ void building_stepped_pyramid::on_post_load() {
     assign_stair();
 }
 
+void building_stepped_pyramid::on_config_reload() {
+    // stairs[] is reloaded from pyramid.js on --mixed / reload_scripts, but each
+    // part keeps a cached stair_index from place/load — rebind so part/tex/offset
+    // edits apply without restarting the mission.
+    assign_stair();
+}
+
 bool building_stepped_pyramid::draw_ornaments_and_animations_flat_impl(painter &ctx, vec2i point, tile2i tile, color color_mask, const vec2i tiles_size) {
     // Use the same implementation as building_mastaba::draw_ornaments_and_animations_flat_impl
     // This can be customized later if pyramid needs different rendering
@@ -859,6 +866,11 @@ int building_stepped_pyramid::get_bricks_image(int orientation, tile2i tile, til
 }
 
 void building_stepped_pyramid::draw_ornaments_and_animations_stairs_impl(painter &ctx, vec2i point, tile2i tile, color color_mask, const vec2i tiles_size) {
+    // phase() is uint8_t: MONUMENT_FINISHED (-1) becomes 255, which would match every stair.
+    if (is_finished()) {
+        return;
+    }
+
     auto &d = runtime_data();
     const auto &stairs = pyramid_params().stairs;
     if (d.stair_index == 0xff || d.stair_index >= stairs.size()) {
@@ -1115,8 +1127,10 @@ bool building_stepped_pyramid::draw_ornaments_and_animations_hight_impl(painter 
             }
         }
         draw_ornaments_and_animations_stairs_impl(ctx, point, tile, color_mask, tiles_size);
-    } else if (phase() == 32 || phase() == 36) {
-        // Medium finishes at 32; large at 36 (full 5 tiers).
+    } else if (is_finished() || phase() == 24 || phase() == 32 || phase() == 36) {
+        // Complete pyramid: last construction phase (small 24 / medium 32 / large 36)
+        // or MONUMENT_FINISHED after monument_up / natural complete. Without this
+        // branch finished monuments draw nothing (phase() is uint8_t 255).
         if (d.layer == 0) {
             auto layer_area = get_layer_area(0);
             int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
@@ -1268,9 +1282,9 @@ void building_stepped_pyramid::update_month() {
 
 void building_stepped_pyramid::update_map_orientation(int map_orientation) {
     if (is_finished()) {
-        building *main = base.main();
-        int image_id = building_small_mastabe_get_bricks_image(base.orientation, type(), tile(), main->tile, main->tile.shifted(3, 9), 6);
-        map_building_tiles_add(id(), tile(), base.size, image_id, TERRAIN_BUILDING);
+        // Finished stepped pyramids are drawn via height ornaments (full tiers).
+        // Do not reuse mastaba brick lookup — wrong footprint (3,9) and images → black grid.
+        map_building_tiles_add(id(), tile(), base.size, building_image_get(), TERRAIN_BUILDING);
     }
 }
 
@@ -1335,7 +1349,7 @@ bool building_small_stepped_pyramid::draw_ornaments_and_animations_flat(painter 
 
 bool building_small_stepped_pyramid::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
     if (is_finished()) {
-        return false;
+        return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
     }
 
     if (phase() == 6 && runtime_data().alt_image > 0) {
@@ -1605,7 +1619,7 @@ bool building_medium_stepped_pyramid::draw_ornaments_and_animations_flat(painter
 
 bool building_medium_stepped_pyramid::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
     if (is_finished()) {
-        return false;
+        return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
     }
 
     if (phase() == 6 && runtime_data().alt_image > 0) {
@@ -1667,7 +1681,7 @@ bool building_large_stepped_pyramid::draw_ornaments_and_animations_flat(painter 
 
 bool building_large_stepped_pyramid::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
     if (is_finished()) {
-        return false;
+        return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
     }
 
     if (phase() == 6 && runtime_data().alt_image > 0) {
@@ -1729,7 +1743,7 @@ bool building_small_bent_pyramid::draw_ornaments_and_animations_flat(painter &ct
 
 bool building_small_bent_pyramid::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
     if (is_finished()) {
-        return false;
+        return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
     }
 
     if (phase() == 6 && runtime_data().alt_image > 0) {
@@ -1787,7 +1801,7 @@ bool building_medium_bent_pyramid::draw_ornaments_and_animations_flat(painter &c
 
 bool building_medium_bent_pyramid::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
     if (is_finished()) {
-        return false;
+        return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
     }
 
     if (phase() == 6 && runtime_data().alt_image > 0) {
