@@ -29,6 +29,7 @@ public:
     bool take_resource_from_storageyard(building *warehouse);
     int take_food_from_storage(building *market, building *granary);
     int create_delivery_boy(int leader_id);
+    void apply_return_home_spawn_cooldown();
 };
 
 int provide_market_goods(building *market, tile2i tile);

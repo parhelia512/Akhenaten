@@ -285,14 +285,24 @@
       <!-- ─── Mechanics ─────────────────────────────────────── -->
       <h2 id="mechanics">Mechanics</h2>
 
-      <h3>Two buyers, two supply chains</h3>
-      <p>Each Bazaar employs <strong>two buyers</strong> that work independently:</p>
-      <ul>
-        <li><strong>Food buyer</strong> — travels exclusively to <a href="granary.html">Granaries</a>. She cannot collect food from a Storage Yard, even if food is stored there.</li>
-        <li><strong>Goods buyer</strong> — travels exclusively to <a href="storage-yard.html">Storage Yards</a>. She collects non-food commodities such as pottery, linen, beer, and luxury goods.</li>
-      </ul>
-      <p>Each buyer is a <em>destination walker</em>: she walks directly to a specific Granary or Storage Yard, loads up, and returns. A string of helpers carries the load back when the haul is large. She deals with at most three supply sources in her range — if you expect her to visit more, she will not go.</p>
-      <p>Both buyers share the same 40-tile search radius measured from the Bazaar's northern tile. A Granary or Storage Yard beyond 40 tiles is invisible to the buyers regardless of road connectivity.</p>
+      <h3>Buyers (OG vs Enhanced)</h3>
+      <p>In original Pharaoh each Bazaar fields <strong>one market buyer</strong> at a time.
+        That buyer fetches a single food or goods type per trip (priority prefers empty food
+        slots, then empty goods, then lowest stock under thresholds). Food comes from
+        <a href="granary.html">Granaries</a>; goods from <a href="storage-yard.html">Storage Yards</a>
+        (food sitting in a yard can also be collected as a good haul).</p>
+      <p><strong>Enhanced option</strong> <code>gameplay_change_bazaar_multi_buyers</code>
+        (default OFF; Options → gameplay changes) allows up to <strong>two concurrent buyers</strong>
+        (<code>max_buyers: 2</code> in building config). While one buyer is out for food, the
+        second prefers goods (and the reverse); if the opposite group has no reachable target,
+        it falls back to another item in the same group. Goods demand counters tick only on a
+        <em>successful</em> pick while no buyers are already out (failed complementary probes do
+        not burn demand). Labor seeker and trader slots are unchanged. Return cooldown
+        (<code>figure_spawn_delay = -3</code>) applies only when the last active buyer comes home.
+        With the option OFF, a leftover second buyer is cleared on the next spawn.</p>
+      <p>Each buyer is a <em>destination walker</em>: she walks to a specific Granary or Storage Yard,
+        loads up, and returns. Helpers carry large hauls. Search radius is <strong>40 tiles</strong>
+        from the Bazaar.</p>
 
       <h3>Bazaar trader</h3>
       <p>The <strong>trader</strong> is a <em>roaming walker</em>: she has no fixed destination and chooses randomly at each intersection. As she passes within two tiles of housing, she supplies whatever that house needs from her current stock. She also notes unmet demands and reports them back to the buyer.</p>
@@ -434,6 +444,7 @@
   <span class="cmt">// Restock thresholds: buyer fetches food when stock drops below these levels</span>
   <span class="kw">pick_food_below</span> [<span class="num">600</span>, <span class="num">400</span>, <span class="num">200</span>, <span class="num">100</span>]
   <span class="kw">pick_good_below</span> [<span class="num">150</span>, <span class="num">100</span>, <span class="num">50</span>,  <span class="num">25</span>]
+  <span class="kw">max_buyers</span> : <span class="num">2</span>   <span class="cmt">// Enhanced multi-buyer cap (flag OFF = still 1)</span>
 
   <span class="kw">overlay</span>     : OVERLAY_BAZAAR_ACCESS
   <span class="kw">flags</span> { is_food: <span class="kw">true</span> }
@@ -457,11 +468,12 @@
 };</code></pre>
             <p>Key methods:</p>
             <ul style="font-size:0.82rem;line-height:1.9;padding-left:1.2rem">
-              <li><code>spawn_figure()</code> — spawns buyer and trader walkers based on stock and staffing</li>
+              <li><code>spawn_figure()</code> — spawns buyer(s) and trader based on stock and staffing</li>
+              <li><code>pick_next_buyer_destination()</code> — Enhanced complementary / same-group fallback pick</li>
+              <li><code>get_storage_destination()</code> — returns the Granary or Storage Yard the buyer should walk to</li>
               <li><code>update_graphic()</code> — switches between <code>base</code> / <code>fancy</code> animation based on current desirability</li>
               <li><code>idx_accepted(index)</code> — returns true if slot <em>index</em> is toggled on in Special Orders</li>
               <li><code>toggle_idx_accepted(index)</code> — flips the Buy/Don't Buy state for a slot</li>
-              <li><code>get_storage_destination()</code> — returns the Granary or Storage Yard the buyer should walk to</li>
               <li><code>max_food_stock() / max_goods_stock()</code> — maximum inventory per category</li>
             </ul>
             <p>JavaScript bindings in <span class="file-ref">src/building/building_bazaar_js.cpp</span> expose bazaar state to mission scripts (e.g. checking if the bazaar is active).</p>

@@ -58,6 +58,7 @@ localization_de = [
   {key:"#TR_CONFIG_IMMEDIATELY_DELETE_BUILDINGS", text:"Gebäude sofort zerstören"}
   {key:"#TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD", text:"Karrenschieber von abholenden Kornkammern können abseits der Straße gehen"}
   {key:"#TR_CONFIG_GRANARIES_GET_DOUBLE", text:"Doppelte Kapazität für Karrenschieber von abholenden Kornkammern"}
+  {key:"#TR_CONFIG_BAZAAR_MULTI_BUYERS", text:"Basare können zwei Einkäufer gleichzeitig aussenden (Nahrung + Waren)"}
   {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Größere Händlerkapazität (1600 pro Besuch; kein Jahreslimit der Handelsroute)"}
   {key:"#TR_CONFIG_BAST_LION_RAID", text:"Bast-Zorn: Löwenüberfall aus Tempeln/Zoo (TEMP Enhanced)"}
   {key:"#TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD", text:"Turmwachen benötigen keinen Straßenzugang von Kasernen"}

@@ -98,11 +98,13 @@ function bazaar_info_window_init_warning_text(window) {
     var amount = bazaar.idx_amount(0) || bazaar.idx_amount(1) || bazaar.idx_amount(2) || bazaar.idx_amount(3)
     if (amount > 0) {
         var buyer = bazaar.get_figure(BUILDING_SLOT_MARKET_BUYER)
+        var buyer2 = bazaar.get_figure(BUILDING_SLOT_MARKET_BUYER_2)
         var trader = bazaar.get_figure(BUILDING_SLOT_SERVICE)
+        var any_buyer = (buyer.valid || buyer2.valid)
 
-        if (buyer.valid && trader.valid) {
+        if (any_buyer && trader.valid) {
             warning_text = __loc(meta_text_id, 1)
-        } else if (buyer.valid) {
+        } else if (any_buyer) {
             warning_text = __loc(meta_text_id, 10)
         } else if (trader.valid) {
             var state = (trader.action_state == ACTION_126_ROAMER_RETURNING) ? 12 : 11

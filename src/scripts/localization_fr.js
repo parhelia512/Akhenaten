@@ -59,6 +59,7 @@ localization_fr = [
   { key:"#TR_CONFIG_IMMEDIATELY_DELETE_BUILDINGS", text:"Destruction immédiate des bâtiments"},
   { key:"#TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD", text:"Les charretiers peuvent faire du hors route"},
   { key:"#TR_CONFIG_GRANARIES_GET_DOUBLE", text:"Double la capacité des charretiers sortant des greniers"},
+  { key:"#TR_CONFIG_BAZAAR_MULTI_BUYERS", text:"Les bazars peuvent envoyer deux acheteuses à la fois (nourriture + biens)"},
   { key:"#TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD", text:"Les sentinelles de la tour n'ont plus besoin de route"},
   { key:"#TR_CONFIG_FARMS_DELIVER_CLOSE", text:"Fermes et Quais ne livrent plus qu'aux grenier à proximité"},
   { key:"#TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES", text:"La nourriture n'est pas livrée depuis/vers les greniers"},

@@ -27,9 +27,41 @@
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_market_buyer);
 
 void figure_market_buyer::figure_before_action() {
-    building* b = home();
-    if (b->state != BUILDING_STATE_VALID || !b->has_figure(BUILDING_SLOT_MARKET_BUYER, id())) {
+    building *b = home();
+    const bool in_buyer_slot = b->has_figure(BUILDING_SLOT_MARKET_BUYER, id())
+        || b->has_figure(BUILDING_SLOT_MARKET_BUYER_2, id());
+    if (b->state != BUILDING_STATE_VALID || !in_buyer_slot) {
         poof();
+    }
+}
+
+void figure_market_buyer::apply_return_home_spawn_cooldown() {
+    building *h = home();
+    if (!h) {
+        return;
+    }
+
+    if (!game_features::gameplay_change_bazaar_multi_buyers) {
+        h->figure_spawn_delay = -3;
+        return;
+    }
+
+    // Cooldown only when this is the last active buyer. Exclude self, and ignore
+    // buyers that already finished return (action_state < 0 → dead next tick).
+    int others = 0;
+    auto count_other = [&](e_building_slot slot) {
+        if (!h->has_figure_of_type(slot, FIGURE_MARKET_BUYER)
+            || h->get_figure_id(slot) == id()) {
+            return;
+        }
+        if (building_bazaar::is_active_market_buyer(h->get_figure(slot))) {
+            others++;
+        }
+    };
+    count_other(BUILDING_SLOT_MARKET_BUYER);
+    count_other(BUILDING_SLOT_MARKET_BUYER_2);
+    if (others == 0) {
+        h->figure_spawn_delay = -3;
     }
 }
 
@@ -57,8 +89,7 @@ void figure_market_buyer::figure_action() {
 
     case ACTION_146_MARKET_BUYER_RETURNING:
         if (base.do_returnhome()) {
-            home()->figure_spawn_delay = -3;
-            //logs::info("stop");
+            apply_return_home_spawn_cooldown();
         }
         break;
 
@@ -73,7 +104,7 @@ sound_key figure_market_buyer::phrase_key() const {
         keys.push_back("buyer_goto_store");
     } else if (action_state() == ACTION_146_MARKET_BUYER_RETURNING) {
         keys.push_back("buyer_back_to_market");
-    } 
+    }
 
     if (g_city.health.value < 30) {
         keys.push_back("buyer_city_has_low_health");
