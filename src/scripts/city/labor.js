@@ -13,6 +13,8 @@ city.labor = extend(__city_labor, {
     get_category: get_labor_category
     set_priority: __city_labor_set_priority
     max_selectable_priority: __city_labor_max_selectable_priority
+    calc_fixed_workers_available: __city_labor_calc_fixed_workers_available
+    calculate_workers: __city_labor_calculate_workers
 
     food_production : get_labor_category(LABOR_CATEGORY_FOOD_PRODUCTION)
     industry_commerce : get_labor_category(LABOR_CATEGORY_INDUSTRY_COMMERCE)

@@ -47,6 +47,7 @@ namespace game_features {
     game_feature gameplay_change_school_walkers{ "gameplay_change_school_walkers", "#TR_CONFIG_SCHOOL_WALKERS", false };
     game_feature gameplay_change_retire_at_60{ "gameplay_change_retire_at_60", "#TR_CONFIG_RETIRE_AT_60", true };
     game_feature gameplay_change_fixed_workers{ "gameplay_change_fixed_workers", "#TR_CONFIG_FIXED_WORKERS", false };
+    game_feature gameplay_fixed_worker_percent{ "gameplay_fixed_worker_percent", "", 38.0f };
     game_feature gameplay_enable_extra_forts{ "gameplay_enable_extra_forts", "#TR_CONFIG_EXTRA_FORTS", false };
     game_feature gameplay_hyenas_block{ "gameplay_hyenas_block", "#TR_CONFIG_WOLVES_BLOCK", false };
     game_feature gameplay_dynamic_granaries{ "gameplay_dynamic_granaries", "#TR_CONFIG_DYNAMIC_GRANARIES", false };

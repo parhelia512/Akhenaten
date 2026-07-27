@@ -64,6 +64,7 @@ namespace game_features {
     extern game_feature gameplay_change_school_walkers;
     extern game_feature gameplay_change_retire_at_60;
     extern game_feature gameplay_change_fixed_workers;
+    extern game_feature gameplay_fixed_worker_percent;
     extern game_feature gameplay_enable_extra_forts;
     extern game_feature gameplay_hyenas_block;
     extern game_feature gameplay_dynamic_granaries;

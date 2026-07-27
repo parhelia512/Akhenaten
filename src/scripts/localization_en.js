@@ -53,7 +53,7 @@ localization_en = [
   {key:"#TR_CONFIG_GLOBAL_LABOUR", text:"Enable global labour pool"}
   {key:"#TR_CONFIG_SCHOOL_WALKERS", text:"Extend school walkers range"}
   {key:"#TR_CONFIG_RETIRE_AT_60", text:"Change citizens' retirement age from 50 to 60"}
-  {key:"#TR_CONFIG_FIXED_WORKERS", text:"Fixed worker pool - 38% of population"}
+  {key:"#TR_CONFIG_FIXED_WORKERS", text:"Fixed worker pool — 38% of commoners"}
   {key:"#TR_CONFIG_EXTRA_FORTS", text:"Allow building 4 extra forts"}
   {key:"#TR_CONFIG_WOLVES_BLOCK", text:"Block building around wolves"}
   {key:"#TR_CONFIG_DYNAMIC_GRANARIES", text:"Block unconnected granary roads"}

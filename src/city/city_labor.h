@@ -25,6 +25,7 @@ struct city_labor_t {
     labor_category categories[10];
 
     int workers_allocated(int category) const;
+    static int calc_fixed_workers_available(int num_plebs);
     void calculate_workers(int num_plebs, int num_patricians);
     void calculate_workers_needed_per_category();
     void set_building_worker_weight();

@@ -69,9 +69,7 @@ function advisor_population_percent_in_workforce_value() {
 	if (!cur) {
 		return 0
 	}
-	if (game_features.get("gameplay_change_fixed_workers")) {
-		return 38
-	}
+
 	var wa = city.labor.workers_available
 	return (100 * wa / cur) | 0
 }

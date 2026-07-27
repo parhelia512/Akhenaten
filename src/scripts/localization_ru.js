@@ -43,7 +43,7 @@ localization_ru = [
     { key:"#TR_CONFIG_GLOBAL_LABOUR", text:"Включить глобальный пул работников"}
     { key:"#TR_CONFIG_SCHOOL_WALKERS", text:"Увеличить зону покрытия школ"}
     { key:"#TR_CONFIG_RETIRE_AT_60", text:"Изменить возраст выхода на пенсию с 50 до 60 лет"}
-    { key:"#TR_CONFIG_FIXED_WORKERS", text:"Фиксированный размер пула работников в 38% от населения"}
+    { key:"#TR_CONFIG_FIXED_WORKERS", text:"Фиксированный пул работников — 38% простолюдинов"}
     { key:"#TR_CONFIG_EXTRA_FORTS", text:"Разрешить строительство 4-х дополнительных фортов"}
     { key:"#TR_CONFIG_WOLVES_BLOCK", text:"Запретить строительство около волков"}
     { key:"#TR_CONFIG_DYNAMIC_GRANARIES", text:"Блокировать тупиковые выходы из амбара"}
