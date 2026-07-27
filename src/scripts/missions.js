@@ -256,6 +256,7 @@ import mission.m_025_kebet
 import mission.m_026_menat_khufu
 import mission.m_027_itjtawy
 import mission.m_028_iken
+import mission.m_029_sawu
 import mission.m_030_heh
 import mission.m_128_alexandria
 import mission.m_129_bridges
