@@ -60,16 +60,14 @@ e_figure_type climate_prey_type() {
 
 // Cleopatra Killer Type: climate pair + alt_predator_type flag.
 // Arid: hyena | scorpion; Normal: crocodile | lion; Humid: hippo | asp.
-// Asp class not ready yet — humid alt falls back to hippo.
 e_figure_type climate_predator_type() {
     const bool alt = g_scenario.alt_predator_type;
     switch (g_scenario.climate) {
     case CLIMATE_CENTRAL:
         return alt ? FIGURE_LION : FIGURE_CROCODILE;
     case CLIMATE_NORTHERN:
-        // Humid pair: hippo | asp. Asp METAINFO not ready (CF3a) — keep hippo.
-        (void)alt;
-        return FIGURE_HIPPO;
+        // Humid pair: hippo | asp.
+        return alt ? FIGURE_ASP : FIGURE_HIPPO;
     case CLIMATE_DESERT:
         return alt ? FIGURE_SCORPION : FIGURE_HYENA;
     default:

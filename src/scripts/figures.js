@@ -306,6 +306,30 @@ figure_hyena {
 	chase_speed_mult : 2
 }
 
+
+// Cleopatra SprMain2 bmp "asp": groups 0–4 before Lion @391.
+// Counts from SprMain2 extract: 0/1/2/4 = 96 sprites (12×8); group 3 = 6 (non-8-dir death).
+// Slot order like scorpion (death before eating), not lion.
+// TEMP: attack/params not dumped from exe; walker-only prey (humid wildlife).
+figure_asp {
+	animations {
+		walk { pack:PACK_EXPANSION_SPR, id:0, max_frames:12 }
+		attack { pack:PACK_EXPANSION_SPR, id:1, max_frames:12 }
+		idle { pack:PACK_EXPANSION_SPR, id:2, max_frames:12 }
+		death { pack:PACK_EXPANSION_SPR, id:3, max_frames:6, loop:false }
+		eating { pack:PACK_EXPANSION_SPR, id:4, max_frames:12 }
+		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_ASP }
+	}
+
+	category: figure_category_animal
+	max_damage: 60
+	attack_value: 4
+	terrain_usage: TERRAIN_USAGE_ANIMAL
+	max_hungry: 30
+	max_hunting_distance: 10
+	chase_speed_mult: 2
+}
+
 // Cleopatra SprMain2 bmp "Lion": group 5 = SprMain2_00391.
 // Group 9 = sit (used as rest via anim key "death" slot — no free anim key for sit).
 // Corpse uses stand idle until a real lying-death strip is found.
