@@ -3,6 +3,7 @@
 #include "graphics/view/view.h"
 #include "grid/figure.h"
 #include "sound/sound.h"
+#include "sound/effect.h"
 #include "graphics/animkeys.h"
 #include "city/city_buildings.h"
 #include "city/city_figures.h"
@@ -16,6 +17,7 @@ REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_arrow);
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_spear);
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_javelin);
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_bolt);
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_antelope_hunter_javelin);
 
 figure_missile* figure_missile::create(figure_id fid, tile2i src, tile2i dst, e_figure_type type) {
     auto f = figure_create(type, src, DIR_0_TOP_RIGHT);
@@ -87,21 +89,21 @@ void figure_missile::figure_action() {
     figure_id target_id = get_non_citizen_on_tile();
     if (target_id && target_id != runtime_data().shooter_id) {
         missile_hit_figure(target_id, FIGURE_STANDARD_BEARER);
-        events::emit(event_sound_effect{ SOUND_EFFECT_ARROW_HIT });
+        events::emit(event_sound_effect{ hit_sound_effect() });
         return;
-    } 
+    }
 
     // Check if missile has reached destination tile and is close to center
     // Center of tile in cross-country coordinates is around 7-8 (out of 0-14)
-    bool at_destination_center = (base.tile == base.destination_tile) && 
+    bool at_destination_center = (base.tile == base.destination_tile) &&
                                   (base.cc_coords.x % 15 >= 6 && base.cc_coords.x % 15 <= 9) &&
                                   (base.cc_coords.y % 15 >= 6 && base.cc_coords.y % 15 <= 9);
-    
+
     if (at_destination_center || should_die) {
         building* b = building_at(base.destination_tile);
         if (b->is_valid()) {
             missile_hit_building(b->id);
-            events::emit(event_sound_effect{ SOUND_EFFECT_ARROW_HIT });
+            events::emit(event_sound_effect{ hit_sound_effect() });
             return;
         }
     }
@@ -247,3 +249,4 @@ void figure_bolt::figure_action() {
     int dir = (16 + direction() - 2 * g_camera.orientation) % 16;
     base.main_image_id = anim(animkeys().walk).first_img() + 32 + dir;
 }
+

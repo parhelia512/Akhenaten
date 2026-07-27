@@ -26,7 +26,8 @@
 #include "figure/figure.h"
 #include "figure/figure_impl.h"
 #include "figuretype/figure_missile.h"
-#include "figuretype/figure_ostrich_hunter.h"
+#include "figuretype/figure_hunter.h"
+#include "city/city_animals.h"
 #include "graphics/color.h"
 #include "city/city.h"
 #include "city/city_buildings.h"
@@ -38,11 +39,11 @@
 #include "scenario/scenario.h"
 #include "scenario/scenario_event_manager.h"
 #include "scenario/scenario_invasion.h"
+#include "window/window_info.h"
+#include "city/object_info.h"
 #include "scenario/request.h"
 #include "figure/enemy_army.h"
 #include "figure/formation.h"
-#include "window/window_info.h"
-#include "city/object_info.h"
 #include "empire/empire.h"
 #include "widget/widget_sidebar.h"
 
@@ -465,12 +466,19 @@ static int __test_count_figures(int type) {
 }
 ANK_FUNCTION_1(__test_count_figures);
 
-// Bypass hunt-animation callback: spawn a hunter arrow at the hunter aimed at its target.
+// Bypass hunt-animation callback: spawn the hunter's missile at its target.
 static int __test_hunter_force_shot(int hunter_fid) {
     figure *hunter = figure_get(hunter_fid);
-    if (!hunter || !hunter->is_alive() || hunter->type != FIGURE_OSTRICH_HUNTER) {
+    if (!hunter || !hunter->is_alive()) {
         return 0;
     }
+
+    figure_impl *impl = hunter->dcast();
+    figure_hunter *h = impl ? impl->dcast_hunter() : nullptr;
+    if (!h) {
+        return 0;
+    }
+
     if (!hunter->target_figure_id) {
         return 0;
     }
@@ -479,8 +487,8 @@ static int __test_hunter_force_shot(int hunter_fid) {
         return 0;
     }
 
-    const auto &params = figure_ostrich_hunter::current_params();
-    auto missile = figure_missile::create(hunter->id, hunter->tile, prey->tile, FIGURE_HUNTER_ARROW);
+    const auto &params = h->hunter_params();
+    auto missile = figure_missile::create(hunter->id, hunter->tile, prey->tile, h->missile_type());
     if (!missile) {
         return 0;
     }
@@ -488,6 +496,40 @@ static int __test_hunter_force_shot(int hunter_fid) {
     return missile->id();
 }
 ANK_FUNCTION_1(__test_hunter_force_shot);
+
+static int __test_get_scenario_climate() {
+    return (int)g_scenario.climate;
+}
+ANK_FUNCTION(__test_get_scenario_climate);
+
+static void __test_set_scenario_climate(int climate) {
+    if (climate < CLIMATE_CENTRAL || climate > CLIMATE_DESERT) {
+        return;
+    }
+    g_scenario.climate = (e_climate)climate;
+}
+ANK_FUNCTION_1(__test_set_scenario_climate);
+
+static void __test_clear_scenario_prey_points() {
+    g_scenario.herd_points_prey.clear();
+}
+ANK_FUNCTION(__test_clear_scenario_prey_points);
+
+static void __test_set_scenario_prey_point(int index, int x, int y) {
+    if (index < 0) {
+        return;
+    }
+    if ((int)g_scenario.herd_points_prey.size() <= index) {
+        g_scenario.herd_points_prey.resize(index + 1, tile2i::invalid);
+    }
+    g_scenario.herd_points_prey[index] = tile2i(x, y);
+}
+ANK_FUNCTION_3(__test_set_scenario_prey_point);
+
+static int __test_hunting_lodge_default_hunter_type() {
+    return (int)hunting_lodge_default_hunter_type();
+}
+ANK_FUNCTION(__test_hunting_lodge_default_hunter_type);
 
 static void __test_figure_set_action(int fid, int action) {
     figure *f = figure_get(fid);
@@ -548,7 +590,6 @@ pcstr __test_info_ui_text(pcstr element_id) {
     return buf.c_str();
 }
 ANK_FUNCTION_1(__test_info_ui_text);
-
 
 static e_building_type test_mastaba_params_type(building *head) {
     switch (head->type) {

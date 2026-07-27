@@ -306,7 +306,6 @@ figure_hyena {
 	chase_speed_mult : 2
 }
 
-
 // Cleopatra SprMain2 bmp "asp": groups 0–4 before Lion @391.
 // Counts from SprMain2 extract: 0/1/2/4 = 96 sprites (12×8); group 3 = 6 (non-8-dir death).
 // Slot order like scorpion (death before eating), not lion.
@@ -526,7 +525,7 @@ figure_ostrich_hunter {
 		walk { id:45, max_frames:12 }
 		death { id:46, max_frames:8, loop:false }
 		hunt { id:47, max_frames:12, loop:false }
-		figth { id:48, max_frames:12 }
+		fight { id:48, max_frames:12 }
 		//work_in_field : {  id:49, max_frames:12, loop:false }
 		pack { id:50, max_frames:12, loop:false }
 		unpack { id:50, max_frames:12, loop:false, start_frame:11, reverse:true }
@@ -571,28 +570,35 @@ figure_antelope_hunter {
 	animations {
 		walk { pack:PACK_SPR_AMBIENT, id:36, max_frames:12 }
 		death { pack:PACK_SPR_AMBIENT, id:37, max_frames:8, loop:false }
-		hunt { pack:PACK_SPR_AMBIENT, id:38, max_frames:12 }
-		figth { pack:PACK_SPR_AMBIENT, id:39, max_frames:12 }
-		figth_apcked { pack:PACK_SPR_AMBIENT, id:40, max_frames:12 }
+		hunt { pack:PACK_SPR_AMBIENT, id:38, max_frames:12, loop:false }
+		fight { pack:PACK_SPR_AMBIENT, id:39, max_frames:12 }
 		pack { pack:PACK_SPR_AMBIENT, id:41, max_frames:18, loop:false }
+		unpack { pack:PACK_SPR_AMBIENT, id:41, max_frames:18, loop:false, start_frame:17, reverse:true }
 		move_pack { pack:PACK_SPR_AMBIENT, id:42, max_frames:12 }
 		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_OSTRICH_HUNTER }
 	}
 
 	sounds {
-		antelope_hunter_hunting  { sound:"hunt_ostrich_e01.wav" }
-   		antelope_hunter_back  { sound:"hunt_ostrich_e02.wav" }
-        antelope_hunter_city_is_good  { sound: "hunt_ostrich_e10.wav" }
+		antelope_hunter_hunting { sound:"hunt_ostrich_e01.wav", text: "#antelope_hunter_hunting" }
+		antelope_hunter_back { sound:"hunt_ostrich_e02.wav", text: "#antelope_hunter_back" }
+		antelope_hunter_city_is_good { sound: "hunt_ostrich_e10.wav", text: "#antelope_hunter_city_is_good" }
 	}
 
+	category: figure_category_armed
+	max_damage: 30
+	attack_value: 4
+	missile_attack_value: 4
+	animal_attack_value: 100
+	missile_delay: 25
+	attack_distance: 5
 	terrain_usage : TERRAIN_USAGE_ANIMAL,
 	max_hunting_distance : 30,
 }
 
-figure_antelope_hunter_arrow = {
+figure_antelope_hunter_javelin = {
 	animations : {
-		walk : { pack:PACK_SPR_AMBIENT, id:43, max_frames:12 }
-		shadow : { pack:PACK_SPR_AMBIENT, id:44, max_frames:12 }
+		walk : { pack:PACK_SPR_AMBIENT, id:44, max_frames:12 }
+		shadow : { pack:PACK_SPR_AMBIENT, id:43, max_frames:12 }
 		big_image : { pack:PACK_UNLOADED, id:25, offset:FIGURE_HUNTER_ARROW }
 	}
 
@@ -1163,6 +1169,7 @@ figure_bricklayer {
 	max_damage: 10
 	terrain_usage : TERRAIN_USAGE_ROADS,
 }
+
 
 figure_storageyard_cart = {
 	animations : {

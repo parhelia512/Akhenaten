@@ -1,6 +1,7 @@
 #pragma once
 
 #include "figure/figure.h"
+#include "sound/effect.h"
 
 class figure_missile : public figure_impl {
 public:
@@ -18,6 +19,7 @@ public:
     virtual void figure_action() override;
     virtual void main_image_update() override;
     virtual void cart_image_update() override;
+    virtual e_sound_effect hit_sound_effect() const { return SOUND_EFFECT_ARROW_HIT; }
 
     figure_id get_non_citizen_on_tile();
     figure_id get_citizen_on_tile();
@@ -63,4 +65,12 @@ public:
     figure_bolt(figure *f) : figure_missile(f) {}
 
     virtual void figure_action() override;
+};
+
+class figure_antelope_hunter_javelin : public figure_missile {
+public:
+    FIGURE_METAINFO(FIGURE_ANTELOPE_HUNTER_JAVELIN, figure_antelope_hunter_javelin)
+    figure_antelope_hunter_javelin(figure *f) : figure_missile(f) {}
+
+    virtual e_sound_effect hit_sound_effect() const override { return SOUND_EFFECT_JAVELIN; }
 };

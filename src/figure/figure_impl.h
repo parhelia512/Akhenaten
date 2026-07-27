@@ -103,6 +103,7 @@ public:
     ALLOW_SMART_CAST_FIGURE_I(ballista)
     ALLOW_SMART_CAST_FIGURE_I(market_buyer)
     ALLOW_SMART_CAST_FIGURE_I(bricklayer)
+    ALLOW_SMART_CAST_FIGURE_I(hunter)
 
     building *home();
     e_figure_type type() const;
@@ -204,6 +205,7 @@ GENERATE_SMART_CAST_FIGURE(animal)
 GENERATE_SMART_CAST_FIGURE(ballista)
 GENERATE_SMART_CAST_FIGURE(market_buyer)
 GENERATE_SMART_CAST_FIGURE(bricklayer)
+GENERATE_SMART_CAST_FIGURE(hunter)
 
 namespace figures {
 

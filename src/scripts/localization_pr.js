@@ -146,4 +146,9 @@ localization_pr = [
      { key: "#TR_PALACE_TOOLTIP_PROSPERITY_RATING", text: "Avaliação de prosperidade" }
      { key: "#TR_PALACE_TOOLTIP_MONUMENT_RATING", text: "Avaliação de monumentos" }
      { key: "#TR_PALACE_TOOLTIP_KINGDOM_RATING", text: "Avaliação do reino" }
+     { key: "#figure_antelope_hunter", text: "Caçador de antílopes" }
+     { key: "#figure_antelope_hunter_javelin", text: "Dardo do caçador" }
+     { key: "#antelope_hunter_hunting", text: "Antílopes não são páreo para nós!" }
+     { key: "#antelope_hunter_back", text: "Esta noite haverá bifes para todos." }
+     { key: "#antelope_hunter_city_is_good", text: "Esta cidade é boa!" }
 ]

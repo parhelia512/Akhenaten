@@ -38,5 +38,5 @@ struct figure_static_params {
 };
 ANK_CONFIG_STRUCT(figure_static_params, terrain_usage,  animations, sounds,
     max_roam_length, speed_mult, meta, permission, is_enemy, is_soldier, use_cart,
-    category, attack_value, defense_value, missile_defense_value, corpse_time_delay,
+    category, max_damage, attack_value, defense_value, missile_defense_value, corpse_time_delay,
     render_on_flat_tiles)

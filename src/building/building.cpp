@@ -622,6 +622,8 @@ tile2i building::access_tile() {
 
     case BUILDING_LARGE_STEPPED_PYRAMID:
         return main()->tile.shifted(0, 22);
+
+
     default:
         break;
     }
@@ -633,7 +635,8 @@ int building::get_figures_number(e_figure_type ftype) {
     int figures_this_yard = 0;
     for (int i = 0; i < MAX_FIGURES; i++) {
         figure *f = figure_get(i);
-        if (f->has_type(ftype) && f->has_home(this)) {        // figure with type on map and  belongs to this building
+        // Count only living walkers — DEAD figures keep type/home until delete.
+        if (f->is_alive() && f->has_type(ftype) && f->has_home(this)) {
             figures_this_yard++;
         }
     }

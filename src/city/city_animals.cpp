@@ -22,29 +22,6 @@
 
 declare_console_var_bool(allow_span_ostrich, true)
 
-namespace {
-
-int herd_impassable_mask(e_figure_type herd_type) {
-    switch (herd_type) {
-    case FIGURE_OSTRICH:
-    case FIGURE_BIRDS:
-    // Cleopatra editor: scorpions / lions / asps / ostriches / antelopes → plain/meadow.
-    case FIGURE_SCORPION:
-    case FIGURE_LION:
-    case FIGURE_ASP:
-        return TERRAIN_IMPASSABLE_OSTRICH;
-    case FIGURE_ANTELOPE:
-        return TERRAIN_IMPASSABLE_ANTELOPE;
-    case FIGURE_CROCODILE:
-    case FIGURE_HIPPO:
-        return TERRAIN_IMPASSABLE_HIPPO;
-    case FIGURE_HYENA:
-    default:
-        // Hyenas: sand dunes (editor); mask matches historical hyena impassable set.
-        return TERRAIN_IMPASSABLE_HYENA;
-    }
-}
-
 e_figure_type climate_prey_type() {
     switch (g_scenario.climate) {
     case CLIMATE_CENTRAL:
@@ -53,23 +30,6 @@ e_figure_type climate_prey_type() {
         return FIGURE_BIRDS;
     case CLIMATE_DESERT:
         return FIGURE_OSTRICH;
-    default:
-        return FIGURE_NONE;
-    }
-}
-
-// Cleopatra Killer Type: climate pair + alt_predator_type flag.
-// Arid: hyena | scorpion; Normal: crocodile | lion; Humid: hippo | asp.
-e_figure_type climate_predator_type() {
-    const bool alt = g_scenario.alt_predator_type;
-    switch (g_scenario.climate) {
-    case CLIMATE_CENTRAL:
-        return alt ? FIGURE_LION : FIGURE_CROCODILE;
-    case CLIMATE_NORTHERN:
-        // Humid pair: hippo | asp.
-        return alt ? FIGURE_ASP : FIGURE_HIPPO;
-    case CLIMATE_DESERT:
-        return alt ? FIGURE_SCORPION : FIGURE_HYENA;
     default:
         return FIGURE_NONE;
     }
@@ -96,6 +56,68 @@ bool scenario_has_prey_points() {
         }
     }
     return false;
+}
+
+e_figure_type hunting_lodge_default_hunter_type() {
+    e_figure_type prey = FIGURE_NONE;
+    if (scenario_has_prey_points()) {
+        prey = climate_prey_type();
+    } else {
+        prey = climate_legacy_animal_type();
+    }
+
+    switch (prey) {
+    case FIGURE_ANTELOPE:
+        return FIGURE_ANTELOPE_HUNTER;
+    case FIGURE_OSTRICH:
+        return FIGURE_OSTRICH_HUNTER;
+    case FIGURE_BIRDS:
+        // Birds hunter leaf deferred (art gate) — ostrich interim.
+        return FIGURE_OSTRICH_HUNTER;
+    default:
+        // Legacy Northern crocodile etc. — keep ostrich interim.
+        return FIGURE_OSTRICH_HUNTER;
+    }
+}
+
+namespace {
+
+int herd_impassable_mask(e_figure_type herd_type) {
+    switch (herd_type) {
+    case FIGURE_OSTRICH:
+    case FIGURE_BIRDS:
+    // Cleopatra editor: scorpions / lions / asps / ostriches / antelopes → plain/meadow.
+    case FIGURE_SCORPION:
+    case FIGURE_LION:
+    case FIGURE_ASP:
+        return TERRAIN_IMPASSABLE_OSTRICH;
+    case FIGURE_ANTELOPE:
+        return TERRAIN_IMPASSABLE_ANTELOPE;
+    case FIGURE_CROCODILE:
+    case FIGURE_HIPPO:
+        return TERRAIN_IMPASSABLE_HIPPO;
+    case FIGURE_HYENA:
+    default:
+        // Hyenas: sand dunes (editor); mask matches historical hyena impassable set.
+        return TERRAIN_IMPASSABLE_HYENA;
+    }
+}
+
+// Cleopatra Killer Type: climate pair + alt_predator_type flag.
+// Arid: hyena | scorpion; Normal: crocodile | lion; Humid: hippo | asp.
+e_figure_type climate_predator_type() {
+    const bool alt = g_scenario.alt_predator_type;
+    switch (g_scenario.climate) {
+    case CLIMATE_CENTRAL:
+        return alt ? FIGURE_LION : FIGURE_CROCODILE;
+    case CLIMATE_NORTHERN:
+        // Humid pair: hippo | asp.
+        return alt ? FIGURE_ASP : FIGURE_HIPPO;
+    case CLIMATE_DESERT:
+        return alt ? FIGURE_SCORPION : FIGURE_HYENA;
+    default:
+        return FIGURE_NONE;
+    }
 }
 
 int climate_herd_count(e_figure_type type) {

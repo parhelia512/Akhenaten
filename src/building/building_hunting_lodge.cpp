@@ -3,6 +3,7 @@
 #include "core/direction.h"
 #include "city/object_info.h"
 #include "city/city.h"
+#include "city/city_animals.h"
 #include "game/resource.h"
 #include "graphics/elements/panel.h"
 #include "graphics/elements/lang_text.h"
@@ -45,7 +46,20 @@ int building_hunting_lodge::spawn_timer() {
     }
 }
 
-bool building_hunting_lodge::can_spawn_ostrich_hunter() {
+e_figure_type building_hunting_lodge::resolve_hunter_type() const {
+    const e_figure_type override_type = current_params().hunter_type;
+    if (override_type == FIGURE_OSTRICH_HUNTER || override_type == FIGURE_ANTELOPE_HUNTER) {
+        return override_type;
+    }
+    return hunting_lodge_default_hunter_type();
+}
+
+int building_hunting_lodge::active_hunters_count() const {
+    return base.get_figures_number(FIGURE_OSTRICH_HUNTER)
+        + base.get_figures_number(FIGURE_ANTELOPE_HUNTER);
+}
+
+bool building_hunting_lodge::can_spawn_hunter() {
     if (stored_amount(RESOURCE_GAMEMEAT) >= 500) {
         return false;
     }
@@ -55,7 +69,7 @@ bool building_hunting_lodge::can_spawn_ostrich_hunter() {
         return false;
     }
 
-    return base.get_figures_number(FIGURE_OSTRICH_HUNTER) < max_hunters;
+    return active_hunters_count() < max_hunters;
 }
 
 void building_hunting_lodge::spawn_figure() {
@@ -83,9 +97,9 @@ void building_hunting_lodge::spawn_figure() {
         return;
     }
 
-    if (can_spawn_ostrich_hunter()) {
+    if (can_spawn_hunter()) {
         base.figure_spawn_delay = 10;
-        figure* f = create_figure_generic(FIGURE_OSTRICH_HUNTER, ACTION_8_RECALCULATE, BUILDING_SLOT_HUNTER, DIR_4_BOTTOM_LEFT);
+        create_figure_generic(resolve_hunter_type(), ACTION_8_RECALCULATE, BUILDING_SLOT_HUNTER, DIR_4_BOTTOM_LEFT);
     }
 
     figure* fcart = base.common_spawn_goods_output_cartpusher();
@@ -122,5 +136,5 @@ void building_hunting_lodge::update_animation() {
     }
 
     base.play_animation = (stored_amount(RESOURCE_GAMEMEAT) > 0
-        || base.get_figures_number(FIGURE_OSTRICH_HUNTER) > 0);
+        || active_hunters_count() > 0);
 }

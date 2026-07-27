@@ -30,6 +30,8 @@ building_hunting_lodge {
     spawn_delay_default [30]
     // Original lodge fields a hunting party of three.
     max_hunters [3]
+    // FIGURE_NONE = resolve from climate prey / legacy (see hunting_lodge_default_hunter_type).
+    hunter_type : FIGURE_NONE
     flags {
         is_food: true
     }

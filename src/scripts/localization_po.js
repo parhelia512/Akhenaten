@@ -177,4 +177,9 @@ localization_po = [
  { key: "#TR_PALACE_TOOLTIP_PROSPERITY_RATING", text: "Ocena dobrobytu" }
  { key: "#TR_PALACE_TOOLTIP_MONUMENT_RATING", text: "Ocena monumentów" }
  { key: "#TR_PALACE_TOOLTIP_KINGDOM_RATING", text: "Ocena królestwa" }
+ { key: "#figure_antelope_hunter", text: "Myśliwy na antylopy" }
+ { key: "#figure_antelope_hunter_javelin", text: "Oszczep myśliwego" }
+ { key: "#antelope_hunter_hunting", text: "Antylopy nam nie dorównają!" }
+ { key: "#antelope_hunter_back", text: "Dziś wieczorem będą steki dla wszystkich." }
+ { key: "#antelope_hunter_city_is_good", text: "To dobre miasto!" }
 ]

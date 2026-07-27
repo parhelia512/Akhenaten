@@ -217,6 +217,7 @@ public:
     ALLOW_SMART_CAST_FIGURE(soldier)
     ALLOW_SMART_CAST_FIGURE(enemy)
     ALLOW_SMART_CAST_FIGURE(worker)
+    ALLOW_SMART_CAST_FIGURE(hunter)
 
     figure(int _id) {
         // ...can't be bothered to add default values to ALL

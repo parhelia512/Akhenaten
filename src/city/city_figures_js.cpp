@@ -29,6 +29,9 @@ ANK_FUNCTION_1(__figure_is_scared)
 int __figure_get_action_state(int fid) { return figure_get(fid)->action_state; }
 ANK_FUNCTION_1(__figure_get_action_state)
 
+int __figure_get_target_figure_id(int fid) { return figure_get(fid)->target_figure_id; }
+ANK_FUNCTION_1(__figure_get_target_figure_id)
+
 int __figure_get_destination_building_id(int fid) { return figure_get(fid)->destination_building_id; }
 ANK_FUNCTION_1(__figure_get_destination_building_id)
 
