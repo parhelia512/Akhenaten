@@ -17,9 +17,11 @@
 #include "input/input.h"
 #include "io/gamefiles/lang.h"
 #include "window/window_city.h"
+#include "window/autoconfig_window.h"
 #include "message_dialog.h"
 #include "core/string.h"
 #include "game/game.h"
+#include "scenario/invasion_auto_resolve.h"
 
 int ui::message_dialog_invasion::handle_mouse(const mouse *m) {
     return ui_handle_mouse(m);
@@ -77,5 +79,10 @@ void ui::message_dialog_invasion::button_go_to_problem() {
     }
 
     window_city_show();
+
+    // Quick-battle message param1 = seq — reopen resolve UI if still pending.
+    if (g_invasion_auto_resolve.is_seq_frozen((uint16_t)player_msg.param1)) {
+        autoconfig_window::show("invasion_quick_battle_window");
+    }
 }
 

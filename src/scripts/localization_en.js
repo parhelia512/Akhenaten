@@ -68,6 +68,18 @@ localization_en = [
   {key:"#TR_CONFIG_BAZAAR_MULTI_BUYERS", text:"Bazaars can send two buyers at once (food + goods)"}
   {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Larger trader capacity (1600 per visit; not yearly empire limit)"}
   {key:"#TR_CONFIG_BAST_LION_RAID", text:"Bast major curse: lion raid from temples/zoo (TEMP Enhanced)"}
+  {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Auto-resolve invasions: freeze at entry, quick battle in 8 days (walls/towers ignored; Pharaoh included; not uprisings)"}
+  {key:"#warning_auto_resolve_orders_blocked", text:"Cannot march companies onto a frozen invasion wave"}
+  {key:"#warning_auto_resolve_queue_full", text:"Too many pending invasions — this wave fights on the map"}
+  {key:"#invasion_quick_battle_title", text:"Quick battle"}
+  {key:"#invasion_quick_battle_hint", text:"Invaders wait at the entry point. Recruit if you need to. Resolve now or wait for the timer."}
+  {key:"#invasion_quick_battle_resolve", text:"Resolve now"}
+  {key:"#invasion_quick_battle_wait", text:"Wait"}
+  {key:"#invasion_quick_battle_strength", text:"Your forces: {player}   Enemy: {enemy}"}
+  {key:"#invasion_quick_battle_days", text:"Battle in {days} days"}
+  {key:"#invasion_quick_battle_queue", text:"({n} in queue)"}
+  {key:"#invasion_quick_battle_head", text:"Wave #{id} ({i}/{n})"}
+  {key:"#invasion_quick_battle_none", text:"No pending battle"}
   {key:"#TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD", text:"Tower sentries don't need road access from barracks"}
   {key:"#TR_CONFIG_FARMS_DELIVER_CLOSE", text:"Farms and wharves deliver only to nearby granaries"}
   {key:"#TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES", text:"Food isn't delivered to getting granaries"}

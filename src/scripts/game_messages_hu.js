@@ -6190,4 +6190,25 @@ game_messages_hu {
                 title { text: "Múmiatámadások!" }
                 content { text: "Egy múmia életre kelt, és városunk utcáin jár. Állítsd meg ezt az élőhalott átkot, mielőtt az egész földön elterjed." }
             }
+            message_invasion_quick_battle {
+                id: 498,
+                type: 7,
+                size [30, 16]
+                title { text: "Ellenség a kapuknál" }
+                content { text: "Egy támadó sereg érte el a város kapuit, és csatára vár. A tábornokok néhány nap múlva a sereg erőssége alapján döntik el a harcot — vagy most is elrendelheted. A századok mikroja ennél a hullámnál szünetel. @PA Probléma megtekintése újra megnyitja a gyorscsata panelt." }
+            }
+            message_invasion_auto_resolve_win {
+                id: 499,
+                type: 2,
+                size [30, 16]
+                title { text: "Győzelem!" }
+                content { text: "A tábornokok eldöntötték a csatát. A támadók vereséget szenvedtek. Néhány katonád elesett a harcban." }
+            }
+            message_invasion_auto_resolve_lose {
+                id: 500,
+                type: 2,
+                size [30, 16]
+                title { text: "Vereség" }
+                content { text: "A tábornokok vereségről számolnak be. A támadó sereg túl erős volt. Sok katonád elesett — de az ellenség elvonul a mezőről." }
+            }
 }

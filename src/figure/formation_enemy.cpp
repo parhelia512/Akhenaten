@@ -22,6 +22,7 @@
 #include "core/flat_map.h"
 #include "js/js_game.h"
 #include "grid/road_access.h"
+#include "scenario/invasion_auto_resolve.h"
 
 using stage_attack_weight = std::array<int16_t, BUILDING_MAX>;
 using stage_attack_rules = svector<uint16_t, BUILDING_MAX>;
@@ -709,6 +710,9 @@ void formations_t::enemy_update() {
         for (int i = 1; i < MAX_FORMATIONS; i++) {
             formation *m = formation_get(i);
             if (m->in_use && !m->is_herd && !m->own_batalion) {
+                if (g_invasion_auto_resolve.is_formation_frozen(m)) {
+                    continue;
+                }
                 update_enemy_formation(m, &pharaoh_batalion_distance, attackd_buildings);
             }
         }

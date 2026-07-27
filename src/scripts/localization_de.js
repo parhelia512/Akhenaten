@@ -58,9 +58,21 @@ localization_de = [
   {key:"#TR_CONFIG_IMMEDIATELY_DELETE_BUILDINGS", text:"Gebäude sofort zerstören"}
   {key:"#TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD", text:"Karrenschieber von abholenden Kornkammern können abseits der Straße gehen"}
   {key:"#TR_CONFIG_GRANARIES_GET_DOUBLE", text:"Doppelte Kapazität für Karrenschieber von abholenden Kornkammern"}
-  {key:"#TR_CONFIG_BAZAAR_MULTI_BUYERS", text:"Basare können zwei Einkäufer gleichzeitig aussenden (Nahrung + Waren)"}
   {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Größere Händlerkapazität (1600 pro Besuch; kein Jahreslimit der Handelsroute)"}
   {key:"#TR_CONFIG_BAST_LION_RAID", text:"Bast-Zorn: Löwenüberfall aus Tempeln/Zoo (TEMP Enhanced)"}
+  {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Invasionen automatisch lösen: Feinde warten am Eingang, Schnellkampf in 8 Tagen (Mauern/Türme zählen nicht; Pharao inklusive; keine Aufstände)"}
+  {key:"#warning_auto_resolve_orders_blocked", text:"Kompanien können nicht auf eine eingefrorene Invasionswelle marschieren"}
+  {key:"#warning_auto_resolve_queue_full", text:"Zu viele ausstehende Invasionen — diese Welle kämpft auf der Karte"}
+  {key:"#invasion_quick_battle_title", text:"Schnellkampf"}
+  {key:"#invasion_quick_battle_hint", text:"Angreifer warten am Eingangspunkt. Werbt bei Bedarf nach. Sofort kämpfen oder den Timer abwarten."}
+  {key:"#invasion_quick_battle_resolve", text:"Jetzt kämpfen"}
+  {key:"#invasion_quick_battle_wait", text:"Warten"}
+  {key:"#invasion_quick_battle_strength", text:"Eure Kräfte: {player}   Feind: {enemy}"}
+  {key:"#invasion_quick_battle_days", text:"Kampf in {days} Tagen"}
+  {key:"#invasion_quick_battle_queue", text:"({n} in der Warteschlange)"}
+  {key:"#invasion_quick_battle_head", text:"Welle #{id} ({i}/{n})"}
+  {key:"#invasion_quick_battle_none", text:"Kein ausstehender Kampf"}
+  {key:"#TR_CONFIG_BAZAAR_MULTI_BUYERS", text:"Basare können zwei Einkäufer gleichzeitig aussenden (Nahrung + Waren)"}
   {key:"#TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD", text:"Turmwachen benötigen keinen Straßenzugang von Kasernen"}
   {key:"#TR_CONFIG_FARMS_DELIVER_CLOSE", text:"Farmen und Werften liefern nur an nahe Kornkammern"}
   {key:"#TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES", text:"Nahrung wird nicht an abholende Kornkammern geliefert"}

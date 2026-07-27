@@ -14,6 +14,7 @@
 #include "game/game_config.h"
 #include "building/building_fort.h"
 #include "scenario/distant_battle.h"
+#include "scenario/invasion_auto_resolve.h"
 #include "sound/sound.h"
 #include "js/js_game.h"
 
@@ -546,6 +547,11 @@ void formations_t::calculate_figures() {
     }
 
     g_city.military.update_totals();
+
+    // Army wiped (bribe / combat / cheat) while quick-battle pending — drop without COMPLETED.
+    if (g_invasion_auto_resolve.has_pending()) {
+        g_invasion_auto_resolve.sweep_vanished();
+    }
 }
 
 static void update_direction(int formation_id, int first_figure_direction) {

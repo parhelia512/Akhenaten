@@ -6,6 +6,7 @@
 #include "figure/combat.h"
 #include "figure/formation_layout.h"
 #include "grid/road_access.h"
+#include "scenario/invasion_auto_resolve.h"
 
 void figure_enemy::on_create() {
     figure_impl::on_create();
@@ -29,6 +30,10 @@ void figure_enemy::formation_reset_to_initial(const formation *m) {
 }
 
 void figure_enemy::enemy_initial(formation *m) {
+    if (invasion_auto_resolve_figure_immune(&base)) {
+        base.map_figure_update();
+        return;
+    }
     base.map_figure_update();
     base.animctx.frame = 0;
     route_remove();
@@ -60,6 +65,10 @@ void figure_enemy::enemy_initial(formation *m) {
 }
 
 void figure_enemy::enemy_marching(formation *m) {
+    if (invasion_auto_resolve_figure_immune(&base)) {
+        base.map_figure_update();
+        return;
+    }
     base.wait_ticks--;
     if (base.wait_ticks <= 0) {
         base.wait_ticks = 50;
@@ -84,6 +93,10 @@ void figure_enemy::enemy_marching(formation *m) {
 }
 
 void figure_enemy::enemy_fighting(formation *m) {
+    if (invasion_auto_resolve_figure_immune(&base)) {
+        base.map_figure_update();
+        return;
+    }
     if (!m->recent_fight) {
         advance_action(ACTION_151_ENEMY_INITIAL);
     }

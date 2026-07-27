@@ -8,6 +8,7 @@
 #include "figuretype/figure_missile.h"
 #include "figure/formation_layout.h"
 #include "figure/formation.h"
+#include "scenario/invasion_auto_resolve.h"
 #include "city/city_buildings.h"
 #include "city/city_figures.h"
 #include "graphics/view/lookup.h"
@@ -49,6 +50,11 @@ tile2i figure_enemy_fast_sword::get_formation_position(formation *m, int figure_
 
 void figure_enemy_fast_sword::figure_action() {
     OZZY_PROFILER_FUNCTION();
+
+    if (invasion_auto_resolve_figure_immune(&base)) {
+        base.map_figure_update();
+        return;
+    }
 
     base.speed_multiplier = 1;
     formation *m = formation_get(base.formation_id);

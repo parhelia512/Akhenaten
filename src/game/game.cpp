@@ -28,6 +28,7 @@
 #include "figure/formation.h"
 #include "scenario/scenario_event_manager.h"
 #include "scenario/scenario.h"
+#include "scenario/invasion_auto_resolve.h"
 #include "scenario/scenario_invasion.h"
 #include "sound/sound_city.h"
 #include "sound/sound.h"
@@ -198,6 +199,7 @@ void game_t::advance_day() {
     }
 
     g_distant_battle.update_day();
+    g_invasion_auto_resolve.update_day();
 
     g_city.update_day(simtime);
     g_city.victory.victory_check();

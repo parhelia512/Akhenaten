@@ -57,6 +57,18 @@ localization_ru = [
     { key:"#TR_CONFIG_BAZAAR_MULTI_BUYERS", text:"Базар может отправлять двух закупщиков сразу (еда + товары)"}
     { key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Большая вместимость торговцев (1600 за визит; не годовой лимит империи)"}
     { key:"#TR_CONFIG_BAST_LION_RAID", text:"Гнев Бастет: набег львов из храмов/зоопарка (TEMP Enhanced)"}
+    { key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Автобой вторжений: враги ждут на входе, быстрая битва через 8 дней (стены/башни не считаются; фараон включён; не восстания)"}
+    { key:"#warning_auto_resolve_orders_blocked", text:"Нельзя вести роту на замороженную волну вторжения"}
+    { key:"#warning_auto_resolve_queue_full", text:"Слишком много ожидающих вторжений — эта волна идёт боем на карте"}
+    { key:"#invasion_quick_battle_title", text:"Быстрая битва"}
+    { key:"#invasion_quick_battle_hint", text:"Враги ждут у входа. Можно донабрать войска. Сразиться сейчас или ждать таймер."}
+    { key:"#invasion_quick_battle_resolve", text:"Сразиться"}
+    { key:"#invasion_quick_battle_wait", text:"Ждать"}
+    { key:"#invasion_quick_battle_strength", text:"Ваши силы: {player}   Враг: {enemy}"}
+    { key:"#invasion_quick_battle_days", text:"Битва через {days} дн."}
+    { key:"#invasion_quick_battle_queue", text:"(в очереди: {n})"}
+    { key:"#invasion_quick_battle_head", text:"Волна #{id} ({i}/{n})"}
+    { key:"#invasion_quick_battle_none", text:"Нет ожидающей битвы"}
     { key:"#TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD", text:"Башенные часовые не нуждаются в дороге"}
     { key:"#TR_CONFIG_FARMS_DELIVER_CLOSE", text:"Фермы и причалы доставляют еду только в близкорасположенные амбары"}
     { key:"#TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES", text:"Не доставлять еду в амбары с включенной доставкой"}
@@ -455,11 +467,11 @@ localization_ru = [
     { key: "#antelope_hunter_hunting", text: "Антилопы нам не соперники!" }
     { key: "#antelope_hunter_back", text: "Сегодня вечером будут стейки для всех." }    
     { key: "#antelope_hunter_city_is_good", text: "Этот город - хорошее место для жизни." }
-    { key: "#hunt_bird_birds_are_wily", text: "Эти птицы хитрые!" }
-    { key: "#hunt_bird_birds_ready_for_roasting", text: "Эти птицы готовы к жарке!" }
     { key: "#figure_antelope_hunter", text: "Охотник на антилоп" }
     { key: "#figure_antelope_hunter_javelin", text: "Дротик охотника" }
     { key: "#figure_birds_hunter", text: "Охотник на птиц" }
+    { key: "#hunt_bird_birds_are_wily", text: "Эти птицы хитрые!" }
+    { key: "#hunt_bird_birds_ready_for_roasting", text: "Эти птицы готовы к жарке!" }
 
     { key:"#goods_are_finished", text: "Мои припасы продались как горячие пирожки! Я возвращаюсь на базар за ещё." }
     { key:"#we_are_selling_goods", text: "Я стараюсь изо всех сил давать людям то, что они хотят." }

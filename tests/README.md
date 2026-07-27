@@ -110,6 +110,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `50_invasion_bind_resolve.js` | Invasion bind: spawn + `on_completed_tag` deferred KR + history ring (JS calendar model; native EVENT_TYPE_INVASION cancelled) |
 | `78_building_road_access.js` | Building road-access marker (EE*): Preview/Commit resolve, booth assume, temple variant, config flag |
 | `77_brick_wall_placement.js` | Brick wall L-drag; material; clear+undo; mud↔brick overwrite no-op |
+| `76_invasion_auto_resolve.js` | Enhanced auto-resolve invasions (AC*): freeze/pending, lose/win KR, queue timer, flag OFF, natives out, Pharaoh, queue full, save/load, chain spawn |
 | `77_bazaar_multi_buyer.js` | Multi-buyer bazaar (BB*): complementary/fallback/demand freeze/OFF slot1; slots; -3 |
 | `56_medium_stepped_first_stone.js` | Medium stepped first brick tier screenshots (companion/regress for large) |
 | `57_request_cleared.js` | B13 `event_request_cleared`: ok fulfill, overdue fulfill → late, grace expire → refuse |

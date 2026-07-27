@@ -66,6 +66,7 @@
 #include "scenario/farao_change.h"
 #include "scenario/scenario_revolt.h"
 #include "scenario/scenario_invasion.h"
+#include "scenario/invasion_auto_resolve.h"
 #include "scenario/price_change.h"
 #include "scenario/request.h"
 #include "scenario/scenario.h"
@@ -225,6 +226,9 @@ static void post_load() {
     map_image_fix_icorrect_tiles();
     map_bridge_migrate_from_sprite();
     map_wall_material_migrate_from_terrain();
+
+    // Enhanced auto-resolve: honor feature after load, drop ghost pending, reopen UI.
+    g_invasion_auto_resolve.on_after_load();
 
     // building counts / storage
     city_resource_determine_available();
@@ -631,6 +635,10 @@ static void file_schema(e_file_format file_format, const int file_version) {
         }
         if (file_version > 175) {
             FILEIO.push_chunk(51984, false, "wall_material_grid", iob_wall_material_grid); // (228²) * 1
+        }
+        if (file_version > 176) {
+            // count+head+8 order + 8*(bool+u16+u8+i16+bool+pad) + pad = 80
+            FILEIO.push_chunk(80, false, "invasion_auto_resolve", iob_invasion_auto_resolve);
         }
 
         break;

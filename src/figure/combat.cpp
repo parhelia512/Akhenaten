@@ -10,6 +10,7 @@
 #include "grid/point.h"
 #include "sound/sound.h"
 #include "game/game_events.h"
+#include "scenario/invasion_auto_resolve.h"
 
 int attack_is_same_direction(int dir1, int dir2) {
     if (dir1 == dir2)
@@ -38,6 +39,10 @@ int figure_combat_get_target_for_soldier(tile2i tile, int max_distance) {
             continue;
         }
 
+        if (invasion_auto_resolve_figure_immune(f)) {
+            continue;
+        }
+
         if (f->is_enemy() || f->is_criminal()) {
             int distance = calc_maximum_distance(tile, f->tile);
             if (distance <= max_distance) {
@@ -61,6 +66,10 @@ int figure_combat_get_target_for_soldier(tile2i tile, int max_distance) {
         }
 
         if (f->is_dead()) {
+            continue;
+        }
+
+        if (invasion_auto_resolve_figure_immune(f)) {
             continue;
         }
 
@@ -111,6 +120,10 @@ int figure_combat_get_missile_target_for_soldier(figure* shooter, int max_distan
     figure* min_figure = 0;
     for (figure* f: map_figures()) {
         if (!f->is_valid() || f->is_dead()) {
+            continue;
+        }
+
+        if (invasion_auto_resolve_figure_immune(f)) {
             continue;
         }
 
@@ -216,6 +229,11 @@ void figure::hit_opponent() {
     figure* opponent = figure_get(opponent_id);
     formation* opponent_formation = formation_get(opponent->formation_id);
 
+    // Pending auto-resolve waves are non-combatant both ways.
+    if (invasion_auto_resolve_figure_immune(this) || invasion_auto_resolve_figure_immune(opponent)) {
+        return;
+    }
+
     //const figure_properties& props = figure_properties_for_type(type);
     //const figure_properties& opponent_props = figure_properties_for_type(opponent->type);
     if (category() == figure_category_citizen || category() == figure_category_criminal) {
@@ -318,6 +336,11 @@ void figure::figure_combat_attack_figure_at(int grid_offset) {
 
         figure* opponent = figure_get(opponent_id);
         if (opponent_id == id) {
+            opponent_id = opponent->next_figure;
+            continue;
+        }
+
+        if (invasion_auto_resolve_figure_immune(this) || invasion_auto_resolve_figure_immune(opponent)) {
             opponent_id = opponent->next_figure;
             continue;
         }

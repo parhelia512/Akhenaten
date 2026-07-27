@@ -8,6 +8,7 @@
 #include "figuretype/figure_missile.h"
 #include "figure/formation_layout.h"
 #include "js/js_game.h"
+#include "scenario/invasion_auto_resolve.h"
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_egyptian_spearman)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_hittite_spearman)
@@ -188,6 +189,11 @@ void figure_enemy_spearman::leave_city() {
 
 void figure_enemy_spearman::figure_action() {
     OZZY_PROFILER_FUNCTION();
+
+    if (invasion_auto_resolve_figure_immune(&base)) {
+        base.map_figure_update();
+        return;
+    }
 
     base.speed_multiplier = 1;
     formation *m = formation_get(base.formation_id);

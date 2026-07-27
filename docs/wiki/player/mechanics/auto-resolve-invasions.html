@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto-resolve invasions — Akhenaten Wiki</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .cp-table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+    .cp-table th, .cp-table td { padding: 0.35rem 0.6rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .cp-table th { color: var(--text-muted); font-weight: normal; }
+    .file-ref { display: inline-block; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.78rem; background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.2); border-radius: 2px; padding: 0.05rem 0.45rem; color: var(--gold); margin: 0 0.1rem; }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; }
+    summary { padding: 0.7rem 1rem; cursor: pointer; font-size: 0.875rem; font-weight: 600; color: var(--text); list-style: none; display: flex; align-items: center; gap: 0.6rem; user-select: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: "▶"; font-size: 0.6rem; color: var(--gold); transition: transform 0.15s; flex-shrink: 0; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    details[open] > summary { border-bottom: 1px solid var(--border); }
+    .details-body { padding: 1rem 1.1rem; font-size: 0.85rem; line-height: 1.6; }
+    .bld-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; }
+    .bld-nav a { color: var(--gold); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">Akhenaten</a>
+      <ul>
+        <li><a href="../../../about.html">About</a></li>
+        <li><a href="../../../devblog.html">Devblog</a></li>
+        <li><a href="../../index.html" class="active">Wiki</a></li>
+        <li><a href="../../../screenshots.html">Screenshots</a></li>
+        <li><a href="../../../downloads.html">Downloads</a></li>
+        <li><a href="../../../contributors.html">Contributors</a></li>
+        <li><a href="../../../contact.html">Join us</a></li>
+        <li><a href="../../../reportbug.html">Report Bug</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="wiki-layout">
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title"><a href="../index.html">← Player Guide</a></div>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Mechanics</div>
+        <ul>
+          <li><a href="labor.html">Labor</a></li>
+          <li><a href="auto-resolve-invasions.html" class="active">Auto-resolve invasions</a></li>
+        </ul>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">On this page</div>
+        <ul>
+          <li><a href="#what">What it does</a></li>
+          <li><a href="#scope">Scope</a></li>
+          <li><a href="#outcome">Outcome</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <div class="wiki-content">
+      <div class="wiki-breadcrumb"><a href="../../index.html">Wiki</a> / <a href="../index.html">Player Guide</a> / Auto-resolve invasions</div>
+      <h1>Auto-resolve invasions</h1>
+      <p class="section-intro">Optional Enhanced feature: local invasions wait at the entry point and resolve by army strength instead of company micro. Default is <strong>OFF</strong> (original Pharaoh combat).</p>
+
+      <h2 id="what">What it does</h2>
+      <ol>
+        <li>Enable <em>Auto-resolve invasions</em> under Features → Gameplay.</li>
+        <li>When an in-scope invasion reaches the city, enemies <strong>freeze</strong> at the entry point (no pathing, no building attacks, combat-immune both ways).</li>
+        <li>A <strong>quick-battle</strong> window shows your strength vs theirs and a countdown (8 days for the current wave).</li>
+        <li>Click <em>Resolve now</em> or wait for the timer — outcome uses the distant-battle strength ladder.</li>
+        <li>Company march onto that frozen wave is blocked; recruiting and building elsewhere stay allowed.</li>
+      </ol>
+      <p>Multiple waves queue: only the head counts down; others stay frozen until they become head. Closing Wait keeps the freeze; reopen from the invasion message (<em>Go to Problem</em>).</p>
+
+      <h2 id="scope">Scope</h2>
+      <table class="cp-table">
+        <thead>
+          <tr><th>Included</th><th>Excluded</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Foreign invasions, Pharaoh / kingdom armies on the map</td>
+            <td>Local uprisings, natives / Seth wrath, distant battles (already abstract)</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>If the pending queue is full (8 waves), a further invasion fights on the map as usual.</p>
+
+      <h2 id="outcome">Outcome</h2>
+      <ul>
+        <li><strong>Win</strong> (<code>your strength ≥ enemy</code>): kingdom rating <strong>+25</strong>, invaders despawn, mission completed tags fire.</li>
+        <li><strong>Lose</strong>: kingdom rating <strong>−10</strong>, 100% of your local companies lost, invaders still leave the field (no city razing from this path).</li>
+        <li>Empty fort lose is still −10 (same as distant “too weak”), not the distant “no troops” −50.</li>
+      </ul>
+      <p>Walls and towers do not add to the strength totals shown in the window.</p>
+
+      <details>
+        <summary>Developer Reference</summary>
+        <div class="details-body">
+          <p>Flag: <span class="file-ref">gameplay_enhanced_auto_resolve_invasions</span></p>
+          <p>Engine: <span class="file-ref">src/scenario/invasion_auto_resolve.cpp</span>, plan <span class="file-ref">REMAKE_AUTO_COMBAT_PLAN.md</span> (AC* / PC2).</p>
+          <p>UI: <span class="file-ref">src/scripts/ui_invasion_quick_battle_window.js</span></p>
+          <p>Test: <span class="file-ref">tests/76_invasion_auto_resolve.js</span></p>
+        </div>
+      </details>
+
+      <div class="bld-nav">
+        <a href="labor.html">← Labor</a>
+        <a href="../index.html">Player Guide →</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

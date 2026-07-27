@@ -3447,6 +3447,22 @@ game_messages_de {
         video { text: "@24" }
         content { text: "Osiris, Gott der Nilflut, segnet diese Stadt für ihre aufrichtige Verehrung. Die Ernte aller im Überschwemmungsgebiet gelegenen Farmen wird doppelt so reich ausfallen wie erwartet." }
     }
+    message_construction_blessing {
+        id: 1012
+        type: 2
+
+        size [30, 20]
+        title { text: "Ein Bausegen" }
+        content { text: "Die Götter sind erfreut über Eure Hingabe und beschleunigen den Bau Eures Monuments. Lasst Eure Arbeiter zur Seite treten, während dieser Segen eintrifft." }
+    }
+    message_construction_blessing_minor {
+        id: 1013
+        type: 2
+
+        size [30, 20]
+        title { text: "Ein Bausegen" }
+        content { text: "Die Götter würdigen Eure Anbetung, indem sie Eurem Monumentbau helfen. Lasst Eure Arbeiter kurz ruhen, während dieses Geschenk eintrifft." }
+    }
    message_blessing_trade_from_ra {
         id: 296
         type: 2
@@ -6178,5 +6194,26 @@ game_messages_de {
         urgent: 1
         title { text: "Mumie greift an!" }
         content { text: "Eine Mumie ist auferstanden und streift durch die Straßen der Stadt. Dieser Fluch muss gestoppt werden, bevor er das ganze Land erfasst." }
+    }
+    message_invasion_quick_battle {
+        id: 498,
+        type: 7,
+        size [30, 16]
+        title { text: "Feind vor den Toren" }
+        content { text: "Eine Invasionsstreitmacht steht an den Stadttoren und erwartet die Schlacht. Eure Generäle entscheiden den Kampf nach Truppenstärke in wenigen Tagen — oder ihr befehlt den Angriff jetzt. Kompanie-Mikro ist für diese Welle ausgesetzt. @PKlickt auf Problem anzeigen, um das Schnellkampf-Fenster erneut zu öffnen." }
+    }
+    message_invasion_auto_resolve_win {
+        id: 499,
+        type: 2,
+        size [30, 16]
+        title { text: "Sieg!" }
+        content { text: "Eure Generäle haben die Schlacht entschieden. Die Eindringlinge sind besiegt. Einige eurer Soldaten fielen im Kampf." }
+    }
+    message_invasion_auto_resolve_lose {
+        id: 500,
+        type: 2,
+        size [30, 16]
+        title { text: "Niederlage" }
+        content { text: "Eure Generäle melden eine Niederlage. Die Invasionsstreitmacht war zu stark. Viele eurer Soldaten sind gefallen — doch der Feind zieht vom Feld ab." }
     }
 }

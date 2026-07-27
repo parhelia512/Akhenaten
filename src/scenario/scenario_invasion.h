@@ -19,6 +19,15 @@ enum e_attack_faction {
 using e_attack_faction_tokens_t = token_holder<e_attack_faction, ATTACK_TYPE_ENEMIES, ATTACK_TYPE_MAX>;
 extern const e_attack_faction_tokens_t e_attack_faction_tokens;
 
+// Spawn classification for Enhanced auto-resolve (not the same as mode).
+enum e_invasion_spawn_kind : uint8_t {
+    INVASION_KIND_FOREIGN = 0,
+    INVASION_KIND_PHARAOH = 1,
+    INVASION_KIND_KINGDOME = 2,
+    INVASION_KIND_UPRISING = 3,
+    INVASION_KIND_NATIVES = 4,
+};
+
 struct invasion_warning_t {
     bool in_use;
     bool handled;
@@ -36,6 +45,7 @@ struct invasion_warning_t {
 struct invasion_opts_t {
     e_attack_faction mode = ATTACK_TYPE_ENEMIES;
     e_enemy_type enemy_type = ENEMY_0_BARBARIAN;
+    e_invasion_spawn_kind kind = INVASION_KIND_FOREIGN;
     int size = 0;
     int invasion_id = 0;
     // FORMATION_ATTACK_*; pak EVENT_ATTACK_TARGET_RANDOM(4) maps to FORMATION_ATTACK_RANDOM(5)
@@ -144,3 +154,7 @@ void scenario_invasion_process();
 int map_invasion_point(tile2i point);
 
 tile2i scenario_start_invasion_impl(invasion_opts_t opts);
+
+// Force bind/history outcome for a spawn seq (auto-resolve, cheats, etc.).
+// COMPLETED → on_completed_tag; DEFEAT → on_defeat_tag; NONE → clear bind, no tags.
+void invasion_force_outcome(uint16_t seq, e_invasion_outcome outcome);

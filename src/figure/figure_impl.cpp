@@ -11,6 +11,7 @@
 #include "grid/terrain.h"
 #include "core/object_property.h"
 #include "core/profiler.h"
+#include "scenario/invasion_auto_resolve.h"
 
 #include "dev/debug.h"
 
@@ -468,6 +469,15 @@ bool figure_impl::is_destination(const building *b) const {
 }
 
 void figure_impl::apply_damage(int hit_dmg, figure_id attaker_id) {
+    if (invasion_auto_resolve_figure_immune(&base)) {
+        return;
+    }
+    if (attaker_id > 0) {
+        figure *attacker = figure_get(attaker_id);
+        if (attacker && invasion_auto_resolve_figure_immune(attacker)) {
+            return;
+        }
+    }
     base.damage += hit_dmg;
 }
 

@@ -63,9 +63,21 @@ localization_hu = [
   {key:"#TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD", text:"A beszállító magtárak taligásai letérhetnek az útról"}
   {key:"#TR_CONFIG_GRANARIES_GET_DOUBLE", text:"A beszállító magtárak taligásainak kapacitása kétszeres"}
   {key:"#TR_CONFIG_DOCK_DOUBLE_HAUL", text:"A dokkmunkások kétszeres rakományt szállítanak (200/út)"}
-  {key:"#TR_CONFIG_BAZAAR_MULTI_BUYERS", text:"A bazárok egyszerre két beszerzőt küldhetnek (élelem + áruk)"}
   {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Nagyobb kereskedőkapacitás (1600/látogatás; nem éves birodalmi limit)"}
   {key:"#TR_CONFIG_BAST_LION_RAID", text:"Bast haragja: oroszlánrajtaütés templomokból/állatkertből (TEMP Enhanced)"}
+  {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Inváziók auto-megoldása: az ellenség a bejáratnál vár, gyorscsata 8 nap múlva (fal/torony nem számít; fáraó benne; nem felkelés)"}
+  {key:"#warning_auto_resolve_orders_blocked", text:"A századok nem vonulhatnak befagyasztott inváziós hullámra"}
+  {key:"#warning_auto_resolve_queue_full", text:"Túl sok várakozó invázió — ez a hullám a térképen harcol"}
+  {key:"#invasion_quick_battle_title", text:"Gyorscsata"}
+  {key:"#invasion_quick_battle_hint", text:"A támadók a bejáratnál várnak. Toborozz, ha kell. Harcolj most, vagy várd ki az időzítőt."}
+  {key:"#invasion_quick_battle_resolve", text:"Harcolj most"}
+  {key:"#invasion_quick_battle_wait", text:"Várakozás"}
+  {key:"#invasion_quick_battle_strength", text:"Erőitek: {player}   Ellenség: {enemy}"}
+  {key:"#invasion_quick_battle_days", text:"Csata {days} nap múlva"}
+  {key:"#invasion_quick_battle_queue", text:"({n} a sorban)"}
+  {key:"#invasion_quick_battle_head", text:"Hullám #{id} ({i}/{n})"}
+  {key:"#invasion_quick_battle_none", text:"Nincs várakozó csata"}
+  {key:"#TR_CONFIG_BAZAAR_MULTI_BUYERS", text:"A bazárok egyszerre két beszerzőt küldhetnek (élelem + áruk)"}
   {key:"#TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD", text:"Az őrtornyok őreinek nem kell útkapcsolat a laktanyához"}
   {key:"#TR_CONFIG_FARMS_DELIVER_CLOSE", text:"A farmok és kikötők csak közeli magtárakba szállítanak"}
   {key:"#TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES", text:"Az élelem nem kerül beszállító magtárakba"}

@@ -18,6 +18,7 @@
 #include "grid/terrain.h"
 #include "scenario/map.h"
 #include "scenario/scenario.h"
+#include "scenario/invasion_auto_resolve.h"
 #include "dev/debug.h"
 #include "core/log.h"
 #include "empire/empire.h"
@@ -26,6 +27,14 @@
 #include "scenario/scenario_event_manager.h"
 
 const e_attack_faction_tokens_t ANK_CONFIG_ENUM(e_attack_faction_tokens);
+
+// Skip OG attack popup when auto-resolve already queued this seq (quick-battle message sent).
+static void emit_local_invasion_attack_message(xstring msg_id, uint16_t seq, int grid_offset) {
+    if (g_invasion_auto_resolve.is_seq_frozen(seq)) {
+        return;
+    }
+    events::emit(event_message{ true, msg_id, seq, grid_offset, SOURCE_LOCATION });
+}
 
 e_formation_attack_type formation_attack_from_event_target(int invasion_attack_target) {
     // Pak EVENT_ATTACK_TARGET_* is 0..4; FORMATION_ATTACK_RANDOM is 5 (SIMPLE sits at 4).
@@ -54,6 +63,7 @@ declare_console_command_p(start_invasion) {
     opts.invasion_point = { tilex, tiley };
     opts.invasion_id = 23;
     opts.want_destroy = parse_integer_from<bstring32>(is);
+    opts.kind = (opts.enemy_type == ENEMY_3_EGYPTIAN) ? INVASION_KIND_PHARAOH : INVASION_KIND_FOREIGN;
 
     scenario_invasion_start(opts);
 
@@ -69,9 +79,11 @@ declare_console_command_p(start_invasion_fast) {
     opts.invasion_point = tile2i::invalid;
     opts.invasion_id = 23;
     opts.want_destroy = 5;
+    opts.kind = INVASION_KIND_FOREIGN;
     tile2i tile = scenario_start_invasion_impl(opts);
     if (tile.valid()) {
-        events::emit(event_message{ true, "message_barbarians_attack", g_invasions.last_internal_invasion_id, tile.grid_offset(), SOURCE_LOCATION });
+        emit_local_invasion_attack_message("message_barbarians_attack",
+            g_invasions.last_internal_invasion_id, tile.grid_offset());
     }
 }
 
@@ -120,6 +132,7 @@ void invasion_data_t::clear(void) {
     }
     history_count = 0;
     history_next = 0;
+    g_invasion_auto_resolve.clear();
 }
 
 // ONLY_VIA masters clone to ACTIVATED_* then return; drain those clones here so KR/siege/request
@@ -211,6 +224,27 @@ static void history_set_outcome(uint16_t seq, e_invasion_outcome outcome) {
             h.outcome = (uint8_t)outcome;
             return;
         }
+    }
+}
+
+void invasion_force_outcome(uint16_t seq, e_invasion_outcome outcome) {
+    if (!seq) {
+        return;
+    }
+    history_set_outcome(seq, outcome);
+    for (auto &b : g_invasions.binds) {
+        if (!b.in_use || b.seq != seq) {
+            continue;
+        }
+        const uint16_t ok_tag = b.on_completed_tag;
+        const uint16_t defeat_tag = b.on_defeat_tag;
+        b = {};
+        if (outcome == INVASION_OUTCOME_COMPLETED && ok_tag) {
+            fire_chain_by_tag(ok_tag);
+        } else if (outcome == INVASION_OUTCOME_DEFEAT && defeat_tag) {
+            fire_chain_by_tag(defeat_tag);
+        }
+        return;
     }
 }
 
@@ -529,6 +563,7 @@ tile2i scenario_start_invasion_impl(invasion_opts_t opts) {
 
     if (seq > 0 && invasion_tile.valid()) {
         g_invasions.record_spawn(opts, invasion_tile, opts.size);
+        g_invasion_auto_resolve.maybe_enqueue(opts, (uint16_t)data.last_internal_invasion_id);
     }
 
     return invasion_tile;
@@ -573,9 +608,11 @@ void scenario_invasion_process() {
                 // opts.invasion_point = g_scenario.invasions[warning.invasion_id].from;
                 opts.attack_type = g_scenario.invasions[warning.invasion_id].attack_type;
                 opts.invasion_id = warning.invasion_id;
+                opts.kind = (enemy_id == ENEMY_3_EGYPTIAN) ? INVASION_KIND_PHARAOH : INVASION_KIND_FOREIGN;
                 tile2i invasion_tile = scenario_start_invasion_impl(opts);
                 if (invasion_tile.valid()) {
-                    events::emit(event_message{ true, "message_barbarians_attack", g_invasions.last_internal_invasion_id, invasion_tile.grid_offset(), SOURCE_LOCATION });
+                    emit_local_invasion_attack_message("message_barbarians_attack",
+                        g_invasions.last_internal_invasion_id, invasion_tile.grid_offset());
                 }
             }
             if (g_scenario.invasions[warning.invasion_id].type == INVASION_TYPE_KNGDOME) {
@@ -585,9 +622,11 @@ void scenario_invasion_process() {
                 // opts.invasion_point = g_scenario.invasions[warning.invasion_id].from;
                 opts.attack_type = g_scenario.invasions[warning.invasion_id].attack_type;
                 opts.invasion_id = warning.invasion_id;
+                opts.kind = INVASION_KIND_KINGDOME;
                 tile2i invasion_tile = scenario_start_invasion_impl(opts);
                 if (invasion_tile.valid()) {
-                    events::emit(event_message{ true, "message_legion_attacks", g_invasions.last_internal_invasion_id, invasion_tile.grid_offset(), SOURCE_LOCATION });
+                    emit_local_invasion_attack_message("message_legion_attacks",
+                        g_invasions.last_internal_invasion_id, invasion_tile.grid_offset());
                 }
             }
         }
@@ -602,6 +641,7 @@ void scenario_invasion_process() {
                 // opts.invasion_point = g_scenario.invasions[warning.invasion_id].from;
                 opts.attack_type = g_scenario.invasions[i].attack_type;
                 opts.invasion_id = i;
+                opts.kind = INVASION_KIND_UPRISING;
                 tile2i invasion_tile = scenario_start_invasion_impl(opts);
                 if (invasion_tile.valid()) {
                     events::emit(event_message{ true, "message_local_uprising", g_invasions.last_internal_invasion_id, invasion_tile.grid_offset(), SOURCE_LOCATION });
@@ -636,10 +676,12 @@ bool scenario_invasion_start_from_kingdome(int size) {
     // opts.invasion_point = g_scenario.invasions[warning.invasion_id].from;
     opts.attack_type = FORMATION_ATTACK_BEST_BUILDINGS;
     opts.invasion_id = 24;
+    opts.kind = INVASION_KIND_KINGDOME;
 
     tile2i invasion_tile = scenario_start_invasion_impl(opts);
     if (invasion_tile.valid()) {
-        events::emit(event_message{ true, "message_kingdome_army_attack", data.last_internal_invasion_id, invasion_tile.grid_offset(), SOURCE_LOCATION });
+        emit_local_invasion_attack_message("message_kingdome_army_attack",
+            data.last_internal_invasion_id, invasion_tile.grid_offset());
         return true;
     }
     return false;
@@ -647,17 +689,27 @@ bool scenario_invasion_start_from_kingdome(int size) {
 
 int scenario_invasion_start(invasion_opts_t opts) {
     auto &data = g_invasions;
+    // Derive kind when caller left default FOREIGN but mode/enemy imply otherwise.
+    if (opts.kind == INVASION_KIND_FOREIGN) {
+        if (opts.mode == ATTACK_TYPE_NATIVES) {
+            opts.kind = INVASION_KIND_NATIVES;
+        } else if (opts.mode == ATTACK_TYPE_KINGDOME) {
+            opts.kind = INVASION_KIND_KINGDOME;
+        } else if (opts.enemy_type == ENEMY_3_EGYPTIAN) {
+            opts.kind = INVASION_KIND_PHARAOH;
+        }
+    }
     switch (opts.mode) {
     case ATTACK_TYPE_ENEMIES: {
         tile2i invasion_tile = scenario_start_invasion_impl(opts);
         if (invasion_tile.valid()) {
             // Favour / Pharaoh army uses Egyptian sprites — kingdome message, not barbarians.
             if (opts.enemy_type == ENEMY_3_EGYPTIAN) {
-                events::emit(event_message{ true, "message_kingdome_army_attack",
-                    data.last_internal_invasion_id, invasion_tile.grid_offset(), SOURCE_LOCATION });
+                emit_local_invasion_attack_message("message_kingdome_army_attack",
+                    data.last_internal_invasion_id, invasion_tile.grid_offset());
             } else {
-                events::emit(event_message{ true, "message_barbarians_attack",
-                    data.last_internal_invasion_id, invasion_tile.grid_offset(), SOURCE_LOCATION });
+                emit_local_invasion_attack_message("message_barbarians_attack",
+                    data.last_internal_invasion_id, invasion_tile.grid_offset());
             }
             return data.last_internal_invasion_id;
         }
@@ -665,12 +717,14 @@ int scenario_invasion_start(invasion_opts_t opts) {
     }
     case ATTACK_TYPE_KINGDOME: {
         // Legacy / console path (mission favour uses ENEMIES + Egyptian instead).
+        opts.kind = INVASION_KIND_KINGDOME;
         g_city.kingdome.force_attack(opts.size);
         return data.last_internal_invasion_id;
     }
     case ATTACK_TYPE_NATIVES: {
         opts.attack_type = FORMATION_ATTACK_FOOD_CHAIN;
         opts.enemy_type = ENEMY_0_BARBARIAN;
+        opts.kind = INVASION_KIND_NATIVES;
         tile2i invasion_tile = scenario_start_invasion_impl(opts);
         if (invasion_tile.valid()) {
             events::emit(event_message{ true, "message_local_wrath_of_seth",

@@ -165,6 +165,7 @@ namespace game_features {
     extern game_feature gameplay_change_disaster_events_use_amount;
     extern game_feature gameplay_change_trader_capacity_1600;
     extern game_feature gameplay_bast_lion_raid;
+    extern game_feature gameplay_enhanced_auto_resolve_invasions;
 
     xspan<game_feature*> all();
     game_feature* find(const xstring& name);

@@ -55,6 +55,7 @@ void formation_batalion_update_recruit_status(building* b) {
 }
 
 void formation_batalion_change_layout(formation* m, e_formation_layout new_layout) {
+    // Mop-up OK during pending: combat target filters skip frozen waves.
     if (new_layout == FORMATION_MOP_UP && m->layout != FORMATION_MOP_UP)
         m->prev.layout = m->layout;
 

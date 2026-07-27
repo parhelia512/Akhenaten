@@ -3466,6 +3466,22 @@ game_messages_en {
         video { text: "@24" }
         content { text: "Osiris, god of the Nile flood, blesses this city for its sincere devotion. All farms on the flood plain will harvest double what they had expected this season!" }
     }
+    message_construction_blessing {
+        id: 1012
+        type: 2
+
+        size [30, 20]
+        title { text: "A Construction Blessing" }
+        content { text: "The gods are pleased by your devotion and give a major boost to your monument. Let your workers stand aside while this blessing is received." }
+    }
+    message_construction_blessing_minor {
+        id: 1013
+        type: 2
+
+        size [30, 20]
+        title { text: "A Construction Blessing" }
+        content { text: "The gods acknowledge your worship by aiding your monument. Let your workers rest briefly while this gift arrives." }
+    }
     message_blessing_trade_from_ra {
         id: 296
         type: 2
@@ -6196,5 +6212,26 @@ game_messages_en {
         title { text: "Wrath of Bast" }
         video { text: "@20" }
         content { text: "Bast's patience is spent. From her temples — and even from the zoo, if you keep one — she unleashes a pride of lions into your streets. Citizens and soldiers alike scatter as the hunt begins — honor the Goddess of the Home before more blood stains the roads." }
+    }
+    message_invasion_quick_battle {
+        id: 498,
+        type: 7,
+        size [30, 16]
+        title { text: "Enemy at the Gates" }
+        content { text: "An invading force has reached the city gates and awaits battle. Your generals will resolve the fight by army strength in a few days — or you may order them to engage now. Company micro is suspended for this wave. @PClick Go to Problem to reopen the quick-battle panel." }
+    }
+    message_invasion_auto_resolve_win {
+        id: 499,
+        type: 2,
+        size [30, 16]
+        title { text: "Victory!" }
+        content { text: "Your generals have resolved the battle. The invaders are defeated. Some of your soldiers were lost in the fighting." }
+    }
+    message_invasion_auto_resolve_lose {
+        id: 500,
+        type: 2,
+        size [30, 16]
+        title { text: "Defeat" }
+        content { text: "Your generals report defeat. The invading force was too strong. Many of your soldiers have fallen — but the enemy withdraws from the field." }
     }
 }
