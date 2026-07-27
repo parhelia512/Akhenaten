@@ -231,7 +231,9 @@ function mission_end_show(state) {
         return
     }
 
-    if (mission_end_compute_next_scenario_id(scenario.campaign_scenario_id) == -1
+    var completed_for_video = scenario.campaign_scenario_id
+    if (!mission_has_post_victory_choice(completed_for_video)
+        && mission_end_compute_next_scenario_id(completed_for_video) == -1
         && scenario.scmode != e_scenario_custom_map) {
         __game_victory_video_show("smk/win_game.smk", 400, 292, "mission_end_after_video")
         return

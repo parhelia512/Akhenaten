@@ -59,7 +59,7 @@
       <h1>Heh <span style="color:var(--text-muted);font-weight:normal;font-size:0.65em">— The Gauntlet</span></h1>
       <div class="mission-infobox">
         <dl>
-          <dt>Mission</dt><dd>30 — funnel target after Iken (28) / Sawu (29)</dd>
+          <dt>Mission</dt><dd>30 — choice A after Iken (28) / Sawu (29)</dd>
           <dt>Classical name</dt><dd>Semna (briefing key <code>message_mission_semna</code>)</dd>
           <dt>Starting funds</dt>
           <dd><div class="funds-row">
@@ -69,9 +69,10 @@
           </div></dd>
           <dt>Deities</dt><dd>Osiris (patron) · Ra · Seth</dd>
           <dt>Trade</dt><dd>Buhen · Byblos · Dakhla · Pwenet; unlock Baki (sandstone) / Sawu / Men-nefer / Itjtawy mid-game</dd>
-          <dt>Previous</dt><dd><a href="iken.html">Iken</a> (28) / <a href="sawu.html">Sawu</a> (29) — choice pair funnel</dd>
-          <dt>Next</dt><dd>Bubastis (31) — not scripted yet (end-of-campaign until D8d)</dd>
-          <dt>Status</dt><dd><span class="mission-badge badge-impl">Implemented</span></dd>
+          <dt>Previous</dt><dd><a href="iken.html">Iken</a> (28) / <a href="sawu.html">Sawu</a> (29) — choice pair</dd>
+          <dt>Sibling</dt><dd><a href="bubastis.html">Bubastis</a> (31) — choice B</dd>
+          <dt>Next</dt><dd>Khmun (32) / Sauty (33) — choice (B5 until D9)</dd>
+          <dt>Status</dt><dd><span class="mission-badge badge-choice">Choice A</span> <span class="mission-badge badge-impl">Implemented</span></dd>
         </dl>
       </div>
 
@@ -101,7 +102,7 @@
           <div class="details-body">
             <p><span class="file-ref">src/scripts/mission/m_030_heh.js</span> · import in <span class="file-ref">src/scripts/missions.js</span></p>
             <p>Empire id <strong>20</strong> (pak). Map <span class="file-ref">data/maps/m_030_heh.map</span>. Rank 10. Scenario enemy <code>ENEMY_6_KUSHITE</code>; favour via <code>ENEMY_3_EGYPTIAN</code>. Dump 2026-07-26.</p>
-            <p><code>next_mission : 31</code> (linear; end-of-campaign until Bubastis D8d). SKIP: empty map_obj idx=9. Soft: E3 sea, C9 mausoleum.</p>
+            <p><code>choice[]</code> → Khmun/Sauty (g144 64/65/66); sibling Bubastis. SKIP: empty map_obj idx=9. Soft: E3 sea, C9 mausoleum.</p>
           </div>
         </details>
         <details>
@@ -118,7 +119,7 @@
 
       <div class="mission-nav">
         <a href="iken.html">← Iken</a> · <a href="sawu.html">Sawu</a>
-        <a href="index.html">Bubastis (31) →</a>
+        <a href="bubastis.html">Bubastis (sibling) →</a>
       </div>
     </div>
   </main>

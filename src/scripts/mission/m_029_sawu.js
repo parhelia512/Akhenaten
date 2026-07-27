@@ -6,8 +6,27 @@ mission29 { // Sawu (Mersa Gawasis) — Shores of the Red Sea; briefing key = me
 	selection_title : "Sawu"
 	player_rank : 10
 
-	// Iken (28) and Sawu (29) are a choice pair; both converge on Heh (30).
-	next_mission : 30
+	// Choice pair with Iken; next is Heh (30) / Bubastis (31) — B1 / D8d.
+	choice_background {pack:PACK_UNLOADED, id:12}
+	choice_image1 {pack:PACK_UNLOADED, id:13}
+	choice_image1_pos [192, 144]
+	choice_title [144, 61]
+	choice [
+		{
+			name : "Heh"
+			id : 30
+			image {pack:PACK_UNLOADED, id:20, offset:0}
+			tooltip [144, 62]
+			pos [620, 420]
+		}
+		{
+			name : "Bubastis"
+			id : 31
+			image {pack:PACK_UNLOADED, id:20}
+			tooltip [144, 63]
+			pos [640, 480]
+		}
+	]
 
 	// pak Normal funds=8000 loan=3000 debt_interest=20 -> int_dcy around Normal.
 	initial_funds [16000, 10600, 8000, 5400, 4200]

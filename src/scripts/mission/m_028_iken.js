@@ -1,31 +1,32 @@
 log_info("akhenaten: mission 28 iken started")
 
-// Empire / events verified vs mission1.pak scenario 28 (2026-07-26 dump).
-// Empire id=13. Scenario enemy ENEMY_4_HITTITE (briefing Kushites — pak wins; iunet pattern).
-// Beduin raids use Libyan sprites. Favour / oil-refuse invasions → ENEMY_3_EGYPTIAN.
-// Gods: Osiris(1), Seth(2 patron), Bast(1) — from pak, no JS override.
-// Funds Normal 7000 / loan 3000 / debt_interest 0. Rank 10.
-// Win: pop 6000 / culture 45 / prosperity 40 / monuments 11 / kingdom 80 / housing 10.
-// Monuments: Large Obelisk only (gr198 23). Weight 4 → rating 13.5 ≥ 11 → keep pak goal 11.
-// Burial: pak burial_count=0 — no provisions block.
-// Trade: Buhen(7 sea) Dakhla(9) Farafra(1) Kebet(10 sea) Men-nefer(6 sea).
-// Display→NEW_TRADE: Sawu(3), Waset(8), Byblos(2), Kerma(5 copper ladder); stubs Menat(4) Kharga(11). SKIP empty map_obj idx=10.
-// Events: gamemeat/oil/barley/weapons/copper/linen; beduin timed; enemy×12 y10; favour egypt×40→×40→×40(FOOD).
-// Copper ok/late/refuse → KR leaf first, then enemy ladder next month (pending); wipe → KR+25 → NEW_TRADE Kerma.
-// Oil refuse → egypt×64 (B12). Linen recurring idle-gate.
-//
-// Tag_id scheme:
-//   1000 + i               chain-only leaves
-//   2000 + i               once calendar roots
-
 mission28 { // Iken (Mirgissa) — Into Nubia; briefing key = mirgissa
 	map_file : "data/maps/m_028_iken.map"
 	start_message : "message_mission_mirgissa"
 	selection_title : "Iken"
 	player_rank : 10
 
-	// Iken (28) and Sawu (29) are a choice pair; both converge on Heh (30).
-	next_mission : 30
+	// Choice pair with Sawu; next is Heh (30) / Bubastis (31) — B1 / D8d.
+	choice_background {pack:PACK_UNLOADED, id:12}
+	choice_image1 {pack:PACK_UNLOADED, id:13}
+	choice_image1_pos [192, 144]
+	choice_title [144, 61]
+	choice [
+		{
+			name : "Heh"
+			id : 30
+			image {pack:PACK_UNLOADED, id:20, offset:0}
+			tooltip [144, 62]
+			pos [620, 420]
+		}
+		{
+			name : "Bubastis"
+			id : 31
+			image {pack:PACK_UNLOADED, id:20}
+			tooltip [144, 63]
+			pos [640, 480]
+		}
+	]
 
 	// pak Normal funds=7000 loan=3000 debt_interest=0 → int_dcy around Normal.
 	initial_funds [14000, 9300, 7000, 4700, 3700]

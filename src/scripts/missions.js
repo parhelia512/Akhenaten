@@ -105,7 +105,13 @@ function mission_end_compute_next_scenario_id(completed_id) {
     }
     var src = get_mission_config(completed_id)
     var next_id = (src && src.next_mission) ? src.next_mission : 0
+
     if (!next_id) {
+        if (src && src.choice && src.choice.length > 0) {
+            log_info("mission_end_compute_next: completed=" + completed_id
+                + " has choice[] and no next_mission -> end of game (no completed+1)")
+            return -1
+        }
         next_id = completed_id + 1
     }
     if (next_id < 0 || !mission_is_playable(next_id)) {
@@ -258,6 +264,7 @@ import mission.m_027_itjtawy
 import mission.m_028_iken
 import mission.m_029_sawu
 import mission.m_030_heh
+import mission.m_031_bubastis
 import mission.m_128_alexandria
 import mission.m_129_bridges
 import mission.m_130_sandbox

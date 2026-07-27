@@ -1,28 +1,32 @@
 log_info("akhenaten: mission 30 heh started")
 
-// Empire / events verified vs mission1.pak scenario 30 (2026-07-26 dump).
-// Empire id=20. Scenario enemy ENEMY_6_KUSHITE. Favour invasions invader=egypt(2) → ENEMY_3_EGYPTIAN.
-// Gods: Osiris(2), Ra(1), Seth(1) — no JS override. Funds Normal 5500 / loan 0 / debt 20. Rank 10.
-// Win: pop 6000 / culture 50 / prosperity 45 / monuments TEMP 0 (pak 15; gr198 first=27 Mausoleum; C9) /
-//   kingdom 60 / housing 10.
-// Burial: weapons×16 pottery×8 beer×8 gems×16. Climate desert.
-// Trade openable: Buhen(5) Byblos(1) Dakhla(2) Pwenet(4). Display→NEW_TRADE (trade:false until event):
-//   Itjtawy(6) Men-nefer(15) Baki(7 sandstone; pak empty) Sawu(3). Routes: 1–9,12–15,25–27 (8 stub). SKIP idx=9.
-// Sea inv points: loc 3/4 + OOB Kushite → disembark land-proxy until E3c (sea tiles are water).
-// Keys: briefing semna / history heh; Semna↔Heh, Kuban↔Baki.
-//
-// Tag_id scheme:
-//   1000 + i               chain-only leaves
-//   2000 + i               once calendar roots
-
 mission30 { // Heh (Semna) — The Gauntlet
 	map_file : "data/maps/m_030_heh.map"
 	start_message : "message_mission_semna"
 	selection_title : "Heh"
 	player_rank : 10
 
-	// Iken (28) and Sawu (29) funnel here; next is Bubastis (31).
-	next_mission : 31
+	// Sibling Bubastis (31); both host choice -> Khmun/Sauty (B5 until D9). D8d topo.
+	choice_background {pack:PACK_UNLOADED, id:12}
+	choice_image1 {pack:PACK_UNLOADED, id:13}
+	choice_image1_pos [192, 144]
+	choice_title [144, 64]
+	choice [
+		{
+			name : "Khmun"
+			id : 32
+			image {pack:PACK_UNLOADED, id:20, offset:0}
+			tooltip [144, 65]
+			pos [620, 420]
+		}
+		{
+			name : "Sauty"
+			id : 33
+			image {pack:PACK_UNLOADED, id:20}
+			tooltip [144, 66]
+			pos [640, 480]
+		}
+	]
 
 	// pak Normal funds=5500 loan=0 debt_interest=20 → int_dcy around Normal.
 	initial_funds [11000, 7300, 5500, 3700, 2900]
@@ -931,10 +935,10 @@ function mission30_update_day(ev) {
 	// pak i=22 ok→i=23 kushite×20 loc=9 (after wave1 cleared)
 	if (mission.event22_invasion_done && !mission.event23_invasion_done) {
 		if (!mission.event22_enemies_seen) {
-			if (city.count_enemies() > 0) {
+			if (city.num_enemy_formations > 0) {
 				mission.event22_enemies_seen = true
 			}
-		} else if (city.count_enemies() == 0) {
+		} else if (city.num_enemy_formations == 0) {
 			mission.event23_invasion_done = true
 			log_info("akhenaten: mission 30 kushite×20 chain (i=23)")
 			mission30_kushite_raid(23, 20, 9)
@@ -942,17 +946,17 @@ function mission30_update_day(ev) {
 	}
 
 	// Favour egypt×60→×60 (pak i=35/36) — loc 4 / 6 via loc_tile
-	if (!mission.pharaoh_favour_invasion_done && city.kingdom.rating < 30) {
+	if (!mission.pharaoh_favour_invasion_done && city.rating_kingdom < 30) {
 		mission.pharaoh_favour_invasion_done = true
 		log_info("akhenaten: mission 30 favour egypt×60 (i=35)")
 		mission30_pharaoh_raid(35, 60, 4)
 	}
 	if (mission.pharaoh_favour_invasion_done && !mission.pharaoh_favour_wave2_done) {
 		if (!mission.pharaoh_favour_enemies_seen) {
-			if (city.count_enemies() > 0) {
+			if (city.num_enemy_formations > 0) {
 				mission.pharaoh_favour_enemies_seen = true
 			}
-		} else if (city.count_enemies() == 0) {
+		} else if (city.num_enemy_formations == 0) {
 			mission.pharaoh_favour_wave2_done = true
 			log_info("akhenaten: mission 30 favour egypt×60 wave2 (i=36)")
 			mission30_pharaoh_raid(36, 60, 6)
