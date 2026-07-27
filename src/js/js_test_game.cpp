@@ -42,6 +42,7 @@
 #include "figure/enemy_army.h"
 #include "figure/formation.h"
 #include "window/window_info.h"
+#include "city/object_info.h"
 #include "empire/empire.h"
 #include "widget/widget_sidebar.h"
 
@@ -532,6 +533,22 @@ void __test_show_tile_info(int bid) {
     events::emit(event_show_tile_info{ b->tile, true, "test" });
 }
 ANK_FUNCTION_1(__test_show_tile_info);
+
+pcstr __test_info_ui_text(pcstr element_id) {
+    static bstring512 buf;
+    buf = "";
+    if (!element_id || !*element_id) {
+        return buf.c_str();
+    }
+    object_info &context = common_info_window::get_object_info();
+    if (!context.ui || !context.ui->contains(element_id)) {
+        return buf.c_str();
+    }
+    buf = (*context.ui)[element_id].text().c_str();
+    return buf.c_str();
+}
+ANK_FUNCTION_1(__test_info_ui_text);
+
 
 static e_building_type test_mastaba_params_type(building *head) {
     switch (head->type) {

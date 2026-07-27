@@ -7,6 +7,7 @@
 #include "building/building_house.h"
 #include "building/culture.h"
 #include "building/government.h"
+#include "building/monuments.h"
 #include "window/building/common.h"
 #include "window/message_dialog.h"
 #include "sound/sound.h"
@@ -140,6 +141,62 @@ void building_info_window::window_info_background(object_info &c) {
 
     if (ui["title"].text().empty()) {
         ui["title"] = ui::str(28, b->type);
+    }
+
+    // City-labor staffing row: show tooltip on workers_img; hide fake 0/0 when
+    // the building takes no laborers. Skip unfinished monuments — they reuse
+    // workers_text for construction crew slots.
+    const bool monument_crew = [&]() {
+        auto *impl = b ? b->dcast() : nullptr;
+        auto *mon = impl ? impl->dcast_monument() : nullptr;
+        return mon && mon->is_unfinished();
+    }();
+    const int laborers = b ? b->params().laborers : 0;
+    const bool show_staff = laborers > 0;
+    auto set_workers_tooltip = [&]() {
+        if (!ui.contains("workers_img")) {
+            return;
+        }
+        // Match employment row: workshop/granary/C++ use max_workers; JS templates
+        // use model.laborers (== max_workers at create). Prefer live max_workers.
+        const int needed = b->max_workers > 0 ? b->max_workers : laborers;
+        bstring64 tip;
+        pcstr fmt = lang_text_from_key("#workers_staffing_tooltip");
+        if (fmt && *fmt && fmt[0] != '#') {
+            tip.printf(fmt, b->num_workers, needed);
+        } else {
+            tip.printf("%d / %d", b->num_workers, needed);
+        }
+        ui["workers_img"].tooltip(xstring(tip.c_str()));
+    };
+    auto set_staff_enabled = [&](bool on) {
+        if (ui.contains("workers_img")) {
+            ui["workers_img"].set_enabled(on);
+        }
+        if (ui.contains("workers_text")) {
+            ui["workers_text"].set_enabled(on);
+        }
+        if (ui.contains("workers_desc")) {
+            ui["workers_desc"].set_enabled(on);
+        }
+        // Staffing chrome behind a named panel (workshop/granary/…). Never use
+        // workers_panel alone as the gate — festival_square reuses that id for
+        // non-labor UI. Do not touch generic inner_panel on houses/etc.
+        if (ui.contains("workers_panel")) {
+            ui["workers_panel"].set_enabled(on);
+        } else if (ui.contains("inner_panel") && ui.contains("workers_img")) {
+            // Base building_info: inner_panel only hosts workers_*.
+            ui["inner_panel"].set_enabled(on);
+        }
+    };
+    // Gate on staffing widgets only — not workers_panel by itself.
+    if (!monument_crew && (ui.contains("workers_img") || ui.contains("workers_text"))) {
+        set_staff_enabled(show_staff);
+        if (show_staff) {
+            set_workers_tooltip();
+        }
+    } else if (show_staff) {
+        set_workers_tooltip();
     }
 
     update_buttons(c);

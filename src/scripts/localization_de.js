@@ -49,6 +49,7 @@ localization_de = [
   {key:"#TR_CONFIG_SCHOOL_WALKERS", text:"Reichweite der Schulwanderer erweitern"}
   {key:"#TR_CONFIG_RETIRE_AT_60", text:"Rentenalter der Bürger von 50 auf 60 ändern"}
   {key:"#TR_CONFIG_FIXED_WORKERS", text:"Fester Arbeiterpool — 38% der Bürger (Plebs)"}
+  {key:"#workers_staffing_tooltip", text:"%d / %d Arbeiter"}
   {key:"#TR_CONFIG_EXTRA_FORTS", text:"Bau von 4 zusätzlichen Forts erlauben"}
   {key:"#TR_CONFIG_WOLVES_BLOCK", text:"Bauen um Wölfe herum blockieren"}
   {key:"#TR_CONFIG_DYNAMIC_GRANARIES", text:"Nicht verbundene Kornkammerstraßen blockieren"}

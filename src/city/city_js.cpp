@@ -132,6 +132,19 @@ int __city_population_at_age(int index) {
 }
 ANK_FUNCTION_1(__city_population_at_age)
 
+void __city_population_set_at_age(int index, int value) {
+    if (index < 0 || index >= 100) {
+        return;
+    }
+    if (value < 0) {
+        value = 0;
+    } else if (value > 65535) {
+        value = 65535;
+    }
+    g_city.population.at_age[index] = (uint16_t)value;
+}
+ANK_FUNCTION_2(__city_population_set_at_age)
+
 int __city_population_at_level(int index) {
     if (index < 0 || index >= HOUSE_LEVEL_MAX) {
         return 0;

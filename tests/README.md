@@ -90,7 +90,8 @@ C++ smoke checks run first (before JS files): `SDL_strlen`/`strcmp`, `vec2i`, `g
 | `66_lion_spawn.js` | Cleopatra `FIGURE_LION`: spawn + type + `update_animation` → `walk` (SprMain2 group 5; CF3b) |
 | `69_scorpion_spawn.js` | Cleopatra `FIGURE_SCORPION`: spawn + type + `update_animation` → `walk` (SprMain2 group 10; CF3c) |
 | `70_asp_spawn.js` | Cleopatra `FIGURE_ASP`: spawn + type + `update_animation` → `walk` (SprMain2 group 0; CF3a) |
-| `67_fixed_workers.js` | Fixed worker ratio: `gameplay_fixed_worker_percent` (default 38% plebs), advisor % of total (WR1/WR4) |
+| `67_fixed_workers.js` | Fixed worker ratio: `gameplay_fixed_worker_percent` (default 38% plebs), advisor % of total, age-skew ON/OFF (WR1/WR4) |
+| `70_workers_staffing_ui.js` | Staffing UI smoke: open pottery/firehouse/dock/granary/temple info → `workers_text` contains needed count (WR2/WR4) |
 | `41_city_smoke_run.js` | Broad crash smoke (TS1): place ~12 building types via the real planner path, open each info window (`[es=(info_window_*, init)]`), advance the sim; driver's whole-log `!!! TypeError:` scan catches on_place/update/init crashes broadly. Per-type `smoke_ok:*` markers isolate the culprit; `smoke_skip:*` logged loudly |
 | `46_bridge_placement.js` | Low Bridge on synthetic 3-wide channel: place (`WATER\|ROAD` + `bridge_part`/`bridge_type` + sprite dual-write), floodplain reject, max_length reject, citizen `CITIZEN_0_ROAD` |
 | `47_js_hotreload_stack.js` | Hot-reload MuJS stack stability: 20× `js_register_game_handlers` + 20× reload `:console_commands.js` via `js_vm_sync` must not grow the value stack (former `[console_command=…]` getglobal leak → stackoverflow after ~10 mixed saves) |
@@ -188,6 +189,7 @@ After each test script loads, the driver calls `js_vm_sync({})` so any top-level
 | `__test_figure_update_animation(fid)` | undefined | Call `figure_impl::update_animation()` |
 | `__figure_get_anim_key(fid)` | string | Current `animctx.key` (e.g. `walk`, `swim`) |
 | `__test_show_tile_info(bid)` | undefined | Open building info window for `bid` |
+| `__test_info_ui_text(element_id)` | string | Text of a named element on the current building/terrain info window (e.g. `workers_text`) |
 | `__test_color_roundtrip(color)` | number | Echo a `color` (uint32) back through the binding conversion; asserts full `COLOR_MASK_*` survive MuJS→C++ (J1) |
 | `__test_enemy_figure_registered(type)` | boolean | Spawn `type` and report whether it resolved to a registered enemy class (`dcast_enemy` != null); false for a missing `FIGURE_METAINFO` (F2) |
 | `__test_monument_set_phase(bid, phase)` | undefined | Force monument (+ linked parts) construction phase |

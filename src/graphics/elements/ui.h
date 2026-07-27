@@ -596,6 +596,7 @@ namespace ui {
         // size box, preserving aspect ratio (never enlarges). Used for variable-
         // sized mission preview thumbnails so large maps don't overflow the panel.
         bool fit = false;
+        xstring _tooltip;
 
         virtual void draw(UiFlags flags) override;
         virtual void load(archive elem, element* parent, items& elems) override;
@@ -603,6 +604,9 @@ namespace ui {
         virtual void image(const animation_t& image) override;
         virtual void image(int image) override;
         virtual image_desc image() const override { return img_desc; }
+        virtual void tooltip(textid t) override { _tooltip = ui::str(t); }
+        virtual void tooltip(const xstring& t) override { _tooltip = t; }
+        virtual const xstring& tooltip() const override { return _tooltip; }
 
         static const xstring skind() { return "UIImage"; }
         virtual xstring kind() const override { return eimg::skind(); }

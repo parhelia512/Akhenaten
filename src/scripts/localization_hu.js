@@ -53,6 +53,7 @@ localization_hu = [
   {key:"#TR_CONFIG_SCHOOL_WALKERS", text:"Iskolai járókelők hatótávjának növelése"}
   {key:"#TR_CONFIG_RETIRE_AT_60", text:"Nyugdíjkorhatár emelése 50-ről 60 évre"}
   {key:"#TR_CONFIG_FIXED_WORKERS", text:"Rögzített munkaerő: a közemberek 38%-a"}
+  {key:"#workers_staffing_tooltip", text:"%d / %d dolgozó"}
   {key:"#TR_CONFIG_EXTRA_FORTS", text:"4 további erőd építésének engedélyezése"}
   {key:"#TR_CONFIG_WOLVES_BLOCK", text:"Építés tiltása a farkasok közelében"}
   {key:"#TR_CONFIG_DYNAMIC_GRANARIES", text:"A magtárakhoz nem vezethetnek zsákutcák"}

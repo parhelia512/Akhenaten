@@ -521,7 +521,7 @@ pcstr ui::resource_name(e_resource r) {
 
 int ui::button_hover(const mouse* m) {
     for (auto& btn : g_state.buttons) {
-        if (is_button_hover(btn, vec2i{0, 0})) {
+        if (is_mouse_over(btn, vec2i{0, 0})) {
             return (std::distance(&g_state.buttons.front(), &btn) + 1);
         }
     }
@@ -535,7 +535,7 @@ generic_button& ui::link(pcstr label, vec2i pos, vec2i size, e_font font, UiFlag
     g_state.buttons.push_back(
         generic_button{offset.x + pos.x, offset.y + pos.y, size.x + 4, size.y + 4, button_none, button_none, 0, 0});
     auto& gbutton = g_state.buttons.back().g_button;
-    int focused = is_button_hover(gbutton, vec2i{0, 0});
+    int focused = is_mouse_over(gbutton, vec2i{0, 0});
 
     push(cmd_t::text_centered, Pos{offset + pos}, BoxWidth{size.x}, Font{focused ? FONT_NORMAL_YELLOW : font},
       Caption{label});
@@ -578,7 +578,7 @@ generic_button& ui::button(pcstr label, vec2i pos, vec2i size, fonts_vec fonts, 
     g_state.buttons.push_back(
         generic_button{offset.x + pos.x, offset.y + pos.y, size.x + 4, size.y + 4, button_none, button_none, 0, 0});
     generic_button& gbutton = g_state.buttons.back().g_button;
-    gbutton.hovered = (is_button_hover(gbutton, vec2i{0, 0}) || selected) && !readonly;
+    gbutton.hovered = (is_mouse_over(gbutton, vec2i{0, 0}) || selected) && !readonly;
     gbutton.clip = graphics_clip_rectangle();
 
     if (small_panel) {
@@ -666,7 +666,7 @@ generic_button& ui::large_button(pcstr label, vec2i pos, vec2i size, e_font font
     const bool subdued = !!(flags & (UiFlags_Darkened | UiFlags_Readonly));
     const bool selected = !!(flags & UiFlags_Selected);
     // type 1 = hover/selected panel chrome; red focus ring matches original Explore History.
-    const int focused = subdued ? 0 : ((selected || is_button_hover(gbutton, vec2i{0, 0})) ? 1 : 0);
+    const int focused = subdued ? 0 : ((selected || is_mouse_over(gbutton, vec2i{0, 0})) ? 1 : 0);
 
     push(cmd_t::large_label, Pos{offset + pos}, Size{size}, BoxWidth{size.x / 16}, ImageId{focused}, Font{font},
       Caption{label});
@@ -701,7 +701,7 @@ image_button& ui::img_button(image_desc desc, vec2i pos, vec2i size, const img_b
     const bool grayscaled = !!(flags & UiFlags_Grayscale);
     const bool darkened = !!(flags & UiFlags_Darkened);
     const bool force_pressed = !!(flags & UiFlags_Selected);
-    ibutton.hovered = !(darkened || grayscaled) && is_button_hover(ibutton, vec2i{0, 0});
+    ibutton.hovered = !(darkened || grayscaled) && is_mouse_over(ibutton, vec2i{0, 0});
     ibutton.pressed = (ibutton.hovered && m.left.is_down);
     ibutton.enabled = !(flags & UiFlags_Readonly);
 
@@ -894,7 +894,7 @@ arrow_button& ui::arw_button(vec2i pos, bool down, bool tiny, UiFlags_ flags, in
     abutton.allow_repeat = !!(flags & UiFlags_AllowRepeat);
     abutton.repeats_ptr = external_repeats;
 
-    const bool hovered = !(flags & UiFlags_Darkened) && (is_button_hover(abutton, {0, 0}) || !!(flags & UiFlags_Selected));
+    const bool hovered = !(flags & UiFlags_Darkened) && (is_mouse_over(abutton, {0, 0}) || !!(flags & UiFlags_Selected));
     const bool down_visual = hovered && m.left.is_down;
     abutton.state = (hovered ? (down_visual ? 2 : 1) : 0);
     abutton.state |= (down ? 0x10 : 0);
@@ -1190,16 +1190,27 @@ void ui::widget::line(bool hline, vec2i npos, int size, color c) {
 
 void ui::eimg::draw(UiFlags flags) {
     scr_pos = pos + ui::current_offset();
+    const image_t* img = nullptr;
+    vec2i hit_pos = scr_pos;
+    vec2i hit_size = size;
+    float draw_scale = 1.f;
+
     if (isometric) {
         push(cmd_t::image_isometric, Pos{scr_pos}, ImageId{img_desc.tid()}, Mask{COLOR_MASK_NONE});
+        if (!_tooltip.empty() && (hit_size.x <= 0 || hit_size.y <= 0)) {
+            img = image_get(img_desc);
+            if (img) {
+                hit_size = {img->width, img->height};
+            }
+        }
     } else {
         vec2i rpos = pos;
-        const image_t* img = (fit || centering.x > -1000 || centering.y > -1000) ? image_get(img_desc) : nullptr;
+        img = (fit || centering.x > -1000 || centering.y > -1000 || !_tooltip.empty()) ? image_get(img_desc)
+                                                                                        : nullptr;
 
         // Shrink-to-fit: if the image is larger than the size box, scale it down
         // (preserving aspect ratio), anchored at the element position so previews
         // that already fit are left exactly where they are.
-        float draw_scale = 1.f;
         if (fit && img && img->width > 0 && img->height > 0 && size.x > 0 && size.y > 0) {
             draw_scale = std::min({(float)size.x / img->width, (float)size.y / img->height, 1.f});
         } else if (centering.x > -1000 || centering.y > -1000) {
@@ -1210,10 +1221,28 @@ void ui::eimg::draw(UiFlags flags) {
             }
         }
 
-        if (draw_scale != 1.f) {
-            push(cmd_t::image, Pos{rpos + ui::current_offset()}, ImageId{img_desc.tid()}, Scale{draw_scale});
+        hit_pos = rpos + ui::current_offset();
+        if (draw_scale != 1.f && img) {
+            hit_size = {(int)(img->width * draw_scale), (int)(img->height * draw_scale)};
+            push(cmd_t::image, Pos{hit_pos}, ImageId{img_desc.tid()}, Scale{draw_scale});
         } else {
+            if ((hit_size.x <= 0 || hit_size.y <= 0) && img) {
+                hit_size = {img->width, img->height};
+            }
             ui::eimage(img_desc, rpos);
+        }
+    }
+
+    if (!_tooltip.empty() && hit_size.x > 0 && hit_size.y > 0) {
+        struct probe_t {
+            vec2i p;
+            vec2i s;
+            vec2i pos() const { return p; }
+            vec2i size() const { return s; }
+        };
+        _hover = is_mouse_over(probe_t{hit_pos, hit_size}, {0, 0});
+        if (_hover) {
+            ui::set_tooltip(_tooltip);
         }
     }
 }
@@ -1229,6 +1258,7 @@ void ui::eimg::load(archive arch, element* parent, items& elems) {
     isometric = arch.r_bool("isometric");
     centering = arch.r_vec2i("centering", {-1001, -1001});
     fit = arch.r_bool("fit");
+    _tooltip = arch.r_string("tooltip");
 }
 
 void ui::eimg::image(const image_desc& image) {
@@ -1740,7 +1770,7 @@ void ui::eimage_button::draw(UiFlags gflags) {
         const vec2i off = g_state.offset();
         const bool bd = !!(flags & UiFlags_Darkened);
         const bool gy = !!(flags & UiFlags_Grayscale);
-        const bool hov = !(bd || gy) && is_button_hover(probe, off);
+        const bool hov = !(bd || gy) && is_mouse_over(probe, off);
         push(cmd_t::button_border, Pos{off + pos}, Size{tsize},
              ImgFlagsTag{(hov && !bd && !readonly) ? ImgFlag_Alpha : ImgFlag_None});
     }
@@ -2375,7 +2405,7 @@ void ui::egeneric_button::draw(UiFlags gflags) {
         btn->onrclick(_srfunc);
     }
 
-    _hover = is_button_hover(*btn, vec2i{0, 0});
+    _hover = is_mouse_over(*btn, vec2i{0, 0});
     if (clickable && _hover) {
         ui::set_tooltip(_tooltip);
     }

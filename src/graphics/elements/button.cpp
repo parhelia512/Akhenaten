@@ -44,6 +44,6 @@ void ui::textured::button_border_draw(vec2i pos, vec2i size, bool has_focus) {
     }
 }
 
-bool button_inside_clip(vec2i p) {
+bool mouse_inside_clip(vec2i p) {
     return graphics_inside_clip_rectangle(p);
 }

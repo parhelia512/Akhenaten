@@ -45,6 +45,7 @@ localization_fr = [
   { key:"#TR_CONFIG_SCHOOL_WALKERS", text:"Augmente la couverture des écoliers"},
   { key:"#TR_CONFIG_RETIRE_AT_60", text:"Change l'âge de retraitre des citoyens de 50 à 60"},
   { key:"#TR_CONFIG_FIXED_WORKERS", text:"Réserve de travailleurs fixe — 38% des plébéiens"},
+  { key:"#workers_staffing_tooltip", text:"%d / %d employés"},
   { key:"#TR_CONFIG_EXTRA_FORTS", text:"Autorise la construction de 4 forts supplémentaires"},
   { key:"#TR_CONFIG_WOLVES_BLOCK", text:"Bloque la construction autour des loups"},
   { key:"#TR_CONFIG_DYNAMIC_GRANARIES", text:"Bloque les routes des greniers non connectées"},

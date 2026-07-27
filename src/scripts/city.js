@@ -40,6 +40,7 @@ city {
         monthly_count: __city_population_monthly_count
         at_month: __city_population_at_month
         at_age: __city_population_at_age
+        set_at_age: __city_population_set_at_age
         at_level: __city_population_at_level
         average_age: __city_population_average_age
         yearly_births: __city_population_yearly_births

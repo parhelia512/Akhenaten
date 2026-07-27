@@ -45,6 +45,8 @@
 #include "core/log.h"
 #include "dev/debug.h"
 #include "js/js_game.h"
+#include "graphics/elements/tooltip.h"
+#include "input/mouse.h"
 
 #include <functional>
 #include <utility>
@@ -391,5 +393,14 @@ void common_info_window::draw_tooltip(tooltip_context *c) {
     int button_id = ui::button_hover(&mouse::get());
     if (button_id > 0 && !(tooltip && *tooltip)) {
         tooltip = ui::button_tooltip(button_id - 1);
+    }
+    if (tooltip && *tooltip) {
+        c->text = tooltip;
+        return;
+    }
+    // Element tooltips (e.g. workers_img) set via ui::set_tooltip during draw.
+    const tooltip_context& uitooltip = ui::get_tooltip();
+    if (!!uitooltip.text) {
+        c->text = uitooltip.text;
     }
 }

@@ -42,6 +42,6 @@ function info_window_raw_material_on_init(window) {
         reason.id = Math.approximate_value(b.worker_percentage / 100.0, [9, 8, 7, 6])
     }
 
-    var wdesc = window.workers_desc || (window.inner_panel && window.inner_panel.workers_desc)
+    var wdesc = window.workers_desc || (window.workers_panel && window.workers_panel.workers_desc) || (window.inner_panel && window.inner_panel.workers_desc)
     if (wdesc) wdesc.text = __loc(reason)
 }
