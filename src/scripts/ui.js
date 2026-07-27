@@ -44,6 +44,7 @@ import ui_brickworks_window
 import ui_bricklayers_guild_window
 import ui_carpenters_guild_window
 import ui_stonemason_guild_window
+import ui_artisans_guild_window
 import ui_garden_info
 import ui_sidebar_window
 import ui_batalion_window

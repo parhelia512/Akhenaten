@@ -1170,6 +1170,26 @@ figure_bricklayer {
 	terrain_usage : TERRAIN_USAGE_ROADS,
 }
 
+// TODO(AG3): dump SprMain2 / Expansion walk/work/death ids — temporarily reuse bricklayer SprMain.
+figure_tomb_artisan {
+	animations {
+		_pack { pack:PACK_SPR_MAIN }
+		walk { id:109, max_frames:12 }
+		death { id:110, max_frames:8, loop:false }
+		work { id:111, max_frames:12, duration:4 }
+		idle { id:112, max_frames:8, duration:2 }
+		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_TOMB_ARTISAN }
+	}
+
+	sounds {
+		tomb_artisan_decorating { sound:"brick_e01.wav" }
+	}
+
+	category: figure_category_citizen
+	max_damage: 10
+	// Prefer roads: guild may spawn beside monument without a paved spawn tile.
+	terrain_usage : TERRAIN_USAGE_PREFER_ROADS,
+}
 
 figure_storageyard_cart = {
 	animations : {

@@ -182,11 +182,11 @@ building_paint_workshop {
     preview { id:125 }
     base { id:125 }
     work { pos [36, -4], id:125, offset:1, max_frames:18 }
-    clay { pos [65, 3], id:207 }
+    henna { pos [65, 3], id:207 }
   }
 
   input {
-    resource : RESOURCE_OIL
+    resource : RESOURCE_HENNA
   }
   output {
     resource : RESOURCE_PAINT
@@ -201,6 +201,8 @@ building_paint_workshop {
   laborers [12]
   fire_risk [3]
   damage_risk [1]
+  meta { help_id: 470, text_id: 313 }
+  info_advisors [ADVISOR_LABOR]
   flags {
     is_workshop: true
     is_industry: true

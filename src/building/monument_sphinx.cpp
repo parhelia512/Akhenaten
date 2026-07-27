@@ -110,12 +110,48 @@ bool building_sphinx::need_stonemason() {
     return p >= 2 && p <= 5;
 }
 
+bool building_sphinx::need_artisan() {
+    if (is_finished() || !is_main()) {
+        return false;
+    }
+    // Finishing / painting (phase 6) — same style as need_stonemason (phase only)
+    return runtime_data().phase == 6;
+}
+
 bool building_sphinx::need_workers() const {
     if (!is_main()) {
         return false;
     }
     const auto &w = runtime_data().workers;
     return std::find(w.begin(), w.end(), 0) != w.end();
+}
+
+void building_sphinx::add_workers(figure_id fid) {
+    if (!is_main()) {
+        main()->add_workers(fid);
+        return;
+    }
+    auto &d = runtime_data();
+    for (auto &wid : d.workers) {
+        if (wid == 0) {
+            wid = fid;
+            return;
+        }
+    }
+}
+
+void building_sphinx::remove_worker(figure_id fid) {
+    if (!is_main()) {
+        main()->remove_worker(fid);
+        return;
+    }
+    auto &d = runtime_data();
+    for (auto &wid : d.workers) {
+        if (wid == fid) {
+            wid = 0;
+            return;
+        }
+    }
 }
 
 int building_sphinx::building_image_get() const {

@@ -623,6 +623,11 @@ tile2i building::access_tile() {
     case BUILDING_LARGE_STEPPED_PYRAMID:
         return main()->tile.shifted(0, 22);
 
+    case BUILDING_SPHINX:
+        if (auto *m = dcast_monument()) {
+            return m->access_point();
+        }
+        break;
 
     default:
         break;

@@ -312,11 +312,26 @@ building_wood_cutter {
 }
 
 building_artisans_guild = {
+  animations : {
+    preview : { pack:PACK_EXPANSION, id:31 },
+    base : { pack:PACK_EXPANSION, id:31 },
+    work : { pos : [75, -14], pack:PACK_EXPANSION, id:31, offset:1, max_frames:12, duration:4 },
+  }
+
   labor_category : LABOR_CATEGORY_INFRASTRUCTURE
+  input : {
+    resource : RESOURCE_PAINT
+    resource_second : RESOURCE_CLAY
+  }
+  min_houses_coverage : 100
+  meta : { help_id: 363, text_id: 312 }
   building_size: 2
   cost: [ 30, 50, 80, 100, 150 ]
   desirability : { value:[-6], step:[1], step_size:[1], range: [4] }
   laborers:[15], fire_risk:[2], damage_risk: [2]
+  max_workers : 1
+  info_sound : "Wavs/eng_r.wav"
+  info_advisors [ADVISOR_LABOR]
   flags {
     is_guild: true
     is_industry: true

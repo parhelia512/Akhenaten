@@ -495,6 +495,10 @@ bool building_monument::need_stonemason() {
     return false;
 }
 
+bool building_monument::need_artisan() {
+    return false;
+}
+
 bool building_monument::need_carpenter() {
     auto &d = runtime_data();
     if (d.phase == MONUMENT_FINISHED) {

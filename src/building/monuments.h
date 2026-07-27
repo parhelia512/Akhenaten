@@ -80,6 +80,7 @@ public:
     virtual bool need_stonemason();
     virtual bool need_carpenter();
     virtual bool need_bricklayers();
+    virtual bool need_artisan();
     virtual bool is_unfinished() const;
     virtual bool is_finished() const;
 };

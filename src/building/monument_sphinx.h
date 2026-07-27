@@ -31,8 +31,11 @@ public:
     virtual int building_image_get() const override;
     virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) override;
     virtual bool need_stonemason() override;
+    virtual bool need_artisan() override;
     virtual bool need_workers() const override;
     virtual bool needs_resources() const override;
+    virtual void add_workers(figure_id fid) override;
+    virtual void remove_worker(figure_id fid) override;
     virtual const monument &config() const override;
     virtual tile2i center_point() const override;
     virtual tile2i access_point() const override;
