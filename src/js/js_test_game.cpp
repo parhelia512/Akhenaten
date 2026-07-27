@@ -458,7 +458,7 @@ static int __test_count_figures(int type) {
     int count = 0;
     for (int i = 1; i < MAX_FIGURES; i++) {
         figure *f = figure_get(i);
-        if (f && f->is_valid() && f->type == (e_figure_type)type) {
+        if (f && f->is_alive() && f->type == (e_figure_type)type) {
             count++;
         }
     }

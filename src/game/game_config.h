@@ -162,6 +162,7 @@ namespace game_features {
     extern game_feature gameplay_pause_sim_while_building;
     extern game_feature gameplay_change_disaster_events_use_amount;
     extern game_feature gameplay_change_trader_capacity_1600;
+    extern game_feature gameplay_bast_lion_raid;
 
     xspan<game_feature*> all();
     game_feature* find(const xstring& name);

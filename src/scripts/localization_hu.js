@@ -64,6 +64,7 @@ localization_hu = [
   {key:"#TR_CONFIG_GRANARIES_GET_DOUBLE", text:"A beszállító magtárak taligásainak kapacitása kétszeres"}
   {key:"#TR_CONFIG_DOCK_DOUBLE_HAUL", text:"A dokkmunkások kétszeres rakományt szállítanak (200/út)"}
   {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Nagyobb kereskedőkapacitás (1600/látogatás; nem éves birodalmi limit)"}
+  {key:"#TR_CONFIG_BAST_LION_RAID", text:"Bast haragja: oroszlánrajtaütés templomokból/állatkertből (TEMP Enhanced)"}
   {key:"#TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD", text:"Az őrtornyok őreinek nem kell útkapcsolat a laktanyához"}
   {key:"#TR_CONFIG_FARMS_DELIVER_CLOSE", text:"A farmok és kikötők csak közeli magtárakba szállítanak"}
   {key:"#TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES", text:"Az élelem nem kerül beszállító magtárakba"}

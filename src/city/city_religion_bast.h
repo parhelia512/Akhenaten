@@ -9,9 +9,9 @@ public:
     virtual void perform_minor_blessing() override;
 
     bool perform_houses_destruction();
+    bool perform_lions();
     void perform_malaria_plague();
     void perform_festival_for_other_gods();
 };
 
 extern god_bast_t god_bast;
-

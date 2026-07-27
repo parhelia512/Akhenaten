@@ -59,6 +59,7 @@ localization_de = [
   {key:"#TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD", text:"Karrenschieber von abholenden Kornkammern können abseits der Straße gehen"}
   {key:"#TR_CONFIG_GRANARIES_GET_DOUBLE", text:"Doppelte Kapazität für Karrenschieber von abholenden Kornkammern"}
   {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Größere Händlerkapazität (1600 pro Besuch; kein Jahreslimit der Handelsroute)"}
+  {key:"#TR_CONFIG_BAST_LION_RAID", text:"Bast-Zorn: Löwenüberfall aus Tempeln/Zoo (TEMP Enhanced)"}
   {key:"#TR_CONFIG_TOWER_SENTRIES_GO_OFFROAD", text:"Turmwachen benötigen keinen Straßenzugang von Kasernen"}
   {key:"#TR_CONFIG_FARMS_DELIVER_CLOSE", text:"Farmen und Werften liefern nur an nahe Kornkammern"}
   {key:"#TR_CONFIG_DELIVER_ONLY_TO_ACCEPTING_GRANARIES", text:"Nahrung wird nicht an abholende Kornkammern geliefert"}

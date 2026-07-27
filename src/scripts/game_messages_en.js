@@ -6188,4 +6188,13 @@ game_messages_en {
         title { text: "Mummy Attacks!" }
         content { text: "A mummy has risen and walks the streets of our city.  Stop this undead curse before it spreads throughout the land." }
     }
+    message_wrath_of_bast_lions {
+        id: 497,
+        type: 2,
+
+        size [30, 20]
+        title { text: "Wrath of Bast" }
+        video { text: "@20" }
+        content { text: "Bast's patience is spent. From her temples — and even from the zoo, if you keep one — she unleashes a pride of lions into your streets. Citizens and soldiers alike scatter as the hunt begins — honor the Goddess of the Home before more blood stains the roads." }
+    }
 }

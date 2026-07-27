@@ -1,23 +1,105 @@
 #include "city_religion_bast.h"
 
+#include "building/building.h"
 #include "city/city.h"
+#include "city/city_buildings.h"
 #include "city/city_festival.h"
 #include "city/city_message.h"
+#include "core/calc.h"
 #include "core/random.h"
+#include "figure/figure.h"
+#include "figuretype/animal_lion.h"
+#include "game/game_config.h"
 #include "game/game_events.h"
+#include "game/simulation_time.h"
+#include "grid/road_access.h"
+#include "grid/terrain.h"
+
+#include <vector>
 
 god_bast_t god_bast;
+
+namespace {
+
+tile2i bast_lion_spawn_tile(building &b) {
+    tile2i road = map_get_road_access_tile(b.tile, b.size);
+    if (road.valid() && !map_terrain_is(road, TERRAIN_IMPASSABLE_OSTRICH)) {
+        return road;
+    }
+
+    int x = 0;
+    int y = 0;
+    if (map_terrain_get_adjacent_road_or_clear_land(b.tile.x(), b.tile.y(), b.size, &x, &y)) {
+        tile2i adj(x, y);
+        if (adj.valid() && !map_terrain_is(adj, TERRAIN_IMPASSABLE_OSTRICH)) {
+            return adj;
+        }
+    }
+
+    // Do not spawn on the building footprint — lions cannot path from TERRAIN_BUILDING.
+    return tile2i::invalid;
+}
+
+int bast_lion_raid_count() {
+    return calc_bound(g_city.population.current / 400, 3, 8);
+}
+
+int bast_lion_raid_days() {
+    const int months = 2 + (random_byte() % 4); // 2..5
+    return months * simulation_time_t::days_in_month;
+}
+
+} // namespace
 
 bool god_bast_t::perform_houses_destruction() {
     return g_city.religion.BAST_houses_destruction();
 }
 
+bool god_bast_t::perform_lions() {
+    std::vector<tile2i> spawn_tiles;
+    buildings_valid_do([&](building &b) {
+        if (b.type != BUILDING_TEMPLE_BAST && b.type != BUILDING_ZOO) {
+            return;
+        }
+        tile2i tile = bast_lion_spawn_tile(b);
+        if (tile.valid()) {
+            spawn_tiles.push_back(tile);
+        }
+    });
+
+    if (spawn_tiles.empty()) {
+        return false;
+    }
+
+    const int count = bast_lion_raid_count();
+    const int days = bast_lion_raid_days();
+    int spawned = 0;
+
+    for (int i = 0; i < count; i++) {
+        tile2i tile = spawn_tiles[i % (int)spawn_tiles.size()];
+        figure *f = figure_create(FIGURE_LION, tile, DIR_0_TOP_RIGHT);
+        if (!f || !f->is_valid()) {
+            continue;
+        }
+        figure_lion_setup_curse_raid(*f, days);
+        spawned++;
+    }
+
+    return spawned > 0;
+}
+
 void god_bast_t::perform_major_curse() {
     if (perform_houses_destruction()) {
         messages::popup("message_wrath_of_bast", 0, 0);
-    } else {
-        messages::popup("message_wrath_of_bast_2", 0, 0);
+        return;
     }
+
+    if (!!game_features::gameplay_bast_lion_raid && perform_lions()) {
+        messages::popup("message_wrath_of_bast_lions", 0, 0);
+        return;
+    }
+
+    messages::popup("message_wrath_of_bast_2", 0, 0);
 }
 
 void god_bast_t::perform_malaria_plague() {

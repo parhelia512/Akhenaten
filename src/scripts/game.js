@@ -100,6 +100,7 @@ game_features {
     @gameplay_change_random_mine_or_pit_collapses_take_money {}
     @gameplay_change_disaster_events_use_amount {}
     @gameplay_change_trader_capacity_1600 {}
+    @gameplay_bast_lion_raid {}
     @gameplay_change_fixed_workers {}
     @gameplay_fixed_worker_percent {}
     @gameopt_display_size {}
