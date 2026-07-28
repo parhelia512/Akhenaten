@@ -1478,6 +1478,16 @@ game_messages_en {
         content { text: "" }
     }
 
+    // Shared shell for city_message_post_full eventmsg (title/body from event phrases).
+    message_template_general {
+        id: 131,
+        type: 2
+        message_type: 2
+        size [30, 20]
+        title { text: "" }
+        content { text: "" }
+    }
+
     message_wrath_of_bast_3 {
         id: 134,
         type: 2,
@@ -6242,5 +6252,57 @@ game_messages_en {
         title { text: "Wrath of Seth" }
         video { text: "@21" }
         content { text: "Seth's fury finds no company to curse — so he sends asps from his temples into your streets. Citizens flee as the snakes hunt. Appease the God of Destruction before more blood is spilled." }
+    }
+
+    // Random / .map table events (price_change / demand_change / random_event).
+    // Titles align with localization group 19 banner strings used by OG Popup Messages.
+    message_kingdome_raises_wages {
+        id: 502,
+        type: 2,
+        size [30, 20]
+        title { text: "Wages raised in kingdom" }
+        content { text: "Wages have increased throughout the Kingdom. Your own workers may depart for greener pastures if they are not paid as much as their counterparts in other cities." }
+    }
+    message_kingdome_lowers_wages {
+        id: 503,
+        type: 2,
+        size [30, 20]
+        title { text: "Wages lowered in kingdom" }
+        content { text: "Wages have fallen throughout the Kingdom of Egypt. It seems everywhere people will work for less." }
+    }
+    message_price_increased {
+        id: 504,
+        type: 2,
+        size [30, 20]
+        title { text: "Price increase" }
+        content { text: "The price of a trade good has risen." }
+    }
+    message_price_decreased {
+        id: 505,
+        type: 2,
+        size [30, 20]
+        title { text: "Price decrease" }
+        content { text: "The price of a trade good has fallen." }
+    }
+    message_increased_trading {
+        id: 506,
+        type: 2,
+        size [30, 20]
+        title { text: "Trade increases with city" }
+        content { text: "A trade city will buy or sell more of a good this year." }
+    }
+    message_decreased_trading {
+        id: 507,
+        type: 2,
+        size [30, 20]
+        title { text: "Trade decreases with city" }
+        content { text: "A trade city will buy or sell less of a good this year." }
+    }
+    message_trade_stopped {
+        id: 508,
+        type: 2,
+        size [30, 20]
+        title { text: "Trade stopped" }
+        content { text: "A trade city will no longer trade a good this year." }
     }
 }

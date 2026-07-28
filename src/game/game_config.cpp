@@ -19,7 +19,7 @@ void ANK_REGISTER_CONFIG_ITERATOR(config_load_game_settings) {
 }
 
 namespace game_features {
-    svector<game_feature*, 128> _features;
+    svector<game_feature*, 160> _features;
     globals_settings_t _settings;
 
     game_feature gameplay_fix_immigration{ "gameplay_fix_immigration", "#TR_CONFIG_FIX_IMMIGRATION_BUG", false };
@@ -132,6 +132,7 @@ namespace game_features {
     game_feature gameopt_autosave_slots{ "gameopt_autosave_slots", "", 1.0f };
     game_feature gameopt_tooltips_mode{ "gameopt_tooltips_mode", "", 2.0f };
     game_feature gameopt_warnings{ "gameopt_warnings", "", true };
+    game_feature gameopt_popup_messages{ "gameopt_popup_messages", "", 0.0f };
     game_feature gameopt_gods_enabled{ "gameopt_gods_enabled", "", true };
     game_feature gameopt_victory_video{ "gameopt_victory_video", "", false };
     game_feature gameopt_pyramid_speedup{ "gameopt_pyramid_speedup", "", false };

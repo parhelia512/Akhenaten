@@ -1477,6 +1477,16 @@ game_messages_ru {
         content { text: "xxxxx" }
     }
 
+    // Shared shell for city_message_post_full eventmsg (title/body from event phrases).
+    message_template_general {
+        id: 131,
+        type: 2
+        message_type: 2
+        size [30, 20]
+        title { text: "" }
+        content { text: "" }
+    }
+
     message_wrath_of_bast_3 {
         id: 134,
         type: 2,

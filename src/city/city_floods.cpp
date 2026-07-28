@@ -10,10 +10,10 @@
 #include "io/manager.h"
 #include "city/city.h"
 #include "city_message.h"
+#include "game/game_config.h"
 #include "core/log.h"
 #include "dev/debug.h"
 #include "game/game.h"
-#include "game/game_config.h"
 
 #include <cmath>
 #include <cctype>
@@ -308,7 +308,10 @@ void floods_t::post_flood_prediction_message() {
         return;
     }
 
-    if (game_features::gameui_disable_nilometer_popups.to_bool()) {
+    // Enhanced mute: swallow modal flood prediction. If OG Flood bit is Banner,
+    // still post so the player gets a non-modal banner (I2).
+    if (game_features::gameui_disable_nilometer_popups.to_bool()
+        && !popup_messages_want_banner(POPUP_MSG_FLOOD)) {
         return;
     }
 

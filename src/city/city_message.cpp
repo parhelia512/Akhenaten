@@ -7,6 +7,7 @@
 #include "core/log.h"
 #include "core/string.h"
 #include "city/city_religion.h"
+#include "city/city_warnings.h"
 #include "figure/formation.h"
 #include "graphics/window.h"
 #include "graphics/image.h"
@@ -15,10 +16,108 @@
 #include "window/message_dialog.h"
 #include "game/game_events.h"
 #include "game/game.h"
+#include "game/game_config.h"
+#include "scenario/scenario.h"
 
 message_manager_t g_message_manager;
 
 static bool should_play_sound = true;
+
+struct popup_key_map_entry {
+    pcstr key;
+    e_popup_message_category cat;
+};
+
+// Exact message keys → OG Popup Messages category (group 310).
+static const popup_key_map_entry POPUP_KEY_MAP[] = {
+    { "message_perfect_inundation", POPUP_MSG_FLOOD },
+    { "message_excellent_inundation", POPUP_MSG_FLOOD },
+    { "message_good_inundation", POPUP_MSG_FLOOD },
+    { "message_mediocre_inundation", POPUP_MSG_FLOOD },
+    { "message_poor_inundation", POPUP_MSG_FLOOD },
+    { "message_no_inundation", POPUP_MSG_FLOOD },
+    { "message_mediocre_inundation_seers", POPUP_MSG_FLOOD },
+    { "message_poor_inundation_seers", POPUP_MSG_FLOOD },
+
+    { "message_population_milestone_100", POPUP_MSG_POPULATION },
+    { "message_population_milestone_500", POPUP_MSG_POPULATION },
+    { "message_population_milestone_1000", POPUP_MSG_POPULATION },
+    { "message_population_milestone_2000", POPUP_MSG_POPULATION },
+    { "message_population_milestone_3000", POPUP_MSG_POPULATION },
+    { "message_population_milestone_5000", POPUP_MSG_POPULATION },
+    { "message_population_milestone_10000", POPUP_MSG_POPULATION },
+    { "message_population_milestone_15000", POPUP_MSG_POPULATION },
+    { "message_population_milestone_20000", POPUP_MSG_POPULATION },
+    { "message_population_milestone_25000", POPUP_MSG_POPULATION },
+
+    { "message_compliance_now_possible", POPUP_MSG_COMPLIANCE },
+    // Actual goods/deben "can fulfill request" post (request.cpp); same OG category.
+    { "message_storage_yards_ready_to_fulfill_request", POPUP_MSG_COMPLIANCE },
+
+    { "message_common_festival", POPUP_MSG_FESTIVALS },
+    { "message_lavish_festival", POPUP_MSG_FESTIVALS },
+    { "message_grand_festival", POPUP_MSG_FESTIVALS },
+
+    { "message_small_blessing_from_osiris", POPUP_MSG_MINOR_BLESSINGS },
+    { "message_minor_blessing_from_ra", POPUP_MSG_MINOR_BLESSINGS },
+    { "message_minor_blessing_from_ptah", POPUP_MSG_MINOR_BLESSINGS },
+    { "message_minor_blessing_from_seth", POPUP_MSG_MINOR_BLESSINGS },
+    { "message_small_blessing_from_bast", POPUP_MSG_MINOR_BLESSINGS },
+    { "message_minor_blessing_trading_from_ra", POPUP_MSG_MINOR_BLESSINGS },
+
+    { "message_price_increased", POPUP_MSG_PRICE },
+    { "message_price_decreased", POPUP_MSG_PRICE },
+
+    { "message_increased_trading", POPUP_MSG_TRADE_LEVEL },
+    { "message_decreased_trading", POPUP_MSG_TRADE_LEVEL },
+    { "message_trade_stopped", POPUP_MSG_TRADE_LEVEL },
+
+    { "message_kingdome_raises_wages", POPUP_MSG_WAGE },
+    { "message_kingdome_lowers_wages", POPUP_MSG_WAGE },
+
+    { "message_disease", POPUP_MSG_DISEASE },
+    { "message_disease_strikes", POPUP_MSG_DISEASE },
+    { "message_malaria", POPUP_MSG_MALARIA },
+    { "malaria_problem", POPUP_MSG_MALARIA }, // legacy key from city_health
+    { "message_employees_needed", POPUP_MSG_EMPLOYEES },
+};
+
+e_popup_message_category popup_message_category_for_key(xstring message_key) {
+    if (message_key.empty()) {
+        return POPUP_MSG_NONE;
+    }
+    for (const auto &e : POPUP_KEY_MAP) {
+        if (message_key == e.key) {
+            return e.cat;
+        }
+    }
+    return POPUP_MSG_NONE;
+}
+
+bool popup_messages_bit_set(e_popup_message_category cat) {
+    if (cat < 0 || cat >= POPUP_MSG_MAX) {
+        return false;
+    }
+    const int mask = game_features::gameopt_popup_messages.to_int();
+    return (mask & (1 << (int)cat)) != 0;
+}
+
+bool popup_messages_want_banner(e_popup_message_category cat) {
+    return popup_messages_bit_set(cat);
+}
+
+void popup_messages_set_banner(e_popup_message_category cat, bool banner) {
+    if (cat < 0 || cat >= POPUP_MSG_MAX) {
+        return;
+    }
+    int mask = game_features::gameopt_popup_messages.to_int();
+    if (banner) {
+        mask |= (1 << (int)cat);
+    } else {
+        mask &= ~(1 << (int)cat);
+    }
+    game_features::gameopt_popup_messages.set(mask);
+}
 
 void messages::popup(xstring message_id, int param1, int param2) {
     events::emit(event_message{ true, message_id, param1, param2 });
@@ -130,6 +229,62 @@ static void show_message_popup(int index) {
     window_message_dialog_show_city_message(message_uid, index, msg.year, msg.month, msg.param1, msg.param2, message_template.advisor, true);
 }
 
+int city_message_find_index_by_sequence(int sequence) {
+    if (sequence < 0) {
+        return -1;
+    }
+    for (int i = 0; i < MAX_MESSAGES; i++) {
+        if (g_message_manager.messages[i].MM_text_id && g_message_manager.messages[i].sequence == sequence) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void city_message_show_from_archive(int message_index) {
+    if (message_index < 0 || message_index >= MAX_MESSAGES) {
+        return;
+    }
+    if (!g_message_manager.messages[message_index].MM_text_id) {
+        return;
+    }
+    show_message_popup(message_index);
+}
+
+static void show_message_banner_for_index(int index) {
+    city_message &msg = g_message_manager.messages[index];
+    xstring title;
+    if (msg.eventmsg_title_id >= 0) {
+        title = g_scenario.events.msg_text(msg.eventmsg_title_id, 0);
+    } else {
+        const lang_message &tmpl = lang_get_message(msg.MM_text_id);
+        title = tmpl.title.text;
+    }
+    if (title.empty()) {
+        title = lang_get_message_id(msg.MM_text_id);
+    }
+    g_warning_manager.show_message_banner(title.c_str(), msg.sequence);
+}
+
+static void apply_popup_delivery(bool use_popup, e_popup_message_category popup_cat, int message_index, xstring sound_template_key) {
+    if (use_popup && popup_messages_want_banner(popup_cat)) {
+        show_message_banner_for_index(message_index);
+        // I3: quiet UI chime instead of fanfare on banner path.
+        g_sound.play_effect(SOUND_EFFECT_ICON);
+        should_play_sound = true;
+        return;
+    }
+    if (use_popup && g_window_manager.window_is("window_city")) {
+        show_message_popup(message_index);
+    } else if (use_popup) {
+        enqueue_message(g_message_manager.messages[message_index].sequence);
+    } else if (should_play_sound) {
+        const lang_message &mm_template = lang_get_message(sound_template_key);
+        play_sound(mm_template);
+    }
+    should_play_sound = true;
+}
+
 void city_message_disable_sound_for_next_message(void) {
     should_play_sound = false;
 }
@@ -144,7 +299,7 @@ void city_message_apply_sound_interval(int category) {
     }
 }
 
-void city_message_post_full(bool use_popup, xstring template_id, const event_ph_t *event, int parent_event_id, int title_id, int body_id, int phrase_id, int param1, int param2) {
+void city_message_post_full(bool use_popup, xstring template_id, const event_ph_t *event, int parent_event_id, int title_id, int body_id, int phrase_id, int param1, int param2, e_popup_message_category popup_cat) {
     auto& data = g_message_manager;
     int id = data.new_message_id();
 
@@ -208,19 +363,10 @@ void city_message_post_full(bool use_popup, xstring template_id, const event_ph_
         }
     }
 
-    // default for sound info / template
-
-    if (use_popup && g_window_manager.window_is("window_city"))
-        show_message_popup(id);
-    else if (use_popup) {
-        // add to queue to be processed when player returns to city
-        enqueue_message(msg->sequence);
-    } else if (should_play_sound) {
-        const lang_message &mm_template = lang_get_message(template_id);
-        play_sound(mm_template);
+    if (popup_cat == POPUP_MSG_NONE) {
+        popup_cat = popup_message_category_for_key(template_id);
     }
-
-    should_play_sound = true;
+    apply_popup_delivery(use_popup, popup_cat, id, template_id);
 }
 
 city_message &message_manager_t::post_common(bool use_popup, xstring mm_text, int param1, int param2, int god, int bg_img) {
@@ -265,16 +411,7 @@ city_message &message_manager_t::post_common(bool use_popup, xstring mm_text, in
         problem_count = 1;
     }
 
-    if (use_popup && g_window_manager.window_is("window_city")) {
-        show_message_popup(id);
-    } else if (use_popup) {
-        // add to queue to be processed when player returns to city
-        enqueue_message(msg.sequence);
-    } else if (should_play_sound) {
-        play_sound(mm_template);
-    }
-
-    should_play_sound = true;
+    apply_popup_delivery(use_popup, popup_message_category_for_key(mm_text), id, mm_text);
 
     return msg;
 }

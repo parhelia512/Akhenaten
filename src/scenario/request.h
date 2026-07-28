@@ -38,6 +38,8 @@ const request_cleared_snapshot_t &scenario_request_last_cleared();
 void scenario_request_init();
 
 void scenario_request_dispatch(int id);
+// Dispatch by event_id (finds visible slot). Returns false if not visible/active.
+bool scenario_request_dispatch_event(int event_id);
 
 int scenario_requests_active_count();
 void scenario_request_set_state(const scenario_request &r, e_event_state new_state);

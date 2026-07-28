@@ -19,6 +19,31 @@ enum e_mesage_category {
     MESSAGE_CAT_SIZE = 20,
 };
 
+// OG Cleopatra Options → Popup Messages (lang group 310, ids 2..13).
+// Bit i in gameopt_popup_messages = show as top banner instead of modal.
+enum e_popup_message_category : int8_t {
+    POPUP_MSG_NONE = -1,
+    POPUP_MSG_FLOOD = 0,
+    POPUP_MSG_POPULATION = 1,
+    POPUP_MSG_COMPLIANCE = 2,
+    POPUP_MSG_KINGDOM = 3,
+    POPUP_MSG_FESTIVALS = 4,
+    POPUP_MSG_MINOR_BLESSINGS = 5,
+    POPUP_MSG_PRICE = 6,
+    POPUP_MSG_TRADE_LEVEL = 7,
+    POPUP_MSG_WAGE = 8,
+    POPUP_MSG_DISEASE = 9,
+    POPUP_MSG_MALARIA = 10,
+    POPUP_MSG_EMPLOYEES = 11,
+
+    POPUP_MSG_MAX = 12
+};
+
+e_popup_message_category popup_message_category_for_key(xstring message_key);
+bool popup_messages_want_banner(e_popup_message_category cat);
+void popup_messages_set_banner(e_popup_message_category cat, bool banner);
+bool popup_messages_bit_set(e_popup_message_category cat);
+
 enum e_message_advisor {
     MESSAGE_ADVISOR_NONE = 0,
     MESSAGE_ADVISOR_LABOR = 1,
@@ -187,8 +212,11 @@ struct event_ph_t;
 
 void city_message_disable_sound_for_next_message(void);
 void city_message_apply_sound_interval(int category);
+// Open archive entry as modal dialog (used by message-banner click, I1).
+void city_message_show_from_archive(int message_index);
+int city_message_find_index_by_sequence(int sequence);
 
-void city_message_post_full(bool use_popup, xstring template_id, const event_ph_t* event, int parent_event_id, int title_id, int body_id, int phrase_id, int param1, int param2);
+void city_message_post_full(bool use_popup, xstring template_id, const event_ph_t* event, int parent_event_id, int title_id, int body_id, int phrase_id, int param1, int param2, e_popup_message_category popup_cat = POPUP_MSG_NONE);
 
 city_message &city_message_post_with_popup_delay(e_mesage_category category, bool use_popup, xstring message, int param1, short param2);
 void city_message_post_with_message_delay(e_mesage_category category, int use_popup, xstring message_type, int delay);

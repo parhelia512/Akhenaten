@@ -150,6 +150,8 @@ namespace game_features {
     extern game_feature gameopt_autosave_slots;
     extern game_feature gameopt_tooltips_mode;
     extern game_feature gameopt_warnings;
+    // Bitmask of e_popup_message_category (OG Popup Messages): bit set = banner, not modal.
+    extern game_feature gameopt_popup_messages;
     extern game_feature gameopt_gods_enabled;
     extern game_feature gameopt_victory_video;
     extern game_feature gameopt_pyramid_speedup;

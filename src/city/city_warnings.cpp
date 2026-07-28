@@ -3,6 +3,7 @@
 #include "building/building.h"
 #include "city/constants.h"
 #include "city/city.h"
+#include "city/city_message.h"
 #include "game/game_events.h"
 #include "city/city_population.h"
 #include "city/city_resource.h"
@@ -17,6 +18,9 @@
 #include "graphics/window.h"
 #include "game/game.h"
 #include "core/profiler.h"
+#include "input/mouse.h"
+
+#include <algorithm>
 
 window_warnings g_warning_manager;
 
@@ -95,6 +99,10 @@ void window_warnings::show_custom(pcstr text) {
         return;
     }
 
+    show_message_banner(text);
+}
+
+void window_warnings::show_message_banner(pcstr text, int message_sequence) {
     warning *w = new_warning();
     if (!w) {
         return;
@@ -102,6 +110,7 @@ void window_warnings::show_custom(pcstr text) {
 
     w->time = time_get_millis();
     w->text = text;
+    w->message_sequence = message_sequence;
 }
 
 int window_warnings::determine_width(pcstr text) {
@@ -116,8 +125,14 @@ int window_warnings::determine_width(pcstr text) {
 
 void window_warnings::draw_foreground(UiFlags flags) {
     OZZY_PROFILER_FUNCTION();
-    if (!g_window_manager.window_is("window_city") && !g_window_manager.window_is("window_editor_map")) {
-        clear_all();
+    const bool on_map = g_window_manager.window_is("window_city")
+                     || g_window_manager.window_is("window_editor_map");
+    if (!on_map) {
+        // E22: do not wipe message banners when leaving city; drop placement toasts only.
+        std::erase_if(warnings, [](const warning &w) {
+            return w.message_sequence < 0;
+        });
+        clear_outdated();
         return;
     }
 
@@ -152,11 +167,37 @@ int window_warnings::handle_mouse(const mouse *m) {
         return false;
     }
 
+    int center = (screen_width() - 180) / 2;
+    int y0 = top_offset;
+    if (game.paused) {
+        y0 += 70;
+    }
+
+    if (m->left.went_up) {
+        for (int i = 0; i < (int)warnings.size(); i++) {
+            if (warnings[i].message_sequence < 0) {
+                continue;
+            }
+            pcstr text = warnings[i].text.c_str();
+            int box_width = determine_width(text);
+            int offset = y0 + message_width * i;
+            if (m->x >= center - box_width / 2 && m->x <= center + box_width / 2
+                && m->y >= offset && m->y <= offset + message_width) {
+                const int seq = warnings[i].message_sequence;
+                const int msg_index = city_message_find_index_by_sequence(seq);
+                warnings.erase(warnings.begin() + i);
+                if (msg_index >= 0) {
+                    city_message_show_from_archive(msg_index);
+                }
+                return true;
+            }
+        }
+    }
+
     if (m->right.went_up) {
-        int bottom_offset = top_offset + (warnings.size() * message_width);
-        int center = (screen_width() - 180) / 2;
+        int bottom_offset = y0 + (int)warnings.size() * message_width;
         int box_width = 230;
-        if (m->x >= center - box_width / 2 && m->x <= center + box_width / 2 && m->y >= top_offset && m->y <= bottom_offset) {
+        if (m->x >= center - box_width / 2 && m->x <= center + box_width / 2 && m->y >= y0 && m->y <= bottom_offset) {
             clear_all();
             return true;
         }

@@ -590,7 +590,7 @@ localization_en = [
   {key: "#population_milestone", group:19, id:225}
   {key: "#minor_god_blessing", group:19, id:226}
   {key: "#festival_starting", group:19, id:227}
-  {key: "#goods_auto_dispatched", group:19, id:228}
+  {key: "#goods_auto_dispatched", group:19, id:233}
   {key: "#building_removed_zoo", group:19, id:234}
   {key: "#building_needs_game_meat", group:19, id:235}
   {key: "#build_hunting_lodge", group:19, id:231}

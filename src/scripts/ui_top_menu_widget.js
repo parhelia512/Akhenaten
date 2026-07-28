@@ -227,6 +227,8 @@ top_menu_widget {
 		pyramid_speedup : menu_item({textfn: top_menu_pyramid_speedup_text
 									 onclick: top_menu_pyramid_speedup_toggle })
 		difficulty_options: menu_item({ text {group:2, id:6}, onclick: top_menu_show_window_by_id("difficulty_options_window") })
+		popup_messages  : menu_item({text {group:2, id:11}, onclick: top_menu_show_window_by_id("popup_messages_window") })
+
 
 		cities_options  : menu_item({textfn: top_menu_cities_old_text
 									 onclick: top_menu_cities_old_toggle })

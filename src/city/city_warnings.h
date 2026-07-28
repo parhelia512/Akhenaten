@@ -9,6 +9,8 @@ struct window_warnings : autoconfig_window_t<window_warnings> {
     struct warning {
         time_millis time;
         xstring text;
+        // City-message archive sequence for OG Popup Messages banners; -1 = placement toast.
+        int message_sequence = -1;
     };
 
     svector<warning, 16> warnings;
@@ -22,6 +24,9 @@ struct window_warnings : autoconfig_window_t<window_warnings> {
     void on_mission_start() override;
     void show(pcstr type);
     void show_custom(pcstr text);
+    // City-message banner (OG Popup Messages). Ignores gameopt_warnings.
+    // message_sequence >= 0: left-click opens that archive entry (I1).
+    void show_message_banner(pcstr text, int message_sequence = -1);
     bool has_warnings();
     pcstr get_warning(int id);
     void clear_all();

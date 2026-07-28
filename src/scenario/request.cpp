@@ -4,11 +4,13 @@
 #include "game/game_events.h"
 #include "city/city_finance.h"
 #include "city/city_message.h"
+#include "city/city_warnings.h"
 #include "city/ratings.h"
 #include "city/city_resource.h"
 #include "city/city.h"
 #include "core/random.h"
 #include "core/svector.h"
+#include "graphics/elements/lang_text.h"
 #include "scenario_event_manager.h"
 #include "game/resource.h"
 #include "scenario/scenario.h"
@@ -114,6 +116,14 @@ void scenario_request_handle(event_ph_t &event, int caller_event_id, e_event_act
     case e_event_state_in_progress:
         if (!event.can_comply_dialog_shown && g_city.resource.stored(request.resource) >= request.resource_amount()) {
             event.can_comply_dialog_shown = true;
+            // OG Popup Messages: selected Compliance → auto-dispatch goods/deben + banner (I6).
+            // Troop requests still need a manual advisor confirm (distant battle side-effects).
+            if (popup_messages_want_banner(POPUP_MSG_COMPLIANCE)
+                && request.resource != RESOURCE_TROOPS
+                && scenario_request_dispatch_event(event.event_id)) {
+                g_warning_manager.show_message_banner(lang_text_from_key("#goods_auto_dispatched"));
+                break;
+            }
             city_message &message = g_message_manager.post_common(true, "message_storage_yards_ready_to_fulfill_request", event.event_id, 0, GOD_UNKNOWN, 0);
             message.req_amount = request.resource_amount();
             message.req_resource = request.resource;
@@ -232,6 +242,17 @@ void scenario_request_dispatch(int id) {
         int amount = request.resource_amount();
         events::emit(event_city_remove_resource{ request.resource, amount });
     }
+}
+
+bool scenario_request_dispatch_event(int event_id) {
+    const auto visible = scenario_get_visible_requests();
+    for (int i = 0; i < (int)visible.size(); i++) {
+        if (visible[i].event_id == event_id) {
+            scenario_request_dispatch(i);
+            return true;
+        }
+    }
+    return false;
 }
 
 int scenario_requests_active_count() {

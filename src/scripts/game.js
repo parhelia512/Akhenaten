@@ -73,6 +73,7 @@ game_features {
     @gameopt_autosave_slots {}
     @gameopt_tooltips_mode {}
     @gameopt_warnings {}
+    @gameopt_popup_messages {}
     @gameopt_gods_enabled {}
     @gameopt_victory_video {}
     @gameopt_pyramid_speedup {}

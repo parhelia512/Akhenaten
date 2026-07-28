@@ -367,6 +367,36 @@ int __city_message_param2(int message_index) {
 }
 ANK_FUNCTION_1(__city_message_param2)
 
+int __city_message_sequence(int message_index) {
+    return city_message_get(message_index).sequence;
+}
+ANK_FUNCTION_1(__city_message_sequence)
+
+int __city_message_find_index_by_sequence(int sequence) {
+    return city_message_find_index_by_sequence(sequence);
+}
+ANK_FUNCTION_1(__city_message_find_index_by_sequence)
+
+void __city_message_show_from_archive(int message_index) {
+    city_message_show_from_archive(message_index);
+}
+ANK_FUNCTION_1(__city_message_show_from_archive)
+
+int __popup_message_category_for_key(xstring key) {
+    return (int)popup_message_category_for_key(key);
+}
+ANK_FUNCTION_1(__popup_message_category_for_key)
+
+bool __popup_messages_want_banner(int cat) {
+    return popup_messages_want_banner((e_popup_message_category)cat);
+}
+ANK_FUNCTION_1(__popup_messages_want_banner)
+
+void __popup_messages_set_banner(int cat, bool banner) {
+    popup_messages_set_banner((e_popup_message_category)cat, banner);
+}
+ANK_FUNCTION_2(__popup_messages_set_banner)
+
 std::optional<bvariant> __city_get_coverage_property(pcstr property) {
     return archive_helper::get(g_city.coverage, property, true);
 }

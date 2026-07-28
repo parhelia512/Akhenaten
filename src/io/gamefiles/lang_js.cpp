@@ -78,3 +78,8 @@ xstring __lang_get_message_id(int mm_text_id) {
     return lang_get_message_id(mm_text_id);
 }
 ANK_FUNCTION_1(__lang_get_message_id)
+
+int __lang_get_message_uid(xstring message_key) {
+    return (int)lang_get_message_uid(message_key);
+}
+ANK_FUNCTION_1(__lang_get_message_uid)
