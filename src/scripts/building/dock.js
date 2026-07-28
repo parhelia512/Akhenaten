@@ -12,6 +12,8 @@ Dock.property.num_ships = { }
 Dock.prototype.is_trade_accepted = function(resource) { return __dock_is_trade_accepted(this.id, resource) }
 Dock.prototype.toggle_good_accepted = function(resource) { __dock_toggle_good_accepted(this.id, resource) }
 Dock.prototype.unaccept_all_goods = function() { __dock_unaccept_all_goods(this.id) }
+Dock.prototype.accept_all_goods = function() { __dock_accept_all_goods(this.id) }
+Dock.prototype.accepts_any_goods = function() { return __dock_accepts_any_goods(this.id) }
 Dock.prototype.has_trade_ship = function() { return __dock_has_trade_ship(this.id) }
 Dock.prototype.count_idle_dockers = function() { return __dock_count_idle_dockers(this.id) }
 

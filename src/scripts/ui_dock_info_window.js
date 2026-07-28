@@ -14,8 +14,9 @@ function info_window_dock_on_init(window) {
     var dock = city.get_dock(window.bid)
     var meta_text_id = dock.meta_text_id
 
-    window.warning_text.text = __loc(meta_text_id, 1)
-
+    // Meta blurb + orders status on separate lines (warning_text is multiline).
+    var orders_note = dock.accepts_any_goods() ? __loc("#dock_orders_hint") : __loc("#dock_orders_closed")
+    window.warning_text.text = __loc(meta_text_id, 1) + "\n" + orders_note
     var reason = { group: 0, id: 0 }
     if (!dock.has_road_access) {
         reason = { key: "#building_no_road_access" }

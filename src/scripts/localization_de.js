@@ -119,6 +119,11 @@ localization_de = [
   {key:"#TR_CONFIG_CONSERVATORY_HELPS_DANCE_SCHOOL", text:"Konservatorium hilft Tanzschule (reduziert Spawn-Verzögerung)"}
   {key:"#TR_CONFIG_JEWELS_WORKSHOPS_CULTURE_BONUS", text:"Juwelenwerkstätten geben Kulturbonus (+1 pro 3 Werkstätten)"}
   {key:"#TR_CONFIG_PROMPT_SAVE_ON_EXIT", text:"Beim Schließen des Spiels (Alt+F4) nach Speichern fragen"}
+  {key:"#dock_order_trade", text:"Handeln"}
+  {key:"#dock_order_dont_trade", text:"Nicht handeln"}
+  {key:"#dock_order_accept_all", text:"Alles annehmen"}
+  {key:"#dock_orders_hint", text:"Schiffe nutzen diesen Dock nur, wenn mindestens eine ihrer Waren auf Handeln steht."}
+  {key:"#dock_orders_closed", text:"Dieser Dock nimmt keine Waren an — Schiffe legen hier nicht an."}
   {key:"#TR_CONFIG_OVERLAY_SHOW_GRAY_BUILDINGS", text:"Graue Gebäude auf Overlays anzeigen, wenn sie nicht dargestellt werden"}
   {key:"#TR_CONFIG_HEADER_SCENARIO_CHANGES", text:"Szenarien ändern"}
   {key:"#TR_CONFIG_HEADER_RESOURCES", text:"Ressourcen ändern"}

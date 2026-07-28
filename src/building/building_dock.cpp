@@ -3,10 +3,13 @@
 #include "building/building_bazaar.h"
 #include "building/building.h"
 #include "building/building_type.h"
+#include "building/building_storage_yard.h"
 #include "figuretype/figure_docker.h"
 #include "grid/water.h"
 #include "city/buildings.h"
+#include "city/city_buildings.h"
 #include "city/city_resource.h"
+#include "core/calc.h"
 #include "core/profiler.h"
 #include "empire/empire.h"
 #include "grid/figure.h"
@@ -185,6 +188,14 @@ void building_dock::unaccept_all_goods() {
     runtime_data().trading_goods.zeroes(64);
 }
 
+void building_dock::accept_all_goods() {
+    runtime_data().trading_goods.one();
+}
+
+bool building_dock::accepts_any_goods() const {
+    return runtime_data().trading_goods.is_not_zero();
+}
+
 empire_trader_handle building_dock::empire_trader() const {
     auto& d = runtime_data();
     if (d.trade_ship == 0) {
@@ -203,7 +214,7 @@ empire_city_handle building_dock::trader_city() {
     return { ship ? ship->empire_city() : empire_city_handle{} };
 }
 
-bool building_dock::is_trade_accepted(e_resource r) {
+bool building_dock::is_trade_accepted(e_resource r) const {
     return runtime_data().trading_goods.is_set(r);
 }
 
@@ -211,29 +222,112 @@ void building_dock::toggle_good_accepted(e_resource r) {
     runtime_data().trading_goods.flip(r);
 }
 
-bool building_dock::accepts_ship(int ship_id) {
+int building_dock::count_matching_goods(const resource_list &importable, const resource_list &exportable) const {
+    int n = 0;
+    for (const auto &r : resource_list::all) {
+        const bool active = importable[r.type] || exportable[r.type];
+        if (!active) {
+            continue;
+        }
+        if (is_trade_accepted(r.type)) {
+            ++n;
+        }
+    }
+    return n;
+}
+
+int building_dock::trade_match_score(const resource_list &importable, const resource_list &exportable) const {
+    int n = 0;
+    for (const auto &r : resource_list::all) {
+        if (!is_trade_accepted(r.type)) {
+            continue;
+        }
+        if (importable[r.type]) {
+            n += 2; // Prefer unload (city import / ship sell) over buy-only docks
+        } else if (exportable[r.type]) {
+            n += 1;
+        }
+    }
+    return n;
+}
+
+int building_dock::match_score_for_ship(int ship_id) const {
     auto ship = figure_get<figure_trade_ship>(ship_id);
     if (!ship) {
-        return false;
+        return 0;
     }
 
     empire_city_handle city = ship->empire_city();
     const resource_list importable = g_empire.importable_resources_from_city(city.handle);
     const resource_list exportable = g_empire.exportable_resources_from_city(city.handle);
 
-    bool any_match = false;
-    for (const auto &r : resource_list::all) {
-        const bool active = importable[r.type] || exportable[r.type];
-        if (!active) {
+    resource_list import_focus;
+    bool budgets_populated = false;
+    for (const auto &slot : ship->runtime_data().import_budgets) {
+        if (slot.resource == 0) {
             continue;
         }
-        if (!is_trade_accepted(r.type)) {
-            return false;
+        budgets_populated = true;
+        if (slot.remaining_chunks > 0) {
+            const e_resource r = (e_resource)slot.resource;
+            // Only count goods the city can still import (quota/stock gates).
+            if (importable[r]) {
+                import_focus[r] = 1;
+            }
         }
-        any_match = true;
     }
 
-    return any_match;
+    // Need at least one docker haul chunk of free buy capacity for exports to matter.
+    resource_list export_for_score;
+    const int buy_room = ship->max_capacity() - (int)ship->total_bought();
+    if (buy_room >= 100) {
+        export_for_score = exportable;
+    }
+
+    if (!budgets_populated) {
+        return trade_match_score(importable, export_for_score);
+    }
+
+    // Budgets known: remaining feasible imports + current export opportunities.
+    return trade_match_score(import_focus, export_for_score);
+}
+
+bool building_dock::accepts_ship(int ship_id) {
+    return match_score_for_ship(ship_id) > 0;
+}
+
+int building_dock::yard_proximity_cost() const {
+    if (!has_road_access() || base.distance_from_entry <= 0) {
+        return 10000;
+    }
+
+    const int road_network_id = base.road_network_id;
+    const int distance_from_entry = base.distance_from_entry;
+    int min_distance = 10000;
+
+    buildings_valid_do([&](building &b) {
+        building_storage_yard *warehouse = b.dcast_storage_yard();
+        if (!warehouse || !warehouse->is_valid()) {
+            return;
+        }
+        if (!warehouse->has_road_access() || warehouse->base.distance_from_entry <= 0) {
+            return;
+        }
+        if (warehouse->road_network() != road_network_id) {
+            return;
+        }
+        if (!warehouse->get_permission(BUILDING_STORAGE_PERMISSION_DOCK)) {
+            return;
+        }
+
+        const int distance = calc_distance_with_penalty(
+            warehouse->tile(), tile(), distance_from_entry, warehouse->base.distance_from_entry);
+        if (distance < min_distance) {
+            min_distance = distance;
+        }
+    }, BUILDING_STORAGE_YARD);
+
+    return min_distance;
 }
 
 void building_dock::highlight_waypoints() {
@@ -291,6 +385,17 @@ building_dest map_get_free_destination_dock(int ship_id) {
         return { 0, tile2i::invalid };
     }
 
+    auto *ship = figure_get<figure_trade_ship>(ship_id);
+    if (!ship) {
+        return { 0, tile2i::invalid };
+    }
+
+    building_dock *best = nullptr;
+    int best_score = -1;
+    int best_yard = 0;
+    int best_ship_dist = 0;
+    const tile2i ship_tile = ship->tile();
+
     const auto &docks = g_city.buildings.track_buildings(BUILDING_DOCK);
     for (const auto &bid: docks) {
         building_dock *dock = ::building_get(bid)->dcast_dock();
@@ -298,7 +403,8 @@ building_dest map_get_free_destination_dock(int ship_id) {
             continue;
         }
 
-        if (!dock->accepts_ship(ship_id)) {
+        const int score = dock->match_score_for_ship(ship_id);
+        if (score <= 0) {
             continue;
         }
 
@@ -307,11 +413,96 @@ building_dest map_get_free_destination_dock(int ship_id) {
             continue;
         }
 
-        d.trade_ship = ship_id;
-        return { dock->id(), dock->moor_tile() };
+        const int yard = dock->yard_proximity_cost();
+        const int ship_dist = calc_maximum_distance(ship_tile, dock->moor_tile());
+        const bool better = !best
+            || score > best_score
+            || (score == best_score && yard < best_yard)
+            || (score == best_score && yard == best_yard && ship_dist < best_ship_dist);
+        if (better) {
+            best_score = score;
+            best_yard = yard;
+            best_ship_dist = ship_dist;
+            best = dock;
+        }
     }
 
-    return { 0, tile2i::invalid };
+    if (!best) {
+        return { 0, tile2i::invalid };
+    }
+
+    // Drop prior reservation if scoring moved the ship to another pier.
+    for (const auto &bid : docks) {
+        building_dock *dock = ::building_get(bid)->dcast_dock();
+        if (dock && dock != best && dock->runtime_data().trade_ship == ship_id) {
+            dock->runtime_data().trade_ship = 0;
+        }
+    }
+
+    best->runtime_data().trade_ship = ship_id;
+    return { best->id(), best->moor_tile() };
+}
+
+building_dest map_get_better_free_destination_dock(int ship_id, int min_exclusive_score) {
+    if (!g_city.buildings.has_working_dock()) {
+        return { 0, tile2i::invalid };
+    }
+
+    auto *ship = figure_get<figure_trade_ship>(ship_id);
+    if (!ship) {
+        return { 0, tile2i::invalid };
+    }
+
+    building_dock *best = nullptr;
+    int best_score = min_exclusive_score;
+    int best_yard = 0;
+    int best_ship_dist = 0;
+    const tile2i ship_tile = ship->tile();
+
+    const auto &docks = g_city.buildings.track_buildings(BUILDING_DOCK);
+    for (const auto &bid : docks) {
+        building_dock *dock = ::building_get(bid)->dcast_dock();
+        if (!dock || !dock->num_workers()) {
+            continue;
+        }
+
+        const int score = dock->match_score_for_ship(ship_id);
+        if (score <= min_exclusive_score) {
+            continue;
+        }
+
+        auto &d = dock->runtime_data();
+        if (d.trade_ship && d.trade_ship != ship_id) {
+            continue;
+        }
+
+        const int yard = dock->yard_proximity_cost();
+        const int ship_dist = calc_maximum_distance(ship_tile, dock->moor_tile());
+        const bool better = !best
+            || score > best_score
+            || (score == best_score && yard < best_yard)
+            || (score == best_score && yard == best_yard && ship_dist < best_ship_dist);
+        if (better) {
+            best_score = score;
+            best_yard = yard;
+            best_ship_dist = ship_dist;
+            best = dock;
+        }
+    }
+
+    if (!best) {
+        return { 0, tile2i::invalid };
+    }
+
+    for (const auto &bid : docks) {
+        building_dock *dock = ::building_get(bid)->dcast_dock();
+        if (dock && dock != best && dock->runtime_data().trade_ship == ship_id) {
+            dock->runtime_data().trade_ship = 0;
+        }
+    }
+
+    best->runtime_data().trade_ship = ship_id;
+    return { best->id(), best->moor_tile() };
 }
 
 building_dest map_get_queue_destination_dock(int ship_id) {
@@ -319,41 +510,77 @@ building_dest map_get_queue_destination_dock(int ship_id) {
         return { 0, tile2i::invalid };
     }
 
-    // first queue position
+    auto *ship = figure_get<figure_trade_ship>(ship_id);
+    if (!ship) {
+        return { 0, tile2i::invalid };
+    }
+
     const auto &docks = g_city.buildings.track_buildings(BUILDING_DOCK);
+    const tile2i ship_tile = ship->tile();
+
+    building_dock *best_wait = nullptr;
+    int best_wait_score = -1;
+    int best_wait_yard = 0;
+    int best_wait_dist = 0;
+    tile2i best_wait_tile = tile2i::invalid;
+
+    building_dock *best_reid = nullptr;
+    int best_reid_score = -1;
+    int best_reid_yard = 0;
+    int best_reid_dist = 0;
+    tile2i best_reid_tile = tile2i::invalid;
+
     for (const auto &bid : docks) {
         building_dock *dock = ::building_get(bid)->dcast_dock();
-        if (!dock) {
+        if (!dock || !dock->num_workers()) {
             continue;
         }
 
-        if (!dock->accepts_ship(ship_id)) {
+        const int score = dock->match_score_for_ship(ship_id);
+        if (score <= 0) {
             continue;
         }
 
-        tile2i wait_tile = dock->wait_tile();
-        if (!map_has_figure_at(wait_tile)) {
-            return {dock->id(), wait_tile};
+        const int yard = dock->yard_proximity_cost();
+
+        tile2i wait = dock->wait_tile();
+        if (!map_has_figure_at(wait)) {
+            const int dist = calc_maximum_distance(ship_tile, wait);
+            const bool better = !best_wait
+                || score > best_wait_score
+                || (score == best_wait_score && yard < best_wait_yard)
+                || (score == best_wait_score && yard == best_wait_yard && dist < best_wait_dist);
+            if (better) {
+                best_wait_score = score;
+                best_wait_yard = yard;
+                best_wait_dist = dist;
+                best_wait = dock;
+                best_wait_tile = wait;
+            }
+        }
+
+        tile2i reid = dock->reid_tile();
+        if (!map_has_figure_at(reid)) {
+            const int dist = calc_maximum_distance(ship_tile, reid);
+            const bool better = !best_reid
+                || score > best_reid_score
+                || (score == best_reid_score && yard < best_reid_yard)
+                || (score == best_reid_score && yard == best_reid_yard && dist < best_reid_dist);
+            if (better) {
+                best_reid_score = score;
+                best_reid_yard = yard;
+                best_reid_dist = dist;
+                best_reid = dock;
+                best_reid_tile = reid;
+            }
         }
     }
 
-    // second queue position
-    building_dock *better_dock = nullptr;
-    for (const auto &bid : docks) {
-        building_dock *dock = ::building_get(bid)->dcast_dock();
-        if (!dock) {
-            continue;
-        }
-
-        if (!dock->accepts_ship(ship_id)) {
-            continue;
-        }
-        
-        tile2i reid_tile = dock->reid_tile();
-        if (!map_has_figure_at(reid_tile)) {
-            return {dock->id(), reid_tile};
-        }
+    if (best_wait) {
+        return { best_wait->id(), best_wait_tile };
     }
-
-    return {0, tile2i::invalid};
+    if (best_reid) {
+        return { best_reid->id(), best_reid_tile };
+    }
+    return { 0, tile2i::invalid };
 }

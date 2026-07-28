@@ -32,6 +32,11 @@ localization_hu = [
   {key:"#TR_CONFIG_SIDEBAR_INFO", text:"További információk a vezérlőpanelen"}
   {key:"#TR_CONFIG_BUILDING_MOTHBALL_BUTTON", text:"Épület leállítása gomb megjelenítése az épületablakokban"}
   {key:"#TR_CONFIG_PROMPT_SAVE_ON_EXIT", text:"Kilépéskor mentés felajánlása (Alt+F4)"}
+  {key:"#dock_order_trade", text:"Kereskedés"}
+  {key:"#dock_order_dont_trade", text:"Nincs kereskedés"}
+  {key:"#dock_order_accept_all", text:"Mindent elfogad"}
+  {key:"#dock_orders_hint", text:"A hajók csak akkor használják ezt a dokkot, ha legalább egy árujuk Kereskedésre van állítva."}
+  {key:"#dock_orders_closed", text:"Ez a dokk nem fogad árukat — a hajók nem kötnek ki itt."}
   {key:"#TR_CONFIG_SMOOTH_SCROLLING", text:"Folyamatos görgetés engedélyezése"}
   {key:"#TR_CONFIG_SMOOTH_ZOOM", text:"Folyamatos nagyítás engedélyezése"}
   {key:"#TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE", text:"Területrendezés vizuális visszajelzésének javítása"}

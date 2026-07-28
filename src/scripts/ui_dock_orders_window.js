@@ -2,16 +2,29 @@ log_info("akhenaten: ui_dock_orders_window.js loaded")
 
 function dock_order_instruction(dock, resource) {
     if (dock.is_trade_accepted(resource)) {
-        return { text: "Trade", font: FONT_NORMAL_WHITE_ON_DARK }
+        return { text: __loc("#dock_order_trade"), font: FONT_NORMAL_WHITE_ON_DARK }
     }
-    return { text: "Don't trade", font: FONT_NORMAL_BLACK_ON_DARK }
+    return { text: __loc("#dock_order_dont_trade"), font: FONT_NORMAL_BLACK_ON_DARK }
 }
 
 function dock_orders_window_accept_none() {
+    if (!dock_orders_window.dock) {
+        return
+    }
     dock_orders_window.dock.unaccept_all_goods()
 }
 
+function dock_orders_window_accept_all() {
+    if (!dock_orders_window.dock) {
+        return
+    }
+    dock_orders_window.dock.accept_all_goods()
+}
+
 function dock_orders_list_on_click_item(p) {
+    if (!dock_orders_window.dock) {
+        return
+    }
     dock_orders_window.dock.toggle_good_accepted(p.user_data)
 }
 
@@ -57,7 +70,8 @@ dock_orders_window {
             onrender_item: dock_orders_list_on_render_item
             onclick_item: dock_orders_list_on_click_item
         })
-        accept_none  : button({pos[80, -1], size[300, 24], text:{group:99, id:7}, margin{bottom:-38}, onclick: dock_orders_window_accept_none })
+        accept_all   : button({pos[16, -1], size[200, 24], text:"#dock_order_accept_all", margin{bottom:-38}, onclick: dock_orders_window_accept_all })
+        accept_none  : button({pos[226, -1], size[200, 24], text:{group:99, id:7}, margin{bottom:-38}, onclick: dock_orders_window_accept_none })
 
         button_help   : help_button({})
         button_close  : close_button({ onclick: window_go_back })

@@ -33,6 +33,11 @@ localization_en = [
   {key:"#TR_CONFIG_SIDEBAR_INFO", text:"Extra information in the control panel"}
   {key:"#TR_CONFIG_BUILDING_MOTHBALL_BUTTON", text:"Show mothball button on building info windows"}
   {key:"#TR_CONFIG_PROMPT_SAVE_ON_EXIT", text:"Prompt to save when closing the game (Alt+F4)"}
+  {key:"#dock_order_trade", text:"Trade"}
+  {key:"#dock_order_dont_trade", text:"Don't trade"}
+  {key:"#dock_order_accept_all", text:"Accept all"}
+  {key:"#dock_orders_hint", text:"Ships only use this dock if at least one of their goods is set to Trade."}
+  {key:"#dock_orders_closed", text:"This dock accepts no goods — ships will not moor here."}
   {key:"#TR_CONFIG_SMOOTH_SCROLLING", text:"Enable smooth scrolling"}
   {key:"#TR_CONFIG_SMOOTH_ZOOM", text:"Enable smooth zoom"}
   {key:"#TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE", text:"Improve visual feedback when clearing land"}

@@ -245,6 +245,7 @@ void figure_trade_ship::figure_action() {
             
             auto queued_dock = map_get_queue_destination_dock(id());
             if (queued_dock.bid) {
+                set_destination(queued_dock.bid);
                 base.action_state = ACTION_113_TRADE_SHIP_GOING_TO_DOCK_QUEUE;
                 base.destination_tile = queued_dock.tile;
                 break;
@@ -274,8 +275,54 @@ void figure_trade_ship::figure_action() {
             // Dock demolished mid-approach. Tell the empire-side trader to head home —
             // otherwise it stays stuck in estate_moving_to_destination with is_active=true.
             runtime_data().trader.back_to_city();
+            {
+                auto *dock = destination()->dcast_dock();
+                if (dock && dock->runtime_data().trade_ship == id()) {
+                    dock->runtime_data().trade_ship = 0;
+                }
+            }
             advance_action(ACTION_115_TRADE_SHIP_LEAVING, scenario_map_river_exit());
             base.wait_ticks = 0;
+        } else if (auto *dock = destination()->dcast_dock()) {
+            if (!dock->accepts_ship(id())) {
+                // Orders changed mid-approach (Accept none / goods flipped off).
+                if (dock->runtime_data().trade_ship == id()) {
+                    dock->runtime_data().trade_ship = 0;
+                }
+                auto free_dock = map_get_free_destination_dock(id());
+                if (free_dock.bid) {
+                    set_destination(free_dock.bid);
+                    base.destination_tile = free_dock.tile;
+                    route_remove();
+                    base.wait_ticks = 0;
+                } else {
+                    auto queued = map_get_queue_destination_dock(id());
+                    if (queued.bid) {
+                        set_destination(queued.bid);
+                        base.action_state = ACTION_113_TRADE_SHIP_GOING_TO_DOCK_QUEUE;
+                        base.destination_tile = queued.tile;
+                        route_remove();
+                        base.wait_ticks = 0;
+                    } else {
+                        runtime_data().trader.back_to_city();
+                        advance_action(ACTION_115_TRADE_SHIP_LEAVING, scenario_map_river_exit());
+                        base.wait_ticks = 0;
+                    }
+                }
+            } else {
+                // Strictly better free pier opened (e.g. player specialized another dock).
+                base.wait_ticks++;
+                if (base.wait_ticks > 40) {
+                    base.wait_ticks = 0;
+                    const int cur_score = dock->match_score_for_ship(id());
+                    auto better = map_get_better_free_destination_dock(id(), cur_score);
+                    if (better.bid && better.bid != dock->id()) {
+                        set_destination(better.bid);
+                        base.destination_tile = better.tile;
+                        route_remove();
+                    }
+                }
+            }
         }
         break;
 
@@ -285,6 +332,24 @@ void figure_trade_ship::figure_action() {
             base.action_state = ACTION_115_TRADE_SHIP_LEAVING;
             base.wait_ticks = 0;
             base.destination_tile = scenario_map_river_entry();
+            // Release pier if still reserved (e.g. dock lost workers).
+            {
+                auto *dock = destination()->dcast_dock();
+                if (dock && dock->runtime_data().trade_ship == id()) {
+                    dock->runtime_data().trade_ship = 0;
+                }
+            }
+        } else if (auto *dock = destination()->dcast_dock(); dock && !dock->accepts_ship(id())) {
+            // Orders no longer match — leave instead of idling until TRADE_SHIP_IDLE_DAYS_MAX.
+            d.failed_dock_attempts = 0;
+            base.action_state = ACTION_115_TRADE_SHIP_LEAVING;
+            base.wait_ticks = 0;
+            base.destination_tile = scenario_map_river_entry();
+            if (dock->runtime_data().trade_ship == id()) {
+                dock->runtime_data().trade_ship = 0;
+            }
+            dock->runtime_data().queued_docker_id = 0;
+            dock->runtime_data().num_ships = 0;
         } else if (done_trading()) {
             d.failed_dock_attempts = 0;
             base.action_state = ACTION_115_TRADE_SHIP_LEAVING;
@@ -318,6 +383,29 @@ void figure_trade_ship::figure_action() {
             route_remove();
         } else if (direction() == DIR_FIGURE_CAN_NOT_REACH) {
             poof();
+        } else {
+            // Free pier opened while sailing to the queue — take it.
+            base.wait_ticks++;
+            if (base.wait_ticks > 40) {
+                base.wait_ticks = 0;
+                auto free_dock = map_get_free_destination_dock(id());
+                if (free_dock.bid) {
+                    set_destination(free_dock.bid);
+                    base.action_state = ACTION_111_TRADE_SHIP_GOING_TO_DOCK;
+                    base.destination_tile = free_dock.tile;
+                    route_remove();
+                } else if (auto *dock = destination()->dcast_dock(); dock && !dock->accepts_ship(id())) {
+                    auto queued = map_get_queue_destination_dock(id());
+                    if (queued.bid) {
+                        set_destination(queued.bid);
+                        base.destination_tile = queued.tile;
+                        route_remove();
+                    } else {
+                        runtime_data().trader.back_to_city();
+                        advance_action(ACTION_115_TRADE_SHIP_LEAVING, scenario_map_river_exit());
+                    }
+                }
+            }
         }
         break;
 
@@ -332,10 +420,12 @@ void figure_trade_ship::figure_action() {
                 break;
             }
             
+            // Free pier busy — move/reseat in queue if a better free wait/reid exists.
             auto queue_dock = map_get_queue_destination_dock(id());
-            if (free_dock.tile.valid() && map_figure_id_get(free_dock.tile) != id() && queue_dock.bid) {
+            if (queue_dock.bid && map_figure_id_get(queue_dock.tile) != id()) {
+                set_destination(queue_dock.bid);
                 base.action_state = ACTION_113_TRADE_SHIP_GOING_TO_DOCK_QUEUE;
-                base.destination_tile = free_dock.tile;
+                base.destination_tile = queue_dock.tile;
             }
 
             if (d.failed_dock_attempts >= TRADE_SHIP_IDLE_DAYS_MAX) {

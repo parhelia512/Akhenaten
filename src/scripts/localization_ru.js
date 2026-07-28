@@ -108,6 +108,11 @@ localization_ru = [
     { key:"#quicksave_missing", text:"Нет быстрого сохранения"}
     { key:"#quicksave_failed", text:"Ошибка быстрого сохранения"}
     { key:"#quickload_failed", text:"Ошибка быстрой загрузки"}
+    { key:"#dock_order_trade", text:"Торговать"}
+    { key:"#dock_order_dont_trade", text:"Не торговать"}
+    { key:"#dock_order_accept_all", text:"Принимать всё"}
+    { key:"#dock_orders_hint", text:"Корабли швартуются здесь, только если хотя бы один их товар включён (Торговать)."}
+    { key:"#dock_orders_closed", text:"Док не принимает товары — корабли сюда не швартуются."}
     { key:"#TR_HOTKEY_INCREASE_GAME_SPEED", text:"Увеличить скорость игры"}
     { key:"#TR_HOTKEY_DECREASE_GAME_SPEED", text:"Уменьшить скорость игры"}
     { key:"#TR_HOTKEY_TOGGLE_PAUSE", text:"Пауза"}

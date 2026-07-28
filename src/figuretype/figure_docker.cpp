@@ -127,10 +127,15 @@ int figure_docker::try_export_resource(building* b, e_resource resource, empire_
 building_dest figure_docker::get_closest_warehouse_for_import(tile2i pos, empire_city_handle city, int distance_from_entry, int road_network_id, building_dock *dock, e_resource& import_resource) {
     const resource_list importable = g_empire.importable_resources_from_city(city.handle);
 
-    // Treat an unconfigured dock (all-zero trading_goods, e.g. legacy saves) as accept-all so the filter doesn't strand trade.
-    const bool dock_filter = dock && dock->runtime_data().trading_goods.is_not_zero();
+    // Dock orders (DO1): zero bitmask = accept none (same as Accept none button).
     auto allowed = [&](e_resource r) {
-        return importable[r] && (!dock_filter || dock->is_trade_accepted(r));
+        if (!importable[r]) {
+            return false;
+        }
+        if (!dock) {
+            return true;
+        }
+        return dock->is_trade_accepted(r);
     };
 
     // If the dock's ship has per-good budgets populated, pick from those (preserves per-visit
@@ -267,9 +272,14 @@ building_dest figure_docker::get_closest_warehouse_for_import(tile2i pos, empire
 building_dest figure_docker::get_closest_warehouse_for_export(tile2i pos, empire_city_handle city, int distance_from_entry, int road_network_id, building_dock *dock, e_resource &export_resource) {
     const resource_list exportable = g_empire.exportable_resources_from_city(city.handle);
 
-    const bool dock_filter = dock && dock->runtime_data().trading_goods.is_not_zero();
     auto allowed = [&](e_resource r) {
-        return exportable[r] && (!dock_filter || dock->is_trade_accepted(r));
+        if (!exportable[r]) {
+            return false;
+        }
+        if (!dock) {
+            return true;
+        }
+        return dock->is_trade_accepted(r);
     };
 
     e_resource resource = city_trade_next_docker_export_resource();
