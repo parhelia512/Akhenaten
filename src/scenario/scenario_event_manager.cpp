@@ -34,6 +34,7 @@
 #include "graphics/elements/lang_text.h"
 #include "figure/enemy_army.h"
 #include "figure/formation.h"
+#include "figuretype/figure_mummy.h"
 #include "game/game_config.h"
 #include "core/svector.h"
 
@@ -203,23 +204,6 @@ void event_manager_t::create_pharaoh_gift(int tag, e_resource r, int amount) {
     event.tag_id = tag;
     event.location_fields = { -1, -1, -1, -1 };
     event.event_id = event_id;
-    g_scenario_events.event_list.front().num_total_header = g_scenario_events.event_list.size();
-}
-
-void event_manager_t::create_trade_city_under_siege(int tag, int months_initial) {
-    auto& event = g_scenario_events.event_list.emplace_back();
-    int event_id = g_scenario_events.event_list.size() - 1;
-    memset(&event, 0, sizeof(event_ph_t));
-    event.type = EVENT_TYPE_TRADE_CITY_UNDER_SIEGE;
-    event.time.year = game.simtime.years_since_start();
-    event.time.month = game.simtime.month;
-    event.tag_id = tag;
-    event.location_fields = { -1, -1, -1, -1 };
-    event.months_initial = months_initial;
-    event.event_id = event_id;
-    //event.event_trigger_type = EVENT_TRIGGER_GLOBAL_UPDATE;
-    event.event_state = e_event_state_initial;
-    //process_event(event_id, false, -1);
     g_scenario_events.event_list.front().num_total_header = g_scenario_events.event_list.size();
 }
 
@@ -585,7 +569,7 @@ void event_manager_t::process_event_city_under_siege(const event_ph_t& event, bo
     }
 
     if (cityid < 0) {
-        logs::debug("EVENT_TYPE_TRADE_CITY_UNDER_SIEGE: no valid trade city found");
+        logs::debug("CITY_UNDER_SIEGE: no valid trade city found");
         return;
     }
 
@@ -685,7 +669,7 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         g_city.kingdome.change(event.amount.value);
         city_message_post_full(true, "message_template_general", &event, caller_event_id,
                                PHRASE_rating_change_title_I, PHRASE_rating_change_initial_announcement_I, PHRASE_rating_change_reason_I_A,
-                               id, 0);
+                               id, 0, POPUP_MSG_KINGDOM);
         break;
 
     case EVENT_TYPE_SEA_TRADE_PROBLEM:
@@ -717,14 +701,14 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         g_city.finance.raise_wages_kingdome();
         city_message_post_full(true, "message_template_general", &event, caller_event_id,
                                PHRASE_wage_change_title_I, PHRASE_wage_change_initial_announcement_I,
-                               PHRASE_wage_change_no_reason_I_A, id, 0);
+                               PHRASE_wage_change_no_reason_I_A, id, 0, POPUP_MSG_WAGE);
         break;
 
     case EVENT_TYPE_WAGE_DECREASE:
         g_city.finance.lower_wages_kingdome();
         city_message_post_full(true, "message_template_general", &event, caller_event_id,
                                PHRASE_wage_change_title_D, PHRASE_wage_change_initial_announcement_D,
-                               PHRASE_wage_change_no_reason_D_A, id, 0);
+                               PHRASE_wage_change_no_reason_D_A, id, 0, POPUP_MSG_WAGE);
         break;
 
     case EVENT_TYPE_CONTAMINATED_WATER: {
@@ -766,11 +750,11 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
             if (is_rise) {
                 city_message_post_full(true, "message_template_general", &event, caller_event_id,
                                        PHRASE_demand_change_title_I, PHRASE_demand_change_initial_announcement_I,
-                                       PHRASE_demand_change_no_reason_I_A, id, touched_city_id);
+                                       PHRASE_demand_change_no_reason_I_A, id, touched_city_id, POPUP_MSG_TRADE_LEVEL);
             } else {
                 city_message_post_full(true, "message_template_general", &event, caller_event_id,
                                        PHRASE_demand_change_title_D, PHRASE_demand_change_initial_announcement_D,
-                                       PHRASE_demand_change_no_reason_D_A, id, touched_city_id);
+                                       PHRASE_demand_change_no_reason_D_A, id, touched_city_id, POPUP_MSG_TRADE_LEVEL);
             }
         }
         break;
@@ -784,11 +768,11 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
                 if (is_rise) {
                     city_message_post_full(true, "message_template_general", &event, caller_event_id,
                                            PHRASE_price_change_title_I, PHRASE_price_change_initial_announcement_I,
-                                           PHRASE_price_change_no_reason_I_A, id, 0);
+                                           PHRASE_price_change_no_reason_I_A, id, 0, POPUP_MSG_PRICE);
                 } else {
                     city_message_post_full(true, "message_template_general", &event, caller_event_id,
                                            PHRASE_price_change_title_D, PHRASE_price_change_initial_announcement_D,
-                                           PHRASE_price_change_no_reason_D_A, id, 0);
+                                           PHRASE_price_change_no_reason_D_A, id, 0, POPUP_MSG_PRICE);
                 }
             }
         }
@@ -820,14 +804,14 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         g_floods.quality_next = 0;
         city_message_post_full(true, "message_template_general", &event, caller_event_id,
                                PHRASE_flood_fails_title, PHRASE_flood_fails_initial_announcement,
-                               PHRASE_flood_fails_no_reason_A, id, 0);
+                               PHRASE_flood_fails_no_reason_A, id, 0, POPUP_MSG_FLOOD);
         break;
 
     case EVENT_TYPE_PERFECT_FLOOD:
         g_floods.quality_next = 100;
         city_message_post_full(true, "message_template_general", &event, caller_event_id,
                                PHRASE_perfect_flood_title, PHRASE_perfect_flood_initial_announcement,
-                               PHRASE_perfect_flood_no_reason_A, id, 0);
+                               PHRASE_perfect_flood_no_reason_A, id, 0, POPUP_MSG_FLOOD);
         break;
 
     case EVENT_TYPE_FOREIGN_ARMY_ATTACK_WARNING: {
@@ -847,8 +831,9 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         }
         break;
 
-    case EVENT_TYPE_TRADE_CITY_UNDER_SIEGE: {
-            process_event_city_under_siege(event, via_event_trigger, chain_action_parent, caller_event_id, caller_event_var);
+    case EVENT_TYPE_MUMMY: {
+            int n = event.amount.value > 0 ? event.amount.value : 1;
+            figure_mummy::spawn_wave(n);
         }
         break;
 

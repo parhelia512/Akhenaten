@@ -1243,6 +1243,29 @@ figure_governor {
 }
 
 // BF4 cinematic / victory VFX walker — walk-only (SprMain 28); no death group.
+
+// BF3 undead curse walker — Cleopatra SprMain2 bmp "mummy":
+// group 40 = SprMain2_01919 walk (12×8); 41 attack (11×8); 42 idle (12×8).
+// No death strip in pak (Blood_Transport begins at group 43) — reuse walk for death.
+figure_mummy {
+	animations {
+		walk { pack:PACK_EXPANSION_SPR, id:40, max_frames:12 }
+		attack { pack:PACK_EXPANSION_SPR, id:41, max_frames:11 }
+		idle { pack:PACK_EXPANSION_SPR, id:42, max_frames:12 }
+		death { pack:PACK_EXPANSION_SPR, id:40, max_frames:8, loop:false }
+		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_MUMMY }
+	}
+
+	category: figure_category_hostile
+	is_enemy: true
+	max_damage: 20
+	attack_value: 8
+	defense_value: 2
+	terrain_usage: TERRAIN_USAGE_ANY
+	// Live cap enforced in figure_mummy::spawn_wave (max 4).
+	max_roam_length: 480
+}
+
 figure_pharaoh {
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:28, max_frames:12 }

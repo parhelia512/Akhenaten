@@ -466,15 +466,6 @@ city.create_pharaoh_gift = function(obj) {
     }
 }
 
-city.create_trade_city_under_siege = function(tag_id, months_initial) {
-    __city_event_create_trade_city_under_siege(tag_id, months_initial)
-    return {
-        tag_id: tag_id
-        set_reasons: function(r1, r2, r3, r4) { __city_request_set_reasons(this.tag_id, r1, r2, r3, r4) }
-        execute: function() { __city_request_execute(this.tag_id) }
-    }
-}
-
 city.create_foreign_army_attack_warning = function(obj) {
     __city_event_create_foreign_army_attack_warning(obj)
     return {

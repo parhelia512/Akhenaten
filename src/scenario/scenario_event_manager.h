@@ -37,7 +37,7 @@ enum e_event_type : uint8_t {
     EVENT_TYPE_BLOOD_RIVER = 27,
     EVENT_TYPE_CRIME_WAVE = 28,
 
-    EVENT_TYPE_TRADE_CITY_UNDER_SIEGE = 29,
+    EVENT_TYPE_MUMMY = 29,
     EVENT_TYPE_FOREIGN_ARMY_ATTACK_WARNING = 30,
     EVENT_TYPE_DISTANT_BATTLE = 31,
     EVENT_TYPE_DISTANT_BATTLE_WON = 32,
@@ -238,7 +238,6 @@ struct event_manager_t {
     void create_good_request(int tag, e_resource r, int amount, int months_initial, int8_t subtype = 0,
                              e_event_trigger_type trigger = EVENT_TRIGGER_ONCE, int8_t city_id = -1);
     void create_pharaoh_gift(int tag, e_resource r, int amount);
-    void create_trade_city_under_siege(int tag, int months_initial);
     void create_foreign_army_attack_warning(int tag, int8_t sender_faction, int months_initial = 0,
                                             int invader = 0);
     void create_distant_battle(int tag, pcstr city, vec2i pos);

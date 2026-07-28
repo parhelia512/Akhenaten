@@ -34,6 +34,8 @@
 #include "figuretype/figure_hunter.h"
 #include "figuretype/animal_lion.h"
 #include "figuretype/animal_asp.h"
+#include "figuretype/figure_mummy.h"
+#include "figure/combat.h"
 #include "city/city_animals.h"
 #include "graphics/color.h"
 #include "city/city.h"
@@ -474,6 +476,40 @@ static int __test_count_figures(int type) {
     return count;
 }
 ANK_FUNCTION_1(__test_count_figures);
+
+
+static int __test_mummy_spawn_wave(int count) {
+    return figure_mummy::spawn_wave(count);
+}
+ANK_FUNCTION_1(__test_mummy_spawn_wave);
+
+static int __test_figure_is_enemy(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_valid()) {
+        return 0;
+    }
+    return f->is_enemy() ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_figure_is_enemy);
+
+static int __test_soldier_combat_target(int x, int y, int max_distance) {
+    tile2i tile(x, y);
+    if (!tile.valid()) {
+        tile.set(g_scenario.map.width / 2, g_scenario.map.height / 2);
+    }
+    return figure_combat_get_target_for_soldier(tile, max_distance > 0 ? max_distance : 8);
+}
+ANK_FUNCTION_3(__test_soldier_combat_target);
+
+static void __test_figure_kill(int fid) {
+    figure *f = figure_get(fid);
+    if (f && f->is_alive()) {
+        f->wait_ticks = 0; // corpse timer must not inherit roam lifetime
+        f->kill();
+    }
+}
+ANK_FUNCTION_1(__test_figure_kill);
+
 
 static int __test_lion_setup_curse_raid(int fid, int days) {
     figure *f = figure_get(fid);
