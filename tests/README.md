@@ -97,6 +97,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `66_lion_spawn.js` | Cleopatra `FIGURE_LION`: spawn + type + `update_animation` → `walk` (SprMain2 group 5; CF3b) |
 | `75_bast_lion_curse.js` | Bast lion raid (CF5): feature ON spawn at temple; OFF / smash / no-temple fallback → no lions; raid prey skips ostrich; 1-day timer poof |
 | `89_seth_asp_curse.js` | Seth asp raid (CF7): feature ON spawn at temple; OFF / no-temple fallback → no asps; raid prey skips ostrich; 1-day timer poof |
+| `94_locust_swarm.js` | CF2 locust: Osiris/EVENT/pak-chain/cheat; sentiment; saveload; timer; variant/float |
 | `85_mummy_attack.js` | BF3 mummy: register + `spawn_wave` → 1× msg 496; soldier target + kill |
 | `91_popup_messages.js` | OG Popup Messages: category map + banner/click-open vs modal; unlisted stays modal |
 | `69_scorpion_spawn.js` | Cleopatra `FIGURE_SCORPION`: spawn + type + `update_animation` → `walk` (SprMain2 group 10; CF3c) |
@@ -223,6 +224,12 @@ After each test script loads, the driver calls `js_vm_sync({})` so any top-level
 | `__test_figure_is_enemy(fid)` | 0\|1 | Whether figure has enemy flag |
 | `__test_soldier_combat_target(x,y,d)` | figure id | Soldier combat target near tile |
 | `__test_figure_kill(fid)` | undefined | Kill live figure (reset wait_ticks) |
+| `__test_locust_spawn_swarm(count)` | figure id | CF2: spawn locust swarm (0 → default) |
+| `__test_locust_set_days(fid, days)` | 0\|1 | CF2: set locust `days_left` |
+| `__test_locust_get_days(fid)` | days | CF2: get locust `days_left` |
+| `__test_locust_cloud_variant(fid)` | 0..4 | CF2: SprMain2 group variant |
+| `__test_locust_post_load(fid)` | 0\|1 | CF2: exercise `on_post_load` restore |
+| `__test_figure_current_height(fid)` | height | Figure `current_height` (float) |
 | `__test_lion_setup_curse_raid(fid, days)` | 0\|1 | Mark `FIGURE_LION` as Bast curse raid with duration days |
 | `__test_lion_is_curse_raid(fid)` | 0\|1 | Whether lion has curse-raid flag |
 | `__figure_get_anim_key(fid)` | string | Current `animctx.key` (e.g. `walk`, `swim`) |

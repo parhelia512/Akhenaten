@@ -35,6 +35,7 @@
 #include "figuretype/animal_lion.h"
 #include "figuretype/animal_asp.h"
 #include "figuretype/figure_mummy.h"
+#include "figuretype/figure_locust.h"
 #include "figuretype/figure_funeral_walker.h"
 #include "figure/combat.h"
 #include "city/city_animals.h"
@@ -483,6 +484,73 @@ static int __test_mummy_spawn_wave(int count) {
     return figure_mummy::spawn_wave(count);
 }
 ANK_FUNCTION_1(__test_mummy_spawn_wave);
+
+static int __test_locust_spawn_swarm(int count) {
+    return figure_locust::spawn_swarm(count);
+}
+ANK_FUNCTION_1(__test_locust_spawn_swarm);
+
+static int __test_locust_set_days(int fid, int days) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive() || f->type != FIGURE_LOCUST) {
+        return 0;
+    }
+    figure_locust(f).runtime_data().days_left = (uint16_t)std::max(0, days);
+    return 1;
+}
+ANK_FUNCTION_2(__test_locust_set_days);
+
+static int __test_locust_get_days(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive() || f->type != FIGURE_LOCUST) {
+        return -1;
+    }
+    return figure_locust(f).runtime_data().days_left;
+}
+ANK_FUNCTION_1(__test_locust_get_days);
+
+static int __test_locust_cloud_variant(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive() || f->type != FIGURE_LOCUST) {
+        return -1;
+    }
+    return figure_locust(f).runtime_data().cloud_variant;
+}
+ANK_FUNCTION_1(__test_locust_cloud_variant);
+
+static int __test_figure_current_height(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive()) {
+        return -1;
+    }
+    return f->current_height;
+}
+ANK_FUNCTION_1(__test_figure_current_height);
+
+static int __test_locust_post_load(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive() || f->type != FIGURE_LOCUST) {
+        return 0;
+    }
+    f->allow_move_type = EMOVE_TERRAIN;
+    f->use_cross_country = false;
+    f->current_height = 0;
+    figure_locust(f).runtime_data().cloud_variant = 99;
+    figure_locust(f).on_post_load();
+    if (f->allow_move_type != EMOVE_AMPHIBIAN || !f->use_cross_country) {
+        return 0;
+    }
+    if (figure_locust(f).runtime_data().cloud_variant != 0) {
+        return 0;
+    }
+    if (f->current_height <= 0) {
+        return 0;
+    }
+    return 1;
+}
+ANK_FUNCTION_1(__test_locust_post_load);
+
+
 
 static int __test_figure_is_enemy(int fid) {
     figure *f = figure_get(fid);

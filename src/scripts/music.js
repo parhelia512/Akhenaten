@@ -47,6 +47,10 @@ music = {
 		{ key: "city_35", file:"AUDIO/Music/Anquet.mp3" },
 		{ key: "city_36", file:"AUDIO/Music/Sekhmet.mp3" },
 		{ key: "city_37", file:"AUDIO/Music/Ra.mp3" },
+		// Cleopatra major-plague ambients (AUDIO/Ambient/)
+		{ key: "plague_locusts", file:"AUDIO/Ambient/Locusts.mp3" },
+		{ key: "plague_frogs", file:"AUDIO/Ambient/Frogs.mp3" },
+		{ key: "plague_hailstorm", file:"AUDIO/Ambient/Hailstorm.mp3" },
 	]
 
 	music_populations : [

@@ -1242,6 +1242,34 @@ figure_governor {
 	terrain_usage : TERRAIN_USAGE_ROADS,
 }
 
+
+// CF2 locust swarm — Cleopatra SprMain2 bmp "locust":
+// groups 30–34 = 6-frame cloud strips (non-8-dir). Runtime picks variant 0–4.
+// Walk JS id=30 is timing only; main_image_update remaps to g30+variant.
+// Must override main_image_update (no dir+8*frame) — see figure_locust.cpp.
+// big_image: Cleopatra Unloaded pack 25 slot FIGURE_LOCUST (107).
+// Tunables: swarm_days matches building_curse_farms(big); happiness Major Plague TEMP.
+figure_locust {
+	animations {
+		walk { pack:PACK_EXPANSION_SPR, id:30, max_frames:6 }
+		idle { pack:PACK_EXPANSION_SPR, id:30, max_frames:6 }
+		death { pack:PACK_EXPANSION_SPR, id:30, max_frames:6, loop:false }
+		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_LOCUST }
+	}
+
+	category: figure_category_inactive
+	max_damage: 1
+	attack_value: 0
+	terrain_usage: TERRAIN_USAGE_ANY
+	max_roam_length: 320
+
+	default_swarm: 8
+	max_amount: 16
+	swarm_days: 48
+	happiness_hit: -10
+	float_height: 20
+}
+
 // BF4 cinematic / victory VFX walker — walk-only (SprMain 28); no death group.
 
 // BF3 undead curse walker — Cleopatra SprMain2 bmp "mummy":

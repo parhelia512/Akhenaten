@@ -35,6 +35,7 @@
 #include "figure/enemy_army.h"
 #include "figure/formation.h"
 #include "figuretype/figure_mummy.h"
+#include "figuretype/figure_locust.h"
 #include "game/game_config.h"
 #include "core/svector.h"
 
@@ -963,7 +964,12 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         }
         break;
     }
-    case EVENT_TYPE_LOCUSTS:
+    case EVENT_TYPE_LOCUSTS: {
+        const int n = event.amount.value > 0 ? event.amount.value : 0;
+        figure_locust::apply_plague(n);
+        messages::popup("message_plague_of_locusts", 0, 0);
+        break;
+    }
     case EVENT_TYPE_FROGS:
     case EVENT_TYPE_HAILSTORM:
     case EVENT_TYPE_BLOOD_RIVER:
