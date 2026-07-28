@@ -4,6 +4,7 @@
 //   [test-marker] flat_should_flatten_ok
 //   [test-marker] flat_raise_ok
 //   [test-marker] flat_unraise_ok
+//   [test-marker] flat_overlay_blocks_ok
 //   [test-marker] flat_view_off_clears_raise_ok
 
 function run_test() {
@@ -60,6 +61,22 @@ function run_test() {
     }
     __log_marker('flat_unraise_ok')
 
+    // Overlay temporarily wins over flatten (view flag stays On).
+    city.current_overlay = OVERLAY_FIRE
+    if (__city_flat_should_flatten(bid)) {
+        __log_info_native('[test:88] overlay should block flatten')
+        city.current_overlay = OVERLAY_NONE
+        __test_signal_ready()
+        return
+    }
+    city.current_overlay = OVERLAY_NONE
+    if (!__city_flat_should_flatten(bid) || !__city_flat_buildings_active()) {
+        __log_info_native('[test:88] after overlay exit should flatten again')
+        __test_signal_ready()
+        return
+    }
+    __log_marker('flat_overlay_blocks_ok')
+
     __city_flat_toggle_raised(bid)
     __city_flat_buildings_set(0)
     if (__city_flat_is_raised(bid) || __city_flat_buildings_active()) {
@@ -78,6 +95,7 @@ function check_valid() {
         'flat_should_flatten_ok',
         'flat_raise_ok',
         'flat_unraise_ok',
+        'flat_overlay_blocks_ok',
         'flat_view_off_clears_raise_ok'
     ]
     for (var i = 0; i < markers.length; i++) {

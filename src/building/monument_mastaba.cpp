@@ -6,6 +6,7 @@
 #include "core/custom_span.hpp"
 #include "graphics/image.h"
 #include "widget/city/tile_draw.h"
+#include "widget/city/flat_draw.h"
 #include "window/building/common.h"
 #include "city/city_warnings.h"
 #include "city/city_buildings.h"
@@ -841,6 +842,11 @@ bool building_small_mastaba::draw_ornaments_and_animations_height(painter &ctx, 
         return false;
     }
 
+    // Construction progress lives in flat ornaments; under flat view skip tall height_impl.
+    if (city_flat_should_flatten_building(base)) {
+        return false;
+    }
+
     auto &monumentd = runtime_data();
     if (monumentd.phase < 2) {
         return false;
@@ -902,6 +908,10 @@ bool building_medium_mastaba::draw_ornaments_and_animations_flat(painter &ctx, v
 
 bool building_medium_mastaba::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
     if (is_finished()) {
+        return false;
+    }
+
+    if (city_flat_should_flatten_building(base)) {
         return false;
     }
 

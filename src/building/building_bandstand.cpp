@@ -20,6 +20,7 @@
 #include "window/building/common.h"
 #include "window/building/figures.h"
 #include "widget/city/ornaments.h"
+#include "widget/city/flat_draw.h"
 #include "widget/city/building_ghost.h"
 #include "figuretype/figure_entertainer.h"
 #include "sound/sound_building.h"
@@ -234,6 +235,10 @@ bool building_bandstand::force_draw_flat_tile(painter &ctx, tile2i tile, vec2i p
 
 bool building_bandstand::force_draw_height_tile(painter &ctx, tile2i tile, vec2i pixel, color mask) {
     OZZY_PROFILER_FUNCTION()
+
+    if (city_flat_should_flatten_building(base)) {
+        return false;
+    }
 
     xstring imgs[] = {parts::booth, parts::stand_sn_n, parts::stand_sn_s, parts::stand_we_e, parts::stand_we_w};
     int image_id = map_image_at(tile);

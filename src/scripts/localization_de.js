@@ -169,6 +169,11 @@ localization_de = [
   {key:"#TR_HOTKEY_SHOW_ADVISOR_CHIEF", text:"Hauptberater"}
   {key:"#TR_HOTKEY_SHOW_ADVISOR_HOUSING", text:"Wohnungsberater"}
   {key:"#TR_HOTKEY_TOGGLE_OVERLAY", text:"Aktuelles Overlay umschalten"}
+  {key:"#TR_HOTKEY_TOGGLE_FLAT_BUILDINGS", text:"Flache Gebäudeansicht"}
+  { key: "#sidebar_flat_buildings", text: "Flachansicht" }
+  { key: "#sidebar_flat_buildings_on", text: "Flachansicht: AN" }
+  { key: "#TR_CONFIG_FLAT_BUILDINGS", text: "Flache Gebäudeansicht (Shift+F) — hohe Gebäude absenken, um Straßen dahinter zu sehen" }
+  { key: "#TR_TOOLTIP_FLAT_BUILDINGS", text: "Flache Gebäudeansicht (Shift+F). Bei AN: Strg+Rechtsklick hebt ein Gebäude wieder an." }
   {key:"#TR_HOTKEY_SHOW_OVERLAY_WATER", text:"Wasser-Overlay anzeigen"}
   {key:"#TR_HOTKEY_SHOW_OVERLAY_FIRE", text:"Feuer-Overlay anzeigen"}
   {key:"#TR_HOTKEY_SHOW_OVERLAY_DAMAGE", text:"Schadens-Overlay"}

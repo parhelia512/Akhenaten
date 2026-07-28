@@ -181,6 +181,11 @@ localization_hu = [
   {key:"#TR_HOTKEY_SHOW_ADVISOR_CHIEF", text:"Főtanácsadó"}
   {key:"#TR_HOTKEY_SHOW_ADVISOR_HOUSING", text:"Lakhatási tanácsadó"}
   {key:"#TR_HOTKEY_TOGGLE_OVERLAY", text:"Aktuális fedvény be/ki"}
+  {key:"#TR_HOTKEY_TOGGLE_FLAT_BUILDINGS", text:"Lapos épületnézet"}
+  { key: "#sidebar_flat_buildings", text: "Lapos nézet" }
+  { key: "#sidebar_flat_buildings_on", text: "Lapos nézet: BE" }
+  { key: "#TR_CONFIG_FLAT_BUILDINGS", text: "Lapos épületnézet (Shift+F) — magas épületek összecsukása, hogy lásd az utakat mögöttük" }
+  { key: "#TR_TOOLTIP_FLAT_BUILDINGS", text: "Lapos épületnézet (Shift+F). BE állapotban: Ctrl+jobb klikk visszaállít egy épületet." }
   {key:"#TR_HOTKEY_SHOW_OVERLAY_WATER", text:"Víz fedvény"}
   {key:"#TR_HOTKEY_SHOW_OVERLAY_FIRE", text:"Tűzveszély fedvény"}
   {key:"#TR_HOTKEY_SHOW_OVERLAY_DAMAGE", text:"Károk fedvény"}

@@ -131,6 +131,11 @@ localization_ru_f = [
     { key:"#TR_HOTKEY_SHOW_ADVISOR_FINANCIAL", text:"Финансовый советник"}
     { key:"#TR_HOTKEY_SHOW_ADVISOR_CHIEF", text:"Главный советник"}
     { key:"#TR_HOTKEY_TOGGLE_OVERLAY", text:"Переключить текущий слой"}
+    {key:"#TR_HOTKEY_TOGGLE_FLAT_BUILDINGS", text:"Плоский вид зданий"}
+    { key: "#sidebar_flat_buildings", text: "Плоский вид" }
+    { key: "#sidebar_flat_buildings_on", text: "Плоский вид: ВКЛ" }
+    { key: "#TR_CONFIG_FLAT_BUILDINGS", text: "Плоский вид зданий (Shift+F) — схлопывать высокие здания, чтобы видеть дороги за ними" }
+    { key: "#TR_TOOLTIP_FLAT_BUILDINGS", text: "Плоский вид зданий (Shift+F). Когда ВКЛ: Ctrl+ПКМ поднимает одно здание." }
     { key:"#TR_HOTKEY_SHOW_OVERLAY_WATER", text:"Включить слой водоснабжения"}
     { key:"#TR_HOTKEY_SHOW_OVERLAY_FIRE", text:"Включить слой риска пожара"}
     { key:"#TR_HOTKEY_SHOW_OVERLAY_DAMAGE", text:"Включить слой риска разрушения"}

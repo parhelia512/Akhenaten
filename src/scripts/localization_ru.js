@@ -133,6 +133,7 @@ localization_ru = [
     { key: "#sidebar_flat_buildings", text: "Плоский вид" }
     { key: "#sidebar_flat_buildings_on", text: "Плоский вид: ВКЛ" }
     { key: "#TR_CONFIG_FLAT_BUILDINGS", text: "Плоский вид зданий (Shift+F) — схлопывать высокие здания, чтобы видеть дороги за ними" }
+    { key: "#TR_TOOLTIP_FLAT_BUILDINGS", text: "Плоский вид зданий (Shift+F). Когда ВКЛ: Ctrl+ПКМ поднимает одно здание." }
     { key:"#TR_HOTKEY_SHOW_OVERLAY_DAMAGE", text:"Включить слой риска разрушения"}
     { key:"#TR_HOTKEY_SHOW_OVERLAY_CRIME", text:"Включить слой риска преступлений"}
     { key:"#TR_HOTKEY_SHOW_OVERLAY_PROBLEMS", text:"Слой проблем"}

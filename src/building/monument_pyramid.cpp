@@ -6,6 +6,7 @@
 #include "core/custom_span.hpp"
 #include "graphics/image.h"
 #include "widget/city/tile_draw.h"
+#include "widget/city/flat_draw.h"
 #include "window/building/common.h"
 #include "city/city_warnings.h"
 #include "city/city_buildings.h"
@@ -536,6 +537,29 @@ void building_stepped_pyramid::on_config_reload() {
     // part keeps a cached stair_index from place/load — rebind so part/tex/offset
     // edits apply without restarting the mission.
     assign_stair();
+}
+
+bool building_stepped_pyramid::draw_unfinished_height_ornaments(painter &ctx, vec2i point, tile2i tile, color color_mask, const vec2i tiles_size) {
+    if (phase() == 6 && runtime_data().alt_image > 0) {
+        auto &command = ImageDraw::create_command(ctx, render_command_t::ert_drawtile);
+        command.image_id = runtime_data().alt_image;
+        command.pixel = point;
+        command.mask = color_mask;
+        command.use_sort_pixel = true;
+        command.sort_pixel = point + vec2i(0, 1);
+        command.location = SOURCE_LOCATION;
+    }
+
+    // Flat view: keep light construction cues only — no tall height_impl tiers.
+    if (city_flat_should_flatten_building(base)) {
+        return true;
+    }
+
+    if (phase() < 6) {
+        return false;
+    }
+
+    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, tiles_size);
 }
 
 bool building_stepped_pyramid::draw_ornaments_and_animations_flat_impl(painter &ctx, vec2i point, tile2i tile, color color_mask, const vec2i tiles_size) {
@@ -1351,22 +1375,7 @@ bool building_small_stepped_pyramid::draw_ornaments_and_animations_height(painte
     if (is_finished()) {
         return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
     }
-
-    if (phase() == 6 && runtime_data().alt_image > 0) {
-        auto &command = ImageDraw::create_command(ctx, render_command_t::ert_drawtile);
-        command.image_id = runtime_data().alt_image;
-        command.pixel = point;
-        command.mask = color_mask;
-        command.use_sort_pixel = true;
-        command.sort_pixel = point + vec2i(0, 1);
-        command.location = SOURCE_LOCATION;
-    }
-
-    if (phase() < 6) {
-        return false;
-    }
-
-    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
+    return draw_unfinished_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
 }
 
 const monument &building_small_stepped_pyramid::config() const {
@@ -1621,22 +1630,7 @@ bool building_medium_stepped_pyramid::draw_ornaments_and_animations_height(paint
     if (is_finished()) {
         return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
     }
-
-    if (phase() == 6 && runtime_data().alt_image > 0) {
-        auto &command = ImageDraw::create_command(ctx, render_command_t::ert_drawtile);
-        command.image_id = runtime_data().alt_image;
-        command.pixel = point;
-        command.mask = color_mask;
-        command.use_sort_pixel = true;
-        command.sort_pixel = point + vec2i(0, 1);
-        command.location = SOURCE_LOCATION;
-    }
-
-    if (phase() < 6) {
-        return false;
-    }
-
-    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
+    return draw_unfinished_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
 }
 
 const monument &building_medium_stepped_pyramid::config() const {
@@ -1683,22 +1677,7 @@ bool building_large_stepped_pyramid::draw_ornaments_and_animations_height(painte
     if (is_finished()) {
         return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
     }
-
-    if (phase() == 6 && runtime_data().alt_image > 0) {
-        auto &command = ImageDraw::create_command(ctx, render_command_t::ert_drawtile);
-        command.image_id = runtime_data().alt_image;
-        command.pixel = point;
-        command.mask = color_mask;
-        command.use_sort_pixel = true;
-        command.sort_pixel = point + vec2i(0, 1);
-        command.location = SOURCE_LOCATION;
-    }
-
-    if (phase() < 6) {
-        return false;
-    }
-
-    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
+    return draw_unfinished_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
 }
 
 const monument &building_large_stepped_pyramid::config() const {
@@ -1745,22 +1724,7 @@ bool building_small_bent_pyramid::draw_ornaments_and_animations_height(painter &
     if (is_finished()) {
         return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
     }
-
-    if (phase() == 6 && runtime_data().alt_image > 0) {
-        auto &command = ImageDraw::create_command(ctx, render_command_t::ert_drawtile);
-        command.image_id = runtime_data().alt_image;
-        command.pixel = point;
-        command.mask = color_mask;
-        command.use_sort_pixel = true;
-        command.sort_pixel = point + vec2i(0, 1);
-        command.location = SOURCE_LOCATION;
-    }
-
-    if (phase() < 6) {
-        return false;
-    }
-
-    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
+    return draw_unfinished_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
 }
 
 const monument &building_small_bent_pyramid::config() const {
@@ -1803,22 +1767,7 @@ bool building_medium_bent_pyramid::draw_ornaments_and_animations_height(painter 
     if (is_finished()) {
         return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
     }
-
-    if (phase() == 6 && runtime_data().alt_image > 0) {
-        auto &command = ImageDraw::create_command(ctx, render_command_t::ert_drawtile);
-        command.image_id = runtime_data().alt_image;
-        command.pixel = point;
-        command.mask = color_mask;
-        command.use_sort_pixel = true;
-        command.sort_pixel = point + vec2i(0, 1);
-        command.location = SOURCE_LOCATION;
-    }
-
-    if (phase() < 6) {
-        return false;
-    }
-
-    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
+    return draw_unfinished_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
 }
 
 const monument &building_medium_bent_pyramid::config() const {

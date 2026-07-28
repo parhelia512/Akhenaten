@@ -18,6 +18,7 @@
 #include "window/building/common.h"
 #include "window/building/figures.h"
 #include "widget/city/ornaments.h"
+#include "widget/city/flat_draw.h"
 #include "sound/sound_building.h"
 #include "figuretype/figure_entertainer.h"
 #include "city/city_labor.h"
@@ -131,6 +132,11 @@ bool building_booth::force_draw_flat_tile(painter &ctx, tile2i tile, vec2i pixel
 
 bool building_booth::force_draw_height_tile(painter &ctx, tile2i tile, vec2i pixel, color mask) {
     OZZY_PROFILER_FUNCTION()
+
+    // Flat view: plaza stays via force_draw_flat; do not re-lift booth with full tile.
+    if (city_flat_should_flatten_building(base)) {
+        return false;
+    }
 
     int image_id = map_image_at(tile);
     if (first_img(animkeys().booth) == image_id) {

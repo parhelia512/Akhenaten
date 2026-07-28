@@ -735,8 +735,8 @@ void screen_city_t::draw_isometric_nonterrain_height(vec2i pixel, tile2i tile, p
         bool force_draw_tile = false;
         if (building_id > 0 && tile_building) {
             building_impl *b = tile_building->dcast();
-            // Flat view: keep force_draw_height (ferry top, booth full tile).
-            // Skip force_draw_top (iso top bleed).
+            // Flat view: keep force_draw_height (ferry top).
+            // Booth/bandstand no-op under flatten; skip force_draw_top (iso top bleed).
             force_draw_tile = b->force_draw_height_tile(ctx, tile, pixel, color_mask);
             if (!flatten) {
                 b->force_draw_top_tile(ctx, tile, pixel, color_mask);
@@ -1498,9 +1498,9 @@ void screen_city_t::handle_mouse(const mouse* m) {
             if (ctrl && city_flat_view_active() && !g_city_planner.build_type
                 && input_coords_in_city(m->x, m->y) && current_tile.valid()) {
                 building *b = building_at(current_tile);
-                if (b && b->is_valid()) {
+                if (b && city_flat_building_alive(*b)) {
                     building *main_b = b->main();
-                    if (main_b && main_b->is_valid()) {
+                    if (main_b && city_flat_building_alive(*main_b)) {
                         city_flat_toggle_raised(main_b->id);
                         city_flat_prepare_draw();
                         raised = true;

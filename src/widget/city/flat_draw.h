@@ -20,6 +20,9 @@ void city_flat_toggle_raised(int main_building_id);
 void city_flat_clear_raised();
 void city_flat_erase_raised(int main_building_id); // building delete / destroy
 
+// VALID or MOTHBALLED (halted monument construction).
+bool city_flat_building_alive(const building &b);
+
 int city_flat_flatten_id(const building &b);
 int city_flat_building_texture_id(const building &b);
 

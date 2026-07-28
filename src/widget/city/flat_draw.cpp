@@ -114,9 +114,16 @@ void city_flat_toggle_raised(int main_building_id) {
     }
 }
 
+bool city_flat_building_alive(const building &b) {
+    if (b.type == BUILDING_NONE) {
+        return false;
+    }
+    return b.state == BUILDING_STATE_VALID || b.state == BUILDING_STATE_MOTHBALLED;
+}
+
 int city_flat_flatten_id(const building &b) {
     const building *main_b = b.main();
-    if (!main_b || !main_b->is_valid() || main_b->id <= 0) {
+    if (!main_b || main_b->id <= 0 || !city_flat_building_alive(*main_b)) {
         return 0;
     }
     return main_b->id;
@@ -125,7 +132,7 @@ int city_flat_flatten_id(const building &b) {
 int city_flat_building_texture_id(const building &b) {
     // Always resolve from main type — parts share the complex flat sprite.
     const building *main_b = b.main();
-    if (!main_b || !main_b->is_valid()) {
+    if (!main_b || !city_flat_building_alive(*main_b)) {
         return 0;
     }
 
@@ -154,7 +161,7 @@ bool city_flat_should_flatten_building(const building &b) {
     if (g_city.current_overlay != OVERLAY_NONE) {
         return false;
     }
-    if (!b.is_valid()) {
+    if (!city_flat_building_alive(b)) {
         return false;
     }
     const int fid = city_flat_flatten_id(b);
@@ -172,7 +179,8 @@ bool city_flat_should_skip_tall_ornaments(const building &b) {
         return false;
     }
     // Height-pass only. Parts/cones follow main().
-    // Unfinished monuments keep construction cues (phase-6 alt, ladder, …).
+    // Unfinished monuments: do not skip the pass (phase-6 alt / ladder).
+    // Tall height_impl is omitted inside pyramid/mastaba draw under flatten.
     const building *main_b = b.main();
     if (!main_b) {
         return false;
@@ -214,7 +222,7 @@ ANK_FUNCTION_1(__city_flat_buildings_set)
 
 static int __city_flat_should_flatten(int bid) {
     building *b = building_get(bid);
-    if (!b || !b->is_valid()) {
+    if (!b) {
         return 0;
     }
     return city_flat_should_flatten_building(*b) ? 1 : 0;
@@ -223,11 +231,11 @@ ANK_FUNCTION_1(__city_flat_should_flatten)
 
 static void __city_flat_toggle_raised(int bid) {
     building *b = building_get(bid);
-    if (!b || !b->is_valid()) {
+    if (!b || !city_flat_building_alive(*b)) {
         return;
     }
     building *main_b = b->main();
-    if (!main_b || !main_b->is_valid()) {
+    if (!main_b || !city_flat_building_alive(*main_b)) {
         return;
     }
     city_flat_toggle_raised(main_b->id);
@@ -237,7 +245,7 @@ ANK_FUNCTION_1(__city_flat_toggle_raised)
 
 static int __city_flat_is_raised(int bid) {
     building *b = building_get(bid);
-    if (!b || !b->is_valid()) {
+    if (!b || !city_flat_building_alive(*b)) {
         return 0;
     }
     const int fid = city_flat_flatten_id(*b);

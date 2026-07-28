@@ -99,7 +99,7 @@ sidebar_window_expanded {
         toggle_flat       : link({
                                pos[74, 30], size[50, 20], hbody:false, border:false, font_hover:FONT_NORMAL_YELLOW
                                text: "#sidebar_flat_buildings"
-                               tooltip: "#TR_HOTKEY_TOGGLE_FLAT_BUILDINGS"
+                               tooltip: "#TR_TOOLTIP_FLAT_BUILDINGS"
                                onclick: sidebar_window_toggle_flat_buildings
                             })
         collapse          : image_button({pos[128, 30], pack:PACK_GENERAL, id:110, offset:7, tooltip:[68, 10], onclick: __ui_sidebar_expanded_collapse})

@@ -71,6 +71,8 @@ public:
 
     bool draw_ornaments_and_animations_flat_impl(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
     bool draw_ornaments_and_animations_hight_impl(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
+    // Unfinished: phase-6 alt cue; under flat view skip tall height_impl tiers.
+    bool draw_unfinished_height_ornaments(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
     void draw_ornaments_and_animations_stairs_impl(painter &ctx, vec2i point, tile2i tile, color color_mask, const vec2i tiles_size);
     void change_parts_types_in_layer(tile2i begin, const vec2i layer_size, uint8_t layer);
 

@@ -131,7 +131,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `80_birds_hunt.js` | Birds hunter prey filter (ignore ostrich/antelope) → kill → gamemeat (BH3) |
 | `81_construction_blessing.js` | Pyramid Speedup (CB*): OFF/ON; site-prep; masonry +2; delivery clear; min-id; at-cap; halted (+ chain MOTHBALLED) |
 | `87_tomb_robber.js` | Tomb robber TR1: register, refuse without provisions/tomb, spawn → goto finished mastaba |
-| `88_flat_buildings.js` | Flat buildings view: On → flatten palace; raise excludes; Off clears raise |
+| `88_flat_buildings.js` | Flat buildings view: On → flatten palace; raise excludes; overlay blocks; Off clears raise |
 
 Farm **placement** tests (34/35) cover `can_place` / terrain rules; **37** covers preview image helpers.
 When adding more preview draw coverage, follow JS draw conventions in

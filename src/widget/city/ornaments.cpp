@@ -80,7 +80,6 @@ void draw_ornaments_flat(vec2i point, tile2i tile, painter &ctx) {
         return;
     }
 
-    int image_id = map_image_at(grid_offset);
     building* b = building_at(grid_offset);
 
     if (b->type == 0 || b->state == BUILDING_STATE_UNUSED) {

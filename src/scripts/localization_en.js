@@ -195,6 +195,7 @@ localization_en = [
   {key:"#TR_HOTKEY_SHOW_OVERLAY_WATER", text:"Show water overlay"}
   {key:"#TR_HOTKEY_SHOW_OVERLAY_FIRE", text:"Show fire overlay"}
   {key:"#TR_HOTKEY_TOGGLE_FLAT_BUILDINGS", text:"Toggle flat buildings view"}
+  {key:"#TR_TOOLTIP_FLAT_BUILDINGS", text:"Flat buildings view (Shift+F). While On: Ctrl+right-click raises one building."}
   {key:"#TR_HOTKEY_SHOW_OVERLAY_DAMAGE", text:"Damage overlay"}
   {key:"#TR_HOTKEY_SHOW_OVERLAY_CRIME", text:"Crime overlay"}
   {key:"#TR_HOTKEY_ROTATE_BUILDING", text:"Rotate building"}
