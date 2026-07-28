@@ -9,12 +9,16 @@ log_info("akhenaten: mission 21 dunqul started")
 // Display: Djedu(1) Iunet(3) Nekhen(9) Saqqara(11) Dakhla(14). Kharga stub route 13.
 // Triage: SKIP empty map_obj idx=10; SKIP orphan i=6 LOST_TRADE Djedu (chain_only, no inbound);
 // omit river/disembark/inv points (pak 0).
-// Events: gamemeat×12 + granite×12 share KR leaves; siege→weapons×60; beduin/enemy raids; NEW_TRADE; favour×66.
+// Events: gamemeat×12 + granite×12 KR via request_cleared (not shared ONLY_VIA — B14);
+// siege→weapons×60; beduin/enemy raids (unique wipe KR tags); NEW_TRADE; favour×66.
+// SKIP empty NEW_TRADE Djedu/Iunet (display, no sells/buys).
 //
 // Tag_id scheme:
-//   1000 + i               chain-only leaves / chain requests
+//   1000 + i               chain-only leaves / chain requests (once structures)
 //   2000 + i               once calendar roots
 //   3000 + i*100 + year    recurring calendar roots
+//   4100 + year / 4200+y   invasion wipe KR (unique ONCE leaves)
+//   50000 + seq            fire_kr unique ONCE
 
 mission21 { // Dunqul Oasis — The Kushite Threat
 	map_file : "data/maps/m_021_dunqul.map"
@@ -234,6 +238,12 @@ mission21 { // Dunqul Oasis — The Kushite Threat
 					{ resource: RESOURCE_CLAY, limit: 2500 }
 					{ resource: RESOURCE_REEDS, limit: 2500 }
 					{ resource: RESOURCE_LIMESTONE, limit: 2500 }
+					{ resource: RESOURCE_BEER, limit: 2500 }
+					{ resource: RESOURCE_LINEN, limit: 2500 }
+					{ resource: RESOURCE_GEMS, limit: 2500 }
+					{ resource: RESOURCE_LUXURY_GOODS, limit: 2500 }
+					{ resource: RESOURCE_TIMBER, limit: 2500 }
+					{ resource: RESOURCE_GRANITE, limit: 2500 }
 				]
 			}
 	
@@ -504,21 +514,18 @@ mission21 { // Dunqul Oasis — The Kushite Threat
 		]
 
 	vars {
-		shared_kr_wired : false
 		weapons_leaves_wired : false
 		event7_siege_done : false
 		event10_troops_done : false
 		event11_beduin_done : false
-		event16_trade_done : false
-		event17_trade_done : false
 		event20_trade_done : false
 		event21_demand_done : false
 		event0_gamemeat_last_year : -1
 		event4_granite_last_year : -1
 		event12_beduin_last_year : -1
 		event14_enemy_last_year : -1
-		event14_kr_wired : false
 		event18_trade_last_year : -1
+		kr_seq : 0
 		gamemeat_recurring_was_busy : false
 		gamemeat_recurring_idle_since_abs : -1
 		granite_recurring_was_busy : false
@@ -582,26 +589,37 @@ function mission21_fire_request(tag, resource, amount, months, ok_tag, fail_tag,
 	return request
 }
 
-function mission21_ensure_shared_kr() {
-	// pak i=0/i=4 share: ok→i=1 KR+5; refuse→i=2 KR−36; late→i=3 KR−5.
-	if (mission.shared_kr_wired) {
-		return
+// Multi-fire KR must NOT use shared ONLY_VIA leaves (B14 / Sumur pattern).
+function mission21_fire_kr(delta) {
+	var type = delta >= 0 ? EVENT_TYPE_REPUTATION_INCREASE : EVENT_TYPE_REPUTATION_DECREASE
+	var amount = delta >= 0 ? delta : -delta
+	mission.kr_seq = (mission.kr_seq | 0) + 1
+	mission21_fire_simple_event(50000 + mission.kr_seq, type, undefined, amount)
+}
+
+function mission21_apply_shared_request_outcome(outcome) {
+	// pak i=0/i=4 share: ok→KR+5; refuse→KR−36; late→KR−5.
+	if (outcome == "ok") {
+		mission21_fire_kr(5)
+	} else if (outcome == "refuse") {
+		mission21_fire_kr(-36)
+	} else {
+		mission21_fire_kr(-5)
 	}
-	mission.shared_kr_wired = true
-	mission21_make_leaf(1001, EVENT_TYPE_REPUTATION_INCREASE, undefined, 5, 14)
-	mission21_make_leaf(1002, EVENT_TYPE_REPUTATION_DECREASE, undefined, 36, 14)
-	mission21_make_leaf(1003, EVENT_TYPE_REPUTATION_DECREASE, undefined, 5, 14)
 }
 
 function mission21_ensure_weapons_leaves() {
 	// pak i=7 LOST_TRADE Henen-nesw → i=8 UNDER_SIEGE → i=5 weapons×60 → i=9 CITY_FELL Djedu.
 	// SKIP orphan i=6 LOST_TRADE Djedu (chain_only → i=9, but no parent ok/refuse/late).
+	// set_*_action_tag looks up slave by tag — create 1009 before wiring weapons.
 	if (mission.weapons_leaves_wired) {
 		return
 	}
 	mission.weapons_leaves_wired = true
 	var siege = mission21_make_leaf(1008, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 5, 2,
 		EVENT_SUBTYPE_CITY_UNDER_SIEGE, "Henen-nesw")
+	mission21_make_leaf(1009, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 9, 2,
+		EVENT_SUBTYPE_CITY_FELL_TO_ENEMY, "Djedu")
 	var weapons = city.create_good_request({
 		tag_id: 1005,
 		resource: RESOURCE_WEAPONS,
@@ -613,8 +631,6 @@ function mission21_ensure_weapons_leaves() {
 	weapons.set_completed_action_tag(1009)
 	weapons.set_refusal_action_tag(1009)
 	weapons.set_too_late_action_tag(1009)
-	mission21_make_leaf(1009, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 9, 2,
-		EVENT_SUBTYPE_CITY_FELL_TO_ENEMY, "Djedu")
 	siege.set_completed_action_tag(1005)
 }
 
@@ -663,13 +679,11 @@ function mission21_on_start(ev) {
 	for (var i = ADVISOR_NONE + 1; i <= ADVISOR_DIPLOMACY; i++) {
 		city.set_advisor_available(i, 1)
 	}
-	mission21_ensure_shared_kr()
 	mission21_ensure_weapons_leaves()
 }
 
 [es=event_advance_month, mission=mission21]
 function mission21_requests_and_raids(ev) {
-	mission21_ensure_shared_kr()
 	mission21_ensure_weapons_leaves()
 	var abs = ev.years_since_start * 12 + ev.month
 	mission_recurring_request_update_idle(mission, RESOURCE_GAMEMEAT, "gamemeat_recurring", abs)
@@ -699,14 +713,15 @@ function mission21_requests_and_raids(ev) {
 
 	if (!mission.event10_troops_done && ev.years_since_start == 3 && ev.month == 0) {
 		mission.event10_troops_done = true
-		log_info("akhenaten: mission 21 troops ask → NEW_TRADE Kerma")
+		// pak CITY_STATUS subtype=1 ≡ FOREIGN_CITY_CONQUERED (alias CITY_ASKS_FOR_TROOPS).
+		log_info("akhenaten: mission 21 Iunet conquered status → NEW_TRADE Kerma")
 		mission21_make_leaf(1013, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 8, 2,
 			EVENT_SUBTYPE_NEW_TRADE_ROUTE, "Kerma")
 		var ask = city.create_chain_event({
 			tag_id: 2010,
 			type: EVENT_TYPE_CITY_STATUS_CHANGE,
 			amount: 7,
-			subtype: EVENT_SUBTYPE_CITY_ASKS_FOR_TROOPS,
+			subtype: EVENT_SUBTYPE_FOREIGN_CITY_CONQUERED,
 			city: "Iunet",
 			trigger: EVENT_TRIGGER_ONCE
 		})
@@ -720,8 +735,9 @@ function mission21_requests_and_raids(ev) {
 				&& mission_recurring_request_may_fire(mission, RESOURCE_GAMEMEAT, "gamemeat_recurring", abs)) {
 			mission.event0_gamemeat_last_year = ev.years_since_start
 			log_info("akhenaten: mission 21 gamemeat×12 recurring")
+			// Outcomes via event_request_cleared (shared ONLY_VIA would burn — B14).
 			mission21_fire_request(3000 + 0 * 100 + ev.years_since_start,
-				RESOURCE_GAMEMEAT, 12, 7, 1001, 1002, 1003, 5, 0)
+				RESOURCE_GAMEMEAT, 12, 7, 0, 0, 0, 5, 0)
 		}
 	}
 
@@ -731,56 +747,58 @@ function mission21_requests_and_raids(ev) {
 			mission.event4_granite_last_year = ev.years_since_start
 			log_info("akhenaten: mission 21 granite×12 recurring")
 			mission21_fire_request(3000 + 4 * 100 + ev.years_since_start,
-				RESOURCE_GRANITE, 12, 12, 1001, 1002, 1003, 4, 1)
+				RESOURCE_GRANITE, 12, 12, 0, 0, 0, 4, 1)
 		}
 	}
 
 	if (ev.years_since_start >= 3 && ev.month == 0
 			&& mission.event12_beduin_last_year != ev.years_since_start) {
 		mission.event12_beduin_last_year = ev.years_since_start
+		var beduin_kr = 4100 + ev.years_since_start
+		mission21_make_leaf(beduin_kr, EVENT_TYPE_REPUTATION_INCREASE, undefined, 5, 2)
 		log_info("akhenaten: mission 21 beduin×12 recurring")
-		mission21_beduin_raid(12, 12, 1001)
+		mission21_beduin_raid(12, 12, beduin_kr)
 	}
 
 	if (ev.years_since_start > 4 || (ev.years_since_start == 4 && ev.month >= 4)) {
 		if (ev.month == 4 && mission.event14_enemy_last_year != ev.years_since_start) {
 			mission.event14_enemy_last_year = ev.years_since_start
-			if (!mission.event14_kr_wired) {
-				mission.event14_kr_wired = true
-				mission21_make_leaf(1015, EVENT_TYPE_REPUTATION_INCREASE, undefined, 8, 2)
-			}
+			var enemy_kr = 4200 + ev.years_since_start
+			mission21_make_leaf(enemy_kr, EVENT_TYPE_REPUTATION_INCREASE, undefined, 8, 2)
 			log_info("akhenaten: mission 21 enemy×43 recurring")
-			mission21_enemy_raid(14, 43, 1015)
+			mission21_enemy_raid(14, 43, enemy_kr)
 		}
 	}
 
-	if (!mission.event16_trade_done && ev.years_since_start == 7 && ev.month == 0) {
-		mission.event16_trade_done = true
-		mission21_fire_simple_event(2016, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 5, "Iunet",
-			EVENT_SUBTYPE_NEW_TRADE_ROUTE)
-	}
-	if (!mission.event17_trade_done && ev.years_since_start == 5 && ev.month == 6) {
-		mission.event17_trade_done = true
-		mission21_fire_simple_event(2017, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 5, "Djedu",
-			EVENT_SUBTYPE_NEW_TRADE_ROUTE)
-	}
+	// SKIP pak i=16/17 NEW_TRADE Iunet/Djedu — display cities with no sells/buys (empty unlock).
 	if (!mission.event20_trade_done && ev.years_since_start == 1 && ev.month == 9) {
 		mission.event20_trade_done = true
 		mission21_fire_simple_event(2020, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 5, "Henen-nesw",
 			EVENT_SUBTYPE_NEW_TRADE_ROUTE)
 	}
 
-	if (ev.years_since_start > 10 || (ev.years_since_start == 10 && ev.month >= 11)) {
-		if (ev.month == 11 && mission.event18_trade_last_year != ev.years_since_start) {
-			mission.event18_trade_last_year = ev.years_since_start
-			mission21_fire_simple_event(3000 + 18 * 100 + ev.years_since_start,
-				EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 8, "Kerma", EVENT_SUBTYPE_NEW_TRADE_ROUTE)
-		}
+	// pak i=18 NEW_TRADE Kerma recurring — fire once (already-open spam is useless).
+	// Tag 2018 (once band) — NOT 3018 (collides with gamemeat 3000+year at y18).
+	if (ev.years_since_start == 10 && ev.month == 11
+			&& mission.event18_trade_last_year != ev.years_since_start) {
+		mission.event18_trade_last_year = ev.years_since_start
+		mission21_fire_simple_event(2018, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 8, "Kerma",
+			EVENT_SUBTYPE_NEW_TRADE_ROUTE)
 	}
 
 	if (!mission.event21_demand_done && ev.years_since_start == 3 && ev.month == 9) {
 		mission.event21_demand_done = true
 		mission21_fire_simple_event(2021, EVENT_TYPE_DEMAND_INCREASE, RESOURCE_TIMBER, 5)
+	}
+}
+
+[es=event_request_cleared, mission=mission21]
+function mission21_on_request_cleared(ev) {
+	var tag = ev.tag_id
+	var outcome = mission_request_outcome(ev)
+	// gamemeat i=0: 3000..3099; granite i=4: 3400..3499
+	if ((tag >= 3000 && tag < 3100) || (tag >= 3400 && tag < 3500)) {
+		mission21_apply_shared_request_outcome(outcome)
 	}
 }
 

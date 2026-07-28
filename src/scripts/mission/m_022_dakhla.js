@@ -7,14 +7,17 @@ log_info("akhenaten: mission 22 dakhla started")
 // Burial empty. Climate desert.
 // Trade: Nekhen(9) On(2) Saqqara(8) Selima(6). Display Buhen/Byblos/Djedu/Dunqul/Henen/Iunet/Kharga(stub12)/Men-nefer.
 // Triage: SKIP empty map_obj idx=9; omit river/disembark/inv points (pak 0).
-// Events: early grain/timber/beer; timber×18 gift ladder; bricks×25 Pepy; luxury/grain recurring;
-// late-game luxury ladders / pottery / clay floods simplified (wiki note).
+// Events: early grain/timber/beer; timber×18 gift ladder (ONCE ONLY_VIA); bricks×25 Pepy;
+// luxury/grain/pottery recurring — KR via request_cleared (B14 / Sumur); favour×90.
+// late-game luxury ladders / pottery / clay floods simplified where noted.
 // Ebony briefing → luxury_goods (RESOURCE_EBONY absent).
 //
 // Tag_id scheme:
-//   1000 + i               chain-only leaves / chain requests
+//   1000 + i               chain-only leaves (timber gift once)
 //   2000 + i               once calendar roots
 //   3000 + i*100 + year    recurring calendar roots
+//   50000 + seq            fire_kr / unique ONCE
+//   9000 + seq             luxury i=39 refuse follow-up requests
 
 mission22 { // Dakhla Oasis — The Caravan Trail
 	map_file : "data/maps/m_022_dakhla.map"
@@ -153,6 +156,10 @@ mission22 { // Dakhla Oasis — The Caravan Trail
 					{ resource: RESOURCE_TIMBER, limit: 1500 }
 					{ resource: RESOURCE_REEDS, limit: 4000 }
 					{ resource: RESOURCE_LIMESTONE, limit: 2500 }
+					{ resource: RESOURCE_LINEN, limit: 2500 }
+					{ resource: RESOURCE_GEMS, limit: 1500 }
+					{ resource: RESOURCE_LUXURY_GOODS, limit: 1500 }
+					{ resource: RESOURCE_GRANITE, limit: 2500 }
 				]
 			}
 	
@@ -443,10 +450,7 @@ mission22 { // Dakhla Oasis — The Caravan Trail
 		]
 
 	vars {
-		shared_kr_wired : false
 		timber23_leaves_wired : false
-		bricks16_leaves_wired : false
-		luxury39_leaves_wired : false
 		event2_done : false
 		event3_done : false
 		event5_done : false
@@ -483,6 +487,8 @@ mission22 { // Dakhla Oasis — The Caravan Trail
 		event34_flood_last_year : -1
 		event35_flood_last_year : -1
 		event47_flood_last_year : -1
+		kr_seq : 0
+		lux_follow_seq : 0
 		grain_recurring_was_busy : false
 		grain_recurring_idle_since_abs : -1
 		bricks_recurring_was_busy : false
@@ -550,26 +556,49 @@ function mission22_fire_request(tag, resource, amount, months, ok_tag, fail_tag,
 	return request
 }
 
-function mission22_ensure_shared_kr() {
-	// pak i=0 KR+6 / i=1 KR−7 — used by many early requests (ok→0 refuse→1).
-	// pak i=14 KR+17 / i=15 KR−14 — luxury/pottery tails.
-	// pak i=55 KR−4 late leaf.
-	// pak i=10 wage−4 — late leaf for i=9 grain×11 only (not shared KR−4).
-	if (mission.shared_kr_wired) {
-		return
+// Multi-fire KR must NOT use shared ONLY_VIA leaves (B14 / Sumur pattern).
+function mission22_fire_kr(delta) {
+	var type = delta >= 0 ? EVENT_TYPE_REPUTATION_INCREASE : EVENT_TYPE_REPUTATION_DECREASE
+	var amount = delta >= 0 ? delta : -delta
+	mission.kr_seq = (mission.kr_seq | 0) + 1
+	mission22_fire_simple_event(50000 + mission.kr_seq, type, undefined, amount)
+}
+
+function mission22_apply_early_kr(outcome) {
+	// pak i=0 KR+6 / i=1 KR−7 / i=55 KR−4
+	if (outcome == "ok") {
+		mission22_fire_kr(6)
+	} else if (outcome == "refuse") {
+		mission22_fire_kr(-7)
+	} else {
+		mission22_fire_kr(-4)
 	}
-	mission.shared_kr_wired = true
-	mission22_make_leaf(1000, EVENT_TYPE_REPUTATION_INCREASE, undefined, 6, 2)
-	mission22_make_leaf(1001, EVENT_TYPE_REPUTATION_DECREASE, undefined, 7, 2)
-	mission22_make_leaf(1010, EVENT_TYPE_WAGE_DECREASE, undefined, 4, 2, 3)
-	mission22_make_leaf(1014, EVENT_TYPE_REPUTATION_INCREASE, undefined, 17, 2)
-	mission22_make_leaf(1015, EVENT_TYPE_REPUTATION_DECREASE, undefined, 14, 2)
-	mission22_make_leaf(1055, EVENT_TYPE_REPUTATION_DECREASE, undefined, 4, 2)
+}
+
+function mission22_apply_luxury_kr(outcome) {
+	// pak i=14 KR+17 / i=15 KR−14 / i=55 KR−4
+	if (outcome == "ok") {
+		mission22_fire_kr(17)
+	} else if (outcome == "refuse") {
+		mission22_fire_kr(-14)
+	} else {
+		mission22_fire_kr(-4)
+	}
+}
+
+function mission22_start_luxury_refuse_followup() {
+	// pak i=39 refuse → i=41 demand−8 → i=42 luxury×11
+	mission.kr_seq = (mission.kr_seq | 0) + 1
+	mission22_fire_simple_event(51000 + mission.kr_seq, EVENT_TYPE_DEMAND_DECREASE, RESOURCE_LUXURY_GOODS, 8)
+	mission.lux_follow_seq = (mission.lux_follow_seq | 0) + 1
+	var ftag = 9000 + mission.lux_follow_seq
+	mission22_fire_request(ftag, RESOURCE_LUXURY_GOODS, 11, 12, 0, 0, 0, 0, 0)
 }
 
 function mission22_ensure_timber_i23_leaves() {
 	// pak i=23 timber×18: ok→i=24 gift meat×14→i=25 NEW_TRADE Selima;
 	//   gift refuse/late→i=26 gems×5→i=27 oil×812→i=25; refuse→i=28 KR−28→i=57 bricks×17; late→i=25.
+	// Once-only chain — ONLY_VIA leaves OK.
 	if (mission.timber23_leaves_wired) {
 		return
 	}
@@ -603,44 +632,6 @@ function mission22_ensure_timber_i23_leaves() {
 	kr_refuse.set_completed_action_tag(1057)
 }
 
-function mission22_ensure_bricks_i16_leaves() {
-	// pak i=16 bricks×25: ok→i=18 KR+18→i=19 wage+5; refuse→i=20 KR−27; late→i=55.
-	if (mission.bricks16_leaves_wired) {
-		return
-	}
-	mission.bricks16_leaves_wired = true
-	var kr_ok = mission22_make_leaf(1018, EVENT_TYPE_REPUTATION_INCREASE, undefined, 18, 2)
-	mission22_make_leaf(1019, EVENT_TYPE_WAGE_INCREASE, undefined, 5, 0)
-	mission22_make_leaf(1020, EVENT_TYPE_REPUTATION_DECREASE, undefined, 27, 2)
-	kr_ok.set_completed_action_tag(1019)
-}
-
-function mission22_ensure_luxury_i39_leaves() {
-	// pak i=39 luxury×25 rec: ok→i=40 demand+9 (ok=666 junk); refuse→i=41 demand−8→i=42;
-	// i=42 luxury×11: ok→i=40; refuse→i=43 demand−5→i=44 price−45; late→i=55. Root late=666 skip.
-	if (mission.luxury39_leaves_wired) {
-		return
-	}
-	mission.luxury39_leaves_wired = true
-	mission22_make_leaf(1040, EVENT_TYPE_DEMAND_INCREASE, RESOURCE_LUXURY_GOODS, 9, 2)
-	var demand_refuse = mission22_make_leaf(1041, EVENT_TYPE_DEMAND_DECREASE, RESOURCE_LUXURY_GOODS, 8, 12)
-	var followup = city.create_good_request({
-		tag_id: 1042,
-		resource: RESOURCE_LUXURY_GOODS,
-		amount: 11,
-		months_initial: 12,
-		trigger: EVENT_TRIGGER_ONLY_VIA_EVENT
-	})
-	followup.set_sender_faction(0)
-	var demand43 = mission22_make_leaf(1043, EVENT_TYPE_DEMAND_DECREASE, RESOURCE_LUXURY_GOODS, 5, 2)
-	mission22_make_leaf(1044, EVENT_TYPE_PRICE_DECREASE, RESOURCE_LUXURY_GOODS, 45, 2)
-	demand_refuse.set_completed_action_tag(1042)
-	followup.set_completed_action_tag(1040)
-	followup.set_refusal_action_tag(1043)
-	followup.set_too_late_action_tag(1055)
-	demand43.set_completed_action_tag(1044)
-}
-
 [es=event_mission_start, mission=mission22]
 function mission22_on_start(ev) {
 	__image_request_pak(PACK_ENEMY_KUSHITE)
@@ -653,25 +644,19 @@ function mission22_on_start(ev) {
 	for (var i = ADVISOR_NONE + 1; i <= ADVISOR_DIPLOMACY; i++) {
 		city.set_advisor_available(i, 1)
 	}
-	mission22_ensure_shared_kr()
 	mission22_ensure_timber_i23_leaves()
-	mission22_ensure_bricks_i16_leaves()
-	mission22_ensure_luxury_i39_leaves()
 }
 
 [es=event_advance_month, mission=mission22]
 function mission22_requests_and_economy(ev) {
-	mission22_ensure_shared_kr()
 	mission22_ensure_timber_i23_leaves()
-	mission22_ensure_bricks_i16_leaves()
-	mission22_ensure_luxury_i39_leaves()
 	var abs = ev.years_since_start * 12 + ev.month
 	mission_recurring_request_update_idle(mission, RESOURCE_GRAIN, "grain_recurring", abs)
 	mission_recurring_request_update_idle(mission, RESOURCE_BRICKS, "bricks_recurring", abs)
 	mission_recurring_request_update_idle(mission, RESOURCE_LUXURY_GOODS, "luxury_recurring", abs)
 	mission_recurring_request_update_idle(mission, RESOURCE_POTTERY, "pottery_recurring", abs)
 
-	// Early once requests (ok→1000 / refuse→1001 / late→1055).
+	// Early once requests — outcomes via request_cleared (ok→KR+6 refuse→KR−7 late→KR−4).
 	var once = [
 		[2, 7, 2, RESOURCE_GRAIN, 4, 10, 0, 0],
 		[3, 10, 10, RESOURCE_TIMBER, 4, 10, 0, 1],
@@ -692,7 +677,7 @@ function mission22_requests_and_economy(ev) {
 		if (!mission[flag] && ev.years_since_start == row[1] && ev.month == row[2]) {
 			mission[flag] = true
 			log_info("akhenaten: mission 22 request i=" + row[0])
-			mission22_fire_request(2000 + row[0], row[3], row[4], row[5], 1000, 1001, 1055, row[6], row[7])
+			mission22_fire_request(2000 + row[0], row[3], row[4], row[5], 0, 0, 0, row[6], row[7])
 		}
 	}
 
@@ -703,7 +688,7 @@ function mission22_requests_and_economy(ev) {
 	if (!mission.event9_done && ev.years_since_start == 18 && ev.month == 7) {
 		mission.event9_done = true
 		log_info("akhenaten: mission 22 grain×11 (i=9) late→wage−4")
-		mission22_fire_request(2009, RESOURCE_GRAIN, 11, 6, 1000, 1001, 1010, 0, 0)
+		mission22_fire_request(2009, RESOURCE_GRAIN, 11, 6, 0, 0, 0, 0, 0)
 	}
 	if (!mission.event12_price_done && ev.years_since_start == 21 && ev.month == 8) {
 		mission.event12_price_done = true
@@ -729,12 +714,12 @@ function mission22_requests_and_economy(ev) {
 	if (!mission.event45_done && ev.years_since_start == 71 && ev.month == 10) {
 		mission.event45_done = true
 		log_info("akhenaten: mission 22 pottery×15 (i=45)")
-		mission22_fire_request(2045, RESOURCE_POTTERY, 15, 10, 1014, 1015, 1055, 0, 1)
+		mission22_fire_request(2045, RESOURCE_POTTERY, 15, 10, 0, 0, 0, 0, 1)
 	}
 	if (!mission.event50_done && ev.years_since_start == 84 && ev.month == 9) {
 		mission.event50_done = true
 		log_info("akhenaten: mission 22 grain×27 (i=50)")
-		mission22_fire_request(2050, RESOURCE_GRAIN, 27, 10, 1014, 1015, 1055, 3, 0)
+		mission22_fire_request(2050, RESOURCE_GRAIN, 27, 10, 0, 0, 0, 3, 0)
 	}
 
 	// pak i=49: grain×6 / 5mo recurring y4m0+ idle-gated.
@@ -744,7 +729,7 @@ function mission22_requests_and_economy(ev) {
 		mission.event49_grain_last_year = ev.years_since_start
 		log_info("akhenaten: mission 22 grain×6 recurring (i=49)")
 		mission22_fire_request(3000 + 49 * 100 + ev.years_since_start,
-			RESOURCE_GRAIN, 6, 5, 1000, 1001, 1055, 5, 0)
+			RESOURCE_GRAIN, 6, 5, 0, 0, 0, 5, 0)
 	}
 
 	// pak i=16: bricks×25 / 12mo recurring y25m5+ (Pepy construction).
@@ -754,29 +739,29 @@ function mission22_requests_and_economy(ev) {
 			mission.event16_bricks_last_year = ev.years_since_start
 			log_info("akhenaten: mission 22 bricks×25 recurring (i=16)")
 			mission22_fire_request(3000 + 16 * 100 + ev.years_since_start,
-				RESOURCE_BRICKS, 25, 12, 1018, 1020, 1055, 4, 0)
+				RESOURCE_BRICKS, 25, 12, 0, 0, 0, 4, 0)
 		}
 	}
 
-	// pak i=13: luxury×18 / 12mo recurring y23m4+ (ok→1014 refuse→1015 late→1055).
+	// pak i=13: luxury×18 / 12mo recurring y23m4+.
 	if (ev.years_since_start > 23 || (ev.years_since_start == 23 && ev.month >= 4)) {
 		if (ev.month == 4 && mission.event13_luxury_last_year != ev.years_since_start
 				&& mission_recurring_request_may_fire(mission, RESOURCE_LUXURY_GOODS, "luxury_recurring", abs)) {
 			mission.event13_luxury_last_year = ev.years_since_start
 			log_info("akhenaten: mission 22 luxury×18 recurring (i=13)")
 			mission22_fire_request(3000 + 13 * 100 + ev.years_since_start,
-				RESOURCE_LUXURY_GOODS, 18, 12, 1014, 1015, 1055, 0, 1)
+				RESOURCE_LUXURY_GOODS, 18, 12, 0, 0, 0, 0, 1)
 		}
 	}
 
-	// pak i=31: luxury×14 / 12mo recurring y36m7+ (same KR leaves as i=13).
+	// pak i=31: luxury×14 / 12mo recurring y36m7+.
 	if (ev.years_since_start > 36 || (ev.years_since_start == 36 && ev.month >= 7)) {
 		if (ev.month == 7 && mission.event31_luxury_last_year != ev.years_since_start
 				&& mission_recurring_request_may_fire(mission, RESOURCE_LUXURY_GOODS, "luxury_recurring", abs)) {
 			mission.event31_luxury_last_year = ev.years_since_start
 			log_info("akhenaten: mission 22 luxury×14 recurring (i=31)")
 			mission22_fire_request(3000 + 31 * 100 + ev.years_since_start,
-				RESOURCE_LUXURY_GOODS, 14, 12, 1014, 1015, 1055, 0, 0)
+				RESOURCE_LUXURY_GOODS, 14, 12, 0, 0, 0, 0, 0)
 		}
 	}
 
@@ -787,34 +772,33 @@ function mission22_requests_and_economy(ev) {
 			mission.event39_luxury_last_year = ev.years_since_start
 			log_info("akhenaten: mission 22 luxury×25 ladder (i=39)")
 			mission22_fire_request(3000 + 39 * 100 + ev.years_since_start,
-				RESOURCE_LUXURY_GOODS, 25, 10, 1040, 1041, 0, 0, 0)
+				RESOURCE_LUXURY_GOODS, 25, 10, 0, 0, 0, 0, 0)
 		}
 	}
 
-	// pak i=48: pottery×47 / 2mo recurring y80m7+ (ok→1014 refuse→1015 late→1055).
+	// pak i=48: pottery×47 / 2mo recurring y80m7+.
 	if (ev.years_since_start > 80 || (ev.years_since_start == 80 && ev.month >= 7)) {
 		if (ev.month == 7 && mission.event48_pottery_last_year != ev.years_since_start
 				&& mission_recurring_request_may_fire(mission, RESOURCE_POTTERY, "pottery_recurring", abs)) {
 			mission.event48_pottery_last_year = ev.years_since_start
 			log_info("akhenaten: mission 22 pottery×47 recurring (i=48)")
 			mission22_fire_request(3000 + 48 * 100 + ev.years_since_start,
-				RESOURCE_POTTERY, 47, 2, 1014, 1015, 1055, 0, 1)
+				RESOURCE_POTTERY, 47, 2, 0, 0, 0, 0, 1)
 		}
 	}
 
-	// pak i=51: grain×24 / 6mo recurring y88m8+ (same KR leaves as i=45/48/50).
+	// pak i=51: grain×24 / 6mo recurring y88m8+.
 	if (ev.years_since_start > 88 || (ev.years_since_start == 88 && ev.month >= 8)) {
 		if (ev.month == 8 && mission.event51_grain_last_year != ev.years_since_start
 				&& mission_recurring_request_may_fire(mission, RESOURCE_GRAIN, "grain_recurring", abs)) {
 			mission.event51_grain_last_year = ev.years_since_start
 			log_info("akhenaten: mission 22 grain×24 recurring (i=51)")
 			mission22_fire_request(3000 + 51 * 100 + ev.years_since_start,
-				RESOURCE_GRAIN, 24, 6, 1014, 1015, 1055, 0, 0)
+				RESOURCE_GRAIN, 24, 6, 0, 0, 0, 0, 0)
 		}
 	}
 
 	// Economy nuisances (recurring).
-	// pak i=8: land trade problem amt=6 y17m8+ (ok=665 junk ignored).
 	if (ev.years_since_start >= 17 && ev.month == 8
 			&& mission.event8_trade_last_year != ev.years_since_start) {
 		mission.event8_trade_last_year = ev.years_since_start
@@ -862,6 +846,90 @@ function mission22_requests_and_economy(ev) {
 		mission.event47_flood_last_year = ev.years_since_start
 		mission22_fire_simple_event(3000 + 47 * 100 + ev.years_since_start,
 			EVENT_TYPE_CLAY_PIT_FLOOD, undefined, 9)
+	}
+}
+
+[es=event_request_cleared, mission=mission22]
+function mission22_on_request_cleared(ev) {
+	var tag = ev.tag_id
+	var outcome = mission_request_outcome(ev)
+
+	// Timber gift chain request (1057) — keep ONLY_VIA tails; no KR here beyond chain.
+	if (tag == 2023 || tag == 1057) {
+		return
+	}
+
+	// Luxury i=39 refuse follow-up (9001+)
+	if (tag >= 9000 && tag < 9100) {
+		if (outcome == "ok") {
+			mission.kr_seq = (mission.kr_seq | 0) + 1
+			mission22_fire_simple_event(52000 + mission.kr_seq, EVENT_TYPE_DEMAND_INCREASE, RESOURCE_LUXURY_GOODS, 9)
+		} else if (outcome == "refuse") {
+			mission.kr_seq = (mission.kr_seq | 0) + 1
+			mission22_fire_simple_event(53000 + mission.kr_seq, EVENT_TYPE_DEMAND_DECREASE, RESOURCE_LUXURY_GOODS, 5)
+			mission.kr_seq = (mission.kr_seq | 0) + 1
+			mission22_fire_simple_event(54000 + mission.kr_seq, EVENT_TYPE_PRICE_DECREASE, RESOURCE_LUXURY_GOODS, 45)
+		} else {
+			mission22_fire_kr(-4)
+		}
+		return
+	}
+
+	// Luxury i=39 root (6900+year)
+	if (tag >= 6900 && tag < 7000) {
+		if (outcome == "ok") {
+			mission.kr_seq = (mission.kr_seq | 0) + 1
+			mission22_fire_simple_event(52000 + mission.kr_seq, EVENT_TYPE_DEMAND_INCREASE, RESOURCE_LUXURY_GOODS, 9)
+		} else if (outcome == "refuse") {
+			mission22_start_luxury_refuse_followup()
+		}
+		// late = pak 666 junk — skip
+		return
+	}
+
+	// Bricks i=16 (4600+year): ok→KR+18→wage+5; refuse→KR−27; late→KR−4
+	if (tag >= 4600 && tag < 4700) {
+		if (outcome == "ok") {
+			mission22_fire_kr(18)
+			mission.kr_seq = (mission.kr_seq | 0) + 1
+			mission22_fire_simple_event(55000 + mission.kr_seq, EVENT_TYPE_WAGE_INCREASE, undefined, 5)
+		} else if (outcome == "refuse") {
+			mission22_fire_kr(-27)
+		} else {
+			mission22_fire_kr(-4)
+		}
+		return
+	}
+
+	// Luxury i=13 (4300+) / i=31 (6100+) / pottery i=48 (7800+) / pottery once 2045 /
+	// grain once 2050 / grain i=51 (8100+)
+	if ((tag >= 4300 && tag < 4400) || (tag >= 6100 && tag < 6200)
+			|| (tag >= 7800 && tag < 7900) || (tag >= 8100 && tag < 8200)
+			|| tag == 2045 || tag == 2050) {
+		mission22_apply_luxury_kr(outcome)
+		return
+	}
+
+	// Grain i=9: ok/refuse early KR; late → wage−4 (pak i=10)
+	if (tag == 2009) {
+		if (outcome == "ok") {
+			mission22_fire_kr(6)
+		} else if (outcome == "refuse") {
+			mission22_fire_kr(-7)
+		} else {
+			mission.kr_seq = (mission.kr_seq | 0) + 1
+			mission22_fire_simple_event(56000 + mission.kr_seq, EVENT_TYPE_WAGE_DECREASE, undefined, 4)
+		}
+		return
+	}
+
+	// Early once + grain i=49 (7900+): shared early KR
+	var early_once = {
+		2002: 1, 2003: 1, 2005: 1, 2006: 1, 2007: 1, 2011: 1,
+		2022: 1, 2036: 1, 2037: 1, 2052: 1, 2053: 1, 2054: 1
+	}
+	if (early_once[tag] || (tag >= 7900 && tag < 8000)) {
+		mission22_apply_early_kr(outcome)
 	}
 }
 

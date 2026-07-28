@@ -47,10 +47,15 @@
       <div class="wiki-sidebar-section">
         <div class="wiki-sidebar-title">Old Kingdom — Pepy</div>
         <ul>
-          <li><a href="bahariya.html">19 · Bahariya</a></li>
-          <li><a href="djedu.html">20 · Djedu</a></li>
           <li><a href="dunqul.html" class="active">21 · Dunqul</a></li>
           <li><a href="dakhla.html">22 · Dakhla</a></li>
+        </ul>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Also nearby</div>
+        <ul>
+          <li><a href="bahariya.html">19 · Bahariya</a> (Userkaf)</li>
+          <li><a href="djedu.html">20 · Djedu</a> (Userkaf)</li>
         </ul>
       </div>
     </aside>
@@ -88,7 +93,7 @@
       </div>
 
       <h2 id="events">Scripted events (summary)</h2>
-      <p>Gamemeat ×12 and granite ×12 recurring (shared KR leaves); Henen-nesw LOST_TRADE → siege → weapons ×60; beduin and Hittite-pack enemy raids; NEW_TRADE unlocks; favour Pharaoh ×66. Keep Selima open — briefing priority.</p>
+      <p>Gamemeat ×12 and granite ×12 recurring (KR via <code>request_cleared</code>); Henen-nesw LOST_TRADE → siege → weapons ×60; beduin and Hittite-pack enemy raids; NEW_TRADE unlocks; favour Pharaoh ×66. Keep Selima open — briefing priority.</p>
 
       <div class="dev-section">
         <h2 id="dev">Developer reference</h2>
@@ -97,7 +102,9 @@
           <div class="details-body">
             <p><span class="file-ref">src/scripts/mission/m_021_dunqul.js</span> · import in <span class="file-ref">src/scripts/missions.js</span></p>
             <p>Empire id <strong>0</strong> (pak). Map <span class="file-ref">data/maps/m_021_dunqul.map</span>. Rank 8. Enemy <code>ENEMY_4_HITTITE</code> (briefing says Kushite — pak wins).</p>
-            <p>SKIP: empty map_obj idx=10; orphan chain-only i=6 LOST_TRADE Djedu (no inbound). Kharga route 13 = 2-pt stub. No river / disembark / inv points in pak.</p>
+            <p>SKIP: empty map_obj idx=10; orphan chain-only i=6 LOST_TRADE Djedu (no inbound); NEW_TRADE Iunet/Djedu (display, no sells/buys). Kharga route 13 = 2-pt stub. No river / disembark / inv points in pak.</p>
+            <p>Recurring gamemeat/granite KR via <code>event_request_cleared</code> + unique <code>fire_kr</code> (not shared ONLY_VIA — B14). Beduin/enemy wipe KR = unique leaf per year. Kerma NEW_TRADE i=18 reduced to once at y10m11.</p>
+            <p>Dump date: 2026-07-26. Fidelity pass: 2026-07-28.</p>
           </div>
         </details>
         <details>

@@ -47,10 +47,15 @@
       <div class="wiki-sidebar-section">
         <div class="wiki-sidebar-title">Old Kingdom — Pepy</div>
         <ul>
-          <li><a href="bahariya.html">19 · Bahariya</a></li>
-          <li><a href="djedu.html">20 · Djedu</a></li>
           <li><a href="dunqul.html">21 · Dunqul</a></li>
           <li><a href="dakhla.html" class="active">22 · Dakhla</a></li>
+        </ul>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Also nearby</div>
+        <ul>
+          <li><a href="bahariya.html">19 · Bahariya</a> (Userkaf)</li>
+          <li><a href="djedu.html">20 · Djedu</a> (Userkaf)</li>
         </ul>
       </div>
     </aside>
@@ -88,7 +93,7 @@
       </div>
 
       <h2 id="events">Scripted events (summary)</h2>
-      <p>Early grain/timber/beer requests; timber ×18 gift ladder; Pepy bricks ×25 recurring; luxury and grain recurring (idle-gated); favour Pharaoh ×90. Late-game pottery/luxury ladders and extra clay floods are simplified.</p>
+      <p>Early grain/timber/beer requests; timber ×18 gift ladder; Pepy bricks ×25 recurring; luxury and grain recurring (idle-gated); favour Pharaoh ×90. Request KR multi-fires via <code>request_cleared</code>.</p>
 
       <div class="dev-section">
         <h2 id="dev">Developer reference</h2>
@@ -97,7 +102,9 @@
           <div class="details-body">
             <p><span class="file-ref">src/scripts/mission/m_022_dakhla.js</span> · import in <span class="file-ref">src/scripts/missions.js</span></p>
             <p>Empire id <strong>1</strong>. Map <span class="file-ref">data/maps/m_022_dakhla.map</span>. Rank 8. Enemy <code>ENEMY_6_KUSHITE</code>.</p>
-            <p>SKIP: empty map_obj idx=9. Kharga route 12 = 2-pt stub. No river / disembark / inv points in pak.</p>
+            <p>SKIP: empty map_obj idx=9. Kharga route 12 = 2-pt stub. No river / disembark / inv points in pak. Timber gift oil×812 is pak amount (engine ×100 units).</p>
+            <p>Once + recurring request KR via <code>event_request_cleared</code> + unique <code>fire_kr</code> (B14). Timber ×18 gift ladder remains ONLY_VIA (once). Luxury i=39 late=666 skipped.</p>
+            <p>Dump date: 2026-07-26. Fidelity pass: 2026-07-28.</p>
           </div>
         </details>
         <details>
