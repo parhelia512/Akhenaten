@@ -6234,4 +6234,13 @@ game_messages_en {
         title { text: "Defeat" }
         content { text: "Your generals report defeat. The invading force was too strong. Many of your soldiers have fallen — but the enemy withdraws from the field." }
     }
+    message_wrath_of_seth_asps {
+        id: 501,
+        type: 2,
+
+        size [30, 20]
+        title { text: "Wrath of Seth" }
+        video { text: "@21" }
+        content { text: "Seth's fury finds no company to curse — so he sends asps from his temples into your streets. Citizens flee as the snakes hunt. Appease the God of Destruction before more blood is spilled." }
+    }
 }

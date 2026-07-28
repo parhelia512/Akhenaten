@@ -1,21 +1,63 @@
 #include "city_religion_seth.h"
 
-#include "city/city.h"
-#include "city/city_message.h"
-#include "city/city_figures.h"
-#include "figure/figure.h"
-#include "figure/formation_batalion.h"
-#include "figure/figure_type.h"
-#include "scenario/scenario_invasion.h"
-#include "scenario/scenario.h"
-#include "game/game_events.h"
-#include "core/random.h"
-#include "figuretype/water.h"
+#include "building/building.h"
 #include "building/building_fort.h"
-#include "grid/routing/routing_terrain.h"
+#include "city/city.h"
+#include "city/city_buildings.h"
+#include "city/city_figures.h"
+#include "city/city_message.h"
+#include "core/calc.h"
+#include "core/random.h"
+#include "figure/figure.h"
+#include "figure/figure_type.h"
+#include "figure/formation_batalion.h"
+#include "figuretype/animal_asp.h"
+#include "figuretype/water.h"
+#include "game/game_config.h"
+#include "game/game_events.h"
+#include "game/simulation_time.h"
 #include "game/undo.h"
+#include "grid/road_access.h"
+#include "grid/routing/routing_terrain.h"
+#include "grid/terrain.h"
+#include "scenario/scenario.h"
+#include "scenario/scenario_invasion.h"
+
+#include <vector>
 
 god_seth_t god_seth;
+
+namespace {
+
+tile2i seth_asp_spawn_tile(building &b) {
+    tile2i road = map_get_road_access_tile(b.tile, b.size);
+    if (road.valid() && !map_terrain_is(road, TERRAIN_IMPASSABLE_OSTRICH)) {
+        return road;
+    }
+
+    int x = 0;
+    int y = 0;
+    if (map_terrain_get_adjacent_road_or_clear_land(b.tile.x(), b.tile.y(), b.size, &x, &y)) {
+        tile2i adj(x, y);
+        if (adj.valid() && !map_terrain_is(adj, TERRAIN_IMPASSABLE_OSTRICH)) {
+            return adj;
+        }
+    }
+
+    // Do not spawn on the building footprint — asps cannot path from TERRAIN_BUILDING.
+    return tile2i::invalid;
+}
+
+int seth_asp_raid_count() {
+    return calc_bound(g_city.population.current / 400, 3, 8);
+}
+
+int seth_asp_raid_days() {
+    const int months = 2 + (random_byte() % 4); // 2..5
+    return months * simulation_time_t::days_in_month;
+}
+
+} // namespace
 
 void god_seth_t::sink_all_ships() {
     figure_valid_do([] (figure &f) {
@@ -34,7 +76,6 @@ bool god_seth_t::formation_legion_curse() {
 }
 
 int god_seth_t::invasion_start_from_seth() {
-    auto &data = g_invasions;
     int mission = g_scenario.campaign_scenario_id;
     if (mission < 0 || mission > 19) {
         return 0;
@@ -60,23 +101,67 @@ int god_seth_t::invasion_start_from_seth() {
     return 1;
 }
 
+bool god_seth_t::perform_asps() {
+    std::vector<tile2i> spawn_tiles;
+    buildings_valid_do([&](building &b) {
+        if (b.type != BUILDING_TEMPLE_SETH && b.type != BUILDING_TEMPLE_COMPLEX_SETH) {
+            return;
+        }
+        tile2i tile = seth_asp_spawn_tile(b);
+        if (tile.valid()) {
+            spawn_tiles.push_back(tile);
+        }
+    });
+
+    if (spawn_tiles.empty()) {
+        return false;
+    }
+
+    const int count = seth_asp_raid_count();
+    const int days = seth_asp_raid_days();
+    int spawned = 0;
+
+    for (int i = 0; i < count; i++) {
+        tile2i tile = spawn_tiles[i % (int)spawn_tiles.size()];
+        figure *f = figure_create(FIGURE_ASP, tile, DIR_0_TOP_RIGHT);
+        if (!f || !f->is_valid()) {
+            continue;
+        }
+        figure_asp_setup_curse_raid(*f, days);
+        spawned++;
+    }
+
+    return spawned > 0;
+}
+
 void god_seth_t::perform_major_curse() {
     if (anti_scum_random_bool()) {
         ships_destruction();
         events::emit(event_message_god{ GOD_SETH, "message_wrath_of_seth" });
-    } else {
-        perform_hailstorm();
-        events::emit(event_message_god{ GOD_SETH, "message_hailstorm_wrath_of_seth" });
-    }    
+        return;
+    }
+
+    perform_hailstorm();
 }
 
 void god_seth_t::perform_hailstorm() {
     if (formation_legion_curse()) {
         events::emit(event_message_god{ GOD_SETH, "message_wrath_of_seth_2" });
         invasion_start_from_seth();
-    } else {
-        events::emit(event_message_god{ GOD_SETH, "message_curse_seth_noeffect" });
+        events::emit(event_message_god{ GOD_SETH, "message_hailstorm_wrath_of_seth" });
+        return;
     }
+
+    // TEMP Enhanced: asp raid fallback when no batalion to curse (CF5-style).
+    // Note: checks formations (own_batalion), not fort buildings — empty forts do not block.
+    if (!!game_features::gameplay_seth_asp_raid && perform_asps()) {
+        // Same delivery path as other Seth major curses (god-tagged), not GOD_UNKNOWN popup.
+        events::emit(event_message_god{GOD_SETH, "message_wrath_of_seth_asps"});
+        return;
+    }
+
+    events::emit(event_message_god{ GOD_SETH, "message_wrath_of_seth_noeffect" });
+    events::emit(event_message_god{ GOD_SETH, "message_hailstorm_wrath_of_seth" });
 }
 
 bool god_seth_t::perform_fort_destruction() {
@@ -113,7 +198,7 @@ void god_seth_t::perform_minor_curse() {
     if (success) {
         events::emit(event_message_god{ GOD_SETH, "message_seth_is_upset" });
     } else {
-        events::emit(event_message_god{ GOD_SETH, "message_seth_is_upset_noeffect" });
+        events::emit(event_message_god{ GOD_SETH, "message_wrath_of_seth_noeffect" });
     }
 }
 

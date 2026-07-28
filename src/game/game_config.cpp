@@ -148,6 +148,7 @@ namespace game_features {
     game_feature gameplay_change_disaster_events_use_amount{ "gameplay_change_disaster_events_use_amount", "#TR_CONFIG_DISASTER_EVENTS_USE_AMOUNT", false };
     game_feature gameplay_change_trader_capacity_1600{ "gameplay_change_trader_capacity_1600", "#TR_CONFIG_TRADER_CAPACITY_1600", false };
     game_feature gameplay_bast_lion_raid{ "gameplay_bast_lion_raid", "#TR_CONFIG_BAST_LION_RAID", false };
+    game_feature gameplay_seth_asp_raid{ "gameplay_seth_asp_raid", "#TR_CONFIG_SETH_ASP_RAID", false };
     game_feature gameplay_enhanced_auto_resolve_invasions{
         "gameplay_enhanced_auto_resolve_invasions", "#TR_CONFIG_AUTO_RESOLVE_INVASIONS", false };
 

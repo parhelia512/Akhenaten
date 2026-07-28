@@ -60,6 +60,7 @@ localization_de = [
   {key:"#TR_CONFIG_GRANARIES_GET_DOUBLE", text:"Doppelte Kapazität für Karrenschieber von abholenden Kornkammern"}
   {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Größere Händlerkapazität (1600 pro Besuch; kein Jahreslimit der Handelsroute)"}
   {key:"#TR_CONFIG_BAST_LION_RAID", text:"Bast-Zorn: Löwenüberfall aus Tempeln/Zoo (TEMP Enhanced)"}
+  {key:"#TR_CONFIG_SETH_ASP_RAID", text:"Seth-Zorn: Schlangenüberfall aus Tempeln ohne Kompanie (TEMP Enhanced)"}
   {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Invasionen automatisch lösen: Feinde warten am Eingang, Schnellkampf in 8 Tagen (Mauern/Türme zählen nicht; Pharao inklusive; keine Aufstände)"}
   {key:"#warning_auto_resolve_orders_blocked", text:"Kompanien können nicht auf eine eingefrorene Invasionswelle marschieren"}
   {key:"#warning_auto_resolve_queue_full", text:"Zu viele ausstehende Invasionen — diese Welle kämpft auf der Karte"}

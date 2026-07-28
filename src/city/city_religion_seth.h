@@ -14,6 +14,7 @@ public:
     bool formation_legion_curse();
     void sink_all_ships();
     bool perform_fort_destruction();
+    bool perform_asps();
     void perform_protect_troops();
 };
 

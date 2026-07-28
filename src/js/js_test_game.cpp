@@ -33,6 +33,7 @@
 #include "figuretype/figure_missile.h"
 #include "figuretype/figure_hunter.h"
 #include "figuretype/animal_lion.h"
+#include "figuretype/animal_asp.h"
 #include "city/city_animals.h"
 #include "graphics/color.h"
 #include "city/city.h"
@@ -492,6 +493,25 @@ static int __test_lion_is_curse_raid(int fid) {
     return figure_lion(f).is_curse_raid() ? 1 : 0;
 }
 ANK_FUNCTION_1(__test_lion_is_curse_raid);
+
+static int __test_asp_setup_curse_raid(int fid, int days) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive() || f->type != FIGURE_ASP) {
+        return 0;
+    }
+    figure_asp_setup_curse_raid(*f, days);
+    return 1;
+}
+ANK_FUNCTION_2(__test_asp_setup_curse_raid);
+
+static int __test_asp_is_curse_raid(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || f->type != FIGURE_ASP) {
+        return 0;
+    }
+    return figure_asp(f).is_curse_raid() ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_asp_is_curse_raid);
 
 static void __test_figure_update_day(int fid) {
     figure *f = figure_get(fid);
