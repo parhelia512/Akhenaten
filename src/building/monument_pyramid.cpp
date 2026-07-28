@@ -1337,6 +1337,11 @@ void building_stepped_pyramid::bind_dynamic(io_buffer *iob, size_t version) {
     for (int i = 0; i < RESOURCES_MAX; i++) {
         iob->bind_u8(monumentd.resources_pct[i]);
     }
+
+    // BF2: funeral_done appended (mastaba reclaims a former skip byte instead).
+    if (version >= 179) {
+        iob->bind_u8(monumentd.funeral_done);
+    }
 }
 
 int building_small_stepped_pyramid::building_image_get() const {

@@ -35,6 +35,7 @@
 #include "figuretype/animal_lion.h"
 #include "figuretype/animal_asp.h"
 #include "figuretype/figure_mummy.h"
+#include "figuretype/figure_funeral_walker.h"
 #include "figure/combat.h"
 #include "city/city_animals.h"
 #include "graphics/color.h"
@@ -633,6 +634,15 @@ static void __test_figure_set_action(int fid, int action) {
 }
 ANK_FUNCTION_2(__test_figure_set_action);
 
+static void __test_figure_action_perform(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive()) {
+        return;
+    }
+    f->action_perform();
+}
+ANK_FUNCTION_1(__test_figure_action_perform);
+
 static void __test_figure_update_animation(int fid) {
     figure *f = figure_get(fid);
     if (!f || !f->is_alive()) {
@@ -914,6 +924,44 @@ static bool __test_burial_provisions_set(int resource, int required) {
     return true;
 }
 ANK_FUNCTION_2(__test_burial_provisions_set);
+
+static void __test_burial_provisions_force_dispatched(int resource, int dispatched) {
+    if (resource <= RESOURCE_NONE || resource >= RESOURCES_MAX) {
+        return;
+    }
+    g_scenario.monuments.burial_provisions[resource].dispatched = std::max(0, dispatched);
+}
+ANK_FUNCTION_2(__test_burial_provisions_force_dispatched);
+
+static int __test_funeral_try_spawn(int force_ignore_road) {
+    return figure_funeral_walker::try_spawn_all(force_ignore_road != 0);
+}
+ANK_FUNCTION_1(__test_funeral_try_spawn);
+
+static int __test_funeral_target_tomb(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_valid() || f->type != FIGURE_FUNERAL_WALKER) {
+        return 0;
+    }
+    return figure_funeral_walker(f).runtime_data().target_tomb_id;
+}
+ANK_FUNCTION_1(__test_funeral_target_tomb);
+
+static int __test_monument_funeral_done(int bid) {
+    building *b = building_get(bid);
+    auto *m = b ? b->dcast_monument() : nullptr;
+    return (m && m->has_funeral_done()) ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_monument_funeral_done);
+
+static void __test_monument_set_funeral_done(int bid, int done) {
+    building *b = building_get(bid);
+    auto *m = b ? b->dcast_monument() : nullptr;
+    if (m) {
+        m->set_funeral_done(done != 0);
+    }
+}
+ANK_FUNCTION_2(__test_monument_set_funeral_done);
 
 // Return the current resolved image id for a monument building (per phase + variant + camera).
 static int __test_building_current_image(int bid) {

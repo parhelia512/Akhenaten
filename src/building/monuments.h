@@ -44,6 +44,7 @@ public:
         uint8_t upgrades;
         uint16_t alt_image;
         uint8_t stair_index;
+        uint8_t funeral_done; // BF2: procession already held for this tomb (main)
     } BUILDING_RUNTIME_DATA_T;
 
     // Tall monument ornaments (tiers/cones) - skip in flat buildings view.
@@ -86,6 +87,10 @@ public:
     virtual bool need_artisan();
     virtual bool is_unfinished() const;
     virtual bool is_finished() const;
+
+    // BF2: one funeral procession per finished tomb (main part).
+    bool has_funeral_done() const;
+    void set_funeral_done(bool done = true);
 };
 
 ANK_CONFIG_PROPERTY(building_monument::runtime_data_t, variant)
@@ -96,6 +101,11 @@ enum module_type {
 
 int building_monument_has_unfinished_monuments();
 bool building_monument_has_delivery_for_worker(int figure_id);
+
+// Burial tombs (mastaba / pyramid / …) vs non-tomb monuments (sphinx / obelisk / …).
+// Shared by BF1 tomb robber and BF2 funeral walker.
+bool building_monument_is_non_tomb_type(e_building_type type);
+bool building_monument_is_finished_burial_tomb(building &b);
 
 // VALID or MOTHBALLED (halted construction). Not destroyed / deleted.
 inline bool building_monument_is_alive(const building &b) {

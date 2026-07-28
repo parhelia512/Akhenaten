@@ -34,6 +34,7 @@
 #include "figuretype/figure_kingdome_trader.h"
 #include "figuretype/figure_trader_ship.h"
 #include "figuretype/figure_flotsam.h"
+#include "figuretype/figure_funeral_walker.h"
 #include "city_warnings.h"
 #include "game/game_events.h"
 #include "empire/empire_object.h"
@@ -109,6 +110,8 @@ void city_t::reload_objects() {
 void city_t::update_day(simulation_time_t simtime) {
     sentiment.update_day();
     criminals_update_day();
+    // BF2: after crime/steal so same-day steal→funeral race is avoided (TR2).
+    figure_funeral_walker::try_spawn_all(/*force_ignore_road=*/false);
     plague_update_day();
     environment.update_day();
     buildings.update_day();

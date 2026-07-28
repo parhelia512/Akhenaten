@@ -548,6 +548,51 @@ bool building_monument::is_finished() const {
     return runtime_data().phase == MONUMENT_FINISHED;
 }
 
+bool building_monument_is_non_tomb_type(e_building_type type) {
+    switch (type) {
+    case BUILDING_SPHINX:
+    case BUILDING_SMALL_OBELISK:
+    case BUILDING_LARGE_OBELISK:
+    case BUILDING_SUN_TEMPLE:
+    case BUILDING_ALEXANDRIA_LIBRARY:
+    case BUILDING_CAESAREUM:
+    case BUILDING_PHAROS_LIGHTHOUSE:
+    case BUILDING_ABU_SIMBEL:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool building_monument_is_finished_burial_tomb(building &b) {
+    if (!b.is_valid() || !b.is_main()) {
+        return false;
+    }
+    if (!b.is_monument() || building_monument_is_non_tomb_type(b.type)) {
+        return false;
+    }
+    auto *m = b.dcast_monument();
+    return m && m->is_finished();
+}
+
+bool building_monument::has_funeral_done() const {
+    const building *mb = base.main();
+    if (!mb) {
+        mb = &base;
+    }
+    const auto &d = *reinterpret_cast<const runtime_data_t *>(mb->runtime_data);
+    return d.funeral_done != 0;
+}
+
+void building_monument::set_funeral_done(bool done) {
+    building *mb = base.main();
+    if (!mb) {
+        mb = &base;
+    }
+    auto &d = *reinterpret_cast<runtime_data_t *>(mb->runtime_data);
+    d.funeral_done = done ? 1 : 0;
+}
+
 building *city_has_unfinished_monuments() {
     return buildings_valid_first([] (building &b) { 
         auto monument = b.dcast_monument();

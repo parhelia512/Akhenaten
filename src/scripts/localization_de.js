@@ -688,7 +688,7 @@ localization_de = [
   {key: "#figure_festival_guy", group:64, id:91 }
   {key: "#figure_enemy_transport", group:64, id:92 }
   {key: "#figure_enemy_warship", group:64, id:93 }
-  {key: "#figure_funeral_walker", group:64, id:94 }
+  {key: "#figure_funeral_walker", text: "Trauerzug" }
   {key: "#figure_fishing_spot", group:64, id:95 }
   {key: "#figure_sled_puller", group:64, id:96 }
   {key: "#figure_showman", group:64, id:97 }

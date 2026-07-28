@@ -26,7 +26,9 @@
 //  175 akhenaten: storage Empty All order snapshot
 //  176 akhenaten: wall_material_grid (mud/brick terrain walls)
 //  177 akhenaten: invasion auto-resolve pending queue
-constexpr uint32_t latest_save_version = 178;
+//  178 akhenaten: (reserved / in-tree)
+//  179 akhenaten: monument funeral_done (pyramid append; mastaba reclaims skip byte)
+constexpr uint32_t latest_save_version = 179;
 
 vfs::path fullpath_saves(vfs::path filename);
 vfs::path fullpath_maps(char* full, vfs::path filename);

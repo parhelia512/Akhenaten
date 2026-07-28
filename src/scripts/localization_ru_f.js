@@ -420,6 +420,9 @@ localization_ru_f = [
     { key: "#figure_antelope_hunter", text: "Охотник на антилоп" }
     { key: "#figure_antelope_hunter_javelin", text: "Дротик охотника" }
     { key: "#figure_birds_hunter", text: "Охотник на птиц" }
+    { key: "#figure_funeral_walker", text: "Похоронный прохожий" }
+    { key: "#figure_mummy", text: "Мумия" }
+    { key: "#figure_pharaoh", text: "Фараон" }
     { key: "#hunt_bird_birds_are_wily", text: "Эти птицы хитрые!" }
     { key: "#hunt_bird_birds_ready_for_roasting", text: "Эти птицы готовы к жарке!" }
 

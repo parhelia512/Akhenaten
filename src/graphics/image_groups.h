@@ -443,6 +443,9 @@ extern const e_pack_tokens_t e_pack_type_tokens;
 #define GROUP_FIGURE_CROCODILE_SWIM PACK_SPR_MAIN, 26             // 1534
 #define GROUP_FIGURE_CROCODILE_WATER_IDLE PACK_SPR_MAIN, 27       // 1622
 #define GROUP_FIGURE_PHARAOH_WALK PACK_SPR_MAIN, 28               // 1710
+// BF2 TEMP: worker walk until real funeral pack id is found (RE).
+#define GROUP_FIGURE_FUNERAL_WALKER PACK_SPR_MAIN, 116
+#define GROUP_FIGURE_FUNERAL_WALKER_DEATH PACK_SPR_MAIN, 117
 #define GROUP_FIGURE_RIOTER_WALK PACK_SPR_MAIN, 29                // 1806
 #define GROUP_FIGURE_RIOTER_DEATH PACK_SPR_MAIN, 30               // 1902
 #define GROUP_FIGURE_RIOTER_ATTACK PACK_SPR_MAIN, 31              // 1910

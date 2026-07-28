@@ -1279,6 +1279,26 @@ figure_pharaoh {
 	max_roam_length: 320
 }
 
+// BF2 funeral procession — TEMP worker sprites/sounds until SprMain funeral pack id known.
+figure_funeral_walker {
+	animations {
+		walk { pack:PACK_SPR_MAIN, id:116, max_frames:12 }
+		death { pack:PACK_SPR_MAIN, id:117, max_frames:8, loop:false }
+		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_FUNERAL_WALKER }
+	}
+
+	// TEMP: reuse worker wavs (no dedicated funeral click lines yet).
+	sounds {
+		worker_going_to_workplace {sound:"worker_e02.wav", group:212, text:0}
+		worker_city_is_good {sound:"worker_g09.wav", group:212, text:10}
+	}
+
+	category: figure_category_citizen
+	max_damage: 10
+	terrain_usage: TERRAIN_USAGE_ANY
+	max_amount: 8
+}
+
 figure_trade_ship = {
 	animations : {
 		walk : { pack:PACK_SPR_MAIN, id:123, max_frames:4, duration:4 }

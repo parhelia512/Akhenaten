@@ -789,7 +789,7 @@ void building_mastaba::bind_dynamic(io_buffer *iob, size_t version) {
         iob->bind(BIND_SIGNATURE_UINT16, &monumentd.workers[i]);
     }
     iob->bind(BIND_SIGNATURE_UINT8, &monumentd.phase);
-    iob->bind____skip(1); // (BIND_SIGNATURE_UINT8, &data.monuments.statue_offset);
+    iob->bind(BIND_SIGNATURE_UINT8, &monumentd.funeral_done); // was skip(1) statue_offset
     iob->bind____skip(1); // (BIND_SIGNATURE_UINT8, &data.monuments.temple_complex_attachments);
     iob->bind(BIND_SIGNATURE_UINT8, &monumentd.variant);
 

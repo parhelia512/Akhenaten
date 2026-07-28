@@ -132,6 +132,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `79_birds_hunter_registered.js` | `FIGURE_BIRDS_HUNTER` METAINFO + `dcast_hunter` force_shot (BH2/BH3) |
 | `80_birds_hunt.js` | Birds hunter prey filter (ignore ostrich/antelope) → kill → gamemeat (BH3) |
 | `81_construction_blessing.js` | Pyramid Speedup (CB*): OFF/ON; site-prep; masonry +2; delivery clear; min-id; at-cap; halted (+ chain MOTHBALLED) |
+| `84_funeral_procession.js` | BF2 funeral walker: register, provisions gate, goto mastaba, abort leaves `funeral_done` clear, arrive + no re-spawn, steal/re-dispatch keeps done, no-provisions-required spawn, multi-tomb, finished small stepped pyramid spawn, mid-walk save/load (`funeral_done` + dest) |
 | `87_tomb_robber.js` | Tomb robber TR1: register, refuse without provisions/tomb, spawn → goto finished mastaba |
 | `86_pharaoh_figure_smoke.js` | BF4 `FIGURE_PHARAOH`: spawn + type + CREATED→ROAMING + anim `walk` (SprMain 28) |
 | `88_flat_buildings.js` | Flat buildings view: On → flatten palace; raise excludes; overlay blocks; Off clears raise |
@@ -210,8 +211,13 @@ After each test script loads, the driver calls `js_vm_sync({})` so any top-level
 | `__test_building_create(type, x, y)` | building id | Fast spawn without terrain checks; reuses first building of that type if present; center tile when `x` or `y` is negative |
 | `__test_figure_create(type, x, y)` | figure id | Fast spawn via `figure_create` (no herd/formation); center tile when `x` or `y` is negative |
 | `__test_figure_set_action(fid, action)` | undefined | Set figure `action_state` via `advance_action` |
+| `__test_figure_action_perform(fid)` | undefined | Call `figure::action_perform()` once |
 | `__test_figure_update_animation(fid)` | undefined | Call `figure_impl::update_animation()` |
 | `__test_figure_update_day(fid)` | undefined | Call `figure_impl::update_day()` (e.g. curse-raid timer) |
+| `__test_burial_provisions_force_dispatched(res, n)` | undefined | Set burial `dispatched` count for resource |
+| `__test_funeral_try_spawn(force_road)` | figure id | BF2: spawn funeral walkers (force skips road gate) |
+| `__test_monument_funeral_done(bid)` | 0\|1 | BF2: whether tomb has `funeral_done` |
+| `__test_monument_set_funeral_done(bid, done)` | undefined | BF2: set/clear `funeral_done` |
 | `__test_mummy_spawn_wave(n)` | figure id | BF3: spawn mummy wave + 1× msg 496 |
 | `__test_figure_is_enemy(fid)` | 0\|1 | Whether figure has enemy flag |
 | `__test_soldier_combat_target(x,y,d)` | figure id | Soldier combat target near tile |
