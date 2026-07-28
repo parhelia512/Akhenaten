@@ -91,6 +91,7 @@ namespace game_hotkeys {
 
     hotkey_mapping save_screenshot ("save_screenshot", KEY_F12, KEY_MOD_NONE, HOTKEY_SAVE_SCREENSHOT);
     hotkey_mapping save_city_screenshot("save_city_screenshot", KEY_F12, KEY_MOD_CTRL, HOTKEY_SAVE_CITY_SCREENSHOT);
+    hotkey_mapping toggle_flat_buildings("toggle_flat_buildings", KEY_F, KEY_MOD_SHIFT, HOTKEY_TOGGLE_FLAT_BUILDINGS);
 
     hotkey_mapping debug_range1_up("debug_range1_up", KEY_PAGEUP, KEY_MOD_CTRL, HOTKEY_DEBUG_1_UP);
     hotkey_mapping debug_range1_down("debug_range1_down", KEY_PAGEDOWN, KEY_MOD_CTRL, HOTKEY_DEBUG_1_DOWN);
@@ -103,7 +104,7 @@ namespace game_hotkeys {
 
 void game_hotkeys::set_mapping(bool alt, e_key key, e_key_mode modifiers, e_hotkey_action action) {
     hotkey_mapping& mapping = _hotkeys[action];
-    
+
     auto &state = alt ? mapping.alt : mapping.state;
 
     state.key = key;

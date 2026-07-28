@@ -39,6 +39,7 @@ localization_en = [
   {key:"#TR_CONFIG_ALLOW_CYCLING_TEMPLES", text:"Allow building each temple in succession"}
   {key:"#TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE", text:"Show range when building reservoirs, fountains and wells"}
   {key:"#TR_CONFIG_SHOW_BUILDING_ROAD_ACCESS", text:"Show building road access tile when placing or hovering (classic: one tile)"}
+  {key:"#TR_CONFIG_FLAT_BUILDINGS", text:"Flat buildings view (Shift+F) — flatten tall buildings to see roads behind them"}
   {key:"#TR_CONFIG_SHOW_CONSTRUCTION_SIZE", text:"Show draggable construction size"}
   {key:"#TR_CONFIG_PAUSE_SIM_WHILE_BUILDING", text:"Pause simulation while placing buildings"}
   {key:"#TR_CONFIG_HIGHLIGHT_LEGIONS", text:"Highlight legion on cursor hover"}
@@ -193,6 +194,7 @@ localization_en = [
   {key:"#TR_HOTKEY_TOGGLE_OVERLAY", text:"Toggle current overlay"}
   {key:"#TR_HOTKEY_SHOW_OVERLAY_WATER", text:"Show water overlay"}
   {key:"#TR_HOTKEY_SHOW_OVERLAY_FIRE", text:"Show fire overlay"}
+  {key:"#TR_HOTKEY_TOGGLE_FLAT_BUILDINGS", text:"Toggle flat buildings view"}
   {key:"#TR_HOTKEY_SHOW_OVERLAY_DAMAGE", text:"Damage overlay"}
   {key:"#TR_HOTKEY_SHOW_OVERLAY_CRIME", text:"Crime overlay"}
   {key:"#TR_HOTKEY_ROTATE_BUILDING", text:"Rotate building"}
@@ -1458,6 +1460,8 @@ localization_en = [
   { key: "#top_menu_overseers_tooltip", text: "Consult your advisors about the state of the city" }
 
   { key: "#sidebar_speed_header", text: "Speed" }
+  { key: "#sidebar_flat_buildings", text: "Flat view" }
+  { key: "#sidebar_flat_buildings_on", text: "Flat view: ON" }
   { key: "#no_requests", text: "There are no requests outstanding at the moment." }
 
   // overlay menu categories

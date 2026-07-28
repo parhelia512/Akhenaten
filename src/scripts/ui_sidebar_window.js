@@ -92,9 +92,15 @@ sidebar_window_expanded {
         build_image       : image({pos[11, 211], pack:PACK_GENERAL, id:117, offset:1})
 
         show_overlays     : link({
-                               pos[4, 30], size[117, 20], hbody:false, border:false, font_hover:FONT_NORMAL_YELLOW
+                               pos[4, 30], size[70, 20], hbody:false, border:false, font_hover:FONT_NORMAL_YELLOW
                                onclick: show_window_by_id("overlay_menu_widget")
                                onrclick: window_city_overlays_right_click
+                            })
+        toggle_flat       : link({
+                               pos[74, 30], size[50, 20], hbody:false, border:false, font_hover:FONT_NORMAL_YELLOW
+                               text: "#sidebar_flat_buildings"
+                               tooltip: "#TR_HOTKEY_TOGGLE_FLAT_BUILDINGS"
+                               onclick: sidebar_window_toggle_flat_buildings
                             })
         collapse          : image_button({pos[128, 30], pack:PACK_GENERAL, id:110, offset:7, tooltip:[68, 10], onclick: __ui_sidebar_expanded_collapse})
 
@@ -248,6 +254,31 @@ function window_build_menu_on_draw(window) {
     window.undo_btn.readonly = !__ui_game_can_undo()
     window.goto_problem.readonly = !__city_message_problem_area_count()
     window.show_overlays.text = ui.sidebar_overlay_link_text()
+
+    var flat_enabled = !!game_features.gameui_flat_buildings
+    var overlay_on = (city.current_overlay != OVERLAY_NONE)
+    window.toggle_flat.enabled = flat_enabled
+    window.toggle_flat.readonly = false
+    window.toggle_flat.darkened = 0
+    if (!flat_enabled) {
+        __city_flat_buildings_sync()
+        window.toggle_flat.text = ""
+    } else if (overlay_on) {
+        // Visible disabled look while overlay wins; hotkey still toggles the flag.
+        window.toggle_flat.readonly = true
+        window.toggle_flat.darkened = 1
+        window.toggle_flat.text = __city_flat_buildings_active()
+            ? "#sidebar_flat_buildings_on"
+            : "#sidebar_flat_buildings"
+    } else {
+        window.toggle_flat.text = __city_flat_buildings_active()
+            ? "#sidebar_flat_buildings_on"
+            : "#sidebar_flat_buildings"
+    }
+}
+
+function sidebar_window_toggle_flat_buildings() {
+    __city_flat_buildings_toggle()
 }
 
 [es=(sidebar_window_collapsed, ui_draw_foreground)]

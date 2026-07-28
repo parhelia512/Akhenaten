@@ -46,6 +46,9 @@ public:
         uint8_t stair_index;
     } BUILDING_RUNTIME_DATA_T;
 
+    // Tall monument ornaments (tiers/cones) - skip in flat buildings view.
+    virtual bool suppress_ornaments_in_flat_view() const override { return true; }
+
     virtual bool need_workers() const { return false; }
     virtual uint8_t phase() const { return runtime_data().phase; }
 
@@ -88,7 +91,7 @@ public:
 ANK_CONFIG_PROPERTY(building_monument::runtime_data_t, variant)
 
 enum module_type {
-    
+
 };
 
 int building_monument_has_unfinished_monuments();

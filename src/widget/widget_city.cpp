@@ -8,6 +8,7 @@
 #include "grid/property.h"
 #include "grid/grid.h"
 #include "widget/city/building_ghost.h"
+#include "widget/city/flat_draw.h"
 #include "overlays/city_overlay.h"
 #include "graphics/image_groups.h"
 #include "building/building_static_params.h"
@@ -52,6 +53,10 @@
 #include "game/game.h"
 #include "core/threading.h"
 #include "building/building.h"
+#include <SDL.h>
+#ifdef main
+#  undef main
+#endif
 #include "city/city_buildings.h"
 #include "dev/debug.h"
 #include "graphics/elements/tooltip.h"
@@ -217,6 +222,9 @@ void screen_city_t::draw_postrender_building_effects(vec2i pixel, tile2i tile, p
     building *b = building_get(building_id);
 
     if (building_id && b->is_valid()) {
+        if (city_flat_should_flatten_building(*b)) {
+            return;
+        }
         building_impl *bi = b->dcast();
         bi->draw_postrender_effects(ctx, pixel, tile, color_mask);
     }
@@ -365,6 +373,8 @@ void screen_city_t::draw_isometric_mark_sound(int building_id, int grid_offset, 
 void screen_city_t::draw_without_overlay(painter &ctx, int selected_figure_id) {
     OZZY_PROFILER_FUNCTION();
     highlighted_formation = 0;
+
+    city_flat_prepare_draw();
 
     // If the game feature for highlighting legions is enabled, check if there's a formation
     // at the current tile position that should be highlighted
@@ -586,13 +596,26 @@ void screen_city_t::draw_isometric_flat(vec2i pixel, tile2i tile, painter &ctx) 
         color_mask = COLOR_MASK_RED;
     }
 
-    bool force_tile_draw = false;
+    building *tile_building = building_id > 0 ? building_get(building_id) : nullptr;
+    const bool flatten = tile_building && city_flat_should_flatten_building(*tile_building);
+    // animations.flat: one full-building sprite from main type params (finished only;
+    // unfinished monuments return 0 from city_flat_building_texture_id).
+    const int flat_img = (flatten && tile_building) ? city_flat_building_texture_id(*tile_building) : 0;
+    // Multi-part complexes: skip part feet when the finished flat sprite is in use.
+    // Unfinished monuments return flat_img 0 → parts keep construction feet.
+    if (flat_img > 0 && tile_building && !tile_building->is_main()) {
+        map_render_set(tile, 0);
+        return;
+    }
+
     {
         OZZY_PROFILER_SECTION(_, "draw_isometric_flat")
         if (!map_property_is_draw_tile(tile)) {
+            // Keep force_draw_flat_tile under flatten (booth plaza, under-construction
+            // monument partials). Iso tops stay off; force_draw_height is in height pass.
             bool force_tile_draw = false;
-            if (building_id > 0) {
-                building_impl *b = building_get(building_id)->dcast();
+            if (building_id > 0 && tile_building) {
+                building_impl *b = tile_building->dcast();
                 force_tile_draw = b->force_draw_flat_tile(ctx, tile, pixel, color_mask);
             }
 
@@ -634,6 +657,9 @@ void screen_city_t::draw_isometric_flat(vec2i pixel, tile2i tile, painter &ctx) 
 
     if (map_property_is_constructing(tile)) {
         image_id = image_id_from_group(GROUP_TERRAIN_OVERLAY_FLAT);
+    } else if (flat_img > 0 && map_property_is_draw_tile(tile)) {
+        // Main only (parts returned above). force_draw partials keep map_image.
+        image_id = flat_img;
     }
 
     const bool is_green_tile = map_terrain_is(tile, TERRAIN_PLANER_FUTURE);
@@ -654,7 +680,8 @@ void screen_city_t::draw_isometric_flat(vec2i pixel, tile2i tile, painter &ctx) 
         command.mask = color_mask;
     }
 
-    {
+    // Flat view: keep footprint sprite, skip alt ghost and iso tops.
+    if (!flatten) {
         OZZY_PROFILER_SECTION(_, "ert_drawtile_alt")
         int image_alt_value = map_image_alt_at(tile);
         int image_alt_id = (image_alt_value & 0x00ffffff);
@@ -669,7 +696,7 @@ void screen_city_t::draw_isometric_flat(vec2i pixel, tile2i tile, painter &ctx) 
         }
     }
 
-    map_render_set(tile, (img->isometric_top_height > 0) ? RENDER_TALL_TILE : 0);
+    map_render_set(tile, (!flatten && img->isometric_top_height > 0) ? RENDER_TALL_TILE : 0);
 }
 
 void screen_city_t::draw_isometric_nonterrain_height(vec2i pixel, tile2i tile, color mask, painter &ctx) {
@@ -701,17 +728,29 @@ void screen_city_t::draw_isometric_nonterrain_height(vec2i pixel, tile2i tile, p
         color_mask = COLOR_MASK_RED;
     }
 
+    building *tile_building = building_id > 0 ? building_get(building_id) : nullptr;
+    const bool flatten = tile_building && city_flat_should_flatten_building(*tile_building);
+
     if (!map_property_is_draw_tile(grid_offset)) {
         bool force_draw_tile = false;
-        if (building_id > 0) {
-            building_impl *b = building_get(building_id)->dcast();
+        if (building_id > 0 && tile_building) {
+            building_impl *b = tile_building->dcast();
+            // Flat view: keep force_draw_height (ferry top, booth full tile).
+            // Skip force_draw_top (iso top bleed).
             force_draw_tile = b->force_draw_height_tile(ctx, tile, pixel, color_mask);
-            b->force_draw_top_tile(ctx, tile, pixel, color_mask);
+            if (!flatten) {
+                b->force_draw_top_tile(ctx, tile, pixel, color_mask);
+            }
         }
 
         if (!force_draw_tile) {
             return;
         }
+    }
+
+    if (flatten) {
+        // No RENDER_TALL_TILE / iso tops under flat view.
+        return;
     }
 
     bool tall_flat_tile = map_render_isu(grid_offset, RENDER_TALL_TILE);
@@ -837,6 +876,10 @@ void screen_city_t::draw_ornaments_and_animations_height(vec2i point, tile2i til
         return;
     }
 
+    if (city_flat_should_skip_tall_ornaments(*b)) {
+        return;
+    }
+
     // draw in red if necessary
     int color_mask = force_mask;
     if (drawing_building_as_deleted(b) || map_property_is_deleted(grid_offset)) {
@@ -881,6 +924,8 @@ void screen_city_t::draw_ornaments_overlay(vec2i pixel, tile2i point, painter &c
 
 void screen_city_t::draw_with_overlay(painter &ctx) {
     OZZY_PROFILER_FUNCTION();
+    city_flat_prepare_draw();
+
     const auto overlay = g_city.overlay();
     if (!overlay) {
         return;
@@ -1446,7 +1491,23 @@ void screen_city_t::handle_mouse(const mouse* m) {
         if (g_city_planner.construction_active()) {
             g_city_planner.construction_cancel();
         } else {
-            if (allow_building_info(current_tile)) {
+            // FM3: Ctrl+RMB raises one building while flat view is On (no build tool).
+            // Empty / invalid tile must fall through to building info.
+            bool raised = false;
+            const bool ctrl = (SDL_GetModState() & KMOD_CTRL) != 0;
+            if (ctrl && city_flat_view_active() && !g_city_planner.build_type
+                && input_coords_in_city(m->x, m->y) && current_tile.valid()) {
+                building *b = building_at(current_tile);
+                if (b && b->is_valid()) {
+                    building *main_b = b->main();
+                    if (main_b && main_b->is_valid()) {
+                        city_flat_toggle_raised(main_b->id);
+                        city_flat_prepare_draw();
+                        raised = true;
+                    }
+                }
+            }
+            if (!raised && allow_building_info(current_tile)) {
                 events::emit(event_show_tile_info{ current_tile, false, SOURCE_LOCATION });
             }
         }

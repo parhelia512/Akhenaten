@@ -87,6 +87,10 @@ void draw_ornaments_flat(vec2i point, tile2i tile, painter &ctx) {
         return;
     }
 
+    // Do not use should_skip_tall_ornaments here: mastaba/pyramid construction
+    // progress (bricks, grounded) lives in flat ornaments. Tall finished volume
+    // is skipped in the height ornaments pass instead.
+
     // draw in red if necessary
     int color_mask = 0;
     if (drawing_building_as_deleted(b) || map_property_is_deleted(grid_offset)) {

@@ -179,6 +179,7 @@ window_hotkey_config {
         { action: HOTKEY_SHOW_OVERLAY_DAMAGE, text: "#TR_HOTKEY_SHOW_OVERLAY_DAMAGE" },
         { action: HOTKEY_SHOW_OVERLAY_CRIME, text: "#TR_HOTKEY_SHOW_OVERLAY_CRIME" },
         { action: HOTKEY_SHOW_OVERLAY_PROBLEMS, text: "#TR_HOTKEY_SHOW_OVERLAY_PROBLEMS" },
+        { action: HOTKEY_TOGGLE_FLAT_BUILDINGS, text: "#TR_HOTKEY_TOGGLE_FLAT_BUILDINGS" },
         { action: -1, text: "#TR_HOTKEY_HEADER_BOOKMARKS" },
         { action: HOTKEY_GO_TO_BOOKMARK_1, text: "#TR_HOTKEY_GO_TO_BOOKMARK_1" },
         { action: HOTKEY_GO_TO_BOOKMARK_2, text: "#TR_HOTKEY_GO_TO_BOOKMARK_2" },

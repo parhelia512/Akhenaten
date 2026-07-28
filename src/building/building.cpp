@@ -9,6 +9,7 @@
 #include "city/city_warnings.h"
 #include "game/game_events.h"
 #include "widget/city/ornaments.h"
+#include "widget/city/flat_draw.h"
 #include "core/svector.h"
 #include "core/profiler.h"
 #include "figure/formation_batalion.h"
@@ -339,6 +340,16 @@ void building::clear_related_data() {
         city_buildings_remove_triumphal_obelisk();
     }
 
+    // Flat view raised set: drop this id and main id (parts share main).
+    if (id > 0) {
+        city_flat_erase_raised(id);
+        if (const building *m = main()) {
+            if (m->id > 0 && m->id != id) {
+                city_flat_erase_raised(m->id);
+            }
+        }
+    }
+
     dcast()->on_destroy();
     clear_impl();
 }
@@ -484,6 +495,7 @@ void building::destroy_by_collapse() {
 
     destroy_reason = e_destroy_collapse;
     state = BUILDING_STATE_RUBBLE;
+    city_flat_erase_raised(id);
     dcast()->on_before_collapse();
     map_building_tiles_set_rubble(id, tile, size);
     figure_create_explosion_cloud(tile, size);
@@ -498,6 +510,7 @@ void building::destroy_by_flooded() {
 
     destroy_reason = e_destroy_flooded;
     state = BUILDING_STATE_RUBBLE;
+    city_flat_erase_raised(id);
     dcast()->on_before_flooded();
     map_building_tiles_set_rubble(id, tile, size);
     destroy_linked_parts(false);

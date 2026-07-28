@@ -16,6 +16,7 @@ struct screen_city_t {
     color force_mask;
     int new_start_grid_offset;
     bool capture_input;
+    bool buildings_flat_view = false;
 
     local_render_context_t render_ctx;
 

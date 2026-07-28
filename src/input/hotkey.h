@@ -27,6 +27,7 @@ struct event_change_building_variant { int value; };
 struct event_set_bookmark { int value; };
 struct event_goto_bookmark { int value; };
 struct event_editor_toggle_battle_info { int value; };
+struct event_toggle_flat_buildings { int value; };
 struct event_toggle_legion { int value; };
 struct event_copy_build_from_cursor { int value; };
 struct event_show_main_menu { bool play_intro; };

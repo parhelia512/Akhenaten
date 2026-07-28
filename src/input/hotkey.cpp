@@ -62,6 +62,10 @@ static void add_definition(const hotkey_mapping& mapping, bool alt) {
         def->callback = [action = mapping.action] { events::emit(event_toggle_overlay{ action }); };
         break;
 
+    case HOTKEY_TOGGLE_FLAT_BUILDINGS:
+        def->callback = [action = mapping.action] { events::emit(event_toggle_flat_buildings{ action }); };
+        break;
+
     case HOTKEY_CYCLE_LEGION:
         def->callback = [action = mapping.action] { events::emit(event_toggle_legion{ action }); };
         break;

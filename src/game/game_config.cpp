@@ -32,6 +32,7 @@ namespace game_features {
     game_feature gameui_visual_feedback_on_delete{ "gameui_visual_feedback_on_delete", "#TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE", true };
     game_feature gameui_show_water_structure_range{ "gameui_show_water_structure_range", "#TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE", true };
     game_feature gameui_show_building_road_access{ "gameui_show_building_road_access", "#TR_CONFIG_SHOW_BUILDING_ROAD_ACCESS", true };
+    game_feature gameui_flat_buildings{ "gameui_flat_buildings", "#TR_CONFIG_FLAT_BUILDINGS", true };
     game_feature gameui_show_construction_size{ "gameui_show_construction_size", "#TR_CONFIG_SHOW_CONSTRUCTION_SIZE", true };
     game_feature gameui_show_current_select_tile{ "gameui_show_current_select_tile", "#TR_CONFIG_SHOW_CURRENT_SELECT_TILE", false };
     game_feature gameui_show_input_near_cursor{ "gameui_show_input_near_cursor", "#TR_CONFIG_SHOW_INPUT_NEAR_CURSOR", false };

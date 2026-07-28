@@ -50,6 +50,7 @@ namespace game_features {
     extern game_feature gameui_visual_feedback_on_delete;
     extern game_feature gameui_show_water_structure_range;
     extern game_feature gameui_show_building_road_access;
+    extern game_feature gameui_flat_buildings;
     extern game_feature gameui_show_construction_size;
     extern game_feature gameui_show_current_select_tile;
     extern game_feature gameui_show_input_near_cursor;

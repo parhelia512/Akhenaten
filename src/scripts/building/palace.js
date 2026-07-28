@@ -5,6 +5,11 @@ building_village_palace {
     preview { pack:PACK_GENERAL, id:47 },
     base { pack:PACK_GENERAL, id:47 },
     work { pos : [24, -20], pack:PACK_GENERAL, id:47, offset:1, max_frames:5, duration:5, can_reverse:true }
+    // Optional flat-view sprite (Shift+F). Drawn once on main's draw-tile.
+    // Multi-part complexes: parts are skipped when flat is set (provide a full-complex sprite).
+    // Single multi-tile buildings (palace): one draw-tile → full footprint sprite is fine.
+    // If omitted, city keeps isometric foot.
+    // flat { pack:PACK_GENERAL, id:47 }
   }
 
   labor_category : LABOR_CATEGORY_GOVERNMENT

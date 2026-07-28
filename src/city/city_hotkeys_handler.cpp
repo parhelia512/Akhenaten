@@ -3,6 +3,7 @@
 #include "city/city.h"
 #include "game/game_events.h"
 #include "graphics/window.h"
+#include "widget/city/flat_draw.h"
 #include "window/window_city.h"
 
 void city_hotkeys_handler_t::init() {
@@ -32,5 +33,13 @@ void city_hotkeys_handler_t::init() {
             window_city_show();
         }
         g_city.toggle_overlay();
+    });
+
+    events::subscribe([] (event_toggle_flat_buildings) {
+        if (!g_window_manager.window_is("window_city")
+            && !g_window_manager.window_is("window_city_military")) {
+            return;
+        }
+        city_flat_view_toggle();
     });
 }

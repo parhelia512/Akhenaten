@@ -49,6 +49,8 @@ public:
     virtual bool force_draw_flat_tile(painter &ctx, tile2i tile, vec2i pixel, color mask) { return false; }
     virtual bool force_draw_height_tile(painter &ctx, tile2i tile, vec2i pixel, color mask) { return false; }
     virtual bool force_draw_top_tile(painter &ctx, tile2i tile, vec2i pixel, color mask) { return false; }
+    // Tall monument ornaments (pyramid tiers, mastaba height FX) - skip in flat view.
+    virtual bool suppress_ornaments_in_flat_view() const { return false; }
     virtual e_overlay get_overlay() const { return current_params().overlay; }
     virtual bool is_enemies_nearby() const;
     virtual void update_count() const;
