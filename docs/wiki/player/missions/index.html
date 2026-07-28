@@ -63,7 +63,7 @@
       <ul style="margin:0 0 1.5rem;padding-left:1.25rem;font-size:0.88rem;color:var(--text-muted);line-height:1.9">
         <li><strong style="color:var(--text)">38</strong> missions (Pharaoh) + <strong style="color:var(--text)">15</strong> (Cleopatra expansion)</li>
         <li><strong style="color:var(--text)">9</strong> branching pairs (Pharaoh); Cleopatra campaigns are linear (no choice pairs)</li>
-        <li>Missions <strong style="color:var(--text)">0 – 31</strong> + Cleopatra <strong style="color:var(--text)">45</strong> (Pi-Yer) have JS scripts; <strong style="color:var(--text)">32–44, 46–52</strong> pending</li>
+        <li>Missions <strong style="color:var(--text)">0 – 31</strong> + Cleopatra <strong style="color:var(--text)">41</strong> (Sumur) + <strong style="color:var(--text)">45</strong> (Pi-Yer) have JS scripts; <strong style="color:var(--text)">32–40, 42–44, 46–52</strong> pending</li>
         <li>Ratings: <strong style="color:var(--text)">Culture · Prosperity · Kingdom · Monuments</strong></li>
         <li>Housing: <strong style="color:var(--text)">20 tiers</strong>, Crude Hut → Palatial Estate</li>
       </ul>
@@ -683,10 +683,10 @@
 
       <!-- ═══════════════════════════════════════════ -->
       <h2 id="cleopatra" class="era-section">Cleopatra: Queen of the Nile &nbsp;<small style="color:var(--text-muted);font-size:0.7em;font-weight:normal">Expansion — 15 missions in 4 campaigns</small></h2>
-      <p>The Cleopatra expansion adds four independent campaigns spanning the New Kingdom and Ptolemaic periods (~1279 – 30 BC). It introduces new building types — Lamp Makers, Royal Burial Tombs, Paint Makers, Zoos — and Cleopatra monuments including Abu Simbel, Alexandria's Great Library, the Pharos Lighthouse, and the Caesareum. Scenario ids <strong>38–52</strong> map to campaign saves <code>mission_38.sav</code> … <code>mission_52.sav</code> (Actium = 52).</p>
+      <p>The Cleopatra expansion adds four independent campaigns (Valley of the Kings → Ramses II → Ancient Conquerors → Cleopatra's Capital). Eras span New Kingdom through Ptolemaic — per-campaign years after dump, not one block for all four. New buildings include Lamp Makers, Royal Burial Tombs, Paint Makers, Zoos, and Cleopatra monuments (Abu Simbel, Library, Pharos, Caesareum). Scenario ids <strong>38–52</strong> map to <code>mission_38.sav</code> … <code>mission_52.sav</code> (Actium = 52).</p>
 
       <h2 class="era-section" style="font-size:1.1rem;margin-top:1.5rem;color:var(--text-muted)">Valley of the Kings &nbsp;<small style="font-size:0.8em">campaign 5 · missions 38–40</small></h2>
-      <p>Artisan village supporting royal tombs in the Valley of the Kings. New buildings — Lamp Makers, Royal Burial Tombs, Paint Makers — are introduced through the Deir el-Medina missions.</p>
+      <p>Linear chain Thutmose → Tut → Seti in the Valley (<code>campaign.txt</code>; no branching). Scenario titles = OG briefing subtitles (MM). After 40 → campaign end (<code>next_mission: -1</code>), not Sumur. Soft gates: Lamp Makers, Royal Burial Tombs, Paint Makers, tomb robbers.</p>
 
       <div class="wiki-table-wrap">
         <table class="wiki-table">
@@ -702,31 +702,31 @@
           <tbody>
             <tr>
               <td>38</td>
-              <td class="mission-city">Deir el-Medina <span style="color:var(--text-muted);font-weight:normal">(first)</span></td>
-              <td>The Workers' Village</td>
-              <td>Establish the artisan village that houses the stonemasons, painters, and craftsmen who build the royal tombs in the Valley of the Kings. Tutorial for Lamp Makers and Royal Burial Tombs.</td>
+              <td class="mission-city">Thutmose in the Valley</td>
+              <td>The First Tomb</td>
+              <td>Found a west-bank workers' village (Deir el-Medina) and cut Thutmose's tomb in the cliffs — stonemasons, artisans, lamp makers (pottery + imported oil), henna for paint makers.</td>
               <td><span class="mission-badge badge-tutorial">Tutorial</span></td>
             </tr>
             <tr>
               <td>39</td>
-              <td class="mission-city">Deir el-Medina <span style="color:var(--text-muted);font-weight:normal">(second)</span></td>
-              <td>The Artisans' Quarter</td>
-              <td>Grow the workers' settlement. Stonemasons carve the tomb chambers; artisans plaster and paint the walls. New requirements: oil and clay for paint. Tomb robbers appear if city sentiment is poor.</td>
+              <td class="mission-city">Tut in the Valley</td>
+              <td>Death of Tutankhamun</td>
+              <td>Unexpected death of the young Pharaoh — finish and provision Tutankhamun's tomb in a few short years. Speed is critical.</td>
               <td>—</td>
             </tr>
             <tr>
               <td>40</td>
-              <td class="mission-city">Deir el-Medina <span style="color:var(--text-muted);font-weight:normal">(third)</span></td>
-              <td>The Valley's Heart</td>
-              <td>Multiple Royal Burial Tombs under construction simultaneously. Manage complex supply chains for lamps, clay, and paint while keeping the workforce housed and fed.</td>
+              <td class="mission-city">Seti in the Valley</td>
+              <td>Tomb for a Pharaoh</td>
+              <td>Excavate Seti's royal tomb to unrivaled craftsmanship; guard against tomb robbers defiling the Valley.</td>
               <td>—</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h2 class="era-section" style="font-size:1.1rem;margin-top:1.5rem;color:var(--text-muted)">Ramses II &nbsp;<small style="font-size:0.8em">campaign 6 · missions 41–44 · ~1279 – 1213 BC</small></h2>
-      <p>Linear chain Sumur → Qadesh → Abu Simbel → Ramses in the Valley (<code>campaign.txt</code>; no branching). Scenario titles = OG briefing subtitles (MM), not fan names. After 44 → campaign end (<code>next_mission: -1</code>), not Ancient Conquerors.</p>
+      <h2 class="era-section" style="font-size:1.1rem;margin-top:1.5rem;color:var(--text-muted)">Ramses II &nbsp;<small style="font-size:0.8em">campaign 6 · missions 41–44 · Ramses II era (wiki ~1279–1213 BC; years per dump)</small></h2>
+      <p>Linear chain Sumur → Qadesh → Abu Simbel → Ramses in the Valley (<code>campaign.txt</code>; no branching). Scenario titles = OG briefing subtitles (MM), not fan names. After 44 → campaign end (<code>next_mission: -1</code>), not Ancient Conquerors. Soft gates: troop carry 41→42 if CO0 confirms; Abu Simbel monument; royal tomb + lamps on 44.</p>
 
       <div class="wiki-table-wrap">
         <table class="wiki-table">
@@ -742,9 +742,9 @@
           <tbody>
             <tr>
               <td>41</td>
-              <td class="mission-city">Sumur</td>
+              <td class="mission-city"><a href="sumur.html">Sumur</a></td>
               <td>Lands of the Levant</td>
-              <td>Establish a Levantine port of commerce under Ramses II — export wood and copper, hold against Hittite pressure, and erect an obelisk proclaiming Pharaoh's glory.</td>
+              <td>Establish a Levantine port of commerce under Ramses II — export wood, copper, and fish; hold military pressure (pak enemy Canaanite; briefing names Hittites); erect a granite obelisk.</td>
               <td>—</td>
             </tr>
             <tr>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sumur — Lands of the Levant — Akhenaten Wiki</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .mission-infobox { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.9rem 1.1rem; }
+    .mission-infobox dl { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 1rem; margin: 0; }
+    .mission-infobox dt { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; }
+    .mission-infobox dd { margin: 0; font-size: 0.85rem; }
+    .mission-infobox .funds-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .mission-infobox .funds-row span { font-size: 0.75rem; color: var(--text-muted); }
+    .mission-infobox .funds-row span strong { color: var(--text); }
+    .dev-section { margin-top: 2.5rem; }
+    .dev-section h2 { color: var(--text-muted); font-size: 1rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; }
+    summary { padding: 0.7rem 1rem; cursor: pointer; font-size: 0.875rem; font-weight: 600; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    .details-body { padding: 1rem 1.1rem; font-size: 0.85rem; line-height: 1.6; }
+    .file-ref { font-family: Consolas, monospace; font-size: 0.78rem; color: var(--gold); }
+    .msg-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+    .msg-table th, .msg-table td { padding: 0.3rem 0.6rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.8rem; }
+    .objectives-list { list-style: none; padding: 0; }
+    .objectives-list li { display: flex; gap: 0.6rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .obj-label { font-weight: 600; min-width: 8rem; }
+    .deviation-note { background: rgba(201,120,76,0.08); border: 1px solid rgba(201,120,76,0.3); border-radius: 4px; padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--text-muted); margin: 0.75rem 0; }
+    .mission-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; }
+    .mission-nav a { color: var(--gold); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">Akhenaten</a>
+      <ul>
+        <li><a href="../../index.html" class="active">Wiki</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main class="wiki-layout">
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title"><a href="index.html">← All Missions</a></div>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Ramses II</div>
+        <ul>
+          <li><a href="sumur.html" class="active">41 · Sumur</a></li>
+          <li><span style="color:var(--text-muted)">42 · Qadesh</span></li>
+          <li><span style="color:var(--text-muted)">43 · Abu Simbel</span></li>
+          <li><span style="color:var(--text-muted)">44 · Ramses in the Valley</span></li>
+        </ul>
+      </div>
+    </aside>
+
+    <article class="wiki-content">
+      <h1>Sumur</h1>
+      <p class="wiki-subtitle">Lands of the Levant · mission 41 · Cleopatra campaign 6</p>
+
+      <div class="mission-infobox">
+        <dl>
+          <dt>Scenario id</dt><dd>41</dd>
+          <dt>Campaign</dt><dd>Ramses II (6)</dd>
+          <dt>Start year</dt><dd>1300 BC</dd>
+          <dt>Player rank</dt><dd>6 (pak)</dd>
+          <dt>Enemy (pak)</dt><dd><code>ENEMY_2_CANAANITE</code> (briefing says Hittites)</dd>
+          <dt>Funds (Normal)</dt>
+          <dd>
+            <div class="funds-row">
+              <span>treasury <strong>5 565</strong></span>
+              <span>loan <strong>1 500</strong></span>
+              <span>debt interest <strong>9%</strong></span>
+            </div>
+          </dd>
+          <dt>Gods</dt><dd>Ra (2), Ptah (1)</dd>
+          <dt>Next</dt><dd>42 Qadesh (<code>next_mission: 42</code>; playable when stubbed)</dd>
+        </dl>
+      </div>
+
+      <div class="deviation-note">
+        <strong>Status:</strong> full JS redefine — <code>hide_pak_cities/routes/objects</code> + event graph (dump 2026-07-28).
+        <br /><strong>Soft / TEMP:</strong> monuments goal <strong>9</strong> (pak raw 6; Small Obelisk). Granite via Waset. Chain invasion after LOST Qadesh → B12 JS; favour egypt×23; canaanite×33 calendar.
+        <br /><strong>Deviations:</strong> gift refuse paths dead (engine gifts always complete); recurring KR/gifts via <code>event_request_cleared</code> (shared ONLY_VIA leaves fire once); DEMAND_↑ only mutates <em>open</em> cities; NEW_TRADE Knossos is display-only (no sells/buys). Sea-trade duration engine-fixed 48. Timber recurring handoff: i=6 (×21) owns m2 through y15; i=24 (×14) from y16 (same month/resource would starve otherwise). i=5 copper tags use 7100+y (gift keeps 3500+y).
+        <br /><strong>Topo:</strong> linear R2 chain 41→42→43→44→<code>-1</code>. Victory 41→42 ends until <code>m_042</code> exists.
+      </div>
+
+      <h2 id="objectives">Objectives</h2>
+      <ul class="objectives-list">
+        <li><span class="obj-label">Population</span><span class="obj-value">3 000</span></li>
+        <li><span class="obj-label">Culture</span><span class="obj-value">35</span></li>
+        <li><span class="obj-label">Prosperity</span><span class="obj-value">40</span></li>
+        <li><span class="obj-label">Monuments</span><span class="obj-value">9 (TEMP; Small Obelisk)</span></li>
+        <li><span class="obj-label">Kingdom</span><span class="obj-value">90</span></li>
+        <li><span class="obj-label">Housing</span><span class="obj-value">level 14</span></li>
+      </ul>
+
+      <h2 id="briefing">Briefing (summary)</h2>
+      <p>Establish a Levantine port of commerce under Ramses II — export wood, copper, and fish; hold military pressure (pak: Canaanite enemy; briefing mentions Hittites); erect an obelisk (granite via Waset). Qadesh trade starts open (pak).</p>
+
+      <div class="dev-section">
+        <h2 id="dev">Developer reference</h2>
+        <details open>
+          <summary>Mission script</summary>
+          <div class="details-body">
+            <p><span class="file-ref">src/scripts/mission/m_041_sumur.js</span></p>
+            <p><code>map_file</code>: <span class="file-ref">data/maps/m_041_sumur.map</span>. Empire id 23, <code>map_background</code> pack empire id 21. SKIP empty map_obj idx=6. Dump 2026-07-28 Cleop (<span class="file-ref">tmp/mission41_pak.txt</span>). Trade: Qadesh open; Men-nefer / Rowarty / Waset / Timna / Jericho / Enkomi closed. Ours sells fish/timber/copper.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Messages</summary>
+          <div class="details-body">
+            <table class="msg-table">
+              <tr><th>Key</th><th>Id</th></tr>
+              <tr><td><code>message_mission_sumur</code></td><td>450</td></tr>
+              <tr><td><code>message_mission_sumur_2</code></td><td>465</td></tr>
+            </table>
+          </div>
+        </details>
+      </div>
+
+      <div class="mission-nav">
+        <a href="index.html">← Mission index</a>
+        <span style="color:var(--text-muted)">Qadesh →</span>
+      </div>
+    </article>
+  </main>
+</body>
+</html>
