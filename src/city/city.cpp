@@ -34,6 +34,7 @@
 #include "figuretype/figure_kingdome_trader.h"
 #include "figuretype/figure_trader_ship.h"
 #include "figuretype/figure_flotsam.h"
+#include "figuretype/figure_tomb_robber.h"
 #include "figuretype/figure_funeral_walker.h"
 #include "city_warnings.h"
 #include "game/game_events.h"
@@ -143,6 +144,10 @@ void city_t::update_month(simulation_time_t simtime) {
     kingdome.advance_month();
 
     formation_update_monthly_morale_deployed();
+
+    // BF1 / TR: monthly tomb-robber threat (anti-spam — not every day).
+    figure_tomb_robber::try_spawn(/*force_gates=*/false);
+    figure_tomb_robber::try_professional_wave();
 }
 
 void city_t::init_custom_map() {

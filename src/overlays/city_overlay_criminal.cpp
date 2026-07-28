@@ -54,7 +54,7 @@ static int get_crime_image_offset(int crime_level) {
 city_overlay_crime g_city_overlay_crime;
 
 bool city_overlay_crime::show_figure(const figure *f) const {
-    return false;
+    return city_overlay::show_figure(f);
 }
 
 int city_overlay_crime::get_column_height(const building* b) const {

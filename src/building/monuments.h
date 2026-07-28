@@ -44,7 +44,8 @@ public:
         uint8_t upgrades;
         uint16_t alt_image;
         uint8_t stair_index;
-        uint8_t funeral_done; // BF2: procession already held for this tomb (main)
+        uint8_t funeral_done;  // BF2: procession already held for this tomb (main)
+        uint8_t preexisting;   // CO3 / TR4b: sealed carry-over tomb (no steal)
     } BUILDING_RUNTIME_DATA_T;
 
     // Tall monument ornaments (tiers/cones) - skip in flat buildings view.
@@ -91,6 +92,10 @@ public:
     // BF2: one funeral procession per finished tomb (main part).
     bool has_funeral_done() const;
     void set_funeral_done(bool done = true);
+
+    // CO3 / TR4b: pre-existing sealed burial tomb.
+    bool is_preexisting() const;
+    void set_preexisting(bool preexisting = true);
 };
 
 ANK_CONFIG_PROPERTY(building_monument::runtime_data_t, variant)

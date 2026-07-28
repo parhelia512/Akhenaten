@@ -286,7 +286,7 @@ void building_obelisk::bind_dynamic(io_buffer *iob, size_t /*version*/) {
     }
     iob->bind(BIND_SIGNATURE_UINT8, &monumentd.phase);
     iob->bind(BIND_SIGNATURE_UINT8, &monumentd.funeral_done); // was skip(1)
-    iob->bind____skip(1);
+    iob->bind(BIND_SIGNATURE_UINT8, &monumentd.preexisting);  // was skip(1)
     iob->bind(BIND_SIGNATURE_UINT8, &monumentd.variant);
 
     for (int i = 0; i < RESOURCES_MAX; i++) {

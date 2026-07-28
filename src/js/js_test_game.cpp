@@ -37,6 +37,8 @@
 #include "figuretype/figure_mummy.h"
 #include "figuretype/figure_locust.h"
 #include "figuretype/figure_funeral_walker.h"
+#include "figuretype/figure_tomb_robber.h"
+#include "figuretype/figure_constable.h"
 #include "figure/combat.h"
 #include "city/city_animals.h"
 #include "graphics/color.h"
@@ -1000,6 +1002,74 @@ static void __test_burial_provisions_force_dispatched(int resource, int dispatch
     g_scenario.monuments.burial_provisions[resource].dispatched = std::max(0, dispatched);
 }
 ANK_FUNCTION_2(__test_burial_provisions_force_dispatched);
+
+static void __test_sentiment_set(int value) {
+    g_city.sentiment.value = value;
+}
+ANK_FUNCTION_1(__test_sentiment_set);
+
+static int __test_tomb_robber_try_spawn(int force_gates) {
+    return figure_tomb_robber::try_spawn(force_gates != 0);
+}
+ANK_FUNCTION_1(__test_tomb_robber_try_spawn);
+
+static int __test_tomb_robber_spawn_wave(int count) {
+    return figure_tomb_robber::spawn_wave(count);
+}
+ANK_FUNCTION_1(__test_tomb_robber_spawn_wave);
+
+static int __test_tomb_robber_commit_plunder(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive() || f->type != FIGURE_TOMB_ROBER) {
+        return 0;
+    }
+    return figure_tomb_robber(f).commit_plunder() ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_tomb_robber_commit_plunder);
+
+static int __test_tomb_robber_arrest(int fid, int force) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive() || f->type != FIGURE_TOMB_ROBER) {
+        return 0;
+    }
+    return figure_tomb_robber(f).arrest(force != 0) ? 1 : 0;
+}
+ANK_FUNCTION_2(__test_tomb_robber_arrest);
+
+static int __test_constable_try_arrest(int constable_id, int max_distance, int force) {
+    figure *f = figure_get(constable_id);
+    if (!f || !f->is_alive() || f->type != FIGURE_CONSTABLE) {
+        return 0;
+    }
+    return figure_constable(f).try_arrest_criminal(max_distance, force != 0) ? 1 : 0;
+}
+ANK_FUNCTION_3(__test_constable_try_arrest);
+
+static void __test_monument_set_preexisting(int bid, int preexisting) {
+    building *b = building_get(bid);
+    auto *m = b ? b->dcast_monument() : nullptr;
+    if (m) {
+        m->set_preexisting(preexisting != 0);
+    }
+}
+ANK_FUNCTION_2(__test_monument_set_preexisting);
+
+static int __test_monument_is_preexisting(int bid) {
+    building *b = building_get(bid);
+    auto *m = b ? b->dcast_monument() : nullptr;
+    return (m && m->is_preexisting()) ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_monument_is_preexisting);
+
+static int __test_kingdom_rating() {
+    return g_city.kingdome.rating;
+}
+ANK_FUNCTION(__test_kingdom_rating);
+
+static void __test_kingdom_set_rating(int value) {
+    g_city.kingdome.rating = (uint8_t)std::clamp(value, 0, 100);
+}
+ANK_FUNCTION_1(__test_kingdom_set_rating);
 
 static int __test_funeral_try_spawn(int force_ignore_road) {
     return figure_funeral_walker::try_spawn_all(force_ignore_road != 0);

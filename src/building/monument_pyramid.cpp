@@ -1342,6 +1342,10 @@ void building_stepped_pyramid::bind_dynamic(io_buffer *iob, size_t version) {
     if (version >= 179) {
         iob->bind_u8(monumentd.funeral_done);
     }
+    // TR4b / CO3: preexisting sealed tomb flag.
+    if (version >= 180) {
+        iob->bind_u8(monumentd.preexisting);
+    }
 }
 
 int building_small_stepped_pyramid::building_image_get() const {

@@ -593,6 +593,24 @@ void building_monument::set_funeral_done(bool done) {
     d.funeral_done = done ? 1 : 0;
 }
 
+bool building_monument::is_preexisting() const {
+    const building *mb = base.main();
+    if (!mb) {
+        mb = &base;
+    }
+    const auto &d = *reinterpret_cast<const runtime_data_t *>(mb->runtime_data);
+    return d.preexisting != 0;
+}
+
+void building_monument::set_preexisting(bool preexisting) {
+    building *mb = base.main();
+    if (!mb) {
+        mb = &base;
+    }
+    auto &d = *reinterpret_cast<runtime_data_t *>(mb->runtime_data);
+    d.preexisting = preexisting ? 1 : 0;
+}
+
 building *city_has_unfinished_monuments() {
     return buildings_valid_first([] (building &b) { 
         auto monument = b.dcast_monument();

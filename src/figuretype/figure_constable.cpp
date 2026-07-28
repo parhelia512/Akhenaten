@@ -1,6 +1,7 @@
 #include "figure_constable.h"
 
 #include "core/calc.h"
+#include "core/random.h"
 #include "grid/road_access.h"
 #include "grid/building.h"
 #include "figure/enemy_army.h"
@@ -11,6 +12,7 @@
 #include "graphics/image.h"
 #include "building/building_house.h"
 #include "building/building_storage_yard.h"
+#include "figuretype/figure_tomb_robber.h"
 #include "js/js_game.h"
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_constable);
@@ -158,8 +160,53 @@ bool figure_constable::fight_enemy(int category, int max_distance) {
     return false;
 }
 
+bool figure_constable::try_arrest_criminal(int max_distance, bool force) {
+    switch (action_state()) {
+    case ACTION_150_CONSTABLE_ATTACK:
+    case FIGURE_ACTION_149_CORPSE:
+    case ACTION_70_CONSTABLE_CREATED:
+    case ACTION_71_CONSTABLE_ENTERING_EXITING:
+    case ACTION_76_CONSTABLE_GOING_TO_ENEMY:
+    case ACTION_77_CONSTABLE_AT_ENEMY:
+        return false;
+    }
+
+    auto result = base.is_nearby(NEARBY_HOSTILE, max_distance);
+    if (result.fid <= 0 || result.distance > max_distance) {
+        return false;
+    }
+
+    figure *criminal = figure_get(result.fid);
+    if (!criminal || !criminal->is_alive() || !criminal->is_criminal()) {
+        return false;
+    }
+
+    // Prefer dedicated arrest over enemy chase for tomb robbers / muggers.
+    if (criminal->type == FIGURE_TOMB_ROBER) {
+        auto *robber = criminal->dcast<figure_tomb_robber>();
+        if (robber && robber->arrest(force)) {
+            base.target_figure_id = 0;
+            return true;
+        }
+        return false; // failed roll — robber continues
+    }
+
+    if (criminal->type == FIGURE_ROBBER || criminal->type == FIGURE_PROTESTER) {
+        if (!force && (random_byte() % 100) >= 75) {
+            return false;
+        }
+        criminal->poof();
+        base.target_figure_id = 0;
+        return true;
+    }
+
+    return false;
+}
+
 void figure_constable::figure_action() {
-    fight_enemy(2, 22);
+    if (!try_arrest_criminal(22)) {
+        fight_enemy(2, 22);
+    }
 
     building* b = home();
     switch (action_state()) {

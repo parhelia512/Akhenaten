@@ -32,4 +32,6 @@ public:
     //virtual figure_sound_t get_sound_reaction(pcstr key) const override;
 
     bool fight_enemy(int category, int max_distance);
+    // TR3: arrest nearby criminal (tomb robber / mugger). force skips TEMP 75% roll.
+    bool try_arrest_criminal(int max_distance, bool force = false);
 };

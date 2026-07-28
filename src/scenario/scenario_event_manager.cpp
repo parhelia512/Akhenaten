@@ -36,6 +36,7 @@
 #include "figure/formation.h"
 #include "figuretype/figure_mummy.h"
 #include "figuretype/figure_locust.h"
+#include "figuretype/figure_tomb_robber.h"
 #include "game/game_config.h"
 #include "core/svector.h"
 
@@ -970,10 +971,15 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         messages::popup("message_plague_of_locusts", 0, 0);
         break;
     }
+    case EVENT_TYPE_CRIME_WAVE: {
+        // TR4a: popup 491 + spawn 2 tomb robbers (TEMP).
+        const int n = event.amount.value > 0 ? event.amount.value : 2;
+        figure_tomb_robber::spawn_wave(n);
+        break;
+    }
     case EVENT_TYPE_FROGS:
     case EVENT_TYPE_HAILSTORM:
     case EVENT_TYPE_BLOOD_RIVER:
-    case EVENT_TYPE_CRIME_WAVE:
         break;
 
     case EVENT_TYPE_GIFT_FROM_PHARAOH:
