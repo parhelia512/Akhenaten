@@ -63,7 +63,7 @@
       <ul style="margin:0 0 1.5rem;padding-left:1.25rem;font-size:0.88rem;color:var(--text-muted);line-height:1.9">
         <li><strong style="color:var(--text)">38</strong> missions (Pharaoh) + <strong style="color:var(--text)">15</strong> (Cleopatra expansion)</li>
         <li><strong style="color:var(--text)">9</strong> branching pairs (Pharaoh); Cleopatra campaigns are linear (no choice pairs)</li>
-        <li>Missions <strong style="color:var(--text)">0 – 31</strong> + Cleopatra <strong style="color:var(--text)">41</strong> (Sumur) + <strong style="color:var(--text)">45</strong> (Pi-Yer) have JS scripts; <strong style="color:var(--text)">32–40, 42–44, 46–52</strong> pending</li>
+        <li>Missions <strong style="color:var(--text)">0 – 31</strong> + Cleopatra <strong style="color:var(--text)">38–40</strong> (VK) + <strong style="color:var(--text)">41</strong> Sumur + <strong style="color:var(--text)">45</strong> Pi-Yer have JS scripts; <strong style="color:var(--text)">32–37, 42–44, 46–52</strong> pending</li>
         <li>Ratings: <strong style="color:var(--text)">Culture · Prosperity · Kingdom · Monuments</strong></li>
         <li>Housing: <strong style="color:var(--text)">20 tiers</strong>, Crude Hut → Palatial Estate</li>
       </ul>
@@ -702,24 +702,24 @@
           <tbody>
             <tr>
               <td>38</td>
-              <td class="mission-city">Thutmose in the Valley</td>
+              <td class="mission-city"><a href="valley-thutmose.html">Thutmose in the Valley</a></td>
               <td>The First Tomb</td>
-              <td>Found a west-bank workers' village (Deir el-Medina) and cut Thutmose's tomb in the cliffs — stonemasons, artisans, lamp makers (pottery + imported oil), henna for paint makers.</td>
-              <td><span class="mission-badge badge-tutorial">Tutorial</span></td>
+              <td>Found a west-bank workers' village (Deir el-Medina) and cut Thutmose's tomb in the cliffs — stonemasons, artisans, lamp makers (pottery + imported oil), henna for paint makers. Pop off · culture 35 · prosperity 40 · monuments 13 · kingdom 65 · housing lvl 14.</td>
+              <td><span class="mission-badge badge-tutorial">Tutorial</span> <span class="mission-badge badge-impl">Impl</span></td>
             </tr>
             <tr>
               <td>39</td>
-              <td class="mission-city">Tut in the Valley</td>
+              <td class="mission-city"><a href="valley-tut.html">Tut in the Valley</a></td>
               <td>Death of Tutankhamun</td>
-              <td>Unexpected death of the young Pharaoh — finish and provision Tutankhamun's tomb in a few short years. Speed is critical.</td>
-              <td>—</td>
+              <td>Unexpected death of the young Pharaoh — finish and provision Tutankhamun's tomb in a few short years. Speed is critical (8y). Pop 1500 · monuments 22 · kingdom 45 · housing lvl 14.</td>
+              <td><span class="mission-badge badge-impl">Impl</span></td>
             </tr>
             <tr>
               <td>40</td>
-              <td class="mission-city">Seti in the Valley</td>
+              <td class="mission-city"><a href="valley-seti.html">Seti in the Valley</a></td>
               <td>Tomb for a Pharaoh</td>
-              <td>Excavate Seti's royal tomb to unrivaled craftsmanship; guard against tomb robbers defiling the Valley.</td>
-              <td>—</td>
+              <td>Excavate Seti's royal tomb to unrivaled craftsmanship; guard against tomb robbers defiling the Valley. Pop 3000 · culture 40 · prosperity 70 · monuments 32 · kingdom 80 · housing 12×15. Ends campaign (<code>next_mission: -1</code>).</td>
+              <td><span class="mission-badge badge-impl">Impl</span></td>
             </tr>
           </tbody>
         </table>
@@ -869,7 +869,7 @@
 
       <div class="wiki-table-footnotes">
         <p><strong>Objectives legend:</strong> <strong>C</strong> = Culture rating · <strong>Pr</strong> = Prosperity rating · <strong>M</strong> = Monuments points · <strong>K</strong> = Kingdom rating · <strong>Pop</strong> = Population</p>
-        <p><strong>Impl.</strong> missions with full Akhenaten JS scripting currently cover Pharaoh <strong>0–31</strong>. New Kingdom <strong>32–37</strong> and Cleopatra <strong>38–52</strong> are not JS-redefined yet (campaign UI may still list them from <code>campaign.txt</code> / pak; playable JS chains come with <code>m_0NN_*.js</code>).</p>
+        <p><strong>Impl.</strong> missions with Akhenaten JS scripting currently cover Pharaoh <strong>0–31</strong>, plus Cleopatra <strong>38–40</strong> (VK), <strong>41</strong> Sumur, <strong>45</strong> Pi-Yer. New Kingdom <strong>32–37</strong> and remaining Cleo <strong>42–44 / 46–52</strong> are not JS-redefined yet (campaign UI may still list them from <code>campaign.txt</code> / pak).</p>
         <p>Win criteria for missions 11–37 reflect original Pharaoh (1999) mission briefings. Exact rating values will be confirmed as scripting progresses.</p>
       </div>
 

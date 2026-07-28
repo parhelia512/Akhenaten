@@ -136,28 +136,36 @@ void event_ph_t::set_param(pcstr name, int param) {
 }
 
 void event_ph_t::archive_load(archive arch) {
-    switch (type) {
-    case EVENT_TYPE_REQUEST:
-        item.value = arch.r_type<e_resource>("resource");
-        break;
-    case EVENT_TYPE_INVASION:
-        item.value = arch.r_int("item");
-        break;
+    // Optional alias: resource: RESOURCE_* overlays item.value (requests/gifts/prices).
+    const e_resource resource = arch.r_type<e_resource>("resource");
+    if (resource != RESOURCE_NONE) {
+        item.value = resource;
     }
 }
 
 void event_manager_t::load_mission_metadata(const mission_id_t &missionid) {
-    auto &ev_mgr = *this;
     auto &sc_events = g_scenario_events;
 
-    sc_events.event_list.clear();
-    sc_events.event_list.push_back({}); // empty events to compatibilty old engine
+    // Map/pak already loaded events via unserialize. Decide whether to keep or replace.
+    bool enable_scenario_events = false;
+    bool keep_pak_events = false;
     g_config_arch.r_section(missionid, [&] (archive arch) {
-        const bool enable_scenario_events = arch.r_bool("enable_scenario_events");
-        if (!enable_scenario_events) {
-            return;
-        }
+        enable_scenario_events = arch.r_bool("enable_scenario_events", false);
+        keep_pak_events = arch.r_bool("keep_pak_events", false);
+    });
 
+    // Temporary skeletons may set keep_pak_events to retain the map event graph.
+    if (keep_pak_events) {
+        return;
+    }
+
+    sc_events.event_list.clear();
+    sc_events.event_list.push_back({}); // empty header for old-engine compatibility
+    if (!enable_scenario_events) {
+        return;
+    }
+
+    g_config_arch.r_section(missionid, [&] (archive arch) {
         arch.r("events", sc_events.event_list);
         for (int i = 0; i < sc_events.event_list.size(); ++i) {
             sc_events.event_list[i].event_id = i;

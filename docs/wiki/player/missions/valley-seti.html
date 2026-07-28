@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seti in the Valley — Tomb for a Pharaoh — Akhenaten Wiki</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .mission-infobox { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.9rem 1.1rem; }
+    .mission-infobox dl { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 1rem; margin: 0; }
+    .mission-infobox dt { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; }
+    .mission-infobox dd { margin: 0; font-size: 0.85rem; }
+    .mission-infobox .funds-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .mission-infobox .funds-row span { font-size: 0.75rem; color: var(--text-muted); }
+    .mission-infobox .funds-row span strong { color: var(--text); }
+    .dev-section { margin-top: 2.5rem; }
+    .dev-section h2 { color: var(--text-muted); font-size: 1rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; }
+    summary { padding: 0.7rem 1rem; cursor: pointer; font-size: 0.875rem; font-weight: 600; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    .details-body { padding: 1rem 1.1rem; font-size: 0.85rem; line-height: 1.6; }
+    .file-ref { font-family: Consolas, monospace; font-size: 0.78rem; color: var(--gold); }
+    .objectives-list { list-style: none; padding: 0; }
+    .objectives-list li { display: flex; gap: 0.6rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .obj-label { font-weight: 600; min-width: 8rem; }
+    .deviation-note { background: rgba(201,120,76,0.08); border: 1px solid rgba(201,120,76,0.3); border-radius: 4px; padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--text-muted); margin: 0.75rem 0; }
+    .mission-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; }
+    .mission-nav a { color: var(--gold); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">Akhenaten</a>
+      <ul>
+        <li><a href="../../index.html" class="active">Wiki</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main class="wiki-layout">
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title"><a href="index.html">← All Missions</a></div>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Valley of the Kings</div>
+        <ul>
+          <li><a href="valley-thutmose.html">38 · Thutmose in the Valley</a></li>
+          <li><a href="valley-tut.html">39 · Tut in the Valley</a></li>
+          <li><a href="valley-seti.html" class="active">40 · Seti in the Valley</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <article class="wiki-content">
+      <h1>Seti in the Valley</h1>
+      <p class="wiki-subtitle">Tomb for a Pharaoh · mission 40 · Cleopatra campaign 5 · Deir el-Medina</p>
+
+      <div class="mission-infobox">
+        <dl>
+          <dt>Scenario id</dt><dd>40</dd>
+          <dt>Campaign</dt><dd>Valley of the Kings (5)</dd>
+          <dt>Start year</dt><dd>1290 BC</dd>
+          <dt>Player rank</dt><dd>6 (pak)</dd>
+          <dt>Enemy (pak)</dt><dd><code>ENEMY_6_KUSHITE</code></dd>
+          <dt>Funds (Normal)</dt>
+          <dd>
+            <div class="funds-row">
+              <span>treasury <strong>13 720</strong></span>
+              <span>loan <strong>3 000</strong></span>
+              <span>debt interest <strong>8%</strong></span>
+            </div>
+          </dd>
+          <dt>Gods</dt><dd>Osiris (1), Ra (2), Ptah (1)</dd>
+          <dt>Next</dt><dd>campaign end (<code>next_mission: -1</code> — not Sumur 41)</dd>
+        </dl>
+      </div>
+
+      <div class="deviation-note">
+        <strong>Status:</strong> JS redefine (dump 2026-07-28) — <code>map_file</code> terrain; <code>hide_pak_cities/routes/objects</code> + <code>events[]</code>.
+        <br /><strong>Soft / TEMP:</strong> monuments goal <strong>32</strong> (pak first=35 Large Royal Tomb; weight 1 undercounts — C10). Tomb robbers TODO(TR).
+        <br /><strong>Topo:</strong> terminal of VK chain. Victory must not spill to R2 Sumur.
+      </div>
+
+      <h2 id="objectives">Objectives</h2>
+      <ul class="objectives-list">
+        <li><span class="obj-label">Population</span><span class="obj-value">3 000</span></li>
+        <li><span class="obj-label">Culture</span><span class="obj-value">40</span></li>
+        <li><span class="obj-label">Prosperity</span><span class="obj-value">70</span></li>
+        <li><span class="obj-label">Monuments</span><span class="obj-value">32 (TEMP; Large Royal Tomb)</span></li>
+        <li><span class="obj-label">Kingdom</span><span class="obj-value">80</span></li>
+        <li><span class="obj-label">Housing</span><span class="obj-value">12 × level 15</span></li>
+      </ul>
+
+      <h2 id="briefing">Briefing (summary)</h2>
+      <p>Excavate Seti's royal tomb to unrivaled craftsmanship; guard against tomb robbers defiling the Valley.</p>
+
+      <div class="dev-section">
+        <h2 id="dev">Developer reference</h2>
+        <details open>
+          <summary>Mission script</summary>
+          <div class="details-body">
+            <p><span class="file-ref">src/scripts/mission/m_040_valley_seti.js</span></p>
+            <p><span class="file-ref">data/maps/m_040_valley_seti.map</span></p>
+            <p>start_message <code>message_mission_seti_valley</code> (id 449); alt <code>_2</code> 464.</p>
+            <p>Dump: <span class="file-ref">tmp/mission40_pak.txt</span></p>
+          </div>
+        </details>
+      </div>
+
+      <nav class="mission-nav">
+        <a href="valley-tut.html">← 39 · Tut in the Valley</a>
+        <span></span>
+      </nav>
+    </article>
+  </main>
+</body>
+</html>

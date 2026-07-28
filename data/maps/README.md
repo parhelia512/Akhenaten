@@ -3,9 +3,8 @@
 Exported from Pharaoh `mission1.pak` as `FILE_FORMAT_MAP_FILE`
 (terrain, image, elevation, moisture, fertility, vegetation, scenario_info, …).
 
-Naming matches `src/scripts/mission/m_NNN_*.js` (scenarios **0–31** so far;
-21 Dunqul / 22 Dakhla / 23 Thinis / 24 Waset / 25 Kebet / 26 Menat Khufu / 27 Itjtawy /
-28 Iken / 29 Sawu / 30 Heh / 31 Bubastis exported with JS redefine).
+Naming matches `src/scripts/mission/m_NNN_*.js` (scenarios **0–31**, plus Cleo
+**38–40** VK / **41** Sumur / **45** Pi-Yer so far).
 
 Each mission sets `map_file : "data/maps/m_NNN_….map"`. `GamestateIO::load_mission`
 loads that map first (`e_session_mission`), then falls back to `mission1.pak` if

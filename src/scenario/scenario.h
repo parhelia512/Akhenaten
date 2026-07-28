@@ -79,6 +79,12 @@ struct win_criteria_t {
 };
 ANK_CONFIG_STRUCT(win_criteria_t, enabled, goal)
 
+struct scenario_win_criteria_time_t {
+    int enabled;
+    int years;
+};
+ANK_CONFIG_STRUCT(scenario_win_criteria_time_t, enabled, years)
+
 struct custom_mission_config {
     int mission_id;
     xstring filename;
@@ -170,10 +176,8 @@ struct scenario_data_t {
 
     int player_faction;
 
-    struct win_criteria_time_t {
-        int enabled;
-        int years;
-    };
+    // Hoisted (not nested) so ANK_CONFIG_STRUCT / MSVC can name the type.
+    using win_criteria_time_t = scenario_win_criteria_time_t;
 
     struct win_criterias_t {
         win_criteria_t population;
@@ -345,7 +349,7 @@ struct scenario_data_t {
 ANK_CONFIG_STRUCT(scenario_data_t::meta_t, start_message, hide_won_screen, initial_funds, rescue_loans, house_tax_multipliers, debt_interest)
 ANK_CONFIG_STRUCT(scenario_data_t::env_t, flotsam_enabled, has_animals, gods_least_mood, hide_nilometer, marshland_grow, tree_grow)
 ANK_CONFIG_STRUCT(scenario_data_t::sounds_t, briefing, victory)
-ANK_CONFIG_STRUCT(scenario_data_t::win_criterias_t, population, culture, prosperity, monuments, kingdom, housing_count, housing_level, next_mission)
+ANK_CONFIG_STRUCT(scenario_data_t::win_criterias_t, population, culture, prosperity, monuments, kingdom, housing_count, housing_level, time_limit, survival_time, milestone25_year, milestone50_year, milestone75_year, next_mission)
 
 extern scenario_data_t g_scenario;
 

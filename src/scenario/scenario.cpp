@@ -131,10 +131,7 @@ void scenario_data_t::load_metadata(const mission_id_t &missionid, bool is_new_m
         // fishing / herd points: mission config only (map/pak discarded). Absent key → empty.
         arch.r("fishing_points", fishing_points);
         arch.r("herd_points_animals", herd_points_animals);
-        // prey: omit key → keep pak. Present array replaces (incl. empty wipe).
-        if (arch.has_array("herd_points_prey")) {
-            arch.r("herd_points_prey", herd_points_prey);
-        }
+        arch.r("herd_points_prey", herd_points_prey);
 
         // Burial provisions: omit keys → keep pak. hide_pak_burial clears then JS list
         // replaces. On save load, required is overwritten from JS; dispatched is kept.

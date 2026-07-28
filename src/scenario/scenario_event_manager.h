@@ -212,7 +212,9 @@ struct event_ph_t {
     game_date_t date() { return {time.year, time.month}; }
     void archive_load(archive arch);
 };
-ANK_CONFIG_STRUCT(event_ph_t, type, time, amount, tag_id, months_initial, location_fields, reasons, sender_faction)
+ANK_CONFIG_STRUCT(event_ph_t, type, time, item, amount, tag_id, months_initial, location_fields, reasons,
+                   sender_faction, event_trigger_type, on_completed_action, on_refusal_action, on_too_late_action,
+                   on_defeat_action, subtype, city_id, invasion_attack_target)
 
 struct mission_id_t;
 struct event_manager_t {
