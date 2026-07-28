@@ -572,6 +572,10 @@ void empire_t::init_cities() {
         full_empire_object* obj = &objects[i];
         obj->obj.trade_route_id = std::clamp<uint8_t>(obj->obj.trade_route_id, 0, MAX_ROUTES - 1);
         empire_city* city = g_empire.city(obj->city_name_id);
+        if (!city) {
+            logs::warn("empire: skip city object %d with invalid city_name_id=%d", i, obj->city_name_id);
+            continue;
+        }
         city->in_use = 1;
         city->type = obj->city_type;
         city->name_id = obj->city_name_id;

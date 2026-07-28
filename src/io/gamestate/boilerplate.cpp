@@ -357,7 +357,8 @@ static void file_schema(e_file_format file_format, const int file_version) {
         FILEIO.push_chunk(8, false, "city_graph_order", iob_city_graph_order); // I guess ????
         //                state->emperor_change_time = create_savegame_piece(8, false, ""); // MISSING
         FILEIO.push_chunk(12, false, "empire_map_params", iob_empire_map_params);              // ok ???
-        FILEIO.push_chunk(6466, true, "empire_cities", iob_empire_cities);                     // 83920 + 7681 --> 91601
+        // 106 bytes/city: classic 61×106=6466; v178+ 80×106=8480 (Cleopatra name ids 61+)
+        FILEIO.push_chunk(file_version > 177 ? 8480 : 6466, true, "empire_cities", iob_empire_cities);
         FILEIO.push_chunk(288, false, "building_count_industry", iob_building_count_industry); // 288 bytes ??????
         FILEIO.push_chunk(288, false, "trade_prices", iob_trade_prices);
         FILEIO.push_chunk(84, false, "figure_names", iob_figure_names);
@@ -538,7 +539,8 @@ static void file_schema(e_file_format file_format, const int file_version) {
         FILEIO.push_chunk(8, false, "city_view_camera", iob_city_view_camera);                       // ok
         FILEIO.push_chunk(8, false, "city_graph_order", iob_city_graph_order);                       // I guess ????
         FILEIO.push_chunk(12, false, "empire_map_params", iob_empire_map_params);                    // ok ???
-        FILEIO.push_chunk(6466, false, "empire_cities", iob_empire_cities);                    // 83920 + 7681 --> 91601
+        // 106 bytes/city: classic 61×106=6466; v178+ 80×106=8480 (Cleopatra name ids 61+)
+        FILEIO.push_chunk(file_version > 177 ? 8480 : 6466, false, "empire_cities", iob_empire_cities);
         FILEIO.push_chunk(288, false, "building_count_industry", iob_building_count_industry); // 288 bytes ??????
         FILEIO.push_chunk(288, false, "trade_prices", iob_trade_prices);
         FILEIO.push_chunk(84, false, "figure_names", iob_figure_names);

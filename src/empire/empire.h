@@ -12,7 +12,10 @@ struct mission_id_t;
 class empire_t {
 public:
     enum {
-        MAX_CITIES = 61,
+        // Classic Pharaoh saves serialize 61 slots (0..60). Cleopatra adds name ids
+        // 61+ (Siwi, Maritis, …) — keep headroom for those lang ids as array indices.
+        MAX_CITIES = 80,
+        MAX_CITIES_CLASSIC = 61,
         MAX_ROUTES = 20
     };
 

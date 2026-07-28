@@ -265,6 +265,7 @@ import mission.m_028_iken
 import mission.m_029_sawu
 import mission.m_030_heh
 import mission.m_031_bubastis
+import mission.m_045_pi_yer
 import mission.m_128_alexandria
 import mission.m_129_bridges
 import mission.m_130_sandbox
