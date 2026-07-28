@@ -41,6 +41,9 @@ function top_menu_warnings_toggle(p1, p2) { game_features.gameopt_warnings = !ga
 function top_menu_cities_old_text(p1, p2) { return __loc(2, game_features.gameui_empire_city_old_names ? 7 : 8) }
 function top_menu_cities_old_toggle(p1, p2) { game_features.gameui_empire_city_old_names = !game_features.gameui_empire_city_old_names }
 
+function top_menu_pyramid_speedup_text(p1, p2) { return __loc(2, game_features.gameopt_pyramid_speedup ? 5 : 4) }
+function top_menu_pyramid_speedup_toggle(p1, p2) { game_features.gameopt_pyramid_speedup = !game_features.gameopt_pyramid_speedup }
+
 function top_menu_open_advisor(advisor, p2) {
 	widget_top_menu_clear_state()
 	window_go_back()
@@ -221,6 +224,8 @@ top_menu_widget {
 		display_options	: menu_item({text {group:2, id:1}, onclick: top_menu_show_window_by_id("display_options_window") })
 		sound_options  	: menu_item({text {group:2, id:2}, onclick: top_menu_show_window_by_id("sound_options_window") })
 		speed_options  	: menu_item({text {group:2, id:3}, onclick: top_menu_show_window_by_id("speed_options_window") })
+		pyramid_speedup : menu_item({textfn: top_menu_pyramid_speedup_text
+									 onclick: top_menu_pyramid_speedup_toggle })
 		difficulty_options: menu_item({ text {group:2, id:6}, onclick: top_menu_show_window_by_id("difficulty_options_window") })
 
 		cities_options  : menu_item({textfn: top_menu_cities_old_text

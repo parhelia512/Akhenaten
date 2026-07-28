@@ -97,6 +97,12 @@ enum module_type {
 int building_monument_has_unfinished_monuments();
 bool building_monument_has_delivery_for_worker(int figure_id);
 
+// VALID or MOTHBALLED (halted construction). Not destroyed / deleted.
+inline bool building_monument_is_alive(const building &b) {
+    return b.type != BUILDING_NONE
+        && (b.state == BUILDING_STATE_VALID || b.state == BUILDING_STATE_MOTHBALLED);
+}
+
 int building_monument_resource_in_delivery(building *b, int resource_id);
 void building_monument_remove_delivery(int figure_id);
 void building_monument_remove_all_deliveries(int monument_id);

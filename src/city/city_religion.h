@@ -132,9 +132,9 @@ struct city_religion_t {
     int spirit_of_seth_power();
     void spirit_of_seth_mark_used();
 
-    void perform_minor_blessing(e_god god);
+    void perform_minor_blessing(e_god god, bool force_construction = false);
     void perform_minor_curse(e_god god);
-    void perform_major_blessing(e_god god);
+    void perform_major_blessing(e_god god, bool force_construction = false);
     void perform_major_curse(e_god god);
     void update_curses_and_blessings(e_god randm_god, e_god_event force);
     int months_since_last_festival();

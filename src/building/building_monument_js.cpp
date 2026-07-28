@@ -7,9 +7,13 @@
 
 #include <algorithm>
 
+static bool monument_building_alive(const building *b) {
+    return b && building_monument_is_alive(*b);
+}
+
 static building_monument *monument_from_building(int bid) {
     building *b = building_get(bid);
-    if (!b || !b->is_valid() || !b->is_monument()) {
+    if (!monument_building_alive(b) || !b->is_monument()) {
         return nullptr;
     }
 
@@ -18,7 +22,7 @@ static building_monument *monument_from_building(int bid) {
 
 bool __monument_need_workers(int bid) {
     building *b = building_get(bid);
-    if (!b || !b->is_valid()) {
+    if (!monument_building_alive(b)) {
         return false;
     }
 

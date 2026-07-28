@@ -23,6 +23,7 @@
 #include "building/monument_mastaba.h"
 #include "building/monument_pyramid.h"
 #include "building/monuments.h"
+#include "building/construction_blessing.h"
 #include "grid/grid.h"
 #include "graphics/view/view.h"
 #include "graphics/view/zoom.h"
@@ -706,6 +707,75 @@ static int __test_monument_phase(int bid) {
     return mm ? (int)mm->runtime_data().phase : -999;
 }
 ANK_FUNCTION_1(__test_monument_phase);
+
+// Halt / unhalt monument construction (MOTHBALLED). Used by construction-blessing tests.
+static void __test_monument_set_halted(int bid, int halted) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    auto *mm = head ? head->dcast_monument() : nullptr;
+    if (!mm) {
+        return;
+    }
+    const bool want = halted != 0;
+    if ((bool)mm->is_construction_halted() != want) {
+        mm->toggle_construction_halted();
+    }
+}
+ANK_FUNCTION_2(__test_monument_set_halted);
+
+// Register a fake in-flight monument delivery (destination = main or part id).
+static void __test_monument_add_delivery(int bid, int walker_id, int resource, int loads) {
+    building *b = building_get(bid);
+    auto *mm = b ? b->dcast_monument() : nullptr;
+    if (!mm || loads <= 0) {
+        return;
+    }
+    mm->add_delivery(walker_id, resource, loads);
+}
+ANK_FUNCTION_4(__test_monument_add_delivery);
+
+static int __test_monument_resource_in_delivery(int bid, int resource) {
+    building *b = building_get(bid);
+    if (!b) {
+        return -1;
+    }
+    return building_monument_resource_in_delivery(b, resource);
+}
+ANK_FUNCTION_2(__test_monument_resource_in_delivery);
+
+static int __test_construction_blessing_cap(int bid) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    auto *mm = head ? head->dcast_monument() : nullptr;
+    return mm ? construction_blessing_cap_phase(*mm) : -1;
+}
+ANK_FUNCTION_1(__test_construction_blessing_cap);
+
+static int __test_monument_next_part(int bid) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    if (!head || !head->has_next()) {
+        return 0;
+    }
+    return head->next()->id;
+}
+ANK_FUNCTION_1(__test_monument_next_part);
+
+// 1 if every part in the monument chain has the given building state (e.g. MOTHBALLED=7).
+static int __test_monument_chain_all_state(int bid, int state) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    if (!head) {
+        return 0;
+    }
+    for (building *part = head; part; part = part->has_next() ? part->next() : nullptr) {
+        if ((int)part->state != state) {
+            return 0;
+        }
+    }
+    return 1;
+}
+ANK_FUNCTION_2(__test_monument_chain_all_state);
 
 // Deliver resource loads into a monument (updates resources_pct like cart delivery).
 // amount is resource units (same as deliver_resource); returns false if full / not a monument.

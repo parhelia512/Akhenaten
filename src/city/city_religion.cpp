@@ -1,5 +1,6 @@
 #include "city_religion.h"
 
+#include "building/construction_blessing.h"
 #include "building/destruction.h"
 #include "building/building_granary.h"
 #include "building/building_storage_yard.h"
@@ -50,7 +51,7 @@ declare_console_command_p(god_minor_blessing) {
     std::string god_name; is >> god_name;
     e_god god = find_god_id_from_short_name(god_name);
     if (god != GOD_UNKNOWN) {
-        g_city.religion.perform_minor_blessing(god);
+        g_city.religion.perform_minor_blessing(god, /*force_construction=*/true);
         events::emit(event_city_warning{ "Cheated minor blessing" });
     }
 }
@@ -58,7 +59,7 @@ declare_console_command_p(god_minor_blessing) {
 declare_console_command_p(god_major_blessing) {
     std::string args; is >> args;
     int god_id = atoi(args.empty() ? (pcstr)"0" : args.c_str());
-    g_city.religion.perform_major_blessing((e_god)god_id);
+    g_city.religion.perform_major_blessing((e_god)god_id, /*force_construction=*/true);
 
     events::emit(event_city_warning{ "Casted major upset" });
 }
@@ -569,7 +570,11 @@ bool city_religion_t::BAST_houses_destruction() {
     return false;
 }
 
-void city_religion_t::perform_major_blessing(e_god god) {
+void city_religion_t::perform_major_blessing(e_god god, bool force_construction) {
+    if (maybe_construction_blessing(god, /*major=*/true, force_construction)) {
+        return;
+    }
+
     bool success = false;
     switch (god) {
     case GOD_OSIRIS:
@@ -603,23 +608,27 @@ void city_religion_t::perform_major_blessing(e_god god) {
     case GOD_PTAH:
         // gems, clay, pottery, flax, linen, or jewelry in storage yards
         success = PTAH_warehouse_restock();
-        messages::god( GOD_PTAH, success ? "message_blessing_ptah" : "message_blessing_ptah_noeffect" );
+        messages::god(GOD_PTAH, success ? "message_blessing_trade_from_ptah" : "message_blessing_from_ptah");
         return;
 
     case GOD_SETH:
         seth_crush_enemy_troops = 10;
-        messages::god( GOD_SETH, "message_blessing_seth" );
+        messages::god(GOD_SETH, "message_blessing_trade_from_seth");
         return;
 
     case GOD_BAST:
         // fills houses and bazaars
         BAST_refill_houses_and_bazaar();
-        messages::god( GOD_BAST, "message_blessing_bast" );
+        messages::god(GOD_BAST, "message_blessing_from_bast");
         return;
     }
 }
 
-void city_religion_t::perform_minor_blessing(e_god god) {
+void city_religion_t::perform_minor_blessing(e_god god, bool force_construction) {
+    if (maybe_construction_blessing(god, /*major=*/false, force_construction)) {
+        return;
+    }
+
     auto god_ptr = get(god);
     if (god_ptr) {
         god_ptr->perform_minor_blessing();

@@ -3468,6 +3468,22 @@ game_messages_hu {
                 video { text: "@24" }
                 content { text: "Ozirisz, a nílusi áradás istene megáldja ezt a várost őszinte odaadásáért. Az ártéri földek minden gazdasága kétszer annyi termést takarít be ebben az évszakban, mint várta!" }
             }
+            message_construction_blessing {
+                id: 1012
+                type: 2
+
+                size [30, 20]
+                title { text: "Építési áldás" }
+                content { text: "Az istenek elégedettek odaadásoddal, és jelentősen előreviszik emlékműved építését. Hadd lépjenek félre a munkások, amíg ez az áldás megérkezik." }
+            }
+            message_construction_blessing_minor {
+                id: 1013
+                type: 2
+
+                size [30, 20]
+                title { text: "Építési áldás" }
+                content { text: "Az istenek elismerik imádatodat, és segítik emlékműved építését. Hadd pihenjenek röviden a munkások, amíg ez az ajándék megérkezik." }
+            }
             message_blessing_trade_from_ra {
                 id: 296
                 type: 2

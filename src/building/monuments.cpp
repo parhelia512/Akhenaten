@@ -482,13 +482,12 @@ int building_monument::is_construction_halted() {
 }
 
 int building_monument::toggle_construction_halted() {
-    if (base.state == BUILDING_STATE_MOTHBALLED) {
-        base.state = BUILDING_STATE_VALID;
-        return 0;
-    } else {
-        base.state = BUILDING_STATE_MOTHBALLED;
-        return 1;
+    building_impl *m = main();
+    const bool halt = (m->state() != BUILDING_STATE_MOTHBALLED);
+    for (building_impl *part = m; part; part = part->has_next() ? part->next() : nullptr) {
+        part->base.state = halt ? BUILDING_STATE_MOTHBALLED : BUILDING_STATE_VALID;
     }
+    return halt ? 1 : 0;
 }
 
 bool building_monument::need_stonemason() {
@@ -506,7 +505,7 @@ bool building_monument::need_carpenter() {
     }
 
     int phase = d.phase;
-    
+
     // Check if monument needs TIMBER for current phase
     int needs_timber = needs_resource(RESOURCE_TIMBER, phase);
     if (needs_timber <= 0) {
