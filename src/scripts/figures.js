@@ -1242,6 +1242,20 @@ figure_governor {
 	terrain_usage : TERRAIN_USAGE_ROADS,
 }
 
+// BF4 cinematic / victory VFX walker — walk-only (SprMain 28); no death group.
+figure_pharaoh {
+	animations {
+		walk { pack:PACK_SPR_MAIN, id:28, max_frames:12 }
+		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_PHARAOH }
+	}
+
+	category: figure_category_special
+	max_damage: 10
+	terrain_usage: TERRAIN_USAGE_ANY
+	max_amount: 2
+	max_roam_length: 320
+}
+
 figure_trade_ship = {
 	animations : {
 		walk : { pack:PACK_SPR_MAIN, id:123, max_frames:4, duration:4 }

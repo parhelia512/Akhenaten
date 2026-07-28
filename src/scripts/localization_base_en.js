@@ -2792,6 +2792,7 @@ localization_base_en = [
     { group:64, id:107, text: "Locust" }
     { group:64, id:108, text: "Tomb artisan" }
     { group:64, id:109, text: "Mummy" }
+    { group:64, id:110, text: "Pharaoh" }
     { group:65, id:0, text: "unused section 65 - was c3 walker names" }
     { group:66, id:0, text: "Overlay intelligent help." }
     { group:66, id:1, text: "This land has a groundwater supply for wells and Water Supplies" }

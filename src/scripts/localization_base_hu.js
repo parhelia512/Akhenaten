@@ -2826,6 +2826,7 @@ localization_base_hu = [
     { group:64, id:107, text: "Sáska" }
     { group:64, id:108, text: "Sírműves" }
     { group:64, id:109, text: "Múmia" }
+    { group:64, id:110, text: "Fáraó" }
     { group:65, id:0, text: "nem használt szakasz 65 - a C3 járókelők nevei voltak" }
 
     { group:66, id:0, text: "Réteg intelligens súgó." }

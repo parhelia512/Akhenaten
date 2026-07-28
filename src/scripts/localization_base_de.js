@@ -2797,6 +2797,7 @@ localization_base_de = [
     { group:64, id:107, text: "Heuschrecke" }
     { group:64, id:108, text: "Grabhandwerker" }
     { group:64, id:109, text: "Mumie" }
+    { group:64, id:110, text: "Pharao" }
     { group:65, id:0, text: "unbenutzte Sektion 65 - war c3 Walker-Namen" }
     { group:66, id:0, text: "Intelligente Overlay-Hilfe." }
     { group:66, id:1, text: "Dieses Land hat eine Grundwasserversorgung für Brunnen und Wasserversorgung" }
