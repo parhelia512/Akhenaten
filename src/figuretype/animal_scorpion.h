@@ -29,10 +29,13 @@ public:
 
     struct runtime_data_t {
         short hungry;
+        uint8_t curse_raid;
+        uint16_t raid_days_left;
     } FIGURE_RUNTIME_DATA_T;
 
     virtual void on_create() override;
     virtual void on_post_load() override;
+    virtual void before_poof() override;
     virtual void figure_action() override;
     virtual void update_animation() override;
     virtual void update_day() override;
@@ -43,8 +46,14 @@ public:
 
     virtual e_minimap_figure_color minimap_color() const override { return FIGURE_COLOR_ANIMAL; }
 
+    void setup_curse_raid(int days);
+    bool is_curse_raid() const;
+
 private:
+    void release_target();
     int find_prey();
     bool pick_roost_destination();
 };
 ANK_CONFIG_STRUCT(figure_scorpion::static_params, max_hungry, max_hunting_distance, chase_speed_mult)
+
+void figure_scorpion_setup_curse_raid(figure &f, int days);

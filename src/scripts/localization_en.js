@@ -75,6 +75,7 @@ localization_en = [
   {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Larger trader capacity (1600 per visit; not yearly empire limit)"}
   {key:"#TR_CONFIG_BAST_LION_RAID", text:"Bast major curse: lion raid from temples/zoo (TEMP Enhanced)"}
   {key:"#TR_CONFIG_SETH_ASP_RAID", text:"Seth major curse: asp raid from temples when no company to curse (TEMP Enhanced)"}
+  {key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Ptah major curse: scorpion raid from temples when no industry to smash (TEMP Enhanced)"}
   {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Auto-resolve invasions: freeze at entry, quick battle in 8 days (walls/towers ignored; Pharaoh included; not uprisings)"}
   {key:"#warning_auto_resolve_orders_blocked", text:"Cannot march companies onto a frozen invasion wave"}
   {key:"#warning_auto_resolve_queue_full", text:"Too many pending invasions — this wave fights on the map"}

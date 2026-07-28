@@ -10,9 +10,9 @@ public:
 
     bool perform_industry_destruction();
     void perform_frogs();
+    bool perform_scorpions();
     bool perform_warehouse_destruction();
     bool perform_industry_restock();
 };
 
 extern god_ptah_t god_ptah;
-

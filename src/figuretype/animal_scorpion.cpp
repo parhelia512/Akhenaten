@@ -10,16 +10,13 @@
 #include "grid/terrain.h"
 #include "js/js_game.h"
 
+#include <algorithm>
+
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_scorpion);
 
 namespace {
 
-bool is_scorpion_prey(figure *f, int self_id) {
-    if (!f || !f->is_valid() || f->is_dead() || !f->type || f->id == self_id) {
-        return false;
-    }
-
-    // Prefer city walkers; skip other predators / wildlife herds.
+bool is_scorpion_non_target(figure *f) {
     switch (f->type) {
     case FIGURE_SCORPION:
     case FIGURE_ASP:
@@ -27,8 +24,6 @@ bool is_scorpion_prey(figure *f, int self_id) {
     case FIGURE_HYENA:
     case FIGURE_HIPPO:
     case FIGURE_CROCODILE:
-    case FIGURE_ANTELOPE:
-    case FIGURE_OSTRICH:
     case FIGURE_FROG:
     case FIGURE_LOCUST:
     case FIGURE_BIRDS:
@@ -47,12 +42,42 @@ bool is_scorpion_prey(figure *f, int self_id) {
     case FIGURE_BOLT:
     case FIGURE_BALLISTA:
     case FIGURE_CREATURE:
+        return true;
+    default:
         return false;
+    }
+}
 
+bool is_scorpion_prey(figure *f, figure *self) {
+    if (!f || !f->is_valid() || f->is_dead() || !f->type || !self || f->id == self->id) {
+        return false;
+    }
+
+    const bool curse_raid = (self->type == FIGURE_SCORPION) && figure_scorpion(self).is_curse_raid();
+
+    // Scorpions never hunt herd animals (wildlife or raid) — arid wildlife prey is walkers;
+    // ostrich is the climate prey of the hyena pair, not the scorpion.
+    switch (f->type) {
+    case FIGURE_ANTELOPE:
+    case FIGURE_OSTRICH:
+        return false;
     default:
         break;
     }
 
+    if (is_scorpion_non_target(f)) {
+        return false;
+    }
+
+    if (curse_raid) {
+        // Raid: walkers, invasion enemies, soldiers (incl. fort rest) — not wildlife herds.
+        if (f->is_herd() && f->category() == figure_category_animal) {
+            return false;
+        }
+        return true;
+    }
+
+    // Wildlife: passing people / city walkers (not invasion troops / fort rest / herds).
     if (f->is_enemy() || f->is_herd()) {
         return false;
     }
@@ -65,18 +90,62 @@ bool is_scorpion_prey(figure *f, int self_id) {
     return true;
 }
 
+constexpr int k_scorpion_curse_raid_hunt_distance = 40;
+
 } // namespace
+
+bool figure_scorpion::is_curse_raid() const {
+    return runtime_data().curse_raid != 0;
+}
+
+void figure_scorpion::setup_curse_raid(int days) {
+    auto &d = runtime_data();
+    d.curse_raid = 1;
+    d.raid_days_left = (uint16_t)std::max(1, days);
+    d.hungry = 0;
+    advance_action(ACTION_25_SCORPION_LOOKING_FOR_ATTACK);
+}
+
+void figure_scorpion_setup_curse_raid(figure &f, int days) {
+    if (f.type != FIGURE_SCORPION) {
+        return;
+    }
+    figure_scorpion(&f).setup_curse_raid(days);
+}
+
+void figure_scorpion::release_target() {
+    if (!base.target_figure_id) {
+        return;
+    }
+    figure *prey = figure_get(base.target_figure_id);
+    if (prey && prey->targeted_by_figure_id == id()) {
+        prey->targeted_by_figure_id = 0;
+    }
+    base.target_figure_id = 0;
+}
 
 void figure_scorpion::on_create() {
     figure_impl::on_create();
     auto &d = runtime_data();
     const uint16_t max_h = current_params().max_hungry;
     d.hungry = max_h ? (rand() % max_h) : 0;
+    d.curse_raid = 0;
+    d.raid_days_left = 0;
     base.allow_move_type = EMOVE_TERRAIN;
 }
 
 void figure_scorpion::on_post_load() {
     base.allow_move_type = EMOVE_TERRAIN;
+    // Pre-curse-raid saves only used `hungry`; keep wildlife scorpions from inheriting
+    // garbage as a raid flag if the rest of the 40-byte buffer was non-zero.
+    auto &d = runtime_data();
+    if (d.curse_raid && d.raid_days_left == 0) {
+        d.curse_raid = 0;
+    }
+}
+
+void figure_scorpion::before_poof() {
+    release_target();
 }
 
 void figure_scorpion::herd_rest() {
@@ -94,15 +163,22 @@ void figure_scorpion::moveto(tile2i tile) {
 int figure_scorpion::find_prey() {
     int min_figure_id = 0;
     int min_distance = 10000;
-    const int max_distance = current_params().max_hunting_distance;
+    const int max_distance = is_curse_raid()
+        ? k_scorpion_curse_raid_hunt_distance
+        : current_params().max_hunting_distance;
 
     for (figure *f : map_figures()) {
-        if (!is_scorpion_prey(f, id())) {
+        if (!is_scorpion_prey(f, &base)) {
             continue;
         }
         int distance = calc_maximum_distance(tile(), f->tile);
         if (f->targeted_by_figure_id) {
-            distance *= 2;
+            figure *hunter = figure_get(f->targeted_by_figure_id);
+            if (hunter && hunter->is_alive()) {
+                distance *= 2;
+            } else {
+                f->targeted_by_figure_id = 0;
+            }
         }
         if (distance < min_distance) {
             min_distance = distance;
@@ -142,6 +218,7 @@ void figure_scorpion::figure_action() {
     base.roam_wander_freely = false;
     base.speed_multiplier = current_params().speed_mult;
     auto &d = runtime_data();
+    const bool curse_raid = d.curse_raid != 0;
 
     const formation *m = formation_get(base.formation_id);
     const tile2i roost_base = (m && m->in_use) ? m->tile : tile();
@@ -159,15 +236,15 @@ void figure_scorpion::figure_action() {
         if (base.wait_ticks <= 0) {
             advance_action(ACTION_8_SCORPION_RECALCULATE);
         }
-        if (d.hungry <= 0) {
+        if (curse_raid || d.hungry <= 0) {
             advance_action(ACTION_25_SCORPION_LOOKING_FOR_ATTACK);
         }
         break;
 
     case ACTION_9_SCORPION_CHASE_PREY:
         base.speed_multiplier = current_params().chase_speed_mult;
-        if (!base.target_figure_id || !prey || prey->is_dead() || !is_scorpion_prey(prey, id())) {
-            base.target_figure_id = 0;
+        if (!base.target_figure_id || !prey || prey->is_dead() || !is_scorpion_prey(prey, &base)) {
+            release_target();
             return advance_action(ACTION_8_SCORPION_RECALCULATE);
         }
 
@@ -178,12 +255,14 @@ void figure_scorpion::figure_action() {
             do_goto(prey->tile, TERRAIN_USAGE_ANIMAL, ACTION_25_SCORPION_LOOKING_FOR_ATTACK, ACTION_8_SCORPION_RECALCULATE);
             if (direction() == DIR_FIGURE_CAN_NOT_REACH || direction() == DIR_FIGURE_REROUTE) {
                 base.direction = DIR_0_TOP_RIGHT;
+                release_target();
                 advance_action(ACTION_8_SCORPION_RECALCULATE);
             }
         }
         break;
 
     case ACTION_25_SCORPION_LOOKING_FOR_ATTACK: {
+        release_target();
         int target_id = find_prey();
         base.target_figure_id = target_id;
         if (base.target_figure_id) {
@@ -207,7 +286,7 @@ void figure_scorpion::figure_action() {
     case ACTION_18_SCORPION_EATING:
         base.wait_ticks--;
         if (base.wait_ticks <= 0) {
-            if (d.hungry <= 0) {
+            if (curse_raid || d.hungry <= 0) {
                 advance_action(ACTION_8_SCORPION_RECALCULATE);
             } else {
                 route_remove();
@@ -228,34 +307,43 @@ void figure_scorpion::figure_action() {
 
     case ACTION_20_SCORPION_ATTACK: {
         if (base.target_figure_id == INVALID_FIGURE_ID || !prey || prey->is_dead()) {
+            release_target();
             return advance_action(ACTION_8_SCORPION_RECALCULATE);
         }
         base.direction = calc_general_direction_safe(base.tile, prey->tile);
         auto prey_impl = prey->dcast();
-        if (prey_impl) {
-            if (maxdist == 0) {
-                prey_impl->on_attacked(&base);
-                if (prey->is_dead()) {
-                    base.target_figure_id = 0;
-                    route_remove();
-                    advance_action(ACTION_21_SCORPION_SUCCESS_KILL);
+        if (!prey_impl) {
+            release_target();
+            return advance_action(ACTION_8_SCORPION_RECALCULATE);
+        }
+        if (maxdist == 0) {
+            prey_impl->on_attacked(&base);
+            if (prey->is_dead()) {
+                release_target();
+                route_remove();
+                if (curse_raid) {
+                    // City raid: skip kill/eat delay and keep hunting.
+                    d.hungry = 0;
+                    advance_action(ACTION_25_SCORPION_LOOKING_FOR_ATTACK);
+                } else {
                     const uint16_t max_h = current_params().max_hungry;
                     d.hungry = max_h ? (rand() % max_h) : 0;
+                    advance_action(ACTION_21_SCORPION_SUCCESS_KILL);
                     base.wait_ticks = 30 + (random_byte() % 20);
-                } else {
-                    base.wait_ticks = 10;
                 }
             } else {
-                base.wait_ticks = 12;
-                advance_action(ACTION_9_SCORPION_CHASE_PREY);
+                base.wait_ticks = 10;
             }
+        } else {
+            base.wait_ticks = 12;
+            advance_action(ACTION_9_SCORPION_CHASE_PREY);
         }
         break;
     }
 
     case ACTION_8_SCORPION_RECALCULATE:
         base.wait_ticks--;
-        if (d.hungry <= 0) {
+        if (curse_raid || d.hungry <= 0) {
             advance_action(ACTION_25_SCORPION_LOOKING_FOR_ATTACK);
             break;
         }
@@ -329,6 +417,18 @@ void figure_scorpion::update_day() {
     figure_impl::update_day();
 
     auto &d = runtime_data();
+    if (d.curse_raid) {
+        if (d.raid_days_left > 0) {
+            d.raid_days_left--;
+        }
+        if (d.raid_days_left == 0) {
+            poof();
+            return;
+        }
+        d.hungry = 0;
+        return;
+    }
+
     if (d.hungry > 0) {
         d.hungry--;
     }

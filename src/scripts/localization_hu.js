@@ -71,6 +71,7 @@ localization_hu = [
   {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Nagyobb kereskedőkapacitás (1600/látogatás; nem éves birodalmi limit)"}
   {key:"#TR_CONFIG_BAST_LION_RAID", text:"Bast haragja: oroszlánrajtaütés templomokból/állatkertből (TEMP Enhanced)"}
   {key:"#TR_CONFIG_SETH_ASP_RAID", text:"Seth haragja: kígyórajtaütés templomokból század nélkül (TEMP Enhanced)"}
+  {key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Ptah haragja: skorpiórajtaütés templomokból ipar nélkül (TEMP Enhanced)"}
   {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Inváziók auto-megoldása: az ellenség a bejáratnál vár, gyorscsata 8 nap múlva (fal/torony nem számít; fáraó benne; nem felkelés)"}
   {key:"#warning_auto_resolve_orders_blocked", text:"A századok nem vonulhatnak befagyasztott inváziós hullámra"}
   {key:"#warning_auto_resolve_queue_full", text:"Túl sok várakozó invázió — ez a hullám a térképen harcol"}

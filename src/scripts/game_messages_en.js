@@ -6253,6 +6253,15 @@ game_messages_en {
         video { text: "@21" }
         content { text: "Seth's fury finds no company to curse — so he sends asps from his temples into your streets. Citizens flee as the snakes hunt. Appease the God of Destruction before more blood is spilled." }
     }
+    message_wrath_of_ptah_scorpions {
+        id: 509,
+        type: 2,
+
+        size [30, 20]
+        title { text: "Wrath of Ptah" }
+        video { text: "@22" }
+        content { text: "Ptah finds no workshops to smash — so he sends scorpions from his temples into your streets. Citizens scatter as the sting of the craftsman's wrath finds them. Honor the God of Crafts before more blood stains the roads." }
+    }
 
     // Random / .map table events (price_change / demand_change / random_event).
     // Titles align with localization group 19 banner strings used by OG Popup Messages.

@@ -103,6 +103,7 @@ game_features {
     @gameplay_change_trader_capacity_1600 {}
     @gameplay_bast_lion_raid {}
     @gameplay_seth_asp_raid {}
+    @gameplay_ptah_scorpion_raid {}
     @gameplay_enhanced_auto_resolve_invasions {}
     @gameplay_change_fixed_workers {}
     @gameplay_fixed_worker_percent {}
