@@ -4,7 +4,7 @@ var MONUMENT_WEIGHTS = {}
 MONUMENT_WEIGHTS[BUILDING_PYRAMID]                        = 44
 MONUMENT_WEIGHTS[BUILDING_MUDBRICK_PYRAMID_COMPLEX]       = 44
 MONUMENT_WEIGHTS[BUILDING_GRAND_MUDBRICK_PYRAMID_COMPLEX] = 44
-MONUMENT_WEIGHTS[BUILDING_STEPPED_PYRAMID_COMPLEX]        = 44
+MONUMENT_WEIGHTS[BUILDING_STEPPED_PYRAMID_COMPLEX]        = 24  // on-land C1b-1 (= large); +causeway → recalibrate toward 44
 MONUMENT_WEIGHTS[BUILDING_GRAND_STEPPED_PYRAMID_COMPLEX]  = 44
 MONUMENT_WEIGHTS[BUILDING_PYRAMID_COMPLEX]                = 44
 MONUMENT_WEIGHTS[BUILDING_GRAND_PYRAMID_COMPLEX]          = 44
@@ -15,6 +15,9 @@ MONUMENT_WEIGHTS[BUILDING_LARGE_MASTABA]                  = 3
 MONUMENT_WEIGHTS[BUILDING_SMALL_STEPPED_PYRAMID]           = 8
 MONUMENT_WEIGHTS[BUILDING_MEDIUM_STEPPED_PYRAMID]         = 16
 MONUMENT_WEIGHTS[BUILDING_LARGE_STEPPED_PYRAMID]          = 24
+// Rating is clamped to 100 (city/monuments.js). Weight 44 for stepped complex alone
+// already saturates (2.25*44+4.5 > 100), so on-land complex shares large's 24 until
+// causeway/temples (C1b-2) or F3 recalibrates the whole table.
 // Bent pyramids (placeholder weights, like the others — recalibrate in F3).
 // A finished medium bent gives 2.25*8+4.5 = 22, which satisfies mission 14's
 // original monument goal of 21 (Snofru's bent pyramid at South Dahshur).

@@ -13,8 +13,9 @@ log_info("akhenaten: mission 12 meidum started")
 // Resource chains (ONLY_VIA, wired once from on_start): clay i=5/8/9/10/11 (from pottery
 // recurring i=7); timber i=20-25 (from i=19); grain i=42-45 (from i=41); papyrus i=54-57
 // (from i=53); gifts i=50/61/64 (from i=49/60/63).
-// Monuments goal TEMP=58 (pak goal is 39; C1 stepped-pyramid-complex not implemented yet —
-// reachable today via small(8)+medium(16) stepped pyramids, see win_criteria below).
+// Monuments goal: F3(a) — small(8)+complex(24) → trunc(2.25*32+4.5)=76.
+// Complex weight = large (24) while on-land; rating clamp 100 forbids weight 44 alone.
+// Pak original was 39. Causeway = C1b-2.
 //
 // Tag_id scheme used throughout this file (documented once here, not repeated per call):
 //   1000 + i               chain-only ONLY_VIA_EVENT leaves (i = pak event index,
@@ -90,7 +91,7 @@ mission12 { // Meidum
 		BUILDING_GRAIN_FARM, BUILDING_FIGS_FARM,
 		BUILDING_STONE_QUARRY, BUILDING_CLAY_PIT, BUILDING_REED_GATHERER, BUILDING_WOOD_CUTTERS,
 		BUILDING_FERRY,
-		BUILDING_SMALL_STEPPED_PYRAMID, BUILDING_MEDIUM_STEPPED_PYRAMID,
+		BUILDING_SMALL_STEPPED_PYRAMID, BUILDING_STEPPED_PYRAMID_COMPLEX,
 		BUILDING_SMALL_MASTABA, BUILDING_MEDIUM_MASTABA,
 		BUILDING_LIBRARY,
 		BUILDING_FESTIVAL_SQUARE, BUILDING_BOOTH, BUILDING_JUGGLER_SCHOOL, BUILDING_BANDSTAND, BUILDING_CONSERVATORY, BUILDING_PAVILLION, BUILDING_DANCE_SCHOOL,
@@ -98,19 +99,13 @@ mission12 { // Meidum
 	]
 
 	// Goals verified vs mission1.pak scenario 12: pop 1/3000, culture 1/25, prosperity 1/25,
-	// monuments 1/39, kingdom 1/40, housing_level 1/11.
-	// Original monuments: small stepped pyramid + stepped pyramid COMPLEX (weight 44).
-	// The complex is not implemented yet (task C1) -> temporary monument goal, reachable
-	// with small (8) + medium (16) stepped pyramids: 2.25*24+4.5 = 58 (additive rating,
-	// see city/monuments.js). Requires BOTH stepped pyramids to be finished.
-	// TODO(C1/F3): restore goal 39 and swap BUILDING_MEDIUM_STEPPED_PYRAMID for
-	// BUILDING_STEPPED_PYRAMID_COMPLEX once the complex and the calibrated per-type
-	// monument weights land.
+	// monuments 1/39 (pak), kingdom 1/40, housing_level 1/11.
+	// F3(a): goal = trunc(2.25*(8+24)+4.5) = 76 (complex weight = large until C1b-2).
 	win_criteria {
 		population    {enabled : true, goal : 3000 }
 		culture       {enabled : true, goal : 25 }
 		prosperity    {enabled : true, goal : 25 }
-		monuments     {enabled : true, goal : 58 }
+		monuments     {enabled : true, goal : 76 }
 		kingdom       {enabled : true, goal : 40 }
 		housing_level {enabled : true, goal : 11 }
 	}

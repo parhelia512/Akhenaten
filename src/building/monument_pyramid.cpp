@@ -53,6 +53,8 @@ REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_stepped_pyramid)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_stepped_pyramid_corner)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_stepped_pyramid_wall)
 
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_stepped_pyramid_complex)
+
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_bent_pyramid)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_bent_pyramid_corner)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_bent_pyramid_wall)
@@ -137,6 +139,7 @@ struct monument_medium_stepped_pyramid : public monument {
 
 // Large stepped pyramid (20×20). First-cut schedule mirrors the medium cadence
 // (foundation phases 0–6, then flat brick phases) so it builds/finishes/save-loads.
+// Also used by stepped pyramid complex (C1b-1) until causeway/temples change costs.
 // The extra layers of the taller 20×20 and the top-down polish stage are a follow-up
 // visual pass — extend the schedule together with the render (REMAKE_LARGE_PYRAMID_LAYER2.md).
 struct monument_large_stepped_pyramid : public monument {
@@ -252,6 +255,9 @@ const building_pyramid::base_params &get_pyramid_params(e_building_type type) {
     case BUILDING_LARGE_STEPPED_PYRAMID_CONE:
     case BUILDING_LARGE_STEPPED_PYRAMID_WALL:
         return pyramid_base_params<building_large_stepped_pyramid>(params);
+
+    case BUILDING_STEPPED_PYRAMID_COMPLEX:
+        return pyramid_base_params<building_stepped_pyramid_complex>(params);
 
     case BUILDING_SMALL_BENT_PYRAMID:
     case BUILDING_SMALL_BENT_PYRAMID_CORNER:
@@ -852,7 +858,11 @@ int building_stepped_pyramid::get_bricks_image(int orientation, tile2i tile, til
     layer %= 6;
 
     const bool is_bmain = is_main();
-    const bool is_floor = building_type_any_of(type(), { BUILDING_SMALL_STEPPED_PYRAMID, BUILDING_MEDIUM_STEPPED_PYRAMID, BUILDING_LARGE_STEPPED_PYRAMID, BUILDING_SMALL_BENT_PYRAMID, BUILDING_MEDIUM_BENT_PYRAMID });
+    const bool is_floor = building_type_any_of(type(), {
+        BUILDING_SMALL_STEPPED_PYRAMID, BUILDING_MEDIUM_STEPPED_PYRAMID, BUILDING_LARGE_STEPPED_PYRAMID,
+        BUILDING_STEPPED_PYRAMID_COMPLEX,
+        BUILDING_SMALL_BENT_PYRAMID, BUILDING_MEDIUM_BENT_PYRAMID
+    });
     if (is_floor && !is_bmain) {
         int image_base_bricks = current_params().first_img("base_bricks") + layer;
         return image_base_bricks;
@@ -1585,7 +1595,9 @@ void building_stepped_pyramid::on_phase_changed(int old, int current) {
 
     if (current == 24 && is_main()) {
         auto area = get_layer_area(3);
-        change_parts_types_in_layer(area.begin, area.size, 3);
+        if (area.size.x > 0 && area.size.y > 0) {
+            change_parts_types_in_layer(area.begin, area.size, 3);
+        }
     }
 
     if (current == 30 && is_main()) {
@@ -1691,6 +1703,58 @@ bool building_large_stepped_pyramid::draw_ornaments_and_animations_height(painte
 
 const monument &building_large_stepped_pyramid::config() const {
     return g_monument_large_stepped_pyramid;
+}
+
+// --- Stepped pyramid complex (20×20, C1b-1 on-land) -----------------------------
+// Same wrappers as large (TYPE-keyed current_params). Phase schedule shared with large.
+
+void building_stepped_pyramid_complex::update_day() {
+    building_impl::update_day();
+
+    if (is_finished()) {
+        return;
+    }
+
+    building_stepped_pyramid::update_day(current_params().init_tiles);
+}
+
+int building_stepped_pyramid_complex::building_image_get() const {
+    switch (phase()) {
+    case MONUMENT_START:
+        return current_params().base_img();
+    default:
+        return current_params().base_img() + 1;
+    }
+
+    return 0;
+}
+
+grid_area building_stepped_pyramid_complex::get_area() const {
+    tile2i main = tile();
+    tile2i end = main.shifted(size() - 1, size() - 1);
+
+    return { main, end };
+}
+
+bool building_stepped_pyramid_complex::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
+    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, current_params().init_tiles);
+}
+
+bool building_stepped_pyramid_complex::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
+    if (is_finished()) {
+        return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
+    }
+    return draw_unfinished_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+}
+
+const monument &building_stepped_pyramid_complex::config() const {
+    // Same cadence as large until C1b-2; keep btype = COMPLEX for any schedule readers.
+    static monument m = [] {
+        monument copy = g_monument_large_stepped_pyramid;
+        copy.btype = BUILDING_STEPPED_PYRAMID_COMPLEX;
+        return copy;
+    }();
+    return m;
 }
 
 // --- Bent pyramids -------------------------------------------------------------

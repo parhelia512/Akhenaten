@@ -93,6 +93,8 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `38_color_mask_passing.js` | Full `COLOR_MASK_*` (> INT_MAX) survive MuJS→C++ as `color` (uint32): `__test_color_roundtrip` for GREEN/RED/BLUE + `draw_flat_tile` with a full mask without TypeError (J1) |
 | `39_enemy_chariot_registered.js` | Every `FIGURE_ENEMY_*_CHARIOT` resolves to a registered enemy class (`__test_enemy_figure_registered`) instead of asserting; Assyrian/Hyksos chariots (missions 32/33) covered (F2) |
 | `53_enemy_warship_registered.js` | Every `FIGURE_ENEMY_*_WAR_SHIP` (+ galera / generic 93) resolves to a registered enemy class (`__test_enemy_figure_registered`); E3a enemy fleet start |
+| `100_enemy_transport_registered.js` | Every `FIGURE_ENEMY_*_TRANSPORT_SHIP` (+ generic 92 / egyptian 51 / barbarian 115) resolves to a registered enemy class; E3b |
+| `101_enemy_transport_disembark.js` | E3b disembark smoke + E3c `via_sea` fleet spawn + E3a-smoke `sink_all_ships` on enemy warship |
 | `40_hippo_spawn.js` | Spawn `FIGURE_HIPPO` on land and water; `update_animation` → `walk` / `swim` (#77) |
 | `66_lion_spawn.js` | Cleopatra `FIGURE_LION`: spawn + type + `update_animation` → `walk` (SprMain2 group 5; CF3b) |
 | `75_bast_lion_curse.js` | Bast lion raid (CF5): feature ON spawn at temple; OFF / smash / no-temple fallback → no lions; raid prey skips ostrich; 1-day timer poof |

@@ -635,9 +635,12 @@ tile2i building::access_tile() {
     case BUILDING_MEDIUM_MASTABA_ENTRANCE:
     case BUILDING_MEDIUM_MASTABA_WALL:
     case BUILDING_MEDIUM_MASTABA_SIDE:
+    case BUILDING_MEDIUM_STEPPED_PYRAMID:
+    case BUILDING_MEDIUM_BENT_PYRAMID:
         return main()->tile.shifted(0, 14);
 
     case BUILDING_LARGE_STEPPED_PYRAMID:
+    case BUILDING_STEPPED_PYRAMID_COMPLEX:
         return main()->tile.shifted(0, 22);
 
     case BUILDING_SPHINX:
