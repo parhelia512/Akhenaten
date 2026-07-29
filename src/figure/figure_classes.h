@@ -22,6 +22,7 @@ class figure_enemy;
 class figure_enemy_archer;
 class figure_enemy_spearman;
 class figure_enemy_warship;
+class figure_enemy_transport;
 class figure_fireman;
 class figure_missile;
 class figure_emigrant;

@@ -7,6 +7,7 @@
 #include "figuretype/figure_missile.h"
 #include "figuretype/figure_transport_ship.h"
 #include "figuretype/figure_enemy_warship.h"
+#include "figuretype/figure_enemy_transport.h"
 #include "grid/water.h"
 #include "grid/figure.h"
 #include "grid/terrain.h"
@@ -61,6 +62,11 @@ bool is_shore_enemy_target(figure *f) {
         return false;
     }
 
+    // Embarked troops ride an enemy transport hull — shoot the ship, not cargo.
+    if (!f->is_visible()) {
+        return false;
+    }
+
     if (!f->is_enemy() && f->category() != figure_category_hostile) {
         return false;
     }
@@ -71,6 +77,14 @@ bool is_shore_enemy_target(figure *f) {
 int warship_target_priority(figure *f) {
     if (!f || !f->is_valid() || f->is_dead()) {
         return 0;
+    }
+
+    // OG: transports carrying enemy soldiers are the top priority.
+    if (auto enemy_transport = smart_cast<figure_enemy_transport>(f)) {
+        if (enemy_transport->has_troops()) {
+            return 40;
+        }
+        return 10;
     }
 
     if (f->type == FIGURE_TRANSPORT_SHIP) {
@@ -235,6 +249,8 @@ void figure_warship::ram_target(figure *target) {
     if (target->damage > target->max_damage()) {
         if (smart_cast<figure_warship>(target)) {
             smart_cast<figure_warship>(target)->kill();
+        } else if (auto transport = smart_cast<figure_enemy_transport>(target)) {
+            transport->kill();
         } else {
             target->kill();
         }

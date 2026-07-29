@@ -20,6 +20,8 @@ public:
 
     struct runtime_data_t {
         short target_id;
+        int16_t invasion_sequence;
+        int8_t wreck_spawned;
     } FIGURE_RUNTIME_DATA_T;
 
     virtual void on_create() override;
@@ -27,6 +29,9 @@ public:
     virtual void update_animation() override;
     virtual void kill() override;
     virtual bool is_attack() const override;
+
+    int invasion_sequence() const { return runtime_data().invasion_sequence; }
+    void set_invasion_sequence(int seq) { runtime_data().invasion_sequence = (int16_t)seq; }
 
     figure_id find_combat_target(int max_distance);
     void combat_tick_vs_target(figure *target, int max_pursue_distance);

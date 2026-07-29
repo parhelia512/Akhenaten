@@ -198,7 +198,7 @@ void figure_enemy_spearman::figure_action() {
     base.speed_multiplier = 1;
     formation *m = formation_get(base.formation_id);
     // int dir = get_missile_direction(m);
-    g_city.figures.add_enemy();
+    count_as_city_invader();
     base.set_flag(e_figure_flag_inattack, false);
     base.terrain_usage = TERRAIN_USAGE_ENEMY;
 

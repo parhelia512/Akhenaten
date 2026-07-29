@@ -10,6 +10,7 @@
 #include "figuretype/figure_missile.h"
 #include "figuretype/figure_shipwreck.h"
 #include "figuretype/figure_transport_ship.h"
+#include "figuretype/figure_enemy_transport.h"
 #include "figuretype/figure_war_ship.h"
 #include "game/game_events.h"
 #include "graphics/image_desc.h"
@@ -17,6 +18,7 @@
 #include "grid/terrain.h"
 #include "js/js_game.h"
 #include "scenario/scenario.h"
+#include "scenario/invasion_auto_resolve.h"
 #include "sound/effect.h"
 #include "sound/sound.h"
 #include "widget/widget_city.h"
@@ -150,6 +152,8 @@ void figure_enemy_warship::on_create() {
     base.allow_move_type = EMOVE_WATER;
     base.terrain_usage = TERRAIN_USAGE_ANY;
     runtime_data().target_id = 0;
+    runtime_data().invasion_sequence = 0;
+    runtime_data().wreck_spawned = 0;
     advance_action(ACTION_205_ENEMY_WARSHIP_CREATED);
 }
 
@@ -164,9 +168,15 @@ void figure_enemy_warship::check_sink() {
 }
 
 void figure_enemy_warship::kill() {
-    base.wait_ticks = 0;
-    figure_shipwreck::create(tile());
-    figure_impl::kill();
+    auto &d = runtime_data();
+    if (!d.wreck_spawned) {
+        figure_shipwreck::create(tile());
+        d.wreck_spawned = 1;
+    }
+    if (is_alive()) {
+        base.wait_ticks = 1;
+        figure_impl::kill();
+    }
 }
 
 figure_id figure_enemy_warship::find_combat_target(int max_distance) {
@@ -241,6 +251,8 @@ void figure_enemy_warship::ram_target(figure *target) {
     if (target->damage > target->max_damage()) {
         if (auto warship = smart_cast<figure_warship>(target)) {
             warship->kill();
+        } else if (auto transport = smart_cast<figure_enemy_transport>(target)) {
+            transport->kill();
         } else {
             target->kill();
         }
@@ -296,6 +308,9 @@ void figure_enemy_warship::combat_tick_vs_target(figure *target, int max_pursue_
 void figure_enemy_warship::figure_action() {
     check_sink();
     if (!is_alive()) {
+        return;
+    }
+    if (invasion_auto_resolve_figure_immune(&base)) {
         return;
     }
 
@@ -369,6 +384,7 @@ declare_console_command_p(spawn_enemy_warship) {
         events::emit(event_city_warning{ "Failed to spawn enemy warship" });
         return;
     }
+    f->faction_id = 0;
 
     events::emit(event_city_warning{ "Spawned enemy warship" });
 }

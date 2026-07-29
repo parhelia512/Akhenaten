@@ -56,6 +56,9 @@ struct invasion_opts_t {
     uint16_t on_completed_tag = 0;
     uint16_t on_refusal_tag = 0;
     uint16_t on_defeat_tag = 0;
+    // E3c: sea invasion orchestration (transports + escort).
+    bool via_sea = false;
+    int8_t sea_point_index = -1; // -1 = pick random valid sea point
 };
 
 // Map pak/JS invasion_attack_target (EVENT_ATTACK_TARGET_*) → formation attack_type.
@@ -154,6 +157,7 @@ void scenario_invasion_process();
 int map_invasion_point(tile2i point);
 
 tile2i scenario_start_invasion_impl(invasion_opts_t opts);
+tile2i scenario_start_sea_invasion_impl(invasion_opts_t opts);
 
 // Force bind/history outcome for a spawn seq (auto-resolve, cheats, etc.).
 // COMPLETED → on_completed_tag; DEFEAT → on_defeat_tag; NONE → clear bind, no tags.

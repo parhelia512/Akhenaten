@@ -58,7 +58,7 @@ void figure_enemy_fast_sword::figure_action() {
 
     base.speed_multiplier = 1;
     formation *m = formation_get(base.formation_id);
-    g_city.figures.add_enemy();
+    count_as_city_invader();
     base.set_flag(e_figure_flag_inattack, false);
     base.terrain_usage = TERRAIN_USAGE_ENEMY;
 

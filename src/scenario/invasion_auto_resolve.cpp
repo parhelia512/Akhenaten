@@ -7,6 +7,8 @@
 #include "core/log.h"
 #include "figure/figure.h"
 #include "figure/formation.h"
+#include "figuretype/figure_enemy_transport.h"
+#include "figuretype/figure_enemy_warship.h"
 #include "game/game_config.h"
 #include "game/game_events.h"
 #include "grid/figure.h"
@@ -23,6 +25,28 @@ invasion_auto_resolve_t g_invasion_auto_resolve;
 
 // Test-only: >=0 overrides player_strength(); -1 = live count.
 static int s_test_player_str_override = -1;
+
+static void despawn_sea_fleet_by_seq(uint16_t seq) {
+    if (!seq) {
+        return;
+    }
+    for (figure *f : map_figures()) {
+        if (!f || !f->is_alive()) {
+            continue;
+        }
+        if (auto *t = smart_cast<figure_enemy_transport>(f)) {
+            if ((uint16_t)t->invasion_sequence() == seq) {
+                t->kill();
+            }
+            continue;
+        }
+        if (auto *w = smart_cast<figure_enemy_warship>(f)) {
+            if ((uint16_t)w->invasion_sequence() == seq) {
+                w->kill();
+            }
+        }
+    }
+}
 
 static void despawn_invasion_by_seq(uint16_t seq) {
     for (int fi = 1; fi < MAX_FORMATIONS; ++fi) {
@@ -53,6 +77,7 @@ static void despawn_invasion_by_seq(uint16_t seq) {
             f->poof();
         }
     }
+    despawn_sea_fleet_by_seq(seq);
     g_formations.calculate_figures();
 }
 
@@ -389,6 +414,8 @@ void invasion_auto_resolve_t::cancel_vanished(uint16_t seq) {
         }
         // Army gone: clear bind with NONE so month-tick cannot fake COMPLETED.
         invasion_force_outcome(seq, INVASION_OUTCOME_NONE);
+        // Empty hulls/escorts would otherwise linger after land troops vanished.
+        despawn_sea_fleet_by_seq(seq);
         remove_order_index(*this, i);
         if (count <= 0) {
             close_quick_battle_ui_if_needed();
@@ -459,10 +486,18 @@ bool invasion_auto_resolve_figure_immune(const figure *f) {
     if (!f || !g_invasion_auto_resolve.has_pending()) {
         return false;
     }
-    if (f->formation_id <= 0) {
-        return false;
+    if (f->formation_id > 0) {
+        return g_invasion_auto_resolve.is_formation_frozen(formation_get(f->formation_id));
     }
-    return g_invasion_auto_resolve.is_formation_frozen(formation_get(f->formation_id));
+    // Sea hulls store seq in runtime_data (no formation_id on the ship).
+    figure *mut = const_cast<figure *>(f);
+    if (auto *t = smart_cast<figure_enemy_transport>(mut)) {
+        return g_invasion_auto_resolve.is_seq_frozen((uint16_t)t->invasion_sequence());
+    }
+    if (auto *w = smart_cast<figure_enemy_warship>(mut)) {
+        return g_invasion_auto_resolve.is_seq_frozen((uint16_t)w->invasion_sequence());
+    }
+    return false;
 }
 
 bool invasion_auto_resolve_target_blocked(tile2i tile) {

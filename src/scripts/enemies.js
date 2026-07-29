@@ -66,6 +66,67 @@ figure_enemy_warship_generic = {
     max_amount : 25
 }
 
+
+// Generic enemy transport (FIGURE_ENEMY_TRANSPORT = 92). Fallback when a nation
+// has no dedicated transport enum / console spawn.
+figure_enemy_transport_generic = {
+    animations : {
+        swim : { pack:PACK_ENEMY_HITTITE, id:7, max_frames:4 }
+        death : { pack:PACK_ENEMY_HITTITE, id:8, max_frames:11, loop:false }
+        idle : { pack:PACK_ENEMY_HITTITE, id:9, max_frames:1 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 290
+    attack_value : 0
+    missile_defense_value : 2
+    terrain_usage : TERRAIN_USAGE_ANY
+    is_enemy : true
+    max_amount : 25
+}
+
+
+// Barbarian pack has no ship sprites — Hittite transport fallback (E3b).
+figure_barbarian_transport_ship = {
+    animations : {
+        swim : { pack:PACK_ENEMY_HITTITE, id:7, max_frames:4 }
+        death : { pack:PACK_ENEMY_HITTITE, id:8, max_frames:11, loop:false }
+        idle : { pack:PACK_ENEMY_HITTITE, id:9, max_frames:1 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 290
+    attack_value : 0
+    missile_defense_value : 2
+    terrain_usage : TERRAIN_USAGE_ANY
+    is_enemy : true
+    max_amount : 25
+}
+
+
+// egyptian
+// Egyptian transport (FIGURE_ENEMY_EGYPTIAN_TRANSPORT_SHIP = 51). No dedicated
+// transport strip in the pack — reuse galera hull frames for E3b.
+figure_egyptian_transport_ship = {
+    animations : {
+        swim : { pack:PACK_ENEMY_EGYPTIAN, id:0, max_frames:4 }
+        death : { pack:PACK_ENEMY_EGYPTIAN, id:1, max_frames:11, loop:false }
+        idle : { pack:PACK_ENEMY_EGYPTIAN, id:2, max_frames:1 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 290
+    attack_value : 0
+    missile_defense_value : 2
+    terrain_usage : TERRAIN_USAGE_ANY
+    is_enemy : true
+    max_amount : 25
+}
+
+
 // barbarian
 figure_barbarian_archer = {
     animations : {

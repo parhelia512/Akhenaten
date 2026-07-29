@@ -12,6 +12,16 @@ void figure_enemy::on_create() {
     figure_impl::on_create();
 }
 
+void figure_enemy::count_as_city_invader() {
+    // Embarked cargo is invisible on a transport hull — do not inflate the
+    // on-map enemy counter until they disembark.
+    if (!base.is_visible()) {
+        return;
+    }
+    g_city.figures.add_enemy();
+}
+
+
 void figure_enemy::figure_action() {
     assert(false && "you should implement this function in derived class");
 }
@@ -24,7 +34,11 @@ void figure_enemy::formation_reset_to_initial(const formation *m) {
     if (is_attack()) {
         return;
     }
-   
+    // Embarked cargo stays frozen until the transport disembarks.
+    if (!base.is_visible()) {
+        return;
+    }
+
     base.action_state = ACTION_151_ENEMY_INITIAL;
     base.wait_ticks = 0;
 }

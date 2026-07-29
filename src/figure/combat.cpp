@@ -43,6 +43,11 @@ int figure_combat_get_target_for_soldier(tile2i tile, int max_distance) {
             continue;
         }
 
+        // Embarked transport cargo is invisible / off-grid — not a land target.
+        if (!f->is_visible()) {
+            continue;
+        }
+
         if (f->is_enemy() || f->is_criminal()) {
             int distance = calc_maximum_distance(tile, f->tile);
             if (distance <= max_distance) {
@@ -70,6 +75,11 @@ int figure_combat_get_target_for_soldier(tile2i tile, int max_distance) {
         }
 
         if (invasion_auto_resolve_figure_immune(f)) {
+            continue;
+        }
+
+        // Embarked transport cargo is invisible / off-grid — not a land target.
+        if (!f->is_visible()) {
             continue;
         }
 
@@ -124,6 +134,10 @@ int figure_combat_get_missile_target_for_soldier(figure* shooter, int max_distan
         }
 
         if (invasion_auto_resolve_figure_immune(f)) {
+            continue;
+        }
+
+        if (!f->is_visible()) {
             continue;
         }
 

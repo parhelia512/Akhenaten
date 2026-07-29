@@ -26,6 +26,8 @@
 #include "building/monuments.h"
 #include "building/construction_blessing.h"
 #include "grid/grid.h"
+#include "grid/terrain.h"
+#include "grid/water.h"
 #include "graphics/view/view.h"
 #include "graphics/view/zoom.h"
 #include "figure/figure.h"
@@ -41,12 +43,15 @@
 #include "figuretype/figure_funeral_walker.h"
 #include "figuretype/figure_tomb_robber.h"
 #include "figuretype/figure_constable.h"
+#include "figuretype/figure_enemy_transport.h"
+#include "figuretype/figure_enemy_warship.h"
 #include "figure/combat.h"
 #include "city/city_animals.h"
 #include "graphics/color.h"
 #include "city/city.h"
 #include "city/city_buildings.h"
 #include "city/city_maintenance.h"
+#include "city/city_religion_seth.h"
 #include "grid/road_access.h"
 #include "grid/road_network.h"
 #include "game/autosave_module.h"
@@ -761,6 +766,234 @@ bool __test_enemy_figure_registered(int type) {
     return is_enemy;
 }
 ANK_FUNCTION_1(__test_enemy_figure_registered);
+namespace {
+
+tile2i test_find_or_make_water_strip(int *out_cx, int *out_cy) {
+    const int cx = g_scenario.map.width / 2;
+    const int cy = g_scenario.map.height / 2;
+    const int x0 = cx - 2;
+    for (int dy = 0; dy < 2; dy++) {
+        for (int dx = 0; dx < 6; dx++) {
+            tile2i t(x0 + dx, cy + dy);
+            map_terrain_add(t, TERRAIN_WATER);
+        }
+    }
+    // Land strip above water for disembark.
+    for (int dx = 0; dx < 6; dx++) {
+        tile2i land(x0 + dx, cy - 1);
+        map_terrain_remove(land, TERRAIN_WATER);
+    }
+    map_water_rebuild_shores();
+    if (out_cx) {
+        *out_cx = cx;
+    }
+    if (out_cy) {
+        *out_cy = cy;
+    }
+    return tile2i(cx, cy);
+}
+
+} // namespace
+
+
+// Spawn enemy transport with N soldiers loaded and sailing to a nearby shore.
+// Returns transport figure id, or 0 on failure.
+int __test_enemy_transport_spawn_loaded(int enemy_type, int soldier_count) {
+    int cx = 0;
+    int cy = 0;
+    tile2i water = test_find_or_make_water_strip(&cx, &cy);
+    tile2i landing = tile2i(cx, cy);
+    tile2i shore(cx, cy - 1);
+
+    e_enemy_type enemy = (e_enemy_type)enemy_type;
+    e_figure_type ship_type = enemy_transport_type_for(enemy);
+    e_figure_type soldier_type = FIGURE_ENEMY_HITTITE_SPEARMAN;
+    const enemy_properties_t &props = g_invasions.get_prop(enemy);
+    if (props.figure_types[0] != FIGURE_NONE) {
+        soldier_type = props.figure_types[0];
+    }
+
+    if (soldier_count < 1) {
+        soldier_count = 1;
+    }
+    if (soldier_count > 8) {
+        soldier_count = 8;
+    }
+
+    int formation_id = formation_create_enemy(soldier_type,
+                                              shore,
+                                              FORMATION_ENEMY_MOB,
+                                              DIR_0_TOP_RIGHT,
+                                              enemy,
+                                              FORMATION_ATTACK_RANDOM,
+                                              23,
+                                              1);
+    if (formation_id <= 0) {
+        return 0;
+    }
+
+    for (int i = 0; i < soldier_count; i++) {
+        figure *s = figure_create(soldier_type, water, DIR_0_TOP_RIGHT);
+        if (!s || !s->is_valid()) {
+            continue;
+        }
+        s->faction_id = 0;
+        s->formation_id = formation_id;
+        s->index_in_formation = (uint8_t)i;
+        s->action_state = ACTION_152_ENEMY_WAITING;
+        s->wait_ticks = 30000;
+        s->formation_at_rest = 1;
+        s->allow_move_type = EMOVE_AMPHIBIAN;
+        s->set_flag(e_figure_flag_invisible);
+    }
+
+    auto abort_test_formation = [formation_id]() {
+        for (figure *f : map_figures()) {
+            if (f && f->is_alive() && f->formation_id == formation_id) {
+                f->set_flag(e_figure_flag_invisible, false);
+                f->kill();
+            }
+        }
+        formation *m = formation_get(formation_id);
+        if (m && m->in_use) {
+            m->num_figures = 0;
+            for (int fi = 0; fi < formation::max_figures_count; fi++) {
+                m->figures[fi] = 0;
+            }
+            m->in_use = false;
+        }
+    };
+
+    figure *ship = figure_create(ship_type, water, DIR_0_TOP_RIGHT);
+    if (!ship || !ship->is_valid()) {
+        abort_test_formation();
+        return 0;
+    }
+
+    auto *transport = smart_cast<figure_enemy_transport>(ship);
+    if (!transport) {
+        ship->kill();
+        abort_test_formation();
+        return 0;
+    }
+    if (!transport->load_formation(formation_id)) {
+        ship->kill();
+        abort_test_formation();
+        return 0;
+    }
+    if (!transport->sail_to_landing(landing)) {
+        ship->kill();
+        abort_test_formation();
+        return 0;
+    }
+    return ship->id;
+}
+ANK_FUNCTION_2(__test_enemy_transport_spawn_loaded);
+
+
+int __test_enemy_transport_has_troops(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive()) {
+        return 0;
+    }
+    auto *t = smart_cast<figure_enemy_transport>(f);
+    return t && t->has_troops() ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_enemy_transport_has_troops);
+
+
+int __test_count_visible_enemy_soldiers() {
+    int count = 0;
+    for (int i = 1; i < MAX_FIGURES; i++) {
+        figure *f = figure_get(i);
+        if (!f || !f->is_alive()) {
+            continue;
+        }
+        if (!f->is_visible()) {
+            continue;
+        }
+        if (f->is_boat() || f->allow_move_type == EMOVE_WATER || f->allow_move_type == EMOVE_DEEPWATER) {
+            continue;
+        }
+        if (smart_cast<figure_enemy_transport>(f) || smart_cast<figure_enemy_warship>(f)) {
+            continue;
+        }
+        // Prefer flag, fall back to static params (fresh spawn / flag edge cases).
+        if (!f->is_enemy() && !f->params().is_enemy) {
+            continue;
+        }
+        count++;
+    }
+    return count;
+}
+ANK_FUNCTION(__test_count_visible_enemy_soldiers);
+
+
+int __test_start_sea_invasion(int enemy_type, int size) {
+    int cx = 0;
+    int cy = 0;
+    tile2i water = test_find_or_make_water_strip(&cx, &cy);
+    g_scenario.invasion_points_sea.clear();
+    g_scenario.invasion_points_sea.push_back(water);
+    g_scenario.disembark_points.clear();
+    g_scenario.disembark_points.push_back(tile2i(cx, cy - 1));
+
+    invasion_opts_t opts;
+    opts.mode = ATTACK_TYPE_ENEMIES;
+    opts.enemy_type = (e_enemy_type)enemy_type;
+    opts.size = size > 0 ? size : 8;
+    opts.via_sea = true;
+    opts.invasion_id = 23;
+    opts.attack_type = FORMATION_ATTACK_RANDOM;
+    opts.kind = INVASION_KIND_FOREIGN;
+    tile2i tile = scenario_start_invasion_impl(opts);
+    return tile.valid() ? 1 : 0;
+}
+ANK_FUNCTION_2(__test_start_sea_invasion);
+
+
+int __test_count_enemy_transports() {
+    int count = 0;
+    for (int i = 1; i < MAX_FIGURES; i++) {
+        figure *f = figure_get(i);
+        if (f && f->is_alive() && smart_cast<figure_enemy_transport>(f)) {
+            count++;
+        }
+    }
+    return count;
+}
+ANK_FUNCTION(__test_count_enemy_transports);
+
+
+int __test_count_enemy_warships() {
+    int count = 0;
+    for (int i = 1; i < MAX_FIGURES; i++) {
+        figure *f = figure_get(i);
+        if (f && f->is_alive() && smart_cast<figure_enemy_warship>(f)) {
+            count++;
+        }
+    }
+    return count;
+}
+ANK_FUNCTION(__test_count_enemy_warships);
+
+
+int __test_spawn_enemy_warship_on_water(int enemy_type) {
+    int cx = 0;
+    int cy = 0;
+    tile2i water = test_find_or_make_water_strip(&cx, &cy);
+    e_figure_type ftype = enemy_warship_type_for((e_enemy_type)enemy_type);
+    figure *f = figure_create(ftype, water, DIR_0_TOP_RIGHT);
+    return f && f->is_valid() ? f->id : 0;
+}
+ANK_FUNCTION_1(__test_spawn_enemy_warship_on_water);
+
+
+void __test_seth_sink_all_ships() {
+    god_seth.sink_all_ships();
+}
+ANK_FUNCTION(__test_seth_sink_all_ships);
+
 
 void __test_show_tile_info(int bid) {
     building *b = building_get(bid);

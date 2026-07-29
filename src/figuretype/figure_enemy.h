@@ -4,6 +4,7 @@
 
 enum e_enemy_action {
     ACTION_151_ENEMY_INITIAL = 151,
+    ACTION_152_ENEMY_WAITING = 152, // idle / embarked — no march or fire
     ACTION_153_ENEMY_MARCHING = 153,
     ACTION_154_ENEMY_FIGHTING = 154,
     ACTION_156_ENEMY_LEAVING = 156,
@@ -27,6 +28,8 @@ public:
     virtual bool is_mounted_archer() const { return false; }
     virtual e_figure_type missile_type() const { return FIGURE_NONE; }
     virtual bool ignore_pharaoh_soldiers() const { return false; }
+    // Per-tick city tally; invisible embarked cargo skipped in .cpp.
+    virtual void count_as_city_invader();
 
     virtual bool is_attack() const { assert(false && "this function should be implemented"); return false; }
     virtual void formation_reset_to_initial(const formation *m) override;
