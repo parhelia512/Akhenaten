@@ -15,6 +15,7 @@
 #include "widget/debug_console.h"
 
 #include "building/building.h"
+#include "building/building_delivery_path.h"
 #include "building/building_bazaar.h"
 #include "building/building_granary.h"
 #include "building/building_static_params.h"
@@ -47,6 +48,7 @@
 #include "city/city_buildings.h"
 #include "city/city_maintenance.h"
 #include "grid/road_access.h"
+#include "grid/road_network.h"
 #include "game/autosave_module.h"
 #include "core/bstring.h"
 #include "game/game.h"
@@ -1603,6 +1605,124 @@ static int __test_building_type_hover_road_access(int type) {
     return building_type_hover_road_access((e_building_type)type) ? 1 : 0;
 }
 ANK_FUNCTION_1(__test_building_type_hover_road_access);
+
+static void __test_link_producer_for_delivery(int producer_id, int storage_id) {
+    building *producer = building_get(producer_id);
+    building *storage = building_get(storage_id);
+    if (!producer || !storage) {
+        return;
+    }
+
+    producer->has_road_access = true;
+    if (!producer->road_access.valid()) {
+        producer->road_access = producer->tile;
+    }
+    if (producer->distance_from_entry <= 0) {
+        producer->distance_from_entry = 1;
+    }
+
+    // Match map network under access tile when present (predict prefers map net).
+    int net = map_road_network_get(producer->road_access);
+    if (net <= 0) {
+        net = producer->road_network_id > 0 ? producer->road_network_id : 1;
+    }
+    producer->road_network_id = net;
+
+    for (building *part = storage->main(); part;) {
+        part->road_network_id = net;
+        part->distance_from_entry = producer->distance_from_entry;
+        part->has_road_access = true;
+        if (!part->road_access.valid()) {
+            part->road_access = part->tile;
+        }
+        if (part->max_workers > 0) {
+            part->num_workers = part->max_workers;
+        } else {
+            part->num_workers = std::max(1, (int)part->num_workers);
+        }
+        if (!part->has_next()) {
+            break;
+        }
+        part = part->next();
+    }
+}
+ANK_FUNCTION_2(__test_link_producer_for_delivery);
+
+static int __test_predict_delivery(int bid) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return 0;
+    }
+    delivery_path_query q = building_predict_delivery(*b);
+    if (!q.to) {
+        return 0;
+    }
+    building *dest = building_get(q.to);
+    return dest && dest->is_valid() ? dest->main()->id : q.to;
+}
+ANK_FUNCTION_1(__test_predict_delivery);
+
+static int __test_predict_delivery_kind(int bid) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return 0;
+    }
+    delivery_path_query q = building_predict_delivery(*b);
+    return (int)q.kind;
+}
+ANK_FUNCTION_1(__test_predict_delivery_kind);
+
+static int __test_predict_delivery_reason(int bid) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return -1;
+    }
+    delivery_path_query q = building_predict_delivery(*b);
+    return (int)q.reason;
+}
+ANK_FUNCTION_1(__test_predict_delivery_reason);
+
+static void __test_building_set_workers(int bid, int workers) {
+    building *b = building_get(bid);
+    if (!b) {
+        return;
+    }
+    building *m = b->main();
+    if (!m) {
+        return;
+    }
+    m->num_workers = std::max(0, workers);
+    for (building *part = m; part;) {
+        part->num_workers = m->num_workers;
+        if (!part->has_next()) {
+            break;
+        }
+        part = part->next();
+    }
+}
+ANK_FUNCTION_2(__test_building_set_workers);
+
+static void __test_storage_toggle_empty_all(int bid) {
+    building *b = building_get(bid);
+    if (!b) {
+        return;
+    }
+    building *m = b->main();
+    if (!m || m->storage_id <= 0) {
+        return;
+    }
+    building_storage_toggle_empty_all(m->storage_id);
+}
+ANK_FUNCTION_1(__test_storage_toggle_empty_all);
+
+static int __test_building_shows_delivery_paths(int bid) {
+    building *b = building_get(bid);
+    if (!b) {
+        return 0;
+    }
+    return building_shows_delivery_paths(*b) ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_building_shows_delivery_paths);
 
 ANK_DECLARE_JSFUNCTION_ITERATOR(register_test_js_functions);
 inline void register_test_js_functions(js_State *J) {

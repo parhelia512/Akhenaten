@@ -1,6 +1,7 @@
 #include "figure_cartpusher.h"
 
 #include "building/building_barracks.h"
+#include "building/building_delivery_path.h"
 #include "building/building_granary.h"
 #include "city/city_industry.h"
 #include "building/building_type.h"
@@ -186,11 +187,6 @@ void figure_cartpusher::calculate_destination(bool warehouseman) {
 }
 
 void figure_cartpusher::determine_deliveryman_destination() {
-    tile2i dst;
-    int road_network_id = map_road_network_get(tile());
-    building* warehouse = home();
-    int understaffed_storages = 0;
-
     base.destination_tile = tile2i::invalid;
 
     // before we start... check that resource is not empty.
@@ -198,83 +194,32 @@ void figure_cartpusher::determine_deliveryman_destination() {
         return advance_action(ACTION_27_CARTPUSHER_RETURNING);
     }
 
-    // first: gold deliverers
-    if (base.resource_id == RESOURCE_GOLD) {
-        int senate_id = g_city.buildings.get_palace_id();
-        building* b = building_get(senate_id);
-        if (senate_id && b->state == BUILDING_STATE_VALID && b->num_workers >= 5) {
-            set_destination(senate_id);
+    building *home_b = home();
+    if (!home_b) {
+        return advance_action(ACTION_8_RECALCULATE);
+    }
+    auto pred = cartpusher_predict_deliveryman_destination(tile(), base.resource_id, *home_b);
+    set_destination(pred.destination);
+
+    if (has_destination()) {
+        switch (pred.kind) {
+        case e_delivery_dest_kind::palace:
             return advance_action(ACTION_11_CARTPUSHER_DELIVERING_GOLD);
-        }
-    }
-
-    // priority 1: warehouse if resource is on stockpile
-    building_id stockpile_id = building_storage_yard_for_storing(tile(), base.resource_id, warehouse->distance_from_entry, road_network_id, &understaffed_storages, dst);
-    set_destination(stockpile_id);
-    if (!g_city.resource.is_stockpiled(base.resource_id)) {
-        set_destination(nullptr);
-    }
-
-    if (has_destination()) {
-        return advance_action(ACTION_21_CARTPUSHER_DELIVERING_TO_WAREHOUSE);
-    }
-
-    // priority 2: accepting granary for food
-    int granary_food_id = building_granary_for_storing(tile(), base.resource_id, warehouse->distance_from_entry, road_network_id, 0, &understaffed_storages, &dst);
-    set_destination(granary_food_id);
-    if (!!game_features::gameplay_change_farms_deliver_close) {
-        int dist = 0;
-        building* src_building = home();
-        building* dst_building = destination();
-        if (src_building->dcast_farm() || src_building->dcast_fishing_wharf()) {
-            dist = calc_distance_with_penalty(src_building->tile, dst_building->tile, src_building->distance_from_entry,dst_building->distance_from_entry);
-        }
-
-        if (dist >= 64) {
+        case e_delivery_dest_kind::storage_yard:
+            return advance_action(ACTION_21_CARTPUSHER_DELIVERING_TO_WAREHOUSE);
+        case e_delivery_dest_kind::granary:
+            return advance_action(ACTION_22_CARTPUSHER_DELIVERING_TO_GRANARY);
+        case e_delivery_dest_kind::workshop:
+            return advance_action(ACTION_23_CARTPUSHER_DELIVERING_TO_WORKSHOP);
+        default:
+            // Kind/destination mismatch — don't keep a stuck dest into recalc.
             set_destination(nullptr);
+            break;
         }
-    }
-
-    if (has_destination()) {
-        return advance_action(ACTION_22_CARTPUSHER_DELIVERING_TO_GRANARY);
-    }
-
-    // priority 3: workshop for raw material
-    int workshop_id = building_get_workshop_for_raw_material_with_room(tile(), (e_resource)base.resource_id, warehouse->distance_from_entry, road_network_id, dst);
-    set_destination(workshop_id);
-    if (has_destination()) {
-        return advance_action(ACTION_23_CARTPUSHER_DELIVERING_TO_WORKSHOP);
-    }
-
-    // priority 4: warehouse
-    int warehouse_id = building_storage_yard_for_storing(tile(), base.resource_id, warehouse->distance_from_entry, road_network_id, &understaffed_storages, dst);
-    set_destination(warehouse_id);
-    if (has_destination()) {
-        return advance_action(ACTION_21_CARTPUSHER_DELIVERING_TO_WAREHOUSE);
-    }
-
-    // priority 5: granary forced when on stockpile
-    int granary_id = building_granary_for_storing(tile(), base.resource_id, warehouse->distance_from_entry, road_network_id, 1, &understaffed_storages, &dst);
-    set_destination(granary_id);
-    if (!!game_features::gameplay_change_farms_deliver_close) {
-        int dist = 0;
-        building* src_building = home();
-        building* dst_building = destination();
-        if (src_building->dcast_farm() || src_building->dcast_fishing_wharf()) {
-            dist = calc_distance_with_penalty(src_building->tile, dst_building->tile, src_building->distance_from_entry, dst_building->distance_from_entry);
-        }
-
-        if (dist >= 64) {
-            set_destination(nullptr);
-        }
-    }
-
-    if (has_destination()) {
-        return advance_action(ACTION_22_CARTPUSHER_DELIVERING_TO_GRANARY);
     }
 
     // no one will accept
-    base.min_max_seen = understaffed_storages ? 2 : 1;
+    base.min_max_seen = pred.understaffed ? 2 : 1;
     if (++base.routing_try_reroute_counter > 5) {
         // Give up after repeated failures — return home so the workshop can dispatch a fresh cart.
         base.routing_try_reroute_counter = 0;

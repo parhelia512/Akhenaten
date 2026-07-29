@@ -114,6 +114,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `45_mastaba_place.js` | Small mastaba: planner-place `BUILDING_SMALL_MASTABA`, assert 10 linked parts, `image_stick` resolves (#431), bricks via `__test_monument_add_resource`, phase walk + screenshots |
 | `50_invasion_bind_resolve.js` | Invasion bind: spawn + `on_completed_tag` deferred KR + history ring (JS calendar model; native EVENT_TYPE_INVASION cancelled) |
 | `78_building_road_access.js` | Building road-access marker (EE*): Preview/Commit resolve, booth assume, temple variant, config flag |
+| `95_delivery_paths.js` | Delivery paths (DP*): allowlist, pottery→SY, Empty All / understaffed reasons, clay→workshop, feature flag |
 | `77_brick_wall_placement.js` | Brick wall L-drag; material; clear+undo; mud↔brick overwrite no-op |
 | `76_invasion_auto_resolve.js` | Enhanced auto-resolve invasions (AC*): freeze/pending, lose/win KR, queue timer, flag OFF, natives out, Pharaoh, queue full, save/load, chain spawn |
 | `77_bazaar_multi_buyer.js` | Multi-buyer bazaar (BB*): complementary/fallback/demand freeze/OFF slot1; slots; -3 |

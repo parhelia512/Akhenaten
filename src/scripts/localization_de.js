@@ -33,6 +33,11 @@ localization_de = [
   {key:"#TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE", text:"Visuelle Rückmeldung beim Räumen von Land verbessern"}
   {key:"#TR_CONFIG_ALLOW_CYCLING_TEMPLES", text:"Bau jedes Tempels nacheinander erlauben"}
   {key:"#TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE", text:"Reichweite beim Bau von Reservoirs, Brunnen und Quellen anzeigen"}
+  {key:"#TR_CONFIG_SHOW_DELIVERY_PATHS", text:"Lieferweg anzeigen bei Auswahl oder Hover über Produzenten"}
+  {key:"#delivery_path_no_road", text:"Kein Straßenzugang — Lieferung unmöglich"}
+  {key:"#delivery_path_understaffed", text:"Kein annehmendes Lager — unterbesetzt"}
+  {key:"#delivery_path_no_destination", text:"Kein annehmendes Ziel für diese Ware"}
+  {key:"#delivery_path_no_route", text:"Ziel gefunden, aber kein Straßenweg"}
   {key:"#TR_CONFIG_SHOW_CONSTRUCTION_SIZE", text:"Ziehbare Baugröße anzeigen"}
   {key:"#TR_CONFIG_PAUSE_SIM_WHILE_BUILDING", text:"Simulation während dem Bau anhalten"}
   {key:"#TR_CONFIG_HIGHLIGHT_LEGIONS", text:"Legion beim Überfahren mit Mauszeiger hervorheben"}

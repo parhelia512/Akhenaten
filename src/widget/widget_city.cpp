@@ -13,6 +13,7 @@
 #include "graphics/image_groups.h"
 #include "building/building_static_params.h"
 #include "building/building_bridge.h"
+#include "building/building_delivery_path.h"
 #include "building/building_temple_complex.h"
 #include "building/construction/build_planner.h"
 #include "city/city_finance.h"
@@ -526,6 +527,7 @@ void screen_city_t::draw_without_overlay(painter &ctx, int selected_figure_id) {
     }
 
     draw_building_road_access_marker(ctx);
+    delivery_paths_draw(ctx);
 
     // PHASE 5: post-processing of tiles that require special handling after all main elements are drawn
     g_camera.foreach_valid_map_tile(ctx,
@@ -954,6 +956,7 @@ void screen_city_t::draw_with_overlay(painter &ctx) {
     g_city_planner.draw(ctx);
 
     draw_building_road_access_marker(ctx);
+    delivery_paths_draw(ctx);
 
     ImageDraw::apply_render_commands(ctx, "draw_city_planer_overlay");
 

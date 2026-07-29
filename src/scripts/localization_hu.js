@@ -42,6 +42,11 @@ localization_hu = [
   {key:"#TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE", text:"Területrendezés vizuális visszajelzésének javítása"}
   {key:"#TR_CONFIG_ALLOW_CYCLING_TEMPLES", text:"Templomok egymás utáni építésének engedélyezése"}
   {key:"#TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE", text:"Víztározók, szökőkutak és kutak hatótávolságának megjelenítése építéskor"}
+  {key:"#TR_CONFIG_SHOW_DELIVERY_PATHS", text:"Szállítási útvonal megjelenítése gyártó kijelölésekor vagy rámutatáskor"}
+  {key:"#delivery_path_no_road", text:"Nincs útcsatlakozás — szállítás lehetetlen"}
+  {key:"#delivery_path_understaffed", text:"Nincs fogadó raktár — nincs elég munkás"}
+  {key:"#delivery_path_no_destination", text:"Nincs fogadó célhely ehhez az áruhoz"}
+  {key:"#delivery_path_no_route", text:"Van cél, de nincs útvonal az utakon"}
   {key:"#TR_CONFIG_SHOW_CONSTRUCTION_SIZE", text:"Húzható építmények méretének megjelenítése"}
   {key:"#TR_CONFIG_PAUSE_SIM_WHILE_BUILDING", text:"Szimuláció szüneteltetése épületek elhelyezése közben" }
   {key:"#TR_CONFIG_HIGHLIGHT_LEGIONS", text:"Légió kiemelése a kurzor ráhúzásakor"}

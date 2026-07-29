@@ -36,6 +36,11 @@ localization_ru_f = [
     { key:"#TR_CONFIG_ALLOW_CYCLING_TEMPLES", text:"Разрешить строительство каждого храма по очереди"}
     { key:"#TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE", text:"Отображать область водоснабжения при строительстве зданий водоснабжения"}
     { key:"#TR_CONFIG_SHOW_BUILDING_ROAD_ACCESS", text:"Показывать клетку дорожного доступа здания при размещении и наведении"}
+    { key:"#TR_CONFIG_SHOW_DELIVERY_PATHS", text:"Показывать путь доставки при выборе или наведении на производителя"}
+    { key:"#delivery_path_no_road", text:"Нет доступа к дороге — доставка невозможна"}
+    { key:"#delivery_path_understaffed", text:"Нет принимающего склада — нехватка рабочих"}
+    { key:"#delivery_path_no_destination", text:"Нет принимающего назначения для этого товара"}
+    { key:"#delivery_path_no_route", text:"Назначение есть, но нет пути по дорогам"}
     { key:"#TR_CONFIG_SHOW_CONSTRUCTION_SIZE", text:"Отображать размер здания при строительстве с зажатой клавишей мыши"}
     { key:"#TR_CONFIG_FIX_IMMIGRATION_BUG", text:"Исправлять ошибку иммиграции на 'Очень сложной' сложности игры"}
     { key:"#TR_CONFIG_FIX_100_YEAR_GHOSTS", text:"Исправлять ошибку '100-летних призраков' населения"}
