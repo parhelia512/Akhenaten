@@ -65,6 +65,11 @@ bool autosave_module_t::is_monthly_filename(pcstr filename_short) {
     return starts_with_ci(basename_of(filename_short), "autosave_month");
 }
 
+bool autosave_module_t::is_ironwill_exempt_save(pcstr filename_short) {
+    pcstr base = basename_of(filename_short);
+    return starts_with_ci(base, "ironwill.") || starts_with_ci(base, "autosave_replay.");
+}
+
 bstring256 autosave_module_t::format_monthly_filename(int slots, int slot_1based, pcstr extension) {
     bstring256 name;
     const char *ext = (extension && *extension) ? extension : "svx";
@@ -138,6 +143,10 @@ bstring256 autosave_module_t::next_monthly_filename(pcstr extension) {
 
 void autosave_module_t::on_advance_month() {
     if (!game_features::gameopt_monthly_autosave.to_bool()) {
+        return;
+    }
+    if (game_features::gameopt_ironwill.to_bool()) {
+        logs::info("Autosave: skipped (Ironwill mode)");
         return;
     }
     bstring256 autosave_file = next_monthly_filename(saved_game_data_expanded.extension);

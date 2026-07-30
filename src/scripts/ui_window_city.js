@@ -34,6 +34,10 @@ function window_city_on_save_city(ev) {
     if (!ui.window_is("window_city")) {
         return
     }
+    if (!game_allows_player_save()) {
+        game_toast_ironwill_save_blocked()
+        return
+    }
     window_file_dialog_save_show(FILE_TYPE_SAVED_GAME)
 }
 
@@ -42,10 +46,14 @@ function window_city_on_load_city(ev) {
     if (!ui.window_is("window_city")) {
         return
     }
+    if (!game_allows_midgame_load()) {
+        game_toast_ironwill_load_blocked()
+        return
+    }
     window_file_dialog_load_show(FILE_TYPE_SAVED_GAME)
 }
 
-// N=1 quicksave (QS2). Ironwill: route through can_save_now() when IW lands.
+// Single-slot quicksave. Ironwill: game_allows_player_save() / midgame load gate.
 var QUICKSAVE_FILENAME = "quicksave.svx"
 
 function quicksave_fullpath() {
@@ -55,6 +63,11 @@ function quicksave_fullpath() {
 [es=event_quicksave]
 function window_city_on_quicksave(ev) {
     if (!ui.window_is("window_city")) {
+        return
+    }
+
+    if (!game_allows_player_save()) {
+        game_toast_ironwill_save_blocked()
         return
     }
 
@@ -70,6 +83,11 @@ function window_city_on_quicksave(ev) {
 [es=event_quickload]
 function window_city_on_quickload(ev) {
     if (!ui.window_is("window_city")) {
+        return
+    }
+
+    if (!game_allows_midgame_load()) {
+        game_toast_ironwill_load_blocked()
         return
     }
 

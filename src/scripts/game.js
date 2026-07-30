@@ -70,6 +70,7 @@ game_features {
     @gameui_hide_new_game_top_menu {}
     @gameui_empire_city_old_names {}
     @gameopt_monthly_autosave {}
+    @gameopt_ironwill {}
     @gameopt_autosave_slots {}
     @gameopt_tooltips_mode {}
     @gameopt_warnings {}
@@ -128,6 +129,29 @@ game_features.count = __game_features_count
 game_features.type = __game_feature_type
 game_features.type_name = __game_feature_type_name
 game_features.default = __game_feature_default
+
+// Ironwill (IW*): player saves only via ironwill.svx checkpoint (Exit / Alt+F4).
+var IRONWILL_CHECKPOINT_FILENAME = "ironwill.svx"
+
+function game_allows_player_save() {
+    return !game_features.gameopt_ironwill
+}
+
+function game_allows_midgame_load() {
+    return !game_features.gameopt_ironwill
+}
+
+function game_write_ironwill_checkpoint() {
+    return game.write_savegame(IRONWILL_CHECKPOINT_FILENAME)
+}
+
+function game_toast_ironwill_save_blocked() {
+    city.warnings.show("#ironwill_save_blocked")
+}
+
+function game_toast_ironwill_load_blocked() {
+    city.warnings.show("#ironwill_load_blocked")
+}
 
 function calc_bound_scroll_speed(v, lo, hi) {
     if (v < lo) { return lo }
@@ -226,6 +250,24 @@ function app_on_close_requested(ev) {
     }
 
     if (game.session_active) {
+        if (game_features.gameopt_ironwill) {
+            // Ironwill: no named save dialog. Quit without save, or checkpoint then quit.
+            ui.show_yesno("#popup_dialog_quit_without_saving",
+                function() {
+                    emit event_request_exit{ value: true }
+                },
+                function() {
+                    if (!game_write_ironwill_checkpoint()) {
+                        log_warning("Ironwill checkpoint failed on app quit")
+                        city.warnings.show("#ironwill_save_failed")
+                        return
+                    }
+                    emit event_request_exit{ value: true }
+                }
+            )
+            return
+        }
+
         ui.show_yesno("#popup_dialog_quit_without_saving",
             function() {
                 emit event_request_exit{ value: true }

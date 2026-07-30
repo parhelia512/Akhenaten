@@ -10,6 +10,10 @@ localization_en = [
   {key:"#TR_INVALID_LANGUAGE_TITLE", text:"Invalid language directory"}
   {key:"#TR_INVALID_LANGUAGE_MESSAGE", text:"The directory you selected does not contain a valid language pack. Please check the log for errors."}
   {key:"#TR_BUTTON_OK", text:"OK"}
+  {key:"#TR_CONFIG_IRONWILL", text:"Ironwill mode — save only when exiting to the main menu (blocks Save, Ctrl+S, autosave, quicksave/load)"}
+  {key:"#ironwill_save_blocked", text:"Ironwill: save only on Exit to menu"}
+  {key:"#ironwill_load_blocked", text:"Ironwill: load only from the main menu (Continue)"}
+  {key:"#ironwill_save_failed", text:"Ironwill checkpoint failed — still in city"}
   {key:"#TR_BUTTON_CANCEL", text:"Cancel"}
   {key:"#TR_BUTTON_PAUSE", text:"Pause"}
   {key:"#TR_BUTTON_RESUME", text:"Resume"}

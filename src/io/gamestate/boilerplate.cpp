@@ -654,6 +654,12 @@ bool GamestateIO::write_mission(const int scenario_id) {
 }
 
 bool GamestateIO::write_savegame(pcstr filename_short) {
+    if (game_features::gameopt_ironwill.to_bool() && game.session.active
+        && !autosave_module_t::is_ironwill_exempt_save(filename_short)) {
+        logs::info("Save game: blocked by Ironwill (%s)", filename_short ? filename_short : "");
+        return false;
+    }
+
     vfs::path full = fullpath_saves(filename_short);
 
     logs::info("Save game: writing %s", full.c_str());

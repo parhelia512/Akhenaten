@@ -94,6 +94,11 @@ function file_dialog_save_handle_commit(ev) {
     var normalized = file_dialog_save_basename_from_list_entry(source_name)
     var pending = file_dialog_save.pending_type
     if (pending === FILE_TYPE_SAVED_GAME) {
+        if (!game_allows_player_save()) {
+            game_toast_ironwill_save_blocked()
+            ui.window_city_show()
+            return
+        }
         game.write_savegame(normalized + ".svx")
         ui.window_city_show()
         __set_last_loaded_utf8(FILE_TYPE_SAVED_GAME, normalized)

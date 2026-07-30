@@ -8,6 +8,10 @@ localization_ru = [
     { key:"#TR_INVALID_LANGUAGE_TITLE", text:"Неправильная языковая директория"}
     { key:"#TR_INVALID_LANGUAGE_MESSAGE", text:"В указанной папке языковые пакеты отсутствуют. Пожалуйста, проверьте записи журнала игры (log)."}
     { key:"#TR_BUTTON_OK", text:"Ок"}
+    { key:"#TR_CONFIG_IRONWILL", text:"Режим Ironwill — сохранение только при выходе в главное меню (блокирует Save, Ctrl+S, автосейв, быстрый сейв/загрузку)"}
+    { key:"#ironwill_save_blocked", text:"Ironwill: сохранение только при выходе в меню"}
+    { key:"#ironwill_load_blocked", text:"Ironwill: загрузка только из главного меню (Continue)"}
+    { key:"#ironwill_save_failed", text:"Не удалось записать Ironwill-чекпоинт — остаёмся в городе"}
     { key:"#TR_BUTTON_CANCEL", text:"Отмена"}
     { key:"#TR_BUTTON_RESET_DEFAULTS", text:"По умолчанию"}
     { key:"#TR_BUTTON_CONFIGURE_HOTKEYS", text:"Горячие клавиши"}

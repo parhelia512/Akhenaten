@@ -148,6 +148,11 @@ function top_menu_replay_map() {
 }
 
 function top_menu_load_map() {
+	if (!game_allows_midgame_load()) {
+		widget_top_menu_clear_state()
+		game_toast_ironwill_load_blocked()
+		return
+	}
 	widget_top_menu_clear_state()
 	__ui_city_planner_reset()
 	ui.window_city_show()
@@ -155,6 +160,11 @@ function top_menu_load_map() {
 }
 
 function top_menu_save_map() {
+	if (!game_allows_player_save()) {
+		widget_top_menu_clear_state()
+		game_toast_ironwill_save_blocked()
+		return
+	}
 	widget_top_menu_clear_state()
 	ui.window_city_show()
 	window_file_dialog_save_show(FILE_TYPE_SAVED_GAME)
@@ -171,6 +181,14 @@ function top_menu_exit_game() {
 	ui.show_yesno("#popup_dialog_quit",
 		function() {
 			widget_top_menu_clear_state()
+			if (game_features.gameopt_ironwill) {
+				if (!game_write_ironwill_checkpoint()) {
+					log_warning("Ironwill checkpoint failed on exit to menu")
+					city.warnings.show("#ironwill_save_failed")
+					ui.window_city_show()
+					return
+				}
+			}
 			emit event_show_main_menu{ play_intro: true }
 		},
 		function() {
@@ -228,7 +246,6 @@ top_menu_widget {
 									 onclick: top_menu_pyramid_speedup_toggle })
 		difficulty_options: menu_item({ text {group:2, id:6}, onclick: top_menu_show_window_by_id("difficulty_options_window") })
 		popup_messages  : menu_item({text {group:2, id:11}, onclick: top_menu_show_window_by_id("popup_messages_window") })
-
 
 		cities_options  : menu_item({textfn: top_menu_cities_old_text
 									 onclick: top_menu_cities_old_toggle })
