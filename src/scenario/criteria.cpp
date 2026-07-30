@@ -14,7 +14,7 @@ void ank_global_obj_bind_field(js_State *J, js_StringNode name, win_criteria_t *
     js_setproperty(J, -2, name);
 }
 
-void ank_global_obj_bind_field(js_State *J, js_StringNode name, scenario_data_t::win_criteria_time_t *ptr) {
+void ank_global_obj_bind_field(js_State *J, js_StringNode name, scenario_win_criteria_time_t *ptr) {
     js_newobject(J);
     ank_global_obj_bind_field(J, js_intern("enabled"), &ptr->enabled);
     ank_global_obj_bind_field(J, js_intern("years"), &ptr->years);
