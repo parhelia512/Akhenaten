@@ -26,7 +26,7 @@ void figure_zookeeper::update_shows() {
 sound_key figure_zookeeper::phrase_key() const {
     svector<sound_key, 10> keys;
 
-    if (g_city.figures.enemies > 0) {
+    if (g_city.figures.total_invading_enemies() > 0) {
         return "zookeeper_defenses_are_weak";
     }
 

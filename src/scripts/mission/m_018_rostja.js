@@ -1032,6 +1032,7 @@ function mission18_favour_wave(size, invasion_id) {
 	city.start_foreign_army_invasion({
 		mode: ATTACK_TYPE_ENEMIES,
 		enemy: ENEMY_3_EGYPTIAN,
+		kind: INVASION_KIND_KINGDOME,
 		size: size,
 		invasion_id: invasion_id,
 		tilex: -1,

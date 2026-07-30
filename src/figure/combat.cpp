@@ -78,7 +78,6 @@ int figure_combat_get_target_for_soldier(tile2i tile, int max_distance) {
             continue;
         }
 
-        // Embarked transport cargo is invisible / off-grid — not a land target.
         if (!f->is_visible()) {
             continue;
         }
@@ -275,7 +274,7 @@ void figure::hit_opponent() {
     // defense modifiers
     if (opponent_formation->is_halted
         && (opponent_formation->figure_type == FIGURE_STANDARD_BEARER
-            || opponent_formation->figure_type == FIGURE_ENEMY_KINGDOME_INFANTRY)) {
+            || figure_is_kingdome_army(opponent_formation->figure_type))) {
         if (!attack_is_same_direction(opponent->attack_direction, opponent_formation->direction))
             opponent_defense -= 4; // opponent not attacking in coordinated formation
         else if (opponent_formation->layout == FORMATION_COLUMN)

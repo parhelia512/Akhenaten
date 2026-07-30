@@ -27,6 +27,12 @@ REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_nubian_axeman)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_phoenician_swordman)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_roman_legioner)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_seapeople_axeman)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_egyptian_fast_sword)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_egyptian_sword)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_egyptian_heavy_sword)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_egyptian_axe)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_egyptian_camel)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_kingdome_infantry)
 
 tile2i figure_enemy_fast_sword::get_formation_position(formation *m, int figure_index) {
     if (m->destination_building_id <= 0) {
@@ -51,14 +57,14 @@ tile2i figure_enemy_fast_sword::get_formation_position(formation *m, int figure_
 void figure_enemy_fast_sword::figure_action() {
     OZZY_PROFILER_FUNCTION();
 
+    count_as_city_invader();
     if (invasion_auto_resolve_figure_immune(&base)) {
         base.map_figure_update();
         return;
     }
 
-    base.speed_multiplier = 1;
+    base.speed_multiplier = enemy_speed_multiplier();
     formation *m = formation_get(base.formation_id);
-    count_as_city_invader();
     base.set_flag(e_figure_flag_inattack, false);
     base.terrain_usage = TERRAIN_USAGE_ENEMY;
 
@@ -115,8 +121,16 @@ void figure_enemy_fast_sword::enemy_fighting(formation *m) {
         advance_action(ACTION_151_ENEMY_FAST_SWORD_INITIAL);
     }
 
-    if (city_sound_update_march_enemy()) {
-        g_sound.play_effect(SOUND_EFFECT_MARCHING);
+    // Camel/elephant: no foot-march loop. Chariot / kingdom mounted: horse.
+    if (type() != FIGURE_ENEMY_EGYPTIAN_CAMEL && type() != FIGURE_ENEMY_EGYPTIAN_ELEPHANT) {
+        if (type() == FIGURE_ENEMY_EGYPTIAN_CHARIOT
+            || type() == FIGURE_ENEMY_KINGDOME_MOUNTED) {
+            if (city_sound_update_march_horse()) {
+                g_sound.play_effect(SOUND_EFFECT_HORSE_MOVING);
+            }
+        } else if (city_sound_update_march_enemy()) {
+            g_sound.play_effect(SOUND_EFFECT_MARCHING);
+        }
     }
 
     int target_id = base.target_figure_id;

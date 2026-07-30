@@ -26,7 +26,10 @@ enum e_invasion_spawn_kind : uint8_t {
     INVASION_KIND_KINGDOME = 2,
     INVASION_KIND_UPRISING = 3,
     INVASION_KIND_NATIVES = 4,
+    INVASION_KIND_MAX
 };
+using e_invasion_spawn_kind_tokens_t = token_holder<e_invasion_spawn_kind, INVASION_KIND_FOREIGN, INVASION_KIND_MAX>;
+extern const e_invasion_spawn_kind_tokens_t e_invasion_spawn_kind_tokens;
 
 struct invasion_warning_t {
     bool in_use;
@@ -56,7 +59,8 @@ struct invasion_opts_t {
     uint16_t on_completed_tag = 0;
     uint16_t on_refusal_tag = 0;
     uint16_t on_defeat_tag = 0;
-    // E3c: sea invasion orchestration (transports + escort).
+    // E3c: sea invasion orchestration (transports + escort). Explicit flag or
+    // invasion_point in invasion_points_sea / water — never auto land-empty→sea.
     bool via_sea = false;
     int8_t sea_point_index = -1; // -1 = pick random valid sea point
 };
@@ -147,7 +151,8 @@ void scenario_invasion_foreach_warning(std::function<void(vec2i, int)> callback)
 
 int scenario_invasion_count();
 
-bool scenario_invasion_start_from_kingdome(int size);
+// Spawns kingdom army; on success writes difficulty-adjusted size back to `size`.
+bool scenario_invasion_start_from_kingdome(int &size);
 
 // Returns last_internal_invasion_id (seq) after successful spawn, or 0 on failure.
 int scenario_invasion_start(invasion_opts_t opts);
@@ -156,8 +161,9 @@ void scenario_invasion_process();
 
 int map_invasion_point(tile2i point);
 
-tile2i scenario_start_invasion_impl(invasion_opts_t opts);
-tile2i scenario_start_sea_invasion_impl(invasion_opts_t opts);
+// Adjusts opts.size in-place (difficulty clamp) before spawning.
+tile2i scenario_start_invasion_impl(invasion_opts_t &opts);
+tile2i scenario_start_sea_invasion_impl(invasion_opts_t &opts);
 
 // Force bind/history outcome for a spawn seq (auto-resolve, cheats, etc.).
 // COMPLETED → on_completed_tag; DEFEAT → on_defeat_tag; NONE → clear bind, no tags.

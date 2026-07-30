@@ -22,6 +22,7 @@ void figure::play_die_sound() {
 
     case FIGURE_ENEMY_EGYPTIAN_CHARIOT:
     case FIGURE_ENEMY_EGYPTIAN_MOUNTED_ARCHER:
+    case FIGURE_ENEMY_KINGDOME_MOUNTED:
         effect = SOUND_EFFECT_HORSE2;
         break;
 
@@ -38,7 +39,6 @@ void figure::play_die_sound() {
    // case FIGURE_ENEMY_EGYPTIAN_HEAVY_SPEAR:
     case FIGURE_ENEMY_EGYPTIAN_AXE:
     case FIGURE_ENEMY_KINGDOME_JAVELIN:
-    case FIGURE_ENEMY_KINGDOME_MOUNTED:
     case FIGURE_ENEMY_KINGDOME_INFANTRY:
         is_soldier = 1;
         break;
@@ -59,7 +59,7 @@ void figure::play_die_sound() {
     }
 
     if (is_enemy()) {
-        if (g_city.figures.enemies == 1) {
+        if (g_city.figures.total_invading_enemies() == 1) {
             g_sound.speech_play_file("Wavs/army_war_cry.wav", 255);
         }
     }
@@ -80,6 +80,7 @@ void figure::play_hit_sound() {
     case FIGURE_ENEMY_EGYPTIAN_CHARIOT:
     case FIGURE_ENEMY_EGYPTIAN_FAST_SWORD:
     case FIGURE_ENEMY_EGYPTIAN_MOUNTED_ARCHER:
+    case FIGURE_ENEMY_KINGDOME_MOUNTED:
         if (city_sound_update_hit_soldier())
             effect = SOUND_EFFECT_SWORD_SWING;
         break;
@@ -90,6 +91,7 @@ void figure::play_hit_sound() {
         break;
 
     case FIGURE_ENEMY_EGYPTIAN_SPEAR:
+    case FIGURE_ENEMY_KINGDOME_JAVELIN:
     //case FIGURE_ENEMY_EGYPTIAN_HEAVY_SPEAR:
         if (city_sound_update_hit_spear())
             effect = SOUND_EFFECT_SPEAR;

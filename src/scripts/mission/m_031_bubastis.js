@@ -525,6 +525,7 @@ function mission31_egypt_raid(invasion_id, size, attack_target, loc) {
 	city.start_foreign_army_invasion({
 		invasion_id: invasion_id,
 		enemy: ENEMY_3_EGYPTIAN,
+		kind: INVASION_KIND_KINGDOME,
 		size: size,
 		amount: size,
 		tilex: tile[0],

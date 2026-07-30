@@ -1,4 +1,4 @@
-# Akhenaten integral tests
+﻿# Akhenaten integral tests
 
 JS-driven tests run by `--integraltests`, plus a small C++ smoke suite (`SDL_strlen`, `vec2i`, `bstring::cat`, `es_hash_str`, …) in `integral_tests.cpp` before the JS files run.
 
@@ -95,6 +95,11 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `53_enemy_warship_registered.js` | Every `FIGURE_ENEMY_*_WAR_SHIP` (+ galera / generic 93) resolves to a registered enemy class (`__test_enemy_figure_registered`); E3a enemy fleet start |
 | `100_enemy_transport_registered.js` | Every `FIGURE_ENEMY_*_TRANSPORT_SHIP` (+ generic 92 / egyptian 51 / barbarian 115) resolves to a registered enemy class; E3b |
 | `101_enemy_transport_disembark.js` | E3b disembark smoke + E3c `via_sea` fleet spawn + E3a-smoke `sink_all_ships` on enemy warship |
+| `98_egyptian_melee_registered.js` | ES2: egyptian melee 45/49/50/53 registered (`__test_enemy_figure_registered`) |
+| `99_egyptian_mount_registered.js` | ES3: camel 46 + mounted archer 52 register + spawn smoke |
+| `102_egyptian_elephant.js` | ES4: elephant 47 register + spawn + soldier target |
+| `104_kingdome_army.js` | ES6: KINGDOME kind remaps to figures 55–57; pause/retreat types |
+| `109_kingdome_favour_smoke.js` | ES6 favour-KR: favour_only bookkeeping, wipe without Caesar +10 KR |
 | `40_hippo_spawn.js` | Spawn `FIGURE_HIPPO` on land and water; `update_animation` → `walk` / `swim` (#77) |
 | `66_lion_spawn.js` | Cleopatra `FIGURE_LION`: spawn + type + `update_animation` → `walk` (SprMain2 group 5; CF3b) |
 | `75_bast_lion_curse.js` | Bast lion raid (CF5): feature ON spawn at temple; OFF / smash / no-temple fallback → no lions; raid prey skips ostrich; 1-day timer poof |
@@ -121,6 +126,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `98_flood_basin_seal.js` | Flood basins (FB1): sealed detect, spur/thick crest, breach hole, flag OFF |
 | `99_flood_basin_bonus.js` | Flood basins (FB2): fertility bump + farm progress in sealed basin |
 | `107_flood_basin_irrigation_hold.js` | Flood basins (DK3): half-rate canal decay, IRRIGATION_RANGE restamp/clip, reseal, flag OFF |
+| `110_sun_temple_place.js` | Sun Temple (C8): place with 220 sandstone, reject without stock / second unfinished |
 | `77_brick_wall_placement.js` | Brick wall L-drag; material; clear+undo; mud↔brick overwrite no-op |
 | `76_invasion_auto_resolve.js` | Enhanced auto-resolve invasions (AC*): freeze/pending, lose/win KR, queue timer, flag OFF, natives out, Pharaoh, queue full, save/load, chain spawn |
 | `77_bazaar_multi_buyer.js` | Multi-buyer bazaar (BB*): complementary/fallback/demand freeze/OFF slot1; slots; -3 |

@@ -308,8 +308,13 @@ void figure::figure_delete_UNSAFE() {
             home()->remove_figure(3);
         break;
 
+    case FIGURE_ENEMY_KINGDOME_JAVELIN:
+    case FIGURE_ENEMY_KINGDOME_MOUNTED:
     case FIGURE_ENEMY_KINGDOME_INFANTRY:
-        g_city.kingdome.mark_soldier_killed();
+        // Only count kills toward an active favour/kingdom invasion bookkeeping.
+        if (g_city.kingdome.invasion.size > 0) {
+            g_city.kingdome.mark_soldier_killed();
+        }
         break;
 
     default:

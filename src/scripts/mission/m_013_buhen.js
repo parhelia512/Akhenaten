@@ -958,6 +958,7 @@ function mission13_pharaoh_favour_invasion(ev) {
 		city.start_foreign_army_invasion({
 			mode: ATTACK_TYPE_ENEMIES,
 			enemy: ENEMY_3_EGYPTIAN,
+			kind: INVASION_KIND_KINGDOME,
 			size: 28,
 			invasion_id: 27,
 			tilex: -1,
@@ -982,6 +983,7 @@ function mission13_pharaoh_favour_invasion(ev) {
 		city.start_foreign_army_invasion({
 			mode: ATTACK_TYPE_ENEMIES,
 			enemy: ENEMY_3_EGYPTIAN,
+			kind: INVASION_KIND_KINGDOME,
 			size: 21,
 			invasion_id: 26,
 			tilex: -1,
@@ -1004,6 +1006,7 @@ function mission13_pharaoh_favour_invasion(ev) {
 	city.start_foreign_army_invasion({
 		mode: ATTACK_TYPE_ENEMIES,
 		enemy: ENEMY_3_EGYPTIAN,
+		kind: INVASION_KIND_KINGDOME,
 		size: 22,
 		invasion_id: 25,
 		tilex: -1,

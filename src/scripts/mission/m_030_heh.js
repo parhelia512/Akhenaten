@@ -711,6 +711,7 @@ function mission30_pharaoh_raid(invasion_id, size, loc, on_completed_tag) {
 		+ " loc=" + loc + " tile=" + tile[0] + "," + tile[1])
 	city.start_foreign_army_invasion({
 		enemy: ENEMY_3_EGYPTIAN,
+		kind: INVASION_KIND_KINGDOME,
 		amount: size,
 		size: size,
 		invasion_id: invasion_id,

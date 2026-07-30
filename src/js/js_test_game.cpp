@@ -16,9 +16,11 @@
 
 #include "building/building.h"
 #include "building/building_delivery_path.h"
+#include "building/building_house.h"
 #include "building/building_bazaar.h"
 #include "building/building_granary.h"
 #include "building/building_static_params.h"
+#include "building/building_storage.h"
 #include "building/building_storage_yard.h"
 #include "building/building_temple_complex.h"
 #include "building/monument_mastaba.h"
@@ -28,6 +30,8 @@
 #include "grid/grid.h"
 #include "grid/terrain.h"
 #include "grid/water.h"
+#include "grid/building.h"
+#include "grid/building_tiles.h"
 #include "graphics/view/view.h"
 #include "graphics/view/zoom.h"
 #include "figure/figure.h"
@@ -39,16 +43,21 @@
 #include "figuretype/animal_asp.h"
 #include "figuretype/animal_scorpion.h"
 #include "figuretype/figure_mummy.h"
+#include "figuretype/figure_plagued_citizen.h"
 #include "figuretype/figure_locust.h"
 #include "figuretype/figure_funeral_walker.h"
 #include "figuretype/figure_tomb_robber.h"
 #include "figuretype/figure_constable.h"
 #include "figuretype/figure_enemy_transport.h"
 #include "figuretype/figure_enemy_warship.h"
+#include "figuretype/figure_transport_ship.h"
+#include "figuretype/figure_soldier.h"
+#include "building/building_transport_wharf.h"
 #include "figure/combat.h"
 #include "city/city_animals.h"
 #include "graphics/color.h"
 #include "city/city.h"
+#include "city/city_industry.h"
 #include "city/city_buildings.h"
 #include "city/city_maintenance.h"
 #include "city/city_religion_seth.h"
@@ -411,7 +420,13 @@ static int __test_building_create(int type, int x, int y) {
     }
 
     add_building(b, 0, 0);
-    b->state = BUILDING_STATE_VALID;
+    for (building *part = b->main(); part;) {
+        part->state = BUILDING_STATE_VALID;
+        if (!part->has_next()) {
+            break;
+        }
+        part = part->next();
+    }
     return b->id;
 }
 ANK_FUNCTION_3(__test_building_create);
@@ -489,11 +504,125 @@ static int __test_count_figures(int type) {
 }
 ANK_FUNCTION_1(__test_count_figures);
 
-
 static int __test_mummy_spawn_wave(int count) {
     return figure_mummy::spawn_wave(count);
 }
 ANK_FUNCTION_1(__test_mummy_spawn_wave);
+
+static void __test_figure_action_perform(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive()) {
+        return;
+    }
+    f->action_perform();
+}
+ANK_FUNCTION_1(__test_figure_action_perform);
+
+static void __test_sentiment_set(int value) {
+    g_city.sentiment.value = value;
+}
+ANK_FUNCTION_1(__test_sentiment_set);
+
+static void __test_burial_provisions_force_dispatched(int resource, int dispatched) {
+    if (resource <= RESOURCE_NONE || resource >= RESOURCES_MAX) {
+        return;
+    }
+    g_scenario.monuments.burial_provisions[resource].dispatched = std::max(0, dispatched);
+}
+ANK_FUNCTION_2(__test_burial_provisions_force_dispatched);
+
+static int __test_tomb_robber_try_spawn(int force_gates) {
+    return figure_tomb_robber::try_spawn(force_gates != 0);
+}
+ANK_FUNCTION_1(__test_tomb_robber_try_spawn);
+
+static int __test_tomb_robber_spawn_wave(int count) {
+    return figure_tomb_robber::spawn_wave(count);
+}
+ANK_FUNCTION_1(__test_tomb_robber_spawn_wave);
+
+static int __test_tomb_robber_commit_plunder(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive() || f->type != FIGURE_TOMB_ROBER) {
+        return 0;
+    }
+    return figure_tomb_robber(f).commit_plunder() ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_tomb_robber_commit_plunder);
+
+static int __test_tomb_robber_arrest(int fid, int force) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive() || f->type != FIGURE_TOMB_ROBER) {
+        return 0;
+    }
+    return figure_tomb_robber(f).arrest(force != 0) ? 1 : 0;
+}
+ANK_FUNCTION_2(__test_tomb_robber_arrest);
+
+static int __test_constable_try_arrest(int constable_id, int max_distance, int force) {
+    figure *f = figure_get(constable_id);
+    if (!f || !f->is_alive() || f->type != FIGURE_CONSTABLE) {
+        return 0;
+    }
+    return figure_constable(f).try_arrest_criminal(max_distance, force != 0) ? 1 : 0;
+}
+ANK_FUNCTION_3(__test_constable_try_arrest);
+
+static void __test_monument_set_preexisting(int bid, int preexisting) {
+    building *b = building_get(bid);
+    auto *m = b ? b->dcast_monument() : nullptr;
+    if (m) {
+        m->set_preexisting(preexisting != 0);
+    }
+}
+ANK_FUNCTION_2(__test_monument_set_preexisting);
+
+static int __test_monument_is_preexisting(int bid) {
+    building *b = building_get(bid);
+    auto *m = b ? b->dcast_monument() : nullptr;
+    return (m && m->is_preexisting()) ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_monument_is_preexisting);
+
+static int __test_kingdom_rating() {
+    return g_city.kingdome.rating;
+}
+ANK_FUNCTION(__test_kingdom_rating);
+
+static void __test_kingdom_set_rating(int value) {
+    g_city.kingdome.rating = (uint8_t)std::clamp(value, 0, 100);
+}
+ANK_FUNCTION_1(__test_kingdom_set_rating);
+
+static int __test_funeral_try_spawn(int force_ignore_road) {
+    return figure_funeral_walker::try_spawn_all(force_ignore_road != 0);
+}
+ANK_FUNCTION_1(__test_funeral_try_spawn);
+
+static int __test_funeral_target_tomb(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_valid() || f->type != FIGURE_FUNERAL_WALKER) {
+        return 0;
+    }
+    return figure_funeral_walker(f).runtime_data().target_tomb_id;
+}
+ANK_FUNCTION_1(__test_funeral_target_tomb);
+
+static int __test_monument_funeral_done(int bid) {
+    building *b = building_get(bid);
+    auto *m = b ? b->dcast_monument() : nullptr;
+    return (m && m->has_funeral_done()) ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_monument_funeral_done);
+
+static void __test_monument_set_funeral_done(int bid, int done) {
+    building *b = building_get(bid);
+    auto *m = b ? b->dcast_monument() : nullptr;
+    if (m) {
+        m->set_funeral_done(done != 0);
+    }
+}
+ANK_FUNCTION_2(__test_monument_set_funeral_done);
 
 static int __test_locust_spawn_swarm(int count) {
     return figure_locust::spawn_swarm(count);
@@ -542,6 +671,7 @@ static int __test_locust_post_load(int fid) {
     if (!f || !f->is_alive() || f->type != FIGURE_LOCUST) {
         return 0;
     }
+    // Simulate corrupt save flags then restore via on_post_load.
     f->allow_move_type = EMOVE_TERRAIN;
     f->use_cross_country = false;
     f->current_height = 0;
@@ -560,7 +690,78 @@ static int __test_locust_post_load(int fid) {
 }
 ANK_FUNCTION_1(__test_locust_post_load);
 
+static int __test_building_curse_days(int bid) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return -1;
+    }
+    return b->curse_days_left;
+}
+ANK_FUNCTION_1(__test_building_curse_days);
 
+static int __test_plagued_spawn_from_house(int bid) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return 0;
+    }
+    return figure_plagued_citizen::spawn_from_house(*b);
+}
+ANK_FUNCTION_1(__test_plagued_spawn_from_house);
+
+static int __test_house_set_population(int bid, int pop) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return 0;
+    }
+    auto *house = b->dcast_house();
+    if (!house) {
+        return 0;
+    }
+    house->runtime_data().population = (uint16_t)std::max(0, pop);
+    return house->house_population();
+}
+ANK_FUNCTION_2(__test_house_set_population);
+
+static int __test_house_mark_plague(int bid, int days) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return 0;
+    }
+    building *main = b->main();
+    if (!main) {
+        return 0;
+    }
+    main->mark_plague(days);
+    return main->has_plague ? 1 : 0;
+}
+ANK_FUNCTION_2(__test_house_mark_plague);
+
+static int __test_building_has_plague(int bid) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return 0;
+    }
+    return b->main()->has_plague ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_building_has_plague);
+
+static int __test_plagued_cure_nearby(int x, int y) {
+    return figure_plagued_citizen::cure_nearby(tile2i(x, y), 1);
+}
+ANK_FUNCTION_2(__test_plagued_cure_nearby);
+
+static int __test_figure_provide_service(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive()) {
+        return 0;
+    }
+    auto *impl = f->dcast();
+    if (!impl) {
+        return 0;
+    }
+    return impl->provide_service();
+}
+ANK_FUNCTION_1(__test_figure_provide_service);
 
 static int __test_figure_is_enemy(int fid) {
     figure *f = figure_get(fid);
@@ -589,6 +790,33 @@ static void __test_figure_kill(int fid) {
 }
 ANK_FUNCTION_1(__test_figure_kill);
 
+static int __test_city_kingdome_soldiers() {
+    return g_city.figures.kingdome_soldiers;
+}
+ANK_FUNCTION(__test_city_kingdome_soldiers);
+
+static int __test_kingdome_invasion_favour_only() {
+    return g_city.kingdome.invasion.favour_only;
+}
+ANK_FUNCTION(__test_kingdome_invasion_favour_only);
+
+static int __test_kingdome_invasion_size() {
+    return g_city.kingdome.invasion.size;
+}
+ANK_FUNCTION(__test_kingdome_invasion_size);
+
+static void __test_process_kingdome_invasion() {
+    g_city.kingdome.process_invasion();
+}
+ANK_FUNCTION(__test_process_kingdome_invasion);
+
+static void __test_kingdome_set_kills_to_size() {
+    auto &inv = g_city.kingdome.invasion;
+    if (inv.size > 0) {
+        inv.soldiers_killed = inv.size;
+    }
+}
+ANK_FUNCTION(__test_kingdome_set_kills_to_size);
 
 static int __test_lion_setup_curse_raid(int fid, int days) {
     figure *f = figure_get(fid);
@@ -646,7 +874,6 @@ static int __test_scorpion_is_curse_raid(int fid) {
     return figure_scorpion(f).is_curse_raid() ? 1 : 0;
 }
 ANK_FUNCTION_1(__test_scorpion_is_curse_raid);
-
 
 static void __test_figure_update_day(int fid) {
     figure *f = figure_get(fid);
@@ -732,15 +959,6 @@ static void __test_figure_set_action(int fid, int action) {
 }
 ANK_FUNCTION_2(__test_figure_set_action);
 
-static void __test_figure_action_perform(int fid) {
-    figure *f = figure_get(fid);
-    if (!f || !f->is_alive()) {
-        return;
-    }
-    f->action_perform();
-}
-ANK_FUNCTION_1(__test_figure_action_perform);
-
 static void __test_figure_update_animation(int fid) {
     figure *f = figure_get(fid);
     if (!f || !f->is_alive()) {
@@ -766,6 +984,7 @@ bool __test_enemy_figure_registered(int type) {
     return is_enemy;
 }
 ANK_FUNCTION_1(__test_enemy_figure_registered);
+
 namespace {
 
 tile2i test_find_or_make_water_strip(int *out_cx, int *out_cy) {
@@ -794,7 +1013,6 @@ tile2i test_find_or_make_water_strip(int *out_cx, int *out_cy) {
 }
 
 } // namespace
-
 
 // Spawn enemy transport with N soldiers loaded and sailing to a nearby shore.
 // Returns transport figure id, or 0 on failure.
@@ -890,7 +1108,6 @@ int __test_enemy_transport_spawn_loaded(int enemy_type, int soldier_count) {
 }
 ANK_FUNCTION_2(__test_enemy_transport_spawn_loaded);
 
-
 int __test_enemy_transport_has_troops(int fid) {
     figure *f = figure_get(fid);
     if (!f || !f->is_alive()) {
@@ -901,6 +1118,163 @@ int __test_enemy_transport_has_troops(int fid) {
 }
 ANK_FUNCTION_1(__test_enemy_transport_has_troops);
 
+static int g_test_player_transport_company_id = 0;
+static int g_test_player_transport_water_x = 0;
+static int g_test_player_transport_water_y = 0;
+
+// Spawn a moored player transport + own infantry company on adjacent shore.
+// Returns transport figure id (0 on failure). Company id via __test_player_transport_company_id().
+int __test_player_transport_spawn_for_embark(int soldier_count) {
+    g_test_player_transport_company_id = 0;
+
+    int cx = 0;
+    int cy = 0;
+    tile2i water = test_find_or_make_water_strip(&cx, &cy);
+    g_test_player_transport_water_x = cx;
+    g_test_player_transport_water_y = cy;
+
+    if (soldier_count < 1) {
+        soldier_count = 1;
+    }
+    if (soldier_count > 8) {
+        soldier_count = 8;
+    }
+
+    // Prefer a clear shore tile on the land strip (avoid stomping map buildings).
+    tile2i shore = tile2i::invalid;
+    for (int dx = -2; dx <= 2; dx++) {
+        tile2i cand(cx + dx, cy - 1);
+        if (!cand.valid()) {
+            continue;
+        }
+        if (map_terrain_is(cand, TERRAIN_WATER | TERRAIN_DEEPWATER)) {
+            continue;
+        }
+        if (map_building_at(cand) > 0) {
+            continue;
+        }
+        shore = cand;
+        break;
+    }
+    if (!shore.valid()) {
+        shore = tile2i(cx, cy - 1);
+        int bid = map_building_at(shore);
+        if (bid > 0) {
+            building *old = building_get(bid);
+            if (old && old->id) {
+                old->state = BUILDING_STATE_UNUSED;
+            }
+            map_building_tiles_remove(bid, shore);
+        }
+    }
+
+    // Minimal home wharf so figure_action can run LEAVING/ANCHORED.
+    building *wharf_b = building_create(BUILDING_TRANSPORT_WHARF, shore, 0);
+    if (!wharf_b || !wharf_b->id) {
+        logs::info("[test:103] spawn fail: wharf create");
+        return 0;
+    }
+    add_building(wharf_b, 0, 0);
+    wharf_b->state = BUILDING_STATE_VALID;
+    wharf_b->num_workers = 10;
+    wharf_b->max_workers = 10;
+    if (auto *wharf = wharf_b->dcast_transport_wharf()) {
+        wharf->set_water_access_tiles({ water, water });
+    }
+
+    formation *m = formation_get_free(1);
+    if (!m || !m->id) {
+        logs::info("[test:103] spawn fail: formation");
+        return 0;
+    }
+    g_formations.clear(m->id);
+    m->faction_id = 1;
+    m->in_use = 1;
+    m->own_batalion = true;
+    m->figure_type = FIGURE_INFANTRY;
+    m->layout = FORMATION_DOUBLE_LINE_1;
+    m->morale = 50;
+    m->is_at_fort = 0;
+    m->batalion_id = m->id;
+    m->max_figures = 16;
+    m->tile = shore;
+    m->standard_tile = shore;
+    m->home = shore;
+    g_test_player_transport_company_id = m->id;
+
+    int spawned_soldiers = 0;
+    for (int i = 0; i < soldier_count; i++) {
+        figure *s = figure_create(FIGURE_INFANTRY, shore, DIR_0_TOP_RIGHT);
+        if (!s) {
+            continue;
+        }
+        s->faction_id = 1;
+        s->formation_id = m->id;
+        s->index_in_formation = (uint8_t)formation_add_figure(m->id, s->id, 1, 0, s->max_damage());
+        s->action_state = ACTION_84_SOLDIER_AT_STANDARD;
+        s->formation_at_rest = 1;
+        spawned_soldiers++;
+    }
+    if (spawned_soldiers <= 0) {
+        logs::info("[test:103] spawn fail: soldiers");
+        return 0;
+    }
+
+    figure *ship_f = figure_create(FIGURE_TRANSPORT_SHIP, water, DIR_0_TOP_RIGHT);
+    if (!ship_f || !ship_f->is_valid()) {
+        logs::info("[test:103] spawn fail: ship create");
+        return 0;
+    }
+
+    auto *ship = smart_cast<figure_transport_ship>(ship_f);
+    if (!ship) {
+        logs::info("[test:103] spawn fail: ship cast");
+        return 0;
+    }
+
+    ship_f->set_home(wharf_b->id);
+    wharf_b->set_figure(BUILDING_SLOT_BOAT, ship_f);
+    ship_f->source_tile = water;
+    ship_f->advance_action(ACTION_213_TRANSPORT_SHIP_MOORED);
+    return ship_f->id;
+}
+ANK_FUNCTION_1(__test_player_transport_spawn_for_embark);
+
+int __test_player_transport_company_id() {
+    return g_test_player_transport_company_id;
+}
+ANK_FUNCTION(__test_player_transport_company_id);
+
+int __test_player_transport_water_x() {
+    return g_test_player_transport_water_x;
+}
+ANK_FUNCTION(__test_player_transport_water_x);
+
+int __test_player_transport_water_y() {
+    return g_test_player_transport_water_y;
+}
+ANK_FUNCTION(__test_player_transport_water_y);
+
+// Snap player transport to its sail destination and enter ANCHORED so disembark timer can run.
+void __test_transport_ship_snap_to_destination(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive()) {
+        return;
+    }
+    auto *ship = smart_cast<figure_transport_ship>(f);
+    if (!ship) {
+        return;
+    }
+    if (f->destination_tile.valid()) {
+        f->tile = f->destination_tile;
+        f->previous_tile = f->destination_tile;
+    }
+    ship->runtime_data().embark_ticks = 0;
+    f->advance_action(ACTION_214_TRANSPORT_SHIP_ANCHORED);
+    f->direction = DIR_FIGURE_NONE;
+    f->route_remove();
+}
+ANK_FUNCTION_1(__test_transport_ship_snap_to_destination);
 
 int __test_count_visible_enemy_soldiers() {
     int count = 0;
@@ -928,7 +1302,6 @@ int __test_count_visible_enemy_soldiers() {
 }
 ANK_FUNCTION(__test_count_visible_enemy_soldiers);
 
-
 int __test_start_sea_invasion(int enemy_type, int size) {
     int cx = 0;
     int cy = 0;
@@ -951,7 +1324,6 @@ int __test_start_sea_invasion(int enemy_type, int size) {
 }
 ANK_FUNCTION_2(__test_start_sea_invasion);
 
-
 int __test_count_enemy_transports() {
     int count = 0;
     for (int i = 1; i < MAX_FIGURES; i++) {
@@ -963,7 +1335,6 @@ int __test_count_enemy_transports() {
     return count;
 }
 ANK_FUNCTION(__test_count_enemy_transports);
-
 
 int __test_count_enemy_warships() {
     int count = 0;
@@ -977,7 +1348,6 @@ int __test_count_enemy_warships() {
 }
 ANK_FUNCTION(__test_count_enemy_warships);
 
-
 int __test_spawn_enemy_warship_on_water(int enemy_type) {
     int cx = 0;
     int cy = 0;
@@ -988,12 +1358,10 @@ int __test_spawn_enemy_warship_on_water(int enemy_type) {
 }
 ANK_FUNCTION_1(__test_spawn_enemy_warship_on_water);
 
-
 void __test_seth_sink_all_ships() {
     god_seth.sink_all_ships();
 }
 ANK_FUNCTION(__test_seth_sink_all_ships);
-
 
 void __test_show_tile_info(int bid) {
     building *b = building_get(bid);
@@ -1194,6 +1562,38 @@ static int __test_monument_resource_pct(int bid, int resource) {
 }
 ANK_FUNCTION_2(__test_monument_resource_pct);
 
+// Call building_impl::update_day() (e.g. pyramid phase advance / congrats).
+static void __test_building_update_day(int bid) {
+    building *b = building_get(bid);
+    auto *impl = b ? b->dcast() : nullptr;
+    if (!impl) {
+        return;
+    }
+    impl->update_day();
+}
+ANK_FUNCTION_1(__test_building_update_day);
+
+// Minimum map_monuments progress across the monument chain (all parts).
+static int __test_monument_min_progress(int bid) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    if (!head || !head->dcast_monument()) {
+        return -1;
+    }
+    // map_grid_get_tiles(head) already walks the whole part chain — do not
+    // nest another per-part walk (that re-counts the same tiles).
+    grid_tiles tiles = map_grid_get_tiles(head, 0);
+    if (tiles.empty()) {
+        return -1;
+    }
+    int min_p = 200;
+    for (auto &t : tiles) {
+        min_p = std::min(min_p, (int)map_monuments_get_progress(t));
+    }
+    return min_p;
+}
+ANK_FUNCTION_1(__test_monument_min_progress);
+
 // Force-stock a storage yard (bypasses accepting/getting rules). Yard must already exist.
 // Force-remove from a storage yard. Returns true when the resource is fully gone.
 static bool __test_storage_yard_remove_resource(int bid, int resource, int amount) {
@@ -1250,112 +1650,6 @@ static bool __test_burial_provisions_set(int resource, int required) {
     return true;
 }
 ANK_FUNCTION_2(__test_burial_provisions_set);
-
-static void __test_burial_provisions_force_dispatched(int resource, int dispatched) {
-    if (resource <= RESOURCE_NONE || resource >= RESOURCES_MAX) {
-        return;
-    }
-    g_scenario.monuments.burial_provisions[resource].dispatched = std::max(0, dispatched);
-}
-ANK_FUNCTION_2(__test_burial_provisions_force_dispatched);
-
-static void __test_sentiment_set(int value) {
-    g_city.sentiment.value = value;
-}
-ANK_FUNCTION_1(__test_sentiment_set);
-
-static int __test_tomb_robber_try_spawn(int force_gates) {
-    return figure_tomb_robber::try_spawn(force_gates != 0);
-}
-ANK_FUNCTION_1(__test_tomb_robber_try_spawn);
-
-static int __test_tomb_robber_spawn_wave(int count) {
-    return figure_tomb_robber::spawn_wave(count);
-}
-ANK_FUNCTION_1(__test_tomb_robber_spawn_wave);
-
-static int __test_tomb_robber_commit_plunder(int fid) {
-    figure *f = figure_get(fid);
-    if (!f || !f->is_alive() || f->type != FIGURE_TOMB_ROBER) {
-        return 0;
-    }
-    return figure_tomb_robber(f).commit_plunder() ? 1 : 0;
-}
-ANK_FUNCTION_1(__test_tomb_robber_commit_plunder);
-
-static int __test_tomb_robber_arrest(int fid, int force) {
-    figure *f = figure_get(fid);
-    if (!f || !f->is_alive() || f->type != FIGURE_TOMB_ROBER) {
-        return 0;
-    }
-    return figure_tomb_robber(f).arrest(force != 0) ? 1 : 0;
-}
-ANK_FUNCTION_2(__test_tomb_robber_arrest);
-
-static int __test_constable_try_arrest(int constable_id, int max_distance, int force) {
-    figure *f = figure_get(constable_id);
-    if (!f || !f->is_alive() || f->type != FIGURE_CONSTABLE) {
-        return 0;
-    }
-    return figure_constable(f).try_arrest_criminal(max_distance, force != 0) ? 1 : 0;
-}
-ANK_FUNCTION_3(__test_constable_try_arrest);
-
-static void __test_monument_set_preexisting(int bid, int preexisting) {
-    building *b = building_get(bid);
-    auto *m = b ? b->dcast_monument() : nullptr;
-    if (m) {
-        m->set_preexisting(preexisting != 0);
-    }
-}
-ANK_FUNCTION_2(__test_monument_set_preexisting);
-
-static int __test_monument_is_preexisting(int bid) {
-    building *b = building_get(bid);
-    auto *m = b ? b->dcast_monument() : nullptr;
-    return (m && m->is_preexisting()) ? 1 : 0;
-}
-ANK_FUNCTION_1(__test_monument_is_preexisting);
-
-static int __test_kingdom_rating() {
-    return g_city.kingdome.rating;
-}
-ANK_FUNCTION(__test_kingdom_rating);
-
-static void __test_kingdom_set_rating(int value) {
-    g_city.kingdome.rating = (uint8_t)std::clamp(value, 0, 100);
-}
-ANK_FUNCTION_1(__test_kingdom_set_rating);
-
-static int __test_funeral_try_spawn(int force_ignore_road) {
-    return figure_funeral_walker::try_spawn_all(force_ignore_road != 0);
-}
-ANK_FUNCTION_1(__test_funeral_try_spawn);
-
-static int __test_funeral_target_tomb(int fid) {
-    figure *f = figure_get(fid);
-    if (!f || !f->is_valid() || f->type != FIGURE_FUNERAL_WALKER) {
-        return 0;
-    }
-    return figure_funeral_walker(f).runtime_data().target_tomb_id;
-}
-ANK_FUNCTION_1(__test_funeral_target_tomb);
-
-static int __test_monument_funeral_done(int bid) {
-    building *b = building_get(bid);
-    auto *m = b ? b->dcast_monument() : nullptr;
-    return (m && m->has_funeral_done()) ? 1 : 0;
-}
-ANK_FUNCTION_1(__test_monument_funeral_done);
-
-static void __test_monument_set_funeral_done(int bid, int done) {
-    building *b = building_get(bid);
-    auto *m = b ? b->dcast_monument() : nullptr;
-    if (m) {
-        m->set_funeral_done(done != 0);
-    }
-}
-ANK_FUNCTION_2(__test_monument_set_funeral_done);
 
 // Return the current resolved image id for a monument building (per phase + variant + camera).
 static int __test_building_current_image(int bid) {
@@ -1509,6 +1803,11 @@ static int __test_autosave_pick(int slots, int exists_mask, int m0, int m1, int 
     return autosave_module_t::pick_slot(slots, exists, mtime);
 }
 ANK_FUNCTION_5(__test_autosave_pick);
+
+static bool __test_ironwill_exempt(pcstr filename_short) {
+    return autosave_module_t::is_ironwill_exempt_save(filename_short);
+}
+ANK_FUNCTION_1(__test_ironwill_exempt);
 
 #include "figuretype/figure_kingdome_trader.h"
 #include "figuretype/figure_trader_ship.h"
@@ -1823,6 +2122,11 @@ static void __test_update_road_network() {
     g_city.map.update_road_network();
 }
 ANK_FUNCTION(__test_update_road_network);
+
+static void __test_update_farms() {
+    building_industry_update_farms();
+}
+ANK_FUNCTION(__test_update_farms);
 
 static int __test_building_type_ghost_road_access(int type) {
     return building_type_ghost_road_access((e_building_type)type) ? 1 : 0;

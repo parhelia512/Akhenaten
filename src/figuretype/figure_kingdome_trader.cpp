@@ -122,7 +122,7 @@ void figure_trade_caravan::figure_action() {
     int last_action_state = action_state();
     auto& d = runtime_data();
 
-    if (g_city.figures.enemies > 0) {
+    if (g_city.figures.total_invading_enemies() > 0) {
         switch (action_state()) {
         default:
             base.destination_tile = g_city.map.closest_exit_tile_within_radius();

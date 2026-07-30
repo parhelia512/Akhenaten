@@ -342,12 +342,13 @@ mission9 { // Abu — The Nubian Border
 	}
 }
 
-// pak favour armies: ENEMIES + Egyptian (not KINGDOME / force_attack).
+// pak favour armies: ENEMIES + Egyptian + KINGDOME kind (figures 55–57; not force_attack).
 function mission9_spawn_pharaoh_favour(size, invasion_id, attack_target) {
 	__image_request_pak(PACK_ENEMY_EGYPTIAN)
 	return city.start_foreign_army_invasion({
 		mode: ATTACK_TYPE_ENEMIES,
 		enemy: ENEMY_3_EGYPTIAN,
+		kind: INVASION_KIND_KINGDOME,
 		size: size,
 		invasion_id: invasion_id,
 		tilex: -1,

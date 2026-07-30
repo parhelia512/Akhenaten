@@ -47,26 +47,6 @@ enemy_attack_rules = {
     }
 }
 
-// Generic enemy warship (FIGURE_ENEMY_WARSHIP = 93). Fallback for barbarian /
-// console spawn when a nation has no dedicated warship enum.
-figure_enemy_warship_generic = {
-    animations : {
-        swim : { pack:PACK_ENEMY_HITTITE, id:10, max_frames:4 }
-        death : { pack:PACK_ENEMY_HITTITE, id:11, max_frames:11, loop:false }
-        idle : { pack:PACK_ENEMY_HITTITE, id:12, max_frames:1 }
-        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
-    }
-
-    category: figure_category_hostile
-    max_damage : 290
-    attack_value : 17
-    missile_defense_value : 3
-    terrain_usage : TERRAIN_USAGE_ANY
-    is_enemy : true
-    max_amount : 25
-}
-
-
 // Generic enemy transport (FIGURE_ENEMY_TRANSPORT = 92). Fallback when a nation
 // has no dedicated transport enum / console spawn.
 figure_enemy_transport_generic = {
@@ -86,46 +66,24 @@ figure_enemy_transport_generic = {
     max_amount : 25
 }
 
-
-// Barbarian pack has no ship sprites — Hittite transport fallback (E3b).
-figure_barbarian_transport_ship = {
+// Generic enemy warship (FIGURE_ENEMY_WARSHIP = 93). Fallback for barbarian /
+// console spawn when a nation has no dedicated warship enum.
+figure_enemy_warship_generic = {
     animations : {
-        swim : { pack:PACK_ENEMY_HITTITE, id:7, max_frames:4 }
-        death : { pack:PACK_ENEMY_HITTITE, id:8, max_frames:11, loop:false }
-        idle : { pack:PACK_ENEMY_HITTITE, id:9, max_frames:1 }
+        swim : { pack:PACK_ENEMY_HITTITE, id:10, max_frames:4 }
+        death : { pack:PACK_ENEMY_HITTITE, id:11, max_frames:11, loop:false }
+        idle : { pack:PACK_ENEMY_HITTITE, id:12, max_frames:1 }
         big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
     }
 
     category: figure_category_hostile
     max_damage : 290
-    attack_value : 0
-    missile_defense_value : 2
+    attack_value : 17
+    missile_defense_value : 3
     terrain_usage : TERRAIN_USAGE_ANY
     is_enemy : true
     max_amount : 25
 }
-
-
-// egyptian
-// Egyptian transport (FIGURE_ENEMY_EGYPTIAN_TRANSPORT_SHIP = 51). No dedicated
-// transport strip in the pack — reuse galera hull frames for E3b.
-figure_egyptian_transport_ship = {
-    animations : {
-        swim : { pack:PACK_ENEMY_EGYPTIAN, id:0, max_frames:4 }
-        death : { pack:PACK_ENEMY_EGYPTIAN, id:1, max_frames:11, loop:false }
-        idle : { pack:PACK_ENEMY_EGYPTIAN, id:2, max_frames:1 }
-        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
-    }
-
-    category: figure_category_hostile
-    max_damage : 290
-    attack_value : 0
-    missile_defense_value : 2
-    terrain_usage : TERRAIN_USAGE_ANY
-    is_enemy : true
-    max_amount : 25
-}
-
 
 // barbarian
 figure_barbarian_archer = {
@@ -165,6 +123,24 @@ figure_barbarian_sword = {
     missile_defense_value : 1
     terrain_usage : TERRAIN_USAGE_ANY
     interval_attack_delay : 25
+    is_enemy : true
+    max_amount : 25
+}
+
+// Barbarian pack has no ship sprites — Hittite transport fallback (E3b).
+figure_barbarian_transport_ship = {
+    animations : {
+        swim : { pack:PACK_ENEMY_HITTITE, id:7, max_frames:4 }
+        death : { pack:PACK_ENEMY_HITTITE, id:8, max_frames:11, loop:false }
+        idle : { pack:PACK_ENEMY_HITTITE, id:9, max_frames:1 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 290
+    attack_value : 0
+    missile_defense_value : 2
+    terrain_usage : TERRAIN_USAGE_ANY
     is_enemy : true
     max_amount : 25
 }
@@ -387,6 +363,25 @@ enemy_canaanite = {
 }
 
 // egyptian
+// Egyptian transport (FIGURE_ENEMY_EGYPTIAN_TRANSPORT_SHIP = 51). No dedicated
+// transport strip in the pack — reuse galera hull frames for E3b.
+figure_egyptian_transport_ship = {
+    animations : {
+        swim : { pack:PACK_ENEMY_EGYPTIAN, id:0, max_frames:4 }
+        death : { pack:PACK_ENEMY_EGYPTIAN, id:1, max_frames:11, loop:false }
+        idle : { pack:PACK_ENEMY_EGYPTIAN, id:2, max_frames:1 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 290
+    attack_value : 0
+    missile_defense_value : 2
+    terrain_usage : TERRAIN_USAGE_ANY
+    is_enemy : true
+    max_amount : 25
+}
+
 figure_egyptian_galera = {
     animations : {
         swim : { pack:PACK_ENEMY_EGYPTIAN, id:0, max_frames:4 }
@@ -468,6 +463,221 @@ figure_egyptian_spearman = {
 
 figure_egyptian_chariot = {
     animations : {
+        walk : { pack:PACK_ENEMY_EGYPTIAN, id:14, max_frames:12 }
+        death : { pack:PACK_ENEMY_EGYPTIAN, id:14, max_frames:12, loop:false }
+        attack : { pack:PACK_ENEMY_EGYPTIAN, id:15, max_frames:12 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 120
+    attack_value : 9
+    defense_value: 4
+    missile_defense_value : 0
+    terrain_usage : TERRAIN_USAGE_ANY
+    is_enemy : true
+    max_amount : 25
+}
+
+// ES2 egyptian melee specials. Animations TEMP-reuse spearman strips (pack ids 11–13)
+// until PACK_ENEMY_EGYPTIAN dump maps real sword/axe groups (ids ≥16). Do not put
+// these in enemy_egyptian.figure_types[] without OG percentage confirmation.
+figure_egyptian_fast_sword = {
+    animations : {
+        // TEMP(ES2-art): spearman walk/death/attack
+        walk : { pack:PACK_ENEMY_EGYPTIAN, id:11, max_frames:12 }
+        death : { pack:PACK_ENEMY_EGYPTIAN, id:12, max_frames:8, loop:false }
+        attack : { pack:PACK_ENEMY_EGYPTIAN, id:13, max_frames:8 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 70
+    attack_value : 7
+    defense_value: 2
+    missile_defense_value : 0
+    terrain_usage : TERRAIN_USAGE_ANY
+    interval_attack_delay : 20
+    is_enemy : true
+    max_amount : 25
+}
+
+figure_egyptian_sword = {
+    animations : {
+        // TEMP(ES2-art): spearman walk/death/attack
+        walk : { pack:PACK_ENEMY_EGYPTIAN, id:11, max_frames:12 }
+        death : { pack:PACK_ENEMY_EGYPTIAN, id:12, max_frames:8, loop:false }
+        attack : { pack:PACK_ENEMY_EGYPTIAN, id:13, max_frames:8 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 90
+    attack_value : 7
+    defense_value: 3
+    missile_defense_value : 1
+    terrain_usage : TERRAIN_USAGE_ANY
+    interval_attack_delay : 25
+    is_enemy : true
+    max_amount : 25
+}
+
+figure_egyptian_heavy_sword = {
+    animations : {
+        // TEMP(ES2-art): spearman walk/death/attack
+        walk : { pack:PACK_ENEMY_EGYPTIAN, id:11, max_frames:12 }
+        death : { pack:PACK_ENEMY_EGYPTIAN, id:12, max_frames:8, loop:false }
+        attack : { pack:PACK_ENEMY_EGYPTIAN, id:13, max_frames:8 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 110
+    attack_value : 8
+    defense_value: 4
+    missile_defense_value : 1
+    terrain_usage : TERRAIN_USAGE_ANY
+    interval_attack_delay : 35
+    is_enemy : true
+    max_amount : 25
+}
+
+figure_egyptian_axe = {
+    animations : {
+        // TEMP(ES2-art): spearman walk/death/attack
+        walk : { pack:PACK_ENEMY_EGYPTIAN, id:11, max_frames:12 }
+        death : { pack:PACK_ENEMY_EGYPTIAN, id:12, max_frames:8, loop:false }
+        attack : { pack:PACK_ENEMY_EGYPTIAN, id:13, max_frames:8 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 90
+    attack_value : 8
+    defense_value: 2
+    missile_defense_value : 0
+    terrain_usage : TERRAIN_USAGE_ANY
+    interval_attack_delay : 25
+    is_enemy : true
+    max_amount : 25
+}
+
+// ES3: camel + mounted archer. TEMP art until PACK_ENEMY_EGYPTIAN dump (ids ≥16).
+// Not in enemy_egyptian.figure_types[] without OG percentage confirmation.
+figure_egyptian_camel = {
+    animations : {
+        // TEMP(ES3-art): chariot walk/attack as mount stand-in
+        walk : { pack:PACK_ENEMY_EGYPTIAN, id:14, max_frames:12 }
+        death : { pack:PACK_ENEMY_EGYPTIAN, id:14, max_frames:12, loop:false }
+        attack : { pack:PACK_ENEMY_EGYPTIAN, id:15, max_frames:12 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 100
+    attack_value : 8
+    defense_value: 3
+    missile_defense_value : 0
+    terrain_usage : TERRAIN_USAGE_ANY
+    interval_attack_delay : 25
+    is_enemy : true
+    max_amount : 25
+}
+
+figure_egyptian_mounted_archer = {
+    animations : {
+        // TEMP(ES3-art): foot archer strips + horse sound from type branch
+        walk : { pack:PACK_ENEMY_EGYPTIAN, id:7, max_frames:12 }
+        death : { pack:PACK_ENEMY_EGYPTIAN, id:8, max_frames:8, loop:false }
+        bow_attack : { pack:PACK_ENEMY_EGYPTIAN, id:9, max_frames:12 }
+        dagger_attack : { pack:PACK_ENEMY_EGYPTIAN, id:10, max_frames:7 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 60
+    attack_value : 6
+    defense_value: 2
+    missile_attack_value : 7
+    missile_defense_value : 0
+    missile_delay : 40
+    terrain_usage : TERRAIN_USAGE_ANY
+    missile_type : FIGURE_ARROW
+    attack_distance : 5
+    is_enemy : true
+    max_amount : 25
+}
+
+// ES4: war elephant. High HP/attack; TEMP art = chariot strips until pack dump.
+// Not in enemy_egyptian.figure_types[] without OG %. AoE trampling = ES4-followup.
+figure_egyptian_elephant = {
+    animations : {
+        // TEMP(ES4-art): chariot as large-mount stand-in
+        walk : { pack:PACK_ENEMY_EGYPTIAN, id:14, max_frames:12 }
+        death : { pack:PACK_ENEMY_EGYPTIAN, id:14, max_frames:12, loop:false }
+        attack : { pack:PACK_ENEMY_EGYPTIAN, id:15, max_frames:12 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 250
+    attack_value : 14
+    defense_value: 6
+    missile_defense_value : 2
+    terrain_usage : TERRAIN_USAGE_ANY
+    interval_attack_delay : 40
+    is_enemy : true
+    max_amount : 10
+}
+
+// ES6: kingdom favour-army (55–57). TEMP art = egyptian strips. Spawned when
+// invasion kind is KINGDOME (remap of egyptian % slots → javelin/infantry/mounted).
+figure_kingdome_javelin = {
+    animations : {
+        // TEMP(ES6-art): egyptian spearman
+        walk : { pack:PACK_ENEMY_EGYPTIAN, id:11, max_frames:12 }
+        death : { pack:PACK_ENEMY_EGYPTIAN, id:12, max_frames:8, loop:false }
+        attack : { pack:PACK_ENEMY_EGYPTIAN, id:13, max_frames:8 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 60
+    attack_value : 6
+    defense_value: 3
+    missile_attack_value : 6
+    missile_delay : 50
+    missile_defense_value : 1
+    terrain_usage : TERRAIN_USAGE_ANY
+    missile_type : FIGURE_SPEAR
+    attack_distance : 3
+    is_enemy : true
+    max_amount : 25
+}
+
+figure_kingdome_infantry = {
+    animations : {
+        // TEMP(ES6-art): egyptian spearman melee stand-in
+        walk : { pack:PACK_ENEMY_EGYPTIAN, id:11, max_frames:12 }
+        death : { pack:PACK_ENEMY_EGYPTIAN, id:12, max_frames:8, loop:false }
+        attack : { pack:PACK_ENEMY_EGYPTIAN, id:13, max_frames:8 }
+        big_image : { pack:PACK_UNLOADED, id:25, offset:44 }
+    }
+
+    category: figure_category_hostile
+    max_damage : 90
+    attack_value : 8
+    defense_value: 4
+    missile_defense_value : 1
+    terrain_usage : TERRAIN_USAGE_ANY
+    interval_attack_delay : 25
+    is_enemy : true
+    max_amount : 25
+}
+
+figure_kingdome_mounted = {
+    animations : {
+        // TEMP(ES6-art): egyptian chariot
         walk : { pack:PACK_ENEMY_EGYPTIAN, id:14, max_frames:12 }
         death : { pack:PACK_ENEMY_EGYPTIAN, id:14, max_frames:12, loop:false }
         attack : { pack:PACK_ENEMY_EGYPTIAN, id:15, max_frames:12 }

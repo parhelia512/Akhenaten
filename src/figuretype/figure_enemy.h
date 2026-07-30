@@ -26,9 +26,11 @@ public:
     virtual bool is_archer() const { return false; }
     virtual bool is_spearman() const { return false; }
     virtual bool is_mounted_archer() const { return false; }
+    // March/fight tick scale; mounts (camel, mounted archer) return >1.
+    virtual int8_t enemy_speed_multiplier() const { return 1; }
     virtual e_figure_type missile_type() const { return FIGURE_NONE; }
     virtual bool ignore_pharaoh_soldiers() const { return false; }
-    // Per-tick city tally; invisible embarked cargo skipped in .cpp.
+    // Per-tick city tally: normal enemies → figures.enemies; kingdom army → kingdome_soldiers.
     virtual void count_as_city_invader();
 
     virtual bool is_attack() const { assert(false && "this function should be implemented"); return false; }

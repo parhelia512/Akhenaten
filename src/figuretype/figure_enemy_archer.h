@@ -192,3 +192,19 @@ public:
 };
 ANK_CONFIG_STRUCT(figure_seapeople_archer::static_params,
     missile_attack_value, missile_delay, attack_distance, missile_type)
+
+// ES3: Egyptian mounted archer — archer AI + horse march SFX (enemy_marching) + speed.
+class figure_egyptian_mounted_archer : public figure_enemy_archer {
+public:
+    FIGURE_METAINFO(FIGURE_ENEMY_EGYPTIAN_MOUNTED_ARCHER, figure_egyptian_mounted_archer)
+    figure_egyptian_mounted_archer(figure *f) : figure_enemy_archer(f) {}
+
+    struct static_params : public base_params_t, public figure_static_params {
+    } FIGURE_STATIC_DATA_T;
+
+    const base_params_t &base_params() const { return static_cast<const base_params_t &>(current_params()); }
+    virtual bool is_mounted_archer() const override { return true; }
+    virtual int8_t enemy_speed_multiplier() const override { return 2; }
+};
+ANK_CONFIG_STRUCT(figure_egyptian_mounted_archer::static_params,
+    missile_attack_value, missile_delay, attack_distance, missile_type)

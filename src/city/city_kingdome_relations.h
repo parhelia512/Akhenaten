@@ -52,6 +52,10 @@ struct kingdome_relation_t : city_component_t<kingdome_relation_t> {
         int32_t days_until_invasion;
         int32_t duration_day_countdown;
         int32_t retreat_message_shown;
+        // 1 = mission favour / scenario KNGDOME (no Caesar respect on wipe). Saved in former pad byte.
+        uint8_t favour_only;
+        // 1 = console force_attack — skip pause/retreat. Saved in former pad byte after favour_only.
+        uint8_t cheated;
     } invasion;
 
     void load_scenario(int rank, int load_type);
@@ -59,7 +63,16 @@ struct kingdome_relation_t : city_component_t<kingdome_relation_t> {
     void process_invasion();
     void update();
     void mark_soldier_killed();
-    void force_attack(int size);
+    // Clear size/kills after player wipe; Caesar respect unless favour_only.
+    void finish_army_defeated();
+    // Caesar wrath / console attack: count++, zeros days_until_invasion, enables respect popups.
+    // cheated=true skips pause/retreat (console).
+    void begin_invasion(int size, bool cheated);
+    // Mission favour / scenario KNGDOME wave: size+duration for kill tally (no Caesar respect).
+    // Does not bump invasion.count or reset days_until_invasion. Pause/retreat are Caesar-only.
+    void begin_favour_army(int size);
+    // Console / ATTACK_TYPE_KINGDOME. Returns false if spawn failed (no begin_invasion).
+    bool force_attack(int size);
     void advance_month();
     void advance_year();
 

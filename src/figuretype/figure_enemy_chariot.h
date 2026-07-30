@@ -135,3 +135,16 @@ public:
     } FIGURE_STATIC_DATA_T;
 };
 ANK_CONFIG_STRUCT(figure_seapeople_chariot::static_params, interval_attack_delay)
+
+// ES6: kingdom mounted (56). Favour-army remap of egyptian type3 (chariot) slot.
+class figure_kingdome_mounted : public figure_enemy_chariot {
+public:
+    FIGURE_METAINFO(FIGURE_ENEMY_KINGDOME_MOUNTED, figure_kingdome_mounted)
+    figure_kingdome_mounted(figure *f) : figure_enemy_chariot(f) {}
+
+    struct static_params : public base_params_t, public figure_static_params {
+    } FIGURE_STATIC_DATA_T;
+
+    virtual int8_t enemy_speed_multiplier() const override { return 2; }
+};
+ANK_CONFIG_STRUCT(figure_kingdome_mounted::static_params, interval_attack_delay)

@@ -176,8 +176,11 @@ int formation_batalion_curse() {
 
 formation_id formation_batalion_at(tile2i tile) {
     figure_id fid = map_figure_foreach_until(tile.grid_offset(), TEST_SEARCH_FORMATION);
+    if (fid <= 0) {
+        return 0;
+    }
     figure *f = figure_get(fid);
-    return f->formation_id;
+    return f ? f->formation_id : 0;
 }
 
 int formation_batalion_at_building(int grid_offset) {
@@ -198,7 +201,7 @@ void formations_t::batalions_update() {
         }
 
         formation_decrease_monthly_counters(m);
-        if (g_city.figures.enemies <= 0) {
+        if (g_city.figures.total_invading_enemies() <= 0) {
             formation_clear_monthly_counters(m);
         }
 

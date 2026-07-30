@@ -20,8 +20,6 @@
 #include <algorithm>
 #include <iostream>
 
-static int cheated_invasion = 0;
-
 kingdome_relation_t::static_params ANK_VARIABLE(kingdome_relation);
 
 declare_console_command_p(updatekingdome) {
@@ -142,34 +140,43 @@ void kingdome_relation_t::update_debt_state() {
 }
 
 void kingdome_relation_t::process_invasion() {
-    if (g_city.figures.kingdome_soldiers && !cheated_invasion) {
-        // nomes invasion in progress
-        invasion.duration_day_countdown--;
-        if (rating >= 35 && invasion.duration_day_countdown < 176)
-            formation_kingdome_pause();
-        else if (rating >= 22) {
-            if (invasion.duration_day_countdown > 0) {
-                formation_kingdome_retreat();
-                if (!invasion.retreat_message_shown) {
-                    invasion.retreat_message_shown = 1;
-                    messages::popup("message_attack_called_off", 0, 0);
+    if (g_city.figures.kingdome_soldiers) {
+        // cheated (console force_attack): skip duration/pause/retreat only —
+        // do NOT fall through to wipe or Caesar countdown while troops remain.
+        if (!invasion.cheated) {
+            invasion.duration_day_countdown--;
+            // Caesar wrath only: favour/scenario waves must not auto-pause/retreat at KR≥22
+            // (Heh/Bubastis favour triggers at KR<30 — otherwise the army flees on day one).
+            if (!invasion.favour_only) {
+                if (rating >= 35 && invasion.duration_day_countdown < 176)
+                    formation_kingdome_pause();
+                else if (rating >= 22) {
+                    if (invasion.duration_day_countdown > 0) {
+                        formation_kingdome_retreat();
+                        if (!invasion.retreat_message_shown) {
+                            invasion.retreat_message_shown = 1;
+                            messages::popup("message_attack_called_off", 0, 0);
+                        }
+                    } else if (invasion.duration_day_countdown == 0)
+                        messages::popup("message_wrath_of_the_emperor", 0, 0); // a year has passed (11 months), siege goes on
                 }
-            } else if (invasion.duration_day_countdown == 0)
-                messages::popup("message_wrath_of_the_emperor", 0, 0); // a year has passed (11 months), siege goes on
+            }
         }
     } else if (invasion.soldiers_killed && invasion.soldiers_killed >= invasion.size) {
-        // player defeated nomes army
-        invasion.size = 0;
-        invasion.soldiers_killed = 0;
-        if (rating < 35) {
-            change(10);
-            if (invasion.count < 2)
-                messages::popup("MESSAGE_CAESAR_RESPECT_1", 0, 0);
-            else if (invasion.count < 3)
-                messages::popup("MESSAGE_CAESAR_RESPECT_2", 0, 0);
-            else {
-                messages::popup("MESSAGE_CAESAR_RESPECT_3", 0, 0);
-            }
+        finish_army_defeated();
+    } else if (invasion.favour_only && invasion.size > 0) {
+        // Active favour/scenario bookkeeping with no counted soldiers yet.
+        // duration == 192: just spawned / not yet in kingdome_soldiers (same-day gap) /
+        // embarked sea troops still invisible — must NOT fall through to Caesar
+        // days_until (would warn/spawn and begin_invasion overwrites favour_only).
+        // duration != 192: army left the map without a full kill wipe — clear slot.
+        // Use != 192 (not < 192): duration may go negative; field is saved as UINT16.
+        if (invasion.duration_day_countdown != 192) {
+            invasion.size = 0;
+            invasion.soldiers_killed = 0;
+            invasion.duration_day_countdown = 0;
+            invasion.favour_only = 0;
+            invasion.cheated = 0;
         }
     } else if (invasion.days_until_invasion <= 0) {
         if (rating <= 10) {
@@ -194,12 +201,11 @@ void kingdome_relation_t::process_invasion() {
                 size = 144;
             }
             if (scenario_invasion_start_from_kingdome(size)) {
-                cheated_invasion = 0;
-                invasion.count++;
-                invasion.duration_day_countdown = 192;
-                invasion.retreat_message_shown = 0;
-                invasion.size = size;
-                invasion.soldiers_killed = 0;
+                begin_invasion(size, false);
+            } else {
+                // Spawn failed (no tile / formations) — retry next day instead of
+                // leaving days_until at 0 (which never re-enters this branch when rating > 10).
+                invasion.days_until_invasion = 1;
             }
         }
     }
@@ -208,6 +214,7 @@ void kingdome_relation_t::process_invasion() {
 void kingdome_relation_t::update() {
     OZZY_PROFILER_FUNCTION();
     update_debt_state();
+    process_invasion();
     events::emit(event_kingdome_update_gifts{ (int)personal_savings });
 }
 
@@ -215,16 +222,91 @@ void kingdome_relation_t::mark_soldier_killed() {
     invasion.soldiers_killed++;
 }
 
-void kingdome_relation_t::force_attack(int size) {
-    if (scenario_invasion_start_from_kingdome(size)) {
-        cheated_invasion = 1;
+void kingdome_relation_t::finish_army_defeated() {
+    // Player wiped the kingdom army (kills >= size). Favour waves skip Caesar respect.
+    invasion.size = 0;
+    invasion.soldiers_killed = 0;
+    invasion.duration_day_countdown = 0;
+    invasion.cheated = 0;
+    if (invasion.favour_only) {
+        invasion.favour_only = 0;
+        return;
+    }
+    if (rating < 35) {
+        change(10);
+        if (invasion.count < 2)
+            messages::popup("MESSAGE_CAESAR_RESPECT_1", 0, 0);
+        else if (invasion.count < 3)
+            messages::popup("MESSAGE_CAESAR_RESPECT_2", 0, 0);
+        else {
+            messages::popup("MESSAGE_CAESAR_RESPECT_3", 0, 0);
+        }
+    }
+}
+
+void kingdome_relation_t::begin_invasion(int size, bool cheated) {
+    // Live kingdom troops already on the map: grow kill tally, do not replace size
+    // (force_attack / overlapping wrath would otherwise finish early while ghosts remain).
+    if (invasion.size > 0 && g_city.figures.kingdome_soldiers > 0) {
+        invasion.size += size;
+        invasion.favour_only = 0;
+        invasion.cheated = cheated ? 1 : 0;
         invasion.count++;
         invasion.days_until_invasion = 0;
-        invasion.duration_day_countdown = 192;
         invasion.retreat_message_shown = 0;
-        invasion.size = size;
-        invasion.soldiers_killed = 0;
+        return;
     }
+
+    // Pending wipe from the previous army: award respect before overwriting.
+    if (!invasion.favour_only && invasion.soldiers_killed
+        && invasion.soldiers_killed >= invasion.size && invasion.size > 0) {
+        finish_army_defeated();
+    }
+
+    invasion.favour_only = 0;
+    invasion.cheated = cheated ? 1 : 0;
+    invasion.count++;
+    invasion.days_until_invasion = 0;
+    invasion.duration_day_countdown = 192;
+    invasion.retreat_message_shown = 0;
+    invasion.size = size;
+    invasion.soldiers_killed = 0;
+}
+
+void kingdome_relation_t::begin_favour_army(int size) {
+    // Kill tally + duration only — leave Caesar wrath countdown and invasion.count alone.
+    // Pause/retreat stay Caesar-only (!favour_only in process_invasion).
+    //
+    // Accumulate onto an army that is still on the map. Require kingdome_soldiers>0 —
+    // otherwise a same-day gap after wipe (kills tallied, process_invasion not yet run)
+    // would grow size onto a dead slot. Always mark favour_only: a favour wave joining
+    // an active Caesar army must not pick up pause/retreat or Caesar respect on wipe.
+    if (invasion.size > 0 && g_city.figures.kingdome_soldiers > 0) {
+        invasion.size += size;
+        invasion.favour_only = 1;
+        return;
+    }
+
+    // Pending Caesar wipe (no soldiers left): award respect before favour overwrites.
+    if (!invasion.favour_only && invasion.soldiers_killed
+        && invasion.soldiers_killed >= invasion.size && invasion.size > 0) {
+        finish_army_defeated();
+    }
+
+    invasion.cheated = 0;
+    invasion.favour_only = 1;
+    invasion.duration_day_countdown = 192;
+    invasion.retreat_message_shown = 0;
+    invasion.size = size;
+    invasion.soldiers_killed = 0;
+}
+
+bool kingdome_relation_t::force_attack(int size) {
+    if (scenario_invasion_start_from_kingdome(size)) {
+        begin_invasion(size, true);
+        return true;
+    }
+    return false;
 }
 
 void kingdome_relation_t::advance_month() {

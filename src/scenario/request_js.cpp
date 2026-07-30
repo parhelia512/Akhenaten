@@ -162,6 +162,13 @@ int ANK_FUNCTION_UNIFIED(__city_start_foreign_army_invasion)(const bvariant_map 
     opts.on_defeat_tag = (uint16_t)args.i32("on_defeat_tag", 0);
     opts.via_sea = args.i32("via_sea", 0) != 0;
     opts.sea_point_index = (int8_t)args.i32("sea_point", -1);
+    // Optional spawn kind (favour → INVASION_KIND_KINGDOME). Omitted → derive.
+    {
+        const int kind_arg = args.i32("kind", -1);
+        if (kind_arg >= 0 && kind_arg < INVASION_KIND_MAX) {
+            opts.kind = (e_invasion_spawn_kind)kind_arg;
+        }
+    }
     return scenario_invasion_start(opts);
 }
 

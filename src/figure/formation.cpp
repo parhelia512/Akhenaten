@@ -192,14 +192,16 @@ int formation_grid_offset_for_invasion(int invasion_sequence) {
 
 void formation_kingdome_pause(void) {
     for (int i = 1; i < MAX_FORMATIONS; i++) {
-        if (g_formations.formations[i].in_use == 1 && g_formations.formations[i].figure_type == FIGURE_ENEMY_KINGDOME_INFANTRY)
+        if (g_formations.formations[i].in_use == 1
+            && figure_is_kingdome_army(g_formations.formations[i].figure_type))
             g_formations.formations[i].wait_ticks = 20;
     }
 }
 
 void formation_kingdome_retreat(void) {
     for (int i = 1; i < MAX_FORMATIONS; i++) {
-        if (g_formations.formations[i].in_use == 1 && g_formations.formations[i].figure_type == FIGURE_ENEMY_KINGDOME_INFANTRY)
+        if (g_formations.formations[i].in_use == 1
+            && figure_is_kingdome_army(g_formations.formations[i].figure_type))
             g_formations.formations[i].months_low_morale = 1;
     }
 }
@@ -277,7 +279,7 @@ void formation_change_morale(formation* m, int amount) {
     int max_morale;
     if (m->figure_type == FIGURE_INFANTRY)
         max_morale = m->has_military_training ? 100 : 80;
-    else if (m->figure_type == FIGURE_ENEMY_KINGDOME_INFANTRY)
+    else if (figure_is_kingdome_army(m->figure_type))
         max_morale = 100;
     else if (m->figure_type == FIGURE_ARCHER|| m->figure_type == FIGURE_FCHARIOTEER)
         max_morale = m->has_military_training ? 80 : 60;

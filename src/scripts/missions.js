@@ -177,7 +177,8 @@ function mission_request_outcome(ev) {
 }
 
 function mission_pharaoh_favour_invasion_tick(mission, army_size, chain_army_size) {
-    // Favour-KR Pharaoh army via ENEMIES + Egyptian (no force_attack / KINGDOME path).
+    // Favour-KR: ENEMIES + Egyptian enemy pack + INVASION_KIND_KINGDOME → figures 55–57.
+    // Avoid ATTACK_TYPE_KINGDOME / force_attack (cheated_invasion skips pause/retreat).
     if (typeof chain_army_size === "undefined") {
         chain_army_size = 0
     }
@@ -198,6 +199,7 @@ function mission_pharaoh_favour_invasion_tick(mission, army_size, chain_army_siz
         city.start_foreign_army_invasion({
             mode: ATTACK_TYPE_ENEMIES,
             enemy: ENEMY_3_EGYPTIAN,
+            kind: INVASION_KIND_KINGDOME,
             size: chain_army_size,
             invasion_id: 25,
             tilex: -1,
@@ -224,6 +226,7 @@ function mission_pharaoh_favour_invasion_tick(mission, army_size, chain_army_siz
     city.start_foreign_army_invasion({
         mode: ATTACK_TYPE_ENEMIES,
         enemy: ENEMY_3_EGYPTIAN,
+        kind: INVASION_KIND_KINGDOME,
         size: army_size,
         invasion_id: 24,
         tilex: -1,

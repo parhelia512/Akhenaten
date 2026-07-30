@@ -1223,7 +1223,9 @@ io_buffer* iob_city_data = new io_buffer([](io_buffer* iob, size_t version) {
     iob->bind____skip(3);
     iob->bind(BIND_SIGNATURE_INT32, &data.kingdome.invasion.days_until_invasion);
     iob->bind(BIND_SIGNATURE_UINT8, &data.kingdome.invasion.retreat_message_shown);
-    iob->bind____skip(3);
+    iob->bind(BIND_SIGNATURE_UINT8, &data.kingdome.invasion.favour_only);
+    iob->bind(BIND_SIGNATURE_UINT8, &data.kingdome.invasion.cheated);
+    iob->bind____skip(1);
     iob->bind(BIND_SIGNATURE_UINT8, &data.ratings.monument_destroyed_buildings);
     iob->bind____skip(3);
     iob->bind(BIND_SIGNATURE_UINT16, &data.ratings.monument_years_of_monument);

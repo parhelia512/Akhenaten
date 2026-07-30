@@ -146,7 +146,7 @@ enum e_figure_type : uint16_t {
     FIGURE_FUNERAL_WALKER = 94,
     FIGURE_FISHING_SPOT = 95,
     FIGURE_SLED_PULLER = 96,
-    FIGURE_SHOWMAN = 97,
+    FIGURE_SHOWMAN = 97, // named lang slot only; no OG walker — won't implement
     FIGURE_PLAGUED_CITIZEN = 98,
     FIGURE_BEDOUIN_INFANTRY = 99,
     FIGURE_EGYPTIAN_WARSHIP = 100,
@@ -264,6 +264,14 @@ enum e_figure_type : uint16_t {
 
 using figure_id = uint16_t;
 constexpr figure_id INVALID_FIGURE_ID = 0;
+
+// Favour / Pharaoh-army figure IDs (55–57). Used by pause/retreat, kill tracking,
+// and city kingdome_soldiers counting.
+inline bool figure_is_kingdome_army(e_figure_type t) {
+    return t == FIGURE_ENEMY_KINGDOME_JAVELIN
+        || t == FIGURE_ENEMY_KINGDOME_MOUNTED
+        || t == FIGURE_ENEMY_KINGDOME_INFANTRY;
+}
 
 using e_figure_type_tokens_t = token_holder<e_figure_type, FIGURE_NONE, FIGURE_MAX>;
 extern const e_figure_type_tokens_t e_figure_type_tokens;

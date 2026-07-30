@@ -169,6 +169,8 @@ void game_t::advance_month() {
     g_scenario.events.process_random_events();
     g_scenario.events.process_events();
     g_invasions.process_bind_resolutions();
+    // Julius: monthly — warning months_to_go tick + timed map invasions (KNGDOME/enemy/uprising).
+    scenario_invasion_process();
 
     formation_update_monthly_morale_at_rest();
     city_message_decrease_delays();

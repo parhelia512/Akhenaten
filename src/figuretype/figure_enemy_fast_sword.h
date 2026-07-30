@@ -160,3 +160,81 @@ public:
     virtual int8_t interval_attack_delay() const override { return current_params().interval_attack_delay; }
 };
 ANK_CONFIG_STRUCT(figure_seapeople_axeman::static_params, interval_attack_delay)
+
+// Egyptian melee specials (ES2). Not in enemy_egyptian.figure_types[] today
+// (archer/spear/chariot only); register so console/save/spawn never assert.
+class figure_egyptian_fast_sword : public figure_enemy_fast_sword {
+public:
+    FIGURE_METAINFO(FIGURE_ENEMY_EGYPTIAN_FAST_SWORD, figure_egyptian_fast_sword)
+    figure_egyptian_fast_sword(figure *f) : figure_enemy_fast_sword(f) {}
+
+    struct static_params : public base_params_t, public figure_static_params {
+    } FIGURE_STATIC_DATA_T;
+
+    virtual int8_t interval_attack_delay() const override { return current_params().interval_attack_delay; }
+};
+ANK_CONFIG_STRUCT(figure_egyptian_fast_sword::static_params, interval_attack_delay)
+
+class figure_egyptian_sword : public figure_enemy_fast_sword {
+public:
+    FIGURE_METAINFO(FIGURE_ENEMY_EGYPTIAN_SWORD, figure_egyptian_sword)
+    figure_egyptian_sword(figure *f) : figure_enemy_fast_sword(f) {}
+
+    struct static_params : public base_params_t, public figure_static_params {
+    } FIGURE_STATIC_DATA_T;
+
+    virtual int8_t interval_attack_delay() const override { return current_params().interval_attack_delay; }
+};
+ANK_CONFIG_STRUCT(figure_egyptian_sword::static_params, interval_attack_delay)
+
+class figure_egyptian_heavy_sword : public figure_enemy_fast_sword {
+public:
+    FIGURE_METAINFO(FIGURE_ENEMY_EGYPTIAN_HEAVY_SWORD, figure_egyptian_heavy_sword)
+    figure_egyptian_heavy_sword(figure *f) : figure_enemy_fast_sword(f) {}
+
+    struct static_params : public base_params_t, public figure_static_params {
+    } FIGURE_STATIC_DATA_T;
+
+    virtual int8_t interval_attack_delay() const override { return current_params().interval_attack_delay; }
+};
+ANK_CONFIG_STRUCT(figure_egyptian_heavy_sword::static_params, interval_attack_delay)
+
+class figure_egyptian_axe : public figure_enemy_fast_sword {
+public:
+    FIGURE_METAINFO(FIGURE_ENEMY_EGYPTIAN_AXE, figure_egyptian_axe)
+    figure_egyptian_axe(figure *f) : figure_enemy_fast_sword(f) {}
+
+    struct static_params : public base_params_t, public figure_static_params {
+    } FIGURE_STATIC_DATA_T;
+
+    virtual int8_t interval_attack_delay() const override { return current_params().interval_attack_delay; }
+};
+ANK_CONFIG_STRUCT(figure_egyptian_axe::static_params, interval_attack_delay)
+
+// ES3: Egyptian camel — melee mount (fast_sword AI, faster march; silent march SFX
+// in figure_enemy_fast_sword; camel die/hit in sound.cpp).
+class figure_egyptian_camel : public figure_enemy_fast_sword {
+public:
+    FIGURE_METAINFO(FIGURE_ENEMY_EGYPTIAN_CAMEL, figure_egyptian_camel)
+    figure_egyptian_camel(figure *f) : figure_enemy_fast_sword(f) {}
+
+    struct static_params : public base_params_t, public figure_static_params {
+    } FIGURE_STATIC_DATA_T;
+
+    virtual int8_t interval_attack_delay() const override { return current_params().interval_attack_delay; }
+    virtual int8_t enemy_speed_multiplier() const override { return 2; }
+};
+ANK_CONFIG_STRUCT(figure_egyptian_camel::static_params, interval_attack_delay)
+
+// ES6: kingdom infantry (57). Favour-army melee; formation_kingdome_pause/retreat key type.
+class figure_kingdome_infantry : public figure_enemy_fast_sword {
+public:
+    FIGURE_METAINFO(FIGURE_ENEMY_KINGDOME_INFANTRY, figure_kingdome_infantry)
+    figure_kingdome_infantry(figure *f) : figure_enemy_fast_sword(f) {}
+
+    struct static_params : public base_params_t, public figure_static_params {
+    } FIGURE_STATIC_DATA_T;
+
+    virtual int8_t interval_attack_delay() const override { return current_params().interval_attack_delay; }
+};
+ANK_CONFIG_STRUCT(figure_kingdome_infantry::static_params, interval_attack_delay)

@@ -1106,6 +1106,7 @@ function mission23_favour(ev) {
 		city.start_foreign_army_invasion({
 			mode: ATTACK_TYPE_ENEMIES,
 			enemy: ENEMY_3_EGYPTIAN,
+			kind: INVASION_KIND_KINGDOME,
 			size: 50,
 			invasion_id: 25,
 			tilex: tile2[0],
@@ -1130,6 +1131,7 @@ function mission23_favour(ev) {
 	city.start_foreign_army_invasion({
 		mode: ATTACK_TYPE_ENEMIES,
 		enemy: ENEMY_3_EGYPTIAN,
+		kind: INVASION_KIND_KINGDOME,
 		size: 50,
 		invasion_id: 24,
 		tilex: tile[0],

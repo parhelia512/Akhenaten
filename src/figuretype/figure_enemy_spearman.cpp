@@ -11,6 +11,7 @@
 #include "scenario/invasion_auto_resolve.h"
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_egyptian_spearman)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_kingdome_javelin)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_hittite_spearman)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_kushite_spearman)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_persian_spearman)
@@ -190,15 +191,15 @@ void figure_enemy_spearman::leave_city() {
 void figure_enemy_spearman::figure_action() {
     OZZY_PROFILER_FUNCTION();
 
+    count_as_city_invader();
     if (invasion_auto_resolve_figure_immune(&base)) {
         base.map_figure_update();
         return;
     }
 
-    base.speed_multiplier = 1;
+    base.speed_multiplier = enemy_speed_multiplier();
     formation *m = formation_get(base.formation_id);
     // int dir = get_missile_direction(m);
-    count_as_city_invader();
     base.set_flag(e_figure_flag_inattack, false);
     base.terrain_usage = TERRAIN_USAGE_ENEMY;
 

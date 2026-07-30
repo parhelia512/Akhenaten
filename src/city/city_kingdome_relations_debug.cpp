@@ -51,6 +51,8 @@ void config_show_kingdome_properties(bool header) {
     game_debug_show_property("invasion.days_until_invasion", kingdome.invasion.days_until_invasion);
     game_debug_show_property("invasion.duration_day_countdown", kingdome.invasion.duration_day_countdown);
     game_debug_show_property("invasion.retreat_message_shown", kingdome.invasion.retreat_message_shown);
+    game_debug_show_property("invasion.favour_only", kingdome.invasion.favour_only);
+    game_debug_show_property("invasion.cheated", kingdome.invasion.cheated);
 
     ImGui::EndTable();
 

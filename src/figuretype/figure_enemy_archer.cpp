@@ -21,6 +21,7 @@ REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_barbarian_archer)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_assyrian_archer)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_canaanite_archer)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_egyptian_archer)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_egyptian_mounted_archer)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_hittite_archer)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_hyksos_archer)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_libian_archer)
@@ -71,7 +72,12 @@ void figure_enemy_archer::enemy_marching(formation *m) {
     OZZY_PROFILER_FUNCTION();
     base.wait_ticks--;
 
-    if (city_sound_update_march_enemy()) {
+    // Mounted archer: horse loop (parity with figure_enemy::enemy_fighting); foot = march.
+    if (is_mounted_archer()) {
+        if (city_sound_update_march_horse()) {
+            g_sound.play_effect(SOUND_EFFECT_HORSE_MOVING);
+        }
+    } else if (city_sound_update_march_enemy()) {
         g_sound.play_effect(SOUND_EFFECT_MARCHING);
     }
 
@@ -181,6 +187,10 @@ void figure_enemy_archer::enemy_fighting(formation *m) {
             return;
         }
 
+        // Mounted: horse only while closing distance (not during shoot cooldown).
+        if (is_mounted_archer() && city_sound_update_march_horse()) {
+            g_sound.play_effect(SOUND_EFFECT_HORSE_MOVING);
+        }
         base.move_ticks(base.speed_multiplier);
         if (direction() == DIR_FIGURE_NONE) {
             figure *target = figure_get(base.target_figure_id);
@@ -289,15 +299,15 @@ void figure_enemy_archer::leave_city() {
 void figure_enemy_archer::figure_action() {
     OZZY_PROFILER_FUNCTION();
 
+    count_as_city_invader();
     if (invasion_auto_resolve_figure_immune(&base)) {
         base.map_figure_update();
         return;
     }
 
-    base.speed_multiplier = 1;
+    base.speed_multiplier = enemy_speed_multiplier();
     formation *m = formation_get(base.formation_id);
 
-    count_as_city_invader();
     base.set_flag(e_figure_flag_inattack, false);
     base.terrain_usage = TERRAIN_USAGE_ENEMY;
 

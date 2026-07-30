@@ -16,7 +16,7 @@ void figure_senet_player::update_shows() {
 }
 
 sound_key figure_senet_player::phrase_key() const {
-    int enemies = g_city.figures.enemies;
+    int enemies = g_city.figures.total_invading_enemies();
     if (enemies > 0) {
         return "city_not_safety_workers_leaving";
     }

@@ -2,6 +2,7 @@
 
 #include "building/destruction.h"
 #include "city/city.h"
+#include "city/city_figures.h"
 #include "city/city_warnings.h"
 #include "game/game_events.h"
 #include "city/city_message.h"
@@ -12,24 +13,28 @@
 #include "figure/formation.h"
 #include "figure/figure_names.h"
 #include "figuretype/figure_enemy.h"
-#include "core/svector.h"
-#include "figuretype/figure_enemy_warship.h"
 #include "figuretype/figure_enemy_transport.h"
+#include "figuretype/figure_enemy_warship.h"
 #include "game/difficulty.h"
 #include "game/game.h"
 #include "grid/grid.h"
 #include "grid/terrain.h"
+#include "grid/water.h"
 #include "scenario/map.h"
 #include "scenario/scenario.h"
 #include "scenario/invasion_auto_resolve.h"
 #include "dev/debug.h"
 #include "core/log.h"
+#include "core/svector.h"
 #include "empire/empire.h"
 #include "js/js_game.h"
 #include "figure/enemy_army.h"
 #include "scenario/scenario_event_manager.h"
 
+#include <algorithm>
+
 const e_attack_faction_tokens_t ANK_CONFIG_ENUM(e_attack_faction_tokens);
+const e_invasion_spawn_kind_tokens_t ANK_CONFIG_ENUM(e_invasion_spawn_kind_tokens);
 
 // Skip OG attack popup when auto-resolve already queued this seq (quick-battle message sent).
 static void emit_local_invasion_attack_message(xstring msg_id, uint16_t seq, int grid_offset) {
@@ -120,6 +125,38 @@ std::array<enemy_properties_t *, ENEMY_COUNT> g_enemy_properties = {
     &enemy_roman,
     &enemy_seapeople,
 };
+
+// ES6(A): favour army uses figure IDs 55–57 instead of egyptian proxy types.
+static e_figure_type invasion_spawn_figure_type(const invasion_opts_t &opts, int type_slot) {
+    e_figure_type figure_type = g_enemy_properties[opts.enemy_type]->figure_types[type_slot];
+    if (opts.kind == INVASION_KIND_KINGDOME) {
+        static const e_figure_type kingdom_types[3] = {
+            FIGURE_ENEMY_KINGDOME_JAVELIN,
+            FIGURE_ENEMY_KINGDOME_INFANTRY,
+            FIGURE_ENEMY_KINGDOME_MOUNTED,
+        };
+        return kingdom_types[type_slot];
+    }
+    return figure_type;
+}
+
+// Split invasion size across the three type slots. Kingdom kind remaps all three
+// slots; egyptian pack has percentage_type3=0, so steal a mounted share from type1.
+static void invasion_type_counts(const invasion_opts_t &opts, int size, int *n1, int *n2, int *n3) {
+    const auto *ep = g_enemy_properties[opts.enemy_type];
+    int p1 = ep->percentage_type1;
+    int p2 = ep->percentage_type2;
+    int p3 = ep->percentage_type3;
+    if (opts.kind == INVASION_KIND_KINGDOME && p3 <= 0) {
+        constexpr int mounted_share = 10;
+        p3 = mounted_share;
+        p1 = std::max(0, p1 - mounted_share);
+    }
+    *n1 = calc_adjust_with_percentage(size, p1);
+    *n2 = calc_adjust_with_percentage(size, p2);
+    *n3 = calc_adjust_with_percentage(size, p3);
+    *n1 += size - (*n1 + *n2 + *n3);
+}
 
 const int LOCAL_UPRISING_NUM_ENEMIES[20] = {0, 0, 0, 0, 0, 3, 3, 3, 0, 6, 6, 6, 6, 6, 9, 9, 9, 9, 9, 9};
 
@@ -328,8 +365,11 @@ void invasion_data_t::init() {
         return;
     }
 
+    // Julius: warnings[0] unused; fill from [1] onward with ++warning per battle icon.
+    invasion_warning_t *warning = &warnings[1];
+    const invasion_warning_t *warnings_end = warnings.data() + warnings.size();
+
     for (int i = 0; i < MAX_INVASIONS; i++) {
-        invasion_warning_t& warning = warnings[1];
         random_generate_next();
         if (!g_scenario.invasions[i].type) {
             continue;
@@ -346,19 +386,24 @@ void invasion_data_t::init() {
             if (!obj) {
                 continue;
             }
+            if (warning >= warnings_end) {
+                logs::warn("scenario_invasion: warning table full");
+                return;
+            }
 
-            warning.in_use = 1;
-            warning.invasion_path_id = obj->invasion_path_id;
-            warning.warning_years = obj->invasion_years;
-            warning.pos = obj->pos;
-            warning.image_id = obj->image_id;
-            warning.invasion_id = i;
-            warning.empire_object_id = obj->id;
-            warning.month_notified = 0;
-            warning.year_notified = 0;
-            warning.months_to_go = 12 * g_scenario.invasions[i].year;
-            warning.months_to_go += g_scenario.invasions[i].month;
-            warning.months_to_go -= 12 * year;
+            warning->in_use = 1;
+            warning->invasion_path_id = obj->invasion_path_id;
+            warning->warning_years = obj->invasion_years;
+            warning->pos = obj->pos;
+            warning->image_id = obj->image_id;
+            warning->invasion_id = i;
+            warning->empire_object_id = obj->id;
+            warning->month_notified = 0;
+            warning->year_notified = 0;
+            warning->months_to_go = 12 * g_scenario.invasions[i].year;
+            warning->months_to_go += g_scenario.invasions[i].month;
+            warning->months_to_go -= 12 * year;
+            ++warning;
         }
 
         path_current++;
@@ -547,7 +592,7 @@ static void sea_invasion_abort_formation(int formation_id) {
     }
 }
 
-tile2i scenario_start_sea_invasion_impl(invasion_opts_t opts) {
+tile2i scenario_start_sea_invasion_impl(invasion_opts_t &opts) {
     auto &data = g_invasions;
     if (opts.size <= 0) {
         return tile2i::invalid;
@@ -576,10 +621,7 @@ tile2i scenario_start_sea_invasion_impl(invasion_opts_t opts) {
     int soldiers_per_formation[3][4];
 
     int num_type1, num_type2, num_type3;
-    int num_type1 = calc_adjust_with_percentage(opts.size, g_enemy_properties[opts.enemy_type]->percentage_type1);
-    int num_type2 = calc_adjust_with_percentage(opts.size, g_enemy_properties[opts.enemy_type]->percentage_type2);
-    int num_type3 = calc_adjust_with_percentage(opts.size, g_enemy_properties[opts.enemy_type]->percentage_type3);
-    num_type1 += opts.size - (num_type1 + num_type2 + num_type3);
+    invasion_type_counts(opts, opts.size, &num_type1, &num_type2, &num_type3);
 
     for (int t = 0; t < 3; t++) {
         formations_per_type[t] = 0;
@@ -604,7 +646,7 @@ tile2i scenario_start_sea_invasion_impl(invasion_opts_t opts) {
             continue;
         }
 
-        e_figure_type figure_type = g_enemy_properties[opts.enemy_type]->figure_types[type];
+        e_figure_type figure_type = invasion_spawn_figure_type(opts, type);
         if (figure_type == FIGURE_NONE) {
             logs::error("No figure type for %s enemy", e_enemy_type_tokens.name(opts.enemy_type));
             continue;
@@ -709,7 +751,7 @@ tile2i scenario_start_sea_invasion_impl(invasion_opts_t opts) {
     return seq > 0 ? sea_spawn : tile2i::invalid;
 }
 
-tile2i scenario_start_invasion_impl(invasion_opts_t opts) {
+tile2i scenario_start_invasion_impl(invasion_opts_t &opts) {
     if (invasion_should_use_sea(opts)) {
         return scenario_start_sea_invasion_impl(opts);
     }
@@ -730,10 +772,8 @@ tile2i scenario_start_invasion_impl(invasion_opts_t opts) {
     }
 
     // calculate soldiers per type
-    int num_type1 = calc_adjust_with_percentage(opts.size, g_enemy_properties[opts.enemy_type]->percentage_type1);
-    int num_type2 = calc_adjust_with_percentage(opts.size, g_enemy_properties[opts.enemy_type]->percentage_type2);
-    int num_type3 = calc_adjust_with_percentage(opts.size, g_enemy_properties[opts.enemy_type]->percentage_type3);
-    num_type1 += opts.size - (num_type1 + num_type2 + num_type3); // assign leftovers to type1
+    int num_type1, num_type2, num_type3;
+    invasion_type_counts(opts, opts.size, &num_type1, &num_type2, &num_type3);
 
     for (int t = 0; t < 3; t++) {
         formations_per_type[t] = 0;
@@ -827,7 +867,7 @@ tile2i scenario_start_invasion_impl(invasion_opts_t opts) {
             continue;
         }
 
-        e_figure_type figure_type = g_enemy_properties[opts.enemy_type]->figure_types[type];
+        e_figure_type figure_type = invasion_spawn_figure_type(opts, type);
         if (figure_type == FIGURE_NONE) {
             logs::error("No figure type for %s enemy", e_enemy_type_tokens.name(opts.enemy_type));
             continue;
@@ -868,11 +908,15 @@ tile2i scenario_start_invasion_impl(invasion_opts_t opts) {
         army->buildings_destroyed = 0;
     }
 
-    if (seq > 0 && invasion_tile.valid()) {
-        g_invasions.record_spawn(opts, invasion_tile, opts.size);
-        g_invasion_auto_resolve.maybe_enqueue(opts, (uint16_t)data.last_internal_invasion_id);
+    // Match sea path: no formations ⇒ invalid. Callers (begin_favour_army / messages)
+    // key off tile.valid(); a bare tile with seq==0 would arm favour_only at duration=192
+    // with zero soldiers and never clean up (duration never ticks without troops).
+    if (seq <= 0) {
+        return tile2i::invalid;
     }
 
+    g_invasions.record_spawn(opts, invasion_tile, opts.size);
+    g_invasion_auto_resolve.maybe_enqueue(opts, (uint16_t)data.last_internal_invasion_id);
     return invasion_tile;
 }
 
@@ -932,6 +976,9 @@ void scenario_invasion_process() {
                 opts.kind = INVASION_KIND_KINGDOME;
                 tile2i invasion_tile = scenario_start_invasion_impl(opts);
                 if (invasion_tile.valid()) {
+                    // Scenario kingdom wave: kill tally via favour_only (no Caesar respect /
+                    // pause-retreat). opts.size is difficulty-adjusted by start_invasion_impl.
+                    g_city.kingdome.begin_favour_army(opts.size);
                     emit_local_invasion_attack_message("message_legion_attacks",
                         g_invasions.last_internal_invasion_id, invasion_tile.grid_offset());
                 }
@@ -974,7 +1021,7 @@ int map_invasion_point(tile2i point) {
     return 0;
 }
 
-bool scenario_invasion_start_from_kingdome(int size) {
+bool scenario_invasion_start_from_kingdome(int &size) {
     auto &data = g_invasions;
 
     invasion_opts_t opts;
@@ -987,6 +1034,7 @@ bool scenario_invasion_start_from_kingdome(int size) {
 
     tile2i invasion_tile = scenario_start_invasion_impl(opts);
     if (invasion_tile.valid()) {
+        size = opts.size; // difficulty-adjusted spawn count for kill bookkeeping
         emit_local_invasion_attack_message("message_kingdome_army_attack",
             data.last_internal_invasion_id, invasion_tile.grid_offset());
         return true;
@@ -1011,21 +1059,30 @@ int scenario_invasion_start(invasion_opts_t opts) {
         tile2i invasion_tile = scenario_start_invasion_impl(opts);
         if (invasion_tile.valid()) {
             // Favour / Pharaoh army uses Egyptian sprites — kingdome message, not barbarians.
-            if (opts.enemy_type == ENEMY_3_EGYPTIAN) {
+            if (opts.enemy_type == ENEMY_3_EGYPTIAN || opts.kind == INVASION_KIND_KINGDOME) {
                 emit_local_invasion_attack_message("message_kingdome_army_attack",
                     data.last_internal_invasion_id, invasion_tile.grid_offset());
             } else {
                 emit_local_invasion_attack_message("message_barbarians_attack",
                     data.last_internal_invasion_id, invasion_tile.grid_offset());
             }
+            // Favour-KR via ENEMIES+KINGDOME: kill tally only (favour_only; not Caesar wrath).
+            // opts.size is difficulty-adjusted by scenario_start_invasion_impl.
+            if (opts.kind == INVASION_KIND_KINGDOME) {
+                g_city.kingdome.begin_favour_army(opts.size);
+            }
             return data.last_internal_invasion_id;
         }
         break;
     }
     case ATTACK_TYPE_KINGDOME: {
-        // Legacy / console path (mission favour uses ENEMIES + Egyptian instead).
+        // Legacy / console path — cheated_invasion skips pause/retreat.
+        // Do not key off last_internal_invasion_id: failed spawns still bump the
+        // counter before returning invalid (tile/seq failure).
         opts.kind = INVASION_KIND_KINGDOME;
-        g_city.kingdome.force_attack(opts.size);
+        if (!g_city.kingdome.force_attack(opts.size)) {
+            return 0;
+        }
         return data.last_internal_invasion_id;
     }
     case ATTACK_TYPE_NATIVES: {

@@ -6,6 +6,7 @@
 #include "core/calc.h"
 #include "core/log.h"
 #include "figure/figure.h"
+#include "figure/figure_type.h"
 #include "figure/formation.h"
 #include "figuretype/figure_enemy_transport.h"
 #include "figuretype/figure_enemy_warship.h"
@@ -25,6 +26,38 @@ invasion_auto_resolve_t g_invasion_auto_resolve;
 
 // Test-only: >=0 overrides player_strength(); -1 = live count.
 static int s_test_player_str_override = -1;
+
+// Favour bookkeeping is global (favour_only). Only skip auto-resolve ±KR for the
+// kingdom-army wave itself — not for a FOREIGN/PHARAOH wave still queued behind it.
+static bool invasion_seq_is_kingdome_army(uint16_t seq) {
+    if (!seq) {
+        return false;
+    }
+    for (int fi = 1; fi < MAX_FORMATIONS; ++fi) {
+        formation *m = formation_get(fi);
+        if (!m || !m->in_use || m->own_batalion || m->is_herd) {
+            continue;
+        }
+        if ((uint16_t)m->invasion_sequence != seq) {
+            continue;
+        }
+        if (figure_is_kingdome_army(m->figure_type)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Alive kingdom-army figures still on the map (any invasion seq).
+static int count_alive_kingdome_army_figures() {
+    int n = 0;
+    for (figure *f : map_figures()) {
+        if (f && f->is_alive() && figure_is_kingdome_army(f->type)) {
+            ++n;
+        }
+    }
+    return n;
+}
 
 static void despawn_sea_fleet_by_seq(uint16_t seq) {
     if (!seq) {
@@ -383,19 +416,62 @@ bool invasion_auto_resolve_t::try_resolve_now(uint16_t seq) {
 
     kill_own_batalions_pct(pct_loss);
 
+    // Kingdom army (55–57): do not apply enhanced ±KR. Favour skips all KR; Caesar wrath
+    // win gets OG respect via finish_army_defeated after despawn (avoids +25 then +10).
+    // FOREIGN/PHARAOH keep the enhanced ±25/±10.
+    const bool kingdom_seq = invasion_seq_is_kingdome_army(seq);
+    const bool favour_wave = kingdom_seq && g_city.kingdome.invasion.favour_only != 0;
+    const bool caesar_win = kingdom_seq && won && !favour_wave;
+
+    if (!kingdom_seq) {
+        if (won) {
+            g_city.kingdome.change(25);
+        } else {
+            g_city.kingdome.change(-10);
+        }
+    }
+
     if (won) {
-        g_city.kingdome.change(25);
         invasion_force_outcome(seq, INVASION_OUTCOME_COMPLETED);
         events::emit(event_message{ true, "message_invasion_auto_resolve_win", seq, 0, SOURCE_LOCATION });
     } else {
-        g_city.kingdome.change(-10);
         invasion_force_outcome(seq, INVASION_OUTCOME_DEFEAT);
         events::emit(event_message{ true, "message_invasion_auto_resolve_lose", seq, 0, SOURCE_LOCATION });
     }
 
     // Pop pending before despawn: calculate_figures→sweep must not cancel_vanished this wave again.
     remove_order_index(*this, 0);
+
+    // Kingdom bookkeeping is a single global slot. Zero size before poof so this wave's
+    // despawn does not tally as combat kills; after despawn, restore a slot if another
+    // kingdom army is still on the map (accumulated favour/Caesar waves).
+    const uint8_t saved_favour = g_city.kingdome.invasion.favour_only;
+    const uint8_t saved_cheated = g_city.kingdome.invasion.cheated;
+    const int32_t saved_duration = g_city.kingdome.invasion.duration_day_countdown;
+    if (kingdom_seq) {
+        g_city.kingdome.invasion.size = 0;
+        g_city.kingdome.invasion.soldiers_killed = 0;
+    }
+
     despawn_invasion_by_seq(seq);
+
+    if (kingdom_seq) {
+        const int left = count_alive_kingdome_army_figures();
+        if (left > 0) {
+            g_city.kingdome.invasion.size = left;
+            g_city.kingdome.invasion.soldiers_killed = 0;
+            g_city.kingdome.invasion.favour_only = saved_favour;
+            g_city.kingdome.invasion.cheated = saved_cheated;
+            g_city.kingdome.invasion.duration_day_countdown = saved_duration;
+        } else {
+            g_city.kingdome.invasion.favour_only = 0;
+            g_city.kingdome.invasion.cheated = 0;
+            g_city.kingdome.invasion.duration_day_countdown = 0;
+            if (caesar_win) {
+                g_city.kingdome.finish_army_defeated();
+            }
+        }
+    }
 
     if (count > 0) {
         show_quick_battle_window();
