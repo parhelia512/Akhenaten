@@ -80,13 +80,14 @@
         <li><span class="obj-label">Population</span><span class="obj-value">6 000</span></li>
         <li><span class="obj-label">Culture</span><span class="obj-value">55</span></li>
         <li><span class="obj-label">Prosperity</span><span class="obj-value">45</span></li>
-        <li><span class="obj-label">Monuments</span><span class="obj-value">0 (TEMP) — pak 20 = Sun Temple + Small Pyramid</span></li>
+        <li><span class="obj-label">Monuments</span><span class="obj-value">20 (Sun Temple + Small Pyramid)</span></li>
         <li><span class="obj-label">Kingdom</span><span class="obj-value">70</span></li>
         <li><span class="obj-label">Housing level</span><span class="obj-value">10</span></li>
         <li><span class="obj-label">Burial</span><span class="obj-value">weapons ×16 · pottery ×16 · luxury goods ×10</span></li>
       </ul>
       <div class="deviation-note">
-        <strong>TEMP monuments 0 / pak 20:</strong> Sun Temple awaits <code>C8</code>; Small Pyramid is in the build list but the win goal stays 0 until Sun Temple weight lands (same pattern as Bahariya / Djedu). Briefing popup title is <em>Thebes</em>; JS / wiki / choice use <em>Waset</em>.
+        Monument goal matches pak (<strong>20</strong>). Sun Temple weight 4 + small true pyramid 8 →
+        <code>2.25·12+4.5 = 31.5 ≥ 20</code>. Briefing popup title is <em>Thebes</em>; JS / wiki / choice use <em>Waset</em>.
       </div>
 
       <h2 id="events">Scripted events (summary)</h2>
@@ -99,11 +100,11 @@
           <div class="details-body">
             <p><span class="file-ref">src/scripts/mission/m_024_waset.js</span> · import in <span class="file-ref">src/scripts/missions.js</span></p>
             <p>Empire id <strong>1</strong>. Map <span class="file-ref">data/maps/m_024_waset.map</span>. Rank 8.</p>
-            <p>Scenario enemy <code>ENEMY_6_KUSHITE</code>; invasions <code>ENEMY_3_EGYPTIAN</code> (B12 JS proxy on oil refuse).</p>
-            <p>Oil refuse i=7 egypt×6 is pak <code>subtype=3</code> (Is Naval) → land-proxy at disembark <code>[77,73]</code> until E3c; i=21 egypt×4 is land (<code>subtype=0</code>, map entry).</p>
+            <p>Scenario enemy <code>ENEMY_6_KUSHITE</code>; invasions <code>ENEMY_3_EGYPTIAN</code> (JS chain proxy on oil refuse).</p>
+            <p>Oil refuse i=7 egypt×6 is pak <code>subtype=3</code> (Is Naval) → land-proxy at disembark <code>[77,73]</code> until sea invasions land; i=21 egypt×4 is land (<code>subtype=0</code>, map entry).</p>
             <p>SKIP: empty map_obj idx=6; orphan route 19. Kerma remapped to polyline route <strong>23</strong>.</p>
             <p>i=42 y3m1 NEW_TRADE → <strong>Kerma</strong> (pak city=Kharga + loc=23); Kerma starts display-only (<code>trade:false</code>), unlock opens luxury/linen.</p>
-            <p>Dump date 2026-07-26. Plan: <span class="file-ref">REMAKE_WASET_PLAN.md</span>.</p>
+            <p>Dump date 2026-07-26. </p>
           </div>
         </details>
         <details>
