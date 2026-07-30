@@ -34,10 +34,11 @@ namespace game_hotkeys {
     hotkey_mapping decrease_game_speed ("decrease_game_speed", KEY_PAGEUP, KEY_MOD_NONE, HOTKEY_DECREASE_GAME_SPEED, KEY_LEFTBRACKET, KEY_MOD_NONE);
     hotkey_mapping rotate_map_left ("rotate_map_left", KEY_HOME, KEY_MOD_NONE, HOTKEY_ROTATE_MAP_LEFT);
     hotkey_mapping rotate_map_right ("rotate_map_right", KEY_END, KEY_MOD_NONE, HOTKEY_ROTATE_MAP_RIGHT);
-    hotkey_mapping build_vacant_house ("build_vacant_house", KEY_H, KEY_MOD_NONE, HOTKEY_BUILD_VACANT_HOUSE);
+    // Ctrl+H / Ctrl+Z: H/Z taken by OG Cleopatra overlay hotkeys (hide cliffs / disease).
+    hotkey_mapping build_vacant_house ("build_vacant_house", KEY_H, KEY_MOD_CTRL, HOTKEY_BUILD_VACANT_HOUSE);
     hotkey_mapping build_clear_land ("build_clear_land", KEY_X, KEY_MOD_NONE, HOTKEY_BUILD_CLEAR_LAND);
     hotkey_mapping build_road ("build_road", KEY_B, KEY_MOD_NONE, HOTKEY_BUILD_ROAD);
-    hotkey_mapping build_plaza ("build_plaza", KEY_Z, KEY_MOD_NONE, HOTKEY_BUILD_PLAZA);
+    hotkey_mapping build_plaza ("build_plaza", KEY_Z, KEY_MOD_CTRL, HOTKEY_BUILD_PLAZA);
     hotkey_mapping build_gardens ("build_gardens", KEY_G, KEY_MOD_NONE, HOTKEY_BUILD_GARDENS);
     hotkey_mapping build_firehouse ("build_firehouse", KEY_F, KEY_MOD_CTRL, HOTKEY_BUILD_FIREHOUSE);
     hotkey_mapping build_architect ("build_architect", KEY_A, KEY_MOD_CTRL, HOTKEY_BUILD_ARCHITECT);
@@ -70,6 +71,9 @@ namespace game_hotkeys {
     hotkey_mapping show_overlay_damage ("show_overlay_damage", KEY_D, KEY_MOD_NONE, HOTKEY_SHOW_OVERLAY_DAMAGE);
     hotkey_mapping show_overlay_crime ("show_overlay_crime", KEY_C, KEY_MOD_NONE, HOTKEY_SHOW_OVERLAY_CRIME);
     hotkey_mapping show_overlay_problems ("show_overlay_problems", KEY_T, KEY_MOD_NONE, HOTKEY_SHOW_OVERLAY_PROBLEMS);
+    hotkey_mapping show_overlay_malaria_risk ("show_overlay_malaria_risk", KEY_Y, KEY_MOD_NONE, HOTKEY_SHOW_OVERLAY_MALARIA_RISK);
+    hotkey_mapping show_overlay_disease ("show_overlay_disease", KEY_Z, KEY_MOD_NONE, HOTKEY_SHOW_OVERLAY_DISEASE);
+    hotkey_mapping show_overlay_hide_cliffs ("show_overlay_hide_cliffs", KEY_H, KEY_MOD_NONE, HOTKEY_SHOW_OVERLAY_HIDE_CLIFFS);
     hotkey_mapping editor_toggle_battle_info ("editor_toggle_battle_info", KEY_A, KEY_MOD_CTRL, HOTKEY_EDITOR_TOGGLE_BATTLE_INFO);
     hotkey_mapping load_file ("load_file", KEY_O, KEY_MOD_CTRL, HOTKEY_LOAD_FILE);
     hotkey_mapping save_file ("save_file", KEY_S, KEY_MOD_CTRL, HOTKEY_SAVE_FILE);
@@ -178,6 +182,21 @@ void game_hotkeys::load() {
             }
         }        
     });
+
+    // OV5 Cleopatra overlays claim bare Y/Z/H. Old conf may still bind vacant house /
+    // plaza there — move those build shortcuts to Ctrl+H / Ctrl+Z when they collide.
+    auto &hide = _hotkeys[HOTKEY_SHOW_OVERLAY_HIDE_CLIFFS];
+    auto &vacant = _hotkeys[HOTKEY_BUILD_VACANT_HOUSE];
+    if (hide.state.key == KEY_H && hide.state.modifiers == KEY_MOD_NONE
+        && vacant.state.key == KEY_H && vacant.state.modifiers == KEY_MOD_NONE) {
+        vacant.state.modifiers = KEY_MOD_CTRL;
+    }
+    auto &disease = _hotkeys[HOTKEY_SHOW_OVERLAY_DISEASE];
+    auto &plaza = _hotkeys[HOTKEY_BUILD_PLAZA];
+    if (disease.state.key == KEY_Z && disease.state.modifiers == KEY_MOD_NONE
+        && plaza.state.key == KEY_Z && plaza.state.modifiers == KEY_MOD_NONE) {
+        plaza.state.modifiers = KEY_MOD_CTRL;
+    }
 
     install();
 }

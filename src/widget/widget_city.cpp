@@ -1551,25 +1551,17 @@ xstring screen_city_t::get_overlay_tooltip(tooltip_context *c, tile2i tile) {
         return {};
     }
 
-    int overlay_type = overlay->get_type();
-    int building_id = map_building_at(tile);
-    if (!building_id) {
-        return {};
-    }
-
-    int overlay_requires_house = (overlay_type != OVERLAY_WATER) && (overlay_type != OVERLAY_FIRE)
-        && (overlay_type != OVERLAY_DAMAGE) && (overlay_type != OVERLAY_NATIVE)
-        && (overlay_type != OVERLAY_DESIRABILITY);
-
-    auto b = building_get(building_id);
-    auto house = b->dcast_house();
-    if (overlay_requires_house && !house) {
-        return {};
-    }
-
     xstring tooltip;
     auto *city_overlay_ptr = (city_overlay *)overlay;
-    city_overlay_ptr->get_tooltip_for_building(c, b, tooltip);
+    const int building_id = map_building_at(tile);
+
+    if (building_id) {
+        // JS handlers decide relevance (houses vs walls vs ferries, etc.).
+        city_overlay_ptr->get_tooltip_for_building(c, building_get(building_id), tooltip);
+    }
+
+    // Tile-map overlays (irrigation, hide cliffs, bridges, desirability) use
+    // get_tooltip on bare land — do not require a building id.
     if (!tooltip) {
         city_overlay_ptr->get_tooltip(c, tile, tooltip);
     }

@@ -6,7 +6,17 @@ import overlays.tax_income
 import overlays.booth
 import overlays.bandstand
 import overlays.bazaar_access
+import overlays.goods_stock
+import overlays.goods_by_type
 import overlays.brewery
+import overlays.disease
+import overlays.infected_housing
+import overlays.malaria
+import overlays.water_crossings
+import overlays.empty_housing
+import overlays.city_defenses
+import overlays.irrigation
+import overlays.hide_cliffs
 import overlays.flood_basin
 import overlays.entertainment
 import overlays.senet_house
@@ -112,6 +122,24 @@ overlays = [
     walkers:[FIGURE_ARCHITECT]
     buildings:[BUILDING_ARCHITECT_POST, BUILDING_ROADBLOCK]
     column_type: COLUMN_TYPE_RISK
+    column_anim: {pack:PACK_GENERAL, id:103}
+  }
+
+  {
+    id:OVERLAY_IRRIGATION
+    title: "#overlay_irrigation"
+    walkers:[]
+    buildings:[BUILDING_WATER_LIFT, BUILDING_IRRIGATION_DITCH, BUILDING_ROADBLOCK]
+    column_type: COLUMN_TYPE_POSITIVE
+    column_anim: {pack:PACK_GENERAL, id:103}
+  }
+
+  {
+    id:OVERLAY_HIDE_CLIFFS
+    title: "#overlay_hide_cliffs"
+    walkers:[]
+    buildings:[]
+    column_type: COLUMN_TYPE_POSITIVE
     column_anim: {pack:PACK_GENERAL, id:103}
   }
 

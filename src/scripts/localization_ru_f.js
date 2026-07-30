@@ -166,6 +166,72 @@ localization_ru_f = [
     { key:"#TR_HOTKEY_SHOW_OVERLAY_DAMAGE", text:"Включить слой риска разрушения"}
     { key:"#TR_HOTKEY_SHOW_OVERLAY_CRIME", text:"Включить слой риска преступлений"}
     { key:"#TR_HOTKEY_SHOW_OVERLAY_PROBLEMS", text:"Слой проблем"}
+    { key:"#TR_HOTKEY_SHOW_OVERLAY_MALARIA_RISK", text:"Слой риска малярии"}
+    { key:"#TR_HOTKEY_SHOW_OVERLAY_DISEASE", text:"Слой болезни"}
+    { key:"#TR_HOTKEY_SHOW_OVERLAY_HIDE_CLIFFS", text:"Скрыть скалы"}
+    { key: "#grain_stocks_none", text: "В этом доме нет запасов зерна" }
+    { key: "#grain_stocks_low", text: "Этот дом скоро съест свои ограниченные запасы зерна" }
+    { key: "#grain_stocks_medium", text: "У этого дома есть запасы зерна минимум на предстоящий месяц" }
+    { key: "#grain_stocks_high", text: "У этого дома нет проблем с получением необходимого зерна" }
+    { key: "#chickpeas_stocks_none", text: "В этом доме нет запасов нута" }
+    { key: "#chickpeas_stocks_low", text: "Этот дом скоро съест свои ограниченные запасы нута" }
+    { key: "#chickpeas_stocks_medium", text: "У этого дома есть запасы нута минимум на предстоящий месяц" }
+    { key: "#chickpeas_stocks_high", text: "У этого дома нет проблем с получением необходимого нута" }
+    { key: "#pomegranates_stocks_none", text: "В этом доме нет запасов гранатов" }
+    { key: "#pomegranates_stocks_low", text: "Этот дом скоро съест свои ограниченные запасы гранатов" }
+    { key: "#pomegranates_stocks_medium", text: "У этого дома есть запасы гранатов минимум на предстоящий месяц" }
+    { key: "#pomegranates_stocks_high", text: "У этого дома нет проблем с получением необходимых гранатов" }
+    { key: "#figs_stocks_none", text: "В этом доме нет запасов инжира" }
+    { key: "#figs_stocks_low", text: "Этот дом скоро съест свои ограниченные запасы инжира" }
+    { key: "#figs_stocks_medium", text: "У этого дома есть запасы инжира минимум на предстоящий месяц" }
+    { key: "#figs_stocks_high", text: "У этого дома нет проблем с получением необходимого инжира" }
+    { key: "#meat_stocks_none", text: "В этом доме нет запасов мяса" }
+    { key: "#meat_stocks_low", text: "Этот дом скоро съест свои ограниченные запасы мяса" }
+    { key: "#meat_stocks_medium", text: "У этого дома есть запасы мяса минимум на предстоящий месяц" }
+    { key: "#meat_stocks_high", text: "У этого дома нет проблем с получением необходимого мяса" }
+    { key: "#game_stocks_none", text: "В этом доме нет запасов дичи" }
+    { key: "#game_stocks_low", text: "Этот дом скоро съест свои ограниченные запасы дичи" }
+    { key: "#game_stocks_medium", text: "У этого дома есть запасы дичи минимум на предстоящий месяц" }
+    { key: "#game_stocks_high", text: "У этого дома нет проблем с получением необходимой дичи" }
+    { key: "#pottery_stocks_none", text: "В этом доме нет запасов керамики" }
+    { key: "#pottery_stocks_low", text: "Этот дом скоро израсходует свои ограниченные запасы керамики" }
+    { key: "#pottery_stocks_medium", text: "У этого дома есть запасы керамики минимум на предстоящий месяц" }
+    { key: "#pottery_stocks_high", text: "У этого дома нет проблем с получением необходимой керамики" }
+    { key: "#jewelry_stocks_none", text: "В этом доме нет запасов украшений" }
+    { key: "#jewelry_stocks_low", text: "Этот дом скоро израсходует свои ограниченные запасы украшений" }
+    { key: "#jewelry_stocks_medium", text: "У этого дома есть запасы украшений минимум на предстоящий месяц" }
+    { key: "#jewelry_stocks_high", text: "У этого дома нет проблем с получением необходимых украшений" }
+    { key: "#linen_stocks_none", text: "В этом доме нет запасов льна" }
+    { key: "#linen_stocks_low", text: "Этот дом скоро израсходует свои ограниченные запасы льна" }
+    { key: "#linen_stocks_medium", text: "У этого дома есть запасы льна минимум на предстоящий месяц" }
+    { key: "#linen_stocks_high", text: "У этого дома нет проблем с получением необходимого льна" }
+    { key: "#empty_housing_vacant", text: "В этом жилище никто не живёт" }
+    { key: "#irrigation_none", text: "Эта земля не орошена" }
+    { key: "#irrigation_low", text: "Эта земля слабо орошена" }
+    { key: "#irrigation_medium", text: "Эта земля умеренно орошена" }
+    { key: "#irrigation_high", text: "Эта земля хорошо орошена" }
+    { key: "#overlay_water_crossings_ferry", text: "Паромная переправа" }
+    { key: "#overlay_water_crossings_bridge", text: "Мост" }
+    { key: "#overlay_city_defenses_structure", text: "Оборонительное сооружение" }
+    { key: "#overlay_hide_cliffs_hint", text: "Скалы временно скрыты" }
+    { key: "#overlay_grain", text: "Зерно" }
+    { key: "#overlay_chickpeas", text: "Нут" }
+    { key: "#overlay_pomegranates", text: "Гранаты" }
+    { key: "#overlay_figs", text: "Инжир" }
+    { key: "#overlay_meat", text: "Мясо" }
+    { key: "#overlay_game", text: "Дичь" }
+    { key: "#overlay_pottery", text: "Керамика" }
+    { key: "#overlay_jewelry", text: "Украшения" }
+    { key: "#overlay_linen", text: "Лён" }
+    { key: "#overlay_beer", text: "Пиво" }
+    { key: "#overlay_disease", text: "Болезнь" }
+    { key: "#overlay_infected_housing", text: "Заражённые дома" }
+    { key: "#overlay_malaria", text: "Малярия" }
+    { key: "#overlay_water_crossings", text: "Переправы" }
+    { key: "#overlay_empty_housing", text: "Пустые дома" }
+    { key: "#overlay_irrigation", text: "Ирригация" }
+    { key: "#overlay_city_defenses", text: "Оборона города" }
+    { key: "#overlay_hide_cliffs", text: "Скрыть скалы" }
     { key:"#TR_HOTKEY_GO_TO_BOOKMARK_1", text:"Перейти к закладке 1"}
     { key:"#TR_HOTKEY_GO_TO_BOOKMARK_2", text:"Перейти к закладке 2"}
     { key:"#TR_HOTKEY_GO_TO_BOOKMARK_3", text:"Перейти к закладке 3"}

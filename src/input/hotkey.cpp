@@ -126,6 +126,9 @@ static void add_definition(const hotkey_mapping& mapping, bool alt) {
     case HOTKEY_SHOW_OVERLAY_DAMAGE:
     case HOTKEY_SHOW_OVERLAY_CRIME:
     case HOTKEY_SHOW_OVERLAY_PROBLEMS:
+    case HOTKEY_SHOW_OVERLAY_MALARIA_RISK:
+    case HOTKEY_SHOW_OVERLAY_DISEASE:
+    case HOTKEY_SHOW_OVERLAY_HIDE_CLIFFS:
         def->callback = [action = mapping.action] { events::emit(event_hotkey_overlay{ action }); };
         break;
 

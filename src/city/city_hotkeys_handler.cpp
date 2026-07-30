@@ -15,6 +15,9 @@ void city_hotkeys_handler_t::init() {
         case HOTKEY_SHOW_OVERLAY_DAMAGE: overlay = OVERLAY_DAMAGE; break;
         case HOTKEY_SHOW_OVERLAY_CRIME: overlay = OVERLAY_CRIME; break;
         case HOTKEY_SHOW_OVERLAY_PROBLEMS: overlay = OVERLAY_PROBLEMS; break;
+        case HOTKEY_SHOW_OVERLAY_MALARIA_RISK: overlay = OVERLAY_MALARIA_RISK; break;
+        case HOTKEY_SHOW_OVERLAY_DISEASE: overlay = OVERLAY_DISEASE; break;
+        case HOTKEY_SHOW_OVERLAY_HIDE_CLIFFS: overlay = OVERLAY_HIDE_CLIFFS; break;
         }
 
         if (g_window_manager.window_is("window_city_military")) {

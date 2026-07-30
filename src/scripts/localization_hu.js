@@ -235,6 +235,72 @@ localization_hu = [
   {key:"#TR_HOTKEY_BUILD_WATER_SUPPLY", group:28, id:180}
   {key:"#TR_HOTKEY_BUILD_ROADBLOCK", group:28, id:138}
   {key:"#TR_HOTKEY_SHOW_OVERLAY_PROBLEMS", text:"Problémák fedvény"}
+  {key:"#TR_HOTKEY_SHOW_OVERLAY_MALARIA_RISK", text:"Maláriakockázat fedvény"}
+  {key:"#TR_HOTKEY_SHOW_OVERLAY_DISEASE", text:"Betegség fedvény"}
+  {key:"#TR_HOTKEY_SHOW_OVERLAY_HIDE_CLIFFS", text:"Sziklák elrejtése"}
+  { key: "#grain_stocks_none", text: "This house has no stocks of grain" }
+  { key: "#grain_stocks_low", text: "This house will soon eat through its limited stocks of grain" }
+  { key: "#grain_stocks_medium", text: "This house has grain stocks to last for at least the coming month" }
+  { key: "#grain_stocks_high", text: "This house has no problems in getting the grain it requires" }
+  { key: "#chickpeas_stocks_none", text: "This house has no stocks of chickpeas" }
+  { key: "#chickpeas_stocks_low", text: "This house will soon eat through its limited stocks of chickpeas" }
+  { key: "#chickpeas_stocks_medium", text: "This house has chickpea stocks to last for at least the coming month" }
+  { key: "#chickpeas_stocks_high", text: "This house has no problems in getting the chickpeas it requires" }
+  { key: "#pomegranates_stocks_none", text: "This house has no stocks of pomegranates" }
+  { key: "#pomegranates_stocks_low", text: "This house will soon eat through its limited stocks of pomegranates" }
+  { key: "#pomegranates_stocks_medium", text: "This house has pomegranate stocks to last for at least the coming month" }
+  { key: "#pomegranates_stocks_high", text: "This house has no problems in getting the pomegranates it requires" }
+  { key: "#figs_stocks_none", text: "This house has no stocks of figs" }
+  { key: "#figs_stocks_low", text: "This house will soon eat through its limited stocks of figs" }
+  { key: "#figs_stocks_medium", text: "This house has fig stocks to last for at least the coming month" }
+  { key: "#figs_stocks_high", text: "This house has no problems in getting the figs it requires" }
+  { key: "#meat_stocks_none", text: "This house has no stocks of meat" }
+  { key: "#meat_stocks_low", text: "This house will soon eat through its limited stocks of meat" }
+  { key: "#meat_stocks_medium", text: "This house has meat stocks to last for at least the coming month" }
+  { key: "#meat_stocks_high", text: "This house has no problems in getting the meat it requires" }
+  { key: "#game_stocks_none", text: "This house has no stocks of game meat" }
+  { key: "#game_stocks_low", text: "This house will soon eat through its limited stocks of game meat" }
+  { key: "#game_stocks_medium", text: "This house has game meat stocks to last for at least the coming month" }
+  { key: "#game_stocks_high", text: "This house has no problems in getting the game meat it requires" }
+  { key: "#pottery_stocks_none", text: "This house has no stocks of pottery" }
+  { key: "#pottery_stocks_low", text: "This house will soon use up its limited stocks of pottery" }
+  { key: "#pottery_stocks_medium", text: "This house has pottery stocks to last for at least the coming month" }
+  { key: "#pottery_stocks_high", text: "This house has no problems in getting the pottery it requires" }
+  { key: "#jewelry_stocks_none", text: "This house has no stocks of jewelry" }
+  { key: "#jewelry_stocks_low", text: "This house will soon use up its limited stocks of jewelry" }
+  { key: "#jewelry_stocks_medium", text: "This house has jewelry stocks to last for at least the coming month" }
+  { key: "#jewelry_stocks_high", text: "This house has no problems in getting the jewelry it requires" }
+  { key: "#linen_stocks_none", text: "This house has no stocks of linen" }
+  { key: "#linen_stocks_low", text: "This house will soon use up its limited stocks of linen" }
+  { key: "#linen_stocks_medium", text: "This house has linen stocks to last for at least the coming month" }
+  { key: "#linen_stocks_high", text: "This house has no problems in getting the linen it requires" }
+  { key: "#empty_housing_vacant", text: "No one lives in this dwelling" }
+  { key: "#irrigation_none", text: "This land is not irrigated" }
+  { key: "#irrigation_low", text: "This land has limited irrigation" }
+  { key: "#irrigation_medium", text: "This land is moderately irrigated" }
+  { key: "#irrigation_high", text: "This land is well irrigated" }
+  { key: "#overlay_water_crossings_ferry", text: "Ferry crossing" }
+  { key: "#overlay_water_crossings_bridge", text: "Bridge crossing" }
+  { key: "#overlay_city_defenses_structure", text: "City defense structure" }
+  { key: "#overlay_hide_cliffs_hint", text: "Cliffs are temporarily flattened" }
+  { key: "#overlay_grain", text: "Gabona" }
+  { key: "#overlay_chickpeas", text: "Csicseriborsó" }
+  { key: "#overlay_pomegranates", text: "Gránátalma" }
+  { key: "#overlay_figs", text: "Füge" }
+  { key: "#overlay_meat", text: "Hús" }
+  { key: "#overlay_game", text: "Vad" }
+  { key: "#overlay_pottery", text: "Fazekasáru" }
+  { key: "#overlay_jewelry", text: "Ékszerek" }
+  { key: "#overlay_linen", text: "Vászon" }
+  { key: "#overlay_beer", text: "Sör" }
+  { key: "#overlay_disease", text: "Betegség" }
+  { key: "#overlay_infected_housing", text: "Fertőzött házak" }
+  { key: "#overlay_malaria", text: "Malária" }
+  { key: "#overlay_water_crossings", text: "Vízi átkelők" }
+  { key: "#overlay_empty_housing", text: "Üres házak" }
+  { key: "#overlay_irrigation", text: "Öntözés" }
+  { key: "#overlay_city_defenses", text: "Városvédelem" }
+  { key: "#overlay_hide_cliffs", text: "Sziklák elrejtése" }
   {key:"#TR_HOTKEY_GO_TO_BOOKMARK_1", text:"Ugrás az 1. könyvjelzőre"}
   {key:"#TR_HOTKEY_GO_TO_BOOKMARK_2", text:"Ugrás a 2. könyvjelzőre"}
   {key:"#TR_HOTKEY_GO_TO_BOOKMARK_3", text:"Ugrás a 3. könyvjelzőre"}

@@ -4,7 +4,6 @@ log_info("akhenaten: overlay criminal started")
 function criminal_building_tooltip(ev) {
     var house = city.get_house(ev.bid)
     if (!house || house.population <= 0) {
-        city.overlay_tooltip = "#criminal_level_worst"
         return
     }
 

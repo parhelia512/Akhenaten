@@ -69,6 +69,31 @@ enum e_overlay : uint8_t {
     // Enhanced flood basins (DK4) — sealed contour tint
     OVERLAY_FLOOD_BASIN = 48,
 
+    // OV1 food / goods stocks (house inventory columns)
+    OVERLAY_GRAIN = 49,
+    OVERLAY_CHICKPEAS = 50,
+    OVERLAY_POMEGRANATES = 51,
+    OVERLAY_FIGS = 52,
+    OVERLAY_MEAT = 53,
+    OVERLAY_GAME = 54,
+    OVERLAY_POTTERY = 55,
+    OVERLAY_JEWELRY = 56,
+    OVERLAY_LINEN = 57,
+
+    // OV2 health extras (≠ OVERLAY_MALARIA_RISK)
+    OVERLAY_DISEASE = 58,
+    OVERLAY_INFECTED_HOUSING = 59,
+    OVERLAY_MALARIA = 60,
+
+    // OV3 administration extras (magistrate = OVERLAY_COUTHOUSE; admin problems = OVERLAY_PROBLEMS)
+    OVERLAY_WATER_CROSSINGS = 61,
+    OVERLAY_EMPTY_HOUSING = 62,
+
+    // OV4 other
+    OVERLAY_IRRIGATION = 63,
+    OVERLAY_CITY_DEFENSES = 64,
+    OVERLAY_HIDE_CLIFFS = 65,
+
     OVERLAY_SIZE
 };
 using e_overlay_tokens_t = token_holder<e_overlay, OVERLAY_NONE, OVERLAY_SIZE>;

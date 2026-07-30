@@ -58,9 +58,9 @@ overlay_menu {
 				OVERLAY_PHYSICIAN,
 				OVERLAY_DENTIST,
 				OVERLAY_MORTUARY,
-				// OVERLAY_DISEASE
-				// OVERLAY_INFECTED_HOUSING
-				// OVERLAY_MALARIA
+				OVERLAY_DISEASE,
+				OVERLAY_INFECTED_HOUSING,
+				OVERLAY_MALARIA,
 	    	]
 	    }
 
@@ -74,11 +74,9 @@ overlay_menu {
 			    OVERLAY_COUTHOUSE,
 			    OVERLAY_FOOD_STOCKS,
 			    OVERLAY_LABOR_ACCESS,
-			    // OVERLAY_LABOR
-			    // OVERLAY_ADMINISTRATION_PROBLEMS
-			    // OVERLAY_WATER_CROSSINGS
-			    // OVERLAY_EMPTY_HOUSING
-			    // OVERLAY_MAGISTRATE
+			    OVERLAY_PROBLEMS,
+			    OVERLAY_WATER_CROSSINGS,
+			    OVERLAY_EMPTY_HOUSING,
 	    	]
 	    }
 
@@ -97,15 +95,15 @@ overlay_menu {
 	    {
 	    	title: "#overlay_menu_food"
 	    	ids[
-	    		// OVERLAY_GRAIN
-	    		// OVERLAY_CHICKPEAS
-				// OVERLAY_POMEGRANATES
-				// OVERLAY_FIGS
-				// OVERLAY_MEAT
-				// OVERLAY_GAME
-				// OVERLAY_POTTERY
-				// OVERLAY_JEWELRY
-				// OVERLAY_LINEN
+	    		OVERLAY_GRAIN,
+	    		OVERLAY_CHICKPEAS,
+				OVERLAY_POMEGRANATES,
+				OVERLAY_FIGS,
+				OVERLAY_MEAT,
+				OVERLAY_GAME,
+				OVERLAY_POTTERY,
+				OVERLAY_JEWELRY,
+				OVERLAY_LINEN,
 				OVERLAY_BREWERY,
 	    	]
 	    }
@@ -113,10 +111,10 @@ overlay_menu {
 	    {
 	    	title: "#overlay_menu_other"
 	    	ids[
+				OVERLAY_IRRIGATION,
 				OVERLAY_FLOOD_BASIN,
-				// OVERLAY_IRRIGATION
-				// OVERLAY_CITY_DEFENSES
-				// OVERLAY_HIDE_CLIFFS
+				OVERLAY_CITY_DEFENSES,
+				OVERLAY_HIDE_CLIFFS,
 	    	]
 	    }
 	]
