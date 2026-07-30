@@ -5,6 +5,8 @@
 #include "grid/floodplain.h"
 #include "js/js_game.h"
 
+#include <algorithm>
+
 int __building_farm_progress_pct(int bid) {
     building_farm *farm = building_get(bid)->dcast_farm();
     if (!farm) {
@@ -14,6 +16,33 @@ int __building_farm_progress_pct(int bid) {
     return calc_percentage<int>(farm->progress(), farm->progress_max());
 }
 ANK_FUNCTION_1(__building_farm_progress_pct)
+
+int __building_farm_progress(int bid) {
+    building_farm *farm = building_get(bid)->dcast_farm();
+    return farm ? farm->progress() : 0;
+}
+ANK_FUNCTION_1(__building_farm_progress)
+
+void __building_farm_set_labor_days(int bid, int days) {
+    building_farm *farm = building_get(bid)->dcast_farm();
+    if (!farm) {
+        return;
+    }
+    auto &d = farm->runtime_data();
+    d.labor_days_left = (uint8_t)std::clamp(days, 0, 255);
+    d.labor_state = d.labor_days_left > 0 ? LABOR_STATE_PRESENT : LABOR_STATE_NONE;
+}
+ANK_FUNCTION_2(__building_farm_set_labor_days)
+
+void __building_farm_set_progress(int bid, int progress) {
+    building_farm *farm = building_get(bid)->dcast_farm();
+    if (!farm) {
+        return;
+    }
+    auto &d = farm->runtime_data();
+    d.progress = (uint16_t)std::clamp(progress, 0, (int)d.progress_max);
+}
+ANK_FUNCTION_2(__building_farm_set_progress)
 
 int __building_farm_fertility(int bid) {
     building *b = building_get(bid);
