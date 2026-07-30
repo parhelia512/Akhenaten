@@ -98,6 +98,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `98_egyptian_melee_registered.js` | ES2: egyptian melee 45/49/50/53 registered (`__test_enemy_figure_registered`) |
 | `99_egyptian_mount_registered.js` | ES3: camel 46 + mounted archer 52 register + spawn smoke |
 | `102_egyptian_elephant.js` | ES4: elephant 47 register + spawn + soldier target |
+| `103_transport_embark_js_api.js` | TE1: player transport embark/disembark UI + engine smoke |
 | `104_kingdome_army.js` | ES6: KINGDOME kind remaps to figures 55–57; pause/retreat types |
 | `109_kingdome_favour_smoke.js` | ES6 favour-KR: favour_only bookkeeping, wipe without Caesar +10 KR |
 | `40_hippo_spawn.js` | Spawn `FIGURE_HIPPO` on land and water; `update_animation` → `walk` / `swim` (#77) |

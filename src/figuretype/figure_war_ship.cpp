@@ -36,6 +36,35 @@ constexpr int WARSHIP_SEEK_RANGE = 80;
 constexpr int WARSHIP_RAM_INTERVAL = 50;
 constexpr int WARSHIP_REPAIR_INTERVAL = 20;
 constexpr int WARSHIP_REPAIR_AMOUNT = 2;
+constexpr int WARSHIP_FATIGUE_GROW_INTERVAL = 40;
+constexpr int WARSHIP_FATIGUE_COMBAT_INTERVAL = 20;
+constexpr int WARSHIP_FATIGUE_REST_INTERVAL = 20;
+constexpr int WARSHIP_FATIGUE_REST_AMOUNT = 2;
+
+void warship_update_crew_fatigue(figure_warship *ship) {
+    auto &d = ship->runtime_data();
+    building *home_b = ship->home();
+    building_warship_wharf *wharf = (home_b && home_b->id) ? home_b->dcast_warship_wharf() : nullptr;
+    const bool moored_resting = ship->action_state() == ACTION_203_WARSHIP_MOORED
+        && wharf && wharf->num_workers() > 0;
+
+    d.fatigue_tick++;
+    if (moored_resting) {
+        if (d.fatigue_tick >= WARSHIP_FATIGUE_REST_INTERVAL) {
+            d.fatigue_tick = 0;
+            d.crew_fatigue = (int8_t)std::max(0, (int)d.crew_fatigue - WARSHIP_FATIGUE_REST_AMOUNT);
+        }
+        return;
+    }
+
+    const int interval = (ship->action_state() == ACTION_204_WARSHIP_ATTACK)
+        ? WARSHIP_FATIGUE_COMBAT_INTERVAL
+        : WARSHIP_FATIGUE_GROW_INTERVAL;
+    if (d.fatigue_tick >= interval) {
+        d.fatigue_tick = 0;
+        d.crew_fatigue = (int8_t)std::min(100, (int)d.crew_fatigue + 1);
+    }
+}
 
 bool is_water_figure(const figure *f) {
     return f->allow_move_type == EMOVE_WATER || f->allow_move_type == EMOVE_DEEPWATER;
@@ -87,14 +116,10 @@ int warship_target_priority(figure *f) {
         return 10;
     }
 
+    // Player transports are never valid targets for the player navy.
+    // (Enemy cargo ships are FIGURE_ENEMY_TRANSPORT — handled above.)
     if (f->type == FIGURE_TRANSPORT_SHIP) {
-        if (auto transport = smart_cast<figure_transport_ship>(f)) {
-            if (transport->has_troops()) {
-                return 40;
-            }
-            return 10;
-        }
-        return 10;
+        return 0;
     }
 
     if (smart_cast<figure_enemy_warship>(f) || (is_enemy_warship_target(f) && is_water_figure(f))) {
@@ -130,42 +155,19 @@ water_dest map_water_get_wharf_for_new_warship(figure &boat) {
     return { dock_tile.valid(), wharf->id(), dock_tile };
 }
 
-water_dest map_water_get_closest_working_warship_wharf(figure &boat) {
-    building_warship_wharf *wharf = nullptr;
-
-    int mindist = 9999;
-    tile2i dock_tile;
-    buildings_valid_do([&] (building &b) {
-        auto w = b.dcast_warship_wharf();
-        if (!w) {
-            return;
-        }
-
-        const auto water_tiles = w->get_water_access_tiles();
-        const float curdist = boat.tile.dist(water_tiles.point_a);
-        if (curdist < mindist) {
-            wharf = w;
-            mindist = curdist;
-            dock_tile = water_tiles.point_a;
-        }
-    }, BUILDING_WARSHIP_WHARF);
-
-    if (!wharf) {
-        return { false, 0 };
-    }
-
-    return { true, wharf->id(), dock_tile };
-}
-
 void figure_warship::on_create() {
     figure_impl::on_create();
     base.allow_move_type = EMOVE_WATER;
     runtime_data().active_order = e_order_goto_wharf;
+    runtime_data().crew_fatigue = 0;
+    runtime_data().fatigue_tick = 0;
 }
 
 void figure_warship::on_destroy() {
-    building* b = home();
-    b->remove_figure_by_id(id());
+    building *b = home();
+    if (b && b->id) {
+        b->remove_figure_by_id(id());
+    }
 }
 
 void figure_warship::before_poof() {
@@ -397,21 +399,32 @@ void figure_warship::figure_action_move_to_tile() {
 }
 
 void figure_warship::figure_action() {
-    building* b = home();
+    building *b = home();
 
     if (action_state() == ACTION_205_WARSHIP_CREATED) {
         figure_action_common();
         return;
     }
 
-    building_warship_wharf *wharf = b->dcast_warship_wharf();
+    warship_update_crew_fatigue(this);
+
+    building_warship_wharf *wharf = (b && b->id) ? b->dcast_warship_wharf() : nullptr;
 
     if (!wharf) {
         if (action_state() != ACTION_207_WARSHIP_GOING_TO_WHARF || base.destination_building_id == 0) {
-            water_dest result = map_water_get_closest_working_warship_wharf(base);
+            water_dest result = map_water_get_wharf_for_new_warship(base);
             if (result.found) {
-                set_destination(result.bid);
+                building *nb = building_get(result.bid);
+                if (b && b->id) {
+                    b->remove_figure_by_id(id());
+                }
+                set_home(result.bid);
+                if (nb && nb->id) {
+                    nb->set_figure(BUILDING_SLOT_BOAT, &base);
+                }
+                set_destination(nb);
                 base.destination_tile = result.tile;
+                base.source_tile = result.tile;
                 route_remove();
                 advance_action(ACTION_207_WARSHIP_GOING_TO_WHARF);
             } else {
@@ -439,17 +452,45 @@ void figure_warship::figure_action() {
 
     int wharf_boat_id = b ? b->get_figure_id(BUILDING_SLOT_BOAT) : 0;
     if (action_state() != ACTION_205_WARSHIP_CREATED && wharf_boat_id != id()) {
-        water_dest result = map_water_get_wharf_for_new_warship(base);
-        b = building_get(result.bid);
-        if (b->id) {
-            set_home(b->id);
-            b->set_figure(BUILDING_SLOT_BOAT, &base);
-            advance_action(ACTION_207_WARSHIP_GOING_TO_WHARF);
-            base.destination_tile = result.tile;
-            base.source_tile = result.tile;
-            route_remove();
+        const int state = action_state();
+        if (state == ACTION_203_WARSHIP_MOORED) {
+            // Sitting at home berth — reclaim rather than flee/poof.
+            if (b && b->id) {
+                b->set_figure(BUILDING_SLOT_BOAT, &base);
+            }
+        } else if (state == ACTION_207_WARSHIP_GOING_TO_WHARF) {
+            // Already heading to a berth — finish the trip; reclaim on MOOR.
         } else {
-            poof();
+            water_dest result = map_water_get_wharf_for_new_warship(base);
+            building *nb = building_get(result.bid);
+            if (nb && nb->id) {
+                if (b && b->id && b->id != nb->id) {
+                    b->remove_figure_by_id(id());
+                }
+                set_home(nb->id);
+                nb->set_figure(BUILDING_SLOT_BOAT, &base);
+                b = nb;
+                wharf = nb->dcast_warship_wharf();
+                advance_action(ACTION_207_WARSHIP_GOING_TO_WHARF);
+                base.destination_tile = result.tile;
+                base.source_tile = result.tile;
+                route_remove();
+            } else if (wharf) {
+                // No free berth elsewhere — reclaim our home instead of poofing.
+                tile2i dock = wharf->get_water_access_tiles().point_a;
+                if (dock.valid() && b && b->id) {
+                    b->set_figure(BUILDING_SLOT_BOAT, &base);
+                    set_destination(&wharf->base);
+                    advance_action(ACTION_207_WARSHIP_GOING_TO_WHARF);
+                    base.destination_tile = dock;
+                    base.source_tile = dock;
+                    route_remove();
+                } else {
+                    poof();
+                }
+            } else {
+                poof();
+            }
         }
     }
 
@@ -477,7 +518,8 @@ void figure_warship::figure_action() {
 }
 
 void figure_warship::kill() {
-    if (building *b = home()) {
+    building *b = home();
+    if (b && b->id) {
         b->remove_figure_by_id(id());
     }
     base.set_home(0);
@@ -493,7 +535,7 @@ sound_key figure_warship::phrase_key() const {
         keys.push_back("warship_well_fight_to_the_death");
     }
 
-    if (g_city.figures.enemies > 0) {
+    if (g_city.figures.total_invading_enemies() > 0) {
         keys.push_back("warship_enemies_coming_this_way");
     }
 
@@ -558,6 +600,9 @@ void figure_warship::figure_action_goto_wharf() {
     if (direction() == DIR_FIGURE_NONE) {
         advance_action(ACTION_203_WARSHIP_MOORED);
         base.wait_ticks = 0;
+        if (home_building && home_building->id) {
+            home_building->set_figure(BUILDING_SLOT_BOAT, &base);
+        }
     } else if (direction() == DIR_FIGURE_REROUTE) {
         route_remove();
     } else if (direction() == DIR_FIGURE_CAN_NOT_REACH) {
@@ -575,7 +620,9 @@ void figure_warship::figure_action_common() {
             base.wait_ticks = 0;
             water_dest result = map_water_get_wharf_for_new_warship(base);
             if (result.bid && result.found) {
-                b->remove_figure_by_id(id());
+                if (b && b->id) {
+                    b->remove_figure_by_id(id());
+                }
                 building *new_home = building_get(result.bid);
                 set_home(new_home->id);
                 new_home->set_figure(BUILDING_SLOT_BOAT, &base);
@@ -593,6 +640,10 @@ void figure_warship::figure_action_common() {
         if (direction() == DIR_FIGURE_NONE) {
             advance_action(ACTION_203_WARSHIP_MOORED);
             base.wait_ticks = 0;
+            building *home_b = home();
+            if (home_b && home_b->id) {
+                home_b->set_figure(BUILDING_SLOT_BOAT, &base);
+            }
         } else if (direction() == DIR_FIGURE_REROUTE) {
             route_remove();
         } else if (direction() == DIR_FIGURE_CAN_NOT_REACH) {

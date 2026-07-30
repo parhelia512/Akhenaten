@@ -1774,6 +1774,8 @@ figure_transport_ship = {
 	category: figure_category_citizen
 	max_damage: 250
 	terrain_usage : TERRAIN_USAGE_ANY
+
+	meta { help_id: 367, text_id: 184 }
 }
 
 figure_soldier_archer {

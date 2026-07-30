@@ -47,6 +47,8 @@ public:
         short active_order;
         short target_id;
         short last_order;
+        int8_t crew_fatigue;   // 0–100; UI bands Rested/Tired/Exhausted
+        uint8_t fatigue_tick;  // sub-counter for growth/decay intervals
     } FIGURE_RUNTIME_DATA_T;
 
     int8_t missile_attack_value() const { return current_params().missile_attack_value; }

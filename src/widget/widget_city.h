@@ -42,6 +42,9 @@ struct screen_city_t {
     bool handle_warship_click(tile2i tile);
     void handle_input_warship(const mouse *m, const hotkeys *h, int warship_figure_id);
     void warship_map_click(int warship_figure_id, tile2i tile);
+    bool handle_transport_click(tile2i tile);
+    void handle_input_transport(const mouse *m, const hotkeys *h, int transport_figure_id, int pick_mode);
+    void transport_map_click(int transport_figure_id, int pick_mode, tile2i tile);
     int input_coords_in_city(int x, int y);
 
     void draw(painter &ctx);

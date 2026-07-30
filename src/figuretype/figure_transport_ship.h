@@ -40,7 +40,14 @@ public:
 
     bool has_troops() const;
     int transported_formation() const;
+    bool can_embark() const;
     bool embark_formation(int formation_id);
     void sail_to_landing(tile2i water_tile);
+    void move_to_tile(tile2i water_tile);
+    void move_to_wharf(int wharf_building_id, tile2i dock_tile);
     void disembark_troops();
+
+private:
+    void clear_stale_cargo();
+    void sync_embarked_troops();
 };

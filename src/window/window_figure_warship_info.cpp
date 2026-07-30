@@ -33,6 +33,13 @@ static int hull_strength_text_id(figure_warship *f) {
     return 8;                        // Weak
 }
 
+static int crew_fatigue_text_id(figure_warship *f) {
+    const int fatigue = f->runtime_data().crew_fatigue;
+    if (fatigue >= 75) return 30; // Exhausted
+    if (fatigue >= 40) return 29; // Tired
+    return 28;                    // Rested
+}
+
 static vec2i resolve_button_size(ui::eimage_button *imgbtn) {
     if (imgbtn->size.x > 0 && imgbtn->size.y > 0) {
         return imgbtn->size;
@@ -49,10 +56,19 @@ void figure_warship_info_window::init(object_info &c) {
     figure_info_window::init(c);
 
     figure_warship *f = c.figure_get<figure_warship>();
+    if (!f) {
+        return;
+    }
+    const int ship_id = f->id();
 
     for (const pcstr id : button_ids) {
-        ui[id].onclick([f] (int p1, int p2) {
-            f->runtime_data().active_order = p1;
+        ui[id].onclick([ship_id] (int p1, int p2) {
+            figure *fig = ::figure_get(ship_id);
+            figure_warship *ship = fig ? smart_cast<figure_warship>(fig) : nullptr;
+            if (!ship) {
+                return;
+            }
+            ship->runtime_data().active_order = p1;
             window_city_show();
         });
     }
@@ -62,14 +78,16 @@ void figure_warship_info_window::window_info_background(object_info &c) {
     figure_info_window::window_info_background(c);
 
     figure_warship *f = c.figure_get<figure_warship>();
+    if (!f) {
+        return;
+    }
     const short order = f->runtime_data().active_order;
 
     ui["repair"].darkened = (f->base.damage == 0) ? UiFlags_Grayscale : UiFlags_None;
     ui["return_to_wharf"].darkened = (f->base.action_state == ACTION_203_WARSHIP_MOORED) ? UiFlags_Grayscale : UiFlags_None;
 
     ui["hullstrength_val"].text_var("%s", ui::str(c.group_id, hull_strength_text_id(f)));
-    // Crew fatigue mechanic isn't simulated yet — display "Rested" as a placeholder.
-    ui["crewfatique_val"].text_var("%s", ui::str(c.group_id, 28));
+    ui["crewfatique_val"].text_var("%s", ui::str(c.group_id, crew_fatigue_text_id(f)));
 
     const mouse &m = mouse::get();
     int hovered_param1 = 0;

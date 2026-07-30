@@ -48,8 +48,11 @@
 #include "window/window_city.h"
 #include "window/window_city_military.h"
 #include "window/window_city_warship.h"
+#include "window/window_city_transport.h"
 #include "figuretype/figure_war_ship.h"
+#include "figuretype/figure_transport_ship.h"
 #include "building/building_warship_wharf.h"
+#include "building/building_transport_wharf.h"
 #include "grid/water.h"
 #include "game/game.h"
 #include "core/threading.h"
@@ -163,7 +166,7 @@ void update_tile_coords(vec2i pixel, tile2i tile, painter &ctx) {
 void screen_city_t::update_clouds(painter &ctx) {
     OZZY_PROFILER_FUNCTION();
 
-    if (game.paused || (!g_window_manager.window_is("window_city") && !g_window_manager.window_is("window_city_military") && !g_window_manager.window_is("window_city_warship"))) {
+    if (game.paused || (!g_window_manager.window_is("window_city") && !g_window_manager.window_is("window_city_military") && !g_window_manager.window_is("window_city_warship") && !g_window_manager.window_is("window_city_transport"))) {
         g_clouds.pause();
     }
 
@@ -377,16 +380,32 @@ void screen_city_t::draw_without_overlay(painter &ctx, int selected_figure_id) {
 
     city_flat_prepare_draw();
 
-    // If the game feature for highlighting legions is enabled, check if there's a formation
-    // at the current tile position that should be highlighted
-    if (!!game_features::gameui_highlight_legions) {
+    // Transport embark pick: draw clears this every frame, so re-resolve here
+    // (handle_input alone cannot stick a highlight across the draw pass).
+    if (g_window_manager.window_is("window_city_transport")
+        && window_city_transport_pick_mode() == TRANSPORT_PICK_FORMATION
+        && current_tile.valid()) {
+        int fid = formation_batalion_at(current_tile);
+        if (fid <= 0) {
+            fid = formation_batalion_at_building(current_tile.grid_offset());
+        }
+        if (fid > 0) {
+            formation *fm = formation_get(fid);
+            if (fm && fm->in_use && fm->own_batalion && !fm->in_distant_battle) {
+                highlighted_formation = fid;
+            }
+        }
+    } else if (!!game_features::gameui_highlight_legions) {
         // Get the battalion ID at the current tile position (if any)
         highlighted_formation = formation_batalion_at(current_tile);
 
         // If a formation exists but it's currently in a distant battle, don't highlight it
         // (formations in distant battles should not be highlighted on the main city map)
-        if (highlighted_formation > 0 && formation_get(highlighted_formation)->in_distant_battle) {
-            highlighted_formation = 0;
+        if (highlighted_formation > 0) {
+            formation *fm = formation_get(highlighted_formation);
+            if (!fm || fm->in_distant_battle) {
+                highlighted_formation = 0;
+            }
         }
     }
 
@@ -1154,7 +1173,7 @@ void screen_city_t::handle_first_touch(tile2i tile) {
     e_building_type type = g_city_planner.build_type;
 
     if (touch_was_click(first)) {
-        if (handle_cancel_construction_button(first) || handle_legion_click(tile) || handle_warship_click(tile)) {
+        if (handle_cancel_construction_button(first) || handle_legion_click(tile) || handle_warship_click(tile) || handle_transport_click(tile)) {
             return;
         }
 
@@ -1380,13 +1399,218 @@ void screen_city_t::warship_map_click(int warship_figure_id, tile2i tile) {
         }
     }
 
-    if (!map_water_is_point_inside(tile)) {
+    if (!tile.valid()
+        || !map_terrain_is(tile, TERRAIN_WATER | TERRAIN_DEEPWATER)
+        || map_terrain_is(tile, TERRAIN_BUILDING)) {
         window_city_show();
         return;
     }
 
     w->move_to_tile(tile);
     window_city_show();
+}
+
+bool screen_city_t::handle_transport_click(tile2i tile) {
+    if (!tile.valid()) {
+        return false;
+    }
+
+    int figure_id = map_figure_id_get(tile);
+    while (figure_id > 0) {
+        figure *f = ::figure_get(figure_id);
+        if (f->state == FIGURE_STATE_ALIVE && smart_cast<figure_transport_ship>(f)) {
+            window_city_transport_show(figure_id, TRANSPORT_PICK_MOVE);
+            return true;
+        }
+        figure_id = (figure_id != f->next_figure) ? f->next_figure : 0;
+    }
+    return false;
+}
+
+void screen_city_t::transport_map_click(int transport_figure_id, int pick_mode, tile2i tile) {
+    if (!tile.valid()) {
+        highlighted_formation = 0;
+        window_city_show();
+        return;
+    }
+
+    figure *f = ::figure_get(transport_figure_id);
+    if (!f || f->state != FIGURE_STATE_ALIVE) {
+        highlighted_formation = 0;
+        window_city_show();
+        return;
+    }
+
+    figure_transport_ship *ship = smart_cast<figure_transport_ship>(f);
+    if (!ship) {
+        highlighted_formation = 0;
+        window_city_show();
+        return;
+    }
+
+    switch (pick_mode) {
+    case TRANSPORT_PICK_FORMATION: {
+        int formation_id = formation_batalion_at(tile);
+        if (formation_id <= 0) {
+            formation_id = formation_batalion_at_building(tile.grid_offset());
+        }
+        if (formation_id > 0) {
+            formation *fm = formation_get(formation_id);
+            if (fm && fm->in_use && fm->own_batalion && !fm->in_distant_battle) {
+                ship->embark_formation(formation_id);
+            }
+        }
+        highlighted_formation = 0;
+        window_city_show();
+        return;
+    }
+    case TRANSPORT_PICK_LANDING: {
+        // map_water_is_point_inside() is bounds-only; require real navigable water.
+        auto is_nav_water = [](tile2i t) {
+            return t.valid()
+                && map_terrain_is(t, TERRAIN_WATER | TERRAIN_DEEPWATER)
+                && !map_terrain_is(t, TERRAIN_BUILDING);
+        };
+        tile2i water = tile;
+        if (!is_nav_water(water)) {
+            // Shore click → adjacent water that can actually land (has shore).
+            static const vec2i dirs[] = {
+                {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}
+            };
+            auto has_shore = [](tile2i water_tile) {
+                for (const vec2i &d : dirs) {
+                    tile2i land = water_tile.shifted(d);
+                    if (!land.valid()) {
+                        continue;
+                    }
+                    if (map_terrain_is(land, TERRAIN_WATER | TERRAIN_DEEPWATER)) {
+                        continue;
+                    }
+                    if (map_terrain_is(land, TERRAIN_BUILDING | TERRAIN_WALL | TERRAIN_ROCK | TERRAIN_ELEVATION)) {
+                        continue;
+                    }
+                    return true;
+                }
+                return false;
+            };
+            water = tile2i::invalid;
+            tile2i fallback = tile2i::invalid;
+            for (const vec2i &dir : dirs) {
+                tile2i cand = tile.shifted(dir);
+                if (!is_nav_water(cand)) {
+                    continue;
+                }
+                if (!fallback.valid()) {
+                    fallback = cand;
+                }
+                if (has_shore(cand)) {
+                    water = cand;
+                    break;
+                }
+            }
+            if (!water.valid()) {
+                water = fallback;
+            }
+        }
+        if (water.valid()) {
+            ship->sail_to_landing(water);
+        }
+        highlighted_formation = 0;
+        window_city_show();
+        return;
+    }
+    case TRANSPORT_PICK_MOVE:
+    default: {
+        int bid = map_building_at(tile);
+        if (bid > 0) {
+            building *b = ::building_get(bid);
+            if (b && b->is_valid()) {
+                building_transport_wharf *wharf = b->dcast_transport_wharf();
+                if (wharf) {
+                    tile2i dock = wharf->get_water_access_tiles().point_a;
+                    if (dock.valid()) {
+                        ship->move_to_wharf(wharf->id(), dock);
+                        highlighted_formation = 0;
+                        window_city_show();
+                        return;
+                    }
+                }
+            }
+        }
+
+        if (tile.valid()
+            && map_terrain_is(tile, TERRAIN_WATER | TERRAIN_DEEPWATER)
+            && !map_terrain_is(tile, TERRAIN_BUILDING)) {
+            ship->move_to_tile(tile);
+        }
+        highlighted_formation = 0;
+        window_city_show();
+        return;
+    }
+    }
+}
+
+void screen_city_t::handle_input_transport(const mouse *m, const hotkeys *h, int transport_figure_id, int pick_mode) {
+    current_tile = update_city_view_coords(*m);
+
+    if (!g_camera.sidebar_collapsed && widget_minimap_handle_mouse(m)) {
+        return;
+    }
+
+    if (m->is_touch) {
+        const touch_t *t = get_earliest_touch();
+        if (!t->in_use) {
+            return;
+        }
+
+        handle_touch_scroll(t, true);
+    }
+
+    scroll_map(m);
+
+    if (m->right.went_up || h->escape_pressed) {
+        capture_input = false;
+        highlighted_formation = 0;
+        g_warning_manager.clear_all();
+        window_city_show();
+        return;
+    }
+
+    figure *f = ::figure_get(transport_figure_id);
+    if (!f || f->state != FIGURE_STATE_ALIVE || !smart_cast<figure_transport_ship>(f)) {
+        capture_input = false;
+        highlighted_formation = 0;
+        window_city_show();
+        return;
+    }
+
+    // Re-resolve tile after scroll so highlight/click match the cursor.
+    current_tile = update_city_view_coords(*m);
+
+    // Highlight own battalions while picking a company to embark.
+    if (pick_mode == TRANSPORT_PICK_FORMATION) {
+        highlighted_formation = 0;
+        if (current_tile.valid()) {
+            int fid = formation_batalion_at(current_tile);
+            if (fid <= 0) {
+                fid = formation_batalion_at_building(current_tile.grid_offset());
+            }
+            if (fid > 0) {
+                formation *fm = formation_get(fid);
+                if (fm && fm->in_use && fm->own_batalion && !fm->in_distant_battle) {
+                    highlighted_formation = fid;
+                }
+            }
+        }
+    }
+
+    const bool m_left_down = (!m->is_touch && m->left.went_down);
+    const auto *early_touch = get_earliest_touch();
+    const bool m_has_touch = (m->is_touch && m->left.went_up && touch_was_click(early_touch));
+
+    if (m_left_down || m_has_touch) {
+        transport_map_click(transport_figure_id, pick_mode, current_tile);
+    }
 }
 
 void screen_city_t::handle_input_warship(const mouse *m, const hotkeys *h, int warship_figure_id) {
@@ -1465,7 +1689,7 @@ void screen_city_t::handle_mouse(const mouse* m) {
 
     g_city_planner.draw_as_constructing = false;
     if (m->left.went_down) {
-        if (handle_legion_click(current_tile) || handle_warship_click(current_tile)) {
+        if (handle_legion_click(current_tile) || handle_warship_click(current_tile) || handle_transport_click(current_tile)) {
             return;
         }
 
@@ -1494,7 +1718,7 @@ void screen_city_t::handle_mouse(const mouse* m) {
         if (g_city_planner.construction_active()) {
             g_city_planner.construction_cancel();
         } else {
-            // FM3: Ctrl+RMB raises one building while flat view is On (no build tool).
+            // Ctrl+RMB raises one building while flat view is On (no build tool).
             // Empty / invalid tile must fall through to building info.
             bool raised = false;
             const bool ctrl = (SDL_GetModState() & KMOD_CTRL) != 0;

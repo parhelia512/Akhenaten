@@ -160,14 +160,26 @@ bool figure_soldier::play_die_sound() {
 }
 
 void figure_soldier::acquire_attack() {
-    // enter the C3-style attack state so action_perform() routes us to
-    // figure_combat_handle_attack(); acquire_attack() was empty, so soldiers
-    // never actually engaged after figure_combat_attack_figure_at() set up a target.
     base.action_state = ACTION_90_SOLDIER_ATTACK;
     base.set_flag(e_figure_flag_inattack);
 }
 
 void figure_soldier::figure_action() {
+    // Aboard a player transport: stay glued/invisible and skip land AI.
+    // (Enemy cargo uses ACTION_152_WAITING; embark sets EMOVE_AMPHIBIAN + invisible.)
+    // Must run before the unconditional invisible clear below.
+    if (base.allow_move_type == EMOVE_AMPHIBIAN && !base.is_visible()) {
+        g_city.figures_add_soldier();
+        formation *m = formation_get(base.formation_id);
+        if (!m || m->in_use != 1) {
+            // Formation wiped while we were aboard — don't stay invisible forever.
+            base.set_flag(e_figure_flag_invisible, false);
+            base.allow_move_type = EMOVE_TERRAIN;
+            base.kill();
+        }
+        return;
+    }
+
     base.set_flag(e_figure_flag_invisible, false);
 
     formation* m = formation_get(base.formation_id);
