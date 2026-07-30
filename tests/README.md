@@ -126,6 +126,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `98_flood_basin_seal.js` | Flood basins (FB1): sealed detect, spur/thick crest, breach hole, flag OFF |
 | `99_flood_basin_bonus.js` | Flood basins (FB2): fertility bump + farm progress in sealed basin |
 | `107_flood_basin_irrigation_hold.js` | Flood basins (DK3): half-rate canal decay, IRRIGATION_RANGE restamp/clip, reseal, flag OFF |
+| `111_flood_basin_breach.js` | Flood basins (DK4): perimeter dike breach unseals; flag OFF no-op; overlay id |
 | `108_true_pyramid_small_place.js` | C3a/C3.4 small true pyramid: place + parts, polish schedule (no limestone), natural finish/terminal keep-progress/congrats |
 | `110_sun_temple_place.js` | Sun Temple (C8): place with 220 sandstone, reject without stock / second unfinished |
 | `77_brick_wall_placement.js` | Brick wall L-drag; material; clear+undo; mud↔brick overwrite no-op |

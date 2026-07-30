@@ -7,6 +7,7 @@ import overlays.booth
 import overlays.bandstand
 import overlays.bazaar_access
 import overlays.brewery
+import overlays.flood_basin
 import overlays.entertainment
 import overlays.senet_house
 import overlays.zoo
@@ -111,6 +112,15 @@ overlays = [
     walkers:[FIGURE_ARCHITECT]
     buildings:[BUILDING_ARCHITECT_POST, BUILDING_ROADBLOCK]
     column_type: COLUMN_TYPE_RISK
+    column_anim: {pack:PACK_GENERAL, id:103}
+  }
+
+  {
+    id:OVERLAY_FLOOD_BASIN
+    title: "#overlay_flood_basin"
+    walkers:[]
+    buildings:[BUILDING_DIKE, BUILDING_ROADBLOCK]
+    column_type: COLUMN_TYPE_POSITIVE
     column_anim: {pack:PACK_GENERAL, id:103}
   }
 ]

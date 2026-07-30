@@ -87,6 +87,10 @@ localization_hu = [
   {key:"#terrain_dike_farms", text:"farm"}
   {key:"#terrain_dike_bonus_hint", text:"Zárt kontúr mellett jobb a termékenység és a farm növekedése."}
   {key:"#farm_in_flood_basin", text:"Ártéri medencében — jobb termés az áradás után, amíg a kontúr zárt."}
+  {key:"#overlay_flood_basin", text:"Ártéri medencék"}
+  {key:"#overlay_flood_basin_off", text:"Ártéri medencék (Enhanced) kikapcsolva"}
+  {key:"#overlay_flood_basin_open", text:"Nyílt ártér — nincs zárt medence"}
+  {key:"#overlay_flood_basin_none", text:"Itt nincs ártéri medence"}
   {key:"#warning_auto_resolve_orders_blocked", text:"A századok nem vonulhatnak befagyasztott inváziós hullámra"}
   {key:"#warning_auto_resolve_queue_full", text:"Túl sok várakozó invázió — ez a hullám a térképen harcol"}
   {key:"#invasion_quick_battle_title", text:"Gyorscsata"}

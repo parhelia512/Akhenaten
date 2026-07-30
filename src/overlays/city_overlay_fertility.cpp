@@ -15,7 +15,8 @@
 
 static int terrain_on_fertility_overlay(void) {
     return TERRAIN_TREE | TERRAIN_ROCK | TERRAIN_WATER | TERRAIN_ROAD
-            | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP | TERRAIN_RUBBLE | TERRAIN_CANAL | TERRAIN_WALL;
+            | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP | TERRAIN_RUBBLE | TERRAIN_CANAL | TERRAIN_WALL
+            | TERRAIN_DIKE;
 }
 
 static int get_fertility_image_offset(int fertilty) {

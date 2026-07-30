@@ -113,6 +113,7 @@ overlay_menu {
 	    {
 	    	title: "#overlay_menu_other"
 	    	ids[
+				OVERLAY_FLOOD_BASIN,
 				// OVERLAY_IRRIGATION
 				// OVERLAY_CITY_DEFENSES
 				// OVERLAY_HIDE_CLIFFS

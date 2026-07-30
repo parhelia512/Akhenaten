@@ -211,6 +211,11 @@ void __map_basin_rebuild() {
 }
 ANK_FUNCTION(__map_basin_rebuild);
 
+int __map_basin_breach_perimeter(int max_tiles) {
+    return map_basin_breach_perimeter(max_tiles, nullptr);
+}
+ANK_FUNCTION_1(__map_basin_breach_perimeter);
+
 int __map_get_fertility_at(tile2i tile, int tally_type) {
     return map_get_fertility(tile.grid_offset(), tally_type);
 }

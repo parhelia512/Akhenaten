@@ -74,6 +74,10 @@ localization_ru = [
     { key:"#terrain_dike_farms", text:"ферм"}
     { key:"#terrain_dike_bonus_hint", text:"Пока контур замкнут, плодородие и рост ферм выше."}
     { key:"#farm_in_flood_basin", text:"В пойменном бассейне — урожай после разлива выше, пока контур замкнут."}
+    { key:"#overlay_flood_basin", text:"Пойменные бассейны"}
+    { key:"#overlay_flood_basin_off", text:"Пойменные бассейны (Enhanced) выключены"}
+    { key:"#overlay_flood_basin_open", text:"Открытая пойма — не в замкнутом бассейне"}
+    { key:"#overlay_flood_basin_none", text:"Здесь нет пойменного бассейна"}
     { key:"#warning_auto_resolve_orders_blocked", text:"Нельзя вести роту на замороженную волну вторжения"}
     { key:"#warning_auto_resolve_queue_full", text:"Слишком много ожидающих вторжений — эта волна идёт боем на карте"}
     { key:"#invasion_quick_battle_title", text:"Быстрая битва"}

@@ -66,6 +66,9 @@ enum e_overlay : uint8_t {
     OVERLAY_ARCHITECT_REACH = 46,
     OVERLAY_ZOO = 47,
 
+    // Enhanced flood basins (DK4) — sealed contour tint
+    OVERLAY_FLOOD_BASIN = 48,
+
     OVERLAY_SIZE
 };
 using e_overlay_tokens_t = token_holder<e_overlay, OVERLAY_NONE, OVERLAY_SIZE>;

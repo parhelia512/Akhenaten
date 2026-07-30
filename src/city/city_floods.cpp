@@ -5,6 +5,7 @@
 #include "core/calc.h"
 #include "core/profiler.h"
 #include "core/random.h"
+#include "grid/basin.h"
 #include "grid/floodplain.h"
 #include "grid/tiles.h"
 #include "io/manager.h"
@@ -364,6 +365,19 @@ void floods_t::tick_update(bool calc_only) {
             if (!calc_only) {
                 update_next_flood_params();
                 post_flood_prediction_message();
+            }
+        } else if (cycle == cycle_start) {
+            // DK4: Osiris "next flood destroys farms" also overruns perimeter dikes once.
+            // Perfect/Excellent quality alone does NOT breach — that is a gift, not a disaster.
+            if (!calc_only
+                && game_features::gameplay_enhanced_flood_basins.to_bool()
+                && g_city.religion.osiris_flood_will_destroy_active > 0) {
+                const int max_tiles = 1 + (anti_scum_random_15bit() % 3); // 1..3
+                int first_offset = -1;
+                const int removed = map_basin_breach_perimeter(max_tiles, &first_offset);
+                if (removed > 0) {
+                    messages::popup("message_dike_breach", 0, first_offset >= 0 ? first_offset : 0);
+                }
             }
         } else if (cycle == cycle_start + floodplain_width) {
             // This is where the fertility gets restored in the OG game.

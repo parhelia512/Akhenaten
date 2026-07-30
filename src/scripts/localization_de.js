@@ -77,6 +77,10 @@ localization_de = [
   {key:"#terrain_dike_farms", text:"Farmen"}
   {key:"#terrain_dike_bonus_hint", text:"Solange geschlossen: höhere Fruchtbarkeit und Farmwachstum."}
   {key:"#farm_in_flood_basin", text:"Im Flutbecken — bessere Erträge nach der Überschwemmung, solange der Kontur dicht ist."}
+  {key:"#overlay_flood_basin", text:"Überschwemmungsbecken"}
+  {key:"#overlay_flood_basin_off", text:"Überschwemmungsbecken (Enhanced) sind deaktiviert"}
+  {key:"#overlay_flood_basin_open", text:"Offene Überschwemmungsebene — kein geschlossenes Becken"}
+  {key:"#overlay_flood_basin_none", text:"Kein Überschwemmungsbecken hier"}
   {key:"#warning_auto_resolve_orders_blocked", text:"Kompanien können nicht auf eine eingefrorene Invasionswelle marschieren"}
   {key:"#warning_auto_resolve_queue_full", text:"Zu viele ausstehende Invasionen — diese Welle kämpft auf der Karte"}
   {key:"#invasion_quick_battle_title", text:"Schnellkampf"}

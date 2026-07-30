@@ -91,6 +91,10 @@ localization_en = [
   {key:"#terrain_dike_farms", text:"farms"}
   {key:"#terrain_dike_bonus_hint", text:"Fertility and farm growth improve while sealed."}
   {key:"#farm_in_flood_basin", text:"In flood basin — better yields after the inundation while the contour stays sealed."}
+  {key:"#overlay_flood_basin", text:"Flood basins"}
+  {key:"#overlay_flood_basin_off", text:"Flood basins (Enhanced) are disabled"}
+  {key:"#overlay_flood_basin_open", text:"Open floodplain — not in a sealed basin"}
+  {key:"#overlay_flood_basin_none", text:"No flood basin here"}
   {key:"#warning_auto_resolve_orders_blocked", text:"Cannot march companies onto a frozen invasion wave"}
   {key:"#warning_auto_resolve_queue_full", text:"Too many pending invasions — this wave fights on the map"}
   {key:"#invasion_quick_battle_title", text:"Quick battle"}

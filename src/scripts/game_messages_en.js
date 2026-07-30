@@ -6340,4 +6340,11 @@ game_messages_en {
             text: "Construction of the Bent Pyramid is finally complete! This is a stupendous achievement for your city."
         }
     }
+    message_dike_breach {
+        id: 523,
+        type: 2,
+        size [30, 16]
+        title { text: "Dike breach" }
+        content { text: "The wrath of Osiris has torn gaps in your floodplain embankments. Sealed basins are breached — repair the dikes before the next inundation if you want to hold the flood's gift." }
+    }
 }

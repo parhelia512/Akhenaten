@@ -1,13 +1,16 @@
 #include "basin.h"
 
 #include "building/building.h"
+#include "building/building_dike.h"
 #include "core/profiler.h"
+#include "core/random.h"
 #include "game/game_config.h"
 #include "grid/building.h"
 #include "grid/canals.h"
 #include "grid/grid.h"
 #include "grid/irrigation_value.h"
 #include "grid/terrain.h"
+#include "grid/tiles.h"
 #include "scenario/map.h"
 
 #include <algorithm>
@@ -387,4 +390,66 @@ void map_basin_rebuild_dirty() {
         return;
     }
     map_basin_rebuild();
+}
+
+int map_basin_breach_perimeter(int max_tiles, int *first_breach_offset) {
+    if (first_breach_offset) {
+        *first_breach_offset = -1;
+    }
+    if (max_tiles <= 0 || !game_features::gameplay_enhanced_flood_basins.to_bool()) {
+        return 0;
+    }
+    if (g_basins.empty()) {
+        return 0;
+    }
+
+    std::vector<int> candidates;
+    candidates.reserve(64);
+
+    int grid_offset = scenario_map_data()->start_offset;
+    for (int y = 0; y < scenario_map_data()->height; y++, grid_offset += scenario_map_data()->border_size) {
+        for (int x = 0; x < scenario_map_data()->width; x++, grid_offset++) {
+            if (!map_terrain_is(grid_offset, TERRAIN_DIKE)) {
+                continue;
+            }
+            if (map_basin_adjacent_id(tile2i(grid_offset)) == 0) {
+                continue;
+            }
+            candidates.push_back(grid_offset);
+        }
+    }
+
+    if (candidates.empty()) {
+        return 0;
+    }
+
+    // Deterministic shuffle from map random so tests / replay stay stable enough.
+    for (int i = (int)candidates.size() - 1; i > 0; i--) {
+        const int j = anti_scum_random_15bit() % (i + 1);
+        std::swap(candidates[(size_t)i], candidates[(size_t)j]);
+    }
+
+    const int remove_count = std::min(max_tiles, (int)candidates.size());
+    int min_x = 9999, min_y = 9999, max_x = -1, max_y = -1;
+    for (int i = 0; i < remove_count; i++) {
+        const int offset = candidates[(size_t)i];
+        if (i == 0 && first_breach_offset) {
+            *first_breach_offset = offset;
+        }
+        // Strip crest only — keep ROAD / SUBMERGED_ROAD so a sluice becomes a
+        // plain road gap (floodfill breach) without orphaning the road bit.
+        map_terrain_remove(offset, TERRAIN_DIKE);
+        map_refresh_river_image_at(offset, true);
+        tile2i t(offset);
+        min_x = std::min(min_x, t.x());
+        min_y = std::min(min_y, t.y());
+        max_x = std::max(max_x, t.x());
+        max_y = std::max(max_y, t.y());
+    }
+
+    const int span = std::max(max_x - min_x, max_y - min_y) + 3;
+    building_dike::update_area_dikes(tile2i(min_x, min_y).shifted(-1, -1), span);
+    map_basin_mark_dirty();
+    map_basin_rebuild_dirty();
+    return remove_count;
 }

@@ -33,3 +33,8 @@ void map_basin_mark_dirty();
 
 // Rebuild only if map_basin_mark_dirty() was called since the last rebuild.
 void map_basin_rebuild_dirty();
+
+// DK4: remove up to max_tiles DIKE crests that border a sealed basin (Osiris
+// destructive flood). Leaves ROAD on sluice tiles. Returns tiles removed;
+// first_breach_offset (optional) gets the first removed tile for Go-to-Problem.
+int map_basin_breach_perimeter(int max_tiles, int *first_breach_offset = nullptr);
