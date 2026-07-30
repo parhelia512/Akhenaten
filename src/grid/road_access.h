@@ -17,7 +17,7 @@ struct building_road_access_result {
 
 struct building_road_ports {
     tile2i tile = tile2i::invalid;  // v1 access (== spawn == ret)
-    tile2i spawn = tile2i::invalid; // EE3
+    tile2i spawn = tile2i::invalid;
     tile2i ret = tile2i::invalid;
     bool valid = false;
 };
@@ -51,7 +51,7 @@ tile2i map_road_to_largest_network_rotation(int rotation, tile2i tile, int size,
 tile2i map_road_to_largest_network(tile2i tile, int size, bool closest,
     bool assume_footprint_occupied = false);
 int map_road_to_largest_network_hippodrome(int x, int y, int* x_road, int* y_road);
-int map_get_adjacent_road_tiles_for_roaming(int grid_offset, int* road_tiles, e_permission permission);
+int map_get_adjacent_road_tiles_for_roaming(int grid_offset, int* road_tiles, e_permission permission, bool ignore_roadblocks = false);
 int map_get_diagonal_road_tiles_for_roaming(int grid_offset, int* road_tiles);
 inline int map_get_diagonal_road_tiles_for_roaming(tile2i tile, int *road_tiles) { return map_get_diagonal_road_tiles_for_roaming(tile.grid_offset(), road_tiles); }
 int map_has_adjacent_road_tiles(int grid_offset);

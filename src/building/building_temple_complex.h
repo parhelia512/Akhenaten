@@ -47,6 +47,7 @@ public:
     virtual void on_place(int orientation, int variant) override;
     virtual void on_destroy() override;
     virtual void bind_dynamic(io_buffer *iob, size_t version) override;
+    virtual void spawn_figure() override;
 
     bool has_upgrade(e_temple_compex_upgrade a) const { return !!(runtime_data().temple_complex_upgrades & a); }
     void set_upgrade(e_temple_compex_upgrade a) { runtime_data().temple_complex_upgrades |= a; }

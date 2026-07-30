@@ -41,6 +41,8 @@ public:
     virtual sound_key default_phrase_key() const;
     virtual int provide_service() { return 0; }
     virtual bool play_die_sound() { return false; }
+    // Plague carriers pass roadblocks freely (original Pharaoh).
+    virtual bool ignores_roadblocks() const { return false; }
     virtual void update_animation();
     virtual void update_day() {}
     virtual bool can_move_by_water() const;

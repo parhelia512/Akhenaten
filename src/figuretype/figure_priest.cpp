@@ -1,13 +1,15 @@
 #include "figure_priest.h"
 
+#include "building/building_house.h"
+#include "building/building_temple_complex.h"
 #include "city/city.h"
 #include "city/city_health.h"
 #include "city/ratings.h"
 #include "figure/service.h"
+#include "figuretype/figure_plagued_citizen.h"
 #include "graphics/image_groups.h"
 #include "graphics/image.h"
 #include "graphics/animation.h"
-#include "building/building_house.h"
 #include "js/js_game.h"
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_priest);
@@ -150,7 +152,6 @@ int figure_priest::provide_service() {
         break;
 
     case BUILDING_TEMPLE_BAST:
-    case BUILDING_TEMPLE_COMPLEX_BAST:
         houses_serviced = figure_provide_service(tile(), &base, [] (building *b, figure *f) {
             auto house = b->dcast_house();
             if (house && house->house_population() > 0) {
@@ -158,6 +159,31 @@ int figure_priest::provide_service() {
             }
         });
         break;
+
+    case BUILDING_TEMPLE_COMPLEX_BAST: {
+        // Isis altar on Bast complex: clear infected houses + remove plagued walkers.
+        building *main = home()->main();
+        auto *complex = main ? main->dcast_temple_complex() : nullptr;
+        const bool isis_altar = complex && complex->has_upgrade(etc_upgrade_altar);
+        houses_serviced = figure_provide_service(tile(), &base, [isis_altar] (building *b, figure *f) {
+            auto house = b->dcast_house();
+            if (house && house->house_population() > 0) {
+                house->runtime_data().temple_bast = MAX_COVERAGE;
+            }
+            if (isis_altar && house) {
+                building *main = &house->main()->base;
+                if (main->has_plague) {
+                    main->has_plague = false;
+                    main->disease_days = 0;
+                }
+            }
+        });
+        if (isis_altar) {
+            figure_plagued_citizen::cure_nearby(tile(), 1);
+        }
+        break;
+    }
+
     default:
         break;
     }

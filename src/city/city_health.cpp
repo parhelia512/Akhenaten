@@ -9,10 +9,12 @@
 #include "building/building_house.h"
 #include "building/destruction.h"
 #include "city/city.h"
+#include "city/city_figures.h"
 #include "game/game_events.h"
 #include "city/coverage.h"
 #include "city/city_message.h"
 #include "core/random.h"
+#include "figuretype/figure_plagued_citizen.h"
 #include "scenario/scenario.h"
 #include "game/game.h"
 #include "dev/debug.h"
@@ -23,7 +25,7 @@ declare_console_command_p(plague_start) {
 
     int total_population = 0;
     buildings_house_do([&] (building_house *house) {
-        if (house->house_population() <= 0) {
+        if (!house->base.is_main() || house->house_population() <= 0) {
             return;
         }
         total_population += house->house_population();
@@ -33,14 +35,14 @@ declare_console_command_p(plague_start) {
 
 declare_console_command_p(plague_no) {
     buildings_house_do([&] (building_house *house) {
-        if (house->house_population() <= 0) {
-            return;
+        building &main = house->main()->base;
+        main.disease_days = 0;
+        main.has_plague = false;
+        if (house->house_population() > 0) {
+            main.common_health = 100;
         }
-
-        house->base.disease_days = 0;
-        house->base.has_plague = false;
-        house->base.common_health = 100;
     });
+    g_city.figures.remove_figures(FIGURE_PLAGUED_CITIZEN);
 }
 
 
@@ -73,75 +75,80 @@ void city_health_t::start_disease(int total_people, bool force, int plague_peopl
         return;
     }
 
-    change(10);
     int people_to_plague = sick_people - num_mortuary_workers;
     if (people_to_plague <= 0) {
-        city_message_post_with_popup_delay(MESSAGE_CAT_HEALTH_PROBLEM, false, "malaria_problem", 0, 0);
+        change(10);
+        city_message_post_with_popup_delay(MESSAGE_CAT_HEALTH_PROBLEM, false, "message_malaria", 0, 0);
         return;
     }
 
-    events::emit(event_city_disease{game.simtime.absolute_day(true)});
+    building *warn_building = nullptr;
+    auto infect_house = [&](building_house *house) {
+        auto main = house->main();
+        if (main->base.has_plague) {
+            return; // already counted / spawned this outbreak
+        }
+        warn_building = &main->base;
+        people_to_plague -= house->house_population();
+        main->base.mark_plague(30);
+        figure_plagued_citizen::spawn_from_house(main->base);
+    };
 
     // kill people where has little common_health
-    building *warn_building = nullptr;
     buildings_house_do([&] (building_house *house) {
-        if (people_to_plague <= 0 || !house || house->house_population() <= 0) {
+        if (people_to_plague <= 0 || !house || !house->base.is_main() || house->house_population() <= 0) {
             return;
         }
 
-        if (house->base.common_health < 10) {
-            warn_building = &house->base;
-            people_to_plague -= house->house_population();
-            auto main = house->main();
-            main->base.mark_plague(30);
+        if (house->main()->base.common_health < 10) {
+            infect_house(house);
         }
     });
 
     // kill people who don't have access to apothecary/physician
     buildings_house_do([&] (building_house *house) {
-        if (people_to_plague <= 0 || house->house_population() <= 0) {
+        if (people_to_plague <= 0 || !house->base.is_main() || house->house_population() <= 0) {
             return;
         }
 
         auto &housed = house->runtime_data();
         if (!(housed.apothecary || housed.physician)) {
-            warn_building = &house->base;
-            people_to_plague -= house->house_population();
-            auto main = house->main();
-            main->base.mark_plague(30);
+            infect_house(house);
         }
     });
 
     // kill people in tents
     buildings_house_do([&] (building_house *house) {
-        if (people_to_plague <= 0 || house->house_population() <= 0) {
+        if (people_to_plague <= 0 || !house->base.is_main() || house->house_population() <= 0) {
             return;
         }
 
         if (house->house_level() <= HOUSE_STURDY_HUT) {
-            warn_building = &house->base;
-            people_to_plague -= house->house_population();
-            auto main = house->main();
-            main->base.mark_plague(30);
+            infect_house(house);
         }
     });
 
     // kill anyone
     buildings_house_do([&] (building_house *house) {
-        if (people_to_plague <= 0 || house->house_population() <= 0) {
+        if (people_to_plague <= 0 || !house->base.is_main() || house->house_population() <= 0) {
             return;
         }
 
-        warn_building = &house->base;
-        people_to_plague -= house->house_population();
-        auto main = house->main();
-        main->base.mark_plague(30);
+        infect_house(house);
     });
 
-    e_building_type btype = (warn_building ? warn_building->type : BUILDING_NONE);
-    int grid_offset = (warn_building ? warn_building->tile.grid_offset() : 0);
+    // Nothing newly infected (all candidates already had plague) — no cooldown bump / spam.
+    if (!warn_building) {
+        return;
+    }
+
+    change(10);
+    events::emit(event_city_disease{game.simtime.absolute_day(true)});
+
+    e_building_type btype = warn_building->type;
+    int grid_offset = warn_building->tile.grid_offset();
     if (num_mortuary_workers > 0) {
-        city_message_post_with_popup_delay(MESSAGE_CAT_HEALTH_PROBLEM, force, "message_health_disease", btype, grid_offset);
+        city_message_post_with_popup_delay(MESSAGE_CAT_HEALTH_PROBLEM, force, "message_disease", btype, grid_offset);
     } else {
         city_message_post_with_popup_delay(MESSAGE_CAT_HEALTH_PROBLEM, force, "message_disease_strikes", btype, grid_offset);
     }
@@ -157,7 +164,7 @@ void city_health_t::update_coverage() {
 
     const auto &physician_params = building_physician::current_params();
     coverage.physician = std::min<int>(calc_percentage(physician_params.max_serve_clients * g_city.buildings.count_active(BUILDING_PHYSICIAN), population), 100);
-    
+
     const auto &dentist_params = building_dentist::current_params();
     coverage.dentist = std::min<int>(calc_percentage(dentist_params.max_serve_clients * g_city.buildings.count_active(BUILDING_DENTIST), population), 100);
 

@@ -1191,7 +1191,7 @@ figure_bricklayer {
 	terrain_usage : TERRAIN_USAGE_ROADS,
 }
 
-// TODO(AG3): dump SprMain2 / Expansion walk/work/death ids — temporarily reuse bricklayer SprMain.
+// TODO: dump SprMain2 / Expansion walk/work/death ids — temporarily reuse bricklayer SprMain.
 figure_tomb_artisan {
 	animations {
 		_pack { pack:PACK_SPR_MAIN }
@@ -1242,8 +1242,7 @@ figure_governor {
 	terrain_usage : TERRAIN_USAGE_ROADS,
 }
 
-
-// CF2 locust swarm — Cleopatra SprMain2 bmp "locust":
+// Locust swarm — Cleopatra SprMain2 bmp "locust":
 // groups 30–34 = 6-frame cloud strips (non-8-dir). Runtime picks variant 0–4.
 // Walk JS id=30 is timing only; main_image_update remaps to g30+variant.
 // Must override main_image_update (no dir+8*frame) — see figure_locust.cpp.
@@ -1270,9 +1269,7 @@ figure_locust {
 	float_height: 20
 }
 
-// BF4 cinematic / victory VFX walker — walk-only (SprMain 28); no death group.
-
-// BF3 undead curse walker — Cleopatra SprMain2 bmp "mummy":
+// Undead curse walker — Cleopatra SprMain2 bmp "mummy":
 // group 40 = SprMain2_01919 walk (12×8); 41 attack (11×8); 42 idle (12×8).
 // No death strip in pak (Blood_Transport begins at group 43) — reuse walk for death.
 figure_mummy {
@@ -1294,6 +1291,7 @@ figure_mummy {
 	max_roam_length: 480
 }
 
+// Cinematic / victory VFX walker — walk-only (SprMain 28); no death group.
 figure_pharaoh {
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:28, max_frames:12 }
@@ -1307,7 +1305,7 @@ figure_pharaoh {
 	max_roam_length: 320
 }
 
-// BF2 funeral procession — TEMP worker sprites/sounds until SprMain funeral pack id known.
+// Funeral procession — TEMP worker sprites/sounds until SprMain funeral pack id known.
 figure_funeral_walker {
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:116, max_frames:12 }
@@ -1454,6 +1452,21 @@ figure_homeless = {
   category: figure_category_citizen
 	max_damage : 20
 	terrain_usage : TERRAIN_USAGE_PREFER_ROADS
+}
+
+// Plague carrier — SprMain GROUP_FIGURE_DESEASED (203/205).
+// TEMP: same strip ids as figure_drunkard (art collision; follow-up after pak dump).
+figure_plagued_citizen {
+	animations {
+		walk { pack:PACK_SPR_MAIN, id:203, max_frames:12 }
+		death { pack:PACK_SPR_MAIN, id:205, max_frames:8, loop:false }
+		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_PLAGUED_CITIZEN }
+	}
+
+	category: figure_category_citizen
+	max_damage: 10
+	terrain_usage: TERRAIN_USAGE_ROADS
+	max_roam_length: 480
 }
 
 figure_drunkard {
@@ -1774,7 +1787,6 @@ figure_transport_ship = {
 	category: figure_category_citizen
 	max_damage: 250
 	terrain_usage : TERRAIN_USAGE_ANY
-
 	meta { help_id: 367, text_id: 184 }
 }
 

@@ -478,7 +478,7 @@ static int terrain_is_road_like(int grid_offset) {
     return map_terrain_is(grid_offset, TERRAIN_ROAD | TERRAIN_ACCESS_RAMP) ? 1 : 0;
 }
 
-static bool is_adjacent_road_tile_for_roaming(int grid_offset, e_permission perm) {
+static bool is_adjacent_road_tile_for_roaming(int grid_offset, e_permission perm, bool ignore_roadblocks) {
     if (map_terrain_is(grid_offset, TERRAIN_WATER) && map_terrain_is(grid_offset, TERRAIN_FLOODPLAIN)) {
         return 0;
     }
@@ -494,7 +494,8 @@ static bool is_adjacent_road_tile_for_roaming(int grid_offset, e_permission perm
     }
 
     building_routeblock *roadblock = b->dcast_roadblock();
-    if (roadblock && !roadblock->get_permission(perm)) {
+    // Plague carriers (and similar) pass roadblocks freely — original Pharaoh behavior.
+    if (roadblock && !ignore_roadblocks && !roadblock->get_permission(perm)) {
         return false;
     }
 
@@ -523,13 +524,13 @@ static bool is_adjacent_road_tile_for_roaming(int grid_offset, e_permission perm
     return is_road;
 }
 
-int map_get_adjacent_road_tiles_for_roaming(int grid_offset, int* road_tiles, e_permission perm) {
+int map_get_adjacent_road_tiles_for_roaming(int grid_offset, int* road_tiles, e_permission perm, bool ignore_roadblocks) {
     road_tiles[1] = road_tiles[3] = road_tiles[5] = road_tiles[7] = 0;
 
-    road_tiles[0] = is_adjacent_road_tile_for_roaming(grid_offset + GRID_OFFSET(0, -1), perm);
-    road_tiles[2] = is_adjacent_road_tile_for_roaming(grid_offset + GRID_OFFSET(1, 0), perm);
-    road_tiles[4] = is_adjacent_road_tile_for_roaming(grid_offset + GRID_OFFSET(0, 1), perm);
-    road_tiles[6] = is_adjacent_road_tile_for_roaming(grid_offset + GRID_OFFSET(-1, 0), perm);
+    road_tiles[0] = is_adjacent_road_tile_for_roaming(grid_offset + GRID_OFFSET(0, -1), perm, ignore_roadblocks);
+    road_tiles[2] = is_adjacent_road_tile_for_roaming(grid_offset + GRID_OFFSET(1, 0), perm, ignore_roadblocks);
+    road_tiles[4] = is_adjacent_road_tile_for_roaming(grid_offset + GRID_OFFSET(0, 1), perm, ignore_roadblocks);
+    road_tiles[6] = is_adjacent_road_tile_for_roaming(grid_offset + GRID_OFFSET(-1, 0), perm, ignore_roadblocks);
 
     return road_tiles[0] + road_tiles[2] + road_tiles[4] + road_tiles[6];
 }

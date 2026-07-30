@@ -1,9 +1,11 @@
 #include "city_religion_bast.h"
 
 #include "building/building.h"
+#include "building/building_house.h"
 #include "city/city.h"
 #include "city/city_buildings.h"
 #include "city/city_festival.h"
+#include "city/city_health.h"
 #include "city/city_message.h"
 #include "core/calc.h"
 #include "core/random.h"
@@ -103,11 +105,20 @@ void god_bast_t::perform_major_curse() {
 }
 
 void god_bast_t::perform_malaria_plague() {
-    // TODO: implement malaria plague
-    //            city_sentiment_set_max_happiness(50);
-    //            city_sentiment_change_happiness(-5);
-    //            city_health_change(-10);
-    //            city_sentiment_update();
+    // Bast minor curse: happiness hit + force city plague (plague carriers via start_disease).
+    g_city.set_max_happiness(50);
+    g_city.change_happiness(-5);
+    g_city.health.change(-10);
+    g_city.religion.bast_curse_active = true;
+
+    int total_population = 0;
+    buildings_house_do([&](building_house *house) {
+        if (house->base.is_main() && house->house_population() > 0) {
+            total_population += house->house_population();
+        }
+    });
+    // Immediate outbreak so the curse is visible; clears bast_curse_active inside start_disease.
+    g_city.health.start_disease(total_population, true, 0);
 }
 
 void god_bast_t::perform_minor_curse() {
