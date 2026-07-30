@@ -38,9 +38,13 @@ public:
 
     virtual const base_params &pyramid_params() const = 0;
 
+    // Geometric NW of the init_tiles rect. Linked-list head (is_main) can be a
+    // corner/wall when orientation != 0 — never use main()->tile() as footprint origin.
+    tile2i footprint_nw() const;
+
     virtual tile2i center_point() const override;
-    // enter_offset is relative to footprint NW (the placed 2×2 / chain head @ orient 0).
-    virtual tile2i access_point() const override { return main()->tile().shifted(pyramid_params().enter_offset); }
+    // enter_offset is relative to footprint NW.
+    virtual tile2i access_point() const override { return footprint_nw().shifted(pyramid_params().enter_offset); }
     // Full init_tiles footprint — sled delivery checks this (must not be part size 2×2).
     virtual grid_area get_area() const override;
 };

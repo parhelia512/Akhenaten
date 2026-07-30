@@ -173,7 +173,11 @@
       </ul>
       <div class="deviation-note">
         <strong>Temporary deviation (D6 / C3):</strong> pak monument goal is <strong>32</strong> (large true pyramid, weight ≈12).
-        <strong>C3a done:</strong> small true pyramid (weight 8) + polish is playable, but does not meet the pak goal alone.
+        <strong>C3a done:</strong> small true pyramid (weight 8) + polish + orientation-safe
+        <code>footprint_nw</code> is playable, but does not meet the pak goal alone.
+        <strong>Next:</strong> medium → large true (C3) before dropping TEMP / F3 weights.
+        Plans: <code>REMAKE_MISSING_MONUMENTS_PLAN.md</code> §C3,
+        <code>REMAKE_TRUE_PYRAMID_POLISH_PLAN.md</code>.
         Stand-in remains small + medium stepped → rating 58. Reverts to 32 when <strong>C3b large</strong> lands.
       </div>
 
@@ -283,7 +287,10 @@
           <summary>Known deviations from the original (tracked)</summary>
           <div class="details-body">
             <ul>
-              <li><strong>Monuments TEMP 58</strong> (pak 32) — C3a small true ✅; C3b large still needed to drop TEMP / F3 weights.</li>
+              <li><strong>Monuments TEMP 58</strong> (pak 32) — C3a small true ✅
+                (<code>monument_pyramid.*</code> / <code>pyramid.js</code> / test 108);
+                medium→large still needed to drop TEMP / F3 weights.
+                Polish plan: <code>REMAKE_TRUE_PYRAMID_POLISH_PLAN.md</code>.</li>
               <li><strong>Clay floods i=0/1</strong> — pak year=24 reinterpreted as annual y1m0+; amount=8 = 8% of clay pits per wave (×2 waves).</li>
               <li><strong>Henna i=11</strong> — pak year=24 amount=8 once → biennial y2m1+ amount=<strong>12</strong>; MESSAGE i=12/15 and invasion i=30 skipped (INVASION no-op / fluff).</li>
               <li><strong>Routes 7/8</strong> orphan polylines skipped; map_obj idx=10 empty stub skipped.</li>

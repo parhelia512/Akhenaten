@@ -1,6 +1,7 @@
 #include "monuments.h"
 
 #include "building/building.h"
+#include "building/monument_pyramid.h"
 #include "graphics/image.h"
 #include "graphics/image_groups.h"
 #include "graphics/view/view.h"
@@ -90,13 +91,20 @@ tile2i building_monument_mason_waiting_tile(building *b) {
         return tile2i{ -1, -1 };
     }
 
+    // Work-site offsets are relative to footprint NW. For pyramids that is not
+    // always main()->tile() (orientation can put a corner/wall first in the chain).
+    tile2i origin = main->tile;
+    if (auto *pyr = main->dcast_pyramid()) {
+        origin = pyr->footprint_nw();
+    }
+
     // Same 2×2 work-site pattern as mastaba bricklayers. Prefer idle sites so
     // multiple masons spread out; fall back to mid-progress for resume-after-poof.
     grid_tiles tiles = map_grid_get_tiles(main, 0);
     auto find_in_range = [&] (int lo, int hi) {
-        return map_grid_area_first(tiles, [main, lo, hi] (tile2i tile) {
+        return map_grid_area_first(tiles, [origin, lo, hi] (tile2i tile) {
             int progress = map_monuments_get_progress(tile);
-            tile2i offset = tile.dist2i(main->tile).mod(4, 4);
+            tile2i offset = tile.dist2i(origin).mod(4, 4);
             return progress >= lo && progress < hi
                 && (offset.x() == 1 || offset.x() == 3)
                 && (offset.y() == 1 || offset.y() == 3);
@@ -547,6 +555,12 @@ bool building_monument::need_carpenter() {
     // Check if monument needs TIMBER for current phase
     int needs_timber = needs_resource(RESOURCE_TIMBER, phase);
     if (needs_timber <= 0) {
+        return false;
+    }
+
+    // Free worker slot required — without this, guilds keep spawning carpenters
+    // that add_workers silently drops while need_carpenter stays true.
+    if (!need_workers()) {
         return false;
     }
 
