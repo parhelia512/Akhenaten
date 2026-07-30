@@ -643,6 +643,7 @@ tile2i building::access_tile() {
 
     case BUILDING_LARGE_STEPPED_PYRAMID:
     case BUILDING_STEPPED_PYRAMID_COMPLEX:
+    case BUILDING_LARGE_PYRAMID:
         return main()->tile.shifted(0, 22);
 
     case BUILDING_SPHINX:

@@ -23,10 +23,10 @@ MONUMENT_WEIGHTS[BUILDING_LARGE_STEPPED_PYRAMID]          = 24
 // original monument goal of 21 (Snofru's bent pyramid at South Dahshur).
 MONUMENT_WEIGHTS[BUILDING_SMALL_BENT_PYRAMID]             = 4
 MONUMENT_WEIGHTS[BUILDING_MEDIUM_BENT_PYRAMID]            = 8
-// True (smooth) pyramids — placeholder weights. Small/medium ≈ stepped counterparts
-// until large weight is fitted to m_015 pak goal 32 (≈ w=12).
+// True (smooth) pyramids. Large weight 12 → rating 2.25*12+4.5 = 31.5 ≈ pak 32 (m_015).
 MONUMENT_WEIGHTS[BUILDING_SMALL_PYRAMID]                  = 8
 MONUMENT_WEIGHTS[BUILDING_MEDIUM_PYRAMID]                 = 16
+MONUMENT_WEIGHTS[BUILDING_LARGE_PYRAMID]                  = 12
 MONUMENT_WEIGHTS[BUILDING_SPHINX]                         = 1
 MONUMENT_WEIGHTS[BUILDING_SMALL_OBELISK]                  = 2
 MONUMENT_WEIGHTS[BUILDING_LARGE_OBELISK]                  = 4

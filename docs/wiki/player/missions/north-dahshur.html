@@ -162,23 +162,18 @@
       <p>North Dahshur is where Snofru built the Red Pyramid, the first successful true (smooth-sided) pyramid and the direct precursor to Khufu's Great Pyramid. In the campaign it is the payoff of the Snofru arc — the largest monument project yet — and it plants the seed of the Khufu missions to come. It is also a fork point: after completing it the player chooses Iunet or On.</p>
 
       <h2 id="objectives">Objectives</h2>
-      <p>Goals match <code>mission1.pak</code> scenario 15 except the monument stand-in (see below).</p>
+      <p>Goals match <code>mission1.pak</code> scenario 15.</p>
       <ul class="objectives-list">
         <li><span class="obj-label">Population</span><span class="obj-value">3 000 citizens</span></li>
         <li><span class="obj-label">Culture rating</span><span class="obj-value">20</span></li>
         <li><span class="obj-label">Prosperity rating</span><span class="obj-value">30</span></li>
-        <li><span class="obj-label">Monument rating</span><span class="obj-value">TEMP 58 — both stepped pyramids (pak raw 32 = large true pyramid)</span></li>
+        <li><span class="obj-label">Monument rating</span><span class="obj-value">32 (large true pyramid, weight 12)</span></li>
         <li><span class="obj-label">Kingdom rating</span><span class="obj-value">55</span></li>
         <li><span class="obj-label">Housing level</span><span class="obj-value">10</span></li>
       </ul>
       <div class="deviation-note">
-        <strong>Temporary deviation (D6 / C3):</strong> pak monument goal is <strong>32</strong> (large true pyramid, weight ≈12).
-        <strong>C3a done:</strong> small true pyramid (weight 8) + polish + orientation-safe
-        <code>footprint_nw</code> is playable, but does not meet the pak goal alone.
-        <strong>Next:</strong> medium → large true (C3) before dropping TEMP / F3 weights.
-        Plans: <code>REMAKE_MISSING_MONUMENTS_PLAN.md</code> §C3,
-        <code>REMAKE_TRUE_PYRAMID_POLISH_PLAN.md</code>.
-        Stand-in remains small + medium stepped → rating 58. Reverts to 32 when <strong>C3b large</strong> lands.
+        Monument goal matches pak (<strong>32</strong>). Large true pyramid weight 12 →
+        <code>2.25·12+4.5 ≈ 31.5</code>. Small/medium true and stepped remain available as extras.
       </div>
 
       <h2 id="events">Scripted events</h2>
@@ -194,11 +189,11 @@
       <div class="tutorial-step"><span class="step-tag">Favour collapse</span><span>Pharaoh army size <strong>75</strong>.</span></div>
 
       <h2 id="strategy">Strategy</h2>
-      <p>Largest monument stand-in yet, prosperity 30, and Hyksos pressure that does not stop after the first wipe. Open Byblos early for timber; Meidum is cheap stone (300 Db).</p>
+      <p>Largest monument yet (large true pyramid), prosperity 30, and Hyksos pressure that does not stop after the first wipe. Open Byblos early for timber; Meidum is cheap stone (300 Db).</p>
       <h3>Phase 1 — Food and housing</h3>
       <p>Grain and barley farms support 3 000 people and the recurring grain asks. Evolve homes toward housing level 10 and prosperity 30 with gems/luxury from Serabit and Byblos.</p>
       <h3>Phase 2 — Pyramid and timber</h3>
-      <p>Start both stepped pyramids early. Import timber from Byblos for carpenter ramps; limestone also arrives via the year-13 gift→request chain.</p>
+      <p>Start the large true pyramid early. Import timber from Byblos for carpenter ramps; limestone also arrives via the year-13 gift→request chain.</p>
       <h3>Phase 3 — Defense</h3>
       <p>Hyksos from y3m11 never fully go away (size-6 chain). Beduin y6m8+ every year. Keep walls, academy, and standing companies — invasion points fall back to the map exit tile.</p>
       <h3>Tips</h3>
@@ -221,7 +216,7 @@
             <tr><td>Food &amp; farming</td><td>Grain Farm · Barley Farm · Figs Farm · Hunting Lodge · Water Lift · Irrigation Ditch · Bazaar · Granary · Storage Yard</td></tr>
             <tr><td>Raw materials</td><td><strong>Limestone Quarry</strong> · Stone Quarry · Clay Pit</td></tr>
             <tr><td>Industry</td><td>Bricks · Pottery · Brewery · Papyrus · Weaver · Jewels Workshops · Work Camp</td></tr>
-            <tr><td>Monuments</td><td>Small / Medium Stepped Pyramid · Small / Medium Mastaba · <strong>Small / Medium True Pyramid</strong> <span style="color:var(--text-muted)">(C3a/C3a2 ✅; large true still pending for pak goal 32)</span></td></tr>
+            <tr><td>Monuments</td><td>Small / Medium Stepped Pyramid · Small / Medium Mastaba · <strong>Small / Medium True Pyramid</strong> <span style="color:var(--text-muted)">(small/medium true ✅; large true still pending for pak goal 32)</span></td></tr>
             <tr><td>Guilds</td><td>Stonemasons' · Carpenters' · Bricklayers'</td></tr>
             <tr><td>Military</td><td>Recruiter · Weaponsmith · Military Academy · Infantry / Archers / Charioteers Fort · Mud Wall · Mud Gatehouse · Mud Tower</td></tr>
             <tr><td>Religion</td><td>Temples &amp; Shrines of Osiris, Ptah, Seth, Ra · Festival Square</td></tr>
@@ -248,7 +243,7 @@
   <span class="kw">initial_funds</span> [<span class="num">20000</span>, <span class="num">13300</span>, <span class="num">10000</span>, <span class="num">6700</span>, <span class="num">5300</span>]
   <span class="kw">debt_interest</span> [<span class="num">10</span>, <span class="num">15</span>, <span class="num">20</span>, <span class="num">25</span>, <span class="num">30</span>]
 
-  <span class="cmt">// pop 3000, culture 20, prosperity 30, monuments TEMP 58 (pak 32), kingdom 55, housing 10</span>
+  <span class="cmt">// pop 3000, culture 20, prosperity 30, monuments 32 (large true W=12), kingdom 55, housing 10</span>
   <span class="kw">win_criteria</span> { … }
 }</code></pre>
             <p>Empire id <strong>14</strong> via <code>empire.set_id(14)</code>. Choice → Iunet/On (scripts exist; empire redefine still pending for 16/17).</p>
@@ -287,10 +282,10 @@
           <summary>Known deviations from the original (tracked)</summary>
           <div class="details-body">
             <ul>
-              <li><strong>Monuments TEMP 58</strong> (pak 32) — C3a small + C3a2 medium true ✅
-                (<code>monument_pyramid.*</code> / tests 108–109);
-                large still needed to drop TEMP / F3 weights.
-                Polish plan: <code>REMAKE_TRUE_PYRAMID_POLISH_PLAN.md</code>.</li>
+              <li><strong>Monuments 32</strong> (pak) — large true ✅
+                (<code>monument_pyramid.*</code> / tests 108–110); weight 12.
+                Stepped S/M still on the build list as extras.
+                </li>
               <li><strong>Clay floods i=0/1</strong> — pak year=24 reinterpreted as annual y1m0+; amount=8 = 8% of clay pits per wave (×2 waves).</li>
               <li><strong>Henna i=11</strong> — pak year=24 amount=8 once → biennial y2m1+ amount=<strong>12</strong>; MESSAGE i=12/15 and invasion i=30 skipped (INVASION no-op / fluff).</li>
               <li><strong>Routes 7/8</strong> orphan polylines skipped; map_obj idx=10 empty stub skipped.</li>

@@ -71,6 +71,7 @@ mission15 { // North Dahshur — The True Pyramid
 		BUILDING_STONE_QUARRY, BUILDING_LIMESTONE_QUARRY, BUILDING_CLAY_PIT, BUILDING_WOOD_CUTTERS,
 		BUILDING_FERRY,
 		BUILDING_SMALL_STEPPED_PYRAMID, BUILDING_MEDIUM_STEPPED_PYRAMID,
+		BUILDING_LARGE_PYRAMID,
 		BUILDING_SMALL_MASTABA, BUILDING_MEDIUM_MASTABA,
 		BUILDING_LIBRARY,
 		BUILDING_FESTIVAL_SQUARE, BUILDING_BOOTH, BUILDING_JUGGLER_SCHOOL, BUILDING_BANDSTAND, BUILDING_CONSERVATORY, BUILDING_PAVILLION, BUILDING_DANCE_SCHOOL,
@@ -78,12 +79,12 @@ mission15 { // North Dahshur — The True Pyramid
 	]
 
 	// Goals verified vs pak: pop 1/3000, culture 1/20, prosperity 1/30, monuments 1/32,
-	// kingdom 1/55, housing_level 1/10. TEMP monuments 58 until C3 true pyramid.
+	// kingdom 1/55, housing_level 1/10. Large true pyramid weight 12 → rating ≈32.
 	win_criteria {
 		population    {enabled : true, goal : 3000 }
 		culture       {enabled : true, goal : 20 }
 		prosperity    {enabled : true, goal : 30 }
-		monuments     {enabled : true, goal : 58 }
+		monuments     {enabled : true, goal : 32 }
 		kingdom       {enabled : true, goal : 55 }
 		housing_level {enabled : true, goal : 10 }
 	}
@@ -561,6 +562,7 @@ function mission15_on_start(ev) {
 	__image_request_pak(PACK_ENEMY_EGYPTIAN) // favour
 	__image_request_pak(PACK_MASTABA)
 	__image_request_pak(PACK_STEPPED_PYRAMID)
+	__image_request_pak(PACK_PYRAMID)
 	mission_show_start_message(mission, "message_mission_north_dahshur")
 	empire.set_id(14)
 	empire.set_expanded(false)

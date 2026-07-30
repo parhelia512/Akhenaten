@@ -354,4 +354,44 @@ public:
     BUILDING_METAINFO(BUILDING_MEDIUM_PYRAMID_CONE, building_medium_pyramid_cone, building_medium_pyramid)
 };
 
+// True (smooth) large pyramid — 20×20, limestone + polish after height 35.
+class building_large_pyramid : public building_stepped_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_LARGE_PYRAMID, building_large_pyramid, building_stepped_pyramid)
+
+    struct static_params : public base_params, public building_static_params {
+    } BUILDING_STATIC_DATA_T;
+
+    // First polish phase (height courses end at 35; polish count = 20/4 = 5).
+    static constexpr int k_polish_phase_begin = 36;
+    static constexpr int k_polish_layers = 5;
+
+    virtual void update_day() override;
+    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual int building_image_get() const override;
+    virtual const base_params &pyramid_params() const override { return current_params(); }
+    virtual bool need_stonemason() override;
+    virtual bool use_polish_sprites_for_layer(int layer) const override;
+
+    virtual const monument &config() const override;
+};
+ANK_CONFIG_STRUCT(building_large_pyramid::static_params,
+    init_tiles, corner_type, wall_type, cone_type, filler_type, enter_offset, stairs);
+
+class building_large_pyramid_corner : public building_large_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_LARGE_PYRAMID_CORNER, building_large_pyramid_corner, building_large_pyramid)
+};
+
+class building_large_pyramid_wall : public building_large_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_LARGE_PYRAMID_WALL, building_large_pyramid_wall, building_large_pyramid)
+};
+
+class building_large_pyramid_cone : public building_large_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_LARGE_PYRAMID_CONE, building_large_pyramid_cone, building_large_pyramid)
+};
+
 void map_pyramid_tiles_add(int building_id, tile2i tile, int size, int image_id, int terrain);
