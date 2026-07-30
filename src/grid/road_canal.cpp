@@ -38,6 +38,11 @@ bool map_can_place_road_under_canal(tile2i tile) {
 }
 
 bool map_can_place_canal_on_road(tile2i tile) {
+    // Sluice (road|dike) is an embankment — no irrigation ditch on the same tile.
+    if (map_terrain_is(tile, TERRAIN_DIKE)) {
+        return false;
+    }
+
     const auto &params = building_static_params::get(BUILDING_ROAD);
     int base_img = params.base_img();
     int image_id = map_image_at(tile) - base_img;

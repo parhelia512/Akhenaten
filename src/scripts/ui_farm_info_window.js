@@ -20,13 +20,14 @@ info_window_farm {
         BUILDING_FIGS_FARM, BUILDING_FIGS_MEADOW_FARM
     ]
     ui : baseui(building_info_window, {
-        background    : outer_panel({size: [29, 18]}),
+        background    : outer_panel({size: [29, 19]}),
         resource      : resource_icon({ pos:[10, 10], prop:"${building.output_resource}" }),
         workers_desc  : text({ pos: [70, 116], font: FONT_NORMAL_BLACK_ON_DARK,  multiline:true, wrap:px(23) }),
         farm_desc     : text({ pos: [32, 40], font: FONT_NORMAL_BLACK_ON_LIGHT, wrap:px(26), multiline:true }),
         farm_state    : text({ pos: [32, 186], font: FONT_NORMAL_BLACK_ON_LIGHT, wrap:px(27), multiline:true }),
         flood_info    : text({ pos: [32, 206], font: FONT_NORMAL_BLACK_ON_LIGHT }),
         progress_desc : text({ pos: [32, 226], font: FONT_NORMAL_BLACK_ON_LIGHT }),
+        basin_info    : text({ pos: [32, 246], font: FONT_NORMAL_BLACK_ON_LIGHT, wrap:px(26), multiline:true }),
     })
 }
 
@@ -59,7 +60,14 @@ function info_window_farm_on_init(window) {
         var is_not_irrigated = 0 // TODO: fetch irrigation info
         window.farm_state.text = __loc(177, is_not_irrigated)
         window.farm_desc.text = __loc(gid, 1)
+        if (game_features.get('gameplay_enhanced_flood_basins') === true
+            && terrain.basin_sealed(b.tile)) {
+            window.basin_info.text = __loc("#farm_in_flood_basin")
+        } else {
+            window.basin_info.text = ""
+        }
     } else {
         window.farm_state.text = __loc(gid, 1)
+        window.basin_info.text = ""
     }
 }

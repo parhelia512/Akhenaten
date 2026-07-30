@@ -27,8 +27,8 @@ void map_grid_init(grid_xx& grid) {
 
 
 namespace detail {
-    svector<grid_xx *, 64>& registered_grids() {
-        static svector<grid_xx *, 64> s;
+    svector<grid_xx *, 128>& registered_grids() {
+        static svector<grid_xx *, 128> s;
         return s;
     }
     std::mutex& registered_grids_mutex() {

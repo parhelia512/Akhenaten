@@ -28,6 +28,9 @@ function routed_building_preview_item_count(tile, mode) {
     if (mode == ROUTED_BUILDING_WALL) {
         return terrain.is(tile, TERRAIN_WALL) ? 0 : 1
     }
+    if (mode == ROUTED_BUILDING_DIKE) {
+        return terrain.is(tile, TERRAIN_DIKE) ? 0 : 1
+    }
     return 1
 }
 

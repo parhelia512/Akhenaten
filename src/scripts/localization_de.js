@@ -68,6 +68,15 @@ localization_de = [
   {key:"#TR_CONFIG_SETH_ASP_RAID", text:"Seth-Zorn: Schlangenüberfall aus Tempeln ohne Kompanie (TEMP Enhanced)"}
   {key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Ptah-Zorn: Skorpionüberfall aus Tempeln ohne Industrie (TEMP Enhanced)"}
   {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Invasionen automatisch lösen: Feinde warten am Eingang, Schnellkampf in 8 Tagen (Mauern/Türme zählen nicht; Pharao inklusive; keine Aufstände)"}
+  {key:"#TR_CONFIG_FLOOD_BASINS", text:"Enhanced: Deiche / Becken (Kontur schließen — bessere Erträge nach der Flut)"}
+  {key:"#building_dike", text:"Deich"}
+  {key:"#building_dike_info", text:"Erdwall zur Beckenbewässerung auf der Überschwemmungsebene. Schließt einen Kontur um die Felder — höhere Erträge nach der Überschwemmung."}
+  {key:"#terrain_dike_sealed", text:"Geschlossenes Becken"}
+  {key:"#terrain_dike_breached", text:"Kein geschlossenes Becken daneben — schließt einen Kontur um die Felder, um die Flutgabe zu halten."}
+  {key:"#terrain_dike_tiles", text:"Felder"}
+  {key:"#terrain_dike_farms", text:"Farmen"}
+  {key:"#terrain_dike_bonus_hint", text:"Solange geschlossen: höhere Fruchtbarkeit und Farmwachstum."}
+  {key:"#farm_in_flood_basin", text:"Im Flutbecken — bessere Erträge nach der Überschwemmung, solange der Kontur dicht ist."}
   {key:"#warning_auto_resolve_orders_blocked", text:"Kompanien können nicht auf eine eingefrorene Invasionswelle marschieren"}
   {key:"#warning_auto_resolve_queue_full", text:"Zu viele ausstehende Invasionen — diese Welle kämpft auf der Karte"}
   {key:"#invasion_quick_battle_title", text:"Schnellkampf"}

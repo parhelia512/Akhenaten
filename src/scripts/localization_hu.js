@@ -78,6 +78,15 @@ localization_hu = [
   {key:"#TR_CONFIG_SETH_ASP_RAID", text:"Seth haragja: kígyórajtaütés templomokból század nélkül (TEMP Enhanced)"}
   {key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Ptah haragja: skorpiórajtaütés templomokból ipar nélkül (TEMP Enhanced)"}
   {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Inváziók auto-megoldása: az ellenség a bejáratnál vár, gyorscsata 8 nap múlva (fal/torony nem számít; fáraó benne; nem felkelés)"}
+  {key:"#TR_CONFIG_FLOOD_BASINS", text:"Enhanced: gátak / medencék (zárd körbe — jobb termés áradás után)"}
+  {key:"#building_dike", text:"Gát"}
+  {key:"#building_dike_info", text:"Földsánc az ártéri medence-öntözéshez. Zárd körbe a földeket — jobb termés az áradás után."}
+  {key:"#terrain_dike_sealed", text:"Zárt medence"}
+  {key:"#terrain_dike_breached", text:"Nincs zárt medence mellette — zárd körbe az ártéri farmokat, hogy megmaradjon az áradás ajándéka."}
+  {key:"#terrain_dike_tiles", text:"mező"}
+  {key:"#terrain_dike_farms", text:"farm"}
+  {key:"#terrain_dike_bonus_hint", text:"Zárt kontúr mellett jobb a termékenység és a farm növekedése."}
+  {key:"#farm_in_flood_basin", text:"Ártéri medencében — jobb termés az áradás után, amíg a kontúr zárt."}
   {key:"#warning_auto_resolve_orders_blocked", text:"A századok nem vonulhatnak befagyasztott inváziós hullámra"}
   {key:"#warning_auto_resolve_queue_full", text:"Túl sok várakozó invázió — ez a hullám a térképen harcol"}
   {key:"#invasion_quick_battle_title", text:"Gyorscsata"}

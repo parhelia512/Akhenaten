@@ -48,27 +48,6 @@ void building_water_lift::update_day() {
 
 void building_water_lift::on_tick(bool b) {
     building_impl::on_tick(b);
-
-    if (!base.has_water_access) {
-        return;
-    }
-
-    const auto &d = runtime_data();
-    if (d.tick % 25 != 0) {
-        return;
-    }
-
-    const bool is_canal1 = map_terrain_is(d.output_tiles[0], TERRAIN_CANAL);
-    if (is_canal1) {
-        map_canal_fill_from_offset(tile2i(d.output_tiles[0]), current_params().canal_fill_water_level);
-    }
-
-    const bool is_canal2 = map_terrain_is(d.output_tiles[1], TERRAIN_CANAL);
-    if (is_canal2) {
-        map_canal_fill_from_offset(tile2i(d.output_tiles[1]), current_params().canal_fill_water_level);
-    }
-
-    map_terrain_add_with_radius(tile(), current_params().building_size, current_params().irrigation_radius, TERRAIN_IRRIGATION_RANGE);
 }
 
 int building_water_lift::animation_speed(int speed) const {

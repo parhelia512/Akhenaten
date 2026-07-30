@@ -20,6 +20,7 @@
 #include "city/city_floods.h"
 #include "grid/floodplain.h"
 #include "grid/grid.h"
+#include "grid/basin.h"
 
 #include <cmath>
 
@@ -130,8 +131,20 @@ void building_industry_update_farms(void) {
 
         bool is_floodplain = b.is_floodplain_farm();
         int fert = map_get_fertility_for_farm(b.tile.grid_offset());
-        int progress_step = (float)fert * get_farm_produce_uptick_per_day(b); // 0.16f
+        // Truncate base first (OG / remake meadow parity). Basin bonus applied after.
+        int progress_step = (int)((float)fert * get_farm_produce_uptick_per_day(b)); // 0.16f
         const bool osiris_blessing = g_city.religion.osiris_double_farm_yield_days > 0;
+
+        // FB2: sealed basin holds moisture → slightly faster progress while labor is present.
+        if (is_floodplain && game_features::gameplay_enhanced_flood_basins.to_bool()
+            && map_basin_is_sealed_at(b.tile) && progress_step > 0) {
+            // Round +15%; if trunc would be a no-op, force +1 so low fert still benefits.
+            int boosted = (progress_step * 115 + 50) / 100;
+            if (boosted <= progress_step) {
+                boosted = progress_step + 1;
+            }
+            progress_step = boosted;
+        }
         
         auto& farmd = farm->runtime_data();
         if (osiris_blessing) {

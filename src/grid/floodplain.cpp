@@ -1,6 +1,7 @@
 #include "floodplain.h"
 
 #include "building_tiles.h"
+#include "building/building_dike.h"
 #include "building/building_farm.h"
 #include "game/game_config.h"
 #include "scenario/map.h"
@@ -17,6 +18,7 @@
 #include "city/city.h"
 #include "city/city_industry.h"
 #include "js/js_game.h"
+#include "grid/basin.h"
 
 #include <cstdint>
 #include <algorithm>
@@ -112,6 +114,19 @@ static void map_floodplain_update_inundation_row(int floodplain_is_flooding, int
 
     // tile is FLOODING
     if (floodplain_is_flooding == 1) {
+        // Dike crest stays dry (no TERRAIN_WATER). Handle before the water early-out:
+        // crest never keeps WATER, so flooded==WATER would otherwise re-enter every tick
+        // (add WATER → strip WATER → soil/farm side effects).
+        if (map_terrain_is(grid_offset, TERRAIN_DIKE)) {
+            map_terrain_remove(grid_offset, TERRAIN_WATER);
+            if (flooded && map_terrain_is(grid_offset, TERRAIN_ROAD)) {
+                map_terrain_remove(grid_offset, TERRAIN_ROAD);
+                map_terrain_add(grid_offset, TERRAIN_SUBMERGED_ROAD);
+                map_refresh_river_image_at(grid_offset, true);
+            }
+            return;
+        }
+
         // tile is updating!
         if (flooded == map_terrain_is(grid_offset, TERRAIN_WATER)) {
             return;
@@ -120,6 +135,7 @@ static void map_floodplain_update_inundation_row(int floodplain_is_flooding, int
         map_terrain_add(grid_offset, TERRAIN_WATER);
 
         map_soil_set_depletion(grid_offset, 0);
+        map_floodplain_apply_basin_fertility_bonus(grid_offset);
 
         // hide / destroy farm
         if (farm && farm->is_valid() && map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
@@ -178,10 +194,12 @@ static void map_floodplain_update_inundation_row(int floodplain_is_flooding, int
             }
         }
 
-        // resurface roads
+        // resurface roads / restore dike crest graphic
         if (map_terrain_is(grid_offset, TERRAIN_SUBMERGED_ROAD)) {
             map_terrain_remove(grid_offset, TERRAIN_SUBMERGED_ROAD);
             map_terrain_add(grid_offset, TERRAIN_ROAD);
+        } else if (map_terrain_is(grid_offset, TERRAIN_DIKE)) {
+            building_dike::set_image(tile2i(grid_offset));
         } else {
             int fertility_value = map_get_fertility(grid_offset, FERT_WITH_MALUS);
             int fertility_index = std::clamp(fertility_value / 25, 0, 3);
@@ -336,7 +354,8 @@ void set_floodplain_land_tiles_image(int grid_offset, bool force) {
                             && !map_terrain_is(grid_offset, TERRAIN_WATER)
                             && !map_terrain_is(grid_offset, TERRAIN_BUILDING)
                             && !map_terrain_is(grid_offset, TERRAIN_ROAD)
-                            && !map_terrain_is(grid_offset, TERRAIN_CANAL);
+                            && !map_terrain_is(grid_offset, TERRAIN_CANAL)
+                            && !map_terrain_is(grid_offset, TERRAIN_DIKE);
 
     if (!is_floodpain) {
         return;
@@ -375,7 +394,8 @@ void set_floodplain_land_tiles_image(int grid_offset, bool force) {
 
 void map_floodplain_adv_growth_tile(int _, int grid_offset, int /*order*/) {
     if (map_terrain_is(grid_offset, TERRAIN_WATER) || map_terrain_is(grid_offset, TERRAIN_BUILDING)
-        || map_terrain_is(grid_offset, TERRAIN_ROAD) || map_terrain_is(grid_offset, TERRAIN_CANAL)) {
+        || map_terrain_is(grid_offset, TERRAIN_ROAD) || map_terrain_is(grid_offset, TERRAIN_CANAL)
+        || map_terrain_is(grid_offset, TERRAIN_DIKE)) {
         map_set_floodplain_growth(grid_offset, 0);
         set_floodplain_land_tiles_image(grid_offset, false);
         map_refresh_river_image_at(grid_offset, false);
@@ -391,6 +411,10 @@ void map_floodplain_adv_growth_tile(int _, int grid_offset, int /*order*/) {
 }
 
 void map_floodplain_sub_growth_tile(int grid_offset, int order) {
+    if (map_terrain_is(grid_offset, TERRAIN_DIKE)) {
+        return;
+    }
+
     int value = map_image_alt_at(grid_offset);
     int image_id = (value & 0x00ffffff);
     if (image_id <= 0) {
@@ -433,7 +457,7 @@ void map_image_set_road_floodplain(tile2i tile) {
 
 void set_floodplain_edges_image(int grid_offset) {
     if (map_terrain_is(grid_offset, TERRAIN_BUILDING)
-        || map_terrain_is(grid_offset, TERRAIN_WALL | TERRAIN_GATEHOUSE | TERRAIN_SHRUB | TERRAIN_ROCK)
+        || map_terrain_is(grid_offset, TERRAIN_WALL | TERRAIN_GATEHOUSE | TERRAIN_DIKE | TERRAIN_SHRUB | TERRAIN_ROCK)
         || (map_terrain_is(grid_offset, TERRAIN_FLOODPLAIN) && !map_terrain_is(grid_offset, TERRAIN_WATER))) { // non-flooded floodplain, skip
         return;
     }
@@ -575,6 +599,29 @@ void map_update_tile_fertility(int grid_offset, int delta) {
 void map_soil_set_depletion(int grid_offset, int malus) {
     int new_fert = map_get_fertility(grid_offset, FERT_NO_MALUS) + malus;
     map_grid_set(g_terrain_floodplain_fertility, grid_offset, std::clamp(new_fert, 3, 99));
+}
+
+// FB2: sealed-basin fertility bump after inundation restore.
+// Poor floods get a slightly larger % (partial compensation); never exceeds fert cap 99.
+void map_floodplain_apply_basin_fertility_bonus(int grid_offset) {
+    if (!game_features::gameplay_enhanced_flood_basins.to_bool()) {
+        return;
+    }
+    if (!map_grid_is_valid_offset(grid_offset) || !map_basin_is_sealed_at(grid_offset)) {
+        return;
+    }
+    if (!map_terrain_is(grid_offset, TERRAIN_FLOODPLAIN) || map_terrain_is(grid_offset, TERRAIN_DIKE)) {
+        return;
+    }
+
+    constexpr int BONUS_PCT_AT_PERFECT = 12; // quality_current == 100
+    constexpr int BONUS_PCT_AT_NONE = 22;    // quality_current == 0
+
+    const int fert = map_get_fertility(grid_offset, FERT_WITH_MALUS);
+    const int q = std::clamp(g_floods.quality_current, 0, 100);
+    const int pct = BONUS_PCT_AT_PERFECT + (100 - q) * (BONUS_PCT_AT_NONE - BONUS_PCT_AT_PERFECT) / 100;
+    const int add = std::max(1, fert * pct / 100);
+    map_update_tile_fertility(grid_offset, add);
 }
 
 io_buffer* iob_soil_fertility_grid = new io_buffer([](io_buffer* iob, size_t version) {

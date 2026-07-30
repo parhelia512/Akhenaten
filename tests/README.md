@@ -117,6 +117,10 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `50_invasion_bind_resolve.js` | Invasion bind: spawn + `on_completed_tag` deferred KR + history ring (JS calendar model; native EVENT_TYPE_INVASION cancelled) |
 | `78_building_road_access.js` | Building road-access marker (EE*): Preview/Commit resolve, booth assume, temple variant, config flag |
 | `95_delivery_paths.js` | Delivery paths (DP*): allowlist, pottery→SY, Empty All / understaffed reasons, clay→workshop, feature flag |
+| `96_dike_place.js` | Enhanced dikes (DK1): place strip on floodplain, clear+undo, flag OFF rejects (`gameplay_enhanced_flood_basins`) |
+| `98_flood_basin_seal.js` | Flood basins (FB1): sealed detect, spur/thick crest, breach hole, flag OFF |
+| `99_flood_basin_bonus.js` | Flood basins (FB2): fertility bump + farm progress in sealed basin |
+| `107_flood_basin_irrigation_hold.js` | Flood basins (DK3): half-rate canal decay, IRRIGATION_RANGE restamp/clip, reseal, flag OFF |
 | `77_brick_wall_placement.js` | Brick wall L-drag; material; clear+undo; mud↔brick overwrite no-op |
 | `76_invasion_auto_resolve.js` | Enhanced auto-resolve invasions (AC*): freeze/pending, lose/win KR, queue timer, flag OFF, natives out, Pharaoh, queue full, save/load, chain spawn |
 | `77_bazaar_multi_buyer.js` | Multi-buyer bazaar (BB*): complementary/fallback/demand freeze/OFF slot1; slots; -3 |

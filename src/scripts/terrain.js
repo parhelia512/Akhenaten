@@ -60,4 +60,17 @@ terrain = {
     canal_image_begin: function() {
         return __terrain_canal_image_begin()
     }
+
+    basin_id: function(tile) {
+        return __map_basin_id_at(tile)
+    }
+
+    basin_sealed: function(tile) {
+        return __map_basin_is_sealed_at(tile)
+    }
+
+    // First sealed basin among 8 neighbors (corner crest only touches interior diagonally).
+    basin_adjacent_id: function(tile) {
+        return __map_basin_adjacent_id(tile)
+    }
 }

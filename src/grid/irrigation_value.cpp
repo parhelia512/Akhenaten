@@ -5,6 +5,8 @@
 #include "building/building_irrigation_ditch.h"
 #include "core/calc.h"
 #include "core/profiler.h"
+#include "game/game_config.h"
+#include "grid/basin.h"
 #include "grid/grid.h"
 #include "grid/ring.h"
 #include "grid/terrain.h"
@@ -17,7 +19,22 @@ grid_xx g_irrigation_value_grid(FS_INT8);
 
 irrigation_value_t g_irrigation_value;
 
+namespace {
+
+bool irrigation_value_accepts_tile(uint16_t src_basin_id, int grid_offset) {
+    if (!game_features::gameplay_enhanced_flood_basins.to_bool()) {
+        return true;
+    }
+    return map_basin_id_at(grid_offset) == src_basin_id;
+}
+
+} // namespace
+
 void irrigation_value_t::add_irrigation_at_distance(tile2i tile, int size, int distance, int value) {
+    add_irrigation_at_distance(tile, size, distance, value, map_basin_id_at(tile));
+}
+
+void irrigation_value_t::add_irrigation_at_distance(tile2i tile, int size, int distance, int value, uint16_t src_basin_id) {
     int partially_outside_map = 0;
     int x = tile.x();
     int y = tile.y();
@@ -38,6 +55,9 @@ void irrigation_value_t::add_irrigation_at_distance(tile2i tile, int size, int d
             const ring_tile* ring_t = map_ring_tile(i);
             if (map_ring_is_inside_map(x + ring_t->x, y + ring_t->y)) {
                 int grid_offset = base_offset + ring_t->grid_offset;
+                if (!irrigation_value_accepts_tile(src_basin_id, grid_offset)) {
+                    continue;
+                }
                 int current = map_grid_get(g_irrigation_value_grid, grid_offset);
                 int new_value = std::max(current, value);
                 map_grid_set(g_irrigation_value_grid, grid_offset, new_value);
@@ -47,6 +67,9 @@ void irrigation_value_t::add_irrigation_at_distance(tile2i tile, int size, int d
         for (int i = start; i < end; i++) {
             const ring_tile* ring_t = map_ring_tile(i);
             int grid_offset = base_offset + ring_t->grid_offset;
+            if (!irrigation_value_accepts_tile(src_basin_id, grid_offset)) {
+                continue;
+            }
             int current = map_grid_get(g_irrigation_value_grid, grid_offset);
             int new_value = std::max(current, value);
             map_grid_set(g_irrigation_value_grid, grid_offset, new_value);
@@ -59,6 +82,7 @@ void irrigation_value_t::add_irrigation(tile2i tile, int size, int base_value, i
         return;
     }
 
+    const uint16_t src_basin_id = map_basin_id_at(tile);
     range = std::min(range, 20); // reasonable max range
     int distance = 1;
     int current_value = base_value;
@@ -69,6 +93,9 @@ void irrigation_value_t::add_irrigation(tile2i tile, int size, int base_value, i
             tile2i t = tile.shifted(dx, dy);
             if (map_ring_is_inside_map(t.x(), t.y())) {
                 int grid_offset = t.grid_offset();
+                if (!irrigation_value_accepts_tile(src_basin_id, grid_offset)) {
+                    continue;
+                }
                 int current = map_grid_get(g_irrigation_value_grid, grid_offset);
                 int new_value = std::max(current, base_value);
                 map_grid_set(g_irrigation_value_grid, grid_offset, new_value);
@@ -78,7 +105,7 @@ void irrigation_value_t::add_irrigation(tile2i tile, int size, int base_value, i
     
     // Spread to surrounding tiles, decreasing by 2 each distance
     while (range > 0 && current_value > 0) {
-        add_irrigation_at_distance(tile, size, distance, current_value);
+        add_irrigation_at_distance(tile, size, distance, current_value, src_basin_id);
         distance++;
         range--;
         current_value -= 2;

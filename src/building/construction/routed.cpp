@@ -1,5 +1,6 @@
 #include "routed.h"
 
+#include "building/building_dike.h"
 #include "building/building_wall.h"
 #include "building/building_road.h"
 #include "core/calc.h"
@@ -51,6 +52,10 @@ routed_building_result place_routed_building(tile2i start, tile2i end, e_routed_
 
         case ROUTED_BUILDING_WALL:
             items += (building_mud_wall::set_wall(end, wall_type, write_wall_material) ? 1 : 0);
+            break;
+
+        case ROUTED_BUILDING_DIKE:
+            items += (building_dike::set_dike(end) ? 1 : 0);
             break;
 
         case ROUTED_BUILDING_CANALS:

@@ -208,6 +208,11 @@ int map_routing_tile_check(int routing_type, int grid_offset) {
                 return CITIZEN_0_ROAD;
             }
 
+            // Dike on floodplain would otherwise fall through FLOODPLAIN passable — block unless road sluice.
+            if (!!(terrain & TERRAIN_DIKE)) {
+                return CITIZEN_N1_BLOCKED;
+            }
+
             // Block pure water tiles (lakes, rivers) - citizens cannot walk through water
             if (!!(terrain & TERRAIN_WATER) && !(terrain & TERRAIN_FERRY_ROUTE)) {
                 return CITIZEN_N1_BLOCKED;
@@ -243,6 +248,10 @@ int map_routing_tile_check(int routing_type, int grid_offset) {
 
             if (terrain & TERRAIN_ROAD) {
                 return NONCITIZEN_0_PASSABLE;
+            }
+
+            if (terrain & TERRAIN_DIKE) {
+                return NONCITIZEN_N1_BLOCKED;
             }
 
             if (terrain & (TERRAIN_GARDEN | TERRAIN_ACCESS_RAMP | TERRAIN_RUBBLE | TERRAIN_MARSHLAND)) {
@@ -281,7 +290,7 @@ int map_routing_tile_check(int routing_type, int grid_offset) {
                 return AMPHIBIA_0_PASSABLE;
             }
 
-            if (terrain & (TERRAIN_WALL | TERRAIN_ROCK | TERRAIN_TREE)) {
+            if (terrain & (TERRAIN_WALL | TERRAIN_DIKE | TERRAIN_ROCK | TERRAIN_TREE)) {
                 return AMPHIBIA_N1_BLOCKED;
             }
 

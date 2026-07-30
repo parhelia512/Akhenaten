@@ -6,6 +6,22 @@
 #include "core/profiler.h"
 #include "widget/debug_console.h"
 #include "scenario/invasion_auto_resolve.h"
+#include "grid/basin.h"
+
+namespace {
+
+void on_bool_feature_maybe_changed(xstring feature_name) {
+    if (feature_name == "gameplay_enhanced_auto_resolve_invasions") {
+        g_invasion_auto_resolve.on_feature_maybe_changed();
+    }
+    if (feature_name == "gameplay_enhanced_flood_basins") {
+        map_basin_mark_dirty();
+        // Rebuild restamps IRRIGATION_RANGE and refreshes irrigation_value.
+        map_basin_rebuild_dirty();
+    }
+}
+
+} // namespace
 
 std::optional<bvariant> __game_feature_get(xstring feature_name) {
     auto feature = game_features::find(feature_name);
@@ -60,9 +76,7 @@ void __game_feature_set(xstring feature_name, bvariant value) {
                 bool_value = false;
             }
             feature->set(bool_value);
-            if (feature_name == "gameplay_enhanced_auto_resolve_invasions") {
-                g_invasion_auto_resolve.on_feature_maybe_changed();
-            }
+            on_bool_feature_maybe_changed(feature_name);
             break;
         }
         case setting_string: feature->set(value.as_str()); break;
@@ -139,6 +153,7 @@ void __debug_feature_bool(xstring feature_name, xstring display_name) {
     game_debug_show_property(label, current);
     if (saved != current) {
         feature->set(current);
+        on_bool_feature_maybe_changed(feature_name);
     }
 }
 ANK_FUNCTION_2(__debug_feature_bool)

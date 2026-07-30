@@ -68,6 +68,15 @@ localization_ru_f = [
     { key:"#TR_CONFIG_SETH_ASP_RAID", text:"Гнев Сета: набег змей из храмов, если нет роты для проклятия (TEMP Enhanced)"}
     { key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Гнев Птаха: набег скорпионов из храмов, если нет промышленности (TEMP Enhanced)"}
     { key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Автобой вторжений: враги ждут на входе, быстрая битва через 8 дней (стены/башни не считаются; фараон включён; не восстания)"}
+    { key:"#TR_CONFIG_FLOOD_BASINS", text:"Enhanced: дамбы / бассейны на пойме (замкните контур — лучше урожай после разлива)"}
+    { key:"#building_dike", text:"Дамба"}
+    { key:"#building_dike_info", text:"Земляной вал для ирригации бассейнов на пойме. Замкните контур вокруг ферм — урожай после разлива будет выше."}
+    { key:"#terrain_dike_sealed", text:"Замкнутый бассейн"}
+    { key:"#terrain_dike_breached", text:"Рядом нет замкнутого бассейна — замкните контур вокруг пойменных ферм, чтобы удержать дар разлива."}
+    { key:"#terrain_dike_tiles", text:"тайлов"}
+    { key:"#terrain_dike_farms", text:"ферм"}
+    { key:"#terrain_dike_bonus_hint", text:"Пока контур замкнут, плодородие и рост ферм выше."}
+    { key:"#farm_in_flood_basin", text:"В пойменном бассейне — урожай после разлива выше, пока контур замкнут."}
     { key:"#warning_auto_resolve_orders_blocked", text:"Нельзя вести роту на замороженную волну вторжения"}
     { key:"#warning_auto_resolve_queue_full", text:"Слишком много ожидающих вторжений — эта волна идёт боем на карте"}
     { key:"#invasion_quick_battle_title", text:"Быстрая битва"}

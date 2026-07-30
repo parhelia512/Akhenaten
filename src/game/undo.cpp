@@ -24,6 +24,7 @@
 #include "js/js_game.h"
 #include "scenario/earthquake.h"
 #include "grid/wall_material.h"
+#include "grid/basin.h"
 
 #include <string.h>
 
@@ -248,7 +249,7 @@ void game_undo_perform() {
         map_property_restore();
         map_property_clear_constructing_and_deleted();
 
-    } else if (building_type_any_of((e_building_type)data.type, make_array(BUILDING_IRRIGATION_DITCH, BUILDING_ROAD, BUILDING_MUD_WALL, BUILDING_BRICK_WALL))) {
+    } else if (building_type_any_of((e_building_type)data.type, make_array(BUILDING_IRRIGATION_DITCH, BUILDING_ROAD, BUILDING_MUD_WALL, BUILDING_BRICK_WALL, BUILDING_DIKE))) {
         map_terrain_restore();
         map_canal_restore();
         map_wall_material_restore();
@@ -287,8 +288,14 @@ void game_undo_perform() {
             }
         }
     }
+
     map_routing_update_land();
     map_routing_update_walls();
+    // CLEAR_LAND may restore/remove dikes; DIKE undo restores embankment terrain.
+    if (data.type == BUILDING_CLEAR_LAND || data.type == BUILDING_DIKE) {
+        map_basin_mark_dirty();
+        map_basin_rebuild_dirty();
+    }
     data.num_buildings = 0;
     int vacant_lot_image = building_static_params::get(BUILDING_HOUSE_VACANT_LOT).base_img();
     for (int i = 0; data.newhouses_offsets[i] != 0; i++) {
@@ -324,6 +331,7 @@ void game_undo_reduce_time_available(void) {
     case BUILDING_ROAD:
     case BUILDING_MUD_WALL:
     case BUILDING_BRICK_WALL:
+    case BUILDING_DIKE:
     case BUILDING_LOW_BRIDGE:
     case BUILDING_UNUSED_SHIP_BRIDGE_83:
     case BUILDING_PLAZA:

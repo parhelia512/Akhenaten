@@ -9,10 +9,12 @@ enum e_routed_mode {
     ROUTED_BUILDING_ROAD = 0,
     ROUTED_BUILDING_WALL = 1,
     ROUTED_BUILDING_CANALS = 2,
+    ROUTED_BUILDING_DIKE = 3,
     ROUTED_BUILDING_CANALS_WITHOUT_GRAPHIC = 4,
+    ROUTED_BUILDING_MAX
 };
 
-using e_routed_mode_tokens_t = token_holder<e_routed_mode, ROUTED_BUILDING_ROAD, (e_routed_mode)3>;
+using e_routed_mode_tokens_t = token_holder<e_routed_mode, ROUTED_BUILDING_ROAD, ROUTED_BUILDING_MAX>;
 
 void map_routing_calculate_distances(tile2i tile);
 void map_routing_calculate_distances_water_boat(tile2i tile);

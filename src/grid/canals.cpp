@@ -4,17 +4,55 @@
 #include "graphics/image_groups.h"
 #include "graphics/image.h"
 #include "graphics/graphics.h"
+#include "grid/grid.h"
 #include "grid/image.h"
 #include "grid/tiles.h"
 #include "grid/property.h"
 #include "scenario/map.h"
 #include "io/io_buffer.h"
 #include "grid/terrain.h"
+#include "grid/basin.h"
 #include "building/building_road.h"
 #include "building/building_irrigation_ditch.h"
 #include "city/city_buildings.h"
 #include "grid/image_context.h"
 #include "graphics/view/view.h"
+#include "game/game.h"
+#include "game/game_config.h"
+
+#include <cstdint>
+
+namespace {
+
+// When flood basins are on, do not stamp irrigation across a dike wall:
+// only tiles that share the canal's basin_id (0 = outside / unsealed).
+void map_add_irrigation_range(tile2i tile, int size, int radius) {
+    if (!game_features::gameplay_enhanced_flood_basins.to_bool()) {
+        map_terrain_add_with_radius(tile, size, radius, TERRAIN_IRRIGATION_RANGE);
+        return;
+    }
+
+    const uint16_t src_id = map_basin_id_at(tile);
+    grid_area area = map_grid_get_area(tile, size, radius);
+    map_grid_area_foreach(area, [src_id](tile2i t) {
+        if (map_basin_id_at(t) == src_id) {
+            map_terrain_add(t, TERRAIN_IRRIGATION_RANGE);
+        }
+    });
+}
+
+// DK3 half-rate bookkeeping. Seeded from saved total_days; subpass allows multiple
+// decrease calls on the same calendar day (tests). Must reset on load — otherwise
+// an in-process load of the same total_days keeps a stale subpass and skews hold.
+uint32_t s_decay_prev_total_days = UINT32_MAX;
+unsigned s_decay_subpass = 0;
+
+} // namespace
+
+void canals_reset_decay_phase() {
+    s_decay_prev_total_days = UINT32_MAX;
+    s_decay_subpass = 0;
+}
 
 static int canals_include_construction = 0;
 
@@ -80,6 +118,18 @@ void canals_decrease_water_level() {
 
     river_access_canal_offsets->clear();
 
+    // DK3: sealed-basin canals decay at half rate (skip every other pass).
+    // Phase is seeded from saved total_days so load does not reset hold parity;
+    // subpass covers multiple decrease calls on the same day (tests / tooling).
+    const uint32_t total_days = game.simtime.total_days;
+    if (total_days != s_decay_prev_total_days) {
+        s_decay_prev_total_days = total_days;
+        s_decay_subpass = 0;
+    }
+    const unsigned decay_pass = total_days + s_decay_subpass++;
+    const bool basin_hold_pass = game_features::gameplay_enhanced_flood_basins.to_bool()
+        && ((decay_pass & 1u) == 0u);
+
     int image_canal_set_begin = building_irrigation_ditch::images().begin; // 119 C3
     int image_without_water = image_canal_set_begin + building_irrigation_ditch::image_set::IMAGE_FULL_OFFSET;
     int grid_offset = scenario_map_data()->start_offset;
@@ -90,7 +140,11 @@ void canals_decrease_water_level() {
                 continue;
             }
 
-            int level = std::max(map_canal_at(grid_offset) - 1, 0);
+            int drop = 1;
+            if (basin_hold_pass && map_basin_is_sealed_at(grid_offset)) {
+                drop = 0;
+            }
+            int level = std::max(map_canal_at(grid_offset) - drop, 0);
             map_canal_set(grid_offset, level);
             int image_id = map_image_at(grid_offset);
             if (level <= 0 && image_id < image_without_water) {
@@ -129,7 +183,7 @@ void map_canal_fill_from_offset(tile2i tile, int water) {
             map_image_set(wtile.tile, image_id - building_irrigation_ditch::image_set::IMAGE_FULL_OFFSET);
         }
 
-        map_terrain_add_with_radius(wtile.tile, 1, 2, TERRAIN_IRRIGATION_RANGE);
+        map_add_irrigation_range(wtile.tile, 1, 2);
 
         for (const auto it : adjacent_offsets) {
             tile2i new_offset = wtile.tile.shifted(it);
@@ -161,6 +215,31 @@ void map_update_canals_from_river() {
     }
 }
 
+// DK3: farms read TERRAIN_IRRIGATION_RANGE (cleared each canal update), not canal
+// water bytes. Re-stamp from every wet canal so residual water (half-rate sealed
+// hold, lift-fed networks after the pre-update fill, river leftovers) still
+// irrigates. Clipped to same basin_id so radius-2 does not leak across a dike.
+static void map_stamp_irrigation_from_wet_canals() {
+    int grid_offset = scenario_map_data()->start_offset;
+    for (int y = 0; y < scenario_map_data()->height; y++, grid_offset += scenario_map_data()->border_size) {
+        for (int x = 0; x < scenario_map_data()->width; x++, grid_offset++) {
+            if (!map_terrain_is(grid_offset, TERRAIN_CANAL) || map_terrain_is(grid_offset, TERRAIN_WATER)) {
+                continue;
+            }
+            if (map_canal_at(grid_offset) <= 0) {
+                continue;
+            }
+            map_add_irrigation_range(tile2i(grid_offset), 1, 2);
+        }
+    }
+}
+
+void map_irrigation_restamp_from_wet_canals() {
+    OZZY_PROFILER_FUNCTION();
+    map_terrain_remove_all(TERRAIN_IRRIGATION_RANGE);
+    map_stamp_irrigation_from_wet_canals();
+}
+
 void map_update_canals() {
     OZZY_PROFILER_FUNCTION();
     // first, reset all canals
@@ -169,6 +248,9 @@ void map_update_canals() {
 
     // fill canals!
     map_update_canals_from_river();
+    // River fill already stamps as it goes; this covers sealed hold + lift-fed
+    // canals filled just before this update (their fill stamps were cleared above).
+    map_stamp_irrigation_from_wet_canals();
 }
 
 void set_terrain_canal_connections(int grid_offset, int direction, int multi_tile_mask, image_tiles_vec& tiles) {

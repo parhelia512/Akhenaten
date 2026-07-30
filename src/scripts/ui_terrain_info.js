@@ -113,12 +113,14 @@ terrain_info_floodplain {
     ui : baseui(terrain_info_window, {
         title         : text({pos: [0, 16], size: [px(29), 13], text:[70, 29], font:FONT_LARGE_BLACK_ON_LIGHT, align:"center"})
         describe      : text({pos: [30, 78], text:[70, 55], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
+        basin_status  : text({pos: [30, 170], size: [px(26), 40], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
     })
 }
 
 [es=terrain_info_floodplain_init]
 function terrain_info_floodplain_on_init(window) {
-
+    window.basin_status.text = terrain_info_format_basin_status_at_tile(
+        __map_tile_at_grid_offset(window.grid_offset), true)
 }
 
 terrain_info_water = {
@@ -176,4 +178,37 @@ terrain_info_rubble {
 function terrain_info_rubble_on_init(window) {
     var rubble_type = __map_rubble_building_type_at_grid(window.grid_offset)
     window.warning_text.text = __loc(41, rubble_type)
+}
+
+terrain_info_dike {
+    help_id           : 60
+    open_sounds       : [ ]
+    ui : baseui(terrain_info_window, {
+        title         : text({pos: [0, 16], size: [px(29), 13], text:"#building_dike", font:FONT_LARGE_BLACK_ON_LIGHT, align:"center"})
+        describe      : text({pos: [30, 78], text:"#building_dike_info", font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
+        basin_status  : text({pos: [30, 160], size: [px(26), 50], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
+    })
+}
+
+function terrain_info_format_basin_status_at_tile(tile, from_interior) {
+    if (game_features.get('gameplay_enhanced_flood_basins') !== true) {
+        return ""
+    }
+
+    var id = from_interior ? terrain.basin_id(tile) : terrain.basin_adjacent_id(tile)
+    if (!id) {
+        return from_interior ? "" : __loc("#terrain_dike_breached")
+    }
+
+    var area = __map_basin_area(id)
+    var farms = __map_basin_farm_count(id)
+    return __loc("#terrain_dike_sealed") + " — " + area + " " + __loc("#terrain_dike_tiles")
+        + ", " + farms + " " + __loc("#terrain_dike_farms") + ". "
+        + __loc("#terrain_dike_bonus_hint")
+}
+
+[es=terrain_info_dike_init]
+function terrain_info_dike_on_init(window) {
+    var tile = __map_tile_at_grid_offset(window.grid_offset)
+    window.basin_status.text = terrain_info_format_basin_status_at_tile(tile, false)
 }

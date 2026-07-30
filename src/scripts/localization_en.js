@@ -82,6 +82,15 @@ localization_en = [
   {key:"#TR_CONFIG_SETH_ASP_RAID", text:"Seth major curse: asp raid from temples when no company to curse (TEMP Enhanced)"}
   {key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Ptah major curse: scorpion raid from temples when no industry to smash (TEMP Enhanced)"}
   {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Auto-resolve invasions: freeze at entry, quick battle in 8 days (walls/towers ignored; Pharaoh included; not uprisings)"}
+  {key:"#TR_CONFIG_FLOOD_BASINS", text:"Enhanced: floodplain dikes / basin irrigation (seal farms for better post-flood yields)"}
+  {key:"#building_dike", text:"Dike"}
+  {key:"#building_dike_info", text:"Earth embankment for floodplain basin irrigation. Seal a contour around farms to improve yields after the inundation."}
+  {key:"#terrain_dike_sealed", text:"Sealed basin"}
+  {key:"#terrain_dike_breached", text:"No sealed basin adjacent — close a contour around floodplain farms to hold the flood's gift."}
+  {key:"#terrain_dike_tiles", text:"tiles"}
+  {key:"#terrain_dike_farms", text:"farms"}
+  {key:"#terrain_dike_bonus_hint", text:"Fertility and farm growth improve while sealed."}
+  {key:"#farm_in_flood_basin", text:"In flood basin — better yields after the inundation while the contour stays sealed."}
   {key:"#warning_auto_resolve_orders_blocked", text:"Cannot march companies onto a frozen invasion wave"}
   {key:"#warning_auto_resolve_queue_full", text:"Too many pending invasions — this wave fights on the map"}
   {key:"#invasion_quick_battle_title", text:"Quick battle"}

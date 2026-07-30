@@ -1,11 +1,12 @@
 #include "routing.h"
 
+#include "building/building.h"
+#include "building/building_dike.h"
 #include "city/city.h"
 #include "city/city_animals.h"
+#include "city/city_buildings.h"
 #include "figure/route.h"
 #include "grid/vegetation.h"
-#include "building/building.h"
-#include "city/city_buildings.h"
 #include "routing_terrain.h"
 #include "core/profiler.h"
 #include "grid/building.h"
@@ -133,6 +134,14 @@ static void callback_calc_distance_build_wall(int next_offset, int dist) {
         enqueue(next_offset, dist);
     }
 }
+
+static void callback_calc_distance_build_dike(int next_offset, int dist) {
+    tile2i tile(next_offset);
+    if (!building_dike::can_place_on_tile(tile)) {
+        return;
+    }
+    enqueue(next_offset, dist);
+}
 static void callback_calc_distance_build_road(int next_offset, int dist) {
     bool blocked = false;
     int d_x = MAP_X(next_offset) - MAP_X(queue_get(0));
@@ -147,6 +156,10 @@ static void callback_calc_distance_build_road(int next_offset, int dist) {
 
     case CITIZEN_2_PASSABLE_TERRAIN: // rubble, garden, access ramp
     case CITIZEN_N1_BLOCKED:         // non-empty land
+        if (map_terrain_is(next_offset, TERRAIN_DIKE)) {
+            // Allow road on dike (sluice) — both floodplain and edge dikes.
+            break;
+        }
         if (!map_terrain_is(next_offset, TERRAIN_FLOODPLAIN) || map_terrain_is(next_offset, TERRAIN_WATER)
             || map_terrain_is(next_offset, TERRAIN_BUILDING))
             blocked = true;
@@ -181,6 +194,11 @@ static void callback_calc_distance_build_aqueduct(int next_offset, int dist) {
 
     case CITIZEN_2_PASSABLE_TERRAIN: // rubble, garden, access ramp
     case CITIZEN_N1_BLOCKED:         // non-empty land
+        // Dikes are embankments — canals must not share the tile (plan: no canal|dike).
+        if (map_terrain_is(next_offset, TERRAIN_DIKE)) {
+            blocked = true;
+            break;
+        }
         if (!map_terrain_is(next_offset, TERRAIN_FLOODPLAIN) || map_terrain_is(next_offset, TERRAIN_WATER)
             || map_terrain_is(next_offset, TERRAIN_BUILDING))
             blocked = true;
@@ -200,9 +218,14 @@ static void callback_calc_distance_build_aqueduct(int next_offset, int dist) {
 bool map_can_place_initial_road_or_canal(int grid_offset, int is_canal) {
     switch (map_grid_get(routing_land_citizen, grid_offset)) {
     case CITIZEN_N1_BLOCKED:
-        // not open land, can only if:
-        // - aqueduct should be placed, and:
-        // - land is a reservoir building OR an canal
+        // Road may start on a dike (sluice). Canal may not.
+        if (map_terrain_is(grid_offset, TERRAIN_DIKE)) {
+            if (is_canal) {
+                return false;
+            }
+            break;
+        }
+        // not open land, can only if floodplain (not underwater)
         if (!map_terrain_is(grid_offset, TERRAIN_FLOODPLAIN) || map_terrain_is(grid_offset, TERRAIN_WATER)) {
             return false;
         }
@@ -300,6 +323,10 @@ bool map_routing_calculate_distances_for_building(e_routed_mode type, tile2i til
 
     case ROUTED_BUILDING_WALL:
         route_queue(tile.grid_offset(), -1, callback_calc_distance_build_wall);
+        break;
+
+    case ROUTED_BUILDING_DIKE:
+        route_queue(tile.grid_offset(), -1, callback_calc_distance_build_dike);
         break;
 
     default:

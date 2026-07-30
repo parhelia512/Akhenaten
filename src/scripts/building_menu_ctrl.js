@@ -34,6 +34,10 @@ building_menu_ctrl.is_visible = function(type) {
 }
 
 building_menu_ctrl.is_enabled = function(type) {
+    // Enhanced dikes: hide from menus while the flood-basins flag is off.
+    if (type == BUILDING_DIKE && game_features.get('gameplay_enhanced_flood_basins') !== true) {
+        return false
+    }
     var e = building_menu_ctrl.enabled[type]
     return (e !== undefined && e !== null) ? e : false
 }

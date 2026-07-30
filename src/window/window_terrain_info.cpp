@@ -77,6 +77,7 @@ void terrain_info_window::init(object_info &c) {
     case terrain_info_wall:
     case terrain_info_mud_wall:
     case terrain_info_brick_wall:
+    case terrain_info_dike:
     case terrain_info_plaza:
     case terrain_info_ore_rock:
     case terrain_info_rock:
@@ -120,6 +121,10 @@ bool terrain_info_window::check(object_info &c) {
 
     } else if (map_terrain_is(c.grid_offset, TERRAIN_TREE)) {
         c.terrain_type = terrain_info_tree;
+
+    } else if (map_terrain_is(c.grid_offset, TERRAIN_DIKE)) {
+        // Before FLOODPLAIN/ROAD: bare crest and sluice both identify as dike.
+        c.terrain_type = terrain_info_dike;
 
     } else if (!c.bid && map_terrain_is(c.grid_offset, TERRAIN_FLOODPLAIN)) {
         if (map_terrain_is(c.grid_offset, TERRAIN_WATER)) {

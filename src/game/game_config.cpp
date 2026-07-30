@@ -154,6 +154,8 @@ namespace game_features {
     game_feature gameplay_ptah_scorpion_raid{ "gameplay_ptah_scorpion_raid", "#TR_CONFIG_PTAH_SCORPION_RAID", false };
     game_feature gameplay_enhanced_auto_resolve_invasions{
         "gameplay_enhanced_auto_resolve_invasions", "#TR_CONFIG_AUTO_RESOLVE_INVASIONS", false };
+    game_feature gameplay_enhanced_flood_basins{
+        "gameplay_enhanced_flood_basins", "#TR_CONFIG_FLOOD_BASINS", false };
 
     xspan<game_feature*> all() {
         return { _features.data(), _features.size() };

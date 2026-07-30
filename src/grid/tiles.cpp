@@ -22,6 +22,7 @@
 #include "building/building_garden.h"
 #include "building/building_plaza.h"
 #include "building/building_road.h"
+#include "building/building_dike.h"
 #include "city/city.h"
 #include "city/city_floods.h"
 #include "core/calc.h"
@@ -440,6 +441,7 @@ void map_refresh_river_image_at(int grid_offset, bool force) {
     set_floodplain_edge_3x3_tiles(grid_offset);
     set_floodplain_land_tiles_image(grid_offset, force);
     building_road::set_image(tile2i(grid_offset));
+    building_dike::set_image(tile2i(grid_offset));
     map_tiles_set_canal_image(grid_offset);
 }
 

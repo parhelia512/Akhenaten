@@ -3,6 +3,7 @@
 #include "building/building_house.h"
 #include "building/building_farm.h"
 #include "building/building_wall.h"
+#include "building/building_dike.h"
 #include "city/city.h"
 #include "game/game_events.h"
 #include "city/city_warnings.h"
@@ -22,6 +23,7 @@
 #include "game/game_config.h"
 #include "window/popup_dialog.h"
 #include "building/building_burning_ruin.h"
+#include "grid/basin.h"
 
 struct clear_confirm_t {
     tile2i cstart = tile2i();
@@ -80,6 +82,7 @@ static building* get_deletable_building(int grid_offset) {
 
 static int clear_land_confirmed(bool measure_only, clear_confirm_t confirm) {
     int items_placed = 0;
+    bool dike_touched = false;
     game_undo_restore_building_state();
     game_undo_restore_map(0);
 
@@ -110,6 +113,7 @@ static int clear_land_confirmed(bool measure_only, clear_confirm_t confirm) {
                     continue;
 
                 } else if (map_terrain_is(grid_offset, TERRAIN_CANAL)
+                           || map_terrain_is(grid_offset, TERRAIN_DIKE)
                            || (map_terrain_is(grid_offset, TERRAIN_NOT_CLEAR)
                            && map_terrain_is(grid_offset, TERRAIN_CLEARABLE)
                            && !map_terrain_exists_tile_in_radius_with_type(tile2i(x, y), 1, 1, TERRAIN_FLOODPLAIN))) {
@@ -178,6 +182,15 @@ static int clear_land_confirmed(bool measure_only, clear_confirm_t confirm) {
                 items_placed++;
                 map_canal_remove(grid_offset);
 
+            } else if (map_terrain_is(grid_offset, TERRAIN_DIKE)) {
+                // CLEARABLE drops DIKE (+ROAD if present) but not SUBMERGED_ROAD —
+                // clear flooded sluice fully so we don't leave an orphan submerged tile.
+                map_terrain_remove(grid_offset, TERRAIN_CLEARABLE | TERRAIN_SUBMERGED_ROAD);
+                items_placed++;
+                dike_touched = true;
+                // Floodplain stays NOT_CLEAR after DIKE removal — empty_land won't repaint.
+                map_refresh_river_image_at(grid_offset, true);
+
             } else if (map_terrain_is(grid_offset, TERRAIN_WATER)) {
                 if (!measure_only && map_bridge_count_figures(grid_offset) > 0)
                     events::emit(event_city_warning{ "#cannot_demolish_bridge_with_people" });
@@ -218,6 +231,7 @@ static int clear_land_confirmed(bool measure_only, clear_confirm_t confirm) {
         map_tiles_update_area_roads(x_min, y_min, radius);
         map_tiles_update_all_plazas();
         building_mud_wall::update_area_walls(area.tmin(), radius);
+        building_dike::update_area_dikes(area.tmin(), radius);
         map_tiles_update_region_canals(tile2i(x_min - 3, y_min - 3), tile2i(x_max + 3, y_max + 3));
     }
 
@@ -225,6 +239,10 @@ static int clear_land_confirmed(bool measure_only, clear_confirm_t confirm) {
         map_routing_update_land();
         map_routing_update_walls();
         map_routing_update_water();
+        if (dike_touched) {
+            map_basin_mark_dirty();
+            map_basin_rebuild_dirty();
+        }
         if (!!game_features::gameplay_change_immediate_delete) {
             building_update_state();
         }

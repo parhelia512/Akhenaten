@@ -18,7 +18,12 @@ void map_canal_backup(void);
 void map_canal_restore(void);
 
 void map_update_canals(void);
+void canals_decrease_water_level(void);
+// Reset DK3 half-rate phase bookkeeping (call after load / new city).
+void canals_reset_decay_phase(void);
 void map_canal_fill_from_offset(tile2i tile, int water);
+// Clear IRRIGATION_RANGE and re-stamp from wet canals (no water decay). Flag toggle.
+void map_irrigation_restamp_from_wet_canals(void);
 void map_canal_update_all_tiles(int include_construction);
 void map_tiles_set_canal_image(int grid_offset);
 

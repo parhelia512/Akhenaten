@@ -49,6 +49,7 @@
 #include "grid/wall_material.h"
 #include "grid/moisture.h"
 #include "grid/floodplain.h"
+#include "grid/basin.h"
 #include "grid/water.h"
 #include "grid/sandstone.h"
 #include "grid/stone.h"
@@ -948,6 +949,8 @@ void GamestateIO::start_loaded_file() {
 
     // river / garden tiles refresh
     build_terrain_caches();
+    map_basin_rebuild();
+    canals_reset_decay_phase();
 
     // routing
     map_routing_update_all();

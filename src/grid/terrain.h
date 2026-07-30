@@ -29,7 +29,7 @@ enum e_terrain : uint32_t {
     TERRAIN_FLOODPLAIN = 0x10000,
     TERRAIN_FERRY_ROUTE = 0x20000,
     TERRAIN_MARSHLAND = 0x40000,
-    TERRAIN_UNK_01 = 0x80000,
+    TERRAIN_DIKE = 0x80000, // Enhanced flood-basin embankment (was UNK_01)
     TERRAIN_ORE = 0x100000,
     TERRAIN_UNK_02 = 0x200000,
     TERRAIN_UNK_03 = 0x400000,
@@ -58,6 +58,7 @@ enum e_terrain : uint32_t {
                         + TERRAIN_FLOODPLAIN
                         // ... //
                         + TERRAIN_MARSHLAND
+                        + TERRAIN_DIKE
                         // ... //
                         + TERRAIN_ORE
                         // ... //

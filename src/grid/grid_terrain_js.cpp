@@ -8,6 +8,10 @@
 #include "grid/bridge.h"
 #include "grid/bridge_grid.h"
 #include "grid/wall_material.h"
+#include "grid/basin.h"
+#include "grid/floodplain.h"
+#include "grid/canals.h"
+#include "grid/irrigation_value.h"
 #include "grid/routing/routing.h"
 #include "grid/routing/routing_terrain.h"
 #include "building/building_irrigation_ditch.h"
@@ -171,3 +175,93 @@ int __map_wall_material(tile2i tile) {
     return (int)map_wall_material_at(tile);
 }
 ANK_FUNCTION_1(__map_wall_material);
+
+int __map_basin_id_at(tile2i tile) {
+    return (int)map_basin_id_at(tile);
+}
+ANK_FUNCTION_1(__map_basin_id_at);
+
+bool __map_basin_is_sealed_at(tile2i tile) {
+    return map_basin_is_sealed_at(tile);
+}
+ANK_FUNCTION_1(__map_basin_is_sealed_at);
+
+int __map_basin_count() {
+    return map_basin_count();
+}
+ANK_FUNCTION(__map_basin_count);
+
+int __map_basin_area(int basin_id) {
+    return map_basin_area((uint16_t)basin_id);
+}
+ANK_FUNCTION_1(__map_basin_area);
+
+int __map_basin_farm_count(int basin_id) {
+    return map_basin_farm_count((uint16_t)basin_id);
+}
+ANK_FUNCTION_1(__map_basin_farm_count);
+
+int __map_basin_adjacent_id(tile2i tile) {
+    return (int)map_basin_adjacent_id(tile);
+}
+ANK_FUNCTION_1(__map_basin_adjacent_id);
+
+void __map_basin_rebuild() {
+    map_basin_rebuild();
+}
+ANK_FUNCTION(__map_basin_rebuild);
+
+int __map_get_fertility_at(tile2i tile, int tally_type) {
+    return map_get_fertility(tile.grid_offset(), tally_type);
+}
+ANK_FUNCTION_2(__map_get_fertility_at);
+
+void __map_soil_set_depletion(tile2i tile, int malus) {
+    map_soil_set_depletion(tile.grid_offset(), malus);
+}
+ANK_FUNCTION_2(__map_soil_set_depletion);
+
+void __map_floodplain_apply_basin_fertility_bonus(tile2i tile) {
+    map_floodplain_apply_basin_fertility_bonus(tile);
+}
+ANK_FUNCTION_1(__map_floodplain_apply_basin_fertility_bonus);
+
+void __map_set_fertility_at(tile2i tile, int value) {
+    map_update_tile_fertility(tile.grid_offset(), value - map_get_fertility(tile.grid_offset(), FERT_WITH_MALUS));
+}
+ANK_FUNCTION_2(__map_set_fertility_at);
+
+int __map_floodplain_rebuild_rows() {
+    return map_floodplain_rebuild_rows();
+}
+ANK_FUNCTION(__map_floodplain_rebuild_rows);
+
+int __map_canal_at(tile2i tile) {
+    return map_canal_at(tile);
+}
+ANK_FUNCTION_1(__map_canal_at);
+
+void __map_canal_set(tile2i tile, int level) {
+    map_canal_set(tile, level);
+}
+ANK_FUNCTION_2(__map_canal_set);
+
+void __map_canals_decrease_water_level() {
+    canals_decrease_water_level();
+}
+ANK_FUNCTION(__map_canals_decrease_water_level);
+
+void __map_update_canals() {
+    map_update_canals();
+}
+ANK_FUNCTION(__map_update_canals);
+
+void __irrigation_value_update() {
+    g_irrigation_value.update();
+}
+ANK_FUNCTION(__irrigation_value_update);
+
+int __irrigation_value_get(tile2i tile) {
+    return g_irrigation_value.get(tile);
+}
+ANK_FUNCTION_1(__irrigation_value_get);

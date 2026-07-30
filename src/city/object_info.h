@@ -39,6 +39,7 @@ enum terrain_info_type {
     terrain_info_mud_wall = 24,
     terrain_info_meadows = 25,
     terrain_info_cliffs = 26,
+    terrain_info_dike = 27,
 
     terrain_info_count
 };

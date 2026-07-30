@@ -10,6 +10,7 @@ struct irrigation_value_t {
     void update_canals();
     
     void add_irrigation_at_distance(tile2i tile, int size, int distance, int value);
+    void add_irrigation_at_distance(tile2i tile, int size, int distance, int value, uint16_t src_basin_id);
     void add_irrigation(tile2i tile, int size, int base_value, int range);
     
     int get(int grid_offset);
