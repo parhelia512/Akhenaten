@@ -39,3 +39,4 @@ class figure_bricklayer;
 class figure_ferry_boat;
 class figure_carpenter;
 class figure_hunter;
+class figure_tomb_robber;
