@@ -394,4 +394,43 @@ public:
     BUILDING_METAINFO(BUILDING_LARGE_PYRAMID_CONE, building_large_pyramid_cone, building_large_pyramid)
 };
 
+// True pyramid complex = plain 20×20 (same as large). Causeway/temples not yet built.
+// Reuses LARGE_PYRAMID part types (344–346) via JS corner/wall/cone/filler params.
+class building_pyramid_complex : public building_large_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_PYRAMID_COMPLEX, building_pyramid_complex, building_large_pyramid)
+
+    struct static_params : public base_params, public building_static_params {
+    } BUILDING_STATIC_DATA_T;
+
+    virtual void update_day() override;
+    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual int building_image_get() const override;
+    virtual const base_params &pyramid_params() const override { return current_params(); }
+
+    virtual const monument &config() const override;
+};
+ANK_CONFIG_STRUCT(building_pyramid_complex::static_params,
+    init_tiles, corner_type, wall_type, cone_type, filler_type, enter_offset, stairs);
+
+// Grand = same on-land footprint until causeway; separate TYPE for monument weight 44.
+class building_grand_pyramid_complex : public building_large_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_GRAND_PYRAMID_COMPLEX, building_grand_pyramid_complex, building_large_pyramid)
+
+    struct static_params : public base_params, public building_static_params {
+    } BUILDING_STATIC_DATA_T;
+
+    virtual void update_day() override;
+    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual int building_image_get() const override;
+    virtual const base_params &pyramid_params() const override { return current_params(); }
+
+    virtual const monument &config() const override;
+};
+ANK_CONFIG_STRUCT(building_grand_pyramid_complex::static_params,
+    init_tiles, corner_type, wall_type, cone_type, filler_type, enter_offset, stairs);
+
 void map_pyramid_tiles_add(int building_id, tile2i tile, int size, int image_id, int terrain);

@@ -131,6 +131,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `108_true_pyramid_small_place.js` | C3a/C3.4 small true pyramid: place + parts, polish schedule (no limestone), natural finish/terminal keep-progress/congrats |
 | `109_true_pyramid_medium_place.js` | C3a2 medium true pyramid (12×12): height→polish 32–34→terminal 35, no-lime polish, saveload, natural finish |
 | `110_true_pyramid_large_place.js` | C3b large true pyramid (20×20): height→polish 36–40→terminal 41, no-lime polish, saveload, natural finish |
+| `112_true_pyramid_complex_place.js` | C3c true pyramid complex (20×20 on-land): same large polish schedule, parts/phases |
 | `110_sun_temple_place.js` | Sun Temple (C8): place with 220 sandstone, reject without stock / second unfinished |
 | `77_brick_wall_placement.js` | Brick wall L-drag; material; clear+undo; mud↔brick overwrite no-op |
 | `76_invasion_auto_resolve.js` | Enhanced auto-resolve invasions (AC*): freeze/pending, lose/win KR, queue timer, flag OFF, natives out, Pharaoh, queue full, save/load, chain spawn |

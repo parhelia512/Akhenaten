@@ -35,11 +35,15 @@ void info_window_pyramid::init(object_info &c) {
     const e_building_type mon_btype = pyramid->config().btype;
     const bool is_true = (mon_btype == BUILDING_SMALL_PYRAMID
         || mon_btype == BUILDING_MEDIUM_PYRAMID
-        || mon_btype == BUILDING_LARGE_PYRAMID);
+        || mon_btype == BUILDING_LARGE_PYRAMID
+        || mon_btype == BUILDING_PYRAMID_COMPLEX
+        || mon_btype == BUILDING_GRAND_PYRAMID_COMPLEX);
     int polish_begin = 24;
     if (mon_btype == BUILDING_MEDIUM_PYRAMID) {
         polish_begin = building_medium_pyramid::k_polish_phase_begin;
-    } else if (mon_btype == BUILDING_LARGE_PYRAMID) {
+    } else if (mon_btype == BUILDING_LARGE_PYRAMID
+        || mon_btype == BUILDING_PYRAMID_COMPLEX
+        || mon_btype == BUILDING_GRAND_PYRAMID_COMPLEX) {
         polish_begin = building_large_pyramid::k_polish_phase_begin;
     }
 

@@ -9,7 +9,7 @@ log_info("akhenaten: mission 18 rostja started")
 // NEW_TRADE i=20 copy Men-nefer; i=32/42/43 Nekhen→remap Iunet (route 3).
 // EVENT_TYPE_INVASION chain leaves no-op → gems crisis refuse JS Hyksos×11;
 // troops refuse/defeat i=35 → JS Hyksos×9 then on_completed → re-arm ×47.
-// Monuments TEMP 67 (pak 53 Sphinx+complex+medium pyramid; C3/F3).
+// Monuments goal 53 (Sphinx + complex + medium true pyramid).
 //
 // Tag_id scheme:
 //   1000 + i               chain-only ONLY_VIA_EVENT leaves / chain requests
@@ -85,17 +85,18 @@ mission18 { // Rostja (Giza) — The Great Pyramid and Sphinx
 		BUILDING_FERRY,
 		BUILDING_SMALL_STEPPED_PYRAMID, BUILDING_MEDIUM_STEPPED_PYRAMID,
 		BUILDING_SMALL_MASTABA, BUILDING_MEDIUM_MASTABA,
+		BUILDING_PYRAMID_COMPLEX, BUILDING_MEDIUM_PYRAMID, BUILDING_SPHINX,
 		BUILDING_FESTIVAL_SQUARE, BUILDING_BOOTH, BUILDING_JUGGLER_SCHOOL, BUILDING_BANDSTAND, BUILDING_PAVILLION,
 		BUILDING_SCRIBAL_SCHOOL,
 	]
 
-	// Goals vs pak: pop/culture/prosperity off; monuments 53 (TEMP 67); kingdom 50; housing_level 10.
-	// TODO(C3+C6/F3): restore goal 53 with pyramid complex + medium pyramid + Sphinx.
+	// Goals vs pak: pop/culture/prosperity off; monuments 53; kingdom 50; housing_level 10.
+	// Complex on-land W=12 + medium 16 + sphinx 1 → 2.25*29+4.5 ≈ 70 (above 53).
 	win_criteria {
 		population    {enabled : false }
 		culture       {enabled : false }
 		prosperity    {enabled : false }
-		monuments     {enabled : true, goal : 67 }
+		monuments     {enabled : true, goal : 53 }
 		kingdom       {enabled : true, goal : 50 }
 		housing_level {enabled : true, goal : 10 }
 	}
@@ -600,6 +601,7 @@ function mission18_on_start(ev) {
 	__image_request_pak(PACK_ENEMY_EGYPTIAN)
 	__image_request_pak(PACK_MASTABA)
 	__image_request_pak(PACK_STEPPED_PYRAMID)
+	__image_request_pak(PACK_PYRAMID)
 	mission_show_start_message(mission, "message_mission_giza")
 	empire.set_id(18)
 	empire.set_expanded(false)

@@ -85,6 +85,8 @@ class building_medium_bent_pyramid;
 class building_small_pyramid;
 class building_medium_pyramid;
 class building_large_pyramid;
+class building_pyramid_complex;
+class building_grand_pyramid_complex;
 class building_sphinx;
 class building_obelisk;
 

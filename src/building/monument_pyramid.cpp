@@ -75,6 +75,9 @@ REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_pyramid)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_pyramid_corner)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_pyramid_wall)
 
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_pyramid_complex)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_grand_pyramid_complex)
+
 struct pyramid_part {
     e_building_type type;
     tile2i offset;
@@ -391,6 +394,12 @@ const building_pyramid::base_params &get_pyramid_params(e_building_type type) {
     case BUILDING_LARGE_PYRAMID_CONE:
     case BUILDING_LARGE_PYRAMID_WALL:
         return pyramid_base_params<building_large_pyramid>(params);
+
+    case BUILDING_PYRAMID_COMPLEX:
+        return pyramid_base_params<building_pyramid_complex>(params);
+
+    case BUILDING_GRAND_PYRAMID_COMPLEX:
+        return pyramid_base_params<building_grand_pyramid_complex>(params);
     }
 
     static building_pyramid::base_params dummy;
@@ -1001,7 +1010,8 @@ int building_stepped_pyramid::get_masonry_image(int orientation, tile2i tile, ti
         BUILDING_SMALL_BENT_PYRAMID, BUILDING_MEDIUM_BENT_PYRAMID,
         BUILDING_SMALL_PYRAMID, BUILDING_SMALL_PYRAMID_CONE,
         BUILDING_MEDIUM_PYRAMID, BUILDING_MEDIUM_PYRAMID_CONE,
-        BUILDING_LARGE_PYRAMID, BUILDING_LARGE_PYRAMID_CONE
+        BUILDING_LARGE_PYRAMID, BUILDING_LARGE_PYRAMID_CONE,
+        BUILDING_PYRAMID_COMPLEX, BUILDING_GRAND_PYRAMID_COMPLEX
     });
     if (is_floor && !is_nw_origin) {
         const xstring floor_key = polished && current_params().first_img("base_polish") > 0
@@ -1444,7 +1454,9 @@ void building_stepped_pyramid::update_day(const vec2i tiles_size) {
                 || mon_type == BUILDING_MEDIUM_BENT_PYRAMID);
             const bool is_true = (mon_type == BUILDING_SMALL_PYRAMID
                 || mon_type == BUILDING_MEDIUM_PYRAMID
-                || mon_type == BUILDING_LARGE_PYRAMID);
+                || mon_type == BUILDING_LARGE_PYRAMID
+                || mon_type == BUILDING_PYRAMID_COMPLEX
+                || mon_type == BUILDING_GRAND_PYRAMID_COMPLEX);
             pcstr congrats = is_true ? "pyramid_congratulations"
                 : (is_bent ? "bent_pyramid_congratulations" : "stepped_pyramid_congratulations");
             city_message &message = city_message_post_with_popup_delay(MESSAGE_CAT_MONUMENTS, true, congrats, type(), tile().grid_offset());
@@ -2246,4 +2258,100 @@ bool building_large_pyramid::use_polish_sprites_for_layer(int layer) const {
 
 const monument &building_large_pyramid::config() const {
     return g_monument_large_pyramid;
+}
+
+// --- True pyramid complex / grand (C3c, on-land = large) ----------------------
+
+void building_pyramid_complex::update_day() {
+    building_impl::update_day();
+
+    if (is_finished()) {
+        return;
+    }
+
+    building_stepped_pyramid::update_day(current_params().init_tiles);
+}
+
+int building_pyramid_complex::building_image_get() const {
+    switch (phase()) {
+    case MONUMENT_START:
+        return current_params().base_img();
+    default:
+        return current_params().base_img() + 1;
+    }
+
+    return 0;
+}
+
+bool building_pyramid_complex::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
+    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, current_params().init_tiles);
+}
+
+bool building_pyramid_complex::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
+    if (is_finished()) {
+        return draw_completed_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+    }
+    if (phase() >= k_polish_phase_begin) {
+        if (city_flat_should_flatten_building(base)) {
+            return true;
+        }
+        return draw_completed_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+    }
+    return draw_unfinished_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+}
+
+const monument &building_pyramid_complex::config() const {
+    static monument m = [] {
+        monument copy = g_monument_large_pyramid;
+        copy.btype = BUILDING_PYRAMID_COMPLEX;
+        return copy;
+    }();
+    return m;
+}
+
+void building_grand_pyramid_complex::update_day() {
+    building_impl::update_day();
+
+    if (is_finished()) {
+        return;
+    }
+
+    building_stepped_pyramid::update_day(current_params().init_tiles);
+}
+
+int building_grand_pyramid_complex::building_image_get() const {
+    switch (phase()) {
+    case MONUMENT_START:
+        return current_params().base_img();
+    default:
+        return current_params().base_img() + 1;
+    }
+
+    return 0;
+}
+
+bool building_grand_pyramid_complex::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
+    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, current_params().init_tiles);
+}
+
+bool building_grand_pyramid_complex::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
+    if (is_finished()) {
+        return draw_completed_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+    }
+    if (phase() >= k_polish_phase_begin) {
+        if (city_flat_should_flatten_building(base)) {
+            return true;
+        }
+        return draw_completed_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+    }
+    return draw_unfinished_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+}
+
+const monument &building_grand_pyramid_complex::config() const {
+    static monument m = [] {
+        monument copy = g_monument_large_pyramid;
+        copy.btype = BUILDING_GRAND_PYRAMID_COMPLEX;
+        return copy;
+    }();
+    return m;
 }
