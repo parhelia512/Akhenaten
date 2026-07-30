@@ -3,6 +3,7 @@
 class building;
 class building_impl;
 
+#include "building_fwd.h"
 #include "core/smart_cast.h"
 
 GENERATE_SMART_CAST(building_impl)
@@ -82,6 +83,7 @@ GENERATE_SMART_CAST_BUILDING(small_stepped_pyramid)
 GENERATE_SMART_CAST_BUILDING(medium_stepped_pyramid)
 GENERATE_SMART_CAST_BUILDING(sphinx)
 GENERATE_SMART_CAST_BUILDING(obelisk)
+GENERATE_SMART_CAST_BUILDING(sun_temple)
 
 template <typename dest_type, typename r_type = std::add_pointer_t<std::remove_pointer_t<dest_type>>>
 inline r_type smart_cast(building *b);

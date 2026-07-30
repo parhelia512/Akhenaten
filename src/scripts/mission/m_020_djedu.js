@@ -4,7 +4,7 @@ log_info("akhenaten: mission 20 djedu started")
 // Empire id=19. Enemy ENEMY_5_HYKSOS. Gods: Osiris, Ra, Bast.
 // Funds Normal 7500 / loan 2500 / debt 20. Rank 7.
 // Win: pop 4500 / culture 45 / prosperity 40 / monuments 13 / kingdom 50 / housing 10.
-// Monuments TEMP 0 (pak 13 Sun Temple; waits C8). Burial empty.
+// Monuments goal 13 (pak; Sun Temple weight 4). Burial empty.
 // Trade: On(1 sea) Dunqul(3). Display Iunet(2) Saqqara(4) Dahshur(5) Abedju(6). Men-nefer stub 19.
 // Triage: SKIP empty map_obj idx=12; SKIP orphan route 25.
 // Events: oil×500 ok→KR+8→gamemeat×5 ladder (i=5…11);
@@ -98,7 +98,7 @@ mission20 { // Djedu (Abusir) — The Temple of the Sun
 		population    {enabled : true, goal : 4500 }
 		culture       {enabled : true, goal : 45 }
 		prosperity    {enabled : true, goal : 40 }
-		monuments     {enabled : true, goal : 0 }
+		monuments     {enabled : true, goal : 13 }
 		kingdom       {enabled : true, goal : 50 }
 		housing_level {enabled : true, goal : 10 }
 	}

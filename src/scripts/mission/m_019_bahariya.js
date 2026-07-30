@@ -4,7 +4,7 @@ log_info("akhenaten: mission 19 bahariya started")
 // Empire id=18. Enemy ENEMY_5_HYKSOS (scenario); timed enemy + beduin raids (Libyan sprites).
 // Gods: Ra, Seth. Funds Normal 7500 / loan 2500 / debt 20.
 // Win: pop 3000 / culture 15 / prosperity 25 / monuments 13 / kingdom 40 / housing 10.
-// Monuments TEMP 0 (pak 13 Sun Temple; waits C8). Burial empty.
+// Monuments goal 13 (pak; Sun Temple weight 4). Burial empty.
 // Trade: On(1) Iunet(2) Abu(3) Serabit(4). Display Dahshur(17). Men-nefer stub route 19.
 // Triage: SKIP empty map_obj idx=10; SKIP orphan routes 5/6/7/25; omit river/disembark/inv points (pak 0).
 // Events: no requests; invasions + economy + NEW_TRADE Dahshur (i=28) + favour×76 + gift after wipe i=26→27.
@@ -80,12 +80,12 @@ mission19 { // Bahariya Oasis — The Western Desert
 		BUILDING_SCRIBAL_SCHOOL,
 	]
 
-	// Goals vs pak; monuments TEMP 0 until C8 Sun Temple weight.
+	// Goals vs pak; monuments 13 = Sun Temple weight 4.
 	win_criteria {
 		population    {enabled : true, goal : 3000 }
 		culture       {enabled : true, goal : 15 }
 		prosperity    {enabled : true, goal : 25 }
-		monuments     {enabled : true, goal : 0 }
+		monuments     {enabled : true, goal : 13 }
 		kingdom       {enabled : true, goal : 40 }
 		housing_level {enabled : true, goal : 10 }
 	}

@@ -89,6 +89,7 @@ class building_pyramid_complex;
 class building_grand_pyramid_complex;
 class building_sphinx;
 class building_obelisk;
+class building_sun_temple;
 
 using e_building_need_rules = uint32_t;
 

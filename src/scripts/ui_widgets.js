@@ -165,6 +165,22 @@ info_window_obelisk = {
     }
 }
 
+info_window_sun_temple = {
+    ui : {
+        background    : outer_panel({size: [29, 16]}),
+        title         : text({pos: [0, 16], text:"${building.name}", size: [px(29), 20], font : FONT_LARGE_BLACK_ON_LIGHT, align:"center"}),
+        subtitle      : text({pos: [32, 46], text:"${text.12}", size: [px(27), -1], wrap:px(27), font : FONT_NORMAL_BLACK_ON_LIGHT, multiline:true }),
+        progress_text : text({pos: [32, 66], size:[px(27), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        warning_text  : text({pos: [32, 96], size:[px(27), -1], wrap:px(27), multiline:true, font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        timber_icon   : resource_icon({pos: [32, 200], resource: RESOURCE_TIMBER }),
+        timber_text   : text({pos: [70, 204], size:[px(15), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        sandstone_icon: resource_icon({pos: [180, 200], resource: RESOURCE_SANDSTONE }),
+        sandstone_text: text({pos: [218, 204], size:[px(15), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        button_help   : help_button({}),
+        button_close  : close_button({}),
+    }
+}
+
 info_window_fishing_wharf = {
     ui : baseui(building_info_window, {
         resource_img : { type : "resource_icon", pos: [32, 186] },

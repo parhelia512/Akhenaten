@@ -3,7 +3,7 @@ log_info("akhenaten: mission 24 waset started")
 // Empire / events verified vs mission1.pak scenario 24 (2026-07-26 dump).
 // Empire id=1. Scenario enemy ENEMY_6_KUSHITE; timed invasions invader=egypt(2).
 // Gods: Osiris, Ra (patron), Bast. Funds Normal 9000 / loan 4000 / debt 20. Rank 8.
-// Win: pop 6000 / culture 55 / prosperity 45 / monuments TEMP 0 (pak 20 Sun Temple+pyramid; C8) / kingdom 70 / housing 10.
+// Win: pop 6000 / culture 55 / prosperity 45 / monuments 20 (pak; Sun Temple+pyramid) / kingdom 70 / housing 10.
 // Burial: weapons×16 pottery×16 luxury×10. Climate northern (map).
 // Trade: Dakhla(4) Thinis(1) Dunqul(3) Men-nefer(5 sea) Khmun(6 sea).
 // Display: Henen-nesw(2 sea) Kharga(0) Nekhen Sauty.
@@ -88,12 +88,12 @@ mission24 { // Waset (Thebes) — Civil War
 		BUILDING_SCRIBAL_SCHOOL, BUILDING_LIBRARY,
 	]
 
-	// Monuments TEMP 0 (pak first=24 Sun Temple + second=13 Small Pyramid; waits C8).
+	// Monuments goal 20 (pak threshold; ST weight 4 + small pyramid 8 → 31≥20).
 	win_criteria {
 		population    {enabled : true, goal : 6000 }
 		culture       {enabled : true, goal : 55 }
 		prosperity    {enabled : true, goal : 45 }
-		monuments     {enabled : true, goal : 0 }
+		monuments     {enabled : true, goal : 20 }
 		kingdom       {enabled : true, goal : 70 }
 		housing_level {enabled : true, goal : 10 }
 	}
@@ -742,7 +742,7 @@ function mission24_requests_and_events(ev) {
 	if (!mission.event4_oil_done && ev.years_since_start == 4 && ev.month == 10) {
 		mission.event4_oil_done = true
 		log_info("akhenaten: mission 24 oil×884 extortion (i=4)")
-		// refuse→egypt×6 via event_request_cleared (B12); no leaf 1007.
+		// refuse→egypt×6 via event_request_cleared (JS chain); no leaf 1007.
 		mission24_fire_request(2004, RESOURCE_OIL, 884, 18, 1005, 0, 1008, 6, 0, "Nekhen")
 	}
 	if (!mission.event10_troops_done && ev.years_since_start == 7 && ev.month == 2) {
@@ -758,7 +758,7 @@ function mission24_requests_and_events(ev) {
 	if (!mission.event18_oil_done && ev.years_since_start == 10 && ev.month == 4) {
 		mission.event18_oil_done = true
 		log_info("akhenaten: mission 24 oil×238 extortion (i=18)")
-		// refuse→egypt×4 via event_request_cleared (B12); no leaf 1021.
+		// refuse→egypt×4 via event_request_cleared (JS chain); no leaf 1021.
 		mission24_fire_request(2018, RESOURCE_OIL, 238, 18, 1019, 0, 1022, 6, 0, "Sauty")
 	}
 	if (!mission.event24_flood_done && ev.years_since_start == 11 && ev.month == 5) {
@@ -799,7 +799,7 @@ function mission24_event_i42_new_trade_kerma(ev) {
 	}).execute()
 }
 
-// B12: chain invasions from JS after request refuse (EVENT_TYPE_INVASION no-op).
+// Chain invasions from JS after request refuse (EVENT_TYPE_INVASION no-op).
 [es=event_request_cleared, mission=mission24]
 function mission24_on_request_cleared(ev) {
 	var outcome = mission_request_outcome(ev)

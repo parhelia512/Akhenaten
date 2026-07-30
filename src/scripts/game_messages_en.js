@@ -6316,6 +6316,7 @@ game_messages_en {
     }
 
     // Monument completion popups (keys match city_message_post from mastaba/pyramid).
+    // Eventmsg PHRASE_* strings are for the event system; these are lang message ids.
     pyramid_congratulations {
         id: 520,
         size [30, 18]
@@ -6340,8 +6341,16 @@ game_messages_en {
             text: "Construction of the Bent Pyramid is finally complete! This is a stupendous achievement for your city."
         }
     }
-    message_dike_breach {
+    sun_temple_congratulations {
         id: 523,
+        size [30, 18]
+        title { text: "Sun Temple finished!" }
+        content {
+            text: "After many months of toil, work on the Sun Temple has finally come to a close. This is a great accomplishment for your city!"
+        }
+    }
+    message_dike_breach {
+        id: 524,
         type: 2,
         size [30, 16]
         title { text: "Dike breach" }
