@@ -172,7 +172,9 @@
         <li><span class="obj-label">Housing level</span><span class="obj-value">10</span></li>
       </ul>
       <div class="deviation-note">
-        <strong>Temporary deviation (D6 / C3):</strong> pak monument goal is <strong>32</strong> (large true pyramid). True pyramids are not implemented (task C3). Stand-in: small + medium stepped pyramids → rating 58 under the additive formula. Reverts to 32 when C3/F3 land.
+        <strong>Temporary deviation (D6 / C3):</strong> pak monument goal is <strong>32</strong> (large true pyramid, weight ≈12).
+        <strong>C3a done:</strong> small true pyramid (weight 8) + polish is playable, but does not meet the pak goal alone.
+        Stand-in remains small + medium stepped → rating 58. Reverts to 32 when <strong>C3b large</strong> lands.
       </div>
 
       <h2 id="events">Scripted events</h2>
@@ -215,7 +217,7 @@
             <tr><td>Food &amp; farming</td><td>Grain Farm · Barley Farm · Figs Farm · Hunting Lodge · Water Lift · Irrigation Ditch · Bazaar · Granary · Storage Yard</td></tr>
             <tr><td>Raw materials</td><td><strong>Limestone Quarry</strong> · Stone Quarry · Clay Pit</td></tr>
             <tr><td>Industry</td><td>Bricks · Pottery · Brewery · Papyrus · Weaver · Jewels Workshops · Work Camp</td></tr>
-            <tr><td>Monuments</td><td>Small / Medium Stepped Pyramid · Small / Medium Mastaba <span style="color:var(--text-muted)">(true pyramid pending — task C3)</span></td></tr>
+            <tr><td>Monuments</td><td>Small / Medium Stepped Pyramid · Small / Medium Mastaba · <strong>Small True Pyramid</strong> <span style="color:var(--text-muted)">(C3a ✅; large true still pending for pak goal 32)</span></td></tr>
             <tr><td>Guilds</td><td>Stonemasons' · Carpenters' · Bricklayers'</td></tr>
             <tr><td>Military</td><td>Recruiter · Weaponsmith · Military Academy · Infantry / Archers / Charioteers Fort · Mud Wall · Mud Gatehouse · Mud Tower</td></tr>
             <tr><td>Religion</td><td>Temples &amp; Shrines of Osiris, Ptah, Seth, Ra · Festival Square</td></tr>
@@ -281,7 +283,7 @@
           <summary>Known deviations from the original (tracked)</summary>
           <div class="details-body">
             <ul>
-              <li><strong>Monuments TEMP 58</strong> (pak 32) — C3 true pyramid not implemented; F3 weights later.</li>
+              <li><strong>Monuments TEMP 58</strong> (pak 32) — C3a small true ✅; C3b large still needed to drop TEMP / F3 weights.</li>
               <li><strong>Clay floods i=0/1</strong> — pak year=24 reinterpreted as annual y1m0+; amount=8 = 8% of clay pits per wave (×2 waves).</li>
               <li><strong>Henna i=11</strong> — pak year=24 amount=8 once → biennial y2m1+ amount=<strong>12</strong>; MESSAGE i=12/15 and invasion i=30 skipped (INVASION no-op / fluff).</li>
               <li><strong>Routes 7/8</strong> orphan polylines skipped; map_obj idx=10 empty stub skipped.</li>
