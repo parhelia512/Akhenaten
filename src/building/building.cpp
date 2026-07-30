@@ -638,6 +638,7 @@ tile2i building::access_tile() {
     case BUILDING_MEDIUM_MASTABA_SIDE:
     case BUILDING_MEDIUM_STEPPED_PYRAMID:
     case BUILDING_MEDIUM_BENT_PYRAMID:
+    case BUILDING_MEDIUM_PYRAMID:
         return main()->tile.shifted(0, 14);
 
     case BUILDING_LARGE_STEPPED_PYRAMID:

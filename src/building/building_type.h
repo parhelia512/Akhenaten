@@ -310,13 +310,16 @@ enum e_building_type : uint16_t {
 	BUILDING_LARGE_STEPPED_PYRAMID_WALL = 335,
 	BUILDING_LARGE_STEPPED_PYRAMID_CONE = 336,
 
-	// Enhanced: floodplain embankment strip (PC2 / dikes). Appended before BUILDING_MAX.
+	// Enhanced: floodplain embankment strip (dikes). Appended before BUILDING_MAX.
 	BUILDING_DIKE = 337,
 
 	// True (smooth) pyramid part runtime-ids. Main types are 253–255 above.
 	BUILDING_SMALL_PYRAMID_CORNER = 338,
 	BUILDING_SMALL_PYRAMID_WALL = 339,
 	BUILDING_SMALL_PYRAMID_CONE = 340,
+	BUILDING_MEDIUM_PYRAMID_CORNER = 341,
+	BUILDING_MEDIUM_PYRAMID_WALL = 342,
+	BUILDING_MEDIUM_PYRAMID_CONE = 343,
 
 	BUILDING_MAX,
 };

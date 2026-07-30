@@ -81,7 +81,7 @@ public:
     // Unfinished: phase-6 alt cue; under flat view skip tall height_impl tiers.
     bool draw_unfinished_height_ornaments(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
     // All present layers at full brick course (finished). True pyramid may polish
-    // individual layers via use_polish_sprites_for_layer (C3.4.3).
+    // individual layers via use_polish_sprites_for_layer.
     bool draw_completed_height_ornaments(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
     // True (smooth) polish: which footprint layers already use casing sprites.
     virtual bool use_polish_sprites_for_layer(int layer) const { return false; }
@@ -91,7 +91,7 @@ public:
     void assign_stair();
     layer_area get_layer_area(int layer) const;
     int get_bricks_image(int orientation, tile2i tile, tile2i start, tile2i end, int layer);
-    // polished=true uses corner_polish/wall_polish/base_polish when present (C3.4.3).
+    // polished=true uses corner_polish/wall_polish/base_polish when present.
     int get_masonry_image(int orientation, tile2i tile, tile2i start, tile2i end, int layer, bool polished);
 
     void update_day(const vec2i tiles_size);
@@ -169,8 +169,8 @@ public:
 };
 
 // Large stepped pyramid (20×20, id 250). Same shared stepped machinery as small/medium,
-// only the footprint (init_tiles) and phase schedule differ. Extra height tiers: see
-// REMAKE_LARGE_PYRAMID_LAYER2.md. Marble polish is true-pyramid only (C3.4), not stepped.
+// only the footprint (init_tiles) and phase schedule differ. Marble polish is
+// true-pyramid only, not stepped.
 class building_large_stepped_pyramid : public building_stepped_pyramid {
 public:
     BUILDING_METAINFO(BUILDING_LARGE_STEPPED_PYRAMID, building_large_stepped_pyramid, building_stepped_pyramid)
@@ -199,7 +199,7 @@ public:
     BUILDING_METAINFO(BUILDING_LARGE_STEPPED_PYRAMID_WALL, building_large_stepped_pyramid_wall, building_large_stepped_pyramid)
 };
 
-// C1b-1: Complex = plain 20×20 (same footprint/pipeline as large). Causeway/temples = C1b-2.
+// Complex = plain 20×20 (same footprint/pipeline as large). Causeway/temples not yet built.
 // Reuses LARGE_* part types (334–336) via JS corner/wall/cone/filler params.
 // Own wrappers required: BUILDING_STATIC_DATA current_params() is keyed on TYPE.
 class building_stepped_pyramid_complex : public building_stepped_pyramid {
@@ -276,7 +276,7 @@ public:
     BUILDING_METAINFO(BUILDING_MEDIUM_BENT_PYRAMID_WALL, building_medium_bent_pyramid_wall, building_medium_bent_pyramid)
 };
 
-// C3a: True (smooth) small pyramid — PACK_PYRAMID + limestone casing + polish phases.
+// True (smooth) small pyramid — PACK_PYRAMID + limestone casing + polish phases.
 class building_small_pyramid : public building_stepped_pyramid {
 public:
     BUILDING_METAINFO(BUILDING_SMALL_PYRAMID, building_small_pyramid, building_stepped_pyramid)
@@ -313,6 +313,45 @@ public:
 class building_small_pyramid_cone : public building_small_pyramid {
 public:
     BUILDING_METAINFO(BUILDING_SMALL_PYRAMID_CONE, building_small_pyramid_cone, building_small_pyramid)
+};
+
+// C3a2: True (smooth) medium pyramid — 12×12, limestone + polish after height 31.
+class building_medium_pyramid : public building_stepped_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_MEDIUM_PYRAMID, building_medium_pyramid, building_stepped_pyramid)
+
+    struct static_params : public base_params, public building_static_params {
+    } BUILDING_STATIC_DATA_T;
+
+    // First polish phase index (height courses end at 31; polish count = 12/4).
+    static constexpr int k_polish_phase_begin = 32;
+
+    virtual void update_day() override;
+    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual int building_image_get() const override;
+    virtual const base_params &pyramid_params() const override { return current_params(); }
+    virtual bool need_stonemason() override;
+    virtual bool use_polish_sprites_for_layer(int layer) const override;
+
+    virtual const monument &config() const override;
+};
+ANK_CONFIG_STRUCT(building_medium_pyramid::static_params,
+    init_tiles, corner_type, wall_type, cone_type, filler_type, enter_offset, stairs);
+
+class building_medium_pyramid_corner : public building_medium_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_MEDIUM_PYRAMID_CORNER, building_medium_pyramid_corner, building_medium_pyramid)
+};
+
+class building_medium_pyramid_wall : public building_medium_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_MEDIUM_PYRAMID_WALL, building_medium_pyramid_wall, building_medium_pyramid)
+};
+
+class building_medium_pyramid_cone : public building_medium_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_MEDIUM_PYRAMID_CONE, building_medium_pyramid_cone, building_medium_pyramid)
 };
 
 void map_pyramid_tiles_add(int building_id, tile2i tile, int size, int image_id, int terrain);

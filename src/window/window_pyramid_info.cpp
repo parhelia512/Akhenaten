@@ -32,7 +32,11 @@ void info_window_pyramid::init(object_info &c) {
     }
 
     auto &d = pyramid->runtime_data();
-    const bool is_true = (pyramid->config().btype == BUILDING_SMALL_PYRAMID);
+    const e_building_type mon_btype = pyramid->config().btype;
+    const bool is_true = (mon_btype == BUILDING_SMALL_PYRAMID || mon_btype == BUILDING_MEDIUM_PYRAMID);
+    const int polish_begin = (mon_btype == BUILDING_MEDIUM_PYRAMID)
+        ? building_medium_pyramid::k_polish_phase_begin
+        : 24;
 
     if (pyramid->is_unfinished()) {
         textid reason = {178, 31}; // rising
@@ -55,8 +59,7 @@ void info_window_pyramid::init(object_info &c) {
             } else {
                 reason = {178, 36}; // amass plain stone (stepped)
             }
-        } else if (is_true && d.phase >= 24) {
-            // C3.4 polish — no more limestone (gr178 id32); also terminal 26
+        } else if (is_true && d.phase >= polish_begin) {
             reason = {178, 32};
         } else {
             int carpenters_total = g_city.buildings.count_total(BUILDING_CARPENTERS_GUILD);

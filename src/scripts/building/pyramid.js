@@ -487,7 +487,7 @@ building_small_stepped_pyramid {
   building_large_stepped_pyramid_wall = building_large_stepped_pyramid
   building_large_stepped_pyramid_cone = building_large_stepped_pyramid
 
-  // C1b-1: Complex = plain 20x20 (same as large; causeway/temples = C1b-2).
+  // Complex = plain 20x20 (same as large; causeway/temples not yet built).
   // Keep stairs/animations in sync with building_large_stepped_pyramid (titles differ).
   building_stepped_pyramid_complex {
     animations {
@@ -970,7 +970,7 @@ building_small_stepped_pyramid {
   building_medium_bent_pyramid_corner = building_medium_bent_pyramid
   building_medium_bent_pyramid_wall = building_medium_bent_pyramid
   building_medium_bent_pyramid_cone = building_medium_bent_pyramid
-  // --- True (smooth) pyramids (C3a) — PACK_PYRAMID + limestone + polish (C3.4) ---
+  // --- True (smooth) pyramids — PACK_PYRAMID + limestone + polish ---
   // Same layout as stepped/bent (159 Pyramid_* + phase one + buildings). Polish
   // casing at Pyramid_00054+ (top-down via use_polish_sprites_for_layer).
   building_small_pyramid {
@@ -981,7 +981,7 @@ building_small_stepped_pyramid {
       base_bricks { path:"Pyramid/Pyramid_00103" }
       corner_bricks { path:"Pyramid/Pyramid_00001" }
       wall_bricks { path:"Pyramid/Pyramid_00005" }
-      // C3.4.3 casing (same corner/wall offset layout as bricks, pack index +53)
+      // Polish casing (same corner/wall offset layout as bricks, pack index +53)
       base_polish { path:"Pyramid/Pyramid_00103" }
       corner_polish { path:"Pyramid/Pyramid_00054" }
       wall_polish { path:"Pyramid/Pyramid_00058" }
@@ -1026,3 +1026,171 @@ building_small_stepped_pyramid {
   building_small_pyramid_corner = building_small_pyramid
   building_small_pyramid_wall = building_small_pyramid
   building_small_pyramid_cone = building_small_pyramid
+  building_medium_pyramid {
+    animations {
+      _pack { pack:PACK_PYRAMID }
+      preview { id:2, offset:7 }
+      base { id:2, offset:7 }
+      base_bricks { path:"Pyramid/Pyramid_00103" }
+      corner_bricks { path:"Pyramid/Pyramid_00001" }
+      wall_bricks { path:"Pyramid/Pyramid_00005" }
+      base_polish { path:"Pyramid/Pyramid_00103" }
+      corner_polish { path:"Pyramid/Pyramid_00054" }
+      wall_polish { path:"Pyramid/Pyramid_00058" }
+      base_grounded { path:"Pyramid/pyramid_phase_one_00013" }
+      clear_land { id:2, offset:12 }
+      image_stick { path:"Pyramid/pyramid_phase_one_00021" }
+      empty_land {path:"Pyramid/Pyramid_00109"}
+      ditches_phase_1 { path:"Pyramid/pyramid_phase_one_00022" }
+      ditches_phase_2 { path:"Pyramid/pyramid_phase_one_00031" }
+      ditches_phase_3 { path:"Pyramid/pyramid_phase_one_00040" }
+      ditches_phase_4 { path:"Pyramid/pyramid_phase_one_00049" }
+      ground_phase_0 { path:"Pyramid/pyramid_phase_one_00013" }
+      basement { path:"Pyramid/pyramid_phase_one_00058" }
+      enter { path:"pharaoh_general/plazatiles_00064"}
+    }
+    build_menu_text : "Medium Pyramid"
+    building_size : 2
+    info_title_id [198, 13]
+    fire_proof :  true
+    damage_proof : true
+    meta { help_id:375, text_id:178 }
+    init_tiles [12, 12]
+
+    flags {
+      is_monument: true
+    }
+
+    enter_offset : [2, 12]
+    stairs [
+      {
+        phase : 7
+        part : [2, 10]
+        tex { path:"Pyramid/Pyramid_00110" }
+        offset : [-15, 25]
+      }
+
+      {
+        phase : 8
+        part : [4, 10]
+        tex { path:"Pyramid/Pyramid_00111" }
+        offset : [-15, 25]
+      }
+
+      {
+        phase : 9
+        part : [6, 10]
+        tex { path:"Pyramid/Pyramid_00112" }
+        offset : [-15, 25]
+      }
+
+      {
+        phase : 10
+        part : [8, 10]
+        tex { path:"Pyramid/Pyramid_00110" }
+        offset : [15, -35]
+      }
+
+      {
+        phase : 10
+        part : [10, 10]
+        tex { path:"Pyramid/Pyramid_00122" }
+        offset : [15, -40]
+      }
+
+      {
+        phase : 11
+        part : [10, 8]
+        tex { path:"Pyramid/Pyramid_00114" }
+        offset : [25, -30]
+      }
+
+      {
+        phase : 12
+        part : [10, 6]
+        tex { path:"Pyramid/Pyramid_00115" }
+        offset : [20, -30]
+      }
+
+      {
+        phase : 13
+        part : [10, 4]
+        tex { path:"Pyramid/Pyramid_00113" }
+        offset : [0, -90]
+      }
+
+      {
+        phase : 13
+        part : [10, 2]
+        tex { path:"Pyramid/Pyramid_00124" }
+        offset : [0, -95]
+      }
+
+      {
+        phase : 16
+        part : [4, 8]
+        tex { path:"Pyramid/Pyramid_00118" }
+        offset : [-28, -155]
+      }
+
+      {
+        phase : 17
+        part : [6, 8]
+        tex { path:"Pyramid/Pyramid_00111" }
+        offset : [-48, -158]
+      }
+
+      {
+        phase : 18
+        part : [8, 8]
+        tex { path:"Pyramid/Pyramid_00112" }
+        offset : [-48, -158]
+      }
+
+      {
+        phase : 19
+        part : [8, 6]
+        tex { path:"Pyramid/Pyramid_00113" }
+        offset : [0, -180]
+      }
+
+      {
+        phase : 20
+        part : [8, 4]
+        tex { path:"Pyramid/Pyramid_00124" }
+        offset : [-0, -180]
+      }
+
+      {
+        phase : 21
+        part : [4, 6]
+        tex { path:"Pyramid/Pyramid_00119" }
+        offset : [-20, -175]
+      }
+
+      {
+        phase : 21
+        part : [6, 6]
+        tex { path:"Pyramid/Pyramid_00112" }
+        offset : [-40, -175]
+      }
+
+      {
+        phase : 22
+        part : [6, 4]
+        tex { path:"Pyramid/Pyramid_00113" }
+        offset : [10, -200]
+      }
+    ]
+
+
+    corner_type : BUILDING_MEDIUM_PYRAMID_CORNER
+    wall_type : BUILDING_MEDIUM_PYRAMID_WALL
+    cone_type : BUILDING_MEDIUM_PYRAMID_CONE
+    filler_type : BUILDING_MEDIUM_PYRAMID
+  }
+
+  building_medium_pyramid_corner = building_medium_pyramid
+  building_medium_pyramid_wall = building_medium_pyramid
+  building_medium_pyramid_cone = building_medium_pyramid
+

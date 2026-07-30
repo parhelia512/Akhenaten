@@ -4,7 +4,7 @@ var MONUMENT_WEIGHTS = {}
 MONUMENT_WEIGHTS[BUILDING_PYRAMID]                        = 44
 MONUMENT_WEIGHTS[BUILDING_MUDBRICK_PYRAMID_COMPLEX]       = 44
 MONUMENT_WEIGHTS[BUILDING_GRAND_MUDBRICK_PYRAMID_COMPLEX] = 44
-MONUMENT_WEIGHTS[BUILDING_STEPPED_PYRAMID_COMPLEX]        = 24  // on-land C1b-1 (= large); +causeway → recalibrate toward 44
+MONUMENT_WEIGHTS[BUILDING_STEPPED_PYRAMID_COMPLEX]        = 24  // on-land (= large); +causeway → recalibrate toward 44
 MONUMENT_WEIGHTS[BUILDING_GRAND_STEPPED_PYRAMID_COMPLEX]  = 44
 MONUMENT_WEIGHTS[BUILDING_PYRAMID_COMPLEX]                = 44
 MONUMENT_WEIGHTS[BUILDING_GRAND_PYRAMID_COMPLEX]          = 44
@@ -17,15 +17,16 @@ MONUMENT_WEIGHTS[BUILDING_MEDIUM_STEPPED_PYRAMID]         = 16
 MONUMENT_WEIGHTS[BUILDING_LARGE_STEPPED_PYRAMID]          = 24
 // Rating is clamped to 100 (city/monuments.js). Weight 44 for stepped complex alone
 // already saturates (2.25*44+4.5 > 100), so on-land complex shares large's 24 until
-// causeway/temples (C1b-2) or F3 recalibrates the whole table.
-// Bent pyramids (placeholder weights, like the others — recalibrate in F3).
+// causeway/temples land or the whole table is recalibrated.
+// Bent pyramids (placeholder weights, like the others).
 // A finished medium bent gives 2.25*8+4.5 = 22, which satisfies mission 14's
 // original monument goal of 21 (Snofru's bent pyramid at South Dahshur).
 MONUMENT_WEIGHTS[BUILDING_SMALL_BENT_PYRAMID]             = 4
 MONUMENT_WEIGHTS[BUILDING_MEDIUM_BENT_PYRAMID]            = 8
-// True (smooth) pyramids — C3a placeholders; recalibrate F3. Small ≈ stepped small
+// True (smooth) pyramids — placeholder weights. Small/medium ≈ stepped counterparts
 // until large weight is fitted to m_015 pak goal 32 (≈ w=12).
 MONUMENT_WEIGHTS[BUILDING_SMALL_PYRAMID]                  = 8
+MONUMENT_WEIGHTS[BUILDING_MEDIUM_PYRAMID]                 = 16
 MONUMENT_WEIGHTS[BUILDING_SPHINX]                         = 1
 MONUMENT_WEIGHTS[BUILDING_SMALL_OBELISK]                  = 2
 MONUMENT_WEIGHTS[BUILDING_LARGE_OBELISK]                  = 4
@@ -48,7 +49,7 @@ MONUMENT_WEIGHTS[BUILDING_GRAND_ROYAL_TOMB]               = 4
 //   1 small mastaba   (sum 2)  -> 2.25*2 +4.5 = 9   (missions 4/13/16, and On x1)
 //   3 small mastabas  (sum 6)  -> 2.25*6 +4.5 = 18  (mission 17 On)
 //   1 medium stepped  (sum 16) -> 2.25*16+4.5 = 40  (>= Saqqara verified goal 19)
-// The exact per-monument point table is NOT yet taken from the original (task F3):
+// The exact per-monument point table is NOT yet taken from the original:
 // the weights below are placeholders and will be moved to per-building configs and
 // recalibrated against the real .pak data later. Until then mission monument goals
 // are derived from these constants (see each m_0xx script comment).
