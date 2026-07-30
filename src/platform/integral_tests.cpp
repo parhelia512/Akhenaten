@@ -419,7 +419,7 @@ int run_js_tests() {
         g_app.quit = false;
         SDL_FlushEvent(SDL_USEREVENT);
 
-        // HR5: drop stale slots left by startup / previous tests so we only
+        // Drop stale slots left by startup / previous tests so we only
         // fail on leaks introduced by *this* test.
         const int stale = js_vm_force_idle_stack();
         if (stale > 0) {
@@ -505,7 +505,7 @@ int run_js_tests() {
             ok_result = true;
         }
 
-        // HR5: MuJS value stack must be idle-empty between tests (catches hot-reload leaks).
+        // MuJS value stack must be idle-empty between tests (catches hot-reload leaks).
         const int leaked = js_vm_force_idle_stack();
         if (leaked > 0) {
             logs::error("[test:%s] FAIL: MuJS stack not idle after test (leaked %d slot(s))", name.c_str(),

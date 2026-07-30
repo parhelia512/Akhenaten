@@ -1,4 +1,4 @@
-// ES6: kingdom favour-army figures (55–57) — register + spawn/action + city tally.
+// Kingdom favour-army figures (55–57) — register + spawn/action + city tally.
 // INVASION_KIND_KINGDOME remaps egyptian slots → these types (pause/retreat/kill).
 // Markers:
 //   [test-marker] kingdome_army_control_ok

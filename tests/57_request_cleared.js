@@ -1,4 +1,4 @@
-// B13: event_request_cleared facts — ok / late (overdue fulfill) / refuse.
+// event_request_cleared facts — ok / late (overdue fulfill) / refuse.
 // Uses RESOURCE_DEBEN so fulfill does not need a storage yard.
 //
 // Markers:

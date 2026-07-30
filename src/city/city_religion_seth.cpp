@@ -152,7 +152,7 @@ void god_seth_t::perform_hailstorm() {
         return;
     }
 
-    // TEMP Enhanced: asp raid fallback when no batalion to curse (CF5-style).
+    // TEMP Enhanced: asp raid fallback when there is no batalion to curse.
     // Note: checks formations (own_batalion), not fort buildings — empty forts do not block.
     if (!!game_features::gameplay_seth_asp_raid && perform_asps()) {
         // Same delivery path as other Seth major curses (god-tagged), not GOD_UNKNOWN popup.

@@ -226,7 +226,7 @@ void building_sphinx::preview::ghost_preview(build_planner &planer, painter &ctx
 }
 
 void building_sphinx::on_place_update_tiles(int orientation, int variant) {
-    // TODO(sphinx-rock): no placement restriction in C6
+    // TODO(sphinx-rock): no placement restriction yet
     base.prev_part_building_id = 0;
     runtime_data().variant = 0;
     base.orientation = orientation;

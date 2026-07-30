@@ -191,7 +191,7 @@ void building_mastaba::preview::ghost_preview(build_planner &planer, painter &ct
     vec2i size{ 1, 1 };
     vec2i size_b = base_params.init_tiles;
     // Must match setup_preview_graphics: orientation 0/2 uses (y,x), 1/3 uses (x,y).
-    // Previously ghost used the opposite swap → green preview was 10×4 while collision was 4×10.
+    // The opposite swap makes the green preview 10×4 while collision stays 4×10.
     switch (g_camera.orientation / 2) {
     case 0: size = { size_b.y, size_b.x }; break;
     case 1: size = { size_b.x, size_b.y }; break;

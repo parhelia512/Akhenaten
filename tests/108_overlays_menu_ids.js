@@ -1,4 +1,4 @@
-// OV5 smoke: REMAKE_OVERLAYS_PLAN — new overlay ids resolve and stock helpers work.
+// Overlay smoke: overlay ids resolve, stock helpers, and Cleopatra Y/Z/H hotkey defaults.
 // Markers:
 //   [test-marker] overlays_menu_ids_ok
 //   [test-marker] overlays_hotkeys_ok
@@ -37,7 +37,7 @@ function run_test() {
     city.current_overlay = OVERLAY_NONE
     __log_marker('overlays_menu_ids_ok')
 
-    // OV5 Cleopatra hotkeys: Y / Z / H defaults (use_defaults=1 ignores user conf).
+    // Cleopatra hotkeys: Y / Z / H defaults (use_defaults=1 ignores user conf).
     // KEY_Y=25 KEY_Z=26 KEY_H=8 KEY_MOD_NONE=0 KEY_MOD_CTRL=2
     var malaria_hk = __hotkey_read_mapping(HOTKEY_SHOW_OVERLAY_MALARIA_RISK, 1)
     var disease_hk = __hotkey_read_mapping(HOTKEY_SHOW_OVERLAY_DISEASE, 1)

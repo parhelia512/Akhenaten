@@ -1,4 +1,4 @@
-// ES3: egyptian camel + mounted archer — register + spawn smoke.
+// Egyptian camel + mounted archer — register + spawn smoke.
 // FIGURE_ENEMY_EGYPTIAN_CAMEL (46) / MOUNTED_ARCHER (52) have METAINFO leaves;
 // not in enemy_egyptian.figure_types[]. Sound branches already know these types.
 // Markers:

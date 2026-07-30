@@ -8,7 +8,7 @@ log_info("akhenaten: mission 41 sumur started")
 //   first=22 Small Obelisk → formula 2.25×2+4.5=9) / kingdom 90 / housing level 14.
 // Climate northern; map_background empire pack id 21.
 // Full empire redefine (hide_pak_*) + JS event graph. SKIP empty map_obj idx=6.
-// Chain-only invasion i=11 (after LOST Qadesh) → B12 via event_request_cleared.
+// Chain-only invasion i=11 (after LOST Qadesh) → JS chain via event_request_cleared.
 // Favour egypt×23 (i=30). Calendar canaanite×33 (i=31). next_mission 42 stub policy.
 // Recurring request/gift outcomes fire via request_cleared (shared ONLY_VIA = ALREADY_FIRED once).
 // Gift refuse paths are dead (engine gifts always COMPLETE).
@@ -650,7 +650,7 @@ function mission41_ensure_chain_leaves() {
 	weapons.set_refusal_action_tag(1012)
 	weapons.set_too_late_action_tag(1012)
 
-	// pak i=12 LOST Qadesh; ok→i=11 invasion no-op → B12 on request_cleared
+	// pak i=12 LOST Qadesh; ok→i=11 invasion no-op → JS chain on request_cleared
 	mission41_make_leaf(1012, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 8, 12,
 		EVENT_SUBTYPE_LOST_TRADE_ROUTE, "Qadesh")
 
@@ -991,7 +991,7 @@ function mission41_event_i31_invasion(ev) {
 	mission41_canaanite_raid(31, 33, EVENT_ATTACK_TARGET_BEST_BUILDINGS, 5)
 }
 
-// B12/B13: multi-fire outcomes + LOST Qadesh → canaanite×42 (pak i=11 loc=2)
+// Multi-fire outcomes + LOST Qadesh → canaanite×42 (pak i=11 loc=2)
 [es=event_request_cleared, mission=mission41]
 function mission41_on_request_cleared(ev) {
 	var outcome = mission_request_outcome(ev)

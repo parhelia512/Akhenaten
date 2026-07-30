@@ -1,4 +1,4 @@
-// BF2: FIGURE_FUNERAL_WALKER register + spawn after finished mastaba + provisions.
+// FIGURE_FUNERAL_WALKER register + spawn after finished mastaba + provisions.
 // Markers:
 //   [test-marker] funeral_registered_ok
 //   [test-marker] funeral_reject_incomplete_provisions_ok
@@ -197,7 +197,7 @@ function run_test() {
     }
     __log_marker('funeral_no_respawn_ok')
 
-    // TR2 contract: lowering dispatched must not clear funeral_done / re-enable funeral.
+    // Contract: lowering dispatched must not clear funeral_done / re-enable funeral.
     __test_burial_provisions_force_dispatched(RESOURCE_LINEN, 0)
     if (__test_monument_funeral_done(bid) != 1) {
         __log_info_native('[test:84] funeral_done cleared when dispatched lowered')
@@ -291,7 +291,7 @@ function run_test() {
     // done and verify the monument bind roundtrips (no re-spawn).
     // Note: under --no-resource integraltests, figure slots can come back empty
     // (fid with type set but action/dest/target 0) — figure mid-walk restore is
-    // best-effort; BF2 DoD is funeral_done save bind.
+    // best-effort; the DoD is the funeral_done save bind.
     if (__figure_get_action_state(pfid) != ACTION_FUNERAL_GOING) {
         __log_info_native('[test:84] expected GOING before saveload, got '
             + __figure_get_action_state(pfid))

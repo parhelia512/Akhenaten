@@ -6,7 +6,7 @@ mission29 { // Sawu (Mersa Gawasis) — Shores of the Red Sea; briefing key = me
 	selection_title : "Sawu"
 	player_rank : 10
 
-	// Choice pair with Iken; next is Heh (30) / Bubastis (31) — B1 / D8d.
+	// Choice pair with Iken; next is Heh (30) / Bubastis (31).
 	choice_background {pack:PACK_UNLOADED, id:12}
 	choice_image1 {pack:PACK_UNLOADED, id:13}
 	choice_image1_pos [192, 144]
@@ -71,7 +71,7 @@ mission29 { // Sawu (Mersa Gawasis) — Shores of the Red Sea; briefing key = me
 		BUILDING_SCRIBAL_SCHOOL, BUILDING_LIBRARY,
 	]
 
-	// Monuments TEMP 0 (pak 21 = Mausoleum gr198:26 + Small Mudbrick gr198:3; waits C9 / C5).
+	// Monuments TEMP 0 (pak 21 = Mausoleum gr198:26 + Small Mudbrick gr198:3; neither implemented yet).
 	// pak housing count enabled with goal 0 (no-op) -> only housing_level is kept.
 	win_criteria {
 		population    {enabled : true, goal : 8000 }

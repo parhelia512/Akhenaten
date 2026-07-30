@@ -369,9 +369,6 @@ function mission5_pharaoh_request_gems(ev) {
 	ok_ev.set_completed_action_tag(204)
 }
 
-// pak: year=2 month=8 item=31 amount=885 / 12mo. Id 31 is C3 denarii / money slot;
-// Cleopatra remapped that id to RESOURCE_OIL — briefing + amount say treasury deben.
-// ok→rep+4→GIFT chickpeas 16
 [es=event_advance_month, mission=mission5]
 function mission5_pharaoh_request_deben(ev) {
 	if (mission.pharaoh_requested_deben) {

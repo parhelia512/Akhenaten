@@ -111,7 +111,7 @@ void city_t::reload_objects() {
 void city_t::update_day(simulation_time_t simtime) {
     sentiment.update_day();
     criminals_update_day();
-    // BF2: after crime/steal so same-day steal→funeral race is avoided (TR2).
+    // After crime/steal so the same-day steal→funeral race is avoided.
     figure_funeral_walker::try_spawn_all(/*force_ignore_road=*/false);
     plague_update_day();
     environment.update_day();
@@ -145,7 +145,7 @@ void city_t::update_month(simulation_time_t simtime) {
 
     formation_update_monthly_morale_deployed();
 
-    // BF1 / TR: monthly tomb-robber threat (anti-spam — not every day).
+    // Monthly tomb-robber threat (anti-spam — not every day).
     figure_tomb_robber::try_spawn(/*force_gates=*/false);
     figure_tomb_robber::try_professional_wave();
 }

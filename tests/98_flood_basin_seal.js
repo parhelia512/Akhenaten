@@ -1,4 +1,4 @@
-// FB1: sealed floodplain basin detect via TERRAIN_DIKE contour.
+// Sealed floodplain basin detect via TERRAIN_DIKE contour.
 // Marker: [test-marker] test_basin_sealed:...
 
 var __test98_result = null

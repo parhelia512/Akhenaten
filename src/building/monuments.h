@@ -44,8 +44,8 @@ public:
         uint8_t upgrades;
         uint16_t alt_image;
         uint8_t stair_index;
-        uint8_t funeral_done;  // BF2: procession already held for this tomb (main)
-        uint8_t preexisting;   // CO3 / TR4b: sealed carry-over tomb (no steal)
+        uint8_t funeral_done;  // procession already held for this tomb (main)
+        uint8_t preexisting;   // sealed carry-over tomb (no steal)
     } BUILDING_RUNTIME_DATA_T;
 
     // Tall monument ornaments (tiers/cones) - skip in flat buildings view.
@@ -89,11 +89,9 @@ public:
     virtual bool is_unfinished() const;
     virtual bool is_finished() const;
 
-    // BF2: one funeral procession per finished tomb (main part).
     bool has_funeral_done() const;
     void set_funeral_done(bool done = true);
 
-    // CO3 / TR4b: pre-existing sealed burial tomb.
     bool is_preexisting() const;
     void set_preexisting(bool preexisting = true);
 };
@@ -108,7 +106,7 @@ int building_monument_has_unfinished_monuments();
 bool building_monument_has_delivery_for_worker(int figure_id);
 
 // Burial tombs (mastaba / pyramid / …) vs non-tomb monuments (sphinx / obelisk / …).
-// Shared by BF1 tomb robber and BF2 funeral walker.
+// Shared by the tomb robber and the funeral walker.
 bool building_monument_is_non_tomb_type(e_building_type type);
 bool building_monument_is_finished_burial_tomb(building &b);
 

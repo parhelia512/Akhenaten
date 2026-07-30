@@ -183,7 +183,7 @@ void game_hotkeys::load() {
         }        
     });
 
-    // OV5 Cleopatra overlays claim bare Y/Z/H. Old conf may still bind vacant house /
+    // Cleopatra overlays claim bare Y/Z/H. Old conf may still bind vacant house /
     // plaza there — move those build shortcuts to Ctrl+H / Ctrl+Z when they collide.
     auto &hide = _hotkeys[HOTKEY_SHOW_OVERLAY_HIDE_CLIFFS];
     auto &vacant = _hotkeys[HOTKEY_BUILD_VACANT_HOUSE];

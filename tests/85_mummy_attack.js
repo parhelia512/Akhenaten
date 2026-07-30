@@ -1,4 +1,4 @@
-// BF3: FIGURE_MUMMY register + spawn_wave → 1× msg 496 + soldier can target + kill.
+// FIGURE_MUMMY register + spawn_wave → 1× msg 496 + soldier can target + kill.
 // Markers:
 //   [test-marker] mummy_registered_ok
 //   [test-marker] mummy_spawn_wave_msg_ok

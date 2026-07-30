@@ -1,4 +1,4 @@
-// Seth asp raid (CF7 TEMP Enhanced): game_feature ON, no batalion → spawn asps at TEMPLE_SETH.
+// Seth asp raid (TEMP Enhanced): game_feature ON, no batalion → spawn asps at TEMPLE_SETH.
 // Markers:
 //   [test-marker] seth_asp_feature_on_spawn_ok
 //   [test-marker] seth_asp_feature_off_no_spawn_ok

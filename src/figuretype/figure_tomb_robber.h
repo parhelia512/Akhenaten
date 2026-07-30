@@ -39,10 +39,10 @@ public:
     // force_gates: skip sentiment/random (tests).
     static int try_spawn(bool force_gates = false);
 
-    // TR4a: spawn up to `count` robbers (cap concurrent) + one crime-wave popup.
+    // Spawn up to `count` robbers (cap concurrent) + one crime-wave popup.
     static int spawn_wave(int count);
 
-    // TR4a2: monthly professional wave (dispatched ≥20, 1/24 → 2 robbers).
+    // Monthly professional wave (dispatched ≥20, 1/24 → 2 robbers).
     static int try_professional_wave();
 
     static bool city_has_stealable_provisions();

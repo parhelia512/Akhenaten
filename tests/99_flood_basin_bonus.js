@@ -1,4 +1,4 @@
-// FB2: sealed flood basin fertility restore bonus + farm progress bonus.
+// Sealed flood basin fertility restore bonus + farm progress bonus.
 // Marker: [test-marker] test_basin_bonus:...
 
 var __test99_result = null
@@ -58,7 +58,7 @@ function run_test() {
     var FERT_NO_MALUS = 0
     var FERT_WITH_MALUS = 1
 
-    // Simulate inundation restore on both tiles, then apply FB2 bonus.
+    // Simulate inundation restore on both tiles, then apply the basin bonus.
     __map_soil_set_depletion(inside, 0)
     __map_soil_set_depletion(outside, 0)
     var fert_in_before = __map_get_fertility_at(inside, FERT_WITH_MALUS)

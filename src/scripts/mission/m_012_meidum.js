@@ -13,9 +13,9 @@ log_info("akhenaten: mission 12 meidum started")
 // Resource chains (ONLY_VIA, wired once from on_start): clay i=5/8/9/10/11 (from pottery
 // recurring i=7); timber i=20-25 (from i=19); grain i=42-45 (from i=41); papyrus i=54-57
 // (from i=53); gifts i=50/61/64 (from i=49/60/63).
-// Monuments goal: F3(a) — small(8)+complex(24) → trunc(2.25*32+4.5)=76.
+// Monuments goal: small(8)+complex(24) → trunc(2.25*32+4.5)=76.
 // Complex weight = large (24) while on-land; rating clamp 100 forbids weight 44 alone.
-// Pak original was 39. Causeway = C1b-2.
+// Pak original was 39. The causeway is not implemented.
 //
 // Tag_id scheme used throughout this file (documented once here, not repeated per call):
 //   1000 + i               chain-only ONLY_VIA_EVENT leaves (i = pak event index,
@@ -100,7 +100,7 @@ mission12 { // Meidum
 
 	// Goals verified vs mission1.pak scenario 12: pop 1/3000, culture 1/25, prosperity 1/25,
 	// monuments 1/39 (pak), kingdom 1/40, housing_level 1/11.
-	// F3(a): goal = trunc(2.25*(8+24)+4.5) = 76 (complex weight = large until C1b-2).
+	// Goal = trunc(2.25*(8+24)+4.5) = 76 (complex weight = large until the causeway lands).
 	win_criteria {
 		population    {enabled : true, goal : 3000 }
 		culture       {enabled : true, goal : 25 }

@@ -168,7 +168,7 @@ building *figure_tomb_robber::find_target_tomb(bool *out_threat_only) {
         }
     });
 
-    // Prefer preexisting sealed tombs for threat-only kingdom hit (TR4b).
+    // Prefer preexisting sealed tombs for the threat-only kingdom hit.
     if (best_threat) {
         if (out_threat_only) {
             *out_threat_only = true;
@@ -235,7 +235,7 @@ bool figure_tomb_robber::arrest(bool force) {
         return false; // already got away with goods
     }
 
-    // TEMP ~75% catch (plan TR3); force for tests.
+    // TEMP ~75% catch; force for tests.
     if (!force && (random_byte() % 100) >= 75) {
         return false;
     }

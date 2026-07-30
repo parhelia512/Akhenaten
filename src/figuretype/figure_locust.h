@@ -7,7 +7,7 @@ enum e_locust_action {
     ACTION_121_LOCUST_ROAMING = 121,
 };
 
-// Cleopatra swarm cloud (CF2). SprMain2 bmp "locust" g30–34 — non-8-dir strips.
+// Cleopatra swarm cloud. SprMain2 bmp "locust" g30–34 — non-8-dir strips.
 // Farm blight stays in building_curse_farms; this is the visual swarm only.
 class figure_locust : public figure_impl {
 public:

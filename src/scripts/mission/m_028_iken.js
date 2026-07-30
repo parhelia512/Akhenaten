@@ -6,7 +6,7 @@ mission28 { // Iken (Mirgissa) — Into Nubia; briefing key = mirgissa
 	selection_title : "Iken"
 	player_rank : 10
 
-	// Choice pair with Sawu; next is Heh (30) / Bubastis (31) — B1 / D8d.
+	// Choice pair with Sawu; next is Heh (30) / Bubastis (31).
 	choice_background {pack:PACK_UNLOADED, id:12}
 	choice_image1 {pack:PACK_UNLOADED, id:13}
 	choice_image1_pos [192, 144]
@@ -767,7 +767,7 @@ function mission28_requests_and_events(ev) {
 		mission28_fire_request(2016, RESOURCE_COPPER, 200, 1, 1017, 1020, 1017, 6, 0, "Kharga Oasis")
 	}
 
-	// pak i=3: oil×1168 /6mo y1m8 subtype=4 → ok/late 1001; refuse → egypt×64 B12.
+	// pak i=3: oil×1168 /6mo y1m8 subtype=4 → ok/late 1001; refuse → egypt×64 via JS chain.
 	if (!mission.event3_oil_done && ev.years_since_start == 1 && ev.month == 8) {
 		mission.event3_oil_done = true
 		log_info("akhenaten: mission 28 oil×1168 (i=3)")
@@ -844,7 +844,7 @@ function mission28_timed_invasions(ev) {
 	}
 }
 
-// B12: oil refuse → egypt×64 (pak i=5).
+// Oil refuse → egypt×64 (pak i=5).
 // Copper: KR leaf fires via request tags first; ladder starts next month (pak 17/20 → 18).
 [es=event_request_cleared, mission=mission28]
 function mission28_on_request_cleared(ev) {

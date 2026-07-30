@@ -1,6 +1,6 @@
-// C7: Small obelisk place via planner after staffing a Storage Yard with granite
+// Small obelisk place via planner after staffing a Storage Yard with granite
 // from placement_resources (100 in obelisk.js). Also rejects place without granite
-// and a second unfinished obelisk (C7-T1), then exercises monument resource delivery.
+// and a second unfinished obelisk, then exercises monument resource delivery.
 
 function run_test() {
     __log_info_native('[test:44] small obelisk reject + place + granite consume + add_resource')
@@ -18,7 +18,7 @@ function run_test() {
     var cx = (__scenario_map.width / 2) | 0
     var cy = (__scenario_map.height / 2) | 0
 
-    // --- C7-T1: reject place without granite in staffed SY ---
+    // --- reject place without granite in staffed SY ---
     var rejected_no_granite = test_building_place(BUILDING_SMALL_OBELISK, cx - 1, cy - 1)
     if (!rejected_no_granite) {
         rejected_no_granite = test_building_place(BUILDING_SMALL_OBELISK, -1, -1)
@@ -88,7 +88,7 @@ function run_test() {
         return
     }
 
-    // --- C7-T1: only one unfinished obelisk (still unfinished — do not finish yet) ---
+    // --- only one unfinished obelisk (still unfinished — do not finish yet) ---
     var second = test_building_place(BUILDING_SMALL_OBELISK, cx + 10, cy + 10)
     if (!second) {
         second = test_building_place(BUILDING_SMALL_OBELISK, cx + 15, cy + 15)

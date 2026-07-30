@@ -1,4 +1,4 @@
-// C3a / C3.4: Small true (smooth) pyramid — place, walk height→polish→finish phases.
+// Small true (smooth) pyramid — place, walk height→polish→finish phases.
 // Polish phases 24–25 consume no limestone (ARCHITECTS-only); schedule ends @26;
 // finish = set_phase(phases_total) → MONUMENT_FINISHED. Also exercises natural
 // update_day finish: polish clear, terminal keep-progress, congrats popup.

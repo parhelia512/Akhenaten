@@ -66,10 +66,10 @@ enum e_overlay : uint8_t {
     OVERLAY_ARCHITECT_REACH = 46,
     OVERLAY_ZOO = 47,
 
-    // Enhanced flood basins (DK4) — sealed contour tint
+    // Enhanced flood basins — sealed contour tint
     OVERLAY_FLOOD_BASIN = 48,
 
-    // OV1 food / goods stocks (house inventory columns)
+    // Food / goods stocks (house inventory columns)
     OVERLAY_GRAIN = 49,
     OVERLAY_CHICKPEAS = 50,
     OVERLAY_POMEGRANATES = 51,
@@ -80,16 +80,16 @@ enum e_overlay : uint8_t {
     OVERLAY_JEWELRY = 56,
     OVERLAY_LINEN = 57,
 
-    // OV2 health extras (≠ OVERLAY_MALARIA_RISK)
+    // Health extras (≠ OVERLAY_MALARIA_RISK)
     OVERLAY_DISEASE = 58,
     OVERLAY_INFECTED_HOUSING = 59,
     OVERLAY_MALARIA = 60,
 
-    // OV3 administration extras (magistrate = OVERLAY_COUTHOUSE; admin problems = OVERLAY_PROBLEMS)
+    // Administration extras (magistrate = OVERLAY_COUTHOUSE; admin problems = OVERLAY_PROBLEMS)
     OVERLAY_WATER_CROSSINGS = 61,
     OVERLAY_EMPTY_HOUSING = 62,
 
-    // OV4 other
+    // Other
     OVERLAY_IRRIGATION = 63,
     OVERLAY_CITY_DEFENSES = 64,
     OVERLAY_HIDE_CLIFFS = 65,

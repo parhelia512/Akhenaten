@@ -1,4 +1,4 @@
-// DK4: Osiris-style perimeter dike breach unseals flood basins.
+// Osiris-style perimeter dike breach unseals flood basins.
 // Marker: [test-marker] test_basin_breach:...
 
 var __test111_result = null

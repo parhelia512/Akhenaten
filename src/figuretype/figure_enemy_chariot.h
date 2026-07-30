@@ -136,7 +136,7 @@ public:
 };
 ANK_CONFIG_STRUCT(figure_seapeople_chariot::static_params, interval_attack_delay)
 
-// ES6: kingdom mounted (56). Favour-army remap of egyptian type3 (chariot) slot.
+// Kingdom mounted (56). Favour-army remap of egyptian type3 (chariot) slot.
 class figure_kingdome_mounted : public figure_enemy_chariot {
 public:
     FIGURE_METAINFO(FIGURE_ENEMY_KINGDOME_MOUNTED, figure_kingdome_mounted)

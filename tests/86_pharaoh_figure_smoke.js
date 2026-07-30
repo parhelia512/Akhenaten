@@ -1,4 +1,4 @@
-// BF4: FIGURE_PHARAOH registered + walk anim (SprMain 28). Stub-only spawn.
+// FIGURE_PHARAOH registered + walk anim (SprMain 28). Stub-only spawn.
 // Markers:
 //   [test-marker] pharaoh_spawn_ok
 //   [test-marker] pharaoh_type_ok

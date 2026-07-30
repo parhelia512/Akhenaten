@@ -1,5 +1,5 @@
-// C1b-1: Stepped Pyramid Complex (20x20 on-land) — place, linked parts, phases.
-// Causeway/temples are C1b-2; this only asserts the plain monument placeable.
+// Stepped Pyramid Complex (20x20 on-land) — place, linked parts, phases.
+// Causeway/temples are not implemented; this only asserts the plain monument placeable.
 
 function run_test() {
     __log_info_native('[test:105] stepped pyramid complex place + parts + phases')

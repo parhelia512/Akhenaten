@@ -1,6 +1,6 @@
-// ES4: egyptian war elephant — register + spawn/action smoke + soldier can target.
+// Egyptian war elephant — register + spawn/action smoke + soldier can target.
 // FIGURE_ENEMY_EGYPTIAN_ELEPHANT (47) → figure_egyptian_elephant (figure_enemy_elephant).
-// Not in enemy_egyptian.figure_types[]. AoE trampling is ES4-followup.
+// Not in enemy_egyptian.figure_types[]. AoE trampling is a follow-up.
 // Markers:
 //   [test-marker] egyptian_elephant_control_ok
 //   [test-marker] egyptian_elephant_registered_ok

@@ -275,7 +275,7 @@ building *building_bazaar::pick_next_buyer_destination() {
 
     // Never tick inside probes: complementary may fail and fall back; burning
     // *_demand on a failed goods/foods probe would soft-lock demand for nothing.
-    // C2: tick only after a successful pick while no active buyers are out.
+    // Tick only after a successful pick while no active buyers are out.
     building *dest;
     if (has_food_buyer) {
         dest = get_storage_destination(e_bazaar_fetch_goods, exclude, false);

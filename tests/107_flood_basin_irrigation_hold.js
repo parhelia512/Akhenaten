@@ -1,4 +1,4 @@
-// DK3: sealed flood basin halves canal water decay.
+// Sealed flood basin halves canal water decay.
 // Marker: [test-marker] test_basin_irrigation_hold:...
 
 var __test107_result = null

@@ -601,7 +601,7 @@ void map_soil_set_depletion(int grid_offset, int malus) {
     map_grid_set(g_terrain_floodplain_fertility, grid_offset, std::clamp(new_fert, 3, 99));
 }
 
-// FB2: sealed-basin fertility bump after inundation restore.
+// Sealed-basin fertility bump after inundation restore.
 // Poor floods get a slightly larger % (partial compensation); never exceeds fert cap 99.
 void map_floodplain_apply_basin_fertility_bonus(int grid_offset) {
     if (!game_features::gameplay_enhanced_flood_basins.to_bool()) {

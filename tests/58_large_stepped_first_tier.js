@@ -1,4 +1,4 @@
-// C1a first-tier pipeline: place Large Stepped Pyramid (20x20), verify the part
+// First-tier pipeline: place Large Stepped Pyramid (20x20), verify the part
 // ring (corners/walls/fillers), walk foundation → first brick tier + ramp climb
 // (phase 13 = SE turn + east-face ascent), then take end screenshots.
 //

@@ -33,7 +33,7 @@ void map_soil_set_depletion(int grid_offset, int malus);
 void map_update_tile_fertility(int grid_offset, int delta);
 void map_update_area_fertility(int x, int y, int size, int delta);
 
-// FB2: after flood restore, bump fertility inside a sealed basin (flag + basin_id).
+// After flood restore, bump fertility inside a sealed basin (flag + basin_id).
 // No-op when flag OFF or tile is not sealed. Safe to call from tests.
 void map_floodplain_apply_basin_fertility_bonus(int grid_offset);
 inline void map_floodplain_apply_basin_fertility_bonus(tile2i tile) {

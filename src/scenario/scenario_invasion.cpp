@@ -126,7 +126,7 @@ std::array<enemy_properties_t *, ENEMY_COUNT> g_enemy_properties = {
     &enemy_seapeople,
 };
 
-// ES6(A): favour army uses figure IDs 55–57 instead of egyptian proxy types.
+// The favour army uses figure IDs 55–57 instead of egyptian proxy types.
 static e_figure_type invasion_spawn_figure_type(const invasion_opts_t &opts, int type_slot) {
     e_figure_type figure_type = g_enemy_properties[opts.enemy_type]->figure_types[type_slot];
     if (opts.kind == INVASION_KIND_KINGDOME) {

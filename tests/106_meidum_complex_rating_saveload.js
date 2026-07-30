@@ -1,4 +1,4 @@
-// C1d / F3(a): Meidum goal = small(8)+complex(24) ? trunc(76.5)=76.
+// Meidum goal = small(8)+complex(24) ? trunc(76.5)=76.
 // Rating first on a clean map; then mid-phase save/load (separate session).
 
 function place_pyramid(type, candidates) {

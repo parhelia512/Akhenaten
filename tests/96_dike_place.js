@@ -1,4 +1,4 @@
-// DK1: place dike strip on floodplain; flag OFF rejects; clear+undo.
+// Place dike strip on floodplain; flag OFF rejects; clear+undo.
 // Marker: [test-marker] test_dike_placed:...
 
 var __test96_result = null

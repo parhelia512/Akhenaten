@@ -6,7 +6,7 @@ mission30 { // Heh (Semna) — The Gauntlet
 	selection_title : "Heh"
 	player_rank : 10
 
-	// Sibling Bubastis (31); both host choice -> Khmun/Sauty (B5 until D9). D8d topo.
+	// Sibling Bubastis (31); both host choice -> Khmun/Sauty (hidden until scripted).
 	choice_background {pack:PACK_UNLOADED, id:12}
 	choice_image1 {pack:PACK_UNLOADED, id:13}
 	choice_image1_pos [192, 144]
@@ -73,7 +73,7 @@ mission30 { // Heh (Semna) — The Gauntlet
 		BUILDING_SCRIBAL_SCHOOL, BUILDING_LIBRARY,
 	]
 
-	// Monuments TEMP 0 (pak 15; mausoleum gr198:27 — waits C9).
+	// Monuments TEMP 0 (pak 15; mausoleum gr198:27 — not implemented yet).
 	win_criteria {
 		population    {enabled : true, goal : 6000 }
 		culture       {enabled : true, goal : 50 }

@@ -728,7 +728,7 @@ function mission16_event_i14_limestone(ev) {
 	mission16_fire_request(2014, RESOURCE_LIMESTONE, 15, 12, 1015, 1018, 1002, 4, 1)
 }
 
-// B13: factual request close — invasions from JS (no KR-snap).
+// Factual request close — invasions from JS (no KR-snap).
 // Leaf KR still via wired on_* tags in C++ storage path.
 [es=event_request_cleared, mission=mission16]
 function mission16_on_request_cleared(ev) {

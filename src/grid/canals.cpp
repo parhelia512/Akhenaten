@@ -41,7 +41,7 @@ void map_add_irrigation_range(tile2i tile, int size, int radius) {
     });
 }
 
-// DK3 half-rate bookkeeping. Seeded from saved total_days; subpass allows multiple
+// Half-rate decay bookkeeping. Seeded from saved total_days; subpass allows multiple
 // decrease calls on the same calendar day (tests). Must reset on load — otherwise
 // an in-process load of the same total_days keeps a stale subpass and skews hold.
 uint32_t s_decay_prev_total_days = UINT32_MAX;
@@ -118,7 +118,7 @@ void canals_decrease_water_level() {
 
     river_access_canal_offsets->clear();
 
-    // DK3: sealed-basin canals decay at half rate (skip every other pass).
+    // Sealed-basin canals decay at half rate (skip every other pass).
     // Phase is seeded from saved total_days so load does not reset hold parity;
     // subpass covers multiple decrease calls on the same day (tests / tooling).
     const uint32_t total_days = game.simtime.total_days;
@@ -215,7 +215,7 @@ void map_update_canals_from_river() {
     }
 }
 
-// DK3: farms read TERRAIN_IRRIGATION_RANGE (cleared each canal update), not canal
+// Farms read TERRAIN_IRRIGATION_RANGE (cleared each canal update), not canal
 // water bytes. Re-stamp from every wet canal so residual water (half-rate sealed
 // hold, lift-fed networks after the pre-update fill, river leftovers) still
 // irrigates. Clipped to same basin_id so radius-2 does not leak across a dike.

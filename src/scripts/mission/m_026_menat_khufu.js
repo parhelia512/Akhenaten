@@ -4,8 +4,8 @@ log_info("akhenaten: mission 26 menat khufu started")
 // Empire id=1. Scenario enemy ENEMY_6_KUSHITE. Favour invasions invader=pharaoh(3) → ENEMY_3_EGYPTIAN.
 // Gods: Osiris(2), Ra(1), Bast(1) — no JS override. Funds Normal 10000 / loan 2500 / debt 20. Rank 9.
 // Win: pop 7000 / culture 60 / prosperity 50 / monuments TEMP 13 (pak raw 21; 2×small obelisk formula
-//   2.25*(2+2)+4.5=13.5→13; waits C5 mudbrick weight) / kingdom 75 / housing 10.
-// Monuments pak: first=22 Small Obelisk ×2, third=3 Small Mudbrick Pyramid (omit from buildings; C5).
+//   2.25*(2+2)+4.5=13.5→13; waits mudbrick weight) / kingdom 75 / housing 10.
+// Monuments pak: first=22 Small Obelisk ×2, third=3 Small Mudbrick Pyramid (omit from buildings).
 // Burial: pottery×8 beer×32 linen×32 papyrus×8 granite×32. Climate northern (map).
 // Trade: Waset(1 sea) Men-nefer(2 sea) Dakhla(3). Display: Buhen Byblos Dunqul Henen-nesw Jericho Kebet Kerma Kharga.
 // Triage: SKIP empty map_obj idx=11; SKIP orphan msgs i=1,4,8,11,14,17,21,24,27,30,33,36; SKIP DEMAND chain_only i=6.
@@ -68,7 +68,7 @@ mission26 { // Menat Khufu (Beni Hasan) — Reunification
 		BUILDING_SCRIBAL_SCHOOL, BUILDING_LIBRARY,
 	]
 
-	// Monuments TEMP 13 (pak first=22 Small Obelisk ×2 + third=3 mudbrick; formula 2.25*(2+2)+4.5→13; C5).
+	// Monuments TEMP 13 (pak first=22 Small Obelisk ×2 + third=3 mudbrick; formula 2.25*(2+2)+4.5→13).
 	win_criteria {
 		population    {enabled : true, goal : 7000 }
 		culture       {enabled : true, goal : 60 }
@@ -587,7 +587,7 @@ function mission26_requests_and_events(ev) {
 	}
 }
 
-// pak i=38→39: by_favour egypt/pharaoh ×40 → after wipe ×40 (attack=4 RANDOM). No B12 refuse invasions.
+// pak i=38→39: by_favour egypt/pharaoh ×40 → after wipe ×40 (attack=4 RANDOM). No refuse-chain invasions.
 [es=event_advance_month, mission=mission26]
 function mission26_pharaoh_favour_invasion(ev) {
 	if (mission.pharaoh_favour_invasion_done && !mission.pharaoh_favour_wave2_done) {

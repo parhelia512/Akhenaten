@@ -367,7 +367,7 @@ void floods_t::tick_update(bool calc_only) {
                 post_flood_prediction_message();
             }
         } else if (cycle == cycle_start) {
-            // DK4: Osiris "next flood destroys farms" also overruns perimeter dikes once.
+            // Osiris "next flood destroys farms" also overruns perimeter dikes once.
             // Perfect/Excellent quality alone does NOT breach — that is a gift, not a disaster.
             if (!calc_only
                 && game_features::gameplay_enhanced_flood_basins.to_bool()

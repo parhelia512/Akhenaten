@@ -1,4 +1,4 @@
-// ES6 favour-KR smoke: INVASION_KIND_KINGDOME → figures 55–57, favour_only bookkeeping,
+// Favour-KR smoke: INVASION_KIND_KINGDOME → figures 55–57, favour_only bookkeeping,
 // wipe without Caesar respect (+10 KR).
 // Markers:
 //   [test-marker] favour_smoke_spawn_ok

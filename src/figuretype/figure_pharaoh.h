@@ -7,7 +7,7 @@ enum e_pharaoh_action {
     ACTION_121_PHARAOH_ROAMING = 121,
 };
 
-// Cinematic / victory VFX walker (BF4). No build-menu spawn; test/event only.
+// Cinematic / victory VFX walker. No build-menu spawn; test/event only.
 class figure_pharaoh : public figure_impl {
 public:
     FIGURE_METAINFO(FIGURE_PHARAOH, figure_pharaoh)

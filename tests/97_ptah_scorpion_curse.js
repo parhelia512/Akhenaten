@@ -1,4 +1,4 @@
-// Ptah scorpion raid (CF6 TEMP Enhanced): game_feature ON, no industry → spawn at TEMPLE_PTAH.
+// Ptah scorpion raid (TEMP Enhanced): game_feature ON, no industry → spawn at TEMPLE_PTAH.
 // Markers:
 //   [test-marker] ptah_scorpion_feature_on_spawn_ok
 //   [test-marker] ptah_scorpion_feature_off_no_spawn_ok

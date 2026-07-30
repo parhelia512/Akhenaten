@@ -1,4 +1,4 @@
-// C6: Sphinx multi-part monument — place via planner, verify 3 linked parts,
+// Sphinx multi-part monument — place via planner, verify 3 linked parts,
 // walk construction stages 1..6 (art resolves per part), and capture a screenshot.
 
 function run_test() {

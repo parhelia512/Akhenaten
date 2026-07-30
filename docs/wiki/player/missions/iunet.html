@@ -192,7 +192,7 @@
       <h3>Phase 2 — Mastaba and exports</h3>
       <p>Granite quarry + gold mines; small mastaba rating 9. Pottery industry before y5.</p>
       <h3>Phase 3 — Defense</h3>
-      <p>Hittite waves at y4 / y5m10 / y8 / y16. Keep walls, academy, and companies. Sea invasion points exist (naval landings still E3).</p>
+      <p>Hittite waves at y4 / y5m10 / y8 / y16. Keep walls, academy, and companies. Sea invasion points exist (naval landings still land-proxied).</p>
       <h3>Tips</h3>
       <ul>
         <li>Do not let kingdom rating hit zero — favour chain is four waves.</li>
@@ -225,7 +225,7 @@
             <ul class="event-list">
               <li><span class="ev-name">event_mission_start</span><span class="ev-desc"><code>empire.set_id(1)</code>; Hittite; wire KR leaves.</span><span class="ev-fn">mission16_on_start</span></li>
               <li><span class="ev-name">Requests</span><span class="ev-desc">fish×4 y1; meat×2 y3m2 (late→hittite×10); pottery×15 y5m2; limestone×15 y10m5.</span><span class="ev-fn">mission16_event_i0/i4/i10/i14_*</span></li>
-              <li><span class="ev-name">Request cleared</span><span class="ev-desc">limestone refuse→egypt×24; meat/pottery late→hittite×10 (<code>event_request_cleared</code>, B13).</span><span class="ev-fn">mission16_on_request_cleared</span></li>
+              <li><span class="ev-name">Request cleared</span><span class="ev-desc">limestone refuse→egypt×24; meat/pottery late→hittite×10 (<code>event_request_cleared</code>).</span><span class="ev-fn">mission16_on_request_cleared</span></li>
               <li><span class="ev-name">Hittite + clay + favour</span><span class="ev-desc">size 10/20/32/48 (×48 bind KR±10); clay 7% y4m1; favour 15→45→30→30.</span><span class="ev-fn">mission16_event_i8/i12/i13/i17 / favour</span></li>
             </ul>
           </div>
@@ -251,9 +251,9 @@
               <li><strong>Briefing “Kushite”</strong> vs pak <strong>Hittite</strong> enemy — pak wins.</li>
               <li><strong>NEW_TRADE i=1/6</strong> — pak city=Iunet + ok=999/99 junk; remapped to Men-nefer (fish ok) / Abu (meat ok) with filled sells/buys.</li>
               <li><strong>Invasion i=3 amount=0</strong> skipped.</li>
-              <li><strong>Egypt×24 on limestone refuse</strong> / <strong>Hittite×10 on meat|pottery late</strong> — JS via <code>event_request_cleared</code> (B13); <code>EVENT_TYPE_INVASION</code> chain child still no-op (B12).</li>
+              <li><strong>Egypt×24 on limestone refuse</strong> / <strong>Hittite×10 on meat|pottery late</strong> — JS via <code>event_request_cleared</code>; <code>EVENT_TYPE_INVASION</code> chain child still no-op.</li>
               <li><strong>Orphan route 15</strong> / empty map_obj idx=9 skipped; Saqqara/Nekhen route 5/8 have no polyline.</li>
-              <li><strong>Naval landings</strong> still land-army proxy (E3).</li>
+              <li><strong>Naval landings</strong> still land-army proxy.</li>
               <li><strong>Favour invasions</strong> JS-proxied (B2 calendar native cancelled).</li>
             </ul>
           </div>

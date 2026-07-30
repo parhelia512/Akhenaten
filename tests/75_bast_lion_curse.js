@@ -1,4 +1,4 @@
-// Bast lion raid (CF5 TEMP Enhanced): game_feature ON, no houses → spawn lions at TEMPLE_BAST/ZOO.
+// Bast lion raid (TEMP Enhanced): game_feature ON, no houses → spawn lions at TEMPLE_BAST/ZOO.
 // Markers:
 //   [test-marker] bast_lion_feature_on_spawn_ok
 //   [test-marker] bast_lion_feature_off_no_spawn_ok

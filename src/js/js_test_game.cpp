@@ -1896,7 +1896,7 @@ static int __test_empire_trader_has_traded_max(int bought, int sold, int capacit
 }
 ANK_FUNCTION_3(__test_empire_trader_has_traded_max);
 
-// BB2/BB3: attach FIGURE_MARKET_BUYER to a bazaar slot and run before_action.
+// Attach FIGURE_MARKET_BUYER to a bazaar slot and run before_action.
 // Returns figure id if still alive, else 0.
 static int __test_bazaar_attach_buyer(int bid, int slot, int collecting_item) {
     auto *bazaar = building_get(bid)->dcast_bazaar();

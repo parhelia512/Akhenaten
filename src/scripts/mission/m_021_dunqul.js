@@ -87,7 +87,7 @@ mission21 { // Dunqul Oasis — The Kushite Threat
 		BUILDING_TEMPLE_COMPLEX_RA, BUILDING_TEMPLE_COMPLEX_PTAH, BUILDING_TEMPLE_COMPLEX_SETH,
 	]
 
-	// Monuments TEMP 9 (pak raw 6; one small obelisk → formula 9, same as Buhen / F3).
+	// Monuments TEMP 9 (pak raw 6; one small obelisk → formula 9, same as Buhen).
 	win_criteria {
 		population    {enabled : true, goal : 3500 }
 		culture       {enabled : true, goal : 20 }

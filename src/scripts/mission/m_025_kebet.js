@@ -636,7 +636,7 @@ function mission25_ensure_food_leaves() {
 
 function mission25_ensure_henna_leaves() {
 	// pak i=15 henna×56: ok→i=18 MESSAGE conquered→i=16 CITY_STATUS conquered (loc 8 = Khmun)
-	//   →i=21 NEW_TRADE Khmun; refuse→i=19 egypt×60 (B12); late/defeat→i=17 henna×25.
+	//   →i=21 NEW_TRADE Khmun; refuse→i=19 egypt×60 (JS chain); late/defeat→i=17 henna×25.
 	// pak i=17 henna×25 repeats the same outcomes; every non-ok branch ends in i=19.
 	if (mission.henna_leaves_wired) {
 		return
@@ -652,7 +652,7 @@ function mission25_ensure_henna_leaves() {
 	message.set_completed_action_tag(1016)
 	conquered.set_completed_action_tag(1021)
 	henna.set_completed_action_tag(1018)
-	// refuse / late / defeat of i=17 → i=19 egypt×60, fired from event_request_cleared (B12).
+	// refuse / late / defeat of i=17 → i=19 egypt×60, fired from event_request_cleared.
 }
 
 function mission25_ensure_fish_i22_leaves() {
@@ -747,7 +747,7 @@ function mission25_requests_and_events(ev) {
 	}
 
 	// pak i=15: henna×56 /12mo y11m2 subtype=2 sender=1.
-	// refuse→egypt×60 via event_request_cleared (B12); no leaf 1019.
+	// refuse→egypt×60 via event_request_cleared (JS chain); no leaf 1019.
 	if (!mission.event15_henna_done && ev.years_since_start == 11 && ev.month == 2) {
 		mission.event15_henna_done = true
 		log_info("akhenaten: mission 25 henna×56 (i=15)")
@@ -795,7 +795,7 @@ function mission25_timed_invasions(ev) {
 	}
 }
 
-// B12: chain invasions from JS after a request refuse (EVENT_TYPE_INVASION is a no-op).
+// Chain invasions from JS after a request refuse (EVENT_TYPE_INVASION is a no-op).
 [es=event_request_cleared, mission=mission25]
 function mission25_on_request_cleared(ev) {
 	if (mission.henna_raid_done) {

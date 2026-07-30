@@ -161,7 +161,7 @@ public:
 };
 ANK_CONFIG_STRUCT(figure_seapeople_axeman::static_params, interval_attack_delay)
 
-// Egyptian melee specials (ES2). Not in enemy_egyptian.figure_types[] today
+// Egyptian melee specials. Not in enemy_egyptian.figure_types[] today
 // (archer/spear/chariot only); register so console/save/spawn never assert.
 class figure_egyptian_fast_sword : public figure_enemy_fast_sword {
 public:
@@ -211,7 +211,7 @@ public:
 };
 ANK_CONFIG_STRUCT(figure_egyptian_axe::static_params, interval_attack_delay)
 
-// ES3: Egyptian camel — melee mount (fast_sword AI, faster march; silent march SFX
+// Egyptian camel — melee mount (fast_sword AI, faster march; silent march SFX
 // in figure_enemy_fast_sword; camel die/hit in sound.cpp).
 class figure_egyptian_camel : public figure_enemy_fast_sword {
 public:
@@ -226,7 +226,7 @@ public:
 };
 ANK_CONFIG_STRUCT(figure_egyptian_camel::static_params, interval_attack_delay)
 
-// ES6: kingdom infantry (57). Favour-army melee; formation_kingdome_pause/retreat key type.
+// Kingdom infantry (57). Favour-army melee; formation_kingdome_pause/retreat key type.
 class figure_kingdome_infantry : public figure_enemy_fast_sword {
 public:
     FIGURE_METAINFO(FIGURE_ENEMY_KINGDOME_INFANTRY, figure_kingdome_infantry)

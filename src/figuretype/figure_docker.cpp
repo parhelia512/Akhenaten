@@ -127,7 +127,7 @@ int figure_docker::try_export_resource(building* b, e_resource resource, empire_
 building_dest figure_docker::get_closest_warehouse_for_import(tile2i pos, empire_city_handle city, int distance_from_entry, int road_network_id, building_dock *dock, e_resource& import_resource) {
     const resource_list importable = g_empire.importable_resources_from_city(city.handle);
 
-    // Dock orders (DO1): zero bitmask = accept none (same as Accept none button).
+    // Dock orders: zero bitmask = accept none (same as Accept none button).
     auto allowed = [&](e_resource r) {
         if (!importable[r]) {
             return false;

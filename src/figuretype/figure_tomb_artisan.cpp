@@ -43,7 +43,7 @@ void figure_tomb_artisan::figure_action() {
         break;
 
     case ACTION_14_TOMB_ARTISAN_WORK:
-        // Stub: decorate for a short while, then return. Phase-gate fidelity is AG7.
+        // Stub: decorate for a short while, then return. Phase-gate fidelity is a follow-up.
         base.wait_ticks++;
         if (base.wait_ticks > simulation_time_t::ticks_in_day * 2) {
             advance_action(ACTION_16_TOMB_ARTISAN_RETURN_HOME);

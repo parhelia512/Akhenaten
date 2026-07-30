@@ -1,4 +1,4 @@
-// CF2: FIGURE_LOCUST register + cloud anim + Osiris/EVENT/cheat/pak-chain + farm + sentiment + saveload + timer.
+// FIGURE_LOCUST register + cloud anim + Osiris/EVENT/cheat/pak-chain + farm + sentiment + saveload + timer.
 // Markers:
 //   [test-marker] locust_registered_ok
 //   [test-marker] locust_anim_walk_ok

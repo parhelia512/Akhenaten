@@ -4,7 +4,7 @@
 #include "scenario/scenario_event_manager.h"
 #include <functional>
 
-// Factual request close signal for JS (B13). C++ stores/emits facts only —
+// Factual request close signal for JS. C++ stores/emits facts only —
 // ok/late/refuse policy and chain reactions live in scripts.
 struct event_request_cleared {
     int tag_id = 0;

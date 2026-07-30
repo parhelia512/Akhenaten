@@ -14,7 +14,7 @@ log_info("akhenaten: mission 23 thinis civil-war started")
 // Oil i=7: ok/late → KR−10 → LOST×3 → pottery×23 → NEW×3 → (i=17) egypt×38;
 //          refuse → KR+7 → LOST×3 → (i=10) egypt×38. Egypt armed by leaf 1019, spawned next month tick.
 // Troops i=35–44: ok NEW→KR+5→enemy×29 wipe→egypt×33→KR+5; refuse KR−20→egypt×72 wipe→copper×30.
-// Copper outcomes (B13): ok→egypt×72; refuse→enemy×29→egypt×33; late→egypt×33.
+// Copper outcomes: ok→egypt×72; refuse→enemy×29→egypt×33; late→egypt×33.
 // Henna×60 i=46–54: ok→egypt×32 wipe→enemy×48→KR+5→unlock troops rec; refuse→KR−25→egypt×72→enemy×48→KR+5;
 //   late→KR−12→unlock troops rec (also calendar y17).
 //
@@ -487,7 +487,7 @@ mission23 { // Thinis — Civil War FIP; != mission1 Dawn
 		enemy48_a_done : false
 		enemy48_b_done : false
 		egypt33_done : false
-		// Wipe polls (B12): after wave seen+cleared, spawn next.
+		// Wipe polls: after wave seen+cleared, spawn next.
 		await_egypt33_after_enemy29 : false
 		enemy29_enemies_seen : false
 		await_copper_after_egypt72 : false
@@ -793,7 +793,7 @@ function mission23_ensure_shared_leaves() {
 	var kr10_oil = mission23_make_leaf(1026, EVENT_TYPE_REPUTATION_DECREASE, undefined, 10, 4)
 	var kr7 = mission23_make_leaf(1025, EVENT_TYPE_REPUTATION_INCREASE, undefined, 7, 4)
 
-	// pak oil i=7 refuse → i=25 KR+7 → LOST×3 (loc route 4/8/9) → egypt×38 (JS B12).
+	// pak oil i=7 refuse → i=25 KR+7 → LOST×3 (loc route 4/8/9) → egypt×38 (JS chain).
 	var lost_r1 = mission23_make_leaf(1008, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 9, 2,
 		EVENT_SUBTYPE_LOST_TRADE_ROUTE, "Henen-nesw")
 	var lost_r2 = mission23_make_leaf(1009, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 9, 2,

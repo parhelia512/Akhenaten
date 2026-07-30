@@ -193,7 +193,7 @@ public:
 ANK_CONFIG_STRUCT(figure_seapeople_archer::static_params,
     missile_attack_value, missile_delay, attack_distance, missile_type)
 
-// ES3: Egyptian mounted archer — archer AI + horse march SFX (enemy_marching) + speed.
+// Egyptian mounted archer — archer AI + horse march SFX (enemy_marching) + speed.
 class figure_egyptian_mounted_archer : public figure_enemy_archer {
 public:
     FIGURE_METAINFO(FIGURE_ENEMY_EGYPTIAN_MOUNTED_ARCHER, figure_egyptian_mounted_archer)

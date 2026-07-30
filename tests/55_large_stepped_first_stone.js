@@ -1,4 +1,4 @@
-// C1a Layer-2 focus: verify the FIRST STONE STAGE of the Large Stepped Pyramid
+// Layer-2 focus: verify the FIRST STONE STAGE of the Large Stepped Pyramid
 // (20x20) renders correctly. That is the bottom brick layer (layer 0) laid across
 // the full footprint during phases 6..11 — corner sprites at the 4 corners, wall
 // sprites along the 4 edges, floor sprites in the interior, growing course 0 -> 5.

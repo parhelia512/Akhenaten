@@ -7,7 +7,7 @@ log_info("akhenaten: mission 45 pi-yer started")
 // Win: pop 2500 / culture 25 / prosperity 30 / monuments off / kingdom 45 / housing 5×level 8.
 // Survival disabled (0/7) — 7-year hold is Migdol (46), not Pi-Yer.
 // Trade: Enkomi Byblos Tyre Men-nefer Bahariya Siwi Farafra Kyrene Waset.
-// Triage: SKIP empty map_obj idx=9. Chain-only invasions → JS (B12) via event_request_cleared.
+// Triage: SKIP empty map_obj idx=9. Chain-only invasions → JS via event_request_cleared.
 // pak_allowed sparse (hut/road/clear only) — buildings from briefing (warships + copper/wood import).
 //
 // Tag_id scheme:
@@ -604,7 +604,7 @@ function mission45_ensure_chain_leaves() {
 	weapons23.set_refusal_action_tag(1011)
 	weapons23.set_too_late_action_tag(1011)
 
-	// pak i=11 LOST Farafra; ok→i=4 invasion is EVENT_TYPE_INVASION no-op → B12 JS on request_cleared.
+	// pak i=11 LOST Farafra; ok→i=4 invasion is EVENT_TYPE_INVASION no-op → JS chain on request_cleared.
 	mission45_make_leaf(1011, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 8, 12,
 		EVENT_SUBTYPE_LOST_TRADE_ROUTE, "Farafra Oasis")
 
@@ -636,7 +636,7 @@ function mission45_ensure_chain_leaves() {
 		EVENT_SUBTYPE_LOST_TRADE_ROUTE, "Kyrene")
 	mission45_make_leaf(1026, EVENT_TYPE_GIFT_FROM_PHARAOH, RESOURCE_TIMBER, 7, 12)
 
-	// Troops i=27 refuse KR−10; pak i=28 ok→29 egypt×12 (INVASION no-op → B12 JS).
+	// Troops i=27 refuse KR−10; pak i=28 ok→29 egypt×12 (INVASION no-op → JS chain).
 	mission45_make_leaf(1028, EVENT_TYPE_REPUTATION_DECREASE, undefined, 10, 12)
 
 	// Papyrus recurring gifts.
@@ -969,11 +969,11 @@ function mission45_event_i37_bricks(ev) {
 	mission.event37_bricks_done = true
 	mission45_ensure_chain_leaves()
 	log_info("akhenaten: mission 45 bricks×8", {ev:ev})
-	// refuse → invasion via event_request_cleared (B12); no leaf 1039.
+	// refuse → invasion via event_request_cleared (JS chain); no leaf 1039.
 	mission45_fire_request(2037, RESOURCE_BRICKS, 8, 10, 1038, 0, 1038, 4, 0, undefined, "Farafra Oasis")
 }
 
-// B12/B13: chain-only invasions after request outcomes.
+// Chain-only invasions after request outcomes.
 [es=event_request_cleared, mission=mission45]
 function mission45_on_request_cleared(ev) {
 	var outcome = mission_request_outcome(ev)

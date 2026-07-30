@@ -165,7 +165,7 @@ function mission_recurring_request_may_fire(mission, resource, prefix, abs_month
     return true
 }
 
-// B13: derive ok/late/refuse from factual event_request_cleared (no KR read).
+// Derive ok/late/refuse from factual event_request_cleared (no KR read).
 function mission_request_outcome(ev) {
 	if (!ev || !ev.fulfilled) {
 		return "refuse"

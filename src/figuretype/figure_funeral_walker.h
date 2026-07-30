@@ -9,7 +9,7 @@ enum e_funeral_walker_action {
     ACTION_123_FUNERAL_ABORT = 123, // path fail — do not set funeral_done
 };
 
-// BF2: one-shot funeral procession to a finished burial tomb.
+// One-shot funeral procession to a finished burial tomb.
 class figure_funeral_walker : public figure_impl {
 public:
     FIGURE_METAINFO(FIGURE_FUNERAL_WALKER, figure_funeral_walker)

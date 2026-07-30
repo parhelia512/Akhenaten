@@ -98,7 +98,7 @@ void scenario_request_handle(event_ph_t &event, int caller_event_id, e_event_act
         break;
 
     case e_event_state_finished_late:
-        // Overdue-grace fulfill uses this path (B13): was_overdue stays true for JS facts.
+        // Overdue-grace fulfill uses this path: was_overdue stays true for JS facts.
         messages::popup("message_request_received_late", event.event_id, 0);
         g_city.kingdome.increase_success_request(1);
         event.event_state = e_event_state_received;
@@ -221,7 +221,7 @@ void scenario_request_dispatch(int id) {
         return;
     }
 
-    // B13: overdue-grace fulfill is late (on_too_late), not ok (on_completed).
+    // Overdue-grace fulfill is late (on_too_late), not ok (on_completed).
     e_event_state new_state;
     if (ev->is_overdue) {
         new_state = e_event_state_finished_late;

@@ -253,7 +253,7 @@
       <p>Under the current additive rating formula, one finished small obelisk (weight 2) yields monument rating <strong>9</strong> — the goal used on <a href="../missions/buhen.html">Buhen</a>.</p>
 
       <div class="note-box">
-        <strong>Akhenaten status (C7):</strong> place, granite pre-stock / consume, only-one unfinished rule, art stages, info window, menu, and Buhen buildings list are in.
+        <strong>Akhenaten status:</strong> place, granite pre-stock / consume, only-one unfinished rule, art stages, info window, menu, and Buhen buildings list are in.
         Timber units per scaffolding phase live in <code>timber_loads</code> in
         <span class="file-ref">src/scripts/building/obelisk.js</span> (tune without C++ rebuild;
         current values are working defaults pending original <code>.pak</code> calibration).
@@ -302,7 +302,7 @@
 
       <div class="dev-section">
         <h2 id="dev">Developer reference</h2>
-        <p style="color:var(--text-muted);font-size:0.85rem">All paths relative to the repository root. Plan: <span class="file-ref">REMAKE_MISSING_MONUMENTS_PLAN.md</span> §C7.</p>
+        <p style="color:var(--text-muted);font-size:0.85rem">All paths relative to the repository root. </p>
 
         <details open>
           <summary>Building config — <code>src/scripts/building/obelisk.js</code></summary>
@@ -357,7 +357,7 @@
               <li>Help dialog: <code>message_building_obelisk</code> id <strong>372</strong></li>
               <li>Monument weights in
                 <span class="file-ref">src/scripts/city/monuments.js</span>:
-                small = <strong>2</strong>, large = <strong>4</strong> (large draft until F3)</li>
+                small = <strong>2</strong>, large = <strong>4</strong> (large draft until weight recalibration)</li>
             </ul>
           </div>
         </details>

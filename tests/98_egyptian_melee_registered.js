@@ -1,4 +1,4 @@
-// ES2: egyptian melee specials resolve to registered figure classes.
+// Egyptian melee specials resolve to registered figure classes.
 // FIGURE_ENEMY_EGYPTIAN_{FAST_SWORD,SWORD,HEAVY_SWORD,AXE} (45/49/50/53) now
 // have FIGURE_METAINFO leaves of figure_enemy_fast_sword
 // (src/figuretype/figure_enemy_fast_sword.h). They are not in

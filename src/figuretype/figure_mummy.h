@@ -7,7 +7,7 @@ enum e_mummy_action {
     ACTION_121_MUMMY_ROAMING = 121,
 };
 
-// Undead curse walker (BF3). Scenario EVENT_TYPE_MUMMY (29) / spawn_wave.
+// Undead curse walker. Scenario EVENT_TYPE_MUMMY (29) / spawn_wave.
 class figure_mummy : public figure_impl {
 public:
     FIGURE_METAINFO(FIGURE_MUMMY, figure_mummy)

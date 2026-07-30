@@ -101,7 +101,7 @@ void god_ptah_t::perform_major_curse() {
             return;
         }
 
-        // TEMP Enhanced: scorpion raid fallback when no industry to smash (CF5-style).
+        // TEMP Enhanced: scorpion raid fallback when there is no industry to smash.
         if (!!game_features::gameplay_ptah_scorpion_raid && perform_scorpions()) {
             messages::popup("message_wrath_of_ptah_scorpions", 0, 0);
             return;
@@ -110,7 +110,7 @@ void god_ptah_t::perform_major_curse() {
         // no industry to punish (msg 141 text)
         messages::popup("message_wrath_of_ptah", 0, 0);
     } else {
-        // frogs — canonical creature curse (msg 148); CF1 implements spawn
+        // frogs — canonical creature curse (msg 148)
         perform_frogs();
         messages::popup("message_wrath_of_ptah_4", 0, 0);
     }

@@ -135,7 +135,7 @@ void building_industry_update_farms(void) {
         int progress_step = (int)((float)fert * get_farm_produce_uptick_per_day(b)); // 0.16f
         const bool osiris_blessing = g_city.religion.osiris_double_farm_yield_days > 0;
 
-        // FB2: sealed basin holds moisture → slightly faster progress while labor is present.
+        // Sealed basin holds moisture → slightly faster progress while labor is present.
         if (is_floodplain && game_features::gameplay_enhanced_flood_basins.to_bool()
             && map_basin_is_sealed_at(b.tile) && progress_step > 0) {
             // Round +15%; if trunc would be a no-op, force +1 so low fert still benefits.

@@ -1,4 +1,4 @@
-// C1a second-tier pipeline: place Large Stepped Pyramid (20x20), walk through
+// Second-tier pipeline: place Large Stepped Pyramid (20x20), walk through
 // layer-0 bricks and into layer-1 (phase 17 = full second tier), screenshot.
 //
 // Zoom convention: higher percentage = farther out (25 close-up … 250 far).

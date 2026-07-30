@@ -56,7 +56,7 @@ public:
     figure_egyptian_spearman(figure *f) : figure_enemy_spearman(f) {}
 };
 
-// ES6: kingdom javelin (55). Favour-army remap of egyptian type1 slot.
+// Kingdom javelin (55). Favour-army remap of egyptian type1 slot.
 class figure_kingdome_javelin : public figure_enemy_spearman {
 public:
     FIGURE_METAINFO(FIGURE_ENEMY_KINGDOME_JAVELIN, figure_kingdome_javelin)

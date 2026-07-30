@@ -2,7 +2,7 @@
 
 #include "figuretype/figure_enemy_fast_sword.h"
 
-// Egyptian war elephant (ES4). Reuses fast-sword formation/melee AI; dedicated type
+// Egyptian war elephant. Reuses fast-sword formation/melee AI; dedicated type
 // so HP/speed/AoE can diverge. March SFX skipped in figure_enemy_fast_sword
 // (camel/elephant filter). Full trampling AoE is a follow-up.
 class figure_enemy_elephant : public figure_enemy_fast_sword {

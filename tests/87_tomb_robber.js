@@ -1,4 +1,4 @@
-// TR1–TR4: FIGURE_TOMB_ROBER path, steal, crime-wave, arrest, preexisting threat.
+// FIGURE_TOMB_ROBER path, steal, crime-wave, arrest, preexisting threat.
 // Markers:
 //   [test-marker] tomb_robber_registered_ok
 //   [test-marker] tomb_robber_reject_no_provisions_ok
@@ -138,7 +138,7 @@ function run_test() {
     }
     __log_marker('tomb_robber_goto_tomb_ok')
 
-    // TR2: commit steal → dispatched -1, kingdom -10.
+    // Commit steal → dispatched -1, kingdom -10.
     __test_kingdom_set_rating(50)
     var before_disp = __scenario_burial_provisions_dispatched(RESOURCE_LINEN)
     var before_kingdom = __test_kingdom_rating()
@@ -193,7 +193,7 @@ function run_test() {
     }
     __log_marker('tomb_robber_crime_wave_ok')
 
-    // TR3: force arrest → caught action / poof, goods not stolen again.
+    // Force arrest → caught action / poof, goods not stolen again.
     var arrest_fid = 0
     for (var i = 1; i < 2000; i++) {
         if (__figure_is_valid(i) && __figure_get_type(i) == FIGURE_TOMB_ROBER) {

@@ -644,7 +644,7 @@ function mission31_requests_and_events(ev) {
 			RESOURCE_FISH, 12, 12, 1014, 1015, 1016, 0, 0, "Kerma")
 	}
 
-	// Heaven / D8d-25 TEMP: ≥2 active warship wharves → NEW_TRADE Gaza (no distant_battle in pak)
+	// Heaven TEMP: ≥2 active warship wharves → NEW_TRADE Gaza (no distant_battle in pak)
 	if (!mission.gaza_trade_done && city.count_active_buildings(BUILDING_WARSHIP_WHARF) >= 2) {
 		mission.gaza_trade_done = true
 		log_info("akhenaten: mission 31 NEW_TRADE Gaza (warship wharves)")

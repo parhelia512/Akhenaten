@@ -8,23 +8,23 @@ log_info("akhenaten: mission 27 itjtawy started")
 // debt_interest 8 (low). Rank 10 (Pharaoh era, matches Iken/Heh).
 // Convergence: Kebet (25) and Menat Khufu (26) both funnel into this scenario. No
 // next_mission here - a choice[] host to Iken (28, already scripted) / Sawu (29, not yet;
-// B5 hides its button until D8b lands).
+// its button stays hidden until that mission is scripted).
 // Win: pop 7500 / culture 60 / prosperity 60 / monuments TEMP 6 (pak raw 33 = Sphinx +
-//   Medium + Small Mudbrick Pyramid; C5a not implemented yet - Sphinx-only rating
+//   Medium + Small Mudbrick Pyramid; mudbrick pyramids not implemented yet - Sphinx-only rating
 //   2.25x1+4.5=6.75->6 truncated) / kingdom 85 / housing_count 6 + housing_level 17
 //   (six BUILDING_HOUSE_STATELY_MANOR).
 // Burial: pak burial_count=5 - grainx10 potteryx25 beerx12 luxury_goodsx12 papyrusx15.
 // Trade: Buhen(7 sea) Byblos(2) Dakhla Oasis(9) Men-nefer(6) Menat Khufu(4).
 // Display: Kerma(5 sea) Kharga Oasis(11) Waset(1) Kebet(3). SKIP empty map_obj idx=8.
 // No pak river/inv_land/inv_sea points beyond the single disembark slot i=2 - omit
-// invasion_points_*; B12/favour invasions fall back to the map entry tile (-1,-1).
+// invasion_points_*; chain / favour invasions fall back to the map entry tile (-1,-1).
 // Events (pragmatic depth, Menat-style - KR leaves + key side effects, not every nested
 // grain/pomegranates/papyrus chain request):
-//   i=0  meatx9      y2m7  /8mo  Men-nefer  ok KR+6 / refuse KRx3 + B12 egyptx8 (i=3) / late KRx3
+//   i=0  meatx9      y2m7  /8mo  Men-nefer  ok KR+6 / refuse KRx3 + chain egyptx8 (i=3) / late KRx3
 //   i=67 meatx2      y2m10 /6mo  Kerma      ok KR+1 / refuse KRx3 / late GIFTx168 (no-op deben)
 //   i=48 potteryx7   y2m2  /8mo  Kerma      ok NEW_TRADE Kerma / refuse KRx2 / late = refuse
-//   i=17 bricksx13   y5m4  /10mo Men-nefer  ok KR+5 / refuse KRx3 + B12 egyptx9 (i=22) / late = refuse
-//   i=70 limestonex6 y6m4  /10mo Men-nefer  ok KR+7->GIFTx1514 / refuse KRx5 + B12 egyptx6 (i=76) / late KRx3->GIFTx135
+//   i=17 bricksx13   y5m4  /10mo Men-nefer  ok KR+5 / refuse KRx3 + chain egyptx9 (i=22) / late = refuse
+//   i=70 limestonex6 y6m4  /10mo Men-nefer  ok KR+7->GIFTx1514 / refuse KRx5 + chain egyptx6 (i=76) / late KRx3->GIFTx135
 //   Favour i=118->119: egyptx50->x50 when kingdom rating x 0 (Menat pattern, size 50 not 40).
 //   Recurring idle-gate (fire once/year from the pak start year, month match):
 //     i=43 linenx15 y14m2+ Menat Khufu (ok KR+3->GIFTx1385 / refuse KRx3 / late KRx3)
@@ -36,7 +36,7 @@ log_info("akhenaten: mission 27 itjtawy started")
 //   i=23 (deep chain-only, unreachable from the wired roots at this depth); pak_allowed dump
 //   (editor artifact - only ROAD/CLEAR_LAND/CRUDE_HUT).
 // TEMP: BUILDING_SPHINX only in buildings[]; BUILDING_SMALL/MEDIUM_MUDBRICK_PYRAMID need
-//   C5a (class + place + monument weights) before they can be restored alongside pak goal 33.
+//   a class + place + monument weights before they can be restored alongside pak goal 33.
 //
 // Tag_id scheme:
 //   1000 + i               chain-only leaves
@@ -115,7 +115,7 @@ mission27 { // Itjtawy - A New Capital is Founded
 		BUILDING_SCRIBAL_SCHOOL, BUILDING_LIBRARY,
 	]
 
-	// Monuments TEMP 6 (pak raw 33 = Sphinx + Medium + Small Mudbrick; C5a not implemented yet).
+	// Monuments TEMP 6 (pak raw 33 = Sphinx + Medium + Small Mudbrick; mudbrick not implemented yet).
 	win_criteria {
 		population    {enabled : true, goal : 7500 }
 		culture       {enabled : true, goal : 60 }
@@ -548,7 +548,7 @@ function mission27_fire_request(tag, resource, amount, months, ok_tag, fail_tag,
 	return request
 }
 
-// pak i=0: meatx9 ok->6 KR+6; refuse->1 KRx3 (+ B12 egyptx8 via i=3); late->91 KRx3.
+// pak i=0: meatx9 ok->6 KR+6; refuse->1 KRx3 (+ chain egyptx8 via i=3); late->91 KRx3.
 function mission27_ensure_i0_leaves() {
 	if (mission.i0_leaves_wired) {
 		return
@@ -559,7 +559,7 @@ function mission27_ensure_i0_leaves() {
 	mission27_make_leaf(1091, EVENT_TYPE_REPUTATION_DECREASE, undefined, 3, 2)
 }
 
-// pak i=17: bricksx13 ok->47 KR+5; refuse/late->18 KRx3 (+ B12 egyptx9 via i=22 on refuse).
+// pak i=17: bricksx13 ok->47 KR+5; refuse/late->18 KRx3 (+ chain egyptx9 via i=22 on refuse).
 function mission27_ensure_i17_leaves() {
 	if (mission.i17_leaves_wired) {
 		return
@@ -591,7 +591,7 @@ function mission27_ensure_i67_leaves() {
 	mission27_make_leaf(1114, EVENT_TYPE_GIFT_FROM_PHARAOH, undefined, 168, 2)
 }
 
-// pak i=70: limestonex6 ok->71 KR+7->72 GIFTx1514; refuse->73 KRx5 (+ B12 egyptx6 via i=76);
+// pak i=70: limestonex6 ok->71 KR+7->72 GIFTx1514; refuse->73 KRx5 (+ chain egyptx6 via i=76);
 // late->115 KRx3->116 GIFTx135.
 function mission27_ensure_i70_leaves() {
 	if (mission.i70_leaves_wired) {
@@ -629,7 +629,7 @@ function mission27_ensure_all_leaves() {
 	mission27_ensure_i43_leaves()
 }
 
-// No pak inv_land/sea points - B12/favour Egyptian raids use the map entry fallback (-1,-1).
+// No pak inv_land/sea points - chain / favour Egyptian raids use the map entry fallback (-1,-1).
 function mission27_egypt_raid(invasion_id, size, attack_target) {
 	log_info("akhenaten: mission 27 itjtawy egypt raid id=" + invasion_id + " size=" + size)
 	__image_request_pak(PACK_ENEMY_EGYPTIAN)
@@ -790,7 +790,7 @@ function mission27_requests_and_events(ev) {
 	}
 }
 
-// B12: chain invasions from JS after a request refuse (EVENT_TYPE_INVASION chain nodes are
+// Chain invasions from JS after a request refuse (EVENT_TYPE_INVASION chain nodes are
 // no-ops in this engine). Only the three once-request roots have a pak invasion child.
 [es=event_request_cleared, mission=mission27]
 function mission27_on_request_cleared(ev) {
