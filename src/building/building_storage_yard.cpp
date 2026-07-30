@@ -746,6 +746,12 @@ storage_worker_task building_storageyard_deliver_to_monuments(building *b) {
 
     svector<building_monument*, 10> monuments;
     buildings_valid_do([&] (building &b) { 
+        // Multi-part monuments (pyramids) share one resource pool on the head —
+        // only consider is_main() so we don't fill the list with corner/wall parts
+        // and point sleds at a 2×2 whose get_area used to miss the delivery tile.
+        if (!b.is_main()) {
+            return;
+        }
         auto monument = b.dcast_monument();
         if (!monument) {
             return;
@@ -774,11 +780,25 @@ storage_worker_task building_storageyard_deliver_to_monuments(building *b) {
         }
 
         for (auto monument : monuments) {
-            int monuments_want = monument->needs_resource(resource);
-            if (monuments_want > 0) {
-                int amount = std::min(available, monuments_want);
-                return {STORAGEYARD_TASK_MONUMENT, &space->base, amount, resource, &monument->base};
+            int needed = monument->needs_resource(resource);
+            if (needed <= 0) {
+                continue;
             }
+            // Remaining after on-site % — without this a full-phase sled can
+            // overshoot / empty the yard in one trip (Pharaoh hauls 4 blocks = 400).
+            auto &d = monument->runtime_data();
+            int on_site = needed * (int)d.resources_pct[resource] / 100;
+            int in_flight = building_monument_resource_in_delivery(&monument->base, resource);
+            int remaining = needed - on_site - in_flight;
+            if (remaining <= 0) {
+                continue;
+            }
+            int amount = std::min(available, remaining);
+            amount = std::min(amount, 400);
+            if (amount <= 0) {
+                continue;
+            }
+            return {STORAGEYARD_TASK_MONUMENT, &space->base, amount, resource, &monument->base};
         }
     }
 
@@ -944,6 +964,9 @@ void building_storage_yard::spawn_figure() {
         sled->set_direction_to(task.dest);
         sled->load_resource(task.resource, task.amount);
         sled->base.leading_figure_id = leader->id;
+        if (auto *mm = task.dest->dcast_monument()) {
+            mm->add_delivery(f->id, task.resource, task.amount);
+        }
         remove_resource(task.resource, task.amount);
 
     } else if (!base.has_figure(BUILDING_SLOT_SERVICE)) {

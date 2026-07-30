@@ -1,7 +1,7 @@
 // C1a: Large Stepped Pyramid (20x20) — place via planner, verify linked parts
 // (10x10 blocks = 100 tiles), walk a few construction phases, capture a screenshot.
-// Height render for the extra layers + polish stage are a follow-up visual pass, so
-// this test only asserts placement / parts / build-phase progression, not final art.
+// Asserts placement / parts / build-phase progression. Marble polish is true-pyramid
+// only (C3.4), not stepped.
 
 function run_test() {
     __log_info_native('[test:52] large stepped pyramid place + parts + phases + screenshot')

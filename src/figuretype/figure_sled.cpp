@@ -16,13 +16,15 @@ void figure_sled::figure_action() {
         if (leader->type == FIGURE_SLED_PULLER && leader->state == FIGURE_STATE_ALIVE) {
             follow_ticks(1);
         } else {
-            auto monument = destination()->dcast_monument();
+            building *dest = destination();
+            auto monument = (dest && dest->id) ? dest->dcast_monument() : nullptr;
             if (monument) {
                 grid_area area = monument->get_area();
                 if (map_tile_is_inside_area(tile(), area.tmin(), area.tmax())) {
                     do_deliver(ACTION_11_SLED_RETURNING_EMPTY);
                 }
             }
+            building_monument_remove_delivery(id());
             poof();
             return;
         }
@@ -59,8 +61,8 @@ void figure_sled::do_deliver(int action_done) {
         return advance_action(action_done);
     }
 
-    auto monument = destination()->dcast_monument();
-    assert(monument);
+    building *dest = destination();
+    auto monument = (dest && dest->id) ? dest->dcast_monument() : nullptr;
     if (monument) {
         monument->deliver_resource(resource, carrying);
     }

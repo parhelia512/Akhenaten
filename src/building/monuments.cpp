@@ -49,17 +49,21 @@ struct monument_delivery {
 svector<monument_delivery, 32> g_monument_deliveries;
 
 bool building_monument::deliver_resource(e_resource resource, int amount) {
-    auto &d = runtime_data();
+    // Always credit the chain head — yard/sled destination may be a corner/wall
+    // part, while update_day / info UI read resources_pct only from main().
+    auto bmain = main()->dcast_monument();
+    verify_no_crash(bmain);
+    auto &d = bmain->runtime_data();
     if (d.resources_pct[resource] >= 100) {
         return false;
     }
 
-    auto bmain = main()->dcast_monument();
-    verify_no_crash(bmain);
-
     int full_resources = bmain->needs_resource(resource);
     int amount_pct = calc_percentage(amount, full_resources);
-    d.resources_pct[resource] += amount_pct;
+    // Clamp to 100 — update_day does tiles.resize(n * pct / 100); pct>100
+    // grew the vector with bogus tiles and wrote monument progress off-footprint.
+    int sum = (int)d.resources_pct[resource] + amount_pct;
+    d.resources_pct[resource] = (uint8_t)std::min(sum, 100);
 
     return true;
 }
@@ -74,6 +78,40 @@ void map_monuments_set_progress(tile2i tile, uint32_t progress) {
 
 void map_monuments_clear() {
     map_grid_fill(g_monuments_progress_grid, 0);
+}
+
+tile2i building_monument_mason_waiting_tile(building *b) {
+    if (!b || !b->is_monument()) {
+        return tile2i{ -1, -1 };
+    }
+
+    building *main = b->main();
+    if (!main) {
+        return tile2i{ -1, -1 };
+    }
+
+    // Same 2×2 work-site pattern as mastaba bricklayers. Prefer idle sites so
+    // multiple masons spread out; fall back to mid-progress for resume-after-poof.
+    grid_tiles tiles = map_grid_get_tiles(main, 0);
+    auto find_in_range = [&] (int lo, int hi) {
+        return map_grid_area_first(tiles, [main, lo, hi] (tile2i tile) {
+            int progress = map_monuments_get_progress(tile);
+            tile2i offset = tile.dist2i(main->tile).mod(4, 4);
+            return progress >= lo && progress < hi
+                && (offset.x() == 1 || offset.x() == 3)
+                && (offset.y() == 1 || offset.y() == 3);
+        });
+    };
+
+    tile2i idle = find_in_range(0, 1);
+    if (idle.valid()) {
+        return idle;
+    }
+    tile2i claimed = find_in_range(1, 3);
+    if (claimed.valid()) {
+        return claimed;
+    }
+    return find_in_range(3, 200);
 }
 
 grid_area building_monument::get_area() const {
@@ -171,8 +209,8 @@ int building_monument::needs_resource(e_resource resource) const {
 int building_monument::needs_resource(e_resource resource, int phase) const {
     const monument &config = this->config();
 
-    auto &d = runtime_data();
-    if (d.phase && phase >= config.phases.size()) {
+    // phase is signed in runtime (FINISHED = -1). Never index phases[] with that.
+    if (phase < 0 || phase >= (int)config.phases.size()) {
         return 0;
     }
 

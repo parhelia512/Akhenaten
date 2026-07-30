@@ -63,6 +63,10 @@ REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_medium_bent_pyramid)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_medium_bent_pyramid_corner)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_medium_bent_pyramid_wall)
 
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_pyramid)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_pyramid_corner)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_pyramid_wall)
+
 struct pyramid_part {
     e_building_type type;
     tile2i offset;
@@ -137,11 +141,10 @@ struct monument_medium_stepped_pyramid : public monument {
     }
 } g_monument_medium_stepped_pyramid;
 
-// Large stepped pyramid (20×20). First-cut schedule mirrors the medium cadence
-// (foundation phases 0–6, then flat brick phases) so it builds/finishes/save-loads.
+// Large stepped pyramid (20×20). Schedule: foundation 0–6, then brick courses → finish@36.
 // Also used by stepped pyramid complex (C1b-1) until causeway/temples change costs.
-// The extra layers of the taller 20×20 and the top-down polish stage are a follow-up
-// visual pass — extend the schedule together with the render (REMAKE_LARGE_PYRAMID_LAYER2.md).
+// Height tiers: REMAKE_LARGE_PYRAMID_LAYER2.md. Top-down marble polish is NOT stepped —
+// true pyramids only (REMAKE_TRUE_PYRAMID_POLISH_PLAN.md / C3.4).
 struct monument_large_stepped_pyramid : public monument {
     monument_large_stepped_pyramid() : monument{ BUILDING_LARGE_STEPPED_PYRAMID } {
         phases.push_back({ 0, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
@@ -195,6 +198,32 @@ struct monument_medium_bent_pyramid : public monument {
     }
 } g_monument_medium_bent_pyramid;
 
+// True (smooth) small pyramid: stone core + limestone casing, then polish phases
+// with no further limestone (gr178 id32 / C3.4). Amounts are placeholders — TODO(orig-data).
+// Height cadence mirrors small stepped (finish brick @23); polish 24–25; terminal 26.
+struct monument_small_pyramid : public monument {
+    monument_small_pyramid() : monument{ BUILDING_SMALL_PYRAMID } {
+        phases.push_back({ 0, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
+        phases.push_back({ 1, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
+        phases.push_back({ 2, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_STONE, 4800}, {RESOURCE_LIMESTONE, 1200} });
+        phases.push_back({ 3, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 2000}, {RESOURCE_STONE, 4000}, {RESOURCE_LIMESTONE, 1000} });
+        phases.push_back({ 4, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 1600}, {RESOURCE_STONE, 3200}, {RESOURCE_LIMESTONE, 800} });
+        phases.push_back({ 5, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 1200}, {RESOURCE_STONE, 2400}, {RESOURCE_LIMESTONE, 600} });
+        phases.push_back({ 6, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 800}, {RESOURCE_STONE, 1600}, {RESOURCE_LIMESTONE, 400} });
+        for (int p = 7; p <= 23; ++p) {
+            phases.push_back({ (uint8_t)p, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 400}, {RESOURCE_STONE, 800}, {RESOURCE_LIMESTONE, 200} });
+        }
+        // C3.4 polish: no new limestone; stonemasons via need_stonemason().
+        // Count = init_tiles/4 layers (8→2). Phases 24–25 collide with stepped
+        // hight_impl large band — building_small_pyramid draws completed height instead.
+        constexpr int k_polish_phases = 8 / 4; // == num layers
+        for (int i = 0; i < k_polish_phases; ++i) {
+            phases.push_back({ (uint8_t)(24 + i), monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
+        }
+        phases.push_back({ 26, monument_phase_resource{RESOURCE_NONE, 0} }); // last id; finish = set_phase(27)
+    }
+} g_monument_small_pyramid;
+
 template<typename T>
 const building_pyramid::base_params &pyramid_base_params(const building_static_params &params) {
     using static_params = typename T::static_params;
@@ -208,7 +237,18 @@ tile2i building_pyramid::center_point() const {
     tile2i tend = tmain.shifted(itiles.x, itiles.y);
     tile2i ctile = tmain.add(tend).div(2);
     building* b = building_at(ctile);
-    return b->tile;
+    // Mid-footprint must be a pyramid part; fall back to main tile if the map
+    // was corrupted / mid-demolition so sleds don't null-deref.
+    return b ? b->tile : tmain;
+}
+
+grid_area building_pyramid::get_area() const {
+    // Sleds deliver when the load is inside this rect. Part buildings are 2×2;
+    // using size()-1 made the area miss center_point() and drop cargo undelivered.
+    const auto &itiles = pyramid_params().init_tiles;
+    tile2i begin = main()->tile();
+    tile2i end = begin.shifted(itiles.x - 1, itiles.y - 1);
+    return { begin, end };
 }
 
 bool building_pyramid::get_route_citizen_land_type(int grid_offset, int &land_result) const {
@@ -270,6 +310,12 @@ const building_pyramid::base_params &get_pyramid_params(e_building_type type) {
     case BUILDING_MEDIUM_BENT_PYRAMID_CONE:
     case BUILDING_MEDIUM_BENT_PYRAMID_WALL:
         return pyramid_base_params<building_medium_bent_pyramid>(params);
+
+    case BUILDING_SMALL_PYRAMID:
+    case BUILDING_SMALL_PYRAMID_CORNER:
+    case BUILDING_SMALL_PYRAMID_CONE:
+    case BUILDING_SMALL_PYRAMID_WALL:
+        return pyramid_base_params<building_small_pyramid>(params);
     }
 
     static building_pyramid::base_params dummy;
@@ -410,6 +456,12 @@ void building_stepped_pyramid::finalize(building *b, const vec2i size_b) {
 }
 
 void building_stepped_pyramid::remove_worker(figure_id fid) {
+    // Worker list lives on the chain head (guilds / work camps always target
+    // is_main, but parts may still receive remove_worker via destination_bid).
+    if (!is_main()) {
+        main()->remove_worker(fid);
+        return;
+    }
     auto &d = runtime_data();
     for (auto &wid : d.workers) {
         if (wid == fid) {
@@ -420,6 +472,10 @@ void building_stepped_pyramid::remove_worker(figure_id fid) {
 }
 
 void building_stepped_pyramid::add_workers(figure_id fid) {
+    if (!is_main()) {
+        main()->add_workers(fid);
+        return;
+    }
     auto &d = runtime_data();
     for (auto &wid : d.workers) {
         if (wid == 0) {
@@ -855,26 +911,38 @@ void building_stepped_pyramid::draw_phase_3_5_tile(painter& ctx, color color_mas
 }
 
 int building_stepped_pyramid::get_bricks_image(int orientation, tile2i tile, tile2i start, tile2i end, int layer) {
+    return get_masonry_image(orientation, tile, start, end, layer, false);
+}
+
+int building_stepped_pyramid::get_masonry_image(int orientation, tile2i tile, tile2i start, tile2i end, int layer, bool polished) {
     layer %= 6;
 
     const bool is_bmain = is_main();
     const bool is_floor = building_type_any_of(type(), {
         BUILDING_SMALL_STEPPED_PYRAMID, BUILDING_MEDIUM_STEPPED_PYRAMID, BUILDING_LARGE_STEPPED_PYRAMID,
         BUILDING_STEPPED_PYRAMID_COMPLEX,
-        BUILDING_SMALL_BENT_PYRAMID, BUILDING_MEDIUM_BENT_PYRAMID
+        BUILDING_SMALL_BENT_PYRAMID, BUILDING_MEDIUM_BENT_PYRAMID,
+        BUILDING_SMALL_PYRAMID, BUILDING_SMALL_PYRAMID_CONE
     });
     if (is_floor && !is_bmain) {
-        int image_base_bricks = current_params().first_img("base_bricks") + layer;
-        return image_base_bricks;
+        const xstring floor_key = polished && current_params().first_img("base_polish") > 0
+            ? "base_polish" : "base_bricks";
+        return current_params().first_img(floor_key) + layer;
     }
 
     tile = building_at(tile)->tile;
     start = building_at(start)->tile;
     end = building_at(end)->tile;
 
-    const bool is_corner = building_type_any_of(type(), { BUILDING_SMALL_STEPPED_PYRAMID_CORNER, BUILDING_MEDIUM_STEPPED_PYRAMID_CORNER, BUILDING_LARGE_STEPPED_PYRAMID_CORNER, BUILDING_SMALL_BENT_PYRAMID_CORNER, BUILDING_MEDIUM_BENT_PYRAMID_CORNER });
+    const bool is_corner = building_type_any_of(type(), {
+        BUILDING_SMALL_STEPPED_PYRAMID_CORNER, BUILDING_MEDIUM_STEPPED_PYRAMID_CORNER, BUILDING_LARGE_STEPPED_PYRAMID_CORNER,
+        BUILDING_SMALL_BENT_PYRAMID_CORNER, BUILDING_MEDIUM_BENT_PYRAMID_CORNER,
+        BUILDING_SMALL_PYRAMID_CORNER
+    });
     if (is_corner || is_bmain) {
-        int image_corner_bricks = current_params().first_img("corner_bricks") + (layer * 8);
+        const xstring corner_key = polished && current_params().first_img("corner_polish") > 0
+            ? "corner_polish" : "corner_bricks";
+        int image_corner_bricks = current_params().first_img(corner_key) + (layer * 8);
         const bool at_min_x = (tile.x() == start.x());
         const bool at_min_y = (tile.y() == start.y());
         const bool at_max_x = (tile.x() == end.x());
@@ -886,9 +954,15 @@ int building_stepped_pyramid::get_bricks_image(int orientation, tile2i tile, til
         return image_corner_bricks;
     }
 
-    const bool is_wall = building_type_any_of(type(), { BUILDING_SMALL_STEPPED_PYRAMID_WALL, BUILDING_MEDIUM_STEPPED_PYRAMID_WALL, BUILDING_LARGE_STEPPED_PYRAMID_WALL, BUILDING_SMALL_BENT_PYRAMID_WALL, BUILDING_MEDIUM_BENT_PYRAMID_WALL });
+    const bool is_wall = building_type_any_of(type(), {
+        BUILDING_SMALL_STEPPED_PYRAMID_WALL, BUILDING_MEDIUM_STEPPED_PYRAMID_WALL, BUILDING_LARGE_STEPPED_PYRAMID_WALL,
+        BUILDING_SMALL_BENT_PYRAMID_WALL, BUILDING_MEDIUM_BENT_PYRAMID_WALL,
+        BUILDING_SMALL_PYRAMID_WALL
+    });
     if (is_wall) {
-        int image_wall_bricks = current_params().first_img("wall_bricks") + (layer * 8);
+        const xstring wall_key = polished && current_params().first_img("wall_polish") > 0
+            ? "wall_polish" : "wall_bricks";
+        int image_wall_bricks = current_params().first_img(wall_key) + (layer * 8);
         if (tile.x() == start.x()) return image_wall_bricks + 0;
         if (tile.y() == start.y()) return image_wall_bricks + 3;
         if (tile.x() == end.x()) return image_wall_bricks + 2;
@@ -1163,59 +1237,78 @@ bool building_stepped_pyramid::draw_ornaments_and_animations_hight_impl(painter 
         draw_ornaments_and_animations_stairs_impl(ctx, point, tile, color_mask, tiles_size);
     } else if (is_finished() || phase() == 24 || phase() == 32 || phase() == 36) {
         // Complete pyramid: last construction phase (small 24 / medium 32 / large 36)
-        // or MONUMENT_FINISHED after monument_up / natural complete. Without this
-        // branch finished monuments draw nothing (phase() is uint8_t 255).
-        if (d.layer == 0) {
-            auto layer_area = get_layer_area(0);
-            int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
+        // or MONUMENT_FINISHED. Note: phase==24 is shadowed by `>=24 && <30` above for
+        // in-progress draws — finished uses phase 255. Shared body:
+        return draw_completed_height_ornaments(ctx, point, tile, color_mask, tiles_size);
+    }
 
-            auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
-            command.image_id = img;
-            command.pixel = point;
-            command.mask = color_mask;
+    return true;
+}
 
-            fill_tiles_height(ctx, tile, img);
-        } else if (d.layer == 1) {
-            auto layer_area = get_layer_area(1);
-            int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
+bool building_stepped_pyramid::draw_completed_height_ornaments(painter &ctx, vec2i point, tile2i tile, color color_mask, const vec2i tiles_size) {
+    color_mask = (color_mask ? color_mask : 0xffffffff);
+    const auto &d = runtime_data();
+    const bool polished = use_polish_sprites_for_layer(d.layer);
 
-            auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
-            command.image_id = img;
-            command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 3 };
-            command.mask = color_mask;
-
-            fill_tiles_height(ctx, tile, img);
-        } else if (d.layer == 2) {
-            auto layer_area = get_layer_area(2);
-            int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
-
-            auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
-            command.image_id = img;
-            command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 6 };
-            command.mask = color_mask;
-
-            fill_tiles_height(ctx, tile, img);
-        } else if (d.layer == 3) {
-            auto layer_area = get_layer_area(3);
-            int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
-
-            auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
-            command.image_id = img;
-            command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 9 };
-            command.mask = color_mask;
-
-            fill_tiles_height(ctx, tile, img);
-        } else if (d.layer == 4) {
-            auto layer_area = get_layer_area(4);
-            int img = get_bricks_image(base.orientation, tile, layer_area.begin, layer_area.end, 5);
-
-            auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
-            command.image_id = img;
-            command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 12 };
-            command.mask = color_mask;
-
-            fill_tiles_height(ctx, tile, img);
+    auto fill_tiles_height = [] (painter &ctx, tile2i tile, int img) {
+        auto image = image_get(img);
+        int iso_size = image->isometric_size() - 1;
+        grid_tiles tiles = map_grid_get_tiles(tile, tile.shifted(iso_size, iso_size));
+        for (auto &t : tiles) {
+            map_building_height_set(t.grid_offset(), image->isometric_top_height);
         }
+    };
+
+    if (d.layer == 0) {
+        auto layer_area = get_layer_area(0);
+        int img = get_masonry_image(base.orientation, tile, layer_area.begin, layer_area.end, 5, polished);
+
+        auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
+        command.image_id = img;
+        command.pixel = point;
+        command.mask = color_mask;
+
+        fill_tiles_height(ctx, tile, img);
+    } else if (d.layer == 1) {
+        auto layer_area = get_layer_area(1);
+        int img = get_masonry_image(base.orientation, tile, layer_area.begin, layer_area.end, 5, polished);
+
+        auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
+        command.image_id = img;
+        command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 3 };
+        command.mask = color_mask;
+
+        fill_tiles_height(ctx, tile, img);
+    } else if (d.layer == 2) {
+        auto layer_area = get_layer_area(2);
+        int img = get_masonry_image(base.orientation, tile, layer_area.begin, layer_area.end, 5, polished);
+
+        auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
+        command.image_id = img;
+        command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 6 };
+        command.mask = color_mask;
+
+        fill_tiles_height(ctx, tile, img);
+    } else if (d.layer == 3) {
+        auto layer_area = get_layer_area(3);
+        int img = get_masonry_image(base.orientation, tile, layer_area.begin, layer_area.end, 5, polished);
+
+        auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
+        command.image_id = img;
+        command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 9 };
+        command.mask = color_mask;
+
+        fill_tiles_height(ctx, tile, img);
+    } else if (d.layer == 4) {
+        auto layer_area = get_layer_area(4);
+        int img = get_masonry_image(base.orientation, tile, layer_area.begin, layer_area.end, 5, polished);
+
+        auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_full);
+        command.image_id = img;
+        command.pixel = point - vec2i{ 0, TILE_HEIGHT_PIXELS * 12 };
+        command.mask = color_mask;
+
+        fill_tiles_height(ctx, tile, img);
     }
 
     return true;
@@ -1228,21 +1321,15 @@ span_const<uint16_t> building_stepped_pyramid::active_workers() const {
 
 void building_stepped_pyramid::update_day(const vec2i tiles_size) {
     auto &monumentd = runtime_data();
-    if (phase() >= phases()) {
-        finalize(&base, tiles_size);
-        if (is_main()) {
-            const bool is_bent = building_type_any_of(type(), { BUILDING_SMALL_BENT_PYRAMID, BUILDING_MEDIUM_BENT_PYRAMID });
-            pcstr congrats = is_bent ? "bent_pyramid_congratulations" : "stepped_pyramid_congratulations";
-            city_message &message = city_message_post_with_popup_delay(MESSAGE_CAT_MONUMENTS, true, congrats, type(), tile().grid_offset());
-            message.hide_img = true;
-        }
+    // Callers also guard, but keep a local bail — after FINISHED, phase() as
+    // uint8_t is 255 and must not re-enter promote / ring logic.
+    if (is_finished()) {
         return;
     }
 
     grid_tiles tiles = map_grid_get_tiles(&base, 0);
     tile2i tile2works = map_grid_area_first(tiles, [] (tile2i tile) { return map_monuments_get_progress(tile) < 200; });
     bool all_tiles_finished = (tile2works == tile2i{ -1, -1 });
-    building *main = base.main();
     building_impl *part = this;
     if (!is_main()) {
         return;
@@ -1250,15 +1337,43 @@ void building_stepped_pyramid::update_day(const vec2i tiles_size) {
 
     if (all_tiles_finished) {
         int curr_phase = phase();
-        map_grid_area_foreach(tiles, [] (tile2i tile) { map_monuments_set_progress(tile, 0); });
+        const int nphases = phases();
+        // Last schedule index is a terminal marker (RESOURCE_NONE) — same pattern as
+        // mastaba phase 8. Keep tiles at 200 when entering it so the next day can
+        // advance past size → FINISHED. Clearing here left progress at 0 forever
+        // (no mason work on an empty terminal) and natural finish never happened.
+        const bool entering_terminal = (curr_phase + 1 >= nphases - 1);
+        const bool finishing = (curr_phase + 1 >= nphases);
+        if (!entering_terminal) {
+            map_grid_area_foreach(tiles, [] (tile2i tile) { map_monuments_set_progress(tile, 0); });
+        }
         while (part) {
             verify_no_crash(part->dcast_monument());
             part->dcast_monument()->set_phase(curr_phase + 1);
             part = part->has_next() ? part->next() : nullptr;
         }
+        // set_phase(phases()) stores FINISHED immediately — the old
+        // `phase() >= phases()` head-check never saw a live phase==size and
+        // congrats never fired on natural completion. Post them here once.
+        if (finishing) {
+            // Use schedule btype (shared by corner/wall parts), not the part's
+            // building type — orientation can make a corner the is_main() head.
+            const e_building_type mon_type = config().btype;
+            const bool is_bent = (mon_type == BUILDING_SMALL_BENT_PYRAMID
+                || mon_type == BUILDING_MEDIUM_BENT_PYRAMID);
+            const bool is_true = (mon_type == BUILDING_SMALL_PYRAMID);
+            pcstr congrats = is_true ? "pyramid_congratulations"
+                : (is_bent ? "bent_pyramid_congratulations" : "stepped_pyramid_congratulations");
+            city_message &message = city_message_post_with_popup_delay(MESSAGE_CAT_MONUMENTS, true, congrats, type(), tile().grid_offset());
+            message.hide_img = true;
+            return;
+        }
     }
 
-    if (phase() >= 6) {
+    // Resource gate: claimed tiles (progress 1) become workable (2) once enough
+    // materials are on-site. Mastaba uses phase >= 2; using >= 6 here left phases
+    // 2–5 with masons stuck on progress 1 forever (need_stonemason starts at 2).
+    if (phase() >= 2) {
         int minimal_percent = 100;
         for (e_resource r = RESOURCES_MIN; r < RESOURCES_MAX; ++r) {
             bool need_resource = needs_resource(r);
@@ -1266,6 +1381,7 @@ void building_stepped_pyramid::update_day(const vec2i tiles_size) {
                 minimal_percent = std::min<int>(minimal_percent, monumentd.resources_pct[r]);
             }
         }
+        minimal_percent = std::clamp(minimal_percent, 0, 100);
 
         grid_tiles tiles = map_grid_get_tiles(&base, 0);
         tiles.resize(tiles.size() * minimal_percent / 100);
@@ -1367,13 +1483,6 @@ int building_small_stepped_pyramid::building_image_get() const {
     }
 
     return 0;
-}
-
-grid_area building_small_stepped_pyramid::get_area() const {
-    tile2i main = tile();
-    tile2i end = main.shifted(size() - 1, size() - 1); 
-
-    return { main, end };
 }
 
 void building_small_stepped_pyramid::update_day() {
@@ -1636,13 +1745,6 @@ int building_medium_stepped_pyramid::building_image_get() const {
     return 0;
 }
 
-grid_area building_medium_stepped_pyramid::get_area() const {
-    tile2i main = tile();
-    tile2i end = main.shifted(size() - 1, size() - 1);
-
-    return { main, end };
-}
-
 bool building_medium_stepped_pyramid::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
     return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, current_params().init_tiles);
 }
@@ -1683,13 +1785,6 @@ int building_large_stepped_pyramid::building_image_get() const {
     return 0;
 }
 
-grid_area building_large_stepped_pyramid::get_area() const {
-    tile2i main = tile();
-    tile2i end = main.shifted(size() - 1, size() - 1);
-
-    return { main, end };
-}
-
 bool building_large_stepped_pyramid::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
     return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, current_params().init_tiles);
 }
@@ -1727,13 +1822,6 @@ int building_stepped_pyramid_complex::building_image_get() const {
     }
 
     return 0;
-}
-
-grid_area building_stepped_pyramid_complex::get_area() const {
-    tile2i main = tile();
-    tile2i end = main.shifted(size() - 1, size() - 1);
-
-    return { main, end };
 }
 
 bool building_stepped_pyramid_complex::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
@@ -1782,13 +1870,6 @@ int building_small_bent_pyramid::building_image_get() const {
     return 0;
 }
 
-grid_area building_small_bent_pyramid::get_area() const {
-    tile2i main = tile();
-    tile2i end = main.shifted(size() - 1, size() - 1);
-
-    return { main, end };
-}
-
 bool building_small_bent_pyramid::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
     return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, current_params().init_tiles);
 }
@@ -1825,13 +1906,6 @@ int building_medium_bent_pyramid::building_image_get() const {
     return 0;
 }
 
-grid_area building_medium_bent_pyramid::get_area() const {
-    tile2i main = tile();
-    tile2i end = main.shifted(size() - 1, size() - 1);
-
-    return { main, end };
-}
-
 bool building_medium_bent_pyramid::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
     return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, current_params().init_tiles);
 }
@@ -1845,4 +1919,101 @@ bool building_medium_bent_pyramid::draw_ornaments_and_animations_height(painter 
 
 const monument &building_medium_bent_pyramid::config() const {
     return g_monument_medium_bent_pyramid;
+}
+
+// --- True (smooth) small pyramid (C3a + C3.4 polish phases) ---------------------
+
+void building_small_pyramid::update_day() {
+    building_impl::update_day();
+
+    if (is_finished()) {
+        return;
+    }
+
+    building_stepped_pyramid::update_day(current_params().init_tiles);
+}
+
+int building_small_pyramid::building_image_get() const {
+    switch (phase()) {
+    case MONUMENT_START:
+        return current_params().base_img();
+    default:
+        return current_params().base_img() + 1;
+    }
+
+    return 0;
+}
+
+bool building_small_pyramid::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
+    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, current_params().init_tiles);
+}
+
+bool building_small_pyramid::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
+    if (is_finished()) {
+        return draw_completed_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+    }
+    // Polish (24–25) and terminal (26): full-height silhouette with top-down casing.
+    // Do not call unfinished→hight_impl (phase≥24 hits large L3 construction band).
+    if (phase() >= 24) {
+        if (city_flat_should_flatten_building(base)) {
+            return true;
+        }
+        return draw_completed_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+    }
+    return draw_unfinished_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+}
+
+bool building_small_pyramid::need_stonemason() {
+    if (is_finished() || !is_main()) {
+        return false;
+    }
+    // Clear/level (0–1) = work-camp peasants; casing + polish = stonemasons.
+    // Skip the terminal schedule marker (last index) — tiles stay at 200, no work left.
+    const int p = phase();
+    if (p < 2 || p >= phases() - 1) {
+        return false;
+    }
+    // Respect worker slots so multiple guilds don't over-assign.
+    return need_workers();
+}
+
+void building_small_pyramid::on_phase_changed(int old, int current) {
+    // Stepped on_phase_changed treats 24/30 as large L3/L4 ring raises. True small
+    // uses 24–25 for polish — do shared tile/resource bookkeeping only.
+    if (current == 24 || current == 30) {
+        if (current >= 2) {
+            int terrain = TERRAIN_BUILDING;
+            if (current >= 3) {
+                terrain |= TERRAIN_CANAL;
+            }
+            map_building_tiles_add(id(), tile(), size(), building_image_get(), terrain);
+        }
+        if (current != MONUMENT_FINISHED) {
+            auto &d = runtime_data();
+            for (e_resource resource = RESOURCE_NONE; resource < RESOURCES_MAX; ++resource) {
+                d.resources_pct[resource] = 0;
+            }
+        }
+        return;
+    }
+    building_stepped_pyramid::on_phase_changed(old, current);
+}
+
+bool building_small_pyramid::use_polish_sprites_for_layer(int layer) const {
+    if (is_finished()) {
+        return true;
+    }
+    const int p = phase();
+    // Top-down: first polish phase covers upper layers, second covers base.
+    if (p >= 25) {
+        return true;
+    }
+    if (p >= 24) {
+        return layer >= 1;
+    }
+    return false;
+}
+
+const monument &building_small_pyramid::config() const {
+    return g_monument_small_pyramid;
 }

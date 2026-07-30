@@ -80,8 +80,17 @@ void building_stonemason_guild::spawn_figure() {
 
     if (monument) {
         auto f = base.create_figure_with_destination(FIGURE_STONEMASON, monument, (e_figure_action)FIGURE_ACTION_10_MASON_CREATED, BUILDING_SLOT_SERVICE);
+        // Set destination_tile before figures.update(): PREFER_ROADS can poof walkers
+        // that are off-road with an empty destination_tile (same as artisans guild).
+        auto *mm = monument->dcast_monument();
+        f->destination_tile = mm ? mm->access_point() : monument->access_tile();
+        f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS;
         monument->dcast()->add_workers(f->id);
         f->wait_ticks = random_short() % 30; // ok
+        // destination_bid so on_destroy clears the monument worker slot (same as statue path).
+        if (auto mason = smart_cast<figure_stonemason>(f)) {
+            mason->runtime_data().destination_bid = monument->id;
+        }
         return;
     }
 

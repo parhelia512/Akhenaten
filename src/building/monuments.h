@@ -131,4 +131,7 @@ uint32_t map_monuments_get_progress(tile2i tile);
 void map_monuments_set_progress(tile2i tile, uint32_t progress);
 void map_monuments_clear();
 
+// Tile for stonemason work on mastaba/pyramid footprints (2×2 work sites).
+tile2i building_monument_mason_waiting_tile(building *b);
+
 building *city_has_unfinished_monuments();

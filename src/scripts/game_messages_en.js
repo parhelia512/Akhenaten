@@ -6314,4 +6314,30 @@ game_messages_en {
         title { text: "Trade stopped" }
         content { text: "A trade city will no longer trade a good this year." }
     }
+
+    // Monument completion popups (keys match city_message_post from mastaba/pyramid).
+    pyramid_congratulations {
+        id: 520,
+        size [30, 18]
+        title { text: "Pyramid finished!" }
+        content {
+            text: "This is a spectacular accomplishment! After countless months of labor the Pyramid is finally complete!"
+        }
+    }
+    stepped_pyramid_congratulations {
+        id: 521,
+        size [30, 18]
+        title { text: "Stepped Pyramid finished!" }
+        content {
+            text: "At long last the Stepped Pyramid is complete! This monument will forever stand as a testament to your abilities."
+        }
+    }
+    bent_pyramid_congratulations {
+        id: 522,
+        size [30, 18]
+        title { text: "Bent Pyramid finished!" }
+        content {
+            text: "Construction of the Bent Pyramid is finally complete! This is a stupendous achievement for your city."
+        }
+    }
 }

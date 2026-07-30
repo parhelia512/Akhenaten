@@ -1,6 +1,7 @@
 #include "figure_carpenter.h"
 
 #include "building/monument_mastaba.h"
+#include "building/monuments.h"
 #include "building/building_statue.h"
 #include "grid/terrain.h"
 #include "grid/grid.h"
@@ -34,10 +35,16 @@ void figure_carpenter::figure_action() {
         advance_action(ACTION_31_CARPENTER_GOING_TO_GARDEN);
         break;
 
-    case ACTION_10_CARPENTER_CREATED:
-        base.destination_tile = destination()->access_tile();
+    case ACTION_10_CARPENTER_CREATED: {
+        // Prefer monument access_point (enter_offset); fall back to access_tile.
+        if (auto *mon = b_dest->dcast_monument()) {
+            base.destination_tile = mon->access_point();
+        } else {
+            base.destination_tile = destination()->access_tile();
+        }
         advance_action(ACTION_11_CARPENTER_GOING);
         break;
+    }
 
     case ACTION_20_CARPENTER_DESTROY:
         poof();
@@ -51,9 +58,16 @@ void figure_carpenter::figure_action() {
         break;
 
     case ACTION_11_CARPENTER_GOING:
-        if (do_goto(base.destination_tile, terrain_usage, -1, ACTION_20_CARPENTER_DESTROY)) {
-            advance_action(ACTION_17_CARPENTER_LOOKING_FOR_WORK_TILE);
-        }
+        // Must not use success=-1 (leaves action_state invalid) or ACTION_17
+        // (no handler — carpenter froze on-site and held a monument worker slot).
+        // Scaffold work is timed on the monument, same as statue service wait.
+        do_goto(base.destination_tile, terrain_usage,
+                ACTION_14_CARPENTER_WORK_GROUND, ACTION_20_CARPENTER_DESTROY);
+        break;
+
+    case ACTION_17_CARPENTER_LOOKING_FOR_WORK_TILE:
+        // Older path / mid-save: no per-tile carpenter work on pyramids.
+        advance_action(ACTION_14_CARPENTER_WORK_GROUND);
         break;
 
     case ACTION_14_CARPENTER_WORK_GROUND:
@@ -82,7 +96,9 @@ void figure_carpenter::figure_action() {
     //break;
 
     case ACTION_16_CARPENTER_RETURN_HOME:
-        if (do_gotobuilding(home(), true, TERRAIN_USAGE_PREFER_ROADS, -1, ACTION_18_CARPENTER_RANDOM_TILE)) {
+        // Fail → destroy (action 18 had no handler and left the walker stuck).
+        if (do_gotobuilding(home(), true, TERRAIN_USAGE_PREFER_ROADS,
+                            ACTION_20_CARPENTER_DESTROY, ACTION_20_CARPENTER_DESTROY)) {
             poof();
         }
         break;
@@ -92,10 +108,16 @@ void figure_carpenter::figure_action() {
 void figure_carpenter::on_destroy() {
     figure_impl::on_destroy();
 
-    // If the stonemason is working on a monument/statue, we need to remove it from the workers list.
+    // Clear monument/statue worker slot (same pattern as stonemason).
     building *b_dest = building_get(runtime_data().destination_bid);
-    if (b_dest) {
+    if (!b_dest || !b_dest->id) {
+        b_dest = destination();
+    }
+    if (b_dest && b_dest->id) {
         b_dest->remove_figure_by_id(base.id);
+        if (auto *mon = b_dest->dcast_monument()) {
+            mon->remove_worker(base.id);
+        }
     }
 }
 

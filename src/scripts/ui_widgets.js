@@ -88,6 +88,26 @@ info_window_mastaba = {
     }
 }
 
+info_window_pyramid = {
+    ui : {
+        background    : outer_panel({size: [29, 18]}),
+        title         : text({pos: [0, 16], text:"${building.name}", size: [px(29), 20], font : FONT_LARGE_BLACK_ON_LIGHT, align:"center"}),
+        subtitle      : text({pos: [32, 46], text:"${text.12}", size: [px(27), -1], wrap:px(27), font : FONT_NORMAL_BLACK_ON_LIGHT, multiline:true }),
+        progress_text : text({pos: [32, 66], size:[px(27), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        warning_text  : text({pos: [32, 96], size:[px(27), -1], wrap:px(27), multiline:true, font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        stone_icon    : resource_icon({pos: [32, 200], resource: RESOURCE_STONE }),
+        stone_text    : text({pos: [70, 204], size:[px(12), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        limestone_icon: resource_icon({pos: [180, 200], resource: RESOURCE_LIMESTONE }),
+        limestone_text: text({pos: [218, 204], size:[px(12), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        timber_icon   : resource_icon({pos: [32, 230], resource: RESOURCE_TIMBER }),
+        timber_text   : text({pos: [70, 234], size:[px(12), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        workers_img   : image({pack:PACK_GENERAL, id:134, offset:14, pos:[260, 215] }),
+        workers_text  : text({pos: [290, 219], size:[px(10), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        button_help   : help_button({}),
+        button_close  : close_button({}),
+    }
+}
+
 info_window_sphinx = {
     ui : {
         background    : outer_panel({size: [29, 18]}),

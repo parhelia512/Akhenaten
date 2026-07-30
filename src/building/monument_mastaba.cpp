@@ -257,7 +257,8 @@ tile2i building_small_mastaba_bricks_waiting_tile(building *b) {
     tile2i tile = map_grid_area_first(tiles, [b] (tile2i tile) {
         int progress = map_monuments_get_progress(tile);
         tile2i offset = tile.dist2i(b->tile).mod(4, 4);
-        return (progress == 0 || progress == 1 || progress == 2) && (offset.x() == 1 || offset.x() == 3) && (offset.y() == 1 || offset.y() == 3);
+        return progress < 200
+            && (offset.x() == 1 || offset.x() == 3) && (offset.y() == 1 || offset.y() == 3);
     });
 
     return tile;
@@ -683,7 +684,7 @@ void building_mastaba::update_day(const vec2i tiles_size) {
     if (monumentd.phase >= 8) {
         finalize(&base, tiles_size);
         if (is_main()) {
-            city_message &message = city_message_post_with_popup_delay(MESSAGE_CAT_MONUMENTS, true, "mastaba_history", type(), tile().grid_offset());
+            city_message &message = city_message_post_with_popup_delay(MESSAGE_CAT_MONUMENTS, true, "message_history_mastaba", type(), tile().grid_offset());
             message.hide_img = true;
         }
         return;
@@ -700,7 +701,11 @@ void building_mastaba::update_day(const vec2i tiles_size) {
 
     if (all_tiles_finished) {
         int curr_phase = monumentd.phase;
-        map_grid_area_foreach(tiles, [] (tile2i tile) { map_monuments_set_progress(tile, 0); });
+        // phase ≥ 8 → finalize next day; don't zero progress on that transition
+        // (bricklayer still on-site would otherwise reclaim forever).
+        if (curr_phase + 1 < 8) {
+            map_grid_area_foreach(tiles, [] (tile2i tile) { map_monuments_set_progress(tile, 0); });
+        }
         update_images(&base, curr_phase, tiles_size);
         while (part) {
             verify_no_crash(part->dcast_monument());

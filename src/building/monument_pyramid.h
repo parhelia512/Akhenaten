@@ -39,7 +39,10 @@ public:
     virtual const base_params &pyramid_params() const = 0;
 
     virtual tile2i center_point() const override;
-    virtual tile2i access_point() const override { return tile().shifted(pyramid_params().enter_offset); }
+    // enter_offset is relative to footprint NW (the placed 2×2 / chain head @ orient 0).
+    virtual tile2i access_point() const override { return main()->tile().shifted(pyramid_params().enter_offset); }
+    // Full init_tiles footprint — sled delivery checks this (must not be part size 2×2).
+    virtual grid_area get_area() const override;
 };
 
 class building_stepped_pyramid : public building_pyramid {
@@ -73,12 +76,19 @@ public:
     bool draw_ornaments_and_animations_hight_impl(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
     // Unfinished: phase-6 alt cue; under flat view skip tall height_impl tiers.
     bool draw_unfinished_height_ornaments(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
+    // All present layers at full brick course (finished). True pyramid may polish
+    // individual layers via use_polish_sprites_for_layer (C3.4.3).
+    bool draw_completed_height_ornaments(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
+    // True (smooth) polish: which footprint layers already use casing sprites.
+    virtual bool use_polish_sprites_for_layer(int layer) const { return false; }
     void draw_ornaments_and_animations_stairs_impl(painter &ctx, vec2i point, tile2i tile, color color_mask, const vec2i tiles_size);
     void change_parts_types_in_layer(tile2i begin, const vec2i layer_size, uint8_t layer);
 
     void assign_stair();
     layer_area get_layer_area(int layer) const;
     int get_bricks_image(int orientation, tile2i tile, tile2i start, tile2i end, int layer);
+    // polished=true uses corner_polish/wall_polish/base_polish when present (C3.4.3).
+    int get_masonry_image(int orientation, tile2i tile, tile2i start, tile2i end, int layer, bool polished);
 
     void update_day(const vec2i tiles_size);
     void draw_phase_3_5_tile(painter &ctx, color color_mask, int channel_base_id_1, int channel_base_id_2, const vec2i tiles_size);
@@ -108,7 +118,6 @@ public:
     virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
     virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
     virtual int building_image_get() const override;
-    virtual grid_area get_area() const override;
     virtual const base_params &pyramid_params() const override { return current_params(); }
 
     virtual const monument &config() const override;
@@ -138,7 +147,6 @@ public:
     virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
     virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
     virtual int building_image_get() const override;
-    virtual grid_area get_area() const override;
     virtual const base_params &pyramid_params() const override { return current_params(); }
 
     virtual const monument &config() const override;
@@ -157,8 +165,8 @@ public:
 };
 
 // Large stepped pyramid (20×20, id 250). Same shared stepped machinery as small/medium,
-// only the footprint (init_tiles) and phase schedule differ. Height render + polish stage
-// for the extra layers are a follow-up visual pass (see REMAKE_LARGE_PYRAMID_LAYER2.md).
+// only the footprint (init_tiles) and phase schedule differ. Extra height tiers: see
+// REMAKE_LARGE_PYRAMID_LAYER2.md. Marble polish is true-pyramid only (C3.4), not stepped.
 class building_large_stepped_pyramid : public building_stepped_pyramid {
 public:
     BUILDING_METAINFO(BUILDING_LARGE_STEPPED_PYRAMID, building_large_stepped_pyramid, building_stepped_pyramid)
@@ -170,7 +178,6 @@ public:
     virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
     virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
     virtual int building_image_get() const override;
-    virtual grid_area get_area() const override;
     virtual const base_params &pyramid_params() const override { return current_params(); }
 
     virtual const monument &config() const override;
@@ -202,7 +209,6 @@ public:
     virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
     virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
     virtual int building_image_get() const override;
-    virtual grid_area get_area() const override;
     virtual const base_params &pyramid_params() const override { return current_params(); }
 
     virtual const monument &config() const override;
@@ -221,7 +227,6 @@ public:
     virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
     virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
     virtual int building_image_get() const override;
-    virtual grid_area get_area() const override;
     virtual const base_params &pyramid_params() const override { return current_params(); }
 
     virtual const monument &config() const override;
@@ -250,7 +255,6 @@ public:
     virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
     virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
     virtual int building_image_get() const override;
-    virtual grid_area get_area() const override;
     virtual const base_params &pyramid_params() const override { return current_params(); }
 
     virtual const monument &config() const override;
@@ -266,6 +270,45 @@ public:
 class building_medium_bent_pyramid_wall : public building_medium_bent_pyramid {
 public:
     BUILDING_METAINFO(BUILDING_MEDIUM_BENT_PYRAMID_WALL, building_medium_bent_pyramid_wall, building_medium_bent_pyramid)
+};
+
+// C3a: True (smooth) small pyramid — PACK_PYRAMID + limestone casing + polish phases.
+class building_small_pyramid : public building_stepped_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_SMALL_PYRAMID, building_small_pyramid, building_stepped_pyramid)
+
+    struct static_params : public base_params, public building_static_params {
+    } BUILDING_STATIC_DATA_T;
+
+    virtual void update_day() override;
+    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual int building_image_get() const override;
+    virtual const base_params &pyramid_params() const override { return current_params(); }
+    virtual bool need_stonemason() override;
+    // Top-down casing: phase 24 → layers ≥1; phase ≥25 / finished → all.
+    virtual bool use_polish_sprites_for_layer(int layer) const override;
+    // Stepped uses phase 24/30 to raise L3/L4 rings — those numbers are polish for true.
+    virtual void on_phase_changed(int old, int current) override;
+
+    virtual const monument &config() const override;
+};
+ANK_CONFIG_STRUCT(building_small_pyramid::static_params,
+    init_tiles, corner_type, wall_type, cone_type, filler_type, enter_offset, stairs);
+
+class building_small_pyramid_corner : public building_small_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_SMALL_PYRAMID_CORNER, building_small_pyramid_corner, building_small_pyramid)
+};
+
+class building_small_pyramid_wall : public building_small_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_SMALL_PYRAMID_WALL, building_small_pyramid_wall, building_small_pyramid)
+};
+
+class building_small_pyramid_cone : public building_small_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_SMALL_PYRAMID_CONE, building_small_pyramid_cone, building_small_pyramid)
 };
 
 void map_pyramid_tiles_add(int building_id, tile2i tile, int size, int image_id, int terrain);

@@ -47,7 +47,7 @@ building_small_stepped_pyramid {
     // todo
   }
 
-  // Parts are 2×2 blocks on the init_tiles grid — without building_size they stay
+  // Parts are 2?2 blocks on the init_tiles grid ? without building_size they stay
   // size 0 and never claim map tiles (edges/corners missing). Alias main so they
   // also inherit brick animations used by get_bricks_image.
   building_small_stepped_pyramid_corner = building_small_stepped_pyramid
@@ -227,7 +227,7 @@ building_small_stepped_pyramid {
 
   // Large stepped pyramid (20x20, id 250). Same PACK_STEPPED_PYRAMID render pipeline as
   // small/medium; only footprint (init_tiles) differs. Stairs: ascending ramp from
-  // enter_offset up the south face to the tier-1 ledge (one layer ≈ TILE_HEIGHT*3 = 90px).
+  // enter_offset up the south face to the tier-1 ledge (one layer ? TILE_HEIGHT*3 = 90px).
   building_large_stepped_pyramid {
     animations {
       _pack { pack:PACK_STEPPED_PYRAMID }
@@ -265,7 +265,7 @@ building_small_stepped_pyramid {
 
     // Medium-style L-ramp: short approach on south from enter, SE corner, then
     // climb the east face (decreasing y) up to the tier-1 ledge. Sprites 00114+
-    // are the ascending ramp pieces; offset.y rises ~+28 → -110 (≈ one tier).
+    // are the ascending ramp pieces; offset.y rises ~+28 ? -110 (? one tier).
     stairs [
       {
         phase : 7
@@ -393,8 +393,8 @@ building_small_stepped_pyramid {
         offset : [20, -210]
       }
 
-      // --- Layer 2 (third tier): L2 south y=14 (begin+4, size 12) → SE [14,14].
-      // Offsets ~two tiers up (≈ -180..-270).
+      // --- Layer 2 (third tier): L2 south y=14 (begin+4, size 12) ? SE [14,14].
+      // Offsets ~two tiers up (? -180..-270).
       {
         phase : 24
         part : [14, 6]
@@ -526,7 +526,7 @@ building_small_stepped_pyramid {
 
     // Medium-style L-ramp: short approach on south from enter, SE corner, then
     // climb the east face (decreasing y) up to the tier-1 ledge. Sprites 00114+
-    // are the ascending ramp pieces; offset.y rises ~+28 → -110 (≈ one tier).
+    // are the ascending ramp pieces; offset.y rises ~+28 ? -110 (? one tier).
     stairs [
       {
         phase : 7
@@ -654,8 +654,8 @@ building_small_stepped_pyramid {
         offset : [20, -210]
       }
 
-      // --- Layer 2 (third tier): L2 south y=14 (begin+4, size 12) → SE [14,14].
-      // Offsets ~two tiers up (≈ -180..-270).
+      // --- Layer 2 (third tier): L2 south y=14 (begin+4, size 12) ? SE [14,14].
+      // Offsets ~two tiers up (? -180..-270).
       {
         phase : 24
         part : [14, 6]
@@ -970,3 +970,59 @@ building_small_stepped_pyramid {
   building_medium_bent_pyramid_corner = building_medium_bent_pyramid
   building_medium_bent_pyramid_wall = building_medium_bent_pyramid
   building_medium_bent_pyramid_cone = building_medium_bent_pyramid
+  // --- True (smooth) pyramids (C3a) — PACK_PYRAMID + limestone + polish (C3.4) ---
+  // Same layout as stepped/bent (159 Pyramid_* + phase one + buildings). Polish
+  // casing at Pyramid_00054+ (top-down via use_polish_sprites_for_layer).
+  building_small_pyramid {
+    animations {
+      _pack { pack:PACK_PYRAMID }
+      preview { id:2, offset:7 }
+      base { id:2, offset:7 }
+      base_bricks { path:"Pyramid/Pyramid_00103" }
+      corner_bricks { path:"Pyramid/Pyramid_00001" }
+      wall_bricks { path:"Pyramid/Pyramid_00005" }
+      // C3.4.3 casing (same corner/wall offset layout as bricks, pack index +53)
+      base_polish { path:"Pyramid/Pyramid_00103" }
+      corner_polish { path:"Pyramid/Pyramid_00054" }
+      wall_polish { path:"Pyramid/Pyramid_00058" }
+      base_grounded { path:"Pyramid/pyramid_phase_one_00013" }
+      clear_land { id:2, offset:12 }
+      image_stick { path:"Pyramid/pyramid_phase_one_00021" }
+      empty_land {path:"Pyramid/Pyramid_00109"}
+      ditches_phase_1 { path:"Pyramid/pyramid_phase_one_00022" }
+      ditches_phase_2 { path:"Pyramid/pyramid_phase_one_00031" }
+      ditches_phase_3 { path:"Pyramid/pyramid_phase_one_00040" }
+      ditches_phase_4 { path:"Pyramid/pyramid_phase_one_00049" }
+      ground_phase_0 { path:"Pyramid/pyramid_phase_one_00013" }
+      basement { path:"Pyramid/pyramid_phase_one_00058" }
+      enter { path:"pharaoh_general/plazatiles_00064"}
+    }
+    build_menu_text : "Small Pyramid"
+    building_size : 2
+    info_title_id [198, 13]
+    fire_proof :  true
+    damage_proof : true
+    meta { help_id:375, text_id:178 }
+    init_tiles [8, 8]
+
+    flags {
+      is_monument: true
+    }
+
+    enter_offset : [1, 8]
+    stair_0_0_offset : [2, 8]
+    stair_0_1_offset : [4, 8]
+    stair_0_4_offset : [6, 8]
+    stair_0_4_corner_offset : [6, 6]
+    stair_0_5_offset : [6, 5]
+    stair_0_6_offset : [6, 4]
+
+    corner_type : BUILDING_SMALL_PYRAMID_CORNER
+    wall_type : BUILDING_SMALL_PYRAMID_WALL
+    cone_type : BUILDING_SMALL_PYRAMID_CONE
+    filler_type : BUILDING_SMALL_PYRAMID
+  }
+
+  building_small_pyramid_corner = building_small_pyramid
+  building_small_pyramid_wall = building_small_pyramid
+  building_small_pyramid_cone = building_small_pyramid
