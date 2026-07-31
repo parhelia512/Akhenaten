@@ -273,7 +273,12 @@ import mission.m_039_valley_tut
 import mission.m_040_valley_seti
 import mission.m_041_sumur
 import mission.m_042_qadesh
+import mission.m_043_abu_simbel
+import mission.m_044_ramses_in_the_valley
 import mission.m_045_pi_yer
+import mission.m_046_migdol
+import mission.m_047_tanis
+import mission.m_048_alexandria_1
 import mission.m_128_alexandria
 import mission.m_129_bridges
 import mission.m_130_sandbox

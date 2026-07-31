@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abu Simbel — Colossi of Abu Simbel — Akhenaten Wiki</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .mission-infobox { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.9rem 1.1rem; }
+    .mission-infobox dl { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 1rem; margin: 0; }
+    .mission-infobox dt { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; }
+    .mission-infobox dd { margin: 0; font-size: 0.85rem; }
+    .mission-infobox .funds-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .mission-infobox .funds-row span { font-size: 0.75rem; color: var(--text-muted); }
+    .mission-infobox .funds-row span strong { color: var(--text); }
+    .dev-section { margin-top: 2.5rem; }
+    .dev-section h2 { color: var(--text-muted); font-size: 1rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; }
+    summary { padding: 0.7rem 1rem; cursor: pointer; font-size: 0.875rem; font-weight: 600; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    .details-body { padding: 1rem 1.1rem; font-size: 0.85rem; line-height: 1.6; }
+    .file-ref { font-family: Consolas, monospace; font-size: 0.78rem; color: var(--gold); }
+    .objectives-list { list-style: none; padding: 0; }
+    .objectives-list li { display: flex; gap: 0.6rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .obj-label { font-weight: 600; min-width: 8rem; }
+    .deviation-note { background: rgba(201,120,76,0.08); border: 1px solid rgba(201,120,76,0.3); border-radius: 4px; padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--text-muted); margin: 0.75rem 0; }
+    .mission-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; }
+    .mission-nav a { color: var(--gold); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">Akhenaten</a>
+      <ul>
+        <li><a href="../../index.html" class="active">Wiki</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main class="wiki-layout">
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title"><a href="index.html">← All Missions</a></div>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Ramses II</div>
+        <ul>
+          <li><a href="sumur.html">41 · Sumur</a></li>
+          <li><a href="qadesh.html">42 · Qadesh</a></li>
+          <li><a href="abu-simbel.html" class="active">43 · Abu Simbel</a></li>
+          <li><a href="ramses-valley.html">44 · Ramses in the Valley</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <article class="wiki-content">
+      <h1>Abu Simbel</h1>
+      <p class="wiki-subtitle">Colossi of Abu Simbel · mission 43 · Cleopatra campaign 6</p>
+
+      <div class="mission-infobox">
+        <dl>
+          <dt>Scenario id</dt><dd>43</dd>
+          <dt>Campaign</dt><dd>Ramses II (6)</dd>
+          <dt>Start year</dt><dd>1270 BC (pak)</dd>
+          <dt>Player rank</dt><dd>5 (pak)</dd>
+          <dt>Enemy (pak)</dt><dd><code>ENEMY_6_KUSHITE</code></dd>
+          <dt>Funds (Normal)</dt>
+          <dd>
+            <div class="funds-row">
+              <span>treasury <strong>8 000</strong></span>
+              <span>loan <strong>2 000</strong></span>
+              <span>debt interest <strong>10%</strong></span>
+            </div>
+          </dd>
+          <dt>Gods</dt><dd>Osiris (1), Ra (2), Ptah (1)</dd>
+          <dt>Previous</dt><dd><a href="qadesh.html">42 Qadesh</a></dd>
+          <dt>Next</dt><dd><a href="ramses-valley.html">44 Ramses in the Valley</a> (<code>next_mission: 44</code>)</dd>
+          <dt>Status</dt><dd><span class="mission-badge badge-impl">Implemented</span></dd>
+        </dl>
+      </div>
+
+      <div class="deviation-note">
+        <strong>Full redefine (2026-07-31):</strong> <code>hide_pak_*</code> empire + JS event graph
+        (dump <span class="file-ref">tmp/mission43_pak.txt</span>). Invasions JS: calendar enemy×27;
+        Monument goal <strong>44</strong> (OG; weight 44 — one finished Abu Simbel). Engine: cliff place + timber scaffold + mason carve.
+      </div>
+
+      <h2 id="objectives">Objectives (pak)</h2>
+      <ul class="objectives-list">
+        <li><span class="obj-label">Population</span> 2 200</li>
+        <li><span class="obj-label">Culture</span> 35</li>
+        <li><span class="obj-label">Prosperity</span> 35</li>
+        <li><span class="obj-label">Monuments</span> 44</li>
+        <li><span class="obj-label">Kingdom</span> 80</li>
+        <li><span class="obj-label">Housing</span> level 10</li>
+        <li><span class="obj-label">Milestones</span> 5 / 9 / 13</li>
+      </ul>
+
+      <h2 id="briefing">Briefing (summary)</h2>
+      <p>Carve four colossal seated figures of Ramses II into the sandstone cliffs at Abu Simbel on the Nile's west bank in Nubia.
+        Import timber for scaffolding; export sandstone; stay ready to dispatch troops if Pharaoh calls.</p>
+
+      <div class="dev-section">
+        <h2>Developer Reference</h2>
+        <details open>
+          <summary>Files &amp; dump</summary>
+          <div class="details-body">
+            <p><code>map_file</code>: <span class="file-ref">data/maps/m_043_abu_simbel.map</span>.
+              Script: <span class="file-ref">src/scripts/mission/m_043_abu_simbel.js</span>.
+              Dump: <span class="file-ref">tmp/mission43_pak.txt</span> (2026-07-31).
+              Empire id 23, <code>map_background</code> pack empire id 21. Climate desert.
+              Messages: <code>message_mission_abu_simbel</code> (452) / <code>_2</code> (467).
+              SKIP empty map_obj idx=2. Events in JS (27).
+              Trade (JS): Men-nefer · Waset · Sumur · Heh · Kerma · Pwenet; display Bahariya / Qadesh /
+              Jericho / Enkomi / Timna / Kharga (route 6) / Abu / Piramesse.
+              Sea routes 1–4,7 · land 5–6; ornament <code>img=13863</code>.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="mission-nav">
+        <a href="qadesh.html">← 42 Qadesh</a>
+        <a href="ramses-valley.html">44 Ramses in the Valley →</a>
+      </div>
+    </article>
+  </main>
+</body>
+</html>
