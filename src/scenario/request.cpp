@@ -304,11 +304,12 @@ std::vector<scenario_request> scenario_get_visible_requests() {
 
 scenario_request scenario_request_get_visible(int index) {
     int event_index = 0;
-    if (index >= g_scenario.events.events_count()) {
+    const int total_events = g_scenario.events.events_count();
+    if (index >= total_events) {
         return {};
     }
 
-    for (int i = 0; i < MAX_REQUESTS; i++) {
+    for (int i = 0; i < total_events; i++) {
         const event_ph_t* event = g_scenario.events.at(i);
         if (!(event->type == EVENT_TYPE_REQUEST && event->is_active && event->event_state <= e_event_state_overdue)) {
             continue;
