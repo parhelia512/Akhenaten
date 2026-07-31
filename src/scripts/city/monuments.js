@@ -6,8 +6,8 @@ MONUMENT_WEIGHTS[BUILDING_MUDBRICK_PYRAMID_COMPLEX]       = 44
 MONUMENT_WEIGHTS[BUILDING_GRAND_MUDBRICK_PYRAMID_COMPLEX] = 44
 MONUMENT_WEIGHTS[BUILDING_STEPPED_PYRAMID_COMPLEX]        = 24  // on-land (= large); +causeway → recalibrate toward 44
 MONUMENT_WEIGHTS[BUILDING_GRAND_STEPPED_PYRAMID_COMPLEX]  = 44
-// True complex on-land shares large weight 12 until causeway (W=44 saturates clamp).
-MONUMENT_WEIGHTS[BUILDING_PYRAMID_COMPLEX]                = 12
+// True complex on-land shares large weight until causeway (W=44 saturates clamp).
+MONUMENT_WEIGHTS[BUILDING_PYRAMID_COMPLEX]                = 13
 MONUMENT_WEIGHTS[BUILDING_GRAND_PYRAMID_COMPLEX]          = 44
 MONUMENT_WEIGHTS[BUILDING_SMALL_MASTABA]                  = 2
 MONUMENT_WEIGHTS[BUILDING_MEDIUM_MASTABA]                 = 2
@@ -24,10 +24,10 @@ MONUMENT_WEIGHTS[BUILDING_LARGE_STEPPED_PYRAMID]          = 24
 // original monument goal of 21 (Snofru's bent pyramid at South Dahshur).
 MONUMENT_WEIGHTS[BUILDING_SMALL_BENT_PYRAMID]             = 4
 MONUMENT_WEIGHTS[BUILDING_MEDIUM_BENT_PYRAMID]            = 8
-// True (smooth) pyramids. Large weight 12 → rating 2.25*12+4.5 = 31.5 ≈ pak 32 (m_015).
+// True (smooth) pyramids.
 MONUMENT_WEIGHTS[BUILDING_SMALL_PYRAMID]                  = 8
 MONUMENT_WEIGHTS[BUILDING_MEDIUM_PYRAMID]                 = 16
-MONUMENT_WEIGHTS[BUILDING_LARGE_PYRAMID]                  = 12
+MONUMENT_WEIGHTS[BUILDING_LARGE_PYRAMID]                  = 13
 MONUMENT_WEIGHTS[BUILDING_SPHINX]                         = 1
 MONUMENT_WEIGHTS[BUILDING_SMALL_OBELISK]                  = 2
 MONUMENT_WEIGHTS[BUILDING_LARGE_OBELISK]                  = 4
@@ -57,6 +57,23 @@ MONUMENT_WEIGHTS[BUILDING_GRAND_ROYAL_TOMB]               = 4
 var MONUMENT_RATING_MULT = 2.25
 var MONUMENT_RATING_OFFSET = 4.5
 
+function monument_weight_btype(list_head_bid) {
+	var cur = city.get_building(list_head_bid)
+	var guard = 0
+	while (cur && guard < 256) {
+		guard++
+		var t = cur.type
+		if (typeof MONUMENT_WEIGHTS[t] !== 'undefined') {
+			return t
+		}
+		if (!cur.next_part_building_id) {
+			break
+		}
+		cur = city.get_building(cur.next_part_building_id)
+	}
+	return __building_type(list_head_bid)
+}
+
 [es=event_advance_month]
 function city_update_monthly_monument_rating(ev) {
 	var n = __city_monuments_list_refresh()
@@ -71,7 +88,7 @@ function city_update_monthly_monument_rating(ev) {
 		if (!bid) {
 			continue
 		}
-		var bt = __building_type(bid)
+		var bt = monument_weight_btype(bid)
 		var w = MONUMENT_WEIGHTS[bt]
 		if (!w) {
 			continue

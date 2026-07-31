@@ -25,6 +25,10 @@ function monuments_advisor_on_render_item(p) {
     var py = p.y
     var bid = p.user_data
     var title = __building_display_name(bid)
+    var menu = __building_static_text(monument_weight_btype(bid), "build_menu_text")
+    if (menu && menu.length > 0) {
+        title = menu
+    }
     ui.label(title, [px + 10, py + 7], FONT_NORMAL_WHITE_ON_DARK)
     ui.label(monuments_advisor_status_line(bid), [px + 10, py + 25], FONT_NORMAL_BLACK_ON_DARK)
     if (p.hover) {

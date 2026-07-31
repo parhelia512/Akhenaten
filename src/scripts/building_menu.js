@@ -173,7 +173,7 @@ var building_menu = [
    			BUILDING_STEPPED_PYRAMID_COMPLEX,
    			BUILDING_SMALL_BENT_PYRAMID, BUILDING_MEDIUM_BENT_PYRAMID,
    			BUILDING_SMALL_PYRAMID, BUILDING_MEDIUM_PYRAMID, BUILDING_LARGE_PYRAMID,
-   			// Complex = same 20×20 plain as Large until the causeway lands; weight 12 (= large)
+   			// Complex = same 20×20 plain as Large until the causeway lands; weight 13 (= large)
    			BUILDING_PYRAMID_COMPLEX,
      		BUILDING_LARGE_ROYAL_TOMB, BUILDING_GRAND_ROYAL_TOMB, BUILDING_PYRAMID,
      		BUILDING_SPHINX, BUILDING_SMALL_OBELISK, BUILDING_LARGE_OBELISK,

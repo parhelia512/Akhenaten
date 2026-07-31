@@ -95,7 +95,10 @@ function mission_won_erected_monuments_text() {
         if (!monument || monument.phase() != -1) {
             continue
         }
-        var name = __building_display_name(bid)
+        var name = __building_static_text(monument_weight_btype(bid), "build_menu_text")
+        if (!name || name.length == 0) {
+            name = __building_display_name(bid)
+        }
         if (name && name.length > 0) {
             names.push(name)
         }

@@ -90,8 +90,6 @@ mission18 { // Rostja (Giza) — The Great Pyramid and Sphinx
 		BUILDING_SCRIBAL_SCHOOL,
 	]
 
-	// Goals vs pak: pop/culture/prosperity off; monuments 53; kingdom 50; housing_level 10.
-	// Complex on-land W=12 + medium 16 + sphinx 1 → 2.25*29+4.5 ≈ 70 (above 53).
 	win_criteria {
 		population    {enabled : false }
 		culture       {enabled : false }

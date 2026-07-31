@@ -78,8 +78,6 @@ mission15 { // North Dahshur — The True Pyramid
 		BUILDING_SCRIBAL_SCHOOL,
 	]
 
-	// Goals verified vs pak: pop 1/3000, culture 1/20, prosperity 1/30, monuments 1/32,
-	// kingdom 1/55, housing_level 1/10. Large true pyramid weight 12 → rating ≈32.
 	win_criteria {
 		population    {enabled : true, goal : 3000 }
 		culture       {enabled : true, goal : 20 }

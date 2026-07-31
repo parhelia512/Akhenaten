@@ -191,3 +191,35 @@ function run_test() {
     __log_info_native('[test:109] done')
     __test_signal_ready()
 }
+
+function check_valid() {
+    var required = [
+        'true_pyramid_medium_placed_ok',
+        'true_pyramid_medium_schedule_ok',
+        'true_pyramid_medium_phases_ok',
+        'true_pyramid_medium_polish_no_lime_ok',
+        'true_pyramid_medium_polish_clear_ok',
+        'true_pyramid_medium_terminal_keep_ok',
+        'true_pyramid_medium_congrats_ok'
+    ]
+    for (var i = 0; i < required.length; i++) {
+        if (!__test_find_inlog(required[i])) {
+            __log_info_native('[test:109] missing: ' + required[i])
+            return false
+        }
+    }
+    if (__test_find_inlog('true_pyramid_medium_phases_fail')
+        || __test_find_inlog('true_pyramid_medium_polish_pct_fail')
+        || __test_find_inlog('true_pyramid_medium_saveload_fail')
+        || __test_find_inlog('true_pyramid_medium_polish_clear_fail')
+        || __test_find_inlog('true_pyramid_medium_terminal_keep_fail')
+        || __test_find_inlog('true_pyramid_medium_congrats_fail')) {
+        return false
+    }
+    if (!__test_find_inlog('true_pyramid_medium_saveload_skipped')
+        && !__test_find_inlog('true_pyramid_medium_saveload_ok')) {
+        __log_info_native('[test:109] missing saveload marker')
+        return false
+    }
+    return true
+}

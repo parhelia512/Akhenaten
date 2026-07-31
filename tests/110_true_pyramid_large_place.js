@@ -99,6 +99,16 @@ function run_test() {
     }
     __log_marker('true_pyramid_large_finish_phase:' + fin)
 
+    city_update_monthly_monument_rating({})
+    var rating = city.rating.monument | 0
+    if (rating >= 32) {
+        __log_marker('true_pyramid_large_rating_ok:' + rating)
+    } else {
+        __log_info_native('[test:110] monument rating want >=32 got ' + rating)
+        __log_marker('true_pyramid_large_rating_fail:' + rating)
+        all_ok = false
+    }
+
     if (all_ok) {
         __log_marker('true_pyramid_large_phases_ok')
     } else {
@@ -190,4 +200,38 @@ function run_test() {
 
     __log_info_native('[test:110] done')
     __test_signal_ready()
+}
+
+function check_valid() {
+    var required = [
+        'true_pyramid_large_placed_ok',
+        'true_pyramid_large_schedule_ok',
+        'true_pyramid_large_phases_ok',
+        'true_pyramid_large_polish_no_lime_ok',
+        'true_pyramid_large_polish_clear_ok',
+        'true_pyramid_large_terminal_keep_ok',
+        'true_pyramid_large_congrats_ok',
+        'true_pyramid_large_rating_ok'
+    ]
+    for (var i = 0; i < required.length; i++) {
+        if (!__test_find_inlog(required[i])) {
+            __log_info_native('[test:110] missing: ' + required[i])
+            return false
+        }
+    }
+    if (__test_find_inlog('true_pyramid_large_phases_fail')
+        || __test_find_inlog('true_pyramid_large_polish_pct_fail')
+        || __test_find_inlog('true_pyramid_large_saveload_fail')
+        || __test_find_inlog('true_pyramid_large_polish_clear_fail')
+        || __test_find_inlog('true_pyramid_large_terminal_keep_fail')
+        || __test_find_inlog('true_pyramid_large_congrats_fail')
+        || __test_find_inlog('true_pyramid_large_rating_fail')) {
+        return false
+    }
+    if (!__test_find_inlog('true_pyramid_large_saveload_skipped')
+        && !__test_find_inlog('true_pyramid_large_saveload_ok')) {
+        __log_info_native('[test:110] missing saveload marker')
+        return false
+    }
+    return true
 }

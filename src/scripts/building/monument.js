@@ -22,3 +22,7 @@ Monument.prototype.phases_total = function() {
 Monument.prototype.material_pct_min = function() {
     return __monument_material_pct_min(this.id)
 }
+
+Monument.prototype.weight_btype = function() {
+    return monument_weight_btype(this.id)
+}

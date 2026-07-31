@@ -105,3 +105,26 @@ function run_test() {
     __log_info_native('[test:112] done')
     __test_signal_ready()
 }
+
+function check_valid() {
+    var required = [
+        'true_pyramid_complex_placed_ok',
+        'true_pyramid_complex_parts_ok',
+        'true_pyramid_complex_schedule_ok',
+        'true_pyramid_complex_phases_ok',
+        'true_pyramid_complex_polish_no_lime_ok'
+    ]
+    for (var i = 0; i < required.length; i++) {
+        if (!__test_find_inlog(required[i])) {
+            __log_info_native('[test:112] missing: ' + required[i])
+            return false
+        }
+    }
+    if (__test_find_inlog('true_pyramid_complex_phases_fail')
+        || __test_find_inlog('true_pyramid_complex_parts_fail')
+        || __test_find_inlog('true_pyramid_complex_polish_fail')
+        || __test_find_inlog('true_pyramid_complex_schedule_fail')) {
+        return false
+    }
+    return true
+}

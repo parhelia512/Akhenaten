@@ -2051,7 +2051,7 @@ bool building_small_pyramid::draw_ornaments_and_animations_height(painter &ctx, 
     }
     // Polish (24–25) and terminal (26): full-height silhouette with top-down casing.
     // Do not call unfinished→hight_impl (phase≥24 hits large L3 construction band).
-    if (phase() >= 24) {
+    if (phase() >= k_polish_phase_begin) {
         if (city_flat_should_flatten_building(base)) {
             return true;
         }
@@ -2077,7 +2077,7 @@ bool building_small_pyramid::need_stonemason() {
 void building_small_pyramid::on_phase_changed(int old, int current) {
     // Stepped on_phase_changed treats 24/30 as large L3/L4 ring raises. True small
     // uses 24–25 for polish — do shared tile/resource bookkeeping only.
-    if (current == 24 || current == 30) {
+    if (current == k_polish_phase_begin || current == 30) {
         if (current >= 2) {
             int terrain = TERRAIN_BUILDING;
             if (current >= 3) {
@@ -2102,10 +2102,10 @@ bool building_small_pyramid::use_polish_sprites_for_layer(int layer) const {
     }
     const int p = phase();
     // Top-down: first polish phase covers upper layers, second covers base.
-    if (p >= 25) {
+    if (p >= k_polish_phase_begin + 1) {
         return true;
     }
-    if (p >= 24) {
+    if (p >= k_polish_phase_begin) {
         return layer >= 1;
     }
     return false;

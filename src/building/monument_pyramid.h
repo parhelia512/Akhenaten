@@ -292,6 +292,7 @@ public:
     virtual bool need_stonemason() override;
     // Top-down casing: phase 24 → layers ≥1; phase ≥25 / finished → all.
     virtual bool use_polish_sprites_for_layer(int layer) const override;
+    static constexpr int k_polish_phase_begin = 24;
     // Stepped uses phase 24/30 to raise L3/L4 rings — those numbers are polish for true.
     virtual void on_phase_changed(int old, int current) override;
 
