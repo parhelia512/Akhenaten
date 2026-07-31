@@ -11,6 +11,7 @@
 #include "grid/basin.h"
 #include "grid/floodplain.h"
 #include "grid/canals.h"
+#include "grid/tiles.h"
 #include "grid/irrigation_value.h"
 #include "grid/routing/routing.h"
 #include "grid/routing/routing_terrain.h"
@@ -36,10 +37,30 @@ void __map_terrain_add(tile2i tile, int terrain) {
 }
 ANK_FUNCTION_2(__map_terrain_add)
 
+void __map_terrain_remove(tile2i tile, int terrain) {
+    map_terrain_remove(tile, terrain);
+}
+ANK_FUNCTION_2(__map_terrain_remove)
+
 void __map_water_rebuild_shores() {
     map_water_rebuild_shores();
 }
 ANK_FUNCTION(__map_water_rebuild_shores)
+
+void __map_tiles_set_water(tile2i tile) {
+    map_tiles_set_water(tile.grid_offset());
+}
+ANK_FUNCTION_1(__map_tiles_set_water)
+
+int __map_tiles_set_canal(tile2i tile) {
+    return map_tiles_set_canal(tile);
+}
+ANK_FUNCTION_1(__map_tiles_set_canal)
+
+bool __map_can_place_canal_on_road(tile2i tile) {
+    return map_can_place_canal_on_road(tile);
+}
+ANK_FUNCTION_1(__map_can_place_canal_on_road)
 
 bool __map_terrain_has_adjacent_x_with_type(tile2i tile, int terrain) {
     return map_terrain_has_adjacent_x_with_type(tile.grid_offset(), terrain);

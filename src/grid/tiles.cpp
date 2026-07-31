@@ -442,7 +442,8 @@ void map_refresh_river_image_at(int grid_offset, bool force) {
     set_floodplain_land_tiles_image(grid_offset, force);
     building_road::set_image(tile2i(grid_offset));
     building_dike::set_image(tile2i(grid_offset));
-    map_tiles_set_canal_image(grid_offset);
+    tile2i tile(grid_offset);
+    map_tiles_update_region_canals(tile.shifted(-1, -1), tile.shifted(1, 1));
 }
 
 void map_tiles_river_refresh_entire(void) {
@@ -459,13 +460,12 @@ void map_tiles_river_refresh_region(int x_min, int y_min, int x_max, int y_max) 
     map_tiles_foreach_region_tile_ex(tile2i(x_min, y_min), tile2i(x_max, y_max), [] (tile2i tile) { 
         set_floodplain_land_tiles_image(tile.grid_offset(), false);
     });
+    map_tiles_update_region_canals(tile2i(x_min - 1, y_min - 1), tile2i(x_max + 1, y_max + 1));
 }
 
-void map_tiles_set_water(int grid_offset) { // todo: broken
+void map_tiles_set_water(int grid_offset) {
     map_terrain_add(grid_offset, TERRAIN_WATER);
     map_refresh_river_image_at(grid_offset, true);
-    //    set_water_image(x, y, map_grid_offset(x, y));
-    //    foreach_region_tile(x - 1, y - 1, x + 1, y + 1, set_water_image);
 }
 
 static void set_rubble_image(int grid_offset) {

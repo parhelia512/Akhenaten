@@ -13,6 +13,10 @@ terrain = {
         __map_terrain_add(tile, mask)
     }
 
+    remove: function(tile, mask) {
+        __map_terrain_remove(tile, mask)
+    }
+
     wall_building_type: function(tile) {
         return __map_wall_building_type(tile)
     }
@@ -47,6 +51,18 @@ terrain = {
 
     can_place_road_under_canal: function(tile) {
         return __map_can_place_road_under_canal(tile)
+    }
+
+    can_place_canal_on_road: function(tile) {
+        return __map_can_place_canal_on_road(tile)
+    }
+
+    set_water: function(tile) {
+        __map_tiles_set_water(tile)
+    }
+
+    set_canal: function(tile) {
+        return __map_tiles_set_canal(tile)
     }
 
     canal_with_road_image: function(tile) {
