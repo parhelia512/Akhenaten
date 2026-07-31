@@ -18,13 +18,17 @@
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_homeless);
 
 void ANK_PERMANENT_CALLBACK(event_create_homeless, ev) {
-    auto homeless = figure_create(FIGURE_HOMELESS, ev.tile, DIR_0_TOP_RIGHT)->dcast_homeless();
+    g_city.population.remove_homeless(ev.num_people);
+
+    figure *f = figure_create(FIGURE_HOMELESS, ev.tile, DIR_0_TOP_RIGHT);
+    auto *homeless = (f && f->id) ? f->dcast_homeless() : nullptr;
+    if (!homeless) {
+        return;
+    }
 
     homeless->advance_action(ACTION_7_HOMELESS_CREATED);
     homeless->base.wait_ticks = 0;
     homeless->runtime_data().migrant_num_people = ev.num_people;
-
-    g_city.population.remove_homeless(ev.num_people);
 }
 
 void figure_homeless::debug_draw(painter &ctx) {
@@ -69,10 +73,16 @@ int figure_homeless::find_closest_house_with_room(tile2i tile) {
 }
 
 void figure_homeless::on_destroy() {
-    auto h = home();
-    auto bhome = building_get(runtime_data().adv_home_building_id);
-    if (h == bhome) {
-        bhome->remove_figure(2);
+    building_id bid = runtime_data().adv_home_building_id;
+    if (!bid) {
+        bid = base.home_building_id;
+    }
+    if (!bid) {
+        return;
+    }
+    building *bhome = building_get(bid);
+    if (bhome && bhome->id) {
+        bhome->remove_figure_by_id(id());
     }
 }
 
@@ -93,6 +103,7 @@ void figure_homeless::figure_action() {
                 if (road_tile.valid()) {
                     b->set_figure(BUILDING_SLOT_IMMIGRANT, id());
                     runtime_data().adv_home_building_id = building_id;
+                    base.home_building_id = building_id;
                     advance_action(ACTION_8_HOMELESS_GOING_TO_HOUSE);
                 } else {
                     poof();
@@ -103,21 +114,43 @@ void figure_homeless::figure_action() {
         }
         break;
 
-    case ACTION_8_HOMELESS_GOING_TO_HOUSE:
-        if (!base.has_home()) {
-            base.direction = DIR_0_TOP_RIGHT;
-            advance_action(ACTION_6_HOMELESS_LEAVING);
-        } else {
+    case ACTION_8_HOMELESS_GOING_TO_HOUSE: {
             building *ihome = building_get(runtime_data().adv_home_building_id);
+            auto *house = ihome ? ihome->dcast_house() : nullptr;
+            if (!house || !house->is_valid() || house->population_room() <= 0) {
+                if (ihome) {
+                    ihome->remove_figure_by_id(id());
+                }
+                runtime_data().adv_home_building_id = 0;
+                base.home_building_id = 0;
+                advance_action(ACTION_7_HOMELESS_CREATED);
+                base.wait_ticks = 0;
+                break;
+            }
             do_gotobuilding(ihome, true, TERRAIN_USAGE_ANY, ACTION_9_HOMELESS_ENTERING_HOUSE);
         }
         break;
 
     case ACTION_9_HOMELESS_ENTERING_HOUSE: {
             building *b = building_get(runtime_data().adv_home_building_id);
+            if (!b || !b->id) {
+                runtime_data().adv_home_building_id = 0;
+                base.home_building_id = 0;
+                advance_action(ACTION_7_HOMELESS_CREATED);
+                base.wait_ticks = 0;
+                break;
+            }
             if (do_enterbuilding(false, b)) {
                 building_house *house = b->dcast_house();
-                house->add_population(d.migrant_num_people);
+                if (house && house->population_room() > 0) {
+                    house->add_population(d.migrant_num_people);
+                } else {
+                    b->remove_figure_by_id(id());
+                    runtime_data().adv_home_building_id = 0;
+                    base.home_building_id = 0;
+                    advance_action(ACTION_7_HOMELESS_CREATED);
+                    base.wait_ticks = 0;
+                }
             }
         }
         break;
@@ -167,6 +200,7 @@ void figure_homeless::figure_action() {
                 if (road_tile.valid()) {
                     b->set_figure(BUILDING_SLOT_IMMIGRANT, id());
                     runtime_data().adv_home_building_id = building_id;
+                    base.home_building_id = building_id;
                     advance_action(ACTION_8_HOMELESS_GOING_TO_HOUSE);
                 }
             }

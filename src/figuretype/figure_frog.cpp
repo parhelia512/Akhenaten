@@ -3,7 +3,6 @@
 #include "building/building.h"
 #include "building/building_house.h"
 #include "city/city.h"
-#include "city/city_buildings.h"
 #include "city/city_message.h"
 #include "city/city_warnings.h"
 #include "core/calc.h"
@@ -11,7 +10,6 @@
 #include "dev/debug.h"
 #include "figuretype/figure_homeless.h"
 #include "game/game_events.h"
-#include "game/simulation_time.h"
 #include "grid/building.h"
 #include "grid/grid.h"
 #include "grid/road_access.h"
@@ -46,7 +44,6 @@ tile2i resolve_border_spawn() {
     if (exit.valid()) {
         return exit;
     }
-    // Help 494: invade from borders — fall back to map edge.
     const int w = g_scenario.map.width;
     const int h = g_scenario.map.height;
     switch (random_byte() & 3) {
@@ -62,12 +59,31 @@ tile2i pick_spawn_tile() {
     if (!spawn.valid()) {
         return tile2i::invalid;
     }
-    // Prefer road near border; otherwise keep border tile (may be rough terrain).
     tile2i road = map_closest_road_within_radius(spawn, 1, 8);
     if (road.valid()) {
         return road;
     }
     return spawn;
+}
+
+void cancel_incoming_immigrant(building &b) {
+    figure *f = b.get_figure(BUILDING_SLOT_IMMIGRANT);
+    b.remove_figure(BUILDING_SLOT_IMMIGRANT);
+    if (!f || !f->is_alive()) {
+        return;
+    }
+    if (f->type == FIGURE_IMMIGRANT) {
+        f->poof();
+        return;
+    }
+    if (f->type == FIGURE_HOMELESS) {
+        if (auto *hl = f->dcast_homeless()) {
+            hl->runtime_data().adv_home_building_id = 0;
+        }
+        f->home_building_id = 0;
+        f->advance_action(ACTION_7_HOMELESS_CREATED);
+        f->wait_ticks = 0;
+    }
 }
 
 void try_infest_at(tile2i tile) {
@@ -87,7 +103,6 @@ void try_infest_at(tile2i tile) {
 
 void try_infest_near(tile2i tile) {
     try_infest_at(tile);
-    // Adjacent tiles — "houses they pass".
     static const int dx[4] = {0, 1, 0, -1};
     static const int dy[4] = {-1, 0, 1, 0};
     for (int i = 0; i < 4; ++i) {
@@ -111,10 +126,14 @@ void figure_frog::infest_house(building &b) {
     const uint8_t days = (uint8_t)calc_bound(infest_days > 0 ? infest_days : 80, 1, 255);
 
     if (d.frog_infest_days > 0) {
-        // Refresh timer while frogs keep passing.
         if (d.frog_infest_days < days) {
             d.frog_infest_days = days;
         }
+        if (d.population > 0) {
+            events::emit(event_create_homeless{b.tile, d.population, SOURCE_LOCATION});
+            d.population = 0;
+        }
+        cancel_incoming_immigrant(b);
         return;
     }
 
@@ -125,16 +144,23 @@ void figure_frog::infest_house(building &b) {
     }
 
     d.frog_infest_days = days;
+    cancel_incoming_immigrant(b);
 }
 
 void figure_frog::on_create() {
     const auto &p = current_params();
     base.roam_wander_freely = true;
     base.max_roam_length = 480;
-    // Prefer animal land routing; wall-pen is TEMP incomplete (ANIMAL passes walls).
     base.terrain_usage = TERRAIN_USAGE_ANIMAL;
+    base.allow_move_type = EMOVE_TERRAIN;
     runtime_data().days_left = p.plague_days > 0 ? p.plague_days : 80;
     advance_action(ACTION_120_FROG_CREATED);
+}
+
+void figure_frog::on_post_load() {
+    base.terrain_usage = TERRAIN_USAGE_ANIMAL;
+    base.allow_move_type = EMOVE_TERRAIN;
+    base.roam_wander_freely = true;
 }
 
 void figure_frog::figure_action() {
@@ -143,6 +169,7 @@ void figure_frog::figure_action() {
     }
 
     base.terrain_usage = TERRAIN_USAGE_ANIMAL;
+    base.allow_move_type = EMOVE_TERRAIN;
 
     switch (action_state()) {
     case ACTION_120_FROG_CREATED:
@@ -161,8 +188,6 @@ void figure_frog::figure_action() {
             if (road.valid() && road != tile()) {
                 do_goto(road, TERRAIN_USAGE_ANIMAL, ACTION_121_FROG_ROAMING, ACTION_121_FROG_ROAMING);
             } else {
-                // Only pick a new drift tile when idle/arrived — random every
-                // tick would route_remove and stall movement.
                 const bool need_dest = !base.destination_tile.valid()
                     || tile() == base.destination_tile
                     || direction() == DIR_FIGURE_NONE
@@ -177,7 +202,14 @@ void figure_frog::figure_action() {
                 }
             }
         }
-        try_infest_near(tile());
+        {
+            auto &d = runtime_data();
+            const int goff = tile().grid_offset();
+            if (d.last_infest_offset != goff) {
+                d.last_infest_offset = (int16_t)goff;
+                try_infest_near(tile());
+            }
+        }
         break;
 
     case FIGURE_ACTION_149_CORPSE:
@@ -194,6 +226,8 @@ void figure_frog::update_animation() {
     xstring animkey = animkeys().walk;
     if (action_state(FIGURE_ACTION_149_CORPSE) || !base.is_alive()) {
         animkey = animkeys().death;
+    } else if (action_state() == ACTION_120_FROG_CREATED || direction() == DIR_FIGURE_NONE) {
+        animkey = animkeys().idle;
     }
     image_set_animation(animkey);
 }
@@ -237,7 +271,6 @@ int figure_frog::spawn_swarm(int count) {
         if (!spawn.valid()) {
             continue;
         }
-        // Jitter so frogs are not stacked on one border tile.
         if (i > 0) {
             tile2i alt = random_around_point(spawn, spawn, 2, 4, 6);
             if (alt.valid() && !map_terrain_is(alt, TERRAIN_WATER)) {

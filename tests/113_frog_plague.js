@@ -2,15 +2,22 @@
 // Markers:
 //   [test-marker] frog_registered_ok
 //   [test-marker] frog_anim_walk_ok
+//   [test-marker] frog_anim_idle_ok
 //   [test-marker] frog_ptah_swarm_ok
 //   [test-marker] frog_event_swarm_ok
 //   [test-marker] frog_happiness_ok
 //   [test-marker] frog_cheat_ok
 //   [test-marker] frog_house_infest_ok
+//   [test-marker] frog_infest_on_pass_ok
+//   [test-marker] frog_saveload_ok | frog_saveload_skipped
 //   [test-marker] frog_timer_poof_ok
 
 var GOD_PTAH = 2
+var ACTION_FROG_CREATED = 120
 var ACTION_FROG_ROAMING = 121
+
+var __test113_saveload_ok = false
+var __test113_saveload_skipped = false
 
 function test113_remove_frogs() {
     city.figures.remove_figures(FIGURE_FROG)
@@ -55,6 +62,16 @@ function run_test() {
         return
     }
     __log_marker('frog_anim_walk_ok')
+
+    __test_figure_set_action(probe, ACTION_FROG_CREATED)
+    __test_figure_update_animation(probe)
+    key = __figure_get_anim_key(probe)
+    if (key != 'idle') {
+        __log_info_native('[test:113] anim key want "idle", got "' + key + '"')
+        __test_signal_ready()
+        return
+    }
+    __log_marker('frog_anim_idle_ok')
     __test_figure_kill(probe)
     test113_remove_frogs()
 
@@ -140,13 +157,11 @@ function run_test() {
         __test_signal_ready()
         return
     }
-    // Evicted house must stay on house info window (not vacant-lot) while lockout runs.
     if (h2.is_vacant_lot) {
         __log_info_native('[test:113] infested empty house must not be is_vacant_lot')
         __test_signal_ready()
         return
     }
-    // Lockout must also block add_population (in-flight immigrant/homeless path).
     __test_house_add_population(hid2, 3)
     h2 = city.get_house(hid2)
     if (h2.population != 0) {
@@ -155,6 +170,103 @@ function run_test() {
         return
     }
     __log_marker('frog_house_infest_ok')
+
+    // --- Infest-on-pass: frog on house tile evicts ---
+    test113_remove_frogs()
+    var hid3 = test_building_place(BUILDING_HOUSE_CRUDE_HUT, -1, -1)
+    if (!hid3) {
+        hid3 = __test_building_create(BUILDING_HOUSE_CRUDE_HUT, -1, -1)
+    }
+    if (!hid3 || __test_house_set_population(hid3, 5) < 1) {
+        __log_info_native('[test:113] failed to create house for infest-on-pass')
+        __test_signal_ready()
+        return
+    }
+    var h3tile = __building_tile(hid3)
+    if (!h3tile) {
+        __log_info_native('[test:113] no tile for infest-on-pass house')
+        __test_signal_ready()
+        return
+    }
+    var frog_pass = test_figure_create(FIGURE_FROG, h3tile.x, h3tile.y)
+    if (!frog_pass || !__figure_is_valid(frog_pass)) {
+        __log_info_native('[test:113] failed to place frog on house tile')
+        __test_signal_ready()
+        return
+    }
+    __test_figure_set_action(frog_pass, ACTION_FROG_ROAMING)
+    __test_figure_action_perform(frog_pass)
+    var h3 = city.get_house(hid3)
+    if (h3.frog_infest_days < 1 || h3.population != 0) {
+        __log_info_native('[test:113] infest-on-pass want days>0 pop=0, got days=' + h3.frog_infest_days + ' pop=' + h3.population)
+        __test_signal_ready()
+        return
+    }
+    __log_marker('frog_infest_on_pass_ok')
+    __test_figure_kill(frog_pass)
+    test113_remove_frogs()
+
+    // --- Save/load: figure days_left + house frog_infest_days ---
+    test113_remove_frogs()
+    var hid_sl = test_building_place(BUILDING_HOUSE_CRUDE_HUT, -1, -1)
+    if (!hid_sl) {
+        hid_sl = __test_building_create(BUILDING_HOUSE_CRUDE_HUT, -1, -1)
+    }
+    if (!hid_sl || !__test_frog_infest_house(hid_sl)) {
+        __log_info_native('[test:113] saveload house infest failed')
+        __test_signal_ready()
+        return
+    }
+    var days_before = city.get_house(hid_sl).frog_infest_days
+    var sid = __test_frog_spawn_swarm(1)
+    if (!sid || !__figure_is_valid(sid)) {
+        __log_info_native('[test:113] saveload spawn failed')
+        __test_signal_ready()
+        return
+    }
+    __test_frog_set_days(sid, 33)
+    var save_name = 'test_113_frog.svx'
+    if (!__game_write_savegame(save_name)) {
+        __log_info_native('[test:113] write_savegame failed — saveload skipped')
+        __log_marker('frog_saveload_skipped')
+        __test113_saveload_skipped = true
+    } else if (!__game_load_savegame(save_name)) {
+        __log_info_native('[test:113] load_savegame failed — saveload skipped')
+        __game_delete_savegame(save_name)
+        __log_marker('frog_saveload_skipped')
+        __test113_saveload_skipped = true
+    } else {
+        __game_delete_savegame(save_name)
+        if (test113_count_frogs() < 1) {
+            __log_info_native('[test:113] after load expected frogs')
+            __test_signal_ready()
+            return
+        }
+        var found_days = false
+        var i
+        for (i = 1; i < 200; i++) {
+            if (__figure_is_valid(i) && __figure_get_type(i) == FIGURE_FROG) {
+                if (__test_frog_get_days(i) == 33) {
+                    found_days = true
+                    break
+                }
+            }
+        }
+        if (!found_days) {
+            __log_info_native('[test:113] after load days_left=33 not found')
+            __test_signal_ready()
+            return
+        }
+        var h_sl = city.get_house(hid_sl)
+        if (!h_sl || h_sl.frog_infest_days != days_before) {
+            __log_info_native('[test:113] after load frog_infest_days want ' + days_before
+                + ', got ' + (h_sl ? h_sl.frog_infest_days : 'no-house'))
+            __test_signal_ready()
+            return
+        }
+        __log_marker('frog_saveload_ok')
+        __test113_saveload_ok = true
+    }
 
     // --- Timer poof ---
     test113_remove_frogs()
@@ -184,11 +296,13 @@ function check_valid() {
     var markers = [
         'frog_registered_ok',
         'frog_anim_walk_ok',
+        'frog_anim_idle_ok',
         'frog_ptah_swarm_ok',
         'frog_event_swarm_ok',
         'frog_happiness_ok',
         'frog_cheat_ok',
         'frog_house_infest_ok',
+        'frog_infest_on_pass_ok',
         'frog_timer_poof_ok'
     ]
     for (var i = 0; i < markers.length; i++) {
@@ -197,6 +311,15 @@ function check_valid() {
             __log_info_native('[test:113] missing marker: ' + marker)
             return false
         }
+    }
+    if (!__test_find_inlog('[test-marker] frog_saveload_ok')
+        && !__test_find_inlog('[test-marker] frog_saveload_skipped')) {
+        __log_info_native('[test:113] missing saveload ok/skip marker')
+        return false
+    }
+    if (!__test113_saveload_ok && !__test113_saveload_skipped) {
+        __log_info_native('[test:113] saveload neither ok nor skipped')
+        return false
     }
     return true
 }

@@ -56,7 +56,6 @@ bool god_ptah_t::perform_industry_destruction() {
 }
 
 void god_ptah_t::perform_frogs() {
-    // Popup stays in perform_major_curse (message_wrath_of_ptah_4).
     figure_frog::apply_plague();
 }
 
@@ -111,7 +110,6 @@ void god_ptah_t::perform_major_curse() {
         // no industry to punish (msg 141 text)
         messages::popup("message_wrath_of_ptah", 0, 0);
     } else {
-        // frogs — canonical creature curse (msg 148)
         perform_frogs();
         messages::popup("message_wrath_of_ptah_4", 0, 0);
     }

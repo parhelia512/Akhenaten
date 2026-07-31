@@ -308,7 +308,19 @@ function info_window_house_init_fill(window) {
     if (house.frog_infest_days > 0) {
         window.additional_info.text = house_get_additional_info(house)
         if (house.population <= 0) {
-            window.people_text.text = __loc(66, 156)
+            window.people_text.text = __loc(66, 172)
+            // Clear stale fields from a previously opened occupied house.
+            window.evolve_reason.text = ""
+            window.tax_info.text = ""
+            window.happiness_info.text = ""
+            window.food0_text.text = ""
+            window.food1_text.text = ""
+            window.food2_text.text = ""
+            window.food3_text.text = ""
+            window.good0_text.text = ""
+            window.good1_text.text = ""
+            window.good2_text.text = ""
+            window.good3_text.text = ""
             return
         }
     }

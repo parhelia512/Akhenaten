@@ -706,6 +706,15 @@ static int __test_frog_set_days(int fid, int days) {
 }
 ANK_FUNCTION_2(__test_frog_set_days);
 
+static int __test_frog_get_days(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive() || f->type != FIGURE_FROG) {
+        return -1;
+    }
+    return figure_frog(f).runtime_data().days_left;
+}
+ANK_FUNCTION_1(__test_frog_get_days);
+
 static int __test_frog_infest_house(int bid) {
     building *b = building_get(bid);
     if (!b || !b->is_valid()) {

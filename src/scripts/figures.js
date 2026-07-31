@@ -1242,16 +1242,13 @@ figure_governor {
 	terrain_usage : TERRAIN_USAGE_ROADS,
 }
 
-// Cleopatra SprMain2 bmp "frog": groups 22–26 (after scorpion 10–14, before locust 30–34).
-// Extract: g22@1181 / g23@1253 / g24@1325 walk strips (~9×8); g25@1397 death (6);
-// g26@1403 pads. TEMP: walk=g22, idle=g23, death=g25 until sprite_tool frame verify.
-// CF1: vermin plague, not predator — figure_impl like locust; roam/infest houses.
 figure_frog {
 	animations {
 		walk { pack:PACK_EXPANSION_SPR, id:22, max_frames:9 }
 		idle { pack:PACK_EXPANSION_SPR, id:23, max_frames:9 }
 		death { pack:PACK_EXPANSION_SPR, id:25, max_frames:6, loop:false }
 		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_FROG }
+		icon { pack:PACK_EXPANSION, id:32 }
 	}
 
 	category: figure_category_inactive

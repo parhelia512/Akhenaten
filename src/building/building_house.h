@@ -88,7 +88,7 @@ public:
         building_id worst_desirability_building_id;
         uint16_t image_id;
         uint8_t fade_alpha;
-        uint8_t frog_infest_days; // Cleopatra plague of frogs lockout (save v181+)
+        uint8_t frog_infest_days;
         xstring evolve_text;
         xstring image_key;
     } BUILDING_RUNTIME_DATA_T;

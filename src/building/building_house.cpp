@@ -207,7 +207,6 @@ void building_house::bind_dynamic(io_buffer *iob, size_t version) {
     } else {
         d.zookeeper = 0;
     }
-    // Plague of frogs house lockout (CF1) — save v181+.
     if (version >= 181) {
         iob->bind_u8(d.frog_infest_days);
     } else {
@@ -216,9 +215,10 @@ void building_house::bind_dynamic(io_buffer *iob, size_t version) {
 }
 
 int building_house::get_fire_risk(int value) const {
-    const bool is_empty = (house_level() == HOUSE_CRUDE_HUT) && is_vacant_lot();
-    if (is_empty) {
-        return 0;
+    if (house_population() <= 0) {
+        if (house_level() == HOUSE_CRUDE_HUT || runtime_data().frog_infest_days > 0) {
+            return 0;
+        }
     }
 
     return value;
@@ -357,9 +357,6 @@ static int house_image_group(int level) {
 }
 
 void building_house::add_population(int num_people) {
-    // population_room() also blocks frog-infested houses (help 494 lockout).
-    // Do not recompute max_people here — immigrants/homeless already in flight
-    // would otherwise refill an emptied infested house.
     int room = population_room();
     if (room <= 0 || num_people <= 0) {
         return;
@@ -438,7 +435,6 @@ void building_house::change_to(building &b, e_building_type new_type, bool force
 }
 
 int16_t building_house::population_room() const {
-    // Frog-infested houses cannot be re-entered (help 494 / g127 id 109).
     if (runtime_data().frog_infest_days > 0) {
         return 0;
     }
@@ -455,6 +451,7 @@ void building_house::change_to_vacant_lot() {
     base.type = BUILDING_HOUSE_VACANT_LOT;
 
     d.population = 0;
+    d.frog_infest_days = 0;
     int vacant_lot_id = anim(animkeys().house).first_img();
 
     // size>1 covers both merged 1x1's and non-merged residences/manors/estates;
@@ -482,8 +479,6 @@ void building_house::change_to_vacant_lot() {
 }
 
 bool building_house::is_vacant_lot() const {
-    // Frog lockout keeps the house as a house (UI g66/g127), not a vacant lot,
-    // even though residents were evicted (population == 0).
     if (runtime_data().frog_infest_days > 0) {
         return false;
     }
@@ -503,6 +498,9 @@ static void prepare_for_merge(int building_id, int num_tiles) {
         if (map_terrain_is(house_offset, TERRAIN_BUILDING)) {
             auto house = building_at(house_offset)->dcast_house();
             if (house && house->id() != building_id && house->runtime_data().hsize) {
+                if (house->runtime_data().frog_infest_days > 0) {
+                    continue;
+                }
                 g_merge_data.population += house->house_population();
                 for (int inv = 0; inv < INVENTORY_MAX; inv++) {
                     auto &housed = house->runtime_data();
@@ -550,6 +548,10 @@ void building_house::merge() {
         return;
     }
 
+    if (runtime_data().frog_infest_days > 0) {
+        return;
+    }
+
     if (!game_features::gameplay_change_all_houses_merge) {
         if ((map_random_get(base.tile) & 7) >= 5)
             return;
@@ -568,7 +570,8 @@ void building_house::merge() {
                 num_house_tiles++;
             } else if (other_house->state() == BUILDING_STATE_VALID && other_house->runtime_data().hsize
                      && (other_house->house_level() == house_level())
-                     && !other_house->is_merged()) {
+                     && !other_house->is_merged()
+                     && other_house->runtime_data().frog_infest_days == 0) {
                 num_house_tiles++;
             }
         }
@@ -831,6 +834,23 @@ void building_house::decay_services() {
 }
 
 bool building_house::can_expand(int num_tiles) {
+    if (runtime_data().frog_infest_days > 0) {
+        return false;
+    }
+
+    auto absorbable = [this](building_house *other) {
+        if (!other || other->id() == id()) {
+            return false;
+        }
+        if (!other->is_valid() || !other->hsize()) {
+            return false;
+        }
+        if (other->runtime_data().frog_infest_days > 0) {
+            return false;
+        }
+        return other->house_level() <= house_level();
+    };
+
     // merge with other houses
     for (int dir = 0; dir < MAX_DIR; dir++) {
         int base_offset = expand_delta(dir).offset + base.tile.grid_offset();
@@ -845,10 +865,8 @@ bool building_house::can_expand(int num_tiles) {
 
                 if (other_house->id() == id()) {
                     ok_tiles++;
-                } else if (other_house->is_valid() && other_house->hsize()) {
-                    if (other_house->house_level() <= house_level()) {
-                        ok_tiles++;
-                    }
+                } else if (absorbable(other_house)) {
+                    ok_tiles++;
                 }
             }
         }
@@ -882,8 +900,7 @@ bool building_house::can_expand(int num_tiles) {
                 continue;
             } 
             
-            if (other_house->state() == BUILDING_STATE_VALID && other_house->runtime_data().hsize
-                && other_house->house_level() <= house_level()) {
+            if (absorbable(other_house)) {
                 ok_tiles++;
             }
         }
@@ -923,8 +940,7 @@ bool building_house::can_expand(int num_tiles) {
                 continue;
             }
 
-            const bool may_expand = other_house->state() == BUILDING_STATE_VALID && other_house->runtime_data().hsize && other_house->house_level() <= house_level();
-            ok_tiles += may_expand ? 1 : 0;
+            ok_tiles += absorbable(other_house) ? 1 : 0;
         }
         if (ok_tiles == num_tiles) {
             g_merge_data.tile = tile2i(tilex() + expand_delta(dir).x, tiley() + expand_delta(dir).y);

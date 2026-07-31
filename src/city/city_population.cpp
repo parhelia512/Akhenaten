@@ -87,12 +87,17 @@ void city_population_t::update_room() {
             return;
         }
 
+        const int people = house->house_population();
         const int mul = house->is_merged() ? 4 : 1;
-        const int max_pop = house->model().max_people * mul;
+        int max_pop = house->model().max_people * mul;
 
-        city_population_add_capacity(house->house_population(), max_pop);
+        if (house->runtime_data().frog_infest_days > 0) {
+            max_pop = people;
+        }
+
+        city_population_add_capacity(people, max_pop);
         auto &housed = house->runtime_data();
-        housed.highest_population = std::max<short>(housed.highest_population, house->house_population());
+        housed.highest_population = std::max<short>(housed.highest_population, people);
     });
 }
 

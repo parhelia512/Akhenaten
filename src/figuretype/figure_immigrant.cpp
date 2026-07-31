@@ -19,19 +19,19 @@ REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_immigrant);
 
 void ANK_PERMANENT_CALLBACK(event_create_immigrant, ev) {
     assert(ev.num_people > 0);
-    auto house = building_get(ev.bid)->dcast_house();;
+    auto house = building_get(ev.bid)->dcast_house();
 
     if (!house) {
         return;
     }
 
     tile2i entry = g_city.map.entry_point;
-    auto f = figure_create(FIGURE_IMMIGRANT, entry, DIR_0_TOP_RIGHT);
-    auto imm = f->dcast_immigrant();
-    assert(imm);
-
+    figure *f = figure_create(FIGURE_IMMIGRANT, entry, DIR_0_TOP_RIGHT);
+    if (!f || !f->id) {
+        return;
+    }
+    auto *imm = f->dcast_immigrant();
     if (!imm) {
-        f->poof();
         return;
     }
 
@@ -134,10 +134,11 @@ void figure_immigrant::figure_action() {
     case ACTION_3_IMMIGRANT_ENTERING_HOUSE:
         if (do_enterbuilding(false, home)) {
             building_house *house = home->dcast_house();
-            if (house) {
+            if (house && house->population_room() > 0) {
                 house->add_population(d.migrant_num_people);
             } else {
-                advance_action(ACTION_8_RECALCULATE);
+                home->remove_figure_by_id(id());
+                poof();
             }
         }
         break;
@@ -146,15 +147,20 @@ void figure_immigrant::figure_action() {
 
 void figure_immigrant::figure_before_action() {
     building *b_imm = immigrant_home();
-    // Original .sav files store the destination house in home_building_id;
-    // adv_home_building_id lives in Akhenaten runtime_data and can be garbage
-    // after a legacy load (see #609). Drop the figure rather than OOB-crash.
     if (!b_imm->id || b_imm->type == BUILDING_NONE) {
         poof();
         return;
     }
     if (b_imm->type == BUILDING_BURNING_RUIN) {
         advance_action(ACTION_1_IMMIGRANT_CREATED);
+        return;
+    }
+
+    if (auto *house = b_imm->dcast_house()) {
+        if (house->population_room() <= 0) {
+            b_imm->remove_figure_by_id(id());
+            poof();
+        }
     }
 }
 
