@@ -192,6 +192,29 @@ void scenario_building_allow(e_building_type btype, bool allow) {
     g_scenario.allowed_buildings[btype] = allow;
 }
 
+int16_t scenario_data_t::pak_editor_allow_flag(int slot) const {
+    if (slot < 1 || slot > SCENARIO_EDITOR_ALLOW_SLOTS) {
+        return 0;
+    }
+    return pak_reserved[slot - 1];
+}
+
+int scenario_editor_allow_mapped_types(int slot, e_building_type *out, int max_out) {
+    if (!out || max_out <= 0) {
+        return 0;
+    }
+    switch (slot) {
+    case scenario_data_t::EDITOR_ALLOW_SLOT_BRIDGE:
+        out[0] = BUILDING_LOW_BRIDGE;
+        return 1;
+    case scenario_data_t::EDITOR_ALLOW_SLOT_FERRY:
+        out[0] = BUILDING_FERRY;
+        return 1;
+    default:
+        return 0;
+    }
+}
+
 int scenario_building_image_native_hut() {
     return g_scenario.native_images.hut;
 }
@@ -356,10 +379,8 @@ io_buffer *iob_scenario_info = new io_buffer([] (io_buffer *iob, size_t version)
     iob->bind____skip(1); // -1
 
     iob->bind_hvector_tiles_xy_i32(g_scenario.herd_points_prey, MAX_PREY_HERD_POINTS);
-    // 114
-    int16_t reserved_data = 0;
-    for (int i = 0; i < 114; i++) {
-        iob->bind(BIND_SIGNATURE_INT16, &reserved_data);
+    for (int i = 0; i < scenario_data_t::SCENARIO_PAK_RESERVED_INT16S; i++) {
+        iob->bind(BIND_SIGNATURE_INT16, &g_scenario.pak_reserved[i]);
     }
 
     iob->bind_hvector_tiles_xy_i32(g_scenario.disembark_points, MAX_DISEMBARK_POINTS);

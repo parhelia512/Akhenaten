@@ -272,6 +272,7 @@ import mission.m_038_valley_thutmose
 import mission.m_039_valley_tut
 import mission.m_040_valley_seti
 import mission.m_041_sumur
+import mission.m_042_qadesh
 import mission.m_045_pi_yer
 import mission.m_128_alexandria
 import mission.m_129_bridges

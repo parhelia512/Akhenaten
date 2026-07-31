@@ -593,6 +593,11 @@ void city_t::plague_update_day() {
             house->base.disease_days--;
             house->base.has_plague = (house->base.disease_days > 0);
         }
+
+        auto &housed = house->runtime_data();
+        if (housed.frog_infest_days > 0) {
+            housed.frog_infest_days--;
+        }
     });
 }
 

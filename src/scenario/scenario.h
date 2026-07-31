@@ -256,6 +256,17 @@ struct scenario_data_t {
     hvector<tile2i, MAX_INVASION_POINTS_SEA> invasion_points_sea;
 
     bool allowed_buildings[BUILDING_MAX] = { 0 };
+
+    enum {
+        SCENARIO_PAK_RESERVED_INT16S = 114,
+        SCENARIO_EDITOR_ALLOW_SLOTS = 47,
+        EDITOR_ALLOW_SLOT_BRIDGE = 28,
+        EDITOR_ALLOW_SLOT_FERRY = 29,
+    };
+    int16_t pak_reserved[SCENARIO_PAK_RESERVED_INT16S] = {};
+
+    int16_t pak_editor_allow_flag(int slot) const;
+
     resource_allow_vec init_resources;
     settings_vars_t vars;
 
@@ -364,6 +375,8 @@ int scenario_property_player_rank();
 
 bool scenario_building_allowed(e_building_type btype);
 void scenario_building_allow(e_building_type btype, bool allow);
+
+int scenario_editor_allow_mapped_types(int slot, e_building_type *out, int max_out);
 
 int scenario_building_image_native_hut();
 

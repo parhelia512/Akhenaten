@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qadesh — The Battle of Qadesh — Akhenaten Wiki</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .mission-infobox { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.9rem 1.1rem; }
+    .mission-infobox dl { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 1rem; margin: 0; }
+    .mission-infobox dt { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; }
+    .mission-infobox dd { margin: 0; font-size: 0.85rem; }
+    .mission-infobox .funds-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .mission-infobox .funds-row span { font-size: 0.75rem; color: var(--text-muted); }
+    .mission-infobox .funds-row span strong { color: var(--text); }
+    .dev-section { margin-top: 2.5rem; }
+    .dev-section h2 { color: var(--text-muted); font-size: 1rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; }
+    summary { padding: 0.7rem 1rem; cursor: pointer; font-size: 0.875rem; font-weight: 600; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    .details-body { padding: 1rem 1.1rem; font-size: 0.85rem; line-height: 1.6; }
+    .file-ref { font-family: Consolas, monospace; font-size: 0.78rem; color: var(--gold); }
+    .objectives-list { list-style: none; padding: 0; }
+    .objectives-list li { display: flex; gap: 0.6rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .obj-label { font-weight: 600; min-width: 8rem; }
+    .deviation-note { background: rgba(201,120,76,0.08); border: 1px solid rgba(201,120,76,0.3); border-radius: 4px; padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--text-muted); margin: 0.75rem 0; }
+    .mission-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; }
+    .mission-nav a { color: var(--gold); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">Akhenaten</a>
+      <ul>
+        <li><a href="../../index.html" class="active">Wiki</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main class="wiki-layout">
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title"><a href="index.html">← All Missions</a></div>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Ramses II</div>
+        <ul>
+          <li><a href="sumur.html">41 · Sumur</a></li>
+          <li><a href="qadesh.html" class="active">42 · Qadesh</a></li>
+          <li><span style="color:var(--text-muted)">43 · Abu Simbel</span></li>
+          <li><span style="color:var(--text-muted)">44 · Ramses in the Valley</span></li>
+        </ul>
+      </div>
+    </aside>
+
+    <article class="wiki-content">
+      <h1>Qadesh</h1>
+      <p class="wiki-subtitle">The Battle of Qadesh · mission 42 · Cleopatra campaign 6</p>
+
+      <div class="mission-infobox">
+        <dl>
+          <dt>Scenario id</dt><dd>42</dd>
+          <dt>Campaign</dt><dd>Ramses II (6)</dd>
+          <dt>Start year</dt><dd>1277 BC (pak)</dd>
+          <dt>Player rank</dt><dd>10 (pak; briefing = Pharaoh Ramses II)</dd>
+          <dt>Enemy (pak)</dt><dd><code>ENEMY_2_CANAANITE</code> (briefing says Hittites)</dd>
+          <dt>Funds (Normal)</dt>
+          <dd>
+            <div class="funds-row">
+              <span>treasury <strong>18 000</strong></span>
+              <span>loan <strong>1 500</strong></span>
+              <span>debt interest <strong>8%</strong></span>
+            </div>
+          </dd>
+          <dt>Gods</dt><dd>Osiris (1), Ra (2)</dd>
+          <dt>Previous</dt><dd><a href="sumur.html">41 Sumur</a></dd>
+          <dt>Next</dt><dd>43 Abu Simbel (<code>next_mission: 43</code>; playable when stubbed)</dd>
+          <dt>Status</dt><dd><span class="mission-badge badge-impl">Implemented</span></dd>
+        </dl>
+      </div>
+
+      <div class="deviation-note">
+        <strong>Full redefine (2026-07-31):</strong> <code>hide_pak_*</code> empire + JS event graph
+        (dump <span class="file-ref">tmp/mission42_pak.txt</span>). Invasions i=1→19→22 → JS canaanite raids.
+        SKIP already_fired gifts i=8/i=9. Shared refuse KR via <code>request_cleared</code>.
+        <br /><strong>CO2:</strong> briefing veteran troops from Sumur — after CO0; not wired yet.
+        <br /><strong>Map:</strong> preplaced chariot fort camps (briefing).
+      </div>
+
+      <h2 id="objectives">Objectives (pak)</h2>
+      <ul class="objectives-list">
+        <li><span class="obj-label">Population</span> 1 800</li>
+        <li><span class="obj-label">Prosperity</span> 20</li>
+        <li><span class="obj-label">Kingdom</span> 50</li>
+        <li><span class="obj-label">Housing</span> level 14</li>
+        <li><span class="obj-label">Time limit</span> 7 years</li>
+        <li><span class="obj-label">Culture / monuments</span> off</li>
+      </ul>
+
+      <h2 id="briefing">Briefing (summary)</h2>
+      <p>As Pharaoh Ramses II at the fortress town of Qadesh: Hittites under Mutwatalli threaten the land of Amurra.
+        Preplaced charioteer camps; delay deploying Sumur veterans until the battle peaks. After victory, revive gems and jewelry trade.</p>
+
+      <div class="dev-section">
+        <h2>Developer Reference</h2>
+        <details open>
+          <summary>Files &amp; dump</summary>
+          <div class="details-body">
+            <p><code>map_file</code>: <span class="file-ref">data/maps/m_042_qadesh.map</span>.
+              Script: <span class="file-ref">src/scripts/mission/m_042_qadesh.js</span>.
+              Dump: <span class="file-ref">tmp/mission42_pak.txt</span> (2026-07-31).
+              Empire id 23, <code>map_background</code> pack empire id 21. SKIP empty map_obj idx=3.
+              Trade (JS): Sumur · Jericho · Timna · Migdol · Men-nefer; display Tyre / Waset (pharaoh→NEW_TRADE via i=5) / oases / Enkomi.
+              Land routes 1–6; ornament <code>img=13863</code>.
+              Events: luxury×2, troops×27, beer, gems, pomegranates; canaanite×50→×30→×35; land trade y6; SKIP i=8/i=9.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="mission-nav">
+        <a href="sumur.html">← 41 Sumur</a>
+        <a href="index.html#ramses-ii">Ramses II index</a>
+      </div>
+    </article>
+  </main>
+</body>
+</html>

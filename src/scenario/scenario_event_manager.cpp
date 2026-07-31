@@ -36,6 +36,7 @@
 #include "figure/formation.h"
 #include "figuretype/figure_mummy.h"
 #include "figuretype/figure_locust.h"
+#include "figuretype/figure_frog.h"
 #include "figuretype/figure_tomb_robber.h"
 #include "game/game_config.h"
 #include "core/svector.h"
@@ -985,7 +986,12 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         figure_tomb_robber::spawn_wave(n);
         break;
     }
-    case EVENT_TYPE_FROGS:
+    case EVENT_TYPE_FROGS: {
+        const int n = event.amount.value > 0 ? event.amount.value : 0;
+        figure_frog::apply_plague(n);
+        messages::popup("message_plague_of_frogs", 0, 0);
+        break;
+    }
     case EVENT_TYPE_HAILSTORM:
     case EVENT_TYPE_BLOOD_RIVER:
         break;

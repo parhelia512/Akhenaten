@@ -8,6 +8,7 @@
 #include "core/random.h"
 #include "figure/figure.h"
 #include "figuretype/animal_scorpion.h"
+#include "figuretype/figure_frog.h"
 #include "game/game_config.h"
 #include "game/game_events.h"
 #include "game/simulation_time.h"
@@ -55,8 +56,8 @@ bool god_ptah_t::perform_industry_destruction() {
 }
 
 void god_ptah_t::perform_frogs() {
-    // TODO: implement frogs
-    // PTAH_frogs();
+    // Popup stays in perform_major_curse (message_wrath_of_ptah_4).
+    figure_frog::apply_plague();
 }
 
 bool god_ptah_t::perform_scorpions() {

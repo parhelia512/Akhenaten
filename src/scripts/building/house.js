@@ -31,6 +31,7 @@ House.property.physician = { }
 House.property.booth_juggler = { }
 House.property.senet_player = { }
 House.property.zookeeper = { }
+House.property.frog_infest_days = { }
 House.property.bandstand_juggler = { }
 House.property.bandstand_musician = { }
 House.property.pavillion_musician = { }

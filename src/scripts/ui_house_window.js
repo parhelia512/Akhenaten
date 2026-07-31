@@ -280,6 +280,10 @@ function house_determine_evolve_text(house) {
 }
 
 function house_get_additional_info(house) {
+    if (house.frog_infest_days > 0) {
+        var months = Math.max(1, Math.ceil(house.frog_infest_days / 16))
+        return __loc(127, 109) + " " + months + " " + __loc(8, 5)
+    }
     if (house.model.food_types) return ""
     return __loc(127, 33)
 }
@@ -300,6 +304,14 @@ function info_window_house_init_fill(window) {
     __log_marker("window_show:info_window_house")
     var house = city.get_house(window.bid)
     window.title.text = __loc(29, house.level)
+
+    if (house.frog_infest_days > 0) {
+        window.additional_info.text = house_get_additional_info(house)
+        if (house.population <= 0) {
+            window.people_text.text = __loc(66, 156)
+            return
+        }
+    }
 
     if (house.population <= 0)
         return

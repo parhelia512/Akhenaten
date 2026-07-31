@@ -29,7 +29,9 @@
 //  178 akhenaten: (reserved / in-tree)
 //  179 akhenaten: monument funeral_done (pyramid append; mastaba reclaims skip byte)
 //  180 akhenaten: monument preexisting (pyramid append; mastaba/sphinx/obelisk reclaim skip)
-constexpr uint32_t latest_save_version = 180;
+//  181 akhenaten: house frog_infest_days (Cleopatra Plague of Frogs / CF1)
+//  182 akhenaten: pyramid complex causeway_length / causeway_dir
+constexpr uint32_t latest_save_version = 182;
 
 vfs::path fullpath_saves(vfs::path filename);
 vfs::path fullpath_maps(char* full, vfs::path filename);

@@ -1,5 +1,4 @@
-// True Pyramid Complex (20×20 on-land) — place, parts, height→polish schedule.
-// Causeway/temples not implemented; same cadence as large true pyramid.
+// True Pyramid Complex (20×20 + causeway-to-water). Temples still open.
 
 function run_test() {
     __log_info_native('[test:112] true pyramid complex place + phase walk')
@@ -13,15 +12,14 @@ function run_test() {
 
     var cx = (__scenario_map.width / 2) | 0
     var cy = (__scenario_map.height / 2) | 0
-    var bid = 0
-    var candidates = [
-        {x: cx - 10, y: cy - 10}, {x: cx, y: cy}, {x: 30, y: 30}, {x: 24, y: 24}
-    ]
-    for (var i = 0; i < candidates.length && !bid; i++) {
-        bid = test_building_place(BUILDING_PYRAMID_COMPLEX, candidates[i].x, candidates[i].y)
-    }
+    var px = cx - 10
+    var py = cy - 10
+    test_prepare_pyramid_complex_causeway(px, py, 20, 4, 3)
+
+    var bid = test_building_place(BUILDING_PYRAMID_COMPLEX, px, py)
     if (!bid) {
-        bid = test_building_place(BUILDING_PYRAMID_COMPLEX, -1, -1)
+        test_prepare_pyramid_complex_causeway(cx, cy, 20, 4, 3)
+        bid = test_building_place(BUILDING_PYRAMID_COMPLEX, cx, cy)
     }
     if (!bid) {
         __log_info_native('[test:112] failed to place BUILDING_PYRAMID_COMPLEX')
@@ -31,6 +29,13 @@ function run_test() {
 
     var tile = __building_tile(bid)
     __log_marker('true_pyramid_complex_placed_ok:' + bid + ':' + tile.x + ',' + tile.y)
+
+    if (test_pyramid_complex_causeway_claimed(bid, tile.x, tile.y, 20, 4)) {
+        __log_marker('true_pyramid_complex_causeway_claimed_ok')
+    } else {
+        __log_info_native('[test:112] causeway tiles not claimed')
+        __log_marker('true_pyramid_complex_causeway_claimed_fail')
+    }
 
     if (__building_type(bid) != BUILDING_PYRAMID_COMPLEX) {
         __log_info_native('[test:112] unexpected type ' + __building_type(bid))
@@ -109,6 +114,7 @@ function run_test() {
 function check_valid() {
     var required = [
         'true_pyramid_complex_placed_ok',
+        'true_pyramid_complex_causeway_claimed_ok',
         'true_pyramid_complex_parts_ok',
         'true_pyramid_complex_schedule_ok',
         'true_pyramid_complex_phases_ok',
@@ -123,7 +129,8 @@ function check_valid() {
     if (__test_find_inlog('true_pyramid_complex_phases_fail')
         || __test_find_inlog('true_pyramid_complex_parts_fail')
         || __test_find_inlog('true_pyramid_complex_polish_fail')
-        || __test_find_inlog('true_pyramid_complex_schedule_fail')) {
+        || __test_find_inlog('true_pyramid_complex_schedule_fail')
+        || __test_find_inlog('true_pyramid_complex_causeway_claimed_fail')) {
         return false
     }
     return true

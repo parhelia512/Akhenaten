@@ -207,6 +207,12 @@ void building_house::bind_dynamic(io_buffer *iob, size_t version) {
     } else {
         d.zookeeper = 0;
     }
+    // Plague of frogs house lockout (CF1) — save v181+.
+    if (version >= 181) {
+        iob->bind_u8(d.frog_infest_days);
+    } else {
+        d.frog_infest_days = 0;
+    }
 }
 
 int building_house::get_fire_risk(int value) const {
@@ -351,10 +357,13 @@ static int house_image_group(int level) {
 }
 
 void building_house::add_population(int num_people) {
-    const int mul = is_merged() ? 4 : 1;
-    const int max_people = get_model(house_level()).max_people * mul;
-
-    int room = std::max(max_people - house_population(), 0);
+    // population_room() also blocks frog-infested houses (help 494 lockout).
+    // Do not recompute max_people here — immigrants/homeless already in flight
+    // would otherwise refill an emptied infested house.
+    int room = population_room();
+    if (room <= 0 || num_people <= 0) {
+        return;
+    }
     if (room < num_people) {
         num_people = room;
     }
@@ -429,10 +438,13 @@ void building_house::change_to(building &b, e_building_type new_type, bool force
 }
 
 int16_t building_house::population_room() const {
+    // Frog-infested houses cannot be re-entered (help 494 / g127 id 109).
+    if (runtime_data().frog_infest_days > 0) {
+        return 0;
+    }
+
     const int mul = is_merged() ? 4 : 1;
     const int max_people = model().max_people * mul;
-
-    const int room = std::max(max_people - house_population(), 0);
     const int house_pop = house_population();
 
     return (max_people - house_pop);
@@ -470,6 +482,11 @@ void building_house::change_to_vacant_lot() {
 }
 
 bool building_house::is_vacant_lot() const {
+    // Frog lockout keeps the house as a house (UI g66/g127), not a vacant lot,
+    // even though residents were evicted (population == 0).
+    if (runtime_data().frog_infest_days > 0) {
+        return false;
+    }
     return house_population() == 0;
 }
 

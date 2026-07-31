@@ -1,5 +1,4 @@
-// Stepped Pyramid Complex (20x20 on-land) — place, linked parts, phases.
-// Causeway/temples are not implemented; this only asserts the plain monument placeable.
+// Stepped Pyramid Complex (20x20 + causeway-to-water). Temples/art still open.
 
 function run_test() {
     __log_info_native('[test:105] stepped pyramid complex place + parts + phases')
@@ -11,17 +10,35 @@ function run_test() {
 
     __test_set_treasury(500000)
 
-    var cx = (__scenario_map.width / 2) | 0
-    var cy = (__scenario_map.height / 2) | 0
-    var bid = 0
-    var candidates = [
-        {x: cx - 10, y: cy - 10}, {x: cx, y: cy}, {x: 40, y: 40}, {x: 30, y: 30}, {x: 60, y: 40}
-    ]
-    for (var i = 0; i < candidates.length && !bid; i++) {
-        bid = test_building_place(BUILDING_STEPPED_PYRAMID_COMPLEX, candidates[i].x, candidates[i].y)
+    var px = 30
+    var py = 30
+
+    // Without a water link the complex must be rejected.
+    if (test_planner_enter_build_mode(BUILDING_STEPPED_PYRAMID_COMPLEX)) {
+        city_planner.update(px, py)
+        if (city_planner.can_be_placed() == CAN_PLACE) {
+            __log_info_native('[test:105] inland place should be blocked')
+            __log_marker('complex_stepped_inland_fail')
+            test_planner_exit_build_mode()
+            __test_signal_ready()
+            return
+        }
+        test_planner_exit_build_mode()
+        __log_marker('complex_stepped_inland_blocked_ok')
+    } else {
+        __log_info_native('[test:105] failed to enter build mode for inland check')
+        __test_signal_ready()
+        return
     }
+
+    test_prepare_pyramid_complex_causeway(px, py, 20, 4, 3)
+
+    var bid = test_building_place(BUILDING_STEPPED_PYRAMID_COMPLEX, px, py)
     if (!bid) {
-        bid = test_building_place(BUILDING_STEPPED_PYRAMID_COMPLEX, -1, -1)
+        var cx = (__scenario_map.width / 2) | 0
+        var cy = (__scenario_map.height / 2) | 0
+        test_prepare_pyramid_complex_causeway(cx, cy, 20, 4, 3)
+        bid = test_building_place(BUILDING_STEPPED_PYRAMID_COMPLEX, cx, cy)
     }
     if (!bid) {
         __log_info_native('[test:105] failed to place BUILDING_STEPPED_PYRAMID_COMPLEX')
@@ -31,6 +48,13 @@ function run_test() {
 
     var tile = __building_tile(bid)
     __log_marker('complex_stepped_placed_ok:' + bid + ':' + tile.x + ',' + tile.y)
+
+    if (test_pyramid_complex_causeway_claimed(bid, tile.x, tile.y, 20, 4)) {
+        __log_marker('complex_stepped_causeway_claimed_ok')
+    } else {
+        __log_info_native('[test:105] causeway tiles not claimed to bid=' + bid)
+        __log_marker('complex_stepped_causeway_claimed_fail')
+    }
 
     var btype = __building_type(bid)
     if (btype != BUILDING_STEPPED_PYRAMID_COMPLEX) {
@@ -105,7 +129,7 @@ function run_test() {
 }
 
 function check_valid() {
-    var required = ['complex_stepped_placed_ok', 'complex_stepped_parts_ok', 'complex_stepped_type_ok']
+    var required = ['complex_stepped_inland_blocked_ok', 'complex_stepped_placed_ok', 'complex_stepped_causeway_claimed_ok', 'complex_stepped_parts_ok', 'complex_stepped_type_ok']
     for (var i = 0; i < required.length; i++) {
         if (!__test_find_inlog(required[i])) {
             __log_info_native('[test:105] missing marker: ' + required[i])

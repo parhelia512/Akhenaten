@@ -877,6 +877,72 @@ static void dump_allowed_buildings() {
     dump_marker("pak_allowed_count:%d", n);
 }
 
+static void append_mapped_types(char *out, size_t out_sz, int slot) {
+    e_building_type types[8];
+    const int n = scenario_editor_allow_mapped_types(slot, types, 8);
+    if (n <= 0) {
+        snprintf(out, out_sz, "?");
+        return;
+    }
+    size_t used = 0;
+    out[0] = 0;
+    for (int i = 0; i < n; i++) {
+        pcstr name = safe_token(e_building_type_tokens.name(types[i]));
+        const size_t nlen = strlen(name);
+        if (used + nlen + 16 >= out_sz) {
+            break;
+        }
+        if (used > 0) {
+            out[used++] = ',';
+            out[used] = 0;
+        }
+        used += (size_t)snprintf(out + used, out_sz - used, "%d(%s)", (int)types[i], name);
+    }
+}
+
+static pcstr editor_allow_slot_label(int slot) {
+    pcstr s = lang_get_string(67, slot);
+    if (s && s[0]) {
+        return s;
+    }
+    switch (slot) {
+    case scenario_data_t::EDITOR_ALLOW_SLOT_BRIDGE:
+        return "Bridge";
+    case scenario_data_t::EDITOR_ALLOW_SLOT_FERRY:
+        return "Ferry Landing";
+    default:
+        return "?";
+    }
+}
+
+static void dump_pak_reserved() {
+    int nonzero = 0;
+    for (int i = 0; i < scenario_data_t::SCENARIO_PAK_RESERVED_INT16S; i++) {
+        const int16_t v = g_scenario.pak_reserved[i];
+        dump_marker("pak_reserved:i=%d|v=%d", i, (int)v);
+        if (v != 0) {
+            nonzero++;
+        }
+    }
+    dump_marker("pak_reserved_nonzero:%d", nonzero);
+
+    char types_buf[256];
+    int allow_on = 0;
+    for (int slot = 1; slot <= scenario_data_t::SCENARIO_EDITOR_ALLOW_SLOTS; slot++) {
+        const int16_t v = g_scenario.pak_editor_allow_flag(slot);
+        append_mapped_types(types_buf, sizeof types_buf, slot);
+        dump_marker("pak_editor_allow:slot=%d|name=%s|v=%d|types=%s",
+            slot,
+            editor_allow_slot_label(slot),
+            (int)v,
+            types_buf);
+        if (v != 0) {
+            allow_on++;
+        }
+    }
+    dump_marker("pak_editor_allow_on:%d", allow_on);
+}
+
 static void dump_loaded_scenario(int scenario_id) {
     dump_scenario_header(scenario_id);
     dump_win_criteria();
@@ -891,6 +957,7 @@ static void dump_loaded_scenario(int scenario_id) {
     dump_legacy_tables();
     dump_terrain_stats();
     dump_starting_buildings();
+    dump_pak_reserved();
     dump_allowed_buildings();
 }
 
@@ -928,6 +995,56 @@ static int __test_mission_pak_dump(int scenario_id) {
     return 1;
 }
 ANK_FUNCTION_1(__test_mission_pak_dump);
+
+static void dump_bridge_allow_summary(int scenario_id, pcstr src) {
+    const int16_t bridge = g_scenario.pak_editor_allow_flag(scenario_data_t::EDITOR_ALLOW_SLOT_BRIDGE);
+    const int16_t ferry = g_scenario.pak_editor_allow_flag(scenario_data_t::EDITOR_ALLOW_SLOT_FERRY);
+    int allow_on = 0;
+    for (int slot = 1; slot <= scenario_data_t::SCENARIO_EDITOR_ALLOW_SLOTS; slot++) {
+        if (g_scenario.pak_editor_allow_flag(slot) != 0) {
+            allow_on++;
+        }
+    }
+    dump_marker("bridge_allow:id=%d|src=%s|bridge=%d|ferry=%d|allow_on=%d",
+        scenario_id,
+        src ? src : "?",
+        (int)bridge,
+        (int)ferry,
+        allow_on);
+}
+
+// Compact Bridge/Ferry allow dump from mission pak (no full scenario dump).
+static int __test_mission_bridge_allow_dump(int scenario_id) {
+    if (g_args.no_resource()) {
+        dump_marker("bridge_allow_skipped:no_resource");
+        return 0;
+    }
+    if (!GamestateIO::load_mission_pak_raw(scenario_id)) {
+        dump_marker("bridge_allow_fail:%d|pak", scenario_id);
+        return 0;
+    }
+    dump_bridge_allow_summary(scenario_id, "pak");
+    return 1;
+}
+ANK_FUNCTION_1(__test_mission_bridge_allow_dump);
+
+static int __test_mission_map_bridge_allow_dump(int scenario_id, pcstr map_path) {
+    if (g_args.no_resource()) {
+        dump_marker("bridge_allow_skipped:no_resource");
+        return 0;
+    }
+    if (!map_path || !map_path[0]) {
+        dump_marker("bridge_allow_fail:%d|-", scenario_id);
+        return 0;
+    }
+    if (!GamestateIO::load_mission_map_raw(scenario_id, map_path)) {
+        dump_marker("bridge_allow_fail:%d|%s", scenario_id, map_path);
+        return 0;
+    }
+    dump_bridge_allow_summary(scenario_id, map_path);
+    return 1;
+}
+ANK_FUNCTION_2(__test_mission_map_bridge_allow_dump);
 
 // Dump a .map file WITHOUT JS mission overlay (load_mission_map_raw, no post_load).
 // scenario_id is only for markers / campaign_scenario_id (e.g. 129 for Bridges.map).

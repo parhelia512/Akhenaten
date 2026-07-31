@@ -45,6 +45,7 @@
 #include "figuretype/figure_mummy.h"
 #include "figuretype/figure_plagued_citizen.h"
 #include "figuretype/figure_locust.h"
+#include "figuretype/figure_frog.h"
 #include "figuretype/figure_funeral_walker.h"
 #include "figuretype/figure_tomb_robber.h"
 #include "figuretype/figure_constable.h"
@@ -690,6 +691,35 @@ static int __test_locust_post_load(int fid) {
 }
 ANK_FUNCTION_1(__test_locust_post_load);
 
+static int __test_frog_spawn_swarm(int count) {
+    return figure_frog::spawn_swarm(count);
+}
+ANK_FUNCTION_1(__test_frog_spawn_swarm);
+
+static int __test_frog_set_days(int fid, int days) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive() || f->type != FIGURE_FROG) {
+        return 0;
+    }
+    figure_frog(f).runtime_data().days_left = (uint16_t)std::max(0, days);
+    return 1;
+}
+ANK_FUNCTION_2(__test_frog_set_days);
+
+static int __test_frog_infest_house(int bid) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return 0;
+    }
+    figure_frog::infest_house(*b);
+    auto *house = b->dcast_house();
+    if (!house) {
+        return 0;
+    }
+    return house->runtime_data().frog_infest_days > 0 ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_frog_infest_house);
+
 static int __test_building_curse_days(int bid) {
     building *b = building_get(bid);
     if (!b || !b->is_valid()) {
@@ -721,6 +751,20 @@ static int __test_house_set_population(int bid, int pop) {
     return house->house_population();
 }
 ANK_FUNCTION_2(__test_house_set_population);
+
+static int __test_house_add_population(int bid, int num_people) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return -1;
+    }
+    auto *house = b->dcast_house();
+    if (!house) {
+        return -1;
+    }
+    house->add_population(num_people);
+    return house->house_population();
+}
+ANK_FUNCTION_2(__test_house_add_population);
 
 static int __test_house_mark_plague(int bid, int days) {
     building *b = building_get(bid);

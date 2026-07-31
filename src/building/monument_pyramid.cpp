@@ -24,6 +24,7 @@
 #include "grid/property.h"
 #include "grid/image.h"
 #include "grid/building_tiles.h"
+#include "grid/figure.h"
 #include "graphics/view/lookup.h"
 #include "graphics/graphics.h"
 #include "graphics/elements/panel.h"
@@ -35,11 +36,201 @@
 #include "dev/debug.h"
 #include "js/js_game.h"
 #include "grid/canals.h"
+#include "grid/water.h"
 #include "building/monument_mastaba.h"
 #include "graphics/image_groups.h"
 
 #include <numeric>
 #include <string>
+#include <algorithm>
+
+namespace {
+
+constexpr int k_causeway_width = 2;
+constexpr int k_causeway_max_length = 80;
+
+// N, E, S, W in map coords.
+const vec2i k_causeway_dir[4] = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
+const vec2i k_causeway_perp[4] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+
+bool building_type_is_pyramid_complex(e_building_type t) {
+    return t == BUILDING_STEPPED_PYRAMID_COMPLEX
+        || t == BUILDING_GRAND_STEPPED_PYRAMID_COMPLEX
+        || t == BUILDING_PYRAMID_COMPLEX
+        || t == BUILDING_GRAND_PYRAMID_COMPLEX;
+}
+
+struct pyramid_causeway_probe {
+    bool ok = false;
+    int dir = 1; // east preferred
+    int length = 0;
+    tile2i origin;
+};
+
+bool causeway_strip_clear(tile2i origin, int dir, int length, int width) {
+    const vec2i step = k_causeway_dir[dir & 3];
+    const vec2i perp = k_causeway_perp[dir & 3];
+    for (int i = 0; i < length; ++i) {
+        for (int w = 0; w < width; ++w) {
+            tile2i t = origin.shifted(step.x * i + perp.x * w, step.y * i + perp.y * w);
+            if (!map_grid_is_inside(t, 1)) {
+                return false;
+            }
+            // TERRAIN_NOT_CLEAR already includes floodplain/road/water/building.
+            // Do not also reject floodplain-*adjacent* land — Nile approaches are
+            // almost always next to floodplain, and that would make complexes
+            // unplaceable on real maps.
+            if (map_terrain_is(t, TERRAIN_NOT_CLEAR) || map_has_figure_at(t)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool causeway_end_reaches_water(tile2i origin, int dir, int length, int width) {
+    const vec2i step = k_causeway_dir[dir & 3];
+    const vec2i perp = k_causeway_perp[dir & 3];
+    for (int w = 0; w < width; ++w) {
+        tile2i t = origin.shifted(step.x * length + perp.x * w, step.y * length + perp.y * w);
+        if (!map_grid_is_inside(t, 1) || !map_terrain_is(t, TERRAIN_WATER)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+tile2i causeway_origin_on_face(tile2i pyramid_nw, vec2i size, int dir, int width) {
+    switch (dir & 3) {
+    case 0: // north face → -y
+        return pyramid_nw.shifted((size.x - width) / 2, -1);
+    case 1: // east face → +x
+        return pyramid_nw.shifted(size.x, (size.y - width) / 2);
+    case 2: // south face → +y
+        return pyramid_nw.shifted((size.x - width) / 2, size.y);
+    case 3: // west face → -x
+        return pyramid_nw.shifted(-1, (size.y - width) / 2);
+    }
+    return pyramid_nw;
+}
+
+pyramid_causeway_probe map_pyramid_complex_find_causeway(tile2i pyramid_nw, vec2i size) {
+    pyramid_causeway_probe best;
+    // Prefer east (OG grand), then other cardinals.
+    const int order[4] = {1, 2, 3, 0};
+    for (int oi = 0; oi < 4; ++oi) {
+        const int dir = order[oi];
+        const tile2i origin = causeway_origin_on_face(pyramid_nw, size, dir, k_causeway_width);
+        for (int length = 1; length <= k_causeway_max_length; ++length) {
+            if (!causeway_strip_clear(origin, dir, length, k_causeway_width)) {
+                break;
+            }
+            if (!causeway_end_reaches_water(origin, dir, length, k_causeway_width)) {
+                continue;
+            }
+            best.ok = true;
+            best.dir = dir;
+            best.length = length;
+            best.origin = origin;
+            return best;
+        }
+    }
+    return best;
+}
+
+void draw_causeway_ghost(build_planner &planer, painter &ctx, const pyramid_causeway_probe &probe, bool blocked) {
+    if (!probe.ok && probe.length <= 0) {
+        return;
+    }
+    const int length = probe.ok ? probe.length : std::max(1, probe.length);
+    const vec2i step = k_causeway_dir[probe.dir & 3];
+    const vec2i perp = k_causeway_perp[probe.dir & 3];
+    const color mask = blocked ? COLOR_MASK_RED_30 : COLOR_MASK_GREEN_30;
+    tile2i origin = probe.origin;
+    for (int i = 0; i < length; ++i) {
+        for (int w = 0; w < k_causeway_width; ++w) {
+            tile2i t = origin.shifted(step.x * i + perp.x * w, step.y * i + perp.y * w);
+            if (!map_grid_is_inside(t, 1)) {
+                continue;
+            }
+            planer.draw_flat_tile(ctx, g_camera.lookup_tile_to_pixel(t), mask);
+        }
+    }
+}
+
+pyramid_causeway_probe causeway_probe_from_runtime(tile2i pyramid_nw, vec2i size, uint8_t length, uint8_t dir) {
+    pyramid_causeway_probe probe;
+    if (length == 0) {
+        return probe;
+    }
+    probe.ok = true;
+    probe.dir = dir & 3;
+    probe.length = length;
+    probe.origin = causeway_origin_on_face(pyramid_nw, size, probe.dir, k_causeway_width);
+    return probe;
+}
+
+void claim_causeway_tiles(int building_id, const pyramid_causeway_probe &probe) {
+    if (!probe.ok || probe.length <= 0 || building_id <= 0) {
+        return;
+    }
+    const vec2i step = k_causeway_dir[probe.dir & 3];
+    const vec2i perp = k_causeway_perp[probe.dir & 3];
+    tile2i origin = probe.origin;
+    for (int i = 0; i < probe.length; ++i) {
+        for (int w = 0; w < k_causeway_width; ++w) {
+            tile2i t = origin.shifted(step.x * i + perp.x * w, step.y * i + perp.y * w);
+            if (!map_grid_is_inside(t, 1)) {
+                continue;
+            }
+            const int grid_offset = t.grid_offset();
+            map_terrain_remove(grid_offset, TERRAIN_CLEARABLE);
+            map_terrain_add(grid_offset, TERRAIN_BUILDING);
+            map_building_set(grid_offset, building_id);
+            map_property_clear_constructing(grid_offset);
+            map_property_set_multi_tile_size(grid_offset, 1);
+            map_property_set_multi_tile_xy(grid_offset, 0, 0, true);
+            map_monuments_set_progress(t, 0);
+        }
+    }
+}
+
+void clear_causeway_tiles(int building_id, const pyramid_causeway_probe &probe) {
+    if (probe.length <= 0) {
+        return;
+    }
+    const vec2i step = k_causeway_dir[probe.dir & 3];
+    const vec2i perp = k_causeway_perp[probe.dir & 3];
+    tile2i origin = probe.origin;
+    int xmin = origin.x(), xmax = origin.x();
+    int ymin = origin.y(), ymax = origin.y();
+    bool any = false;
+    for (int i = 0; i < probe.length; ++i) {
+        for (int w = 0; w < k_causeway_width; ++w) {
+            tile2i t = origin.shifted(step.x * i + perp.x * w, step.y * i + perp.y * w);
+            if (!map_grid_is_inside(t, 1)) {
+                continue;
+            }
+            const int grid_offset = t.grid_offset();
+            // Only wipe tiles still owned by this complex (avoid clearing
+            // unrelated buildings if runtime length/dir were stale).
+            if (building_id > 0 && map_building_at(grid_offset) != building_id) {
+                continue;
+            }
+            map_building_tile_clear_at(grid_offset, /*building_type*/ 0);
+            xmin = any ? std::min(xmin, t.x()) : t.x();
+            xmax = any ? std::max(xmax, t.x()) : t.x();
+            ymin = any ? std::min(ymin, t.y()) : t.y();
+            ymax = any ? std::max(ymax, t.y()) : t.y();
+            any = true;
+        }
+    }
+    if (any) {
+        map_tiles_update_region_empty_land(true, tile2i(xmin - 1, ymin - 1), tile2i(xmax + 1, ymax + 1));
+    }
+}
+
+} // namespace
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_stepped_pyramid)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_stepped_pyramid_corner)
@@ -483,6 +674,38 @@ void building_stepped_pyramid::preview::ghost_preview(build_planner &planer, pai
             command.mask = COLOR_MASK_GREEN;
         }
     }
+
+    if (building_type_is_pyramid_complex(planer.build_type)) {
+        pyramid_causeway_probe probe = map_pyramid_complex_find_causeway(end, size_b);
+        const bool causeway_ok = probe.ok;
+        if (!causeway_ok) {
+            probe.dir = 1;
+            probe.length = 8;
+            probe.origin = causeway_origin_on_face(end, size_b, probe.dir, k_causeway_width);
+        }
+        draw_causeway_ghost(planer, ctx, probe, !causeway_ok || planer.can_be_placed() != CAN_PLACE);
+    }
+}
+
+int building_stepped_pyramid::preview::can_place(build_planner &p, tile2i /*tile*/, tile2i end, int state) const {
+    if (state != CAN_PLACE) {
+        return state;
+    }
+    if (!building_type_is_pyramid_complex(p.build_type)) {
+        return state;
+    }
+    const auto &base_params = get_pyramid_params(p.build_type);
+    const pyramid_causeway_probe probe = map_pyramid_complex_find_causeway(end, base_params.init_tiles);
+    if (!probe.ok) {
+        p.set_warning("#causeway_needs_water");
+        return CAN_NOT_PLACE;
+    }
+    return state;
+}
+
+int building_stepped_pyramid::preview::finalize_check(build_planner &p, tile2i tile, tile2i end, int state) const {
+    state = building_planer_renderer::finalize_check(p, tile, end, state);
+    return can_place(p, tile, end, state);
 }
 
 void map_pyramid_tiles_add(int building_id, tile2i tile, int size, int image_id, int terrain) {
@@ -676,6 +899,22 @@ void building_stepped_pyramid::on_post_load() {
     building_monument::on_post_load();
 
     assign_stair();
+}
+
+void building_stepped_pyramid::on_destroy() {
+    // Causeway is claimed to the complex TYPE building at geometric NW
+    // (walls/corners also store length/dir copies but must not clear).
+    const auto &d = runtime_data();
+    if (d.causeway_length == 0 || !building_type_is_pyramid_complex(type())) {
+        return;
+    }
+    if (tile() != footprint_nw()) {
+        return;
+    }
+    const auto &pi_params = pyramid_params();
+    const pyramid_causeway_probe probe = causeway_probe_from_runtime(
+        footprint_nw(), pi_params.init_tiles, d.causeway_length, d.causeway_dir);
+    clear_causeway_tiles(id(), probe);
 }
 
 void building_stepped_pyramid::on_config_reload() {
@@ -1562,10 +1801,21 @@ void building_stepped_pyramid::bind_dynamic(io_buffer *iob, size_t version) {
     // funeral_done appended (mastaba reclaims a former skip byte instead).
     if (version >= 179) {
         iob->bind_u8(monumentd.funeral_done);
+    } else {
+        monumentd.funeral_done = 0;
     }
     // Preexisting sealed tomb flag.
     if (version >= 180) {
         iob->bind_u8(monumentd.preexisting);
+    } else {
+        monumentd.preexisting = 0;
+    }
+    if (version >= 182) {
+        iob->bind_u8(monumentd.causeway_length);
+        iob->bind_u8(monumentd.causeway_dir);
+    } else {
+        monumentd.causeway_length = 0;
+        monumentd.causeway_dir = 0;
     }
 }
 
@@ -1770,6 +2020,23 @@ void building_stepped_pyramid::on_place(int orientation, int variant) {
     for (auto &part : parts) {
         if (building_pyramid *pyr = part.b->dcast_pyramid()) {
             static_cast<building_stepped_pyramid *>(pyr)->assign_stair();
+        }
+    }
+
+    if (building_type_is_pyramid_complex(type())) {
+        // tile() is the NW place anchor for the 20×20 core.
+        const pyramid_causeway_probe probe = map_pyramid_complex_find_causeway(tile(), pyramid_size);
+        for (building *part = base.main(); part; part = part->has_next() ? part->next() : nullptr) {
+            if (auto *mon = part->dcast_monument()) {
+                auto &d = mon->runtime_data();
+                d.causeway_length = probe.ok ? (uint8_t)probe.length : 0;
+                d.causeway_dir = probe.ok ? (uint8_t)probe.dir : 0;
+            }
+        }
+        // Claim to this building (NW / complex TYPE), not list-head — orientation
+        // can put a corner first in the chain.
+        if (probe.ok) {
+            claim_causeway_tiles(id(), probe);
         }
     }
 }

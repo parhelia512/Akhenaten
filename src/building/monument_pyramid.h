@@ -64,6 +64,7 @@ public:
     virtual void on_post_load() override;
     virtual void on_config_reload() override;
     virtual void on_place_checks() override;
+    virtual void on_destroy() override;
     virtual void update_count() const override;
     virtual void update_month() override;
     virtual void on_phase_changed(int old, int current) override;
@@ -74,6 +75,8 @@ public:
     struct preview : building_planer_renderer {
         virtual void setup_preview_graphics(build_planner &planer) const override;
         virtual void ghost_preview(build_planner &planer, painter &ctx, tile2i tile, tile2i end, vec2i pixel) const override;
+        virtual int can_place(build_planner &p, tile2i tile, tile2i end, int state) const override;
+        virtual int finalize_check(build_planner &p, tile2i tile, tile2i end, int state) const override;
     };
 
     bool draw_ornaments_and_animations_flat_impl(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);

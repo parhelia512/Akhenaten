@@ -3,6 +3,10 @@
 
 function place_pyramid(type, candidates) {
     for (var i = 0; i < candidates.length; i++) {
+        if (type == BUILDING_STEPPED_PYRAMID_COMPLEX || type == BUILDING_PYRAMID_COMPLEX
+            || type == BUILDING_GRAND_PYRAMID_COMPLEX) {
+            test_prepare_pyramid_complex_causeway(candidates[i].x, candidates[i].y, 20, 4, 3)
+        }
         var bid = test_building_place(type, candidates[i].x, candidates[i].y)
         if (bid) return bid
     }
@@ -104,6 +108,14 @@ function run_test() {
             __test_signal_ready(); return
         }
         __log_marker('complex_saveload_ok:' + found)
+        var ft = __building_tile(found)
+        if (test_pyramid_complex_causeway_claimed(found, ft.x, ft.y, 20, 4)) {
+            __log_marker('complex_saveload_causeway_ok')
+        } else {
+            __log_info_native('[test:106] causeway tiles missing after saveload')
+            __log_marker('complex_saveload_causeway_fail')
+            __test_signal_ready(); return
+        }
     }
 
     __test_signal_ready()
@@ -117,11 +129,16 @@ function check_valid() {
             return false
         }
     }
-    if (__test_find_inlog('complex_saveload_fail') || __test_find_inlog('meidum_alone_fail') || __test_find_inlog('meidum_rating_fail'))
+    if (__test_find_inlog('complex_saveload_fail') || __test_find_inlog('meidum_alone_fail')
+        || __test_find_inlog('meidum_rating_fail') || __test_find_inlog('complex_saveload_causeway_fail'))
         return false
     // Soft-skip when write/load unavailable; otherwise require success.
     if (!__test_find_inlog('complex_saveload_skipped') && !__test_find_inlog('complex_saveload_ok')) {
         __log_info_native('[test:106] missing saveload marker')
+        return false
+    }
+    if (__test_find_inlog('complex_saveload_ok') && !__test_find_inlog('complex_saveload_causeway_ok')) {
+        __log_info_native('[test:106] missing causeway-after-load marker')
         return false
     }
     return true

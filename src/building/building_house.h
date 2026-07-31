@@ -88,6 +88,7 @@ public:
         building_id worst_desirability_building_id;
         uint16_t image_id;
         uint8_t fade_alpha;
+        uint8_t frog_infest_days; // Cleopatra plague of frogs lockout (save v181+)
         xstring evolve_text;
         xstring image_key;
     } BUILDING_RUNTIME_DATA_T;
@@ -151,7 +152,7 @@ ANK_CONFIG_PROPERTY(building_house::runtime_data_t,
     magistrate, num_gods, dentist, apothecary, health, mortuary, physician,
     booth_juggler, bandstand_juggler, senet_player, zookeeper, criminal_active,
     no_space_to_expand, fancy_bazaar_access, worst_desirability_building_id,
-    evolve_text)
+    frog_infest_days, evolve_text)
 
 // --- Individual housing tiers -------------------------------------------------
 // some info shared with vacant lot, so this is unique twice-config class

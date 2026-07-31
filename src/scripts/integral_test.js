@@ -150,6 +150,59 @@ function test_prepare_bridge_channel(cx, cy, water_width, water_length) {
     return { x: cx, y: cy }
 }
 
+// Water strip east of a pyramid complex so the variable-length causeway (+x) can reach it.
+// gap = clear land tiles between pyramid east face and water (causeway length).
+function test_prepare_pyramid_complex_causeway(pyramid_x, pyramid_y, pyramid_size, gap, water_depth) {
+    if (typeof pyramid_size !== 'number' || pyramid_size <= 0) {
+        pyramid_size = 20
+    }
+    if (typeof gap !== 'number' || gap < 1) {
+        gap = 4
+    }
+    if (typeof water_depth !== 'number' || water_depth < 2) {
+        water_depth = 3
+    }
+    var causeway_y = pyramid_y + (((pyramid_size - 2) / 2) | 0)
+    var water_x = pyramid_x + pyramid_size + gap
+    for (var dy = -1; dy < 3; dy++) {
+        for (var dx = 0; dx < water_depth; dx++) {
+            terrain.add({ x: water_x + dx, y: causeway_y + dy }, TERRAIN_WATER)
+        }
+    }
+    __map_water_rebuild_shores()
+}
+
+// Verify east causeway tiles are claimed to the complex main building id.
+// Probe prefers east and returns the first (shortest) hit; with
+// test_prepare_pyramid_complex_causeway(gap) that length is exactly `gap`.
+function test_pyramid_complex_causeway_claimed(bid, pyramid_x, pyramid_y, pyramid_size, gap) {
+    if (typeof pyramid_size !== 'number' || pyramid_size <= 0) {
+        pyramid_size = 20
+    }
+    if (typeof gap !== 'number' || gap < 1) {
+        gap = 4
+    }
+    var causeway_y = pyramid_y + (((pyramid_size - 2) / 2) | 0)
+    var ox = pyramid_x + pyramid_size
+    for (var i = 0; i < gap; i++) {
+        for (var w = 0; w < 2; w++) {
+            var at = city.get_building_at(ox + i, causeway_y + w)
+            if (!at || at.id != bid) {
+                return false
+            }
+            if (!terrain.is({ x: ox + i, y: causeway_y + w }, TERRAIN_BUILDING)) {
+                return false
+            }
+        }
+    }
+    // Tile at water edge must not be claimed (water starts at ox+gap).
+    var past = city.get_building_at(ox + gap, causeway_y)
+    if (past && past.id == bid) {
+        return false
+    }
+    return true
+}
+
 // Paint a square terrain patch centered on (cx, cy). Used for farm meadow/floodplain.
 function test_prepare_terrain_patch(cx, cy, size, terrain_mask) {
     var x0 = cx - ((size / 2) | 0)

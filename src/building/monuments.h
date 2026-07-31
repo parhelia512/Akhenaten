@@ -46,6 +46,8 @@ public:
         uint8_t stair_index;
         uint8_t funeral_done;  // procession already held for this tomb (main)
         uint8_t preexisting;   // sealed carry-over tomb (no steal)
+        uint8_t causeway_length; // complex only: land tiles along strip (save v182+)
+        uint8_t causeway_dir;    // 0=N 1=E 2=S 3=W
     } BUILDING_RUNTIME_DATA_T;
 
     // Tall monument ornaments (tiers/cones) - skip in flat buildings view.
