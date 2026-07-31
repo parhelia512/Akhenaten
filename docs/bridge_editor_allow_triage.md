@@ -10,8 +10,10 @@ Dump helpers: `__test_mission_bridge_allow_dump(id)`,
 
 Merge: **UB-A** (JS `buildings[]` / `use_building` = menu; pak = audit).
 Canary: `tests/114_bridge_editor_allow_dump.js` (skips under `--no-resource`).
+Menu smoke: `tests/115_bridge_menu_smoke.js` (Perwadjyt REMAP + Bridges/Nekhen day-0).
 
 Dump date: **2026-07-31** (`mission1.pak` + `Cleop/Maps/{Alexandria,Bridges}.map`).
+Wiki Dev Ref: Low Bridge listed where JS unlocks it (2026-07-31 BR2).
 
 | ID | Src | Bridge | Ferry | JS triage |
 |----|-----|--------|-------|-----------|
@@ -50,7 +52,6 @@ Dump date: **2026-07-31** (`mission1.pak` + `Cleop/Maps/{Alexandria,Bridges}.map
 
 - Cleo **32–37 / 43–44** — no mission JS yet
 - Custom **130–135** — minimal sandbox `buildings[]` (SKIP)
-- Wiki Developer Reference (BR2 remainder)
 - Re-export `data/maps` (zero reserved until batch re-export)
 - Ferry REMAP cleanup (Abu / Meidum / On / Valley keep JS Ferry despite pak OFF)
 - Hermetic CI: canary always skips without Cleop data

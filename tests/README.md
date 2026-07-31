@@ -136,6 +136,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `112_true_pyramid_complex_place.js` | C3c true pyramid complex (20×20 on-land): same large polish schedule, parts/phases |
 | `113_frog_plague.js` | CF1 Frog: register/anim; Ptah/EVENT/cheat swarm; happiness; house infest + lockout; timer poof |
 | `114_bridge_editor_allow_dump.js` | UB1/BR1 canary: Bridges/Alexandria Bridge ON; Nubt/Perwadjyt OFF; Nekhen ON (skip `--no-resource`). Table: [`docs/bridge_editor_allow_triage.md`](../docs/bridge_editor_allow_triage.md) |
+| `115_bridge_menu_smoke.js` | BR2: Perwadjyt Low Bridge locked→`use_building` unlock; Bridges.map day-0 ON (else Nekhen hermetic fallback) |
 | `110_sun_temple_place.js` | Sun Temple (C8): place with 220 sandstone, reject without stock / second unfinished |
 | `77_brick_wall_placement.js` | Brick wall L-drag; material; clear+undo; mud↔brick overwrite no-op |
 | `76_invasion_auto_resolve.js` | Enhanced auto-resolve invasions (AC*): freeze/pending, lose/win KR, queue timer, flag OFF, natives out, Pharaoh, queue full, save/load, chain spawn |
