@@ -11,6 +11,7 @@ localization_de = [
   {key:"#TR_INVALID_LANGUAGE_MESSAGE", text:"Das ausgewählte Verzeichnis enthält kein gültiges Sprachpaket. Bitte prüft das Protokoll auf Fehler."}
   {key:"#TR_BUTTON_OK", text:"OK"}
   {key:"#TR_CONFIG_IRONWILL", text:"Ironwill-Modus — Speichern nur beim Verlassen zum Hauptmenü (Save, Ctrl+S, Autosave, Quicksave/load gesperrt)"}
+  {key:"#ironwill_briefing_label", text:"Ironwill"}
   {key:"#ironwill_save_blocked", text:"Ironwill: Speichern nur beim Verlassen zum Menü"}
   {key:"#ironwill_load_blocked", text:"Ironwill: Laden nur vom Hauptmenü (Continue)"}
   {key:"#ironwill_save_failed", text:"Ironwill-Checkpoint fehlgeschlagen — weiterhin in der Stadt"}

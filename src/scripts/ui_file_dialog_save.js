@@ -96,6 +96,8 @@ function file_dialog_save_handle_commit(ev) {
     if (pending === FILE_TYPE_SAVED_GAME) {
         if (!game_allows_player_save()) {
             game_toast_ironwill_save_blocked()
+            // Mid-toggle Ironwill ON after Alt+F4→Save must not leave pending exit armed.
+            app_clear_pending_exit_after_save()
             ui.window_city_show()
             return
         }
@@ -116,10 +118,17 @@ function file_dialog_save_on_cancel() {
     window_go_back()
 }
 
+// Esc/RMB: same cleanup as Cancel (allow_rmb_goback would skip this).
+[es=(file_dialog_save, go_back)]
+function file_dialog_save_es_go_back(window) {
+    app_clear_pending_exit_after_save()
+    window_go_back()
+}
+
 [es=window]
 file_dialog_save {
     pos: [(sw(0) - px(24)) / 2, (sh(0) - px(21)) / 2]
-    allow_rmb_goback: true
+    allow_rmb_goback: false
     draw_underlying: true
     file_type: 0
     pending_type: FILE_TYPE_SAVED_GAME

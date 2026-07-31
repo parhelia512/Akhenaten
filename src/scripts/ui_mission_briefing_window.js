@@ -5,6 +5,17 @@ function get_difficulty_label() {
     return "${loc.difficulty_" + difficulty_levels[game.difficulty] + "}"
 }
 
+function mission_briefing_ironwill_checked() {
+    return game_features.gameopt_ironwill === true
+}
+
+function mission_briefing_toggle_ironwill() {
+    if (game.mission_briefing_is_review || game_mission_options_locked) {
+        return
+    }
+    game_features.gameopt_ironwill = !game_features.gameopt_ironwill
+}
+
 [es=window]
 mission_briefing_window {
     pos [(sw(0) - px(38))/2, (sh(0) - px(27))/2],
@@ -40,8 +51,12 @@ mission_briefing_window {
         difficulty_label : label({pos[105, 433], size[80, 14], font : FONT_NORMAL_BLACK_ON_LIGHT, textfn: get_difficulty_label })
         back             : image_button({pos[26, 428], size[31, 20], pack:PACK_GENERAL, id:90, offset:8, enabled: false})
 
-        dec_difficulty   : image_button({pos[65, 428], size[17, 17], pack:PACK_GENERAL, id:212, offset:3, onclick: __game_decrease_difficulty })
-        inc_difficulty   : image_button({pos[65 + 18, 428], size[17, 17], pack:PACK_GENERAL, id:212, offset:0, onclick: __game_increase_difficulty })
+        dec_difficulty   : image_button({pos[65, 428], size[17, 17], pack:PACK_GENERAL, id:212, offset:3, onclick: game_decrease_difficulty_if_allowed })
+        inc_difficulty   : image_button({pos[65 + 18, 428], size[17, 17], pack:PACK_GENERAL, id:212, offset:0, onclick: game_increase_difficulty_if_allowed })
+
+        // Ironwill: set at mission start only (locked while reviewing / mid-run).
+        ironwill_check   : checkbox({pos[200, 428], checkedfn: mission_briefing_ironwill_checked, onclick: mission_briefing_toggle_ironwill })
+        ironwill_label   : label({pos[226, 433], size[100, 14], font : FONT_NORMAL_BLACK_ON_LIGHT, text: "#ironwill_briefing_label" })
 
         tocity_label     : label({text{group:62, id:7}, margin{right:-140, bottom:0}, font : FONT_NORMAL_BLACK_ON_LIGHT })
         start_mission    : next_button({ margin{right:-40, bottom:-3}, onclick_event: "start_mission" })
@@ -57,6 +72,8 @@ function mission_briefing_on_show_after_load(ev) {
 
 [es=(mission_briefing_window, start_mission)]
 function mission_briefing_window_on_start_mission(window) {
+    // Lock difficulty + Ironwill for this playthrough (same as OG briefing → city).
+    game_mission_options_locked = true
     __game_sound.speech_stop()
     __game_sound.music_update(1)
     ui.window_city_show()
@@ -68,8 +85,15 @@ function mission_briefing_window_on_init(window) {
     var is_review = game.mission_briefing_is_review
     var text_id = 200 + scenario_id
 
-    window.dec_difficulty.enabled = !is_review
-    window.inc_difficulty.enabled = !is_review
+    if (!is_review) {
+        game_mission_options_locked = false
+    }
+
+    var can_edit_options = !is_review && !game_mission_options_locked
+    window.dec_difficulty.enabled = can_edit_options
+    window.inc_difficulty.enabled = can_edit_options
+    window.ironwill_check.enabled = can_edit_options
+    window.ironwill_check.readonly = !can_edit_options
 
     var goal_tooltip_text = city.goal_tooltip()
     window.goal_immediate.enabled = !!goal_tooltip_text

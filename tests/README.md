@@ -106,7 +106,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `75_bast_lion_curse.js` | Bast lion raid (CF5): feature ON spawn at temple; OFF / smash / no-temple fallback → no lions; raid prey skips ostrich; 1-day timer poof |
 | `89_seth_asp_curse.js` | Seth asp raid (CF7): feature ON spawn at temple; OFF / no-temple fallback → no asps; raid prey skips ostrich; 1-day timer poof |
 | `90_plagued_citizen.js` | Plague carriers: spawn from infected house, roadblock ignore, herbalist/Isis cure |
-| `92_ironwill.js` | Ironwill: mid-game save/load/autosave blocked; exit checkpoint exempt |
+| `92_ironwill.js` | Ironwill: mid-game save/load/autosave blocked; C++ write belt; exit checkpoint exempt |
 | `97_ptah_scorpion_curse.js` | Ptah scorpion raid (CF6): feature ON spawn at temple when no industry; OFF / no-temple fallback → no scorpions; raid prey skips ostrich; 1-day timer poof |
 | `94_locust_swarm.js` | CF2 locust: Osiris/EVENT/pak-chain/cheat; sentiment; saveload; timer; variant/float |
 | `85_mummy_attack.js` | BF3 mummy: register + `spawn_wave` → 1× msg 496; soldier target + kill |

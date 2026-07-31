@@ -654,7 +654,8 @@ bool GamestateIO::write_mission(const int scenario_id) {
 }
 
 bool GamestateIO::write_savegame(pcstr filename_short) {
-    if (game_features::gameopt_ironwill.to_bool() && game.session.active
+    // Gate by flag + whitelist only (session.active is not cleared on main menu — E4/R6).
+    if (game_features::gameopt_ironwill.to_bool()
         && !autosave_module_t::is_ironwill_exempt_save(filename_short)) {
         logs::info("Save game: blocked by Ironwill (%s)", filename_short ? filename_short : "");
         return false;

@@ -119,6 +119,8 @@ function top_menu_new_game() {
 		function() {
 			__ui_city_planner_reset()
 			__game_undo_disable()
+
+			game_mission_options_locked = false
 			window_show_by_id("window_dinasty_menu")
 		},
 		function() {
@@ -178,23 +180,7 @@ function top_menu_delete_map() {
 
 function top_menu_exit_game() {
 	widget_top_menu_clear_state()
-	ui.show_yesno("#popup_dialog_quit",
-		function() {
-			widget_top_menu_clear_state()
-			if (game_features.gameopt_ironwill) {
-				if (!game_write_ironwill_checkpoint()) {
-					log_warning("Ironwill checkpoint failed on exit to menu")
-					city.warnings.show("#ironwill_save_failed")
-					ui.window_city_show()
-					return
-				}
-			}
-			emit event_show_main_menu{ play_intro: true }
-		},
-		function() {
-			ui.window_city_show()
-		}
-	)
+	game_confirm_exit_to_main_menu()
 }
 
 function top_menu_features(p1, p2) {

@@ -2,13 +2,14 @@
 
 #include "city/constants.h"
 #include "core/app.h"
+#include "editor/editor.h"
 #include "overlays/city_overlay.h"
 #include "graphics/screenshot.h"
 #include "graphics/video.h"
 #include "graphics/window.h"
+#include "game/game_events.h"
 #include "input/scroll.h"
 #include "widget/widget_top_menu_game.h"
-#include "window/window_city.h"
 #include "window/hotkey_editor.h"
 #include "window/popup_dialog.h"
 #include "game/game.h"
@@ -404,12 +405,16 @@ void hotkey_key_released(int key, int modifiers) {
 
 void hotkey_handle_escape(void) {
     video_stop();
-    popup_dialog::show_yesno("#popup_dialog_quit", [] (bool accepted) {
-        if (accepted) {
-            widget_top_menu_clear_state();
-            events::emit(event_show_main_menu{ true });
-        } else {
-            window_city_show();
-        }
-    });
+    // Editor: no Ironwill checkpoint (city save would clobber the slot).
+    if (editor_is_active()) {
+        popup_dialog::show_yesno("#popup_dialog_quit", [](bool accepted) {
+            if (accepted) {
+                widget_top_menu_clear_state();
+                events::emit(event_show_main_menu{ true });
+            }
+        });
+        return;
+    }
+    // City: same Exit-to-menu flow as File→Exit (Ironwill checkpoint in JS).
+    events::emit(event_exit_to_menu_requested{ 0 });
 }

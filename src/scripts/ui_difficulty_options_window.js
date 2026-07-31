@@ -16,6 +16,10 @@ function difficulty_options_window_es_draw(window) {
 [es=(difficulty_options_window, init)]
 function difficulty_options_window_es_draw_background(window) {
     window.btn_gods.text = game_features.gameopt_gods_enabled ? "ON" : "OFF"
+    // After mission Start, difficulty matches briefing lock (review / mid-run).
+    var can_edit = !game_mission_options_locked
+    window.arrow_diff_down.readonly = !can_edit
+    window.arrow_diff_up.readonly = !can_edit
 }
 
 [es=modal_window]
@@ -28,8 +32,8 @@ difficulty_options_window {
         background       : outer_panel({size[24, 12]})
         title            : header({pos[0, 16], size[px(24), 20], text:"#difficulty_settings", align:"center"})
 
-        arrow_diff_down  : arrowdown({pos[240, 54], tiny:false, allow_repeat: true, onclick: __game_decrease_difficulty })
-        arrow_diff_up    : arrowup({pos[264, 54], tiny:false, allow_repeat: true, onclick: __game_increase_difficulty })
+        arrow_diff_down  : arrowdown({pos[240, 54], tiny:false, allow_repeat: true, onclick: game_decrease_difficulty_if_allowed })
+        arrow_diff_up    : arrowup({pos[264, 54], tiny:false, allow_repeat: true, onclick: game_increase_difficulty_if_allowed })
         difficulty_value : text({pos[22, 62], size[244, 20], font: FONT_NORMAL_BLACK_ON_LIGHT, align:"center"})
 
         btn_gods         : button({pos[238, 102], size[50, 22], font: FONT_NORMAL_BLACK_ON_DARK, onclick_event: "toggle_gods"})

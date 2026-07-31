@@ -1,11 +1,11 @@
-// Ironwill mode — player-save gate + checkpoint filename.
-// Related: REMAKE_IRONWILL_PLAN.md
+// Ironwill mode — player-save gate + checkpoint filename (IW0–IW5).
 //
 // Markers:
 //   [test-marker] ironwill_allows_off_ok
 //   [test-marker] ironwill_allows_on_ok
 //   [test-marker] ironwill_checkpoint_name_ok
 //   [test-marker] ironwill_exempt_ok
+//   [test-marker] ironwill_write_blocked_ok
 
 function run_test() {
     __log_info_native('[test:92] ironwill gate')
@@ -51,6 +51,16 @@ function run_test() {
     }
     __log_marker('ironwill_exempt_ok')
 
+    // C++ belt: non-exempt write_savegame must fail while Ironwill ON (no disk I/O).
+    if (__game_write_savegame('quicksave.svx') || __game_write_savegame('mysave.svx')
+        || __game_write_savegame('autosave_month.svx')) {
+        __log_info_native('[test:92] write_savegame should be blocked when ON')
+        game_features.gameopt_ironwill = prev
+        __test_signal_ready()
+        return
+    }
+    __log_marker('ironwill_write_blocked_ok')
+
     game_features.gameopt_ironwill = prev
     __test_signal_ready()
 }
@@ -60,7 +70,8 @@ function check_valid() {
         'ironwill_allows_off_ok',
         'ironwill_allows_on_ok',
         'ironwill_checkpoint_name_ok',
-        'ironwill_exempt_ok'
+        'ironwill_exempt_ok',
+        'ironwill_write_blocked_ok'
     ]
     for (var i = 0; i < markers.length; i++) {
         var marker = '[test-marker] ' + markers[i]

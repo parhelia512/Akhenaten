@@ -67,6 +67,8 @@ function main_menu_on_show(ev) {
     if (ev.play_intro) {
         __game_sound.play_intro()
     }
+
+    game_mission_options_locked = false
     window_show_by_id("window_main_menu")
 }
 

@@ -130,8 +130,24 @@ game_features.type = __game_feature_type
 game_features.type_name = __game_feature_type_name
 game_features.default = __game_feature_default
 
-// Ironwill (IW*): player saves only via ironwill.svx checkpoint (Exit / Alt+F4).
+// Ironwill (IW*): player saves only via ironwill.svx checkpoint (Exit / Escape / Alt+F4).
+// Choice is made on mission briefing (like difficulty); locked after Start until next briefing.
 var IRONWILL_CHECKPOINT_FILENAME = "ironwill.svx"
+var game_mission_options_locked = false
+
+function game_decrease_difficulty_if_allowed() {
+    if (game_mission_options_locked) {
+        return
+    }
+    __game_decrease_difficulty()
+}
+
+function game_increase_difficulty_if_allowed() {
+    if (game_mission_options_locked) {
+        return
+    }
+    __game_increase_difficulty()
+}
 
 function game_allows_player_save() {
     return !game_features.gameopt_ironwill
@@ -145,12 +161,65 @@ function game_write_ironwill_checkpoint() {
     return game.write_savegame(IRONWILL_CHECKPOINT_FILENAME)
 }
 
+/** @returns true if exit may proceed (Ironwill OFF, or checkpoint OK). */
+function game_try_ironwill_checkpoint_before_menu() {
+    if (!game_features.gameopt_ironwill) {
+        return true
+    }
+    if (!game_write_ironwill_checkpoint()) {
+        log_warning("Ironwill checkpoint failed on exit to menu")
+        city.warnings.show("#ironwill_save_failed")
+        return false
+    }
+    return true
+}
+
+/** File→Exit Game and Escape (city): confirm, optional Ironwill checkpoint, main menu. */
+function game_confirm_exit_to_main_menu() {
+    ui.show_yesno("#popup_dialog_quit",
+        function() {
+            widget_top_menu_clear_state()
+            if (!game_try_ironwill_checkpoint_before_menu()) {
+                ui.window_city_show()
+                return
+            }
+            emit event_show_main_menu{ play_intro: true }
+        },
+        function() {
+            ui.window_city_show()
+        }
+    )
+}
+
 function game_toast_ironwill_save_blocked() {
     city.warnings.show("#ironwill_save_blocked")
 }
 
 function game_toast_ironwill_load_blocked() {
     city.warnings.show("#ironwill_load_blocked")
+}
+
+[es=event_level_post_load]
+function game_on_level_post_load_mission_options_lock(ev) {
+    // Continue / mid-game load: lock immediately.
+    // Campaign mission: unlock for briefing (Start locks again).
+    // Custom map: do NOT lock here — map is often preview-loaded before Start.
+    if (ev.session_kind === e_session_save) {
+        game_mission_options_locked = true
+    } else if (ev.session_kind === e_session_mission) {
+        game_mission_options_locked = false
+    }
+}
+
+[es=event_mission_start]
+function game_on_mission_start_options_lock(ev) {
+    // Sim/city about to run. Campaign briefing init unlocks again until Start.
+    game_mission_options_locked = true
+}
+
+[es=event_exit_to_menu_requested]
+function game_on_exit_to_menu_requested(ev) {
+    game_confirm_exit_to_main_menu()
 }
 
 function calc_bound_scroll_speed(v, lo, hi) {
@@ -251,11 +320,7 @@ function app_on_close_requested(ev) {
 
     if (game.session_active) {
         if (game_features.gameopt_ironwill) {
-            // Ironwill: no named save dialog. Quit without save, or checkpoint then quit.
-            ui.show_yesno("#popup_dialog_quit_without_saving",
-                function() {
-                    emit event_request_exit{ value: true }
-                },
+            ui.show_yesno("#popup_dialog_quit",
                 function() {
                     if (!game_write_ironwill_checkpoint()) {
                         log_warning("Ironwill checkpoint failed on app quit")
@@ -263,6 +328,9 @@ function app_on_close_requested(ev) {
                         return
                     }
                     emit event_request_exit{ value: true }
+                },
+                function() {
+                    // stay in city
                 }
             )
             return

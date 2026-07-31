@@ -32,6 +32,10 @@ function window_features_append_gameplay_pages(pages) {
         if (typeof val !== "boolean")
             continue
 
+        // Ironwill: chosen at mission briefing; locked for the playthrough (IW5).
+        if (name === "gameopt_ironwill" && game_mission_options_locked)
+            continue
+
         var text = game_features.text(name)
         if (!text)
             continue

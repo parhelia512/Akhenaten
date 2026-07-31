@@ -10,6 +10,7 @@
 #include "core/variant.h"
 #include "core/vec2i.h"
 #include "core/xvalue.h"
+#include "game/game_config.h"
 #include "js/js.h"
 #include "js/js_game.h"
 #include "mujs/mujs.h"
@@ -419,8 +420,7 @@ int run_js_tests() {
         g_app.quit = false;
         SDL_FlushEvent(SDL_USEREVENT);
 
-        // Drop stale slots left by startup / previous tests so we only
-        // fail on leaks introduced by *this* test.
+        game_features::gameopt_ironwill.set(false);
         const int stale = js_vm_force_idle_stack();
         if (stale > 0) {
             logs::info("[test:%s] cleared %d stale MuJS stack slot(s) before test", name.c_str(), stale);

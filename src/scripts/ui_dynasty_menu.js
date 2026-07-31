@@ -51,6 +51,8 @@ window_dinasty_menu {
 function window_dinasty_menu_on_init(window) {
     __game_load_player_data(game.dynasty_name)
 
+    game_mission_options_locked = false
+
     window.title.text = __loc(293, 5).replace("[player_name]", game.dynasty_name)
     var last = normalize_savegame_path_for_load(game.last_autosave)
     var to_begin = !last || last === "" || !__game_file_exists(last)
