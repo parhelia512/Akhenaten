@@ -1158,6 +1158,10 @@ void build_planner::update_preview(tile2i cursor_tile) {
         return;
     }
 
+    if (!cursor_tile.valid()) {
+        return;
+    }
+
     end = cursor_tile;
     update_coord_caches();
 
