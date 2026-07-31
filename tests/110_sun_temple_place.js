@@ -88,6 +88,22 @@ function run_test() {
     }
     __log_marker('sun_temple_sandstone_consumed:' + staffed_after)
 
+    // I5: body + path + hall = 3 linked parts.
+    var parts = [bid]
+    var cur = b
+    while (cur && cur.next_part_building_id > 0 && parts.length < 8) {
+        parts.push(cur.next_part_building_id)
+        cur = city.get_building(cur.next_part_building_id)
+    }
+    if (parts.length == 3) {
+        __log_marker('sun_temple_parts_ok:3')
+    } else {
+        __log_info_native('[test:110] expected 3 parts (body/path/hall), got ' + parts.length)
+        __log_marker('sun_temple_parts_fail:' + parts.length)
+        __test_signal_ready()
+        return
+    }
+
     // Top up yard so reject is from "one unfinished", not stock.
     test_staffed_yard_with_resource(RESOURCE_SANDSTONE, sandstone_need, 60, 60)
     var second = test_building_place(BUILDING_SUN_TEMPLE, 55, 55)
@@ -111,6 +127,7 @@ function check_valid() {
         'sun_temple_sandstone_ready',
         'sun_temple_placed_ok',
         'sun_temple_sandstone_consumed',
+        'sun_temple_parts_ok:3',
         'sun_temple_reject_second_ok'
     ]
     for (var i = 0; i < required.length; i++) {

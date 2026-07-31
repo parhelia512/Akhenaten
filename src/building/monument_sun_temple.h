@@ -5,13 +5,18 @@
 #include "core/svector.h"
 #include "core/vec2i.h"
 
-// Sun Temple: single building id, sandstone place + timber scaffold + carve +
-// sandstone vestibule. Phase 0–1 = work-camp leveling (mastaba-style); 2–4 = progress().
-// Footprint = 10×10 body; the path/hall extension is not implemented yet.
+// Sun Temple: body 10×10 + path 8×2 + hall 3×3 (linked parts).
+// Phase 0–1 = work-camp leveling on body only; 2–4 = progress().
 class building_sun_temple : public building_monument {
 public:
     BUILDING_METAINFO(BUILDING_SUN_TEMPLE, building_sun_temple, building_monument)
     virtual building_sun_temple *dcast_sun_temple() override { return this; }
+
+    enum part_variant : uint8_t {
+        PART_BODY = 0,
+        PART_PATH = 1,
+        PART_HALL = 2,
+    };
 
     struct base_params {
         svector<monument_phase_resource, 4> placement_resources;
@@ -19,6 +24,11 @@ public:
         svector<uint16_t, 8> timber_loads;
         svector<uint16_t, 8> sandstone_loads;
         uint16_t build_sandstone = 160;
+        vec2i init_tiles = {10, 15};
+        vec2i path_size = {8, 2};
+        vec2i hall_size = {3, 3};
+        svector<vec2i, 4> part_path_offset;
+        svector<vec2i, 4> part_hall_offset;
     };
 
     struct static_params : public base_params, public building_static_params {
@@ -27,6 +37,7 @@ public:
     } BUILDING_STATIC_DATA_T;
 
     struct preview : building_planer_renderer {
+        virtual void setup_preview_graphics(build_planner &planer) const override;
         virtual int can_place(build_planner &p, tile2i tile, tile2i end, int state) const override;
         virtual int finalize_check(build_planner &p, tile2i tile, tile2i end, int state) const override;
         virtual void ghost_preview(build_planner &planer, painter &ctx, tile2i start, tile2i end, vec2i pixel) const override;
@@ -51,10 +62,12 @@ public:
     virtual void bind_dynamic(io_buffer *iob, size_t version) override;
 
     int art_stage() const;
-    xstring anim_key_for(int stage) const;
+    xstring anim_key_for(int stage, int orient_idx) const;
     int placement_amount(e_resource r) const;
+    void refresh_part_tiles();
     static int yards_available(e_resource r);
     static bool has_unfinished_sun_temple();
 };
 ANK_CONFIG_STRUCT(building_sun_temple::static_params,
-    placement_resources, art_stages, timber_loads, sandstone_loads, build_sandstone)
+    placement_resources, art_stages, timber_loads, sandstone_loads, build_sandstone,
+    init_tiles, path_size, hall_size, part_path_offset, part_hall_offset)

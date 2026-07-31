@@ -1,7 +1,9 @@
 #include "monument_sun_temple.h"
 
 #include "building/monuments.h"
+#include "building/rotation.h"
 #include "city/city.h"
+#include "city/city_buildings.h"
 #include "city/city_figures.h"
 #include "city/city_message.h"
 #include "city/city_resource.h"
@@ -10,9 +12,18 @@
 #include "figure/figure.h"
 #include "game/game_events.h"
 #include "game/resource.h"
+#include "game/undo.h"
+#include "graphics/color.h"
 #include "graphics/image.h"
+#include "graphics/view/lookup.h"
+#include "graphics/view/view.h"
+#include "grid/building.h"
 #include "grid/building_tiles.h"
+#include "grid/figure.h"
 #include "grid/grid.h"
+#include "grid/image.h"
+#include "grid/property.h"
+#include "grid/terrain.h"
 #include "io/io_buffer.h"
 #include "js/js_game.h"
 
@@ -22,16 +33,101 @@ REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_sun_temple);
 
 static monument g_monument_sun_temple{BUILDING_SUN_TEMPLE};
 
+namespace {
+
+const building_sun_temple::base_params &st_params() {
+    return (const building_sun_temple::base_params &)building_sun_temple::current_params();
+}
+
+vec2i part_offset(const svector<vec2i, 4> &offsets, int rotation, vec2i fallback) {
+    if (offsets.size() >= 4) {
+        return offsets[rotation % 4];
+    }
+    return fallback;
+}
+
+vec2i oriented_wh(vec2i size, int rotation) {
+    if (size.x <= 0 || size.y <= 0) {
+        return size;
+    }
+    rotation %= 4;
+    if (rotation == 1 || rotation == 3) {
+        return {size.y, size.x};
+    }
+    return size;
+}
+
+void sun_temple_add_rect_tiles(int building_id, tile2i tile, int w, int h, int image_id) {
+    if (w < 1 || h < 1) {
+        return;
+    }
+    for (int dy = 0; dy < h; dy++) {
+        for (int dx = 0; dx < w; dx++) {
+            tile2i t = tile.shifted(dx, dy);
+            if (!map_grid_is_inside(t, 1)) {
+                continue;
+            }
+            const int grid_offset = t.grid_offset();
+            map_terrain_remove(grid_offset, TERRAIN_CLEARABLE);
+            map_terrain_add(grid_offset, TERRAIN_BUILDING);
+            map_building_set(grid_offset, building_id);
+            map_property_clear_constructing(grid_offset);
+            map_property_set_multi_tile_size(grid_offset, 1);
+            map_image_set(grid_offset, (dx == 0 && dy == 0) ? image_id : 0);
+            map_property_set_multi_tile_xy(grid_offset, dx, dy, dx == 0 && dy == 0);
+        }
+    }
+    map_property_mark_draw_tile(tile.grid_offset());
+}
+
+bool tile_not_clear(tile2i t) {
+    return map_terrain_is(t, TERRAIN_NOT_CLEAR)
+        || (map_terrain_count_directly_adjacent_with_type(t, TERRAIN_FLOODPLAIN) > 0)
+        || (map_terrain_count_diagonally_adjacent_with_type(t, TERRAIN_FLOODPLAIN) > 0)
+        || map_has_figure_at(t);
+}
+
+// blocked_tile_vec holds only 36 entries — never use is_blocked_for_building for size>6.
+bool area_blocked(tile2i origin, int w, int h) {
+    if (w < 1 || h < 1) {
+        return true;
+    }
+    for (int dy = 0; dy < h; dy++) {
+        for (int dx = 0; dx < w; dx++) {
+            tile2i t = origin.shifted(dx, dy);
+            if (!map_grid_is_inside(t, 1) || tile_not_clear(t)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void draw_area_mask(build_planner &/*planer*/, painter &ctx, tile2i origin, int w, int h, bool force_red) {
+    for (int dy = 0; dy < h; dy++) {
+        for (int dx = 0; dx < w; dx++) {
+            tile2i t = origin.shifted(dx, dy);
+            vec2i pixel = g_camera.lookup_tile_to_pixel(t);
+            const bool bad = force_red || !map_grid_is_inside(t, 1) || tile_not_clear(t);
+            build_planner::draw_flat_tile(ctx, pixel, bad ? COLOR_MASK_RED_30 : COLOR_MASK_GREEN_30);
+        }
+    }
+}
+
+int orient_idx_from_building(const building &b) {
+    return (b.orientation / 2) % 2;
+}
+
+} // namespace
+
 void building_sun_temple::static_params::rebuild_construction() {
     monument &m = g_monument_sun_temple;
     m.btype = BUILDING_SUN_TEMPLE;
     m.phases.clear();
 
-    // Phase 0–1: site clearing (no materials — update_day leveling, not progress()).
     m.phases.push_back({0, monument_phase_resource{ARCHITECTS, 1}});
     m.phases.push_back({1, monument_phase_resource{ARCHITECTS, 1}});
 
-    // Phase 2: carpenter scaffolding.
     const uint16_t timber = !timber_loads.empty() ? timber_loads[0] : 100;
     if (timber > 0) {
         m.phases.push_back({2, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, timber}});
@@ -39,17 +135,14 @@ void building_sun_temple::static_params::rebuild_construction() {
         m.phases.push_back({2, monument_phase_resource{ARCHITECTS, 1}});
     }
 
-    // Phase 3: stonemasons carve obelisk (no new stone).
     m.phases.push_back({3, monument_phase_resource{ARCHITECTS, 1}});
 
-    // Phase 4: vestibule / foretemple — +160 sandstone.
     uint16_t sand = build_sandstone > 0 ? build_sandstone : 160;
     if (!sandstone_loads.empty() && sandstone_loads[0] > 0) {
         sand = sandstone_loads[0];
     }
     m.phases.push_back({4, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_SANDSTONE, sand}});
 
-    // Terminal.
     m.phases.push_back({5, monument_phase_resource{RESOURCE_NONE, 0}});
 }
 
@@ -77,7 +170,7 @@ int building_sun_temple::yards_available(e_resource r) {
 
 bool building_sun_temple::has_unfinished_sun_temple() {
     for (building *b = building_begin(); b != building_end(); ++b) {
-        if (!b || !b->is_valid() || b->type != BUILDING_SUN_TEMPLE) {
+        if (!b || !b->is_valid() || b->type != BUILDING_SUN_TEMPLE || !b->is_main()) {
             continue;
         }
         auto *m = b->dcast_monument();
@@ -101,7 +194,7 @@ int building_sun_temple::art_stage() const {
     return std::min(p, max_stage);
 }
 
-xstring building_sun_temple::anim_key_for(int stage) const {
+xstring building_sun_temple::anim_key_for(int stage, int orient_idx) const {
     const auto &bp = current_params();
     const int max_stage = bp.art_stages > 0 ? bp.art_stages : 4;
     if (stage < 1) {
@@ -110,8 +203,11 @@ xstring building_sun_temple::anim_key_for(int stage) const {
     if (stage > max_stage) {
         stage = max_stage;
     }
+    if (orient_idx < 0 || orient_idx > 1) {
+        orient_idx = 0;
+    }
     bstring32 key;
-    key.printf("s%c", 'a' + (stage - 1));
+    key.printf("s%c%d", 'a' + (stage - 1), orient_idx + 1);
     return xstring(key.c_str());
 }
 
@@ -132,7 +228,7 @@ bool building_sun_temple::needs_resources() const {
 }
 
 bool building_sun_temple::need_stonemason() {
-    if (is_finished()) {
+    if (is_finished() || !is_main()) {
         return false;
     }
     const int p = runtime_data().phase;
@@ -140,7 +236,7 @@ bool building_sun_temple::need_stonemason() {
 }
 
 bool building_sun_temple::need_workers() const {
-    if (is_finished()) {
+    if (is_finished() || !is_main()) {
         return false;
     }
     if (runtime_data().phase >= 2) {
@@ -151,6 +247,9 @@ bool building_sun_temple::need_workers() const {
 }
 
 void building_sun_temple::add_workers(figure_id fid) {
+    if (!is_main()) {
+        return;
+    }
     auto &d = runtime_data();
     for (auto &wid : d.workers) {
         if (wid == 0) {
@@ -171,17 +270,84 @@ void building_sun_temple::remove_worker(figure_id fid) {
 }
 
 int building_sun_temple::building_image_get() const {
-    const xstring key = anim_key_for(art_stage());
     const auto &params = current_params();
+    const int orient = orient_idx_from_building(base);
+    const int part = runtime_data().variant;
+
+    if (part == PART_PATH) {
+        bstring32 key;
+        key.printf("path%d", orient + 1);
+        int img = params.first_img(xstring(key.c_str()));
+        if (img <= 0) {
+            img = params.first_img("path1");
+        }
+        return img > 0 ? img : params.first_img("preview");
+    }
+    if (part == PART_HALL) {
+        bstring32 key;
+        key.printf("hall%d", orient + 1);
+        int img = params.first_img(xstring(key.c_str()));
+        if (img <= 0) {
+            img = params.first_img("hall1");
+        }
+        return img > 0 ? img : params.first_img("preview");
+    }
+
+    const xstring key = anim_key_for(art_stage(), orient);
     int img = params.first_img(key);
+    if (img > 0) {
+        return img;
+    }
+    // Fallback legacy sa / preview
+    img = params.first_img("sa1");
     if (img > 0) {
         return img;
     }
     return params.first_img("preview");
 }
 
-int building_sun_temple::preview::can_place(build_planner &p, tile2i /*tile*/, tile2i /*end*/, int state) const {
-    if (state != CAN_PLACE) {
+void building_sun_temple::refresh_part_tiles() {
+    const int part = runtime_data().variant;
+    const int img = building_image_get();
+    if (part == PART_PATH) {
+        const auto &bp = current_params();
+        const vec2i psz = oriented_wh(bp.path_size.x > 0 ? bp.path_size : vec2i{8, 2}, base.orientation);
+        sun_temple_add_rect_tiles(id(), tile(), psz.x, psz.y, img);
+        return;
+    }
+    if (part == PART_HALL) {
+        const int size = base.size > 0 ? base.size : 3;
+        map_building_tiles_add(id(), tile(), size, img, TERRAIN_BUILDING);
+        return;
+    }
+    const int size = base.size > 0 ? base.size : 10;
+    map_building_tiles_add(id(), tile(), size, img, TERRAIN_BUILDING);
+}
+
+void building_sun_temple::preview::setup_preview_graphics(build_planner &planer) const {
+    const auto &bp = st_params();
+    vec2i init_tiles = bp.init_tiles;
+    if (init_tiles.x <= 0 || init_tiles.y <= 0) {
+        init_tiles = vec2i{10, 15};
+    }
+    switch (building_rotation_global_rotation() % 4) {
+    case 0:
+        planer.init_tiles(init_tiles.x, init_tiles.y);
+        break;
+    case 1:
+        planer.init_tiles(init_tiles.y, init_tiles.x);
+        break;
+    case 2:
+        planer.init_tiles(init_tiles.x, init_tiles.y);
+        break;
+    case 3:
+        planer.init_tiles(init_tiles.y, init_tiles.x);
+        break;
+    }
+}
+
+int building_sun_temple::preview::can_place(build_planner &p, tile2i /*tile*/, tile2i end, int state) const {
+    if (state != CAN_PLACE && state != CAN_NOT_BUT_GREEN) {
         return state;
     }
     if (has_unfinished_sun_temple()) {
@@ -196,6 +362,20 @@ int building_sun_temple::preview::can_place(build_planner &p, tile2i /*tile*/, t
         }
     }
     if (sandstone_need > 0 && yards_available(RESOURCE_SANDSTONE) < sandstone_need) {
+        return CAN_NOT_PLACE;
+    }
+
+    const auto &bp = st_params();
+    const int rotation = building_rotation_global_rotation() % 4;
+    const int body = 10;
+    const vec2i path_sz = oriented_wh(bp.path_size.x > 0 ? bp.path_size : vec2i{8, 2}, rotation);
+    const vec2i hall_sz = bp.hall_size.x > 0 ? bp.hall_size : vec2i{3, 3};
+    const vec2i off_path = part_offset(bp.part_path_offset, rotation, vec2i{1, 10});
+    const vec2i off_hall = part_offset(bp.part_hall_offset, rotation, vec2i{4, 12});
+
+    if (area_blocked(end, body, body)
+        || area_blocked(end.shifted(off_path), path_sz.x, path_sz.y)
+        || area_blocked(end.shifted(off_hall), hall_sz.x, hall_sz.y)) {
         return CAN_NOT_PLACE;
     }
     return CAN_PLACE;
@@ -218,26 +398,66 @@ int building_sun_temple::preview::finalize_check(build_planner &p, tile2i tile, 
         }
     }
     if (sandstone_need > 0 && yards_available(RESOURCE_SANDSTONE) < sandstone_need) {
-        // gr19:88 has fixed wording — no printf substitution.
         p.set_warning("#need_220_blocks_of_sandstone_for_sun_temple");
         g_warning_manager.show("#need_220_blocks_of_sandstone_for_sun_temple");
         return CAN_NOT_PLACE;
     }
-    return CAN_PLACE;
+    // Full footprint check (body + path + hall).
+    return can_place(p, tile, end, CAN_PLACE);
 }
 
 void building_sun_temple::preview::ghost_preview(build_planner &planer, painter &ctx, tile2i /*start*/, tile2i end, vec2i pixel) const {
     const auto &params = building_static_params::get(planer.build_type);
-    const int size = params.building_size > 0 ? params.building_size : 10;
-    blocked_tile_vec blocked;
-    const bool is_blocked = !!planer.is_blocked_for_building(end, size, blocked);
+    const auto &bp = st_params();
+    const int rotation = building_rotation_global_rotation() % 4;
+    const int body = 10;
+    const vec2i path_sz = oriented_wh(bp.path_size.x > 0 ? bp.path_size : vec2i{8, 2}, rotation);
+    const vec2i hall_sz = bp.hall_size.x > 0 ? bp.hall_size : vec2i{3, 3};
+    const vec2i off_path = part_offset(bp.part_path_offset, rotation, vec2i{1, 10});
+    const vec2i off_hall = part_offset(bp.part_hall_offset, rotation, vec2i{4, 12});
+
+    tile2i tile_path = end.shifted(off_path);
+    tile2i tile_hall = end.shifted(off_hall);
+
+    const bool blocked = area_blocked(end, body, body)
+        || area_blocked(tile_path, path_sz.x, path_sz.y)
+        || area_blocked(tile_hall, hall_sz.x, hall_sz.y);
+
     const int preview = params.first_img("preview");
-    const int img = params.first_img("sa");
-    if (is_blocked) {
-        planer.draw_partially_blocked(ctx, false, blocked);
+    const int img_body = params.first_img("sa1");
+    const int img_path = params.first_img("path1");
+    const int img_hall = params.first_img("hall1");
+    const int img_stake = params.first_img("stake");
+
+    if (blocked) {
+        draw_area_mask(planer, ctx, end, body, body, true);
+        draw_area_mask(planer, ctx, tile_path, path_sz.x, path_sz.y, true);
+        draw_area_mask(planer, ctx, tile_hall, hall_sz.x, hall_sz.y, true);
         return;
     }
-    planer.draw_building_ghost(ctx, img > 0 ? img : preview, pixel);
+
+    planer.draw_building_ghost(ctx, img_body > 0 ? img_body : preview, pixel);
+    planer.draw_building_ghost(ctx, img_path > 0 ? img_path : preview, g_camera.lookup_tile_to_pixel(tile_path));
+    planer.draw_building_ghost(ctx, img_hall > 0 ? img_hall : preview, g_camera.lookup_tile_to_pixel(tile_hall));
+
+    // I6: stakes along full AABB corners (V0 place look).
+    if (img_stake > 0) {
+        vec2i init_tiles = bp.init_tiles.x > 0 ? bp.init_tiles : vec2i{10, 15};
+        const vec2i ft = oriented_wh(init_tiles, rotation);
+        const tile2i corners[] = {
+            end,
+            end.shifted(ft.x - 1, 0),
+            end.shifted(0, ft.y - 1),
+            end.shifted(ft.x - 1, ft.y - 1),
+            end.shifted(ft.x / 2, 0),
+            end.shifted(0, ft.y / 2),
+            end.shifted(ft.x - 1, ft.y / 2),
+            end.shifted(ft.x / 2, ft.y - 1),
+        };
+        for (const tile2i &c : corners) {
+            planer.draw_building_ghost(ctx, img_stake, g_camera.lookup_tile_to_pixel(c));
+        }
+    }
 }
 
 void building_sun_temple::on_place(int orientation, int variant) {
@@ -249,9 +469,49 @@ void building_sun_temple::on_place(int orientation, int variant) {
     }
 }
 
-void building_sun_temple::on_place_update_tiles(int /*orientation*/, int /*variant*/) {
-    const int size = base.size > 0 ? base.size : 10;
-    map_building_tiles_add(id(), tile(), size, building_image_get(), TERRAIN_BUILDING);
+void building_sun_temple::on_place_update_tiles(int orientation, int /*variant*/) {
+    base.prev_part_building_id = 0;
+    runtime_data().variant = PART_BODY;
+    base.orientation = orientation;
+    base.size = 10;
+
+    refresh_part_tiles();
+
+    const auto &bp = current_params();
+    const int rotation = building_rotation_global_rotation() % 4;
+    const vec2i off_path = part_offset(bp.part_path_offset, rotation, vec2i{1, 10});
+    const vec2i off_hall = part_offset(bp.part_hall_offset, rotation, vec2i{4, 12});
+    const vec2i path_sz = oriented_wh(bp.path_size.x > 0 ? bp.path_size : vec2i{8, 2}, rotation);
+    const vec2i hall_sz = bp.hall_size.x > 0 ? bp.hall_size : vec2i{3, 3};
+
+    building *part_path = building_create(BUILDING_SUN_TEMPLE, tile().shifted(off_path), 0);
+    building *part_hall = building_create(BUILDING_SUN_TEMPLE, tile().shifted(off_hall), 0);
+    game_undo_add_building(part_path);
+    game_undo_add_building(part_hall);
+
+    auto *sp = part_path->dcast_sun_temple();
+    auto *sh = part_hall->dcast_sun_temple();
+    if (sp) {
+        sp->runtime_data().variant = PART_PATH;
+        sp->runtime_data().phase = runtime_data().phase;
+        part_path->orientation = orientation;
+        part_path->size = 1; // rect tiles; never size² leveling
+        sp->refresh_part_tiles();
+        (void)path_sz;
+    }
+    if (sh) {
+        sh->runtime_data().variant = PART_HALL;
+        sh->runtime_data().phase = runtime_data().phase;
+        part_hall->orientation = orientation;
+        part_hall->size = (uint8_t)std::max(hall_sz.x, 1);
+        sh->refresh_part_tiles();
+    }
+
+    part_path->prev_part_building_id = id();
+    base.next_part_building_id = part_path->id;
+    part_path->next_part_building_id = part_hall->id;
+    part_hall->prev_part_building_id = part_path->id;
+    part_hall->next_part_building_id = 0;
 }
 
 void building_sun_temple::on_destroy() {
@@ -259,9 +519,7 @@ void building_sun_temple::on_destroy() {
 }
 
 void building_sun_temple::on_phase_changed(int old_phase, int current) {
-    // Always refresh body art (core visible from place — no flat wipe).
-    const int size = base.size > 0 ? base.size : 10;
-    map_building_tiles_add(id(), tile(), size, building_image_get(), TERRAIN_BUILDING);
+    refresh_part_tiles();
 
     if (current != MONUMENT_FINISHED) {
         auto &d = runtime_data();
@@ -270,8 +528,11 @@ void building_sun_temple::on_phase_changed(int old_phase, int current) {
         }
     }
 
-    // Leave leveling once: poof laborers and free slots for carpenters/masons.
-    // Do NOT wipe on later advances (2→3→4) — that would kick guild workers.
+    if (!is_main()) {
+        return;
+    }
+
+    // Leave leveling once: poof laborers; do not wipe on later advances.
     if (old_phase < 2 && current >= 2) {
         auto &d = runtime_data();
         for (auto &wid : d.workers) {
@@ -288,13 +549,15 @@ void building_sun_temple::on_phase_changed(int old_phase, int current) {
 
 void building_sun_temple::update_day() {
     building_impl::update_day();
-    if (is_finished()) {
+    if (!is_main() || is_finished()) {
         return;
     }
 
     auto &d = runtime_data();
     if (d.phase < 2) {
-        grid_tiles tiles = map_grid_get_tiles(&base, 0);
+        // Body-only leveling — never walk linked path/hall via map_grid_get_tiles(&base).
+        const int body = base.size > 0 ? base.size : 10;
+        grid_tiles tiles = map_grid_get_tiles(tile(), tile().shifted(body - 1, body - 1));
         tile2i tile2works = map_grid_area_first(tiles, [](tile2i t) {
             return map_monuments_get_progress(t) < 200;
         });
@@ -303,7 +566,7 @@ void building_sun_temple::update_day() {
             map_grid_area_foreach(tiles, [](tile2i t) { map_monuments_set_progress(t, 0); });
             set_phase(d.phase + 1);
         }
-        return; // never progress() same day as leveling advance
+        return;
     }
 
     const int phase_before = d.phase;
@@ -316,23 +579,59 @@ void building_sun_temple::update_day() {
 }
 
 void building_sun_temple::update_map_orientation(int /*map_orientation*/) {
-    const int size = base.size > 0 ? base.size : 10;
-    map_building_tiles_add(id(), tile(), size, building_image_get(), TERRAIN_BUILDING);
+    refresh_part_tiles();
 }
 
 tile2i building_sun_temple::center_point() const {
-    const int s = base.size > 0 ? base.size : 10;
-    return tile().shifted(s / 2, s / 2);
+    building *m = base.main();
+    const int s = m->size > 0 ? m->size : 10;
+    return m->tile.shifted(s / 2, s / 2);
 }
 
 tile2i building_sun_temple::access_point() const {
-    return tile();
+    // Prefer hall (variant 2) when present.
+    for (building *p = base.main(); p; p = p->has_next() ? p->next() : nullptr) {
+        auto *st = p->dcast_sun_temple();
+        if (st && st->runtime_data().variant == PART_HALL) {
+            return p->tile;
+        }
+    }
+    return main()->tile();
 }
 
 grid_area building_sun_temple::get_area() const {
-    const int s = base.size > 0 ? base.size : 10;
-    tile2i start = tile();
-    tile2i end = start.shifted(s - 1, s - 1);
+    building *m = base.main();
+    tile2i start = m->tile;
+    tile2i end = start.shifted(std::max((int)m->size, 1) - 1, std::max((int)m->size, 1) - 1);
+
+    const auto &bp = current_params();
+    for (building *p = m; p; p = p->has_next() ? p->next() : nullptr) {
+        auto *st = p->dcast_sun_temple();
+        int w = p->size;
+        int h = p->size;
+        if (st && st->runtime_data().variant == PART_PATH) {
+            const vec2i psz = oriented_wh(bp.path_size.x > 0 ? bp.path_size : vec2i{8, 2}, p->orientation);
+            w = psz.x;
+            h = psz.y;
+        } else if (st && st->runtime_data().variant == PART_HALL) {
+            w = bp.hall_size.x > 0 ? bp.hall_size.x : 3;
+            h = bp.hall_size.y > 0 ? bp.hall_size.y : 3;
+        }
+        tile2i pmin = p->tile;
+        tile2i pmax = p->tile.shifted(std::max(w, 1) - 1, std::max(h, 1) - 1);
+        if (pmin.x() < start.x()) {
+            start = tile2i(pmin.x(), start.y());
+        }
+        if (pmin.y() < start.y()) {
+            start = tile2i(start.x(), pmin.y());
+        }
+        if (pmax.x() > end.x()) {
+            end = tile2i(pmax.x(), end.y());
+        }
+        if (pmax.y() > end.y()) {
+            end = tile2i(end.x(), pmax.y());
+        }
+    }
     return {start, end};
 }
 

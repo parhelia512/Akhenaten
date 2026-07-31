@@ -14,7 +14,12 @@ function find_msg_key(key) {
 
 function find_sun_temple() {
     for (var bi = 1; bi < 800; bi++) {
-        if (__building_type(bi) == BUILDING_SUN_TEMPLE) {
+        if (__building_type(bi) != BUILDING_SUN_TEMPLE) {
+            continue
+        }
+        var b = city.get_building(bi)
+        // Prefer chain head (body) — path/hall are linked parts.
+        if (b && (!b.prev_part_building_id || b.prev_part_building_id == 0)) {
             return bi
         }
     }
@@ -127,6 +132,20 @@ function run_test() {
         if (!bid || ph != 4) {
             __log_info_native('[test:117] after load bid=' + bid + ' phase=' + ph)
             __log_marker('sun_temple_saveload_fail:' + ph)
+            __test_signal_ready()
+            return
+        }
+        // Chain must survive saveload (body+path+hall).
+        var bload = city.get_building(bid)
+        var nparts = 1
+        var pc = bload
+        while (pc && pc.next_part_building_id > 0 && nparts < 8) {
+            nparts++
+            pc = city.get_building(pc.next_part_building_id)
+        }
+        if (nparts != 3) {
+            __log_info_native('[test:117] after load parts=' + nparts)
+            __log_marker('sun_temple_saveload_parts_fail:' + nparts)
             __test_signal_ready()
             return
         }

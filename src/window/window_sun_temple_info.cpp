@@ -3,7 +3,9 @@
 #include "building/monuments.h"
 #include "city/city.h"
 #include "city/city_resource.h"
+#include "core/string.h"
 #include "game/resource.h"
+#include "graphics/elements/ui.h"
 #include "window/building/common.h"
 #include "window/window_building_info.h"
 
@@ -21,7 +23,12 @@ info_window_sun_temple sun_temple_infow;
 void info_window_sun_temple::init(object_info &c) {
     building_info_window::init(c);
 
-    auto *st = c.building_get()->dcast_monument();
+    auto *part = c.building_get()->dcast_sun_temple();
+    if (!part) {
+        return;
+    }
+    // Always read construction state from the body (main).
+    auto *st = part->main()->dcast_monument();
     if (!st) {
         return;
     }
@@ -43,17 +50,15 @@ void info_window_sun_temple::init(object_info &c) {
         } else if (st->need_stonemason() && d.phase == 4) {
             reason = stonemasons ? textid{178, 56} : textid{199, 49};
         } else if (d.phase > 4) {
-            // Terminal index before FINISHED — not complete yet (rating still open).
             reason = {178, 56};
         } else {
-            reason = {178, 54}; // phase 2 timber just filled, waiting progress()
+            reason = {178, 54};
         }
 
         ui["warning_text"] = reason;
 
         int min_pct = 100;
         bool any_resource = false;
-        // RESOURCES_MAX is exclusive upper bound (array size); never use <=.
         for (int ri = (int)RESOURCES_MIN; ri < (int)RESOURCES_MAX; ++ri) {
             auto r = (e_resource)ri;
             if (st->needs_resource(r) <= 0) {
@@ -67,13 +72,23 @@ void info_window_sun_temple::init(object_info &c) {
         }
 
         // Map remake phases 0–4 onto gr253 Phase 1–4 (0–1 = Phase 1).
-        // Terminal (>4) still displays as Phase 4 until FINISHED.
         int display_phase = d.phase;
         if (display_phase <= 1) {
             display_phase = 1;
         } else if (display_phase > 4) {
             display_phase = 4;
         }
+
+        // I9: gr253 narrative under subtitle (Phase N + two description lines).
+        // ids: 1/4/7/10 = "Phase N"; +1/+2 = description pair.
+        const int phase_title = 1 + (display_phase - 1) * 3;
+        bstring256 phase_desc;
+        phase_desc.printf("%s\n%s%s",
+            ui::str(253, phase_title),
+            ui::str(253, phase_title + 1),
+            ui::str(253, phase_title + 2));
+        ui["subtitle"] = phase_desc.c_str();
+
         bstring64 progress_str;
         progress_str.printf("%d / %d    %d%%", display_phase, 4, min_pct);
         ui["progress_text"] = progress_str;
@@ -94,6 +109,7 @@ void info_window_sun_temple::init(object_info &c) {
         fill_resource_slot(RESOURCE_TIMBER, "timber_icon", "timber_text");
         fill_resource_slot(RESOURCE_SANDSTONE, "sandstone_icon", "sandstone_text");
     } else {
+        ui["subtitle"] = textid{253, 0}; // "Sun Temple"
         ui["warning_text"] = textid{199, 50};
         ui["progress_text"] = "";
         ui["timber_text"] = "";
