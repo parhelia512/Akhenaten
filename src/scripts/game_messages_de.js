@@ -6226,4 +6226,12 @@ game_messages_de {
         title { text: "Niederlage" }
         content { text: "Eure Generäle melden eine Niederlage. Die Invasionsstreitmacht war zu stark. Viele eurer Soldaten sind gefallen — doch der Feind zieht vom Feld ab." }
     }
+    sun_temple_congratulations {
+        id: 523,
+        size [30, 18]
+        title { text: "Sonnentempel fertiggestellt!" }
+        content {
+            text: "Nach vielen Monaten Mühe ist die Arbeit am Sonnentempel endlich abgeschlossen. Dies ist eine großartige Leistung für Eure Stadt!"
+        }
+    }
 }

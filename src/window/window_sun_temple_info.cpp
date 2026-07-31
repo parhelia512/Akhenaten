@@ -42,15 +42,19 @@ void info_window_sun_temple::init(object_info &c) {
             reason = stonemasons ? textid{178, 55} : textid{199, 49};
         } else if (st->need_stonemason() && d.phase == 4) {
             reason = stonemasons ? textid{178, 56} : textid{199, 49};
+        } else if (d.phase > 4) {
+            // Terminal index before FINISHED — not complete yet (rating still open).
+            reason = {178, 56};
         } else {
-            reason = {178, 57};
+            reason = {178, 54}; // phase 2 timber just filled, waiting progress()
         }
 
         ui["warning_text"] = reason;
 
         int min_pct = 100;
         bool any_resource = false;
-        for (int ri = (int)RESOURCES_MIN; ri <= (int)RESOURCES_MAX; ++ri) {
+        // RESOURCES_MAX is exclusive upper bound (array size); never use <=.
+        for (int ri = (int)RESOURCES_MIN; ri < (int)RESOURCES_MAX; ++ri) {
             auto r = (e_resource)ri;
             if (st->needs_resource(r) <= 0) {
                 continue;
@@ -63,9 +67,12 @@ void info_window_sun_temple::init(object_info &c) {
         }
 
         // Map remake phases 0–4 onto gr253 Phase 1–4 (0–1 = Phase 1).
+        // Terminal (>4) still displays as Phase 4 until FINISHED.
         int display_phase = d.phase;
         if (display_phase <= 1) {
             display_phase = 1;
+        } else if (display_phase > 4) {
+            display_phase = 4;
         }
         bstring64 progress_str;
         progress_str.printf("%d / %d    %d%%", display_phase, 4, min_pct);

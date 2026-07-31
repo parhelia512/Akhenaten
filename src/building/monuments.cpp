@@ -298,11 +298,15 @@ int building_monument::progress() {
 
     bmain->set_phase(d.phase + 1);
 
-    auto next = bmain->next();
-    while (next) {
-        auto nextd = next->dcast_monument();
+    // Use has_next() — building_impl::next() returns building_get(0)->dcast() when
+    // next_part_building_id is 0 (always non-null), which then fails dcast_monument().
+    for (building_impl *part = bmain->has_next() ? bmain->next() : nullptr; part;
+         part = part->has_next() ? part->next() : nullptr) {
+        auto *nextd = part->dcast_monument();
+        if (!nextd) {
+            break;
+        }
         nextd->set_phase(nextd->phase() + 1);
-        next = next->next();
     }
 
     if (d.phase == MONUMENT_FINISHED) {

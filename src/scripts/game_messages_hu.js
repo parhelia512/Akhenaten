@@ -6237,4 +6237,12 @@ game_messages_hu {
                 title { text: "Vereség" }
                 content { text: "A tábornokok vereségről számolnak be. A támadó sereg túl erős volt. Sok katonád elesett — de az ellenség elvonul a mezőről." }
             }
+            sun_temple_congratulations {
+                id: 523,
+                size [30, 18]
+                title { text: "Naptemplom elkészült!" }
+                content {
+                    text: "Sok hónapnyi kemény munka után a Naptemplom építése végre véget ért. Ez városod nagyszerű teljesítménye!"
+                }
+            }
 }

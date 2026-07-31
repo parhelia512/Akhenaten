@@ -828,4 +828,6 @@ localization_ru_f = [
     { key: "#western_desert", text: "ЗAПAДHAЯ ПУCTЫHЯ" }
     { key: "#lebanon", text: "ЛИBAH" }
     { key: "#canaan", text: "XAHAAH" }
+    { key: "#need_220_blocks_of_sandstone_for_sun_temple", group:19, id:88 }
+    { key: "#only_one_sun_temple_at_a_time", group:19, id:89 }
 ]

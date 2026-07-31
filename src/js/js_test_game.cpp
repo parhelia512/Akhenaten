@@ -1670,6 +1670,22 @@ static bool __test_storage_yard_add_resource(int bid, int resource, int amount) 
 }
 ANK_FUNCTION_3(__test_storage_yard_add_resource);
 
+// Returns resource id if this yard would dispatch a monument sled task, else 0.
+// Used to assert stockpile blocks SY→monument delivery without waiting for spawn.
+storage_worker_task building_storageyard_deliver_to_monuments(building *b);
+static int __test_storageyard_monument_task_resource(int yard_bid) {
+    building *b = building_get(yard_bid);
+    if (!b || !b->dcast_storage_yard()) {
+        return 0;
+    }
+    storage_worker_task task = building_storageyard_deliver_to_monuments(b);
+    if (task.result != STORAGEYARD_TASK_MONUMENT || task.resource <= RESOURCE_NONE) {
+        return 0;
+    }
+    return (int)task.resource;
+}
+ANK_FUNCTION_1(__test_storageyard_monument_task_resource);
+
 static int __test_yards_stored(int resource) {
     if (resource <= RESOURCE_NONE || resource >= RESOURCES_MAX) {
         return 0;

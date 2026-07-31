@@ -2,10 +2,12 @@ log_info("akhenaten: building sun_temple started")
 
 building_sun_temple {
     animations {
+      // Packs 1→2→3 = construction progress. Within each pack, id 1/2 = map
+      // orientations (not stages) — orientation-aware pick is a follow-up.
       sa { pack:PACK_SUN_TEMPLE_1, id:1 }
       sb { pack:PACK_SUN_TEMPLE_2, id:1 }
       sc { pack:PACK_SUN_TEMPLE_3, id:1 }
-      sd { pack:PACK_SUN_TEMPLE_3, id:2 }
+      sd { pack:PACK_SUN_TEMPLE_3, id:1 }
       preview { pack:PACK_SUN_TEMPLE_1, id:1 }
     }
     // 10×10 body only; path + hall extension are not implemented yet.

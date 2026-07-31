@@ -258,7 +258,7 @@ void building_sun_temple::on_destroy() {
     building_monument_remove_all_deliveries(id());
 }
 
-void building_sun_temple::on_phase_changed(int /*old_phase*/, int current) {
+void building_sun_temple::on_phase_changed(int old_phase, int current) {
     // Always refresh body art (core visible from place — no flat wipe).
     const int size = base.size > 0 ? base.size : 10;
     map_building_tiles_add(id(), tile(), size, building_image_get(), TERRAIN_BUILDING);
@@ -270,11 +270,18 @@ void building_sun_temple::on_phase_changed(int /*old_phase*/, int current) {
         }
     }
 
-    // Drop laborer slots when leaving leveling — free guild/work-camp capacity.
-    if (current >= 2) {
+    // Leave leveling once: poof laborers and free slots for carpenters/masons.
+    // Do NOT wipe on later advances (2→3→4) — that would kick guild workers.
+    if (old_phase < 2 && current >= 2) {
         auto &d = runtime_data();
         for (auto &wid : d.workers) {
-            wid = 0;
+            if (wid) {
+                figure *f = figure_get(wid);
+                if (f && f->is_alive()) {
+                    f->poof();
+                }
+                wid = 0;
+            }
         }
     }
 }

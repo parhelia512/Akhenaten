@@ -104,3 +104,21 @@ function run_test() {
     __log_info_native('[test:110] PASS')
     __test_signal_ready()
 }
+
+function check_valid() {
+    var required = [
+        'sun_temple_reject_no_sandstone_ok',
+        'sun_temple_sandstone_ready',
+        'sun_temple_placed_ok',
+        'sun_temple_sandstone_consumed',
+        'sun_temple_reject_second_ok'
+    ]
+    for (var i = 0; i < required.length; i++) {
+        if (!__test_find_inlog('[test-marker] ' + required[i])
+            && !__test_find_inlog(required[i])) {
+            __log_info_native('[test:110] missing marker ' + required[i])
+            return false
+        }
+    }
+    return true
+}
