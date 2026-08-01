@@ -1,9 +1,10 @@
-// Bast lion raid (TEMP Enhanced): game_feature ON, no houses → spawn lions at TEMPLE_BAST/ZOO.
+// Bast lion raid (TEMP Enhanced): game_feature ON, no houses → spawn lions at TEMPLE_BAST/COMPLEX/ZOO.
 // Markers:
 //   [test-marker] bast_lion_feature_on_spawn_ok
 //   [test-marker] bast_lion_feature_off_no_spawn_ok
 //   [test-marker] bast_lion_no_temple_fallback_ok
 //   [test-marker] bast_lion_houses_smash_no_lions_ok
+//   [test-marker] bast_lion_complex_only_spawn_ok
 //   [test-marker] bast_lion_raid_prey_ok
 //   [test-marker] bast_lion_raid_timer_poof_ok
 
@@ -14,6 +15,7 @@ var __test75_on_ok = false
 var __test75_off_ok = false
 var __test75_fallback_ok = false
 var __test75_smash_ok = false
+var __test75_complex_ok = false
 var __test75_prey_ok = false
 var __test75_timer_ok = false
 
@@ -33,6 +35,14 @@ function test75_place_temple() {
     if (!bid) {
         bid = __test_building_create(BUILDING_TEMPLE_BAST, -1, -1)
     }
+    return bid
+}
+
+function test75_place_complex() {
+    if (!__scenario_building_allowed(BUILDING_TEMPLE_COMPLEX_BAST)) {
+        __scenario_building_allow(BUILDING_TEMPLE_COMPLEX_BAST, true)
+    }
+    var bid = __test_building_create(BUILDING_TEMPLE_COMPLEX_BAST, -1, -1)
     return bid
 }
 
@@ -122,6 +132,31 @@ function run_test() {
     __log_marker('bast_lion_houses_smash_no_lions_ok')
     __test75_smash_ok = true
 
+    // --- Feature ON, complex only (no small temple / zoo) → lions ---
+    test_reload_city_session('data/default.map')
+    __test_set_treasury(50000)
+    game.paused = false
+    game_features.set('gameplay_bast_lion_raid', false)
+    __test_run_console_command('god_major_curse ' + GOD_BAST)
+    test75_remove_lions()
+
+    game_features.set('gameplay_bast_lion_raid', true)
+    var complex = test75_place_complex()
+    if (!complex) {
+        __log_info_native('[test:75] failed to create BUILDING_TEMPLE_COMPLEX_BAST')
+        __test_signal_ready()
+        return
+    }
+    __test_run_console_command('god_major_curse ' + GOD_BAST)
+    lions = test75_count_lions()
+    if (lions < 1) {
+        __log_info_native('[test:75] complex-only expected lions, got ' + lions)
+        __test_signal_ready()
+        return
+    }
+    __log_marker('bast_lion_complex_only_spawn_ok')
+    __test75_complex_ok = true
+
     // --- Raid prey: skip closer ostrich, target invasion enemy ---
     test_reload_city_session('data/default.map')
     __test_set_treasury(50000)
@@ -206,7 +241,8 @@ function run_test() {
 }
 
 function check_valid() {
-    if (!__test75_on_ok || !__test75_off_ok || !__test75_fallback_ok || !__test75_smash_ok || !__test75_prey_ok || !__test75_timer_ok) {
+    if (!__test75_on_ok || !__test75_off_ok || !__test75_fallback_ok || !__test75_smash_ok
+        || !__test75_complex_ok || !__test75_prey_ok || !__test75_timer_ok) {
         __log_info_native('[test:75] one or more phases failed')
         return false
     }
@@ -216,6 +252,7 @@ function check_valid() {
         'bast_lion_feature_off_no_spawn_ok',
         'bast_lion_no_temple_fallback_ok',
         'bast_lion_houses_smash_no_lions_ok',
+        'bast_lion_complex_only_spawn_ok',
         'bast_lion_raid_prey_ok',
         'bast_lion_raid_timer_poof_ok'
     ]

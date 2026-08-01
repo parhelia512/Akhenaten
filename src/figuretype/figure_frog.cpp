@@ -204,9 +204,9 @@ void figure_frog::figure_action() {
         }
         {
             auto &d = runtime_data();
-            const int goff = tile().grid_offset();
+            const uint16_t goff = (uint16_t)tile().grid_offset();
             if (d.last_infest_offset != goff) {
-                d.last_infest_offset = (int16_t)goff;
+                d.last_infest_offset = goff;
                 try_infest_near(tile());
             }
         }

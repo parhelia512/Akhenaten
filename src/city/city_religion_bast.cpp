@@ -60,7 +60,8 @@ bool god_bast_t::perform_houses_destruction() {
 bool god_bast_t::perform_lions() {
     std::vector<tile2i> spawn_tiles;
     buildings_valid_do([&](building &b) {
-        if (b.type != BUILDING_TEMPLE_BAST && b.type != BUILDING_ZOO) {
+        if (b.type != BUILDING_TEMPLE_BAST && b.type != BUILDING_TEMPLE_COMPLEX_BAST
+            && b.type != BUILDING_ZOO) {
             return;
         }
         tile2i tile = bast_lion_spawn_tile(b);

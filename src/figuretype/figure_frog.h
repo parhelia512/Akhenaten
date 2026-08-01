@@ -22,7 +22,8 @@ public:
 
     struct runtime_data_t {
         uint16_t days_left = 0;
-        int16_t last_infest_offset = -1;
+        // uint16 fits 228² grid; 0xFFFF = never visited (int16 truncated high offsets).
+        uint16_t last_infest_offset = 0xFFFF;
     } FIGURE_RUNTIME_DATA_T;
 
     virtual void on_create() override;

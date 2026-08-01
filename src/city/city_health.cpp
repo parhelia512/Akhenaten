@@ -52,14 +52,16 @@ void city_health_t::change(int amount) {
 
 void city_health_t::start_disease(int total_people, bool force, int plague_people) {
     if (!force && value >= 40) {
+        // Natural check blocked by good health — drop a leftover Bast force flag.
+        g_city.religion.bast_curse_active = false;
         return;
     }
 
     int chance_value = random_byte() & 0x3f;
-    if (g_city.religion.bast_curse_active) {
-        // force plague
+    const bool bast_forced = g_city.religion.bast_curse_active;
+    if (bast_forced) {
+        // Force the roll; clear flag only after an outbreak outcome below.
         chance_value = 0;
-        g_city.religion.bast_curse_active = false;
     }
 
     if (!force && (chance_value > 40 - value)) {
@@ -72,11 +74,17 @@ void city_health_t::start_disease(int total_people, bool force, int plague_peopl
     }
 
     if (sick_people <= 0) {
+        if (bast_forced) {
+            g_city.religion.bast_curse_active = false;
+        }
         return;
     }
 
     int people_to_plague = sick_people - num_mortuary_workers;
     if (people_to_plague <= 0) {
+        if (bast_forced) {
+            g_city.religion.bast_curse_active = false;
+        }
         change(10);
         city_message_post_with_popup_delay(MESSAGE_CAT_HEALTH_PROBLEM, false, "message_malaria", 0, 0);
         return;
@@ -139,7 +147,14 @@ void city_health_t::start_disease(int total_people, bool force, int plague_peopl
 
     // Nothing newly infected (all candidates already had plague) — no cooldown bump / spam.
     if (!warn_building) {
+        if (bast_forced) {
+            g_city.religion.bast_curse_active = false;
+        }
         return;
+    }
+
+    if (bast_forced) {
+        g_city.religion.bast_curse_active = false;
     }
 
     change(10);
