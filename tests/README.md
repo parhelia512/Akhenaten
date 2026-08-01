@@ -109,7 +109,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `92_ironwill.js` | Ironwill: mid-game save/load/autosave blocked; C++ write belt; exit checkpoint exempt |
 | `97_ptah_scorpion_curse.js` | Ptah scorpion raid (CF6): feature ON spawn at temple when no industry; OFF / no-temple fallback → no scorpions; raid prey skips ostrich; 1-day timer poof |
 | `94_locust_swarm.js` | CF2 locust: Osiris/EVENT/pak-chain/cheat; sentiment; saveload; timer; variant/float |
-| `85_mummy_attack.js` | BF3 mummy: register + `spawn_wave` → 1× msg 496; soldier target + kill |
+| `85_mummy_attack.js` | BF3 mummy: register + `spawn_wave` → 1× msg 496; soldier target + kill; city cap 4; `EVENT_TYPE_MUMMY` |
 | `91_popup_messages.js` | OG Popup Messages: category map + banner/click-open vs modal; unlisted stays modal |
 | `69_scorpion_spawn.js` | Cleopatra `FIGURE_SCORPION`: spawn + type + `update_animation` → `walk` (SprMain2 group 10; CF3c) |
 | `70_asp_spawn.js` | Cleopatra `FIGURE_ASP`: spawn + type + `update_animation` → `walk` (SprMain2 group 0; CF3a) |
@@ -163,7 +163,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `81_construction_blessing.js` | Pyramid Speedup (CB*): OFF/ON; site-prep; masonry +2; delivery clear; min-id; at-cap; halted (+ chain MOTHBALLED) |
 | `84_funeral_procession.js` | BF2 funeral walker: register, provisions gate, goto mastaba, abort leaves `funeral_done` clear, arrive + no re-spawn, steal/re-dispatch keeps done, no-provisions-required spawn, multi-tomb, finished small stepped pyramid spawn, mid-walk save/load (`funeral_done` + dest) |
 | `87_tomb_robber.js` | Tomb robber TR1–TR4: path, steal dispatched, crime-wave, arrest, preexisting threat |
-| `86_pharaoh_figure_smoke.js` | BF4 `FIGURE_PHARAOH`: spawn + type + CREATED→ROAMING + anim `walk` (SprMain 28) |
+| `86_pharaoh_figure_smoke.js` | BF4 `FIGURE_PHARAOH`: spawn + type + CREATED→ROAMING + anim `walk` (SprMain 28); neighbor ids 108–110 |
 | `88_flat_buildings.js` | Flat buildings view: On → flatten palace; raise excludes; overlay blocks; Off clears raise |
 
 Farm **placement** tests (34/35) cover `can_place` / terrain rules; **37** covers preview image helpers.

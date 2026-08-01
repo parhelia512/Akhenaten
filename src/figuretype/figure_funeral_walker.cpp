@@ -69,7 +69,7 @@ bool figure_funeral_walker::is_burial_tomb(building &b) {
 }
 
 bool figure_funeral_walker::city_burial_provisions_complete() {
-    for (int r = 0; r < RESOURCES_MAX; ++r) {
+    for (int r = RESOURCES_MIN; r < RESOURCES_MAX; ++r) {
         const auto &bp = g_scenario.monuments.burial_provisions[r];
         if (bp.dispatched < bp.required) {
             return false;

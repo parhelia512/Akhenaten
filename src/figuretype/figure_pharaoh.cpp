@@ -19,6 +19,10 @@ void figure_pharaoh::on_create() {
 }
 
 void figure_pharaoh::figure_action() {
+    if (!base.is_alive()) {
+        return;
+    }
+
     switch (action_state()) {
     case ACTION_120_PHARAOH_CREATED:
         base.wait_ticks = 0;
@@ -32,11 +36,6 @@ void figure_pharaoh::figure_action() {
         if (base.wait_ticks > simulation_time_t::ticks_in_day * k_pharaoh_roam_days) {
             poof();
         }
-        break;
-
-    case FIGURE_ACTION_149_CORPSE:
-        // No dedicated death anim (SprMain 29 = riotor). Corpse still advances.
-        base.figure_combat_handle_corpse();
         break;
     }
 }

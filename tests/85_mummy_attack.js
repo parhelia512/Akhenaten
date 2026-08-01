@@ -4,8 +4,11 @@
 //   [test-marker] mummy_spawn_wave_msg_ok
 //   [test-marker] mummy_soldier_target_ok
 //   [test-marker] mummy_soldier_kill_ok
+//   [test-marker] mummy_city_cap_ok
+//   [test-marker] mummy_event_type_ok
 
 var MESSAGE_MUMMY_ATTACKS = 496
+var MUMMY_CITY_CAP = 4
 
 function count_messages_with_id(mm_id) {
     var n = 0
@@ -100,6 +103,55 @@ function run_test() {
     }
     __log_marker('mummy_soldier_kill_ok')
 
+    // City live cap: spawn_wave(10) must clamp to 4.
+    kill_all_mummies()
+    var over = __test_mummy_spawn_wave(10)
+    __test_process_events()
+    var live_cap = __test_count_figures(FIGURE_MUMMY)
+    if (!over || live_cap != MUMMY_CITY_CAP) {
+        __log_info_native('[test:85] city cap want ' + MUMMY_CITY_CAP + ' live, got ' + live_cap)
+        __test_signal_ready()
+        return
+    }
+    // Second wave while at cap → no new spawn.
+    var blocked = __test_mummy_spawn_wave(2)
+    if (blocked) {
+        __log_info_native('[test:85] spawn at cap should return 0, got ' + blocked)
+        __test_signal_ready()
+        return
+    }
+    if (__test_count_figures(FIGURE_MUMMY) != MUMMY_CITY_CAP) {
+        __log_info_native('[test:85] live count changed while at cap')
+        __test_signal_ready()
+        return
+    }
+    __log_marker('mummy_city_cap_ok')
+
+    // EVENT_TYPE_MUMMY path → spawn + 1× msg 496.
+    kill_all_mummies()
+    var before_ev = count_messages_with_id(MESSAGE_MUMMY_ATTACKS)
+    city.create_chain_event({
+        tag_id: 8501,
+        type: EVENT_TYPE_MUMMY,
+        amount: 2,
+        trigger: EVENT_TRIGGER_ONCE
+    }).execute()
+    __test_process_events()
+    var after_ev = count_messages_with_id(MESSAGE_MUMMY_ATTACKS)
+    var live_ev = __test_count_figures(FIGURE_MUMMY)
+    if (live_ev < 1) {
+        __log_info_native('[test:85] EVENT_TYPE_MUMMY spawned 0 mummies')
+        __test_signal_ready()
+        return
+    }
+    if (after_ev != before_ev + 1) {
+        __log_info_native('[test:85] EVENT_TYPE_MUMMY want +1 msg 496, before='
+            + before_ev + ' after=' + after_ev)
+        __test_signal_ready()
+        return
+    }
+    __log_marker('mummy_event_type_ok')
+
     __test_signal_ready()
 }
 
@@ -108,7 +160,9 @@ function check_valid() {
         'mummy_registered_ok',
         'mummy_spawn_wave_msg_ok',
         'mummy_soldier_target_ok',
-        'mummy_soldier_kill_ok'
+        'mummy_soldier_kill_ok',
+        'mummy_city_cap_ok',
+        'mummy_event_type_ok'
     ]
     for (var i = 0; i < markers.length; i++) {
         if (!__test_find_inlog('[test-marker] ' + markers[i])) {

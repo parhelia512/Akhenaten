@@ -4,6 +4,7 @@
 //   [test-marker] pharaoh_type_ok
 //   [test-marker] pharaoh_anim_walk_ok
 //   [test-marker] pharaoh_roam_action_ok
+//   [test-marker] pharaoh_neighbor_ids_ok
 
 var ACTION_PHARAOH_CREATED = 120
 var ACTION_PHARAOH_ROAMING = 121
@@ -12,6 +13,7 @@ var __test86_spawn_ok = false
 var __test86_type_ok = false
 var __test86_anim_ok = false
 var __test86_roam_ok = false
+var __test86_neighbors_ok = false
 
 function run_test() {
     __log_info_native('[test:86] pharaoh figure smoke (BF4)')
@@ -20,12 +22,27 @@ function run_test() {
     var cx = (__scenario_map.width / 2) | 0
     var cy = (__scenario_map.height / 2) | 0
 
+    // Neighbor ids 108–110 must remain distinct registrations (BF4 acceptance).
+    var artisan = test_figure_create(FIGURE_TOMB_ARTISAN, cx - 1, cy)
+    var mummy = test_figure_create(FIGURE_MUMMY, cx + 1, cy)
     var fid = test_figure_create(FIGURE_PHARAOH, cx, cy)
     if (!fid || !__figure_is_valid(fid)) {
         __log_info_native('[test:86] failed to create FIGURE_PHARAOH')
         __test_signal_ready()
         return
     }
+    if (!artisan || __figure_get_type(artisan) != FIGURE_TOMB_ARTISAN
+        || !mummy || __figure_get_type(mummy) != FIGURE_MUMMY
+        || __figure_get_type(fid) != FIGURE_PHARAOH) {
+        __log_info_native('[test:86] neighbor id regression 108/109/110')
+        __test_signal_ready()
+        return
+    }
+    __test_figure_kill(artisan)
+    __test_figure_kill(mummy)
+    __log_marker('pharaoh_neighbor_ids_ok')
+    __test86_neighbors_ok = true
+
     __log_marker('pharaoh_spawn_ok')
     __test86_spawn_ok = true
 
@@ -62,12 +79,14 @@ function run_test() {
 }
 
 function check_valid() {
-    if (!__test86_spawn_ok || !__test86_type_ok || !__test86_roam_ok || !__test86_anim_ok) {
+    if (!__test86_spawn_ok || !__test86_type_ok || !__test86_roam_ok
+        || !__test86_anim_ok || !__test86_neighbors_ok) {
         __log_info_native('[test:86] flag check failed')
         return false
     }
 
     var markers = [
+        'pharaoh_neighbor_ids_ok',
         'pharaoh_spawn_ok',
         'pharaoh_type_ok',
         'pharaoh_roam_action_ok',

@@ -111,7 +111,6 @@ void city_t::reload_objects() {
 void city_t::update_day(simulation_time_t simtime) {
     sentiment.update_day();
     criminals_update_day();
-    // After crime/steal so the same-day steal→funeral race is avoided.
     figure_funeral_walker::try_spawn_all(/*force_ignore_road=*/false);
     plague_update_day();
     environment.update_day();
