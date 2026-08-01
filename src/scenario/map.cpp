@@ -74,3 +74,4 @@ void scenario_map_foreach_fishing_point(void (*callback)(tile2i)) {
 
 ANK_BOUND_BOOL(__scenario_flotsam_enabled, g_scenario.env.flotsam_enabled)
 ANK_BOUND_BOOL(__scenario_has_animals, g_scenario.env.has_animals)
+ANK_BOUND_BOOL(__scenario_alt_predator_type, g_scenario.alt_predator_type)

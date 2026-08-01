@@ -280,6 +280,9 @@ import mission.m_046_migdol
 import mission.m_047_tanis
 import mission.m_048_alexandria_1
 import mission.m_049_alexandria_2
+import mission.m_050_maritis
+import mission.m_051_alexandria_3
+import mission.m_052_actium
 import mission.m_128_alexandria
 import mission.m_129_bridges
 import mission.m_130_sandbox

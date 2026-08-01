@@ -26,6 +26,7 @@ scenario = extend(__scenario, {
     map: __scenario_map,
     has_animals: __scenario_has_animals
     flotsam_enabled: __scenario_flotsam_enabled
+    alt_predator_type: __scenario_alt_predator_type
     building_allowed: __scenario_building_allowed
     // => is_open_play
     // => kingdom_supplies_grain

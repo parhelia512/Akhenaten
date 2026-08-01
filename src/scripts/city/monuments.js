@@ -24,6 +24,11 @@ MONUMENT_WEIGHTS[BUILDING_LARGE_STEPPED_PYRAMID]          = 24
 // original monument goal of 21 (Snofru's bent pyramid at South Dahshur).
 MONUMENT_WEIGHTS[BUILDING_SMALL_BENT_PYRAMID]             = 4
 MONUMENT_WEIGHTS[BUILDING_MEDIUM_BENT_PYRAMID]            = 8
+// Mudbrick (brick-core) pyramids — S=4 (not 8) so Itjtawy Sphinx+S+M → rating 33.
+MONUMENT_WEIGHTS[BUILDING_SMALL_MUDBRICK_PYRAMID]         = 4
+MONUMENT_WEIGHTS[BUILDING_MEDIUM_MUDBRICK_PYRAMID]        = 8
+// Large mudbrick 16×16: continue half-stepped series (S/M/L stepped 8/16/24 → 4/8/12).
+MONUMENT_WEIGHTS[BUILDING_LARGE_MUDBRICK_PYRAMID]         = 12
 // True (smooth) pyramids.
 MONUMENT_WEIGHTS[BUILDING_SMALL_PYRAMID]                  = 8
 MONUMENT_WEIGHTS[BUILDING_MEDIUM_PYRAMID]                 = 16
@@ -36,8 +41,8 @@ MONUMENT_WEIGHTS[BUILDING_MAUSOLEUM]                      = 3
 // Mission 49 goal 28 needs Σw ≥ 11 (trunc(2.25·Σ+4.5)). Library alone must not
 // saturate: W=6 → 18. Pair with Pharos W=5 (PL3) → 29 ≥ 28.
 MONUMENT_WEIGHTS[BUILDING_ALEXANDRIA_LIBRARY]             = 6
-MONUMENT_WEIGHTS[BUILDING_CAESAREUM]                      = 8  // provisional; CZ0/mission 51 recalibrate
-MONUMENT_WEIGHTS[BUILDING_PHAROS_LIGHTHOUSE]              = 5  // PL3; pair Library 6 → 29 ≥ mission 49 goal 28
+MONUMENT_WEIGHTS[BUILDING_CAESAREUM]                      = 8  // mission 51: +Mausoleum 3 → rating 29 ≥ goal 24
+MONUMENT_WEIGHTS[BUILDING_PHAROS_LIGHTHOUSE]              = 5  // PL3; pair Library 6 → rating 29 ≥ goal 28
 MONUMENT_WEIGHTS[BUILDING_SMALL_ROYAL_TOMB]               = 4
 MONUMENT_WEIGHTS[BUILDING_ABU_SIMBEL]                     = 44
 MONUMENT_WEIGHTS[BUILDING_MEDIUM_ROYAL_TOMB]              = 1

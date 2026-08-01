@@ -10,7 +10,7 @@ log_info("akhenaten: mission 49 alexandria_2 started")
 // Rating: Library W=6 + Pharos W=5 → trunc(2.25*11+4.5)=29 ≥ goal 28.
 // Burial: none. Gods: Ra(2) Ptah(1) Bast(1).
 // Enkomi sells marble (briefing OK). Orphan routes Knossos/Migdol/Waset -> route 0.
-// SKIP empty map_obj idx=8. Invasions: 0. next_mission 50 (Maritis stub pending).
+// SKIP empty map_obj idx=8. Invasions: 0. next_mission 50 (Maritis → Notes §13.13).
 
 mission49 { // Ptolemy's Alexandria - A Beacon of Light
 	map_file : "data/maps/m_049_alexandria_2.map"

@@ -63,7 +63,7 @@
       <ul style="margin:0 0 1.5rem;padding-left:1.25rem;font-size:0.88rem;color:var(--text-muted);line-height:1.9">
         <li><strong style="color:var(--text)">38</strong> missions (Pharaoh) + <strong style="color:var(--text)">15</strong> (Cleopatra expansion)</li>
         <li><strong style="color:var(--text)">9</strong> branching pairs (Pharaoh); Cleopatra campaigns are linear (no choice pairs)</li>
-        <li>Missions <strong style="color:var(--text)">0 – 31</strong> + Cleopatra <strong style="color:var(--text)">38–49</strong> (VK + R2 + AC + Capital₁–₂) have JS scripts; <strong style="color:var(--text)">32–37, 50–52</strong> pending</li>
+        <li>Missions <strong style="color:var(--text)">0 – 31</strong> + Cleopatra <strong style="color:var(--text)">38–52</strong> (VK + R2 + AC + Capital) have JS scripts; <strong style="color:var(--text)">32–37</strong> pending</li>
         <li>Ratings: <strong style="color:var(--text)">Culture · Prosperity · Kingdom · Monuments</strong></li>
         <li>Housing: <strong style="color:var(--text)">20 tiers</strong>, Crude Hut → Palatial Estate</li>
       </ul>
@@ -838,29 +838,29 @@
               <td>49</td>
               <td class="mission-city"><a href="alexandria-2.html">Alexandria</a> <span style="color:var(--text-muted);font-weight:normal">(second)</span></td>
               <td>A Beacon of Light</td>
-              <td>As Ptolemy I Soter: <strong>Library</strong> (gr198:29) + <strong>Pharos</strong> (28); import marble from Enkomi; distant troop requests. Library W=6 (Notes 13.11); Pharos pending PL3. Carry from 48 if CO0.</td>
+              <td>As Ptolemy I Soter: <strong>Library</strong> (gr198:29) + <strong>Pharos</strong> (28); import marble from Enkomi; distant troop requests. Library W=6 + Pharos W=5 → 29 ≥ M28 (Notes §13.11 / §13.12). Carry from 48 if CO0.</td>
               <td>Pop 7000 · C75 · Pr75 · M28 · K75 · house 6×16 · no time limit</td>
             </tr>
             <tr>
               <td>50</td>
-              <td class="mission-city">Maritis</td>
+              <td class="mission-city"><a href="maritis.html">Maritis</a></td>
               <td>Caesar and Cleopatra</td>
-              <td>Command Mithradates' force near Maritis (Lake Mariut) to relieve Caesar and Cleopatra in Alexandria. Not an Alexandria city-build; CO0 for any carry. Wiki theme «The Alexandrian War» until dump.</td>
-              <td>—</td>
+              <td>Command Mithradates near Lake Mariut; land battle vs Ptolemy XIII to relieve Caesar+Cleopatra. Not Alexandria city-build; monuments off. Invasions ×3 egypt. Events + empire in JS (§13.13).</td>
+              <td>Pop 1000 · C10 · Pr25 · M off · K35 · house 15×4 · <strong>survival 7y</strong></td>
             </tr>
             <tr>
               <td>51</td>
-              <td class="mission-city">Alexandria <span style="color:var(--text-muted);font-weight:normal">(third)</span></td>
+              <td class="mission-city"><a href="alexandria-3.html">Alexandria</a> <span style="color:var(--text-muted);font-weight:normal">(third)</span></td>
               <td>The Legacy of a Queen</td>
-              <td>As Cleopatra VII: Caesareum + mausoleum; briefing assumes Library/Pharos already present (carry). Wiki theme «Queen of the Nile» until dump.</td>
-              <td>—</td>
+              <td>As Cleopatra VII: <strong>Caesareum</strong> (gr198:30) + <strong>Mausoleum</strong> (27); Rome weapons trade; burial provisions. Caesareum W=8 + Mausoleum W=3 → 29 ≥ M24. Carry Library/Pharos from 48/49 if CO0 (not from 50).</td>
+              <td>Pop 10000 · C80 · Pr70 · M24 · K80 · house 6×19 · no time limit</td>
             </tr>
             <tr>
               <td>52</td>
-              <td class="mission-city">Actium</td>
+              <td class="mission-city"><a href="actium.html">Actium</a></td>
               <td>Antony and Cleopatra</td>
-              <td>Camp near Actium; build military especially navy before Sept 31 BC. Ends campaign (<code>next_mission: -1</code>). Wiki theme «The Last Battle» until dump.</td>
-              <td>—</td>
+              <td>Camp near Actium; survival 6y vs Persian (pak) invasions; navy TEMP (editor warship off). Ends campaign (<code>next_mission: -1</code>). Naval fidelity → CC52.N. Notes §13.15.</td>
+              <td>Pop 1000 · C off · Pr off · M off · K50 · house lv5 · <strong>survival 6y</strong></td>
             </tr>
           </tbody>
         </table>
@@ -869,7 +869,7 @@
 
       <div class="wiki-table-footnotes">
         <p><strong>Objectives legend:</strong> <strong>C</strong> = Culture rating · <strong>Pr</strong> = Prosperity rating · <strong>M</strong> = Monuments points · <strong>K</strong> = Kingdom rating · <strong>Pop</strong> = Population</p>
-        <p><strong>Impl.</strong> missions with Akhenaten JS scripting currently cover Pharaoh <strong>0–31</strong>, plus Cleopatra <strong>38–49</strong> (VK + R2 + AC + Alexandria₁–₂ full redefine). New Kingdom <strong>32–37</strong> and Capital <strong>50–52</strong> are not JS-redefined yet (campaign UI may still list them from <code>campaign.txt</code> / pak).</p>
+        <p><strong>Impl.</strong> missions with Akhenaten JS scripting currently cover Pharaoh <strong>0–31</strong>, plus Cleopatra <strong>38–52</strong> (VK + R2 + AC + Capital full redefine). New Kingdom <strong>32–37</strong> are not JS-redefined yet (campaign UI may still list them from <code>campaign.txt</code> / pak).</p>
         <p>Win criteria for missions 11–37 reflect original Pharaoh (1999) mission briefings. Exact rating values will be confirmed as scripting progresses.</p>
       </div>
 
