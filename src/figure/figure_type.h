@@ -84,8 +84,8 @@ enum e_figure_type : uint16_t {
     FIGURE_PHYSICIAN = 32,
     FIGURE_HERBALIST = 33,
     FIGURE_EMBALMER = 34,
-    FIGURE_WORKER = 35,
-    FIGURE_MAP_FLAG = 36,
+    FIGURE_WORKER = 35, // dead enum; live work-camp walker = FIGURE_LABORER / figure_worker
+    FIGURE_MAP_FLAG = 36, // editor flags — legacy action.cpp case; optional METAINFO wrap
     FIGURE_FLOTSAM = 37,
     FIGURE_DOCKER = 38,
     FIGURE_MARKET_BUYER = 39,
@@ -112,8 +112,8 @@ enum e_figure_type : uint16_t {
     FIGURE_JAVELIN = 60,
     FIGURE_BOLT = 61,
     FIGURE_BALLISTA = 62,
-    FIGURE_CREATURE = 63,
-    FIGURE_MISSIONARY = 64,
+    FIGURE_CREATURE = 63, // Caesar leftover — won't implement
+    FIGURE_MISSIONARY = 64, // Caesar leftover (natives UNUSED) — won't implement
     FIGURE_FISHING_POINT = 65,
     FIGURE_DELIVERY_BOY = 66,
     FIGURE_SHIPWRECK = 67,
@@ -121,7 +121,7 @@ enum e_figure_type : uint16_t {
     FIGURE_OSTRICH = 69,
     FIGURE_ANTELOPE = 70,
     FIGURE_SPEAR = 71,
-    FIGURE_CHARIOR_RACER = 72,
+    FIGURE_CHARIOR_RACER = 72, // Caesar hippodrome leftover — legacy hippodrome_horse_action stub
     FIGURE_OSTRICH_HUNTER = 73,
     FIGURE_HUNTER_ARROW = 74,
     FIGURE_LUMBERJACK = 75,
@@ -148,9 +148,9 @@ enum e_figure_type : uint16_t {
     FIGURE_SLED_PULLER = 96,
     FIGURE_SHOWMAN = 97, // named lang slot only; no OG walker — won't implement
     FIGURE_PLAGUED_CITIZEN = 98,
-    FIGURE_BEDOUIN_INFANTRY = 99,
-    FIGURE_EGYPTIAN_WARSHIP = 100,
-    FIGURE_EGYPTIAN_TRANSPORT = 101,
+    FIGURE_BEDOUIN_INFANTRY = 99, // lang/Ambient only; Bedouin raids → ENEMY_7_LIBIAN — won't implement
+    FIGURE_EGYPTIAN_WARSHIP = 100, // unused lang slot; ≠ WARSHIP(78), ≠ ENEMY_EGYPTIAN_WAR_SHIP(141)
+    FIGURE_EGYPTIAN_TRANSPORT = 101, // unused lang slot; ≠ TRANSPORT_SHIP(77), ≠ enemy transport 51
     FIGURE_ASP = 102,
     FIGURE_LION = 103,
     FIGURE_SCORPION = 104,

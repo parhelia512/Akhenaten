@@ -47,7 +47,7 @@ overlays = [
   {
     id:OVERLAY_NATIVE
     title: "#overlay_native"
-    walkers:[FIGURE_INDIGENOUS_NATIVE, FIGURE_MISSIONARY]
+    walkers:[FIGURE_INDIGENOUS_NATIVE]
     buildings:[BUILDING_ROADBLOCK]
     column_type: COLUMN_TYPE_RISK
     column_anim: {pack:PACK_GENERAL, id:103}

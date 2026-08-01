@@ -57,8 +57,8 @@ bool is_player_fleet_target(figure *f) {
     if (f->is_enemy()) {
         return false;
     }
-    if (f->type == FIGURE_WARSHIP || f->type == FIGURE_TRANSPORT_SHIP
-        || f->type == FIGURE_EGYPTIAN_WARSHIP || f->type == FIGURE_EGYPTIAN_TRANSPORT) {
+    // Player navy only (78/77). Enum 100/101 are unused lang slots — not aliases.
+    if (f->type == FIGURE_WARSHIP || f->type == FIGURE_TRANSPORT_SHIP) {
         return true;
     }
     return is_water_figure(f) && !f->is_enemy();
