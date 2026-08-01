@@ -63,18 +63,17 @@ function run_test() {
     }
     __log_marker('favour_smoke_bookkeeping_ok')
 
-    // Wipe army. Poof may not tally every figure before process runs — force kill
-    // count to size after soldiers are gone, then process_invasion favour wipe (no +10 KR).
+    // Wipe army. Poof (not kill — DYING still tallies kingdome_soldiers) + force
+    // figures.update: pump_frames often yields 0 sim ticks under integraltests.
     __test_clear_enemy_formations()
-    var gone = 0
-    for (var f = 0; f < 40; f++) {
-        __test_pump_frames(1)
-        if (__test_city_kingdome_soldiers() == 0) {
-            gone = 1
-            break
-        }
+    __test_poof_kingdome_figures()
+    __test_figures_update()
+    __test_figures_update()
+    if (__test_city_kingdome_soldiers() != 0) {
+        __test_poof_kingdome_figures()
+        __test_figures_update()
     }
-    if (!gone) {
+    if (__test_city_kingdome_soldiers() != 0) {
         __log_info_native('[test:109] soldiers still on map after clear: '
             + __test_city_kingdome_soldiers())
         game_features.set('gameplay_enhanced_auto_resolve_invasions', flags_prev)

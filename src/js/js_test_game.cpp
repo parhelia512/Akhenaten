@@ -51,6 +51,7 @@
 #include "figuretype/figure_constable.h"
 #include "figuretype/figure_enemy_transport.h"
 #include "figuretype/figure_enemy_warship.h"
+#include "figuretype/figure_enemy_elephant.h"
 #include "figuretype/figure_transport_ship.h"
 #include "figuretype/figure_soldier.h"
 #include "building/building_transport_wharf.h"
@@ -362,6 +363,26 @@ void __test_clear_enemy_formations() {
 }
 ANK_FUNCTION(__test_clear_enemy_formations);
 
+static void __test_poof_kingdome_figures() {
+    for (int i = 1; i < MAX_FIGURES; ++i) {
+        figure *f = figure_get(i);
+        if (!f || !f->is_valid()) {
+            continue;
+        }
+        if (figure_is_kingdome_army(f->type)) {
+            f->poof();
+        }
+    }
+}
+ANK_FUNCTION(__test_poof_kingdome_figures);
+
+// Force figures.reset()+action_perform. Needed when --integraltests pumps
+// frames faster than tick_timer_ms (get_elapsed_ticks → 0).
+static void __test_figures_update() {
+    g_city.figures.update();
+}
+ANK_FUNCTION(__test_figures_update);
+
 int __test_count_enemy_figures() {
     g_formations.calculate_figures();
     int n = 0;
@@ -492,6 +513,21 @@ static int __test_figure_get_damage(int fid) {
     return f->damage;
 }
 ANK_FUNCTION_1(__test_figure_get_damage);
+
+static int __test_elephant_trample(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive() || f->type != FIGURE_ENEMY_EGYPTIAN_ELEPHANT) {
+        return 0;
+    }
+    // Type check above: leaf is figure_egyptian_elephant → figure_enemy_elephant.
+    auto *el = static_cast<figure_enemy_elephant *>(f->dcast());
+    if (!el) {
+        return 0;
+    }
+    el->trample_adjacent(true);
+    return 1;
+}
+ANK_FUNCTION_1(__test_elephant_trample);
 
 static int __test_count_figures(int type) {
     int count = 0;

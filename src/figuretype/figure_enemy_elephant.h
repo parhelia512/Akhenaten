@@ -4,10 +4,21 @@
 
 // Egyptian war elephant. Reuses fast-sword formation/melee AI; dedicated type
 // so HP/speed/AoE can diverge. March SFX skipped in figure_enemy_fast_sword
-// (camel/elephant filter). Full trampling AoE is a follow-up.
+// (camel/elephant filter). Splash trampling hits adjacent soldiers (Chebyshev 1).
 class figure_enemy_elephant : public figure_enemy_fast_sword {
 public:
     figure_enemy_elephant(figure *f) : figure_enemy_fast_sword(f) {}
+
+    // damage_action @0 must match parent building-smash layout.
+    struct runtime_data_t {
+        uint8_t damage_action = 0;
+        uint8_t trample_cooldown = 0;
+    } FIGURE_RUNTIME_DATA_T;
+
+    virtual void figure_action() override;
+
+    // Splash damage to adjacent player soldiers. force=true bypasses cooldown (tests).
+    void trample_adjacent(bool force = false);
 };
 
 class figure_egyptian_elephant : public figure_enemy_elephant {

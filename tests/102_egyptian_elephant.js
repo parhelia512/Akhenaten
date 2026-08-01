@@ -1,11 +1,12 @@
-// Egyptian war elephant — register + spawn/action smoke + soldier can target.
+// Egyptian war elephant — register + spawn/action + soldier target + trampling AoE.
 // FIGURE_ENEMY_EGYPTIAN_ELEPHANT (47) → figure_egyptian_elephant (figure_enemy_elephant).
-// Not in enemy_egyptian.figure_types[]. AoE trampling is a follow-up.
+// Not in enemy_egyptian.figure_types[]. Splash trampling = adjacent soldiers (Chebyshev 1).
 // Markers:
 //   [test-marker] egyptian_elephant_control_ok
 //   [test-marker] egyptian_elephant_registered_ok
 //   [test-marker] egyptian_elephant_spawn_ok
 //   [test-marker] egyptian_elephant_soldier_target_ok
+//   [test-marker] egyptian_elephant_trample_ok
 //   [test-marker] egyptian_elephant_all_ok
 
 function run_test() {
@@ -57,7 +58,34 @@ function run_test() {
     }
     __log_marker('egyptian_elephant_soldier_target_ok')
 
+    // Two infantry adjacent — one force-trample should damage both.
+    var s1 = test_figure_create(FIGURE_INFANTRY, tile.x + 1, tile.y)
+    var s2 = test_figure_create(FIGURE_INFANTRY, tile.x, tile.y + 1)
+    if (!s1 || !s2 || !__figure_is_valid(s1) || !__figure_is_valid(s2)) {
+        __log_info_native('[test:102] infantry spawn for trample failed')
+        __test_signal_ready()
+        return
+    }
+    var d1_before = __test_figure_get_damage(s1)
+    var d2_before = __test_figure_get_damage(s2)
+    if (!__test_elephant_trample(eid)) {
+        __log_info_native('[test:102] __test_elephant_trample failed')
+        __test_signal_ready()
+        return
+    }
+    var d1_after = __test_figure_get_damage(s1)
+    var d2_after = __test_figure_get_damage(s2)
+    if (d1_after <= d1_before || d2_after <= d2_before) {
+        __log_info_native('[test:102] trample want both soldiers damaged, got '
+            + d1_before + '->' + d1_after + ', ' + d2_before + '->' + d2_after)
+        __test_signal_ready()
+        return
+    }
+    __log_marker('egyptian_elephant_trample_ok')
+
     __test_figure_kill(eid)
+    __test_figure_kill(s1)
+    __test_figure_kill(s2)
     __log_marker('egyptian_elephant_all_ok')
 
     __test_signal_ready()
@@ -69,6 +97,7 @@ function check_valid() {
         'egyptian_elephant_registered_ok',
         'egyptian_elephant_spawn_ok',
         'egyptian_elephant_soldier_target_ok',
+        'egyptian_elephant_trample_ok',
         'egyptian_elephant_all_ok'
     ]
     for (var i = 0; i < markers.length; i++) {

@@ -457,6 +457,7 @@ figure_egyptian_spearman = {
     missile_defense_value : 1
     terrain_usage : TERRAIN_USAGE_ANY
     missile_type : FIGURE_SPEAR
+    attack_distance : 3
     is_enemy : true
     max_amount : 25
 }
@@ -608,8 +609,6 @@ figure_egyptian_mounted_archer = {
     max_amount : 25
 }
 
-// War elephant. High HP/attack; TEMP art = chariot strips until pack dump.
-// Not in enemy_egyptian.figure_types[] without OG %. AoE trampling is a follow-up.
 figure_egyptian_elephant = {
     animations : {
         // TEMP art: chariot as large-mount stand-in

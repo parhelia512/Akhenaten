@@ -1035,7 +1035,9 @@ bool scenario_invasion_start_from_kingdome(int &size) {
     tile2i invasion_tile = scenario_start_invasion_impl(opts);
     if (invasion_tile.valid()) {
         size = opts.size; // difficulty-adjusted spawn count for kill bookkeeping
-        emit_local_invasion_attack_message("message_kingdome_army_attack",
+        // Same popup as scenario KINGDOME warnings (id 123); no separate
+        // message_kingdome_army_attack archive entry.
+        emit_local_invasion_attack_message("message_legion_attacks",
             data.last_internal_invasion_id, invasion_tile.grid_offset());
         return true;
     }
@@ -1058,16 +1060,13 @@ int scenario_invasion_start(invasion_opts_t opts) {
     case ATTACK_TYPE_ENEMIES: {
         tile2i invasion_tile = scenario_start_invasion_impl(opts);
         if (invasion_tile.valid()) {
-            // Favour / Pharaoh army uses Egyptian sprites — kingdome message, not barbarians.
             if (opts.enemy_type == ENEMY_3_EGYPTIAN || opts.kind == INVASION_KIND_KINGDOME) {
-                emit_local_invasion_attack_message("message_kingdome_army_attack",
+                emit_local_invasion_attack_message("message_legion_attacks",
                     data.last_internal_invasion_id, invasion_tile.grid_offset());
             } else {
                 emit_local_invasion_attack_message("message_barbarians_attack",
                     data.last_internal_invasion_id, invasion_tile.grid_offset());
             }
-            // Favour-KR via ENEMIES+KINGDOME: kill tally only (favour_only; not Caesar wrath).
-            // opts.size is difficulty-adjusted by scenario_start_invasion_impl.
             if (opts.kind == INVASION_KIND_KINGDOME) {
                 g_city.kingdome.begin_favour_army(opts.size);
             }
