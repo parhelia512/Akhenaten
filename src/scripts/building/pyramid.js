@@ -321,7 +321,7 @@ building_small_stepped_pyramid {
     enter_offset : [2, 20]
 
     // 20×20 multi-tier L-ramp (south → SE → east climb, then upper ledges).
-    // Keep in sync with building_stepped_pyramid_complex. Optional L2.4: eye-tune offsets.
+    // Keep in sync with building_stepped_pyramid_complex. Optional: L4 stairs / eye-tune offsets.
     stairs [
       {
         phase : 7

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Baki — The Glory of Egypt — Akhenaten Wiki</title>
+  <title>Hetepsensusret — The Glory of Pharaoh — Akhenaten Wiki</title>
   <link rel="stylesheet" href="../../../style.css" />
   <style>
     .mission-infobox { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.9rem 1.1rem; }
@@ -47,65 +47,65 @@
       <div class="wiki-sidebar-section">
         <div class="wiki-sidebar-title">New Kingdom</div>
         <ul>
-          <li><a href="baki.html" class="active">35 · Baki</a></li>
+          <li><a href="hetepsensusret.html" class="active">37 · Hetepsensusret</a></li>
         </ul>
       </div>
     </aside>
     <div class="wiki-content">
-      <div class="wiki-breadcrumb"><a href="index.html">Missions</a> / Baki</div>
-      <h1>Baki <span style="color:var(--text-muted);font-weight:normal;font-size:0.65em">— The Glory of Egypt</span></h1>
+      <div class="wiki-breadcrumb"><a href="index.html">Missions</a> / Hetepsensusret</div>
+      <h1>Hetepsensusret <span style="color:var(--text-muted);font-weight:normal;font-size:0.65em">— The Glory of Pharaoh</span></h1>
       <div class="mission-infobox">
         <dl>
-          <dt>Mission</dt><dd>35 — choice B after Khmun (32) / Sauty (33)</dd>
-          <dt>Classical name</dt><dd>Baki / Kuban (briefing key <code>message_mission_kuban</code>)</dd>
+          <dt>Mission</dt><dd>37 — Family History finale after Baki (35)</dd>
+          <dt>Classical name</dt><dd>Hetepsensusret / Kahun (briefing key <code>message_mission_kahun</code>)</dd>
           <dt>Starting funds</dt>
           <dd><div class="funds-row">
-            <span><strong>Normal</strong> 7 000 Db (pak)</span>
-            <span><strong>loan</strong> 2 500</span>
+            <span><strong>Normal</strong> 2 000 Db (pak)</span>
+            <span><strong>loan</strong> 3 000</span>
             <span><strong>debt</strong> 20%</span>
           </div></dd>
-          <dt>Deities</dt><dd>Ra (patron ×2) · Osiris · Ptah · Seth</dd>
-          <dt>Trade</dt><dd>Abu · Itjtawy · Men-nefer · Pwenet · Qadesh · Rowarty · Waset; display Byblos / Gaza / Heh / Iken / Kerma / Knossos / Menat / Tyre</dd>
-          <dt>Previous</dt><dd><a href="khmun.html">Khmun</a> (32) / <a href="sauty.html">Sauty</a> (33) — choice pair</dd>
-          <dt>Sibling</dt><dd><a href="index.html#new-kingdom">Byblos</a> (34) — choice A</dd>
-          <dt>Next</dt><dd><a href="hetepsensusret.html">Hetepsensusret</a> (37) — <code>next_mission</code></dd>
+          <dt>Deities</dt><dd>Bast (patron ×2) · Osiris · Ra · Ptah</dd>
+          <dt>Trade</dt><dd>Baki · Dakhla Oasis; display Abu / Bahariya / Farafra / Itjtawy / Knossos / Men-nefer / Menat / Mycenae / Pwenet / Qadesh / Rowarty / Tyre / Waset</dd>
+          <dt>Previous</dt><dd><a href="baki.html">Baki</a> (35) — <code>next_mission</code></dd>
+          <dt>Sibling finale</dt><dd><a href="index.html#new-kingdom">Rowarty</a> (36) — Byblos branch (mutual exclusive)</dd>
+          <dt>Next</dt><dd>Campaign end (<code>next_mission: -1</code> — not Cleopatra 38)</dd>
           <dt>Status</dt><dd><span class="mission-badge badge-impl">Implemented</span></dd>
         </dl>
       </div>
 
       <div class="deviation-note">
-        <strong>Showpiece:</strong> Nubian gold, sandstone/mausoleum + two mudbrick pyramids, broad egyptian/foreign trade, favour Egypt ladder.
-        <br /><strong>Enemy:</strong> scenario <code>ENEMY_4_HITTITE</code> (pak). Briefing “Sea People” is narrative — timed invasions are egypt <code>by_favour</code> (60→5→15→20→20), not Sea People packs.
-        <br /><strong>Topo:</strong> inv land <code>[187,137]</code>; sea <code>[75,198]</code> water → land-proxy disembark <code>[53,111]</code> until E3c.
-        <br /><strong>Monuments 35:</strong> Mausoleum (gr198:25) + Medium Mudbrick (4) + Small Mudbrick (3); W=3+8+4 →
-        <code>trunc(2.25·15+4.5)=38</code> ≥ pak 35 (keep pak goal).
-        <br /><strong>Soft:</strong> truncate CITY_SAVED i=18→0; remap KR+5 ok=85; SKIP map_obj idx=11; orphan routes 25/26; gems×64 Heh ok→KR−15 as-pak.
+        <strong>Showpiece:</strong> Fayuum endgame — Grand Mudbrick Pyramid Complex + Large Mudbrick + sandstone Mausoleum; city requests / floods / gifts; favour Egypt.
+        <br /><strong>Briefing vs pak:</strong> MM text says a pyramid “larger than Khufu” (true grand). Pak monuments are <strong>Grand Mudbrick Complex</strong> (gr198:7) + Large Mudbrick (5) + Mausoleum skin 2 (27) — keep as-pak.
+        <br /><strong>Enemy:</strong> scenario <code>ENEMY_1_ASSYRIAN</code> (pak). Timed raids are egypt <code>by_favour</code> ×40→×40→×40 only (peaceful calendar).
+        <br /><strong>Topo:</strong> pak inv land/sea empty → land-proxy <code>[80,40]</code> near entry for favour spawn.
+        <br /><strong>Monuments 70:</strong> W=3+44+12 → clamp 100 ≥ pak 70 (keep pak goal).
+        <br /><strong>Soft:</strong> SKIP map_obj idx=11; Farafra NEW_TRADE cosmetic (no route); truncate junk late≥50 on non-request leaves; Water Lift OFF.
       </div>
 
       <h2 id="objectives">Objectives</h2>
       <ul class="objectives-list">
-        <li><span class="obj-label">Population</span><span class="obj-value">10 000</span></li>
-        <li><span class="obj-label">Culture</span><span class="obj-value">70</span></li>
-        <li><span class="obj-label">Prosperity</span><span class="obj-value">70</span></li>
-        <li><span class="obj-label">Monuments</span><span class="obj-value">35 (Mausoleum + Medium + Small Mudbrick)</span></li>
-        <li><span class="obj-label">Kingdom</span><span class="obj-value">85</span></li>
-        <li><span class="obj-label">Housing</span><span class="obj-value">level 19</span></li>
+        <li><span class="obj-label">Population</span><span class="obj-value">12 000</span></li>
+        <li><span class="obj-label">Culture</span><span class="obj-value">80</span></li>
+        <li><span class="obj-label">Prosperity</span><span class="obj-value">80</span></li>
+        <li><span class="obj-label">Monuments</span><span class="obj-value">70 (Mausoleum + Grand Mudbrick Complex + Large Mudbrick)</span></li>
+        <li><span class="obj-label">Kingdom</span><span class="obj-value">75</span></li>
+        <li><span class="obj-label">Housing</span><span class="obj-value">level 14</span></li>
       </ul>
 
       <h2 id="burial">Burial provisions</h2>
-      <p>Grave goods ×5: weapons ×32, pottery ×32, linen ×32, luxury ×32, chariots ×32 (pak burial block).</p>
+      <p>Grave goods ×5: weapons ×32, pottery ×32, linen ×32, luxury ×32, papyrus ×32 (pak burial block).</p>
 
       <h2 id="events">Scripted events (summary)</h2>
-      <p>Gems opener (Kerma) → henna/Iken conquer → NEW_TRADE Kerma (cosmetic). Luxury / gamemeat / copper calendars. Quirky gems×64 Heh refuse → henna Gaza → Itjtawy NEW_TRADE. Recurring sandstone / gems. Favour Egypt ×60 then chain ×5/×15/×20/×20. Win → Hetep (37).</p>
+      <p>Early timber / deben / gamemeat / bricks / papyrus requests. Recurring fish / reeds / grain. Calendar NEW_TRADE Dakhla / Knossos / Itjtawy (+ Farafra cosmetic). Floods → fish aid; perfect flood → luxury. Troops chains (Itjtawy / Knossos / Hetep) with battle-lost message. Contaminated water → papyrus loop. Favour egypt ×40 chain. Win → campaign end (<code>win_game.smk</code>).</p>
 
       <div class="dev-section">
         <h2 id="dev">Developer reference</h2>
         <details open>
           <summary>Mission script</summary>
           <div class="details-body">
-            <p><span class="file-ref">src/scripts/mission/m_035_baki.js</span></p>
-            <p><span class="file-ref">data/maps/m_035_baki.map</span></p>
-            <p><code>next_mission : 37</code>. Empire id 1 · map_background PACK_EMPIRE id 1. SKIP map_obj idx=11. Dump 2026-08-01.</p>
+            <p><span class="file-ref">src/scripts/mission/m_037_hetepsensusret.js</span></p>
+            <p><span class="file-ref">data/maps/m_037_hetepsensusret.map</span></p>
+            <p><code>next_mission : -1</code>. Empire id 23 · map_background PACK_EMPIRE id 23. SKIP map_obj idx=11. Dump 2026-08-01. <code>events[]</code> redefine (69).</p>
           </div>
         </details>
         <details>
@@ -113,16 +113,16 @@
           <div class="details-body">
             <table class="msg-table">
               <tr><th>Key</th><th>Id</th></tr>
-              <tr><td><code>message_mission_kuban</code></td><td>435</td></tr>
-              <tr><td><code>message_history_baki</code></td><td>235</td></tr>
+              <tr><td><code>message_mission_kahun</code></td><td>437</td></tr>
+              <tr><td><code>message_history_hetepsensusret</code></td><td>237</td></tr>
             </table>
           </div>
         </details>
       </div>
 
       <div class="mission-nav">
-        <a href="sauty.html">← Sauty</a>
-        <a href="hetepsensusret.html">Hetep →</a>
+        <a href="baki.html">← Baki</a>
+        <a href="index.html#new-kingdom">Missions ↑</a>
       </div>
     </div>
   </main>

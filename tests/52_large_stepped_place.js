@@ -72,7 +72,8 @@ function run_test() {
     // Filenames are timestamped (full_city_<ts>.png), so time order == this order.
     // Screenshots save into the data dir, so run against a WRITABLE Pharaoh copy
     // (e.g. d:/Work/Cleop), not a read-only Program Files install.
-    var phases = [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 18, 21, 24, 28, 32]
+    // Through all 5 brick tiers; 35 = full apex course, 36 = terminal marker.
+    var phases = [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 18, 21, 24, 28, 32, 35, 36]
     var all_phases_ok = true
     for (var p = 0; p < phases.length; p++) {
         __test_monument_set_phase(bid, phases[p])
