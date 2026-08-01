@@ -34,6 +34,14 @@ function run_test() {
         }
     }
 
+    // SB2: ship bridge must stay out of campaign unlock / menu.
+    if (typeof BUILDING_UNUSED_SHIP_BRIDGE_83 !== 'undefined'
+        && __scenario_building_allowed(BUILDING_UNUSED_SHIP_BRIDGE_83)) {
+        __log_marker('bridge_menu_fail:ship_bridge_allowed')
+    } else {
+        __log_marker('bridge_menu_ok:ship_bridge_absent')
+    }
+
     test_reload_city_session('data/default.map')
     __test_signal_ready()
 }
@@ -46,6 +54,9 @@ function check_valid() {
         return false
     }
     if (!__test_find_inlog('bridge_menu_ok:perwadjyt_unlock')) {
+        return false
+    }
+    if (!__test_find_inlog('bridge_menu_ok:ship_bridge_absent')) {
         return false
     }
     if (__test_find_inlog('bridge_menu_ok:bridges_day0')) {

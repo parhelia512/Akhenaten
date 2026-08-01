@@ -17,7 +17,7 @@ int bridge_span_max_length(bool is_ship_bridge) {
         return v > 0 ? v : 40;
     }
     const uint8_t v = building_low_bridge::current_params().max_length;
-    return v > 0 ? v : 40;
+    return v > 0 ? v : 8;
 }
 
 int bridge_span_min_length(bool is_ship_bridge) {

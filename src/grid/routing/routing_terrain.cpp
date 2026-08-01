@@ -304,7 +304,7 @@ int map_routing_tile_check(int routing_type, int grid_offset) {
                     case 5:
                     case 6: // low bridge middle section
                         return AMPHIBIA_N3_LOW_BRIDGE;
-                    case 13: // ship bridge pillar
+                    case 13: // ship bridge platform (undrawn; Julius blocks boats here)
                         return AMPHIBIA_N1_BLOCKED;
                     default:
                         return AMPHIBIA_0_PASSABLE;
@@ -324,7 +324,7 @@ int map_routing_tile_check(int routing_type, int grid_offset) {
                     case 6: // low bridge middle section
                         return WATER_N3_LOW_BRIDGE;
 
-                    case 13: // ship bridge pillar
+                    case 13: // ship bridge platform (undrawn; Julius blocks boats here)
                         return WATER_N1_BLOCKED;
 
                     default:

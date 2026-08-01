@@ -8,12 +8,20 @@ Dump helpers: `__test_mission_bridge_allow_dump(id)`,
 | **28** | Bridge | `{BUILDING_LOW_BRIDGE}` only |
 | **29** | Ferry Landing | `{BUILDING_FERRY}` |
 
+**SHIP_BRIDGE = none** — no editor slot; `BUILDING_UNUSED_SHIP_BRIDGE_83` is not a
+consumer of UB1 (**SB0=A** locked 2026-08-01). Do not map Bridge → 83.
+Engine/load/undo may still know type 83 (C3 leftover); campaign menu and
+`buildings[]` must not. Place regression: `tests/136_ship_bridge_placement.js`.
+Enhanced menu (if ever) = PC2 only — not remake-close.
+
 Merge: **UB-A** (JS `buildings[]` / `use_building` = menu; pak = audit).
 Canary: `tests/114_bridge_editor_allow_dump.js` (skips under `--no-resource`).
-Menu smoke: `tests/115_bridge_menu_smoke.js` (Perwadjyt REMAP + Bridges/Nekhen day-0).
+Menu smoke: `tests/115_bridge_menu_smoke.js` (Perwadjyt REMAP + Bridges/Nekhen day-0;
+also asserts type 83 never allowed).
 
 Dump date: **2026-07-31** (`mission1.pak` + `Cleop/Maps/{Alexandria,Bridges}.map`).
-Wiki Dev Ref: Low Bridge listed where JS unlocks it (2026-07-31 BR2).
+Wiki Dev Ref: Low Bridge listed where JS unlocks it (2026-07-31 BR2); Ship Bridge
+note on buildings index (2026-08-01).
 
 | ID | Src | Bridge | Ferry | JS triage |
 |----|-----|--------|-------|-----------|
@@ -55,3 +63,4 @@ Wiki Dev Ref: Low Bridge listed where JS unlocks it (2026-07-31 BR2).
 - Re-export `data/maps` (zero reserved until batch re-export)
 - Ferry REMAP cleanup (Abu / Meidum / On / Valley keep JS Ferry despite pak OFF)
 - Hermetic CI: canary always skips without Cleop data
+- Ship Bridge in player menu — Enhanced / PC2 only (not OG parity)

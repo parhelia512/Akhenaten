@@ -7,6 +7,7 @@
 #include "grid/sprite.h"
 #include "grid/bridge.h"
 #include "grid/bridge_grid.h"
+#include "building/building_bridge.h"
 #include "grid/wall_material.h"
 #include "grid/basin.h"
 #include "grid/floodplain.h"
@@ -168,7 +169,11 @@ ANK_FUNCTION_2(__map_bridge_calculate_length);
 bool __map_bridge_calculate_valid(tile2i tile, bool is_ship_bridge) {
     int length = 0;
     int direction = 0;
-    return map_bridge_calculate_length_direction(tile.x(), tile.y(), &length, &direction, is_ship_bridge) != 0;
+    if (!map_bridge_calculate_length_direction(tile.x(), tile.y(), &length, &direction, is_ship_bridge)) {
+        return false;
+    }
+    return length >= bridge_span_min_length(is_ship_bridge)
+        && length <= bridge_span_max_length(is_ship_bridge);
 }
 ANK_FUNCTION_2(__map_bridge_calculate_valid);
 
