@@ -100,14 +100,14 @@ void building_hunting_lodge::spawn_figure() {
     }
 
     if (can_spawn_hunter()) {
-        base.figure_spawn_delay = 10;
+        base.figure_spawn_delay = 0;
         create_figure_generic(resolve_hunter_type(), ACTION_8_RECALCULATE, BUILDING_SLOT_HUNTER, DIR_4_BOTTOM_LEFT);
     }
 
     figure* fcart = base.common_spawn_goods_output_cartpusher();
     if (fcart) {
         events::emit(event_produced_resources{ base.output.resource, fcart->get_carrying_amount() });
-        base.figure_spawn_delay = 10;
+        base.figure_spawn_delay = 0;
     }
 }
 
@@ -117,6 +117,9 @@ bool building_hunting_lodge::draw_ornaments_and_animations_height(painter &ctx, 
     int amount = ceil((float)stored_amount(RESOURCE_GAMEMEAT) / 100.0) - 1;
     if (amount >= 0) {
         const auto &ranim = anim(animkeys().gamemeat);
+        if (ranim.max_frames > 0) {
+            amount = std::min(amount, (int)ranim.max_frames - 1);
+        }
         auto& command = ImageDraw::create_subcommand(ctx, render_command_t::ert_generic);
         command.image_id = ranim.first_img() + amount;
         command.pixel = point + ranim.pos;

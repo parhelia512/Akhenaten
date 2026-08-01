@@ -1039,6 +1039,52 @@ static int __test_hunting_lodge_default_hunter_type() {
 }
 ANK_FUNCTION(__test_hunting_lodge_default_hunter_type);
 
+static int __test_building_figure_spawn_delay(int bid) {
+    building *b = building_get(bid);
+    return b ? b->figure_spawn_delay : -1;
+}
+ANK_FUNCTION_1(__test_building_figure_spawn_delay);
+
+static void __test_building_set_figure_spawn_delay(int bid, int delay) {
+    building *b = building_get(bid);
+    if (!b) {
+        return;
+    }
+    b->figure_spawn_delay = (short)delay;
+}
+ANK_FUNCTION_2(__test_building_set_figure_spawn_delay);
+
+static int __test_hunting_lodge_active_hunters(building *b) {
+    if (!b) {
+        return -1;
+    }
+    return b->get_figures_number(FIGURE_OSTRICH_HUNTER)
+        + b->get_figures_number(FIGURE_ANTELOPE_HUNTER)
+        + b->get_figures_number(FIGURE_BIRDS_HUNTER);
+}
+
+static int __test_hunting_lodge_spawn_figure(int bid) {
+    building *b = building_get(bid);
+    if (!b || b->type != BUILDING_HUNTING_LODGE) {
+        return -1;
+    }
+    building_impl *impl = b->dcast();
+    if (!impl) {
+        return -1;
+    }
+    b->has_road_access = true;
+    if (b->road_network_id <= 0) {
+        b->road_network_id = 1;
+    }
+    if (b->distance_from_entry <= 0) {
+        b->distance_from_entry = 1;
+    }
+    const int before = __test_hunting_lodge_active_hunters(b);
+    impl->spawn_figure();
+    return __test_hunting_lodge_active_hunters(b) - before;
+}
+ANK_FUNCTION_1(__test_hunting_lodge_spawn_figure);
+
 static void __test_figure_set_action(int fid, int action) {
     figure *f = figure_get(fid);
     if (!f || !f->is_alive()) {

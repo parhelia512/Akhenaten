@@ -67,7 +67,21 @@ void figure_hunter::figure_action() {
         if (base.movement_ticks_watchdog > 60) {
             base.movement_ticks_watchdog = 0;
             route_remove();
-            advance_action(ACTION_8_RECALCULATE);
+            // Packed return: never RECALCULATE — that drops the carcass.
+            if (action_state(ACTION_12_OSTRICH_HUNTER_MOVE_PACKED,
+                             ACTION_12_OSTRICH_HUNTER_MOVE_RANDOM_PACKED,
+                             ACTION_12_OSTRICH_HUNTER_LOOK_RANDOM_PACKED)) {
+                if (home()->is_ajacent_tile(tile())) {
+                    advance_action(ACTION_14_OSTRICH_HUNTER_UNLOADING);
+                } else {
+                    advance_action(ACTION_12_OSTRICH_HUNTER_LOOK_RANDOM_PACKED);
+                }
+            } else if (action_state(ACTION_11_OSTRICH_HUNTER_GOING_TO_PICKUP_POINT)
+                       && base.target_figure_id) {
+                // Keep pickup intent; route_remove lets do_goto repath.
+            } else {
+                advance_action(ACTION_8_RECALCULATE);
+            }
         }
     } else {
         base.movement_ticks_watchdog = 0;
@@ -208,6 +222,10 @@ void figure_hunter::figure_action() {
         area.find_all(free_tiles, [&](tile2i t) {
             return map_noncitizen_is_passable(t.grid_offset());
         });
+        if (free_tiles.empty()) {
+            advance_action(ACTION_12_OSTRICH_HUNTER_MOVE_PACKED);
+            break;
+        }
         advance_action(ACTION_12_OSTRICH_HUNTER_MOVE_RANDOM_PACKED);
         base.destination_tile = map_random_choose(free_tiles, tile());
     } break;

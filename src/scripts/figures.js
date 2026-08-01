@@ -388,6 +388,7 @@ figure_antelope {
 	max_damage: 100
 	terrain_usage : TERRAIN_USAGE_ANIMAL
 	scared_ticks: 128
+	corpse_time_delay: 300
 }
 
 figure_horses = {

@@ -29,7 +29,7 @@ struct city_animals_t : public game_system {
     void set_animals_area(int index, int reseach_radius);
 };
 
-// Hunting lodge: climate prey → hunter figure type (birds leaf deferred → ostrich).
+// Hunting lodge: climate prey / legacy animal → hunter figure type.
 e_figure_type climate_prey_type();
 e_figure_type climate_legacy_animal_type();
 bool scenario_has_prey_points();
