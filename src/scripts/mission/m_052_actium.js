@@ -7,6 +7,7 @@ log_info("akhenaten: mission 52 actium started")
 // Win: pop 1000 / culture OFF / prosperity OFF / monuments OFF /
 //      kingdom 50 / housing 0x lv5 / survival 6y (m 2/4/6).
 // Monuments: none. Burial: none. Gods: Ra(2).
+// Env: alt_predator=1 (northern); set in on_start.
 // Invasions x2 land-proxy (loc 9); sea/land inv + disembark points present.
 // Warship editor slot 43 OFF — TEMP on for navy briefing (TODO NV / CC52.N).
 // SKIP empty map_obj idx=6. Orphan Waset route 17 -> 0.
@@ -625,6 +626,7 @@ function mission52_on_start(ev) {
 	__image_request_pak(PACK_ENEMY_PERSIAN)
 	__image_request_pak(PACK_ENEMY_EGYPTIAN)
 	scenario.start_year = -35
+	scenario.alt_predator_type = true
 	__scenario_monuments.first = 0
 	__scenario_monuments.second = 0
 	__scenario_monuments.third = 0
