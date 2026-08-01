@@ -113,13 +113,13 @@ void figure_ostrich::update_animation() {
         image_set_animation(animkeys().eating);
         break;
 
-    case ACTION_16_OSTRICH_FLEEING: 
-    case ACTION_10_OSTRICH_GOING: 
+    case ACTION_16_OSTRICH_FLEEING:
+    case ACTION_10_OSTRICH_GOING:
         image_set_animation(animkeys().walk);
         break;
 
-    case ACTION_15_OSTRICH_TERRIFIED: 
-    case 14:                      
+    case ACTION_15_OSTRICH_TERRIFIED:
+    case 14:
         image_set_animation(animkeys().idle);
         base.animctx.frame = 0;
         break;
@@ -127,12 +127,6 @@ void figure_ostrich::update_animation() {
     case FIGURE_ACTION_149_CORPSE:
         image_set_animation(animkeys().death);
         break;
-
-    //case FIGURE_ACTION_150_ATTACK:
-        // TODO: dalerank ostrich want to attack anybody
-        //advance_action(ACTION_8_RECALCULATE);
-        //image_set_animation(GROUP_FIGURE_OSTRICH_ATTACK, 0, 8);
-    //    break;
 
     default:
         // In any strange situation load eating/roosting animation

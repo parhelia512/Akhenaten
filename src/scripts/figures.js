@@ -422,10 +422,11 @@ figure_birds = {
 		big_image : { pack:PACK_UNLOADED, id:25, offset:FIGURE_BIRDS }
 	}
 
-	category: figure_category_inactive
+	category: figure_category_animal
 	max_damage: 100
 	corpse_time_delay: 300
 	terrain_usage : TERRAIN_USAGE_ANIMAL
+	scared_ticks: 128
 }
 
 figure_crocodile = {
