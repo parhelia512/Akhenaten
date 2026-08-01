@@ -48,13 +48,31 @@ function run_test() {
     check("route14_on", !!by_route[14])
     check("no_orphan15", !by_route[15])
 
+    check("next49", cfg.next_mission == 49)
+    check("start_msg", cfg.start_message == "message_mission_alexandria_2")
+
+    var has_maus = false
+    var has_lib = false
+    var has_pharos = false
+    for (var b = 0; b < cfg.buildings.length; b++) {
+        if (cfg.buildings[b] == BUILDING_MAUSOLEUM) has_maus = true
+        if (cfg.buildings[b] == BUILDING_ALEXANDRIA_LIBRARY) has_lib = true
+        if (cfg.buildings[b] == BUILDING_PHAROS_LIGHTHOUSE) has_pharos = true
+    }
+    check("buildings_mausoleum", has_maus)
+    check("no_library_mon", !has_lib)
+    check("no_pharos", !has_pharos)
+
     __game_load_mission(48, 1)
     check("48.pop", __win_criteria.population.goal == 4000)
+    check("48.mon", __win_criteria.monuments.enabled == true && __win_criteria.monuments.goal == 14)
     check("48.year", scenario.start_year == -331)
+    check("48.first", __scenario_monuments.first == 25)
+    check("48.second", __scenario_monuments.second == 0)
 
-    log_info("CC48 display-route0 smoke fails=" + fails)
+    log_info("CC48 smoke fails=" + fails)
     __test_signal_ready()
 }
 function check_valid() {
-    return __test_find_inlog("CC48 display-route0 smoke fails=0")
+    return __test_find_inlog("CC48 smoke fails=0")
 }

@@ -728,6 +728,9 @@ function mission47_on_start(ev) {
 	__image_request_pak(PACK_ENEMY_ROMAN)
 	__image_request_pak(PACK_ENEMY_EGYPTIAN)
 	scenario.start_year = -395
+	__scenario_monuments.first = 0
+	__scenario_monuments.second = 0
+	__scenario_monuments.third = 0
 	mission_show_start_message(mission, "message_mission_tanis")
 	empire.set_id(1)
 	empire.set_expanded(false)

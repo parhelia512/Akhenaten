@@ -473,6 +473,10 @@ function mission42_ensure_chain_leaves() {
 function mission42_on_start(ev) {
 	log_info("mission42: on_start", {ev:ev})
 	__image_request_pak(PACK_ENEMY_CANAANITE)
+	scenario.start_year = -1277
+	__scenario_monuments.first = 0
+	__scenario_monuments.second = 0
+	__scenario_monuments.third = 0
 	mission_show_start_message(mission, "message_mission_qadesh")
 	empire.set_id(23)
 	empire.set_expanded(false)

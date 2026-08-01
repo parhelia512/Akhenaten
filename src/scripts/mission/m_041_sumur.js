@@ -9,7 +9,7 @@ log_info("akhenaten: mission 41 sumur started")
 // Climate northern; map_background empire pack id 21.
 // Full empire redefine (hide_pak_*) + JS event graph. SKIP empty map_obj idx=6.
 // Chain-only invasion i=11 (after LOST Qadesh) → JS chain via event_request_cleared.
-// Favour egypt×23 (i=30). Calendar canaanite×33 (i=31). next_mission 42 stub policy.
+// Favour egypt×23 (i=30). Calendar canaanite×33 (i=31). next_mission 42 (Qadesh §13.4).
 // Recurring request/gift outcomes fire via request_cleared (shared ONLY_VIA = ALREADY_FIRED once).
 // Gift refuse paths are dead (engine gifts always COMPLETE).
 // Timber i=6 vs i=24 same m2/resource: handoff y16 (i=6 stops, i=24 starts).
@@ -673,6 +673,10 @@ function mission41_on_start(ev) {
 	log_info("mission41: on_start", {ev:ev})
 	__image_request_pak(PACK_ENEMY_CANAANITE)
 	__image_request_pak(PACK_ENEMY_EGYPTIAN)
+	scenario.start_year = -1300
+	__scenario_monuments.first = 22
+	__scenario_monuments.second = 0
+	__scenario_monuments.third = 0
 	mission_show_start_message(mission, "message_mission_sumur")
 	empire.set_id(23)
 	empire.set_expanded(false)

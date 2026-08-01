@@ -624,6 +624,8 @@ function mission39_on_start(ev) {
 	scenario.start_year = -1325
 	scenario.climate = 2 // CLIMATE_DESERT
 	__scenario_monuments.first = 34
+	__scenario_monuments.second = 0
+	__scenario_monuments.third = 0
 	mission_show_start_message(mission, "message_mission_tutankhamun_valley")
 	empire.set_id(21)
 	empire.set_expanded(false)

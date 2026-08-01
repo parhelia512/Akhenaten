@@ -973,6 +973,8 @@ function mission40_on_start(ev) {
 	scenario.start_year = -1290
 	scenario.climate = 2 // CLIMATE_DESERT
 	__scenario_monuments.first = 35
+	__scenario_monuments.second = 0
+	__scenario_monuments.third = 0
 	mission_show_start_message(mission, "message_mission_seti_valley")
 	empire.set_id(21)
 	empire.set_expanded(false)

@@ -1154,6 +1154,9 @@ function mission48_on_start(ev) {
 	__image_request_pak(PACK_ENEMY_PHOENICIAN)
 	__image_request_pak(PACK_ENEMY_EGYPTIAN)
 	scenario.start_year = -331
+	__scenario_monuments.first = 25
+	__scenario_monuments.second = 0
+	__scenario_monuments.third = 0
 	mission_show_start_message(mission, "message_mission_alexandria_2")
 	empire.set_id(0)
 	empire.set_expanded(false)

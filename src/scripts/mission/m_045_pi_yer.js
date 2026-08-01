@@ -708,6 +708,10 @@ function mission45_invasion_outcome(seq) {
 function mission45_on_start(ev) {
 	__image_request_pak(PACK_ENEMY_ASSYRIAN)
 	__image_request_pak(PACK_ENEMY_EGYPTIAN)
+	scenario.start_year = -1235
+	__scenario_monuments.first = 0
+	__scenario_monuments.second = 0
+	__scenario_monuments.third = 0
 	mission_show_start_message(mission, "message_mission_pi_yer")
 	empire.set_id(1)
 	empire.set_expanded(false)

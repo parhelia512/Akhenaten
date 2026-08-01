@@ -1210,6 +1210,7 @@ function mission51_on_start(ev) {
 	scenario.start_year = -40
 	__scenario_monuments.first = 30
 	__scenario_monuments.second = 27
+	__scenario_monuments.third = 0
 	mission_show_start_message(mission, "message_mission_cleopatra_alexandria")
 	empire.set_id(0)
 	empire.set_expanded(false)

@@ -841,6 +841,8 @@ function mission43_on_start(ev) {
 	scenario.start_year = -1270
 	scenario.climate = 2
 	__scenario_monuments.first = 37
+	__scenario_monuments.second = 0
+	__scenario_monuments.third = 0
 	mission_show_start_message(mission, "message_mission_abu_simbel")
 	empire.set_id(23)
 	empire.set_expanded(false)
