@@ -114,8 +114,27 @@ void draw_area_mask(build_planner &/*planer*/, painter &ctx, tile2i origin, int 
     }
 }
 
-int orient_idx_from_building(const building &b) {
-    return (b.orientation / 2) % 2;
+// Placement rotation 0..3 (same source as part offsets / path W×H). Art pack id
+// follows the camera like sphinx — separate from stored placement orientation.
+int placement_rotation(const building &b) {
+    return b.orientation % 4;
+}
+
+int art_orient_idx() {
+    return (g_camera.orientation / 2) % 2;
+}
+
+void advance_phase_all_parts(building_sun_temple *main_st) {
+    if (!main_st) {
+        return;
+    }
+    const int next = main_st->runtime_data().phase + 1;
+    for (building *p = main_st->base.main(); p; p = p->has_next() ? p->next() : nullptr) {
+        auto *st = p->dcast_sun_temple();
+        if (st) {
+            st->set_phase(next);
+        }
+    }
 }
 
 } // namespace
@@ -232,14 +251,24 @@ bool building_sun_temple::need_stonemason() {
         return false;
     }
     const int p = runtime_data().phase;
-    return p >= 3 && p <= 4;
+    if (p < 3 || p > 4) {
+        return false;
+    }
+    // Free worker slot — otherwise guilds keep spawning into a full roster.
+    const auto &w = runtime_data().workers;
+    return std::find(w.begin(), w.end(), 0) != w.end();
 }
 
 bool building_sun_temple::need_workers() const {
     if (is_finished() || !is_main()) {
         return false;
     }
-    if (runtime_data().phase >= 2) {
+    const int p = runtime_data().phase;
+    // 0–1: work-camp laborers. 2: carpenters (need_carpenter → free slot). 3+: stonemasons.
+    if (p >= 3) {
+        return false;
+    }
+    if (p == 2 && needs_resource(RESOURCE_TIMBER) <= 0) {
         return false;
     }
     const auto &w = runtime_data().workers;
@@ -248,6 +277,7 @@ bool building_sun_temple::need_workers() const {
 
 void building_sun_temple::add_workers(figure_id fid) {
     if (!is_main()) {
+        main()->add_workers(fid);
         return;
     }
     auto &d = runtime_data();
@@ -260,6 +290,10 @@ void building_sun_temple::add_workers(figure_id fid) {
 }
 
 void building_sun_temple::remove_worker(figure_id fid) {
+    if (!is_main()) {
+        main()->remove_worker(fid);
+        return;
+    }
     auto &d = runtime_data();
     for (auto &wid : d.workers) {
         if (wid == fid) {
@@ -271,7 +305,7 @@ void building_sun_temple::remove_worker(figure_id fid) {
 
 int building_sun_temple::building_image_get() const {
     const auto &params = current_params();
-    const int orient = orient_idx_from_building(base);
+    const int orient = art_orient_idx();
     const int part = runtime_data().variant;
 
     if (part == PART_PATH) {
@@ -311,7 +345,8 @@ void building_sun_temple::refresh_part_tiles() {
     const int img = building_image_get();
     if (part == PART_PATH) {
         const auto &bp = current_params();
-        const vec2i psz = oriented_wh(bp.path_size.x > 0 ? bp.path_size : vec2i{8, 2}, base.orientation);
+        // Must use placement rotation (0..3), not camera absolute orientation.
+        const vec2i psz = oriented_wh(bp.path_size.x > 0 ? bp.path_size : vec2i{8, 2}, placement_rotation(base));
         sun_temple_add_rect_tiles(id(), tile(), psz.x, psz.y, img);
         return;
     }
@@ -406,6 +441,15 @@ int building_sun_temple::preview::finalize_check(build_planner &p, tile2i tile, 
     return can_place(p, tile, end, CAN_PLACE);
 }
 
+int building_sun_temple::preview::construction_place(build_planner &planer, tile2i tile, tile2i end, int orientation, int variant) const {
+    const int placed = building_planer_renderer::construction_place(planer, tile, end, orientation, variant);
+    if (placed && planer.last_created_building && !planer.last_created_building->is_valid()) {
+        planer.last_created_building = nullptr;
+        return 0;
+    }
+    return placed;
+}
+
 void building_sun_temple::preview::ghost_preview(build_planner &planer, painter &ctx, tile2i /*start*/, tile2i end, vec2i pixel) const {
     const auto &params = building_static_params::get(planer.build_type);
     const auto &bp = st_params();
@@ -463,29 +507,51 @@ void building_sun_temple::preview::ghost_preview(build_planner &planer, painter 
 void building_sun_temple::on_place(int orientation, int variant) {
     building_impl::on_place(orientation, variant);
 
+    // Parts may have failed to spawn — do not charge sandstone for a half-built temple.
+    if (!base.is_valid()) {
+        return;
+    }
+
     const int need = placement_amount(RESOURCE_SANDSTONE);
     if (need > 0) {
         events::emit(event_city_remove_resource{RESOURCE_SANDSTONE, need, /*staffed_only*/true});
     }
 }
 
-void building_sun_temple::on_place_update_tiles(int orientation, int /*variant*/) {
+void building_sun_temple::on_place_update_tiles(int /*orientation*/, int /*variant*/) {
     base.prev_part_building_id = 0;
     runtime_data().variant = PART_BODY;
-    base.orientation = orientation;
+    // Persist placement rotation (0..3) — same index as part_*_offset / path W×H.
+    // absolute_orientation from the planner can differ from global_rotation.
+    const int rotation = building_rotation_global_rotation() % 4;
+    base.orientation = (uint8_t)rotation;
     base.size = 10;
 
     refresh_part_tiles();
 
     const auto &bp = current_params();
-    const int rotation = building_rotation_global_rotation() % 4;
     const vec2i off_path = part_offset(bp.part_path_offset, rotation, vec2i{1, 10});
     const vec2i off_hall = part_offset(bp.part_hall_offset, rotation, vec2i{4, 12});
-    const vec2i path_sz = oriented_wh(bp.path_size.x > 0 ? bp.path_size : vec2i{8, 2}, rotation);
     const vec2i hall_sz = bp.hall_size.x > 0 ? bp.hall_size : vec2i{3, 3};
 
     building *part_path = building_create(BUILDING_SUN_TEMPLE, tile().shifted(off_path), 0);
     building *part_hall = building_create(BUILDING_SUN_TEMPLE, tile().shifted(off_hall), 0);
+    const bool path_ok = part_path && part_path->id > 0;
+    const bool hall_ok = part_hall && part_hall->id > 0;
+    if (!path_ok || !hall_ok) {
+        // Tear down the whole place attempt: body alone would block "one unfinished".
+        if (path_ok) {
+            map_building_tiles_remove(part_path->id, part_path->tile);
+            part_path->state = BUILDING_STATE_DELETED_BY_GAME;
+        }
+        if (hall_ok) {
+            map_building_tiles_remove(part_hall->id, part_hall->tile);
+            part_hall->state = BUILDING_STATE_DELETED_BY_GAME;
+        }
+        map_building_tiles_remove(id(), tile());
+        base.state = BUILDING_STATE_DELETED_BY_GAME;
+        return;
+    }
     game_undo_add_building(part_path);
     game_undo_add_building(part_hall);
 
@@ -494,15 +560,14 @@ void building_sun_temple::on_place_update_tiles(int orientation, int /*variant*/
     if (sp) {
         sp->runtime_data().variant = PART_PATH;
         sp->runtime_data().phase = runtime_data().phase;
-        part_path->orientation = orientation;
+        part_path->orientation = (uint8_t)rotation;
         part_path->size = 1; // rect tiles; never size² leveling
         sp->refresh_part_tiles();
-        (void)path_sz;
     }
     if (sh) {
         sh->runtime_data().variant = PART_HALL;
         sh->runtime_data().phase = runtime_data().phase;
-        part_hall->orientation = orientation;
+        part_hall->orientation = (uint8_t)rotation;
         part_hall->size = (uint8_t)std::max(hall_sz.x, 1);
         sh->refresh_part_tiles();
     }
@@ -564,7 +629,9 @@ void building_sun_temple::update_day() {
         const bool all_tiles_finished = (tile2works == tile2i{-1, -1});
         if (all_tiles_finished) {
             map_grid_area_foreach(tiles, [](tile2i t) { map_monuments_set_progress(t, 0); });
-            set_phase(d.phase + 1);
+            // Mastaba-style: advance every linked part. progress() later does
+            // phase+1 per part — a main-only bump here permanently desyncs path/hall.
+            advance_phase_all_parts(this);
         }
         return;
     }
@@ -610,7 +677,7 @@ grid_area building_sun_temple::get_area() const {
         int w = p->size;
         int h = p->size;
         if (st && st->runtime_data().variant == PART_PATH) {
-            const vec2i psz = oriented_wh(bp.path_size.x > 0 ? bp.path_size : vec2i{8, 2}, p->orientation);
+            const vec2i psz = oriented_wh(bp.path_size.x > 0 ? bp.path_size : vec2i{8, 2}, placement_rotation(*p));
             w = psz.x;
             h = psz.y;
         } else if (st && st->runtime_data().variant == PART_HALL) {

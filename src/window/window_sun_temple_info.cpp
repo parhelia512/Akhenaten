@@ -45,9 +45,10 @@ void info_window_sun_temple::init(object_info &c) {
             reason = {178, 53}; // clearing site / work camps
         } else if (d.phase == 2 && st->needs_resource(RESOURCE_TIMBER) > 0) {
             reason = carpenters ? textid{178, 54} : textid{199, 48};
-        } else if (st->need_stonemason() && d.phase == 3) {
+        } else if (d.phase == 3) {
+            // Do not call need_stonemason() — it also requires a free worker slot.
             reason = stonemasons ? textid{178, 55} : textid{199, 49};
-        } else if (st->need_stonemason() && d.phase == 4) {
+        } else if (d.phase == 4) {
             reason = stonemasons ? textid{178, 56} : textid{199, 49};
         } else if (d.phase > 4) {
             reason = {178, 56};

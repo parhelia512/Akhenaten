@@ -1,6 +1,7 @@
 #include "figure_worker.h"
 
 #include "building/monument_mastaba.h"
+#include "building/monument_sun_temple.h"
 #include "building/building_farm.h"
 #include "graphics/image_groups.h"
 #include "city/city.h"
@@ -23,7 +24,16 @@ tile2i figure_worker::monumen_tile4work(building *b) {
         return tile2i{-1, -1};
     }
 
-    grid_tiles tiles = map_grid_get_tiles(b, 0);
+    // Sun Temple: body-only leveling. map_grid_get_tiles(b,0) walks linked parts by
+    // size² and would send laborers onto the 3×3 hall (path is size=1 so only its origin).
+    grid_tiles tiles;
+    if (b->dcast_sun_temple()) {
+        building *main = b->main();
+        const int body = main->size > 0 ? main->size : 10;
+        tiles = map_grid_get_tiles(main->tile, main->tile.shifted(body - 1, body - 1));
+    } else {
+        tiles = map_grid_get_tiles(b, 0);
+    }
     tile2i tile = map_grid_area_first(tiles, [&mastaba] (tile2i tile) {
         int progress = map_monuments_get_progress(tile);
         if (!progress) {
