@@ -2,8 +2,6 @@ log_info("akhenaten: city_monuments.js started")
 
 var MONUMENT_WEIGHTS = {}
 MONUMENT_WEIGHTS[BUILDING_PYRAMID]                        = 44
-MONUMENT_WEIGHTS[BUILDING_MUDBRICK_PYRAMID_COMPLEX]       = 44
-MONUMENT_WEIGHTS[BUILDING_GRAND_MUDBRICK_PYRAMID_COMPLEX] = 44
 MONUMENT_WEIGHTS[BUILDING_STEPPED_PYRAMID_COMPLEX]        = 24  // on-land (= large); +causeway → recalibrate toward 44
 MONUMENT_WEIGHTS[BUILDING_GRAND_STEPPED_PYRAMID_COMPLEX]  = 44
 // True complex on-land shares large weight until causeway (W=44 saturates clamp).
@@ -29,6 +27,9 @@ MONUMENT_WEIGHTS[BUILDING_SMALL_MUDBRICK_PYRAMID]         = 4
 MONUMENT_WEIGHTS[BUILDING_MEDIUM_MUDBRICK_PYRAMID]        = 8
 // Large mudbrick 16×16: continue half-stepped series (S/M/L stepped 8/16/24 → 4/8/12).
 MONUMENT_WEIGHTS[BUILDING_LARGE_MUDBRICK_PYRAMID]         = 12
+// Complex on-land shares large weight (44 would saturate alone); grand keeps 44.
+MONUMENT_WEIGHTS[BUILDING_MUDBRICK_PYRAMID_COMPLEX]       = 12
+MONUMENT_WEIGHTS[BUILDING_GRAND_MUDBRICK_PYRAMID_COMPLEX] = 44
 // True (smooth) pyramids.
 MONUMENT_WEIGHTS[BUILDING_SMALL_PYRAMID]                  = 8
 MONUMENT_WEIGHTS[BUILDING_MEDIUM_PYRAMID]                 = 16

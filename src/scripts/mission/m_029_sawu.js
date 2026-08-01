@@ -69,15 +69,17 @@ mission29 { // Sawu (Mersa Gawasis) — Shores of the Red Sea; briefing key = me
 		BUILDING_TEMPLE_COMPLEX_RA, BUILDING_TEMPLE_COMPLEX_PTAH, BUILDING_TEMPLE_COMPLEX_BAST,
 		BUILDING_FESTIVAL_SQUARE, BUILDING_BOOTH, BUILDING_JUGGLER_SCHOOL, BUILDING_BANDSTAND, BUILDING_CONSERVATORY, BUILDING_PAVILLION, BUILDING_DANCE_SCHOOL,
 		BUILDING_SCRIBAL_SCHOOL, BUILDING_LIBRARY,
+		BUILDING_MAUSOLEUM, BUILDING_SMALL_MUDBRICK_PYRAMID,
 	]
 
-	// Monuments TEMP 0 (pak 21 = Mausoleum gr198:26 + Small Mudbrick gr198:3; neither implemented yet).
+	// Monuments: Mausoleum (W=3) + Small Mudbrick (W=4) → trunc(2.25·7+4.5)=20.
+	// pak goal 21 = soft weight calib (same pattern as Heh pak 15 → goal 11).
 	// pak housing count enabled with goal 0 (no-op) -> only housing_level is kept.
 	win_criteria {
 		population    {enabled : true, goal : 8000 }
 		culture       {enabled : true, goal : 65 }
 		prosperity    {enabled : true, goal : 65 }
-		monuments     {enabled : true, goal : 0 }
+		monuments     {enabled : true, goal : 20 }
 		kingdom       {enabled : true, goal : 75 }
 		housing_level {enabled : true, goal : 17 }
 	}

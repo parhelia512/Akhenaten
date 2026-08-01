@@ -1420,6 +1420,116 @@ building_small_stepped_pyramid {
   building_large_mudbrick_pyramid_wall = building_large_mudbrick_pyramid
   building_large_mudbrick_pyramid_cone = building_large_mudbrick_pyramid
 
+  // Mudbrick complex — on-land 20x20 + causeway (annex later). Reuses LARGE_MUDBRICK parts.
+  building_mudbrick_pyramid_complex {
+    animations {
+      _pack { pack:PACK_MUDBRICK_PYRAMID }
+      preview { id:2, offset:7 }
+      base { id:2, offset:7 }
+      base_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00103" }
+      corner_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00001" }
+      wall_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00005" }
+      base_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00103" }
+      corner_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00054" }
+      wall_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00058" }
+      base_grounded { path:"mudbrick_pyramid/pyramid_phase_one_00013" }
+      clear_land { id:2, offset:12 }
+      image_stick { path:"mudbrick_pyramid/pyramid_phase_one_00021" }
+      empty_land {path:"mudbrick_pyramid/mudbrick_pyramid_00109"}
+      ditches_phase_1 { path:"mudbrick_pyramid/pyramid_phase_one_00022" }
+      ditches_phase_2 { path:"mudbrick_pyramid/pyramid_phase_one_00031" }
+      ditches_phase_3 { path:"mudbrick_pyramid/pyramid_phase_one_00040" }
+      ditches_phase_4 { path:"mudbrick_pyramid/pyramid_phase_one_00049" }
+      ground_phase_0 { path:"mudbrick_pyramid/pyramid_phase_one_00013" }
+      basement { path:"mudbrick_pyramid/pyramid_phase_one_00058" }
+      enter { path:"pharaoh_general/plazatiles_00064"}
+    }
+    build_menu_text : "Mudbrick Pyramid Complex"
+    building_size : 2
+    info_title_id [198, 6]
+    fire_proof :  true
+    damage_proof : true
+    meta { help_id:55, text_id:178 }
+    init_tiles [20, 20]
+
+    flags {
+      is_monument: true
+    }
+
+    enter_offset : [2, 20]
+    stairs [
+      { phase : 7, part : [4, 18], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }, offset : [-20, 20] }
+      { phase : 8, part : [6, 18], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }, offset : [-25, 20] }
+      { phase : 9, part : [8, 18], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }, offset : [-20, 20] }
+      { phase : 10, part : [12, 18], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }, offset : [0, -40] }
+      { phase : 11, part : [14, 18], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }, offset : [-5, -40] }
+      { phase : 12, part : [16, 18], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }, offset : [-5, -45] }
+      { phase : 13, part : [18, 14], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }, offset : [10, -100] }
+      { phase : 14, part : [18, 12], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00114" }, offset : [0, -100] }
+      { phase : 15, part : [18, 10], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00115" }, offset : [-5, -100] }
+      { phase : 16, part : [18, 8], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }, offset : [0, -170] }
+      { phase : 18, part : [18, 6], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00114" }, offset : [0, -170] }
+      { phase : 20, part : [18, 4], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00124" }, offset : [0, -180] }
+    ]
+
+    corner_type : BUILDING_LARGE_MUDBRICK_PYRAMID_CORNER
+    wall_type : BUILDING_LARGE_MUDBRICK_PYRAMID_WALL
+    cone_type : BUILDING_LARGE_MUDBRICK_PYRAMID_CONE
+    filler_type : BUILDING_MUDBRICK_PYRAMID_COMPLEX
+  }
+
+  // Grand mudbrick — same on-land 20x20; own TYPE for weight 44.
+  building_grand_mudbrick_pyramid_complex {
+    animations {
+      _pack { pack:PACK_MUDBRICK_PYRAMID }
+      preview { id:2, offset:7 }
+      base { id:2, offset:7 }
+      base_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00103" }
+      corner_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00001" }
+      wall_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00005" }
+      base_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00103" }
+      corner_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00054" }
+      wall_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00058" }
+      base_grounded { path:"mudbrick_pyramid/pyramid_phase_one_00013" }
+      clear_land { id:2, offset:12 }
+      image_stick { path:"mudbrick_pyramid/pyramid_phase_one_00021" }
+      empty_land {path:"mudbrick_pyramid/mudbrick_pyramid_00109"}
+      ditches_phase_1 { path:"mudbrick_pyramid/pyramid_phase_one_00022" }
+      ditches_phase_2 { path:"mudbrick_pyramid/pyramid_phase_one_00031" }
+      ditches_phase_3 { path:"mudbrick_pyramid/pyramid_phase_one_00040" }
+      ditches_phase_4 { path:"mudbrick_pyramid/pyramid_phase_one_00049" }
+      ground_phase_0 { path:"mudbrick_pyramid/pyramid_phase_one_00013" }
+      basement { path:"mudbrick_pyramid/pyramid_phase_one_00058" }
+      enter { path:"pharaoh_general/plazatiles_00064"}
+    }
+    build_menu_text : "Grand Mudbrick Pyramid Complex"
+    building_size : 2
+    info_title_id [198, 7]
+    fire_proof :  true
+    damage_proof : true
+    meta { help_id:55, text_id:178 }
+    init_tiles [20, 20]
+
+    flags {
+      is_monument: true
+    }
+
+    enter_offset : [2, 20]
+    stairs [
+      { phase : 7, part : [4, 18], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }, offset : [-20, 20] }
+      { phase : 10, part : [12, 18], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }, offset : [0, -40] }
+      { phase : 12, part : [16, 18], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00122" }, offset : [-5, -45] }
+      { phase : 14, part : [18, 12], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00114" }, offset : [0, -100] }
+      { phase : 16, part : [18, 8], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }, offset : [0, -170] }
+      { phase : 20, part : [18, 4], tex { path:"mudbrick_pyramid/mudbrick_pyramid_00124" }, offset : [0, -180] }
+    ]
+
+    corner_type : BUILDING_LARGE_MUDBRICK_PYRAMID_CORNER
+    wall_type : BUILDING_LARGE_MUDBRICK_PYRAMID_WALL
+    cone_type : BUILDING_LARGE_MUDBRICK_PYRAMID_CONE
+    filler_type : BUILDING_GRAND_MUDBRICK_PYRAMID_COMPLEX
+  }
+
   building_medium_pyramid {
     animations {
       _pack { pack:PACK_PYRAMID }

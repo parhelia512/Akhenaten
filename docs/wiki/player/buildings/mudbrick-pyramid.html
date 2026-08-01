@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brick-core (Mudbrick) Pyramid — Akhenaten Wiki</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .bld-infobox {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0;
+    }
+    .bld-infobox h4 {
+      margin: 0 0 0.6rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--gold);
+    }
+    .bld-infobox dl {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.2rem 1rem;
+      margin: 0;
+    }
+    .bld-infobox dt { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; padding-top: 0.1rem; }
+    .bld-infobox dd { margin: 0; font-size: 0.85rem; color: var(--text); }
+    .file-ref { display: inline-block; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.78rem; background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.2); border-radius: 2px; padding: 0.05rem 0.45rem; color: var(--gold); margin: 0 0.1rem; }
+    .bld-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; }
+    .bld-nav a { color: var(--gold); }
+    .dev-section { margin-top: 2.5rem; }
+    .dev-section h2 { color: var(--text-muted); font-size: 1rem; letter-spacing: 0.04em; text-transform: uppercase; border-color: rgba(255,255,255,0.08); }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; }
+    summary { padding: 0.7rem 1rem; cursor: pointer; font-size: 0.875rem; font-weight: 600; color: var(--text); list-style: none; display: flex; align-items: center; gap: 0.6rem; user-select: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: "▶"; font-size: 0.6rem; color: var(--gold); transition: transform 0.15s; flex-shrink: 0; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    details[open] > summary { border-bottom: 1px solid var(--border); }
+    .details-body { padding: 1rem 1.1rem; font-size: 0.85rem; line-height: 1.6; }
+    .bld-note { font-size: 0.85rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">Akhenaten</a>
+      <ul>
+        <li><a href="../../../about.html">About</a></li>
+        <li><a href="../../../devblog.html">Devblog</a></li>
+        <li><a href="../../index.html" class="active">Wiki</a></li>
+        <li><a href="../../../screenshots.html">Screenshots</a></li>
+        <li><a href="../../../downloads.html">Downloads</a></li>
+        <li><a href="../../../contributors.html">Contributors</a></li>
+        <li><a href="../../../contact.html">Join us</a></li>
+        <li><a href="../../../reportbug.html">Report Bug</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="wiki-layout">
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title"><a href="index.html">← All Buildings</a></div>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Monuments</div>
+        <ul>
+          <li><a href="monuments.html">Overview</a></li>
+          <li><a href="sphinx.html">Sphinx</a></li>
+          <li><a href="obelisk.html">Obelisk</a></li>
+          <li><a href="mudbrick-pyramid.html" class="active">Brick-core pyramid</a></li>
+          <li><a href="mausoleum.html">Mausoleum</a></li>
+          <li><a href="abu-simbel.html">Abu Simbel</a></li>
+          <li><a href="caesareum.html">Caesareum</a></li>
+        </ul>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">On this page</div>
+        <ul>
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#sizes">Sizes</a></li>
+          <li><a href="#construction">Construction</a></li>
+          <li><a href="#missions">Missions</a></li>
+          <li><a href="#dev">Developer reference</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <div class="wiki-content">
+      <div class="wiki-breadcrumb">
+        <a href="../../index.html">Wiki</a> /
+        <a href="../index.html">Player Guide</a> /
+        <a href="index.html">Buildings</a> /
+        <a href="monuments.html">Monuments</a> /
+        Brick-core pyramid
+      </div>
+
+      <h1>Brick-core (Mudbrick) Pyramid</h1>
+
+      <p id="overview">
+        Brick-core pyramids use a <strong>brick</strong> body with a finishing
+        <strong>limestone casing</strong> (help id 55). Not mastabas (brick-only)
+        and not stepped pyramids (plain stone, no polish). Guilds:
+        <strong>Bricklayers</strong>, <strong>Stonemasons</strong>,
+        <strong>Carpenters</strong>, and <strong>Work Camps</strong>.
+      </p>
+
+      <div class="bld-infobox">
+        <h4>At a glance</h4>
+        <dl>
+          <dt>Materials</dt><dd>Bricks · Limestone · Timber</dd>
+          <dt>Guilds</dt><dd>Bricklayers · Stonemasons · Carpenters · Work Camps</dd>
+          <dt>Finish</dt><dd>Limestone casing polish (foreman id 35) + congrats</dd>
+          <dt>Art pack</dt><dd><code>PACK_MUDBRICK_PYRAMID</code></dd>
+        </dl>
+      </div>
+
+      <h2 id="sizes">Sizes</h2>
+      <div class="wiki-table-wrap">
+        <table class="wiki-table">
+          <thead>
+            <tr><th>Type</th><th>Footprint</th><th>Weight</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Small</td><td>8×8</td><td>4</td><td>Itjtawy · Menat · Sawu · Khmun</td></tr>
+            <tr><td>Medium</td><td>12×12</td><td>8</td><td>Itjtawy</td></tr>
+            <tr><td>Large</td><td>16×16</td><td>12</td><td>≠ true large (20×20)</td></tr>
+            <tr><td>Complex</td><td>20×20 + causeway</td><td>12</td><td>On-land body; temples later</td></tr>
+            <tr><td>Grand complex</td><td>20×20 MVP</td><td>44</td><td>Full 24×24 deferred</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="bld-note">
+        Heaven chart totals (bricks / limestone): S 4800/192 · M 24k/432 · L 67.2k/768 ·
+        Complex 144.4k/1200. Per-phase delivery in Akhenaten still mirrors the true-pyramid
+        schedule (soft fidelity).
+      </p>
+
+      <h2 id="construction">Construction</h2>
+      <ol>
+        <li>Clear / level (Work Camps).</li>
+        <li>Brick courses + timber ramps (Bricklayers + Carpenters); limestone stocked for casing.</li>
+        <li>Top-down limestone polish (Stonemasons) — no more bricks/limestone in the phase table.</li>
+        <li>Finished monument; congrats <code>mudbrick_pyramid_congratulations</code>.</li>
+      </ol>
+
+      <h2 id="missions">Missions</h2>
+      <ul>
+        <li><a href="../missions/menat-khufu.html">Menat Khufu</a> (26) — small; monuments <strong>21</strong></li>
+        <li><a href="../missions/itjtawy.html">Itjtawy</a> (27) — sphinx + S + M; monuments <strong>33</strong></li>
+        <li><a href="../missions/sawu.html">Sawu</a> (29) — mausoleum + small; monuments <strong>20</strong> (pak 21 soft)</li>
+        <li><a href="../missions/khmun.html">Khmun</a> (32) — small; monuments <strong>13</strong> (pak 18 soft)</li>
+      </ul>
+
+      <div class="dev-section" id="dev">
+        <h2>Developer reference</h2>
+        <details open>
+          <summary>Source files</summary>
+          <div class="details-body">
+            <p><span class="file-ref">src/building/monument_pyramid.{h,cpp}</span> ·
+              <span class="file-ref">src/scripts/building/pyramid.js</span> ·
+              <span class="file-ref">src/window/window_pyramid_info.cpp</span></p>
+            <p>Enums <code>243–247</code> + parts <code>347–355</code>. Tests:
+              <span class="file-ref">tests/120_mudbrick_small_place.js</span>,
+              <span class="file-ref">123_mudbrick_medium_place.js</span>,
+              <span class="file-ref">125_mudbrick_large_place.js</span>,
+              <span class="file-ref">127_mudbrick_complex_place.js</span>.</p>
+            <p>Index: <span class="file-ref">REMAKE_MISSING_MONUMENTS_PLAN.md</span> §C5.
+              Soft: per-phase amounts vs Heaven totals; annex / Grand 24×24; visual Q-pass.</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="bld-nav">
+        <a href="obelisk.html">← Obelisk</a>
+        <a href="mausoleum.html">Mausoleum →</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -90,6 +90,8 @@ class building_grand_pyramid_complex;
 class building_small_mudbrick_pyramid;
 class building_medium_mudbrick_pyramid;
 class building_large_mudbrick_pyramid;
+class building_mudbrick_pyramid_complex;
+class building_grand_mudbrick_pyramid_complex;
 class building_sphinx;
 class building_obelisk;
 class building_sun_temple;
