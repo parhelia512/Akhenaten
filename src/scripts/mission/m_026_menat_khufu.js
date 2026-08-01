@@ -3,9 +3,9 @@ log_info("akhenaten: mission 26 menat khufu started")
 // Empire / events verified vs mission1.pak scenario 26 (2026-07-26 dump).
 // Empire id=1. Scenario enemy ENEMY_6_KUSHITE. Favour invasions invader=pharaoh(3) → ENEMY_3_EGYPTIAN.
 // Gods: Osiris(2), Ra(1), Bast(1) — no JS override. Funds Normal 10000 / loan 2500 / debt 20. Rank 9.
-// Win: pop 7000 / culture 60 / prosperity 50 / monuments TEMP 13 (pak raw 21; 2×small obelisk formula
-//   2.25*(2+2)+4.5=13.5→13; waits mudbrick weight) / kingdom 75 / housing 10.
-// Monuments pak: first=22 Small Obelisk ×2, third=3 Small Mudbrick Pyramid (omit from buildings).
+// Win: pop 7000 / culture 60 / prosperity 50 / monuments 21 (2×small obelisk 2+2 + Small
+//   mudbrick 4 → trunc(2.25·8+4.5)=22 ≥ pak 21) / kingdom 75 / housing 10.
+// Monuments pak: first=22 Small Obelisk ×2, third=3 Small Mudbrick Pyramid.
 // Burial: pottery×8 beer×32 linen×32 papyrus×8 granite×32. Climate northern (map).
 // Trade: Waset(1 sea) Men-nefer(2 sea) Dakhla(3). Display: Buhen Byblos Dunqul Henen-nesw Jericho Kebet Kerma Kharga.
 // Triage: SKIP empty map_obj idx=11; SKIP orphan msgs i=1,4,8,11,14,17,21,24,27,30,33,36; SKIP DEMAND chain_only i=6.
@@ -60,7 +60,7 @@ mission26 { // Menat Khufu (Beni Hasan) — Reunification
 		BUILDING_WARSHIP_WHARF, BUILDING_TRANSPORT_WHARF, BUILDING_SHIPWRIGHT, BUILDING_DOCK, BUILDING_LOW_BRIDGE, BUILDING_FERRY,
 		BUILDING_GRAIN_FARM, BUILDING_BARLEY_FARM, BUILDING_FLAX_FARM, BUILDING_POMEGRANATES_FARM, BUILDING_FIGS_FARM,
 		BUILDING_STONE_QUARRY, BUILDING_CLAY_PIT, BUILDING_REED_GATHERER,
-		BUILDING_SMALL_OBELISK,
+		BUILDING_SMALL_OBELISK, BUILDING_SMALL_MUDBRICK_PYRAMID,
 		BUILDING_TEMPLE_OSIRIS, BUILDING_SHRINE_OSIRIS, BUILDING_TEMPLE_RA, BUILDING_SHRINE_RA,
 		BUILDING_TEMPLE_BAST, BUILDING_SHRINE_BAST,
 		BUILDING_TEMPLE_COMPLEX_OSIRIS, BUILDING_TEMPLE_COMPLEX_RA, BUILDING_TEMPLE_COMPLEX_BAST,
@@ -68,12 +68,12 @@ mission26 { // Menat Khufu (Beni Hasan) — Reunification
 		BUILDING_SCRIBAL_SCHOOL, BUILDING_LIBRARY,
 	]
 
-	// Monuments TEMP 13 (pak first=22 Small Obelisk ×2 + third=3 mudbrick; formula 2.25*(2+2)+4.5→13).
+	// Monuments 21: 2×Small Obelisk(2) + Small mudbrick(4) → trunc(22.5)=22 ≥ 21.
 	win_criteria {
 		population    {enabled : true, goal : 7000 }
 		culture       {enabled : true, goal : 60 }
 		prosperity    {enabled : true, goal : 50 }
-		monuments     {enabled : true, goal : 13 }
+		monuments     {enabled : true, goal : 21 }
 		kingdom       {enabled : true, goal : 75 }
 		housing_level {enabled : true, goal : 10 }
 	}

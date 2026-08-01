@@ -6261,4 +6261,12 @@ game_messages_hu {
                     text: "A Caesareum szent temploma és pompás, kertekkel díszített udvarai végre elkészültek! Csodálatos szépségének híre máris terjed az egész vidéken."
                 }
             }
+            mudbrick_pyramid_congratulations {
+                id: 528,
+                size [30, 18]
+                title { text: "Téglapiramis elkészült!" }
+                content {
+                    text: "A kőművesek befejezték a ragyogó, finom mészkőből készült külső burkolat utolsó simításait, és a téglapiramis végre elkészült!"
+                }
+            }
 }

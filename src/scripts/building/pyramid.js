@@ -1026,6 +1026,400 @@ building_small_stepped_pyramid {
   building_small_pyramid_corner = building_small_pyramid
   building_small_pyramid_wall = building_small_pyramid
   building_small_pyramid_cone = building_small_pyramid
+
+  // --- Mudbrick (brick-core) pyramids — PACK_MUDBRICK_PYRAMID + bricks + limestone polish ---
+  building_small_mudbrick_pyramid {
+    animations {
+      _pack { pack:PACK_MUDBRICK_PYRAMID }
+      preview { id:2, offset:7 }
+      base { id:2, offset:7 }
+      base_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00103" }
+      corner_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00001" }
+      wall_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00005" }
+      // Polish casing (same corner/wall offset layout as bricks, pack index +53)
+      base_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00103" }
+      corner_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00054" }
+      wall_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00058" }
+      base_grounded { path:"mudbrick_pyramid/pyramid_phase_one_00013" }
+      clear_land { id:2, offset:12 }
+      image_stick { path:"mudbrick_pyramid/pyramid_phase_one_00021" }
+      empty_land {path:"mudbrick_pyramid/mudbrick_pyramid_00109"}
+      ditches_phase_1 { path:"mudbrick_pyramid/pyramid_phase_one_00022" }
+      ditches_phase_2 { path:"mudbrick_pyramid/pyramid_phase_one_00031" }
+      ditches_phase_3 { path:"mudbrick_pyramid/pyramid_phase_one_00040" }
+      ditches_phase_4 { path:"mudbrick_pyramid/pyramid_phase_one_00049" }
+      ground_phase_0 { path:"mudbrick_pyramid/pyramid_phase_one_00013" }
+      basement { path:"mudbrick_pyramid/pyramid_phase_one_00058" }
+      enter { path:"pharaoh_general/plazatiles_00064"}
+    }
+    build_menu_text : "Small Brick Pyramid"
+    building_size : 2
+    info_title_id [198, 3]
+    fire_proof :  true
+    damage_proof : true
+    meta { help_id:55, text_id:178 }
+    init_tiles [8, 8]
+
+    flags {
+      is_monument: true
+    }
+
+    enter_offset : [1, 8]
+    stair_0_0_offset : [2, 8]
+    stair_0_1_offset : [4, 8]
+    stair_0_4_offset : [6, 8]
+    stair_0_4_corner_offset : [6, 6]
+    stair_0_5_offset : [6, 5]
+    stair_0_6_offset : [6, 4]
+
+    corner_type : BUILDING_SMALL_MUDBRICK_PYRAMID_CORNER
+    wall_type : BUILDING_SMALL_MUDBRICK_PYRAMID_WALL
+    cone_type : BUILDING_SMALL_MUDBRICK_PYRAMID_CONE
+    filler_type : BUILDING_SMALL_MUDBRICK_PYRAMID
+  }
+
+  building_small_mudbrick_pyramid_corner = building_small_mudbrick_pyramid
+  building_small_mudbrick_pyramid_wall = building_small_mudbrick_pyramid
+  building_small_mudbrick_pyramid_cone = building_small_mudbrick_pyramid
+
+  // Medium mudbrick — 12×12; stairs mirrored from true medium. Pack stairs start at
+  // 112 (no 110/111), so those two map to 112/113.
+  building_medium_mudbrick_pyramid {
+    animations {
+      _pack { pack:PACK_MUDBRICK_PYRAMID }
+      preview { id:2, offset:7 }
+      base { id:2, offset:7 }
+      base_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00103" }
+      corner_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00001" }
+      wall_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00005" }
+      base_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00103" }
+      corner_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00054" }
+      wall_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00058" }
+      base_grounded { path:"mudbrick_pyramid/pyramid_phase_one_00013" }
+      clear_land { id:2, offset:12 }
+      image_stick { path:"mudbrick_pyramid/pyramid_phase_one_00021" }
+      empty_land {path:"mudbrick_pyramid/mudbrick_pyramid_00109"}
+      ditches_phase_1 { path:"mudbrick_pyramid/pyramid_phase_one_00022" }
+      ditches_phase_2 { path:"mudbrick_pyramid/pyramid_phase_one_00031" }
+      ditches_phase_3 { path:"mudbrick_pyramid/pyramid_phase_one_00040" }
+      ditches_phase_4 { path:"mudbrick_pyramid/pyramid_phase_one_00049" }
+      ground_phase_0 { path:"mudbrick_pyramid/pyramid_phase_one_00013" }
+      basement { path:"mudbrick_pyramid/pyramid_phase_one_00058" }
+      enter { path:"pharaoh_general/plazatiles_00064"}
+    }
+    build_menu_text : "Medium Brick Pyramid"
+    building_size : 2
+    info_title_id [198, 4]
+    fire_proof :  true
+    damage_proof : true
+    meta { help_id:55, text_id:178 }
+    init_tiles [12, 12]
+
+    flags {
+      is_monument: true
+    }
+
+    enter_offset : [2, 12]
+    stairs [
+      {
+        phase : 7
+        part : [2, 10]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }
+        offset : [-15, 25]
+      }
+
+      {
+        phase : 8
+        part : [4, 10]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }
+        offset : [-15, 25]
+      }
+
+      {
+        phase : 9
+        part : [6, 10]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }
+        offset : [-15, 25]
+      }
+
+      {
+        phase : 10
+        part : [8, 10]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }
+        offset : [15, -35]
+      }
+
+      {
+        phase : 10
+        part : [10, 10]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00122" }
+        offset : [15, -40]
+      }
+
+      {
+        phase : 11
+        part : [10, 8]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00114" }
+        offset : [25, -30]
+      }
+
+      {
+        phase : 12
+        part : [10, 6]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00115" }
+        offset : [20, -30]
+      }
+
+      {
+        phase : 13
+        part : [10, 4]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }
+        offset : [0, -90]
+      }
+
+      {
+        phase : 13
+        part : [10, 2]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00124" }
+        offset : [0, -95]
+      }
+
+      {
+        phase : 16
+        part : [4, 8]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00118" }
+        offset : [-28, -155]
+      }
+
+      {
+        phase : 17
+        part : [6, 8]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }
+        offset : [-48, -158]
+      }
+
+      {
+        phase : 18
+        part : [8, 8]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }
+        offset : [-48, -158]
+      }
+
+      {
+        phase : 19
+        part : [8, 6]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }
+        offset : [0, -180]
+      }
+
+      {
+        phase : 20
+        part : [8, 4]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00124" }
+        offset : [-0, -180]
+      }
+
+      {
+        phase : 21
+        part : [4, 6]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00119" }
+        offset : [-20, -175]
+      }
+
+      {
+        phase : 21
+        part : [6, 6]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }
+        offset : [-40, -175]
+      }
+
+      {
+        phase : 22
+        part : [6, 4]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }
+        offset : [10, -200]
+      }
+    ]
+
+    corner_type : BUILDING_MEDIUM_MUDBRICK_PYRAMID_CORNER
+    wall_type : BUILDING_MEDIUM_MUDBRICK_PYRAMID_WALL
+    cone_type : BUILDING_MEDIUM_MUDBRICK_PYRAMID_CONE
+    filler_type : BUILDING_MEDIUM_MUDBRICK_PYRAMID
+  }
+
+  building_medium_mudbrick_pyramid_corner = building_medium_mudbrick_pyramid
+  building_medium_mudbrick_pyramid_wall = building_medium_mudbrick_pyramid
+  building_medium_mudbrick_pyramid_cone = building_medium_mudbrick_pyramid
+
+  // Large mudbrick — 16×16 (≠ true Large 20×20). Stairs = medium pattern shifted
+  // to the south/east faces of the larger footprint (y=14 / x=14).
+  building_large_mudbrick_pyramid {
+    animations {
+      _pack { pack:PACK_MUDBRICK_PYRAMID }
+      preview { id:2, offset:7 }
+      base { id:2, offset:7 }
+      base_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00103" }
+      corner_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00001" }
+      wall_bricks { path:"mudbrick_pyramid/mudbrick_pyramid_00005" }
+      base_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00103" }
+      corner_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00054" }
+      wall_polish { path:"mudbrick_pyramid/mudbrick_pyramid_00058" }
+      base_grounded { path:"mudbrick_pyramid/pyramid_phase_one_00013" }
+      clear_land { id:2, offset:12 }
+      image_stick { path:"mudbrick_pyramid/pyramid_phase_one_00021" }
+      empty_land {path:"mudbrick_pyramid/mudbrick_pyramid_00109"}
+      ditches_phase_1 { path:"mudbrick_pyramid/pyramid_phase_one_00022" }
+      ditches_phase_2 { path:"mudbrick_pyramid/pyramid_phase_one_00031" }
+      ditches_phase_3 { path:"mudbrick_pyramid/pyramid_phase_one_00040" }
+      ditches_phase_4 { path:"mudbrick_pyramid/pyramid_phase_one_00049" }
+      ground_phase_0 { path:"mudbrick_pyramid/pyramid_phase_one_00013" }
+      basement { path:"mudbrick_pyramid/pyramid_phase_one_00058" }
+      enter { path:"pharaoh_general/plazatiles_00064"}
+    }
+    build_menu_text : "Large Brick Pyramid"
+    building_size : 2
+    info_title_id [198, 5]
+    fire_proof :  true
+    damage_proof : true
+    meta { help_id:55, text_id:178 }
+    init_tiles [16, 16]
+
+    flags {
+      is_monument: true
+    }
+
+    enter_offset : [2, 16]
+    stairs [
+      {
+        phase : 7
+        part : [2, 14]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }
+        offset : [-15, 25]
+      }
+
+      {
+        phase : 8
+        part : [4, 14]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }
+        offset : [-15, 25]
+      }
+
+      {
+        phase : 9
+        part : [6, 14]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }
+        offset : [-15, 25]
+      }
+
+      {
+        phase : 10
+        part : [10, 14]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }
+        offset : [15, -35]
+      }
+
+      {
+        phase : 10
+        part : [14, 14]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00122" }
+        offset : [15, -40]
+      }
+
+      {
+        phase : 11
+        part : [14, 12]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00114" }
+        offset : [25, -30]
+      }
+
+      {
+        phase : 12
+        part : [14, 10]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00115" }
+        offset : [20, -30]
+      }
+
+      {
+        phase : 13
+        part : [14, 6]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }
+        offset : [0, -90]
+      }
+
+      {
+        phase : 13
+        part : [14, 2]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00124" }
+        offset : [0, -95]
+      }
+
+      {
+        phase : 16
+        part : [6, 12]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00118" }
+        offset : [-28, -155]
+      }
+
+      {
+        phase : 17
+        part : [8, 12]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }
+        offset : [-48, -158]
+      }
+
+      {
+        phase : 18
+        part : [12, 12]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }
+        offset : [-48, -158]
+      }
+
+      {
+        phase : 19
+        part : [12, 10]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }
+        offset : [0, -180]
+      }
+
+      {
+        phase : 20
+        part : [12, 6]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00124" }
+        offset : [0, -180]
+      }
+
+      {
+        phase : 21
+        part : [6, 10]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00119" }
+        offset : [-20, -175]
+      }
+
+      {
+        phase : 21
+        part : [8, 10]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00112" }
+        offset : [-40, -175]
+      }
+
+      {
+        phase : 22
+        part : [8, 6]
+        tex { path:"mudbrick_pyramid/mudbrick_pyramid_00113" }
+        offset : [10, -200]
+      }
+    ]
+
+    corner_type : BUILDING_LARGE_MUDBRICK_PYRAMID_CORNER
+    wall_type : BUILDING_LARGE_MUDBRICK_PYRAMID_WALL
+    cone_type : BUILDING_LARGE_MUDBRICK_PYRAMID_CONE
+    filler_type : BUILDING_LARGE_MUDBRICK_PYRAMID
+  }
+
+  building_large_mudbrick_pyramid_corner = building_large_mudbrick_pyramid
+  building_large_mudbrick_pyramid_wall = building_large_mudbrick_pyramid
+  building_large_mudbrick_pyramid_cone = building_large_mudbrick_pyramid
+
   building_medium_pyramid {
     animations {
       _pack { pack:PACK_PYRAMID }

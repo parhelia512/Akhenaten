@@ -258,6 +258,18 @@ REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_pyramid)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_pyramid_corner)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_pyramid_wall)
 
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_mudbrick_pyramid)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_mudbrick_pyramid_corner)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_mudbrick_pyramid_wall)
+
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_medium_mudbrick_pyramid)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_medium_mudbrick_pyramid_corner)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_medium_mudbrick_pyramid_wall)
+
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_mudbrick_pyramid)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_mudbrick_pyramid_corner)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_mudbrick_pyramid_wall)
+
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_medium_pyramid)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_medium_pyramid_corner)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_medium_pyramid_wall)
@@ -423,6 +435,27 @@ struct monument_small_pyramid : public monument {
     }
 } g_monument_small_pyramid;
 
+// Mudbrick small: same schedule as true small, but RESOURCE_STONE → RESOURCE_BRICKS.
+struct monument_small_mudbrick_pyramid : public monument {
+    monument_small_mudbrick_pyramid() : monument{ BUILDING_SMALL_MUDBRICK_PYRAMID } {
+        phases.push_back({ 0, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
+        phases.push_back({ 1, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
+        phases.push_back({ 2, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_BRICKS, 4800}, {RESOURCE_LIMESTONE, 1200} });
+        phases.push_back({ 3, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 2000}, {RESOURCE_BRICKS, 4000}, {RESOURCE_LIMESTONE, 1000} });
+        phases.push_back({ 4, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 1600}, {RESOURCE_BRICKS, 3200}, {RESOURCE_LIMESTONE, 800} });
+        phases.push_back({ 5, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 1200}, {RESOURCE_BRICKS, 2400}, {RESOURCE_LIMESTONE, 600} });
+        phases.push_back({ 6, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 800}, {RESOURCE_BRICKS, 1600}, {RESOURCE_LIMESTONE, 400} });
+        for (int p = 7; p <= 23; ++p) {
+            phases.push_back({ (uint8_t)p, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 400}, {RESOURCE_BRICKS, 800}, {RESOURCE_LIMESTONE, 200} });
+        }
+        constexpr int k_polish_phases = 8 / 4;
+        for (int i = 0; i < k_polish_phases; ++i) {
+            phases.push_back({ (uint8_t)(24 + i), monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
+        }
+        phases.push_back({ 26, monument_phase_resource{RESOURCE_NONE, 0} });
+    }
+} g_monument_small_mudbrick_pyramid;
+
 // True medium (12×12): height mirrors medium stepped (courses through 31), then
 // polish top-down (layers = 12/4 = 3) without new limestone; terminal 35.
 struct monument_medium_pyramid : public monument {
@@ -446,6 +479,49 @@ struct monument_medium_pyramid : public monument {
         phases.push_back({ 35, monument_phase_resource{RESOURCE_NONE, 0} }); // finish = set_phase(36)
     }
 } g_monument_medium_pyramid;
+
+// Mudbrick medium: same schedule as true medium, RESOURCE_STONE → RESOURCE_BRICKS.
+struct monument_medium_mudbrick_pyramid : public monument {
+    monument_medium_mudbrick_pyramid() : monument{ BUILDING_MEDIUM_MUDBRICK_PYRAMID } {
+        phases.push_back({ 0, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
+        phases.push_back({ 1, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
+        phases.push_back({ 2, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_BRICKS, 4800}, {RESOURCE_LIMESTONE, 1200} });
+        phases.push_back({ 3, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 2000}, {RESOURCE_BRICKS, 4000}, {RESOURCE_LIMESTONE, 1000} });
+        phases.push_back({ 4, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 1600}, {RESOURCE_BRICKS, 3200}, {RESOURCE_LIMESTONE, 800} });
+        phases.push_back({ 5, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 1200}, {RESOURCE_BRICKS, 2400}, {RESOURCE_LIMESTONE, 600} });
+        phases.push_back({ 6, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 800}, {RESOURCE_BRICKS, 1600}, {RESOURCE_LIMESTONE, 400} });
+        for (int p = 7; p <= 31; ++p) {
+            phases.push_back({ (uint8_t)p, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 400}, {RESOURCE_BRICKS, 800}, {RESOURCE_LIMESTONE, 200} });
+        }
+        constexpr int k_polish_phases = 12 / 4;
+        for (int i = 0; i < k_polish_phases; ++i) {
+            phases.push_back({ (uint8_t)(32 + i), monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
+        }
+        phases.push_back({ 35, monument_phase_resource{RESOURCE_NONE, 0} });
+    }
+} g_monument_medium_mudbrick_pyramid;
+
+// Mudbrick large (16×16): height mirrors large stepped (courses through 35), then
+// polish top-down (layers = 16/4 = 4); terminal 40.
+struct monument_large_mudbrick_pyramid : public monument {
+    monument_large_mudbrick_pyramid() : monument{ BUILDING_LARGE_MUDBRICK_PYRAMID } {
+        phases.push_back({ 0, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
+        phases.push_back({ 1, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
+        phases.push_back({ 2, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_BRICKS, 4800}, {RESOURCE_LIMESTONE, 1200} });
+        phases.push_back({ 3, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 2000}, {RESOURCE_BRICKS, 4000}, {RESOURCE_LIMESTONE, 1000} });
+        phases.push_back({ 4, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 1600}, {RESOURCE_BRICKS, 3200}, {RESOURCE_LIMESTONE, 800} });
+        phases.push_back({ 5, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 1200}, {RESOURCE_BRICKS, 2400}, {RESOURCE_LIMESTONE, 600} });
+        phases.push_back({ 6, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 800}, {RESOURCE_BRICKS, 1600}, {RESOURCE_LIMESTONE, 400} });
+        for (int p = 7; p <= 35; ++p) {
+            phases.push_back({ (uint8_t)p, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_TIMBER, 400}, {RESOURCE_BRICKS, 800}, {RESOURCE_LIMESTONE, 200} });
+        }
+        constexpr int k_polish_phases = 16 / 4;
+        for (int i = 0; i < k_polish_phases; ++i) {
+            phases.push_back({ (uint8_t)(36 + i), monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
+        }
+        phases.push_back({ 40, monument_phase_resource{RESOURCE_NONE, 0} }); // finish = set_phase(41)
+    }
+} g_monument_large_mudbrick_pyramid;
 
 // True large (20×20): height mirrors large stepped (courses through 35), then
 // polish top-down (layers = 20/4 = 5); terminal 41.
@@ -573,6 +649,24 @@ const building_pyramid::base_params &get_pyramid_params(e_building_type type) {
     case BUILDING_SMALL_PYRAMID_CONE:
     case BUILDING_SMALL_PYRAMID_WALL:
         return pyramid_base_params<building_small_pyramid>(params);
+
+    case BUILDING_SMALL_MUDBRICK_PYRAMID:
+    case BUILDING_SMALL_MUDBRICK_PYRAMID_CORNER:
+    case BUILDING_SMALL_MUDBRICK_PYRAMID_CONE:
+    case BUILDING_SMALL_MUDBRICK_PYRAMID_WALL:
+        return pyramid_base_params<building_small_mudbrick_pyramid>(params);
+
+    case BUILDING_MEDIUM_MUDBRICK_PYRAMID:
+    case BUILDING_MEDIUM_MUDBRICK_PYRAMID_CORNER:
+    case BUILDING_MEDIUM_MUDBRICK_PYRAMID_CONE:
+    case BUILDING_MEDIUM_MUDBRICK_PYRAMID_WALL:
+        return pyramid_base_params<building_medium_mudbrick_pyramid>(params);
+
+    case BUILDING_LARGE_MUDBRICK_PYRAMID:
+    case BUILDING_LARGE_MUDBRICK_PYRAMID_CORNER:
+    case BUILDING_LARGE_MUDBRICK_PYRAMID_CONE:
+    case BUILDING_LARGE_MUDBRICK_PYRAMID_WALL:
+        return pyramid_base_params<building_large_mudbrick_pyramid>(params);
 
     case BUILDING_MEDIUM_PYRAMID:
     case BUILDING_MEDIUM_PYRAMID_CORNER:
@@ -1250,7 +1344,10 @@ int building_stepped_pyramid::get_masonry_image(int orientation, tile2i tile, ti
         BUILDING_SMALL_PYRAMID, BUILDING_SMALL_PYRAMID_CONE,
         BUILDING_MEDIUM_PYRAMID, BUILDING_MEDIUM_PYRAMID_CONE,
         BUILDING_LARGE_PYRAMID, BUILDING_LARGE_PYRAMID_CONE,
-        BUILDING_PYRAMID_COMPLEX, BUILDING_GRAND_PYRAMID_COMPLEX
+        BUILDING_PYRAMID_COMPLEX, BUILDING_GRAND_PYRAMID_COMPLEX,
+        BUILDING_SMALL_MUDBRICK_PYRAMID, BUILDING_SMALL_MUDBRICK_PYRAMID_CONE,
+        BUILDING_MEDIUM_MUDBRICK_PYRAMID, BUILDING_MEDIUM_MUDBRICK_PYRAMID_CONE,
+        BUILDING_LARGE_MUDBRICK_PYRAMID, BUILDING_LARGE_MUDBRICK_PYRAMID_CONE
     });
     if (is_floor && !is_nw_origin) {
         const xstring floor_key = polished && current_params().first_img("base_polish") > 0
@@ -1266,7 +1363,10 @@ int building_stepped_pyramid::get_masonry_image(int orientation, tile2i tile, ti
         BUILDING_SMALL_STEPPED_PYRAMID_CORNER, BUILDING_MEDIUM_STEPPED_PYRAMID_CORNER, BUILDING_LARGE_STEPPED_PYRAMID_CORNER,
         BUILDING_SMALL_BENT_PYRAMID_CORNER, BUILDING_MEDIUM_BENT_PYRAMID_CORNER,
         BUILDING_SMALL_PYRAMID_CORNER, BUILDING_MEDIUM_PYRAMID_CORNER,
-        BUILDING_LARGE_PYRAMID_CORNER
+        BUILDING_LARGE_PYRAMID_CORNER,
+        BUILDING_SMALL_MUDBRICK_PYRAMID_CORNER,
+        BUILDING_MEDIUM_MUDBRICK_PYRAMID_CORNER,
+        BUILDING_LARGE_MUDBRICK_PYRAMID_CORNER
     });
     if (is_corner || is_nw_origin) {
         const xstring corner_key = polished && current_params().first_img("corner_polish") > 0
@@ -1287,7 +1387,10 @@ int building_stepped_pyramid::get_masonry_image(int orientation, tile2i tile, ti
         BUILDING_SMALL_STEPPED_PYRAMID_WALL, BUILDING_MEDIUM_STEPPED_PYRAMID_WALL, BUILDING_LARGE_STEPPED_PYRAMID_WALL,
         BUILDING_SMALL_BENT_PYRAMID_WALL, BUILDING_MEDIUM_BENT_PYRAMID_WALL,
         BUILDING_SMALL_PYRAMID_WALL, BUILDING_MEDIUM_PYRAMID_WALL,
-        BUILDING_LARGE_PYRAMID_WALL
+        BUILDING_LARGE_PYRAMID_WALL,
+        BUILDING_SMALL_MUDBRICK_PYRAMID_WALL,
+        BUILDING_MEDIUM_MUDBRICK_PYRAMID_WALL,
+        BUILDING_LARGE_MUDBRICK_PYRAMID_WALL
     });
     if (is_wall) {
         const xstring wall_key = polished && current_params().first_img("wall_polish") > 0
@@ -1691,13 +1794,19 @@ void building_stepped_pyramid::update_day(const vec2i tiles_size) {
             const e_building_type mon_type = config().btype;
             const bool is_bent = (mon_type == BUILDING_SMALL_BENT_PYRAMID
                 || mon_type == BUILDING_MEDIUM_BENT_PYRAMID);
+            const bool is_mudbrick = (mon_type == BUILDING_SMALL_MUDBRICK_PYRAMID
+                || mon_type == BUILDING_MEDIUM_MUDBRICK_PYRAMID
+                || mon_type == BUILDING_LARGE_MUDBRICK_PYRAMID
+                || mon_type == BUILDING_MUDBRICK_PYRAMID_COMPLEX
+                || mon_type == BUILDING_GRAND_MUDBRICK_PYRAMID_COMPLEX);
             const bool is_true = (mon_type == BUILDING_SMALL_PYRAMID
                 || mon_type == BUILDING_MEDIUM_PYRAMID
                 || mon_type == BUILDING_LARGE_PYRAMID
                 || mon_type == BUILDING_PYRAMID_COMPLEX
                 || mon_type == BUILDING_GRAND_PYRAMID_COMPLEX);
-            pcstr congrats = is_true ? "pyramid_congratulations"
-                : (is_bent ? "bent_pyramid_congratulations" : "stepped_pyramid_congratulations");
+            pcstr congrats = is_mudbrick ? "mudbrick_pyramid_congratulations"
+                : (is_true ? "pyramid_congratulations"
+                : (is_bent ? "bent_pyramid_congratulations" : "stepped_pyramid_congratulations"));
             city_message &message = city_message_post_with_popup_delay(MESSAGE_CAT_MONUMENTS, true, congrats, type(), tile().grid_offset());
             message.hide_img = true;
             return;
@@ -2380,6 +2489,241 @@ bool building_small_pyramid::use_polish_sprites_for_layer(int layer) const {
 
 const monument &building_small_pyramid::config() const {
     return g_monument_small_pyramid;
+}
+
+// --- Mudbrick (brick-core) small pyramid (polish phases) ------------------------
+
+void building_small_mudbrick_pyramid::update_day() {
+    building_impl::update_day();
+
+    if (is_finished()) {
+        return;
+    }
+
+    building_stepped_pyramid::update_day(current_params().init_tiles);
+}
+
+int building_small_mudbrick_pyramid::building_image_get() const {
+    switch (phase()) {
+    case MONUMENT_START:
+        return current_params().base_img();
+    default:
+        return current_params().base_img() + 1;
+    }
+
+    return 0;
+}
+
+bool building_small_mudbrick_pyramid::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
+    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, current_params().init_tiles);
+}
+
+bool building_small_mudbrick_pyramid::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
+    if (is_finished()) {
+        return draw_completed_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+    }
+    // Polish (24–25) and terminal (26): full-height silhouette with top-down casing.
+    if (phase() >= k_polish_phase_begin) {
+        if (city_flat_should_flatten_building(base)) {
+            return true;
+        }
+        return draw_completed_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+    }
+    return draw_unfinished_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+}
+
+bool building_small_mudbrick_pyramid::need_stonemason() {
+    if (is_finished() || !is_main()) {
+        return false;
+    }
+    const int p = phase();
+    if (p < 2 || p >= phases() - 1) {
+        return false;
+    }
+    return need_workers();
+}
+
+void building_small_mudbrick_pyramid::on_phase_changed(int old, int current) {
+    // Same as true small: phases 24–25 are polish, not stepped L3/L4 ring raises.
+    if (current == k_polish_phase_begin || current == 30) {
+        if (current >= 2) {
+            int terrain = TERRAIN_BUILDING;
+            if (current >= 3) {
+                terrain |= TERRAIN_CANAL;
+            }
+            map_building_tiles_add(id(), tile(), size(), building_image_get(), terrain);
+        }
+        if (current != MONUMENT_FINISHED) {
+            auto &d = runtime_data();
+            for (e_resource resource = RESOURCE_NONE; resource < RESOURCES_MAX; ++resource) {
+                d.resources_pct[resource] = 0;
+            }
+        }
+        return;
+    }
+    building_stepped_pyramid::on_phase_changed(old, current);
+}
+
+bool building_small_mudbrick_pyramid::use_polish_sprites_for_layer(int layer) const {
+    if (is_finished()) {
+        return true;
+    }
+    const int p = phase();
+    if (p >= k_polish_phase_begin + 1) {
+        return true;
+    }
+    if (p >= k_polish_phase_begin) {
+        return layer >= 1;
+    }
+    return false;
+}
+
+const monument &building_small_mudbrick_pyramid::config() const {
+    return g_monument_small_mudbrick_pyramid;
+}
+
+// --- Mudbrick (brick-core) medium pyramid (polish after height) ------------------
+
+void building_medium_mudbrick_pyramid::update_day() {
+    building_impl::update_day();
+
+    if (is_finished()) {
+        return;
+    }
+
+    building_stepped_pyramid::update_day(current_params().init_tiles);
+}
+
+int building_medium_mudbrick_pyramid::building_image_get() const {
+    switch (phase()) {
+    case MONUMENT_START:
+        return current_params().base_img();
+    default:
+        return current_params().base_img() + 1;
+    }
+
+    return 0;
+}
+
+bool building_medium_mudbrick_pyramid::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
+    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, current_params().init_tiles);
+}
+
+bool building_medium_mudbrick_pyramid::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
+    if (is_finished()) {
+        return draw_completed_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+    }
+    if (phase() >= k_polish_phase_begin) {
+        if (city_flat_should_flatten_building(base)) {
+            return true;
+        }
+        return draw_completed_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+    }
+    return draw_unfinished_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+}
+
+bool building_medium_mudbrick_pyramid::need_stonemason() {
+    if (is_finished() || !is_main()) {
+        return false;
+    }
+    const int p = phase();
+    if (p < 2 || p >= phases() - 1) {
+        return false;
+    }
+    return need_workers();
+}
+
+bool building_medium_mudbrick_pyramid::use_polish_sprites_for_layer(int layer) const {
+    if (is_finished()) {
+        return true;
+    }
+    const int p = phase();
+    // Top-down across 3 layers (0..2): 32→top, 33→mid+, 34+→all.
+    if (p >= k_polish_phase_begin + 2) {
+        return true;
+    }
+    if (p >= k_polish_phase_begin + 1) {
+        return layer >= 1;
+    }
+    if (p >= k_polish_phase_begin) {
+        return layer >= 2;
+    }
+    return false;
+}
+
+const monument &building_medium_mudbrick_pyramid::config() const {
+    return g_monument_medium_mudbrick_pyramid;
+}
+
+// --- Mudbrick (brick-core) large pyramid (16×16, polish after height 35) ---------
+
+void building_large_mudbrick_pyramid::update_day() {
+    building_impl::update_day();
+
+    if (is_finished()) {
+        return;
+    }
+
+    building_stepped_pyramid::update_day(current_params().init_tiles);
+}
+
+int building_large_mudbrick_pyramid::building_image_get() const {
+    switch (phase()) {
+    case MONUMENT_START:
+        return current_params().base_img();
+    default:
+        return current_params().base_img() + 1;
+    }
+
+    return 0;
+}
+
+bool building_large_mudbrick_pyramid::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
+    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, current_params().init_tiles);
+}
+
+bool building_large_mudbrick_pyramid::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
+    if (is_finished()) {
+        return draw_completed_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+    }
+    if (phase() >= k_polish_phase_begin) {
+        if (city_flat_should_flatten_building(base)) {
+            return true;
+        }
+        return draw_completed_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+    }
+    return draw_unfinished_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+}
+
+bool building_large_mudbrick_pyramid::need_stonemason() {
+    if (is_finished() || !is_main()) {
+        return false;
+    }
+    const int p = phase();
+    if (p < 2 || p >= phases() - 1) {
+        return false;
+    }
+    return need_workers();
+}
+
+bool building_large_mudbrick_pyramid::use_polish_sprites_for_layer(int layer) const {
+    if (is_finished()) {
+        return true;
+    }
+    const int p = phase();
+    if (p < k_polish_phase_begin) {
+        return false;
+    }
+    // Top-down across 4 layers (0..3): phase 36→top … 39+→all.
+    const int polish_i = p - k_polish_phase_begin;
+    if (polish_i >= k_polish_layers - 1) {
+        return true;
+    }
+    return layer >= (k_polish_layers - 1 - polish_i);
+}
+
+const monument &building_large_mudbrick_pyramid::config() const {
+    return g_monument_large_mudbrick_pyramid;
 }
 
 void building_medium_pyramid::update_day() {

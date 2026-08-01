@@ -6373,6 +6373,14 @@ game_messages_en {
             text: "After much hard labor the beautiful hand-crafted doors of Alexandria's magnificent Great Library are ready to be opened wide to the scholars of the world."
         }
     }
+    mudbrick_pyramid_congratulations {
+        id: 528,
+        size [30, 18]
+        title { text: "Brick Pyramid finished!" }
+        content {
+            text: "Masons have completed their finishing touches on the gleaming outer casing of fine limestone, and the Brick Pyramid is finally done!"
+        }
+    }
     message_dike_breach {
         id: 524,
         type: 2,

@@ -9,10 +9,9 @@ log_info("akhenaten: mission 27 itjtawy started")
 // Convergence: Kebet (25) and Menat Khufu (26) both funnel into this scenario. No
 // next_mission here - a choice[] host to Iken (28, already scripted) / Sawu (29, not yet;
 // its button stays hidden until that mission is scripted).
-// Win: pop 7500 / culture 60 / prosperity 60 / monuments TEMP 6 (pak raw 33 = Sphinx +
-//   Medium + Small Mudbrick Pyramid; mudbrick pyramids not implemented yet - Sphinx-only rating
-//   2.25x1+4.5=6.75->6 truncated) / kingdom 85 / housing_count 6 + housing_level 17
-//   (six BUILDING_HOUSE_STATELY_MANOR).
+// Win: pop 7500 / culture 60 / prosperity 60 / monuments 33 (Sphinx 1 + Medium mudbrick 8
+//   + Small mudbrick 4 → trunc(2.25·13+4.5)=33) / kingdom 85 / housing_count 6 +
+//   housing_level 17 (six BUILDING_HOUSE_STATELY_MANOR).
 // Burial: pak burial_count=5 - grainx10 potteryx25 beerx12 luxury_goodsx12 papyrusx15.
 // Trade: Buhen(7 sea) Byblos(2) Dakhla Oasis(9) Men-nefer(6) Menat Khufu(4).
 // Display: Kerma(5 sea) Kharga Oasis(11) Waset(1) Kebet(3). SKIP empty map_obj idx=8.
@@ -35,9 +34,6 @@ log_info("akhenaten: mission 27 itjtawy started")
 //   pit flood (editor year=31073 junk, not a real landslide); NEW_TRADE i=14/i=37 and LOST
 //   i=23 (deep chain-only, unreachable from the wired roots at this depth); pak_allowed dump
 //   (editor artifact - only ROAD/CLEAR_LAND/CRUDE_HUT).
-// TEMP: BUILDING_SPHINX only in buildings[]; BUILDING_SMALL/MEDIUM_MUDBRICK_PYRAMID need
-//   a class + place + monument weights before they can be restored alongside pak goal 33.
-//
 // Tag_id scheme:
 //   1000 + i               chain-only leaves
 //   2000 + i               once calendar roots
@@ -107,7 +103,7 @@ mission27 { // Itjtawy - A New Capital is Founded
 		BUILDING_GRAIN_FARM, BUILDING_BARLEY_FARM, BUILDING_FLAX_FARM, BUILDING_LETTUCE_FARM, BUILDING_POMEGRANATES_FARM,
 		BUILDING_CATTLE_RANCH, BUILDING_REED_GATHERER,
 		BUILDING_STONE_QUARRY, BUILDING_LIMESTONE_QUARRY, BUILDING_CLAY_PIT,
-		BUILDING_SPHINX,
+		BUILDING_SPHINX, BUILDING_SMALL_MUDBRICK_PYRAMID, BUILDING_MEDIUM_MUDBRICK_PYRAMID,
 		BUILDING_TEMPLE_OSIRIS, BUILDING_SHRINE_OSIRIS, BUILDING_TEMPLE_PTAH, BUILDING_SHRINE_PTAH,
 		BUILDING_TEMPLE_SETH, BUILDING_SHRINE_SETH, BUILDING_TEMPLE_BAST, BUILDING_SHRINE_BAST,
 		BUILDING_TEMPLE_COMPLEX_OSIRIS, BUILDING_TEMPLE_COMPLEX_PTAH, BUILDING_TEMPLE_COMPLEX_SETH, BUILDING_TEMPLE_COMPLEX_BAST,
@@ -115,12 +111,12 @@ mission27 { // Itjtawy - A New Capital is Founded
 		BUILDING_SCRIBAL_SCHOOL, BUILDING_LIBRARY,
 	]
 
-	// Monuments TEMP 6 (pak raw 33 = Sphinx + Medium + Small Mudbrick; mudbrick not implemented yet).
+	// Monuments 33 = Sphinx(1) + Medium mudbrick(8) + Small mudbrick(4).
 	win_criteria {
 		population    {enabled : true, goal : 7500 }
 		culture       {enabled : true, goal : 60 }
 		prosperity    {enabled : true, goal : 60 }
-		monuments     {enabled : true, goal : 6 }
+		monuments     {enabled : true, goal : 33 }
 		kingdom       {enabled : true, goal : 85 }
 		housing_count {enabled : true, goal : 6 }
 		housing_level {enabled : true, goal : 17 }

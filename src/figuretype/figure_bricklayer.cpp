@@ -1,6 +1,8 @@
 #include "figure_bricklayer.h"
 
 #include "building/monument_mastaba.h"
+#include "building/monument_pyramid.h"
+#include "building/monuments.h"
 #include "building/building_statue.h"
 #include "grid/terrain.h"
 #include "grid/grid.h"
@@ -39,7 +41,12 @@ void figure_bricklayer::figure_action() {
         break;
 
     case ACTION_10_BRICKLAYER_CREATED:
-        base.destination_tile = destination()->access_tile();
+        // Prefer monument access_point (enter_offset); access_tile alone can miss it.
+        if (auto *mm = b_dest->dcast_monument()) {
+            base.destination_tile = mm->access_point();
+        } else {
+            base.destination_tile = destination()->access_tile();
+        }
         advance_action(ACTION_11_BRICKLAYER_GOING);
         break;
 
@@ -61,6 +68,8 @@ void figure_bricklayer::figure_action() {
             advance_action(ACTION_16_BRICKLAYER_RETURN_HOME);
             break;
         }
+        // Mastaba: mastaba-specific sites. Mudbrick pyramids: same 2×2 pattern as
+        // stonemasons — without this branch bricklayers freeze on LOOKING forever.
         if (smart_cast<building_mastaba>(b_dest)) {
             tile2i wait_tile = building_small_mastaba_bricks_waiting_tile(b_dest);
             if (!wait_tile.valid()) {
@@ -76,6 +85,23 @@ void figure_bricklayer::figure_action() {
 
             base.destination_tile = wait_tile;
             advance_action(ACTION_12_BRICKLAYER_GOING_TO_PLACE);
+        } else if (smart_cast<building_pyramid>(b_dest)) {
+            tile2i wait_tile = building_monument_mason_waiting_tile(b_dest);
+            if (!wait_tile.valid()) {
+                advance_action(ACTION_16_BRICKLAYER_RETURN_HOME);
+                break;
+            }
+
+            map_grid_area_foreach(wait_tile.shifted(-1, -1), wait_tile, [] (tile2i t) {
+                if (!map_monuments_get_progress(t)) {
+                    map_monuments_set_progress(t, 1);
+                }
+            });
+
+            base.destination_tile = wait_tile;
+            advance_action(ACTION_12_BRICKLAYER_GOING_TO_PLACE);
+        } else {
+            advance_action(ACTION_16_BRICKLAYER_RETURN_HOME);
         }
         break;
 
@@ -215,9 +241,17 @@ sound_key figure_bricklayer::phrase_key() const {
 void figure_bricklayer::on_destroy() {
     figure_impl::on_destroy();
 
-    // If the bricklayer is working on a monument/statue, we need to remove it from the workers list.
+    // Clear monument/statue worker slot. destination_bid is set at spawn; fall back
+    // to figure destination when missing (older saves / mid-path). Same as stonemason —
+    // without remove_worker, mudbrick pyramids leak slots and block further guild sends.
     building *b_dest = building_get(runtime_data().destination_bid);
-    if (b_dest) {
+    if (!b_dest || !b_dest->id) {
+        b_dest = destination();
+    }
+    if (b_dest && b_dest->id) {
         b_dest->remove_figure_by_id(base.id);
+        if (auto *mon = b_dest->dcast_monument()) {
+            mon->remove_worker(base.id);
+        }
     }
 }

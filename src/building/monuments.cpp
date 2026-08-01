@@ -595,13 +595,24 @@ bool building_monument::need_bricklayers() {
     }
 
     int phase = d.phase;
+    if (needs_resource(RESOURCE_BRICKS, phase) <= 0) {
+        return false;
+    }
+
+    // Free worker slot required — same gate as need_carpenter. Without it, guilds
+    // keep spawning bricklayers that add_workers silently drops (mudbrick pyramids
+    // share the 5-slot list with masons/carpenters) while need_bricklayers stays true.
+    if (!need_workers()) {
+        return false;
+    }
+
     int works_bricklayers = 0;
     for (auto &id : d.workers) {
         figure *f = id > 0 ? figure_get(id) : nullptr;
         works_bricklayers += (f && f->type == FIGURE_BRICKLAYER) ? 1 : 0;
     }
 
-    return (needs_resource(RESOURCE_BRICKS, phase) > 0 && works_bricklayers < needs_bricklayers(phase));
+    return works_bricklayers < needs_bricklayers(phase);
 }
 
 bool building_monument::is_unfinished() const {

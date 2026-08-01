@@ -319,6 +319,123 @@ public:
     BUILDING_METAINFO(BUILDING_SMALL_PYRAMID_CONE, building_small_pyramid_cone, building_small_pyramid)
 };
 
+// Mudbrick (brick-core) small pyramid — PACK_MUDBRICK_PYRAMID + bricks + limestone casing polish.
+class building_small_mudbrick_pyramid : public building_stepped_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_SMALL_MUDBRICK_PYRAMID, building_small_mudbrick_pyramid, building_stepped_pyramid)
+
+    struct static_params : public base_params, public building_static_params {
+    } BUILDING_STATIC_DATA_T;
+
+    virtual void update_day() override;
+    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) override;
+    virtual int building_image_get() const override;
+    virtual const base_params &pyramid_params() const override { return current_params(); }
+    virtual bool need_stonemason() override;
+    // Top-down casing: phase 24 → layers ≥1; phase ≥25 / finished → all.
+    virtual bool use_polish_sprites_for_layer(int layer) const override;
+    static constexpr int k_polish_phase_begin = 24;
+    virtual void on_phase_changed(int old, int current) override;
+
+    virtual const monument &config() const override;
+};
+ANK_CONFIG_STRUCT(building_small_mudbrick_pyramid::static_params,
+    init_tiles, corner_type, wall_type, cone_type, filler_type, enter_offset, stairs);
+
+class building_small_mudbrick_pyramid_corner : public building_small_mudbrick_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_SMALL_MUDBRICK_PYRAMID_CORNER, building_small_mudbrick_pyramid_corner, building_small_mudbrick_pyramid)
+};
+
+class building_small_mudbrick_pyramid_wall : public building_small_mudbrick_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_SMALL_MUDBRICK_PYRAMID_WALL, building_small_mudbrick_pyramid_wall, building_small_mudbrick_pyramid)
+};
+
+class building_small_mudbrick_pyramid_cone : public building_small_mudbrick_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_SMALL_MUDBRICK_PYRAMID_CONE, building_small_mudbrick_pyramid_cone, building_small_mudbrick_pyramid)
+};
+
+// Mudbrick (brick-core) medium pyramid — 12×12, bricks + limestone polish after height 31.
+class building_medium_mudbrick_pyramid : public building_stepped_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_MEDIUM_MUDBRICK_PYRAMID, building_medium_mudbrick_pyramid, building_stepped_pyramid)
+
+    struct static_params : public base_params, public building_static_params {
+    } BUILDING_STATIC_DATA_T;
+
+    static constexpr int k_polish_phase_begin = 32;
+
+    virtual void update_day() override;
+    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) override;
+    virtual int building_image_get() const override;
+    virtual const base_params &pyramid_params() const override { return current_params(); }
+    virtual bool need_stonemason() override;
+    virtual bool use_polish_sprites_for_layer(int layer) const override;
+
+    virtual const monument &config() const override;
+};
+ANK_CONFIG_STRUCT(building_medium_mudbrick_pyramid::static_params,
+    init_tiles, corner_type, wall_type, cone_type, filler_type, enter_offset, stairs);
+
+class building_medium_mudbrick_pyramid_corner : public building_medium_mudbrick_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_MEDIUM_MUDBRICK_PYRAMID_CORNER, building_medium_mudbrick_pyramid_corner, building_medium_mudbrick_pyramid)
+};
+
+class building_medium_mudbrick_pyramid_wall : public building_medium_mudbrick_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_MEDIUM_MUDBRICK_PYRAMID_WALL, building_medium_mudbrick_pyramid_wall, building_medium_mudbrick_pyramid)
+};
+
+class building_medium_mudbrick_pyramid_cone : public building_medium_mudbrick_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_MEDIUM_MUDBRICK_PYRAMID_CONE, building_medium_mudbrick_pyramid_cone, building_medium_mudbrick_pyramid)
+};
+
+// Mudbrick (brick-core) large pyramid — 16×16 (≠ true large 20×20), bricks + polish after height 35.
+class building_large_mudbrick_pyramid : public building_stepped_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_LARGE_MUDBRICK_PYRAMID, building_large_mudbrick_pyramid, building_stepped_pyramid)
+
+    struct static_params : public base_params, public building_static_params {
+    } BUILDING_STATIC_DATA_T;
+
+    // Height courses end at 35 (same band as true/stepped large); polish count = 16/4 = 4.
+    static constexpr int k_polish_phase_begin = 36;
+    static constexpr int k_polish_layers = 4;
+
+    virtual void update_day() override;
+    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) override;
+    virtual int building_image_get() const override;
+    virtual const base_params &pyramid_params() const override { return current_params(); }
+    virtual bool need_stonemason() override;
+    virtual bool use_polish_sprites_for_layer(int layer) const override;
+
+    virtual const monument &config() const override;
+};
+ANK_CONFIG_STRUCT(building_large_mudbrick_pyramid::static_params,
+    init_tiles, corner_type, wall_type, cone_type, filler_type, enter_offset, stairs);
+
+class building_large_mudbrick_pyramid_corner : public building_large_mudbrick_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_LARGE_MUDBRICK_PYRAMID_CORNER, building_large_mudbrick_pyramid_corner, building_large_mudbrick_pyramid)
+};
+
+class building_large_mudbrick_pyramid_wall : public building_large_mudbrick_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_LARGE_MUDBRICK_PYRAMID_WALL, building_large_mudbrick_pyramid_wall, building_large_mudbrick_pyramid)
+};
+
+class building_large_mudbrick_pyramid_cone : public building_large_mudbrick_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_LARGE_MUDBRICK_PYRAMID_CONE, building_large_mudbrick_pyramid_cone, building_large_mudbrick_pyramid)
+};
+
 // C3a2: True (smooth) medium pyramid — 12×12, limestone + polish after height 31.
 class building_medium_pyramid : public building_stepped_pyramid {
 public:

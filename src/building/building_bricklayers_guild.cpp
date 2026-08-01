@@ -122,8 +122,14 @@ void building_bricklayers_guild::spawn_figure() {
 
     if (monument) {
         auto f = base.create_figure_with_destination(FIGURE_BRICKLAYER, monument, (e_figure_action)ACTION_10_BRICKLAYER_CREATED, BUILDING_SLOT_SERVICE);
+        auto *mm = monument->dcast_monument();
+        f->destination_tile = mm ? mm->access_point() : monument->access_tile();
+        f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS;
         monument->dcast()->add_workers(f->id);
         f->wait_ticks = random_short() % 30; // ok
+        if (auto bricklayer = smart_cast<figure_bricklayer>(f)) {
+            bricklayer->runtime_data().destination_bid = monument->id;
+        }
         return;
     }
 

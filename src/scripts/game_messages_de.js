@@ -6250,4 +6250,12 @@ game_messages_de {
             text: "Der heilige Tempel und die prächtigen Gartenhöfe des Caesareums sind endlich vollendet! Die Kunde seiner herrlichen Schönheit verbreitet sich bereits in der ganzen Region."
         }
     }
+    mudbrick_pyramid_congratulations {
+        id: 528,
+        size [30, 18]
+        title { text: "Ziegelpyramide fertiggestellt!" }
+        content {
+            text: "Steinmetze haben ihre letzten Feinarbeiten an der glänzenden Außenverkleidung aus feinem Kalkstein vollendet, und die Ziegelpyramide ist endlich fertig!"
+        }
+    }
 }
