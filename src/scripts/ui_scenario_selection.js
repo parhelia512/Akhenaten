@@ -248,6 +248,10 @@ function window_scenario_selection_btn_start() {
     if (scenario.campaign_scenario_id < 0) {
         return
     }
+    // Menu pick is never a victory advance — drop dynasty / troop carry leftovers.
+    city.kingdome.campaign_carry_personal_savings = 0
+    city.kingdome.personal_savings = 0
+    __campaign_carry_clear()
     __game_start_loaded_file()
 }
 

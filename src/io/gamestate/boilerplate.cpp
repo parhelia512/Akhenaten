@@ -11,6 +11,7 @@
 #include "city/map.h"
 #include "city/city_message.h"
 #include "city/city_hotkeys_handler.h"
+#include "city/campaign_carry.h"
 #include "city/military.h"
 #include "city/city_resource.h"
 #include "core/bstring.h"
@@ -161,6 +162,9 @@ static void pre_load() { // do we NEED this...?
     g_formations.clear_all();
     figure_route_clear_all();
     map_clear_floodplain_growth();
+    // Troop carry lives outside city_data; clear so old saves (no chunk) and map
+    // loads cannot inherit a stale snapshot from the previous session.
+    g_campaign_carry.clear();
 
     game.time_init(2098);
     map_monuments_clear();
@@ -257,7 +261,8 @@ static void post_load() {
         game_features::gameopt_game_speed.set( 80 );
         g_city.init_campaign_mission();
         g_city.init_mission_resources(g_scenario.init_resources);
-        g_city.kingdome.load_scenario(g_scenario.campaign_scenario_id, game.session.last_loaded);
+        // Pass JS player_rank from load_metadata — not campaign_scenario_id.
+        g_city.kingdome.load_scenario(g_city.kingdome.player_rank, game.session.last_loaded);
         events::emit(event_building_menu_update{ "stage_normal" });
         break;
 
@@ -268,7 +273,7 @@ static void post_load() {
     case e_session_custom_map:
         g_city.init_custom_map();
         g_city.init_mission_resources(g_scenario.init_resources);
-        g_city.kingdome.load_scenario(g_scenario.campaign_scenario_id, game.session.last_loaded);
+        g_city.kingdome.load_scenario(g_city.kingdome.player_rank, game.session.last_loaded);
         events::emit(event_building_menu_update{ "stage_normal" });
         break;
     }
@@ -643,6 +648,14 @@ static void file_schema(e_file_format file_format, const int file_version) {
             // count+head+8 order + 8*(bool+u16+u8+i16+bool+pad) + pad = 80
             FILEIO.push_chunk(80, false, "invasion_auto_resolve", iob_invasion_auto_resolve);
         }
+        if (file_version > 182) {
+            // 3 troop slots × 8 + notice + pad = 32
+            FILEIO.push_chunk(32, false, "campaign_carry_troops", iob_campaign_carry_troops);
+        }
+        if (file_version > 183) {
+            // 8 monument slots × 12 = 96
+            FILEIO.push_chunk(96, false, "campaign_carry_monuments", iob_campaign_carry_monuments);
+        }
 
         break;
     }
@@ -709,9 +722,10 @@ bool GamestateIO::load_mission_pak_raw(const int scenario_id) {
         return false;
     }
 
-    // mission pack files do not store carry savings or campaign rank; preserve across pre_load().
+    // mission pack files do not store carry savings / troops / campaign rank; preserve across pre_load().
     const uint16_t saved_carry = g_city.kingdome.campaign_carry_personal_savings;
     const int32_t saved_rank = g_scenario.campaign_mission_rank;
+    const campaign_carry_t saved_troops = g_campaign_carry;
 
     pre_load();
     vfs::path mission_pak_path = vfs::path(MISSION_PACK_FILE).resolve();
@@ -722,6 +736,7 @@ bool GamestateIO::load_mission_pak_raw(const int scenario_id) {
 
     g_city.kingdome.campaign_carry_personal_savings = saved_carry;
     g_scenario.campaign_mission_rank = saved_rank;
+    g_campaign_carry = saved_troops;
 
     game.session.last_loaded = e_session_mission;
     game.session.last_loaded_mission = MISSION_PACK_FILE;
@@ -734,9 +749,10 @@ bool GamestateIO::load_mission_map_raw(const int scenario_id, pcstr map_path) {
         return false;
     }
 
-    // Same carry/rank preservation as load_mission_pak_raw.
+    // Same carry/rank/troops preservation as load_mission_pak_raw.
     const uint16_t saved_carry = g_city.kingdome.campaign_carry_personal_savings;
     const int32_t saved_rank = g_scenario.campaign_mission_rank;
+    const campaign_carry_t saved_troops = g_campaign_carry;
 
     pre_load();
     vfs::path full = vfs::path(map_path).resolve();
@@ -747,6 +763,7 @@ bool GamestateIO::load_mission_map_raw(const int scenario_id, pcstr map_path) {
 
     g_city.kingdome.campaign_carry_personal_savings = saved_carry;
     g_scenario.campaign_mission_rank = saved_rank;
+    g_campaign_carry = saved_troops;
 
     // Campaign session so post_load() applies JS metadata as a new mission (not custom-map hacks).
     game.session.last_loaded = e_session_mission;
@@ -978,6 +995,17 @@ void GamestateIO::start_loaded_file() {
 
     autoconfig_window::before_mission_start();
     events::emit(event_mission_start{ g_scenario.campaign_scenario_id });
+    // Fresh mission start only: activate troop carry + notice.
+    // Do not run on selection preview loads (start_immediately=false) or save resume —
+    // preview would wipe a pending snapshot when browsing missions without carry_troops.
+    if (game.session.last_loaded == e_session_mission) {
+        g_campaign_carry.activate_for_mission(g_scenario.carry_troops_mask);
+        g_campaign_carry.post_notice_if_needed();
+        // Monument store survives missions without carry_monuments (e.g. Maritis 50).
+        if (g_scenario.carry_monuments) {
+            g_campaign_carry.apply_monuments();
+        }
+    }
 
     g_city.before_start_simulation();
     game.before_start_simulation();

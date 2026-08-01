@@ -16,6 +16,7 @@ mission32 { // Khmun (Hermopolis) — Egypt Reclaimed
 	start_message : "message_mission_hermopolis"
 	selection_title : "Khmun"
 	player_rank : 10
+	reset_personal_savings : true
 
 	choice_background {pack:PACK_UNLOADED, id:12}
 	choice_image1 {pack:PACK_UNLOADED, id:13}

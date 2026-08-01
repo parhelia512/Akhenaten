@@ -1,6 +1,7 @@
 #include "scenario.h"
 
 #include "io/io_buffer.h"
+#include "city/campaign_carry.h"
 #include "city/city.h"
 #include "city/city_resource.h"
 #include "core/custom_span.hpp"
@@ -40,6 +41,9 @@ int get_custom_mission_id(xstring mission) {
 void scenario_data_t::init() {
     campaign_scenario_id = 0;
     campaign_mission_rank = 0;
+    carry_troops_mask = 0;
+    carry_monuments = false;
+    reset_personal_savings = false;
     scmode = e_scenario_normal;
     settings.starting_kingdom = difficulty_starting_kingdom();
     if (debt_interest_rate <= 0) {
@@ -107,6 +111,16 @@ void scenario_data_t::load_metadata(const mission_id_t &missionid, bool is_new_m
 
         init_resources.clear();
         arch.r("init_resources", init_resources);
+
+        carry_troops_mask = 0;
+        for (const auto &name : arch.r_array_str("carry_troops")) {
+            carry_troops_mask |= troop_carry_mask_parse_name(name.c_str());
+        }
+        carry_monuments = arch.r_bool("carry_monuments");
+        reset_personal_savings = arch.r_bool("reset_personal_savings");
+        if (is_new_mission && reset_personal_savings) {
+            g_city.kingdome.campaign_carry_personal_savings = 0;
+        }
 
         arch.r("invasion_points_land", invasion_points_land);
         arch.r("invasion_points_sea", invasion_points_sea);

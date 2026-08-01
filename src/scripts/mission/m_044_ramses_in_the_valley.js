@@ -5,6 +5,7 @@ mission44 {
 	start_message : "message_mission_ramses_valley"
 	selection_title : "Ramses in the Valley"
 	player_rank : 6
+	carry_troops : ["archer", "infantry"]
 
 	next_mission : -1
 

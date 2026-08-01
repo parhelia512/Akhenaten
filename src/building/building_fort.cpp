@@ -1,6 +1,7 @@
 #include "building/building_fort.h"
 
 #include "building/rotation.h"
+#include "city/campaign_carry.h"
 #include "figure/formation.h"
 #include "figuretype/figure_soldier.h"
 #include "figure/formation_batalion.h"
@@ -209,6 +210,7 @@ void building_fort::on_place_update_tiles(int orientation, int variant) {
 
     base.formation_id = create_batalion();
     ground->formation_id = base.formation_id;
+    g_campaign_carry.try_apply_to_fort(type(), base.formation_id);
 }
 
 void building_fort::on_place_checks() {
@@ -237,6 +239,7 @@ void building_fort::remove_batalion() {
 }
 
 void building_fort::on_destroy() {
+    g_campaign_carry.refund_fort_if_applied(type());
     remove_batalion();
 }
 

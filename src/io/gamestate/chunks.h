@@ -140,3 +140,5 @@ extern io_buffer* iob_bizarre_ordered_fields_8;
 extern io_buffer* iob_bizarre_ordered_fields_9;
 
 extern io_buffer *iob_monuments_progress_grid;
+extern io_buffer *iob_campaign_carry_troops;
+extern io_buffer *iob_campaign_carry_monuments;

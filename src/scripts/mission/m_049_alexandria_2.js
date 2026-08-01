@@ -17,6 +17,8 @@ mission49 { // Ptolemy's Alexandria - A Beacon of Light
 	start_message : "message_mission_ptolemy_alexandria"
 	selection_title : "Ptolemy's Alexandria"
 	player_rank : 10
+	carry_troops : ["archer", "infantry"]
+	carry_monuments : true
 
 	next_mission : 50
 

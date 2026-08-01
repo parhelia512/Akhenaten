@@ -17,6 +17,7 @@ mission51 { // Cleopatra's Alexandria - The Legacy of a Queen
 	start_message : "message_mission_cleopatra_alexandria"
 	selection_title : "Cleopatra's Alexandria"
 	player_rank : 10
+	carry_monuments : true
 
 	next_mission : 52
 

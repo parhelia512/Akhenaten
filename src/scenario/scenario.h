@@ -279,6 +279,12 @@ struct scenario_data_t {
     int campaign_scenario_id;
     e_scenario_mode scmode;
     int campaign_mission_rank;
+    // Bitmask of e_troop_carry_mask — destination mission accepts these fort types.
+    uint8_t carry_troops_mask;
+    // Destination accepts finished monument snapshots (Capital 49/51). Survives mission 50.
+    bool carry_monuments = false;
+    // First mission of a new Pharaoh period — drop dynasty personal savings.
+    bool reset_personal_savings = false;
     int32_t has_won;
     int32_t continue_months_left;
     int32_t continue_months_chosen;

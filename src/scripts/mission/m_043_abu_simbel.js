@@ -5,6 +5,7 @@ mission43 {
 	start_message : "message_mission_abu_simbel"
 	selection_title : "Abu Simbel"
 	player_rank : 5
+	carry_troops : ["infantry"]
 
 	next_mission : 44
 

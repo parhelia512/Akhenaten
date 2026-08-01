@@ -48,20 +48,23 @@ declare_console_command_p(addsavings) {
 void kingdome_relation_t::load_scenario(int rank, int load_type) {
     rating = g_scenario.starting_kingdom();
     personal_savings = 0;
-    player_rank = rank;
-    int salary_rank = rank;
     const bool custom_scenario = g_scenario.mode() != e_scenario_normal;
 
     if (custom_scenario) {
         personal_savings = 0;
-        player_rank = scenario_property_player_rank();
-        salary_rank = scenario_property_player_rank();
+        player_rank = (int8_t)scenario_property_player_rank();
     } else if (load_type == e_session_mission) {
+        // player_rank already set from mission JS in load_metadata.
+        // Accept override only for a valid salary rank (0..10) — never scenario_id.
+        if (rank >= 0 && rank <= 10) {
+            player_rank = (int8_t)rank;
+        }
         personal_savings = campaign_carry_personal_savings;
+    } else if (rank >= 0 && rank <= 10) {
+        player_rank = (int8_t)rank;
     }
 
-    salary_rank = std::clamp(salary_rank, 0, 10);
-
+    const int salary_rank = std::clamp((int)player_rank, 0, 10);
     this->salary_rank = (uint8_t)salary_rank;
     this->salary_amount = (uint8_t)params().salary_ranks[salary_rank];
 }

@@ -28,6 +28,7 @@ mission23 { // Thinis — Civil War FIP; != mission1 Dawn
 	start_message : "message_mission_thinis"
 	selection_title : "Thinis"
 	player_rank : 9
+	reset_personal_savings : true
 
 	choice_background {pack:PACK_UNLOADED, id:12}
 	choice_image1 {pack:PACK_UNLOADED, id:13}

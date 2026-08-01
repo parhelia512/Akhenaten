@@ -140,6 +140,10 @@ function top_menu_replay_map() {
 				ui.window_city_show()
 			} else {
 				widget_top_menu_clear_state()
+				// Replay is not a victory advance — drop dynasty / troop / monument carry.
+				city.kingdome.campaign_carry_personal_savings = 0
+				city.kingdome.personal_savings = 0
+				__campaign_carry_clear()
 				__game_load_mission(scenario.campaign_scenario_id, 1)
 			}
 		},

@@ -18,6 +18,7 @@ mission52 { // Actium - Antony and Cleopatra
 	start_message : "message_mission_actium"
 	selection_title : "Actium"
 	player_rank : 10
+	carry_troops : ["archer", "infantry"]
 
 	next_mission : -1
 

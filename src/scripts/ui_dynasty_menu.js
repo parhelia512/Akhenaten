@@ -4,6 +4,9 @@ function dynasty_menu_btn_resume() {
     var last = normalize_savegame_path_for_load(game.last_autosave)
     var to_begin = !last || last === "" || !__game_file_exists(last)
     if (to_begin) {
+        city.kingdome.campaign_carry_personal_savings = 0
+        city.kingdome.personal_savings = 0
+        __campaign_carry_clear()
         __game_load_mission(SCENARIO_NUBT, 1)
         return
     }

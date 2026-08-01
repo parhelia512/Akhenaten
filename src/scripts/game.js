@@ -95,6 +95,7 @@ game_features {
     @gameui_building_mothball_button {}
     @gameui_prompt_save_on_exit {}
     @gameui_road_preview_in_map_order {}
+    @gameui_enhanced_nilometer {}
     @gameopt_scroll_speed {}
     @gameopt_middle_mouse_camera_pan {}
     @gameopt_middle_mouse_pan_speed {}
@@ -215,6 +216,16 @@ function game_on_level_post_load_mission_options_lock(ev) {
 function game_on_mission_start_options_lock(ev) {
     // Sim/city about to run. Campaign briefing init unlocks again until Start.
     game_mission_options_locked = true
+}
+
+[es=event_mission_won]
+function game_on_mission_won_troop_carry(ev) {
+    if (ev.next_scenario_id < 0) {
+        __campaign_carry_clear()
+        return
+    }
+    __campaign_carry_snapshot_troops()
+    __campaign_carry_snapshot_monuments()
 }
 
 [es=event_exit_to_menu_requested]

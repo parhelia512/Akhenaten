@@ -1309,8 +1309,9 @@ io_buffer* iob_city_data = new io_buffer([](io_buffer* iob, size_t version) {
     iob->bind_u8((uint8_t&)g_distant_battle.dispatched_army.state);
     iob->bind_u8(g_distant_battle.dispatched_army.await_soldiers);
     iob->bind_u8(g_distant_battle.dispatched_army.position_index);
-    iob->bind____skip(1); // (BIND_SIGNATURE_INT32, &data.buildings.temple_complex_id);
-    iob->bind____skip(44);
+    // Was pad; persist troop-ask ↔ distant-battle link across save/load (Akhenaten).
+    iob->bind_i16(g_distant_battle.source_request_event_id);
+    iob->bind____skip(43);
     iob->bind____skip(68);
     iob->bind(BIND_SIGNATURE_UINT32, data.buildings.festival_square);
     iob->bind____skip(4);

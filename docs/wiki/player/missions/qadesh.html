@@ -83,8 +83,10 @@
         <strong>Full redefine (2026-07-31):</strong> <code>hide_pak_*</code> empire + JS event graph
         (dump <span class="file-ref">tmp/mission42_pak.txt</span>). Invasions i=1→19→22 → JS canaanite raids.
         SKIP already_fired gifts i=8/i=9. Shared refuse KR via <code>request_cleared</code>.
-        <br /><strong>CO2:</strong> briefing veteran troops from Sumur — after CO0; not wired yet.
-        <br /><strong>Map:</strong> preplaced chariot fort camps (briefing).
+        <br /><strong>CO2:</strong> <code>carry_troops: ["infantry","chariot"]</code> — notice at start;
+        place matching forts immediately to receive Sumur veterans (entry → fort). Building anything else
+        drops pending carry. Briefing «delay deployment» is flavor only.
+        <br /><strong>Map:</strong> preplaced chariot fort camps (≠ carry veterans).
       </div>
 
       <h2 id="objectives">Objectives (pak)</h2>
@@ -99,7 +101,8 @@
 
       <h2 id="briefing">Briefing (summary)</h2>
       <p>As Pharaoh Ramses II at the fortress town of Qadesh: Hittites under Mutwatalli threaten the land of Amurra.
-        Preplaced charioteer camps; delay deploying Sumur veterans until the battle peaks. After victory, revive gems and jewelry trade.</p>
+        Preplaced charioteer camps. Sumur veterans rejoin when you build infantry/chariot forts (briefing «delay»
+        is narrative — place forts promptly or lose the carry). After victory, revive gems and jewelry trade.</p>
 
       <div class="dev-section">
         <h2>Developer Reference</h2>

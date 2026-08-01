@@ -33,6 +33,8 @@ function new_career_btn_ok() {
 function window_new_career_on_init(window) {
     __scenario_init()
     city.kingdome.campaign_carry_personal_savings = 0
+    city.kingdome.personal_savings = 0
+    __campaign_carry_clear()
 
     window.player_name.value = game.dynasty_name || "My Dynasty"
     window_new_career.player_name_value = window.player_name.value

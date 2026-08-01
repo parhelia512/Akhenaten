@@ -15,6 +15,7 @@ mission34 { // Byblos — Expansion and Conquest
 	start_message : "message_mission_byblos"
 	selection_title : "Byblos"
 	player_rank : 10
+	reset_personal_savings : true
 
 	next_mission : 36
 

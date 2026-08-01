@@ -181,10 +181,6 @@ function mission_end_advance_to_next_mission() {
     var completed_id = scenario.campaign_scenario_id
     var savings = city.kingdome.personal_savings
 
-    if (scenario.scmode != e_scenario_custom_map) {
-        city.kingdome.campaign_carry_personal_savings = savings
-    }
-
     var next_scenario_id = -1
     if (mission_has_post_victory_choice(completed_id)) {
         next_scenario_id = completed_id
@@ -192,6 +188,12 @@ function mission_end_advance_to_next_mission() {
         next_scenario_id = mission_end_compute_next_scenario_id(completed_id)
     }
 
+    if (scenario.scmode != e_scenario_custom_map) {
+        // Terminus: drop carry so the next campaign from the menu starts clean.
+        city.kingdome.campaign_carry_personal_savings = (next_scenario_id == -1) ? 0 : savings
+    }
+
+    // Snapshot troops while the won city still exists; terminus clears inside the handler.
     emit event_mission_won { scenario_id: completed_id, next_scenario_id: next_scenario_id }
 
     if (scenario.scmode != e_scenario_custom_map) {

@@ -30,6 +30,7 @@ mission25 { // Kebet (Coptos) — Reunification; briefing key = coptos
 	start_message : "message_mission_coptos"
 	selection_title : "Kebet"
 	player_rank : 9
+	reset_personal_savings : true
 
 	// Kebet (25) and Menat (26) are a choice pair; both converge on Itjtawy (27).
 	next_mission : 27

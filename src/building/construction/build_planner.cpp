@@ -27,6 +27,7 @@
 #include "city/city_industry.h"
 #include "building/building_fort.h"
 #include "building/building.h"
+#include "city/campaign_carry.h"
 #include "building/building_temple_complex.h"
 #include "city/buildings.h"
 #include "city/city_buildings.h"
@@ -1496,6 +1497,11 @@ bool build_planner::place() {
     total_cost = placement_cost;
     if (total_cost == 0) {
         return false;
+    }
+
+    // CO2b: OG-style — building anything except a land fort drops pending troop carry.
+    if (!campaign_carry_is_fort_building(build_type)) {
+        g_campaign_carry.expire_pending_troops();
     }
 
     return true;

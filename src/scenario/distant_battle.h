@@ -64,8 +64,8 @@ struct distant_battles_t {
     battle_state_t battle;
     dispatched_army_t dispatched_army;
 
-    // Runtime link from a RESOURCE_TROOPS request that deferred ok/defeat to battle
-    // resolution. Not part of the original save blob (cleared on load / clear()).
+    // Link from a RESOURCE_TROOPS request that deferred ok/defeat to battle resolution.
+    // Persisted in city_data pad (Akhenaten); fight_distant_battle also recovers via scan.
     int16_t source_request_event_id = -1;
 
     void init_distant_battle(int enemy_strength);

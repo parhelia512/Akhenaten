@@ -31,7 +31,9 @@
 //  180 akhenaten: monument preexisting (pyramid append; mastaba/sphinx/obelisk reclaim skip)
 //  181 akhenaten: house frog_infest_days (Cleopatra Plague of Frogs / CF1)
 //  182 akhenaten: pyramid complex causeway_length / causeway_dir
-constexpr uint32_t latest_save_version = 182;
+//  183 akhenaten: campaign_carry_troops (Cleopatra fort carry CO2)
+//  184 akhenaten: campaign_carry_monuments (Cleopatra monument carry CO1)
+constexpr uint32_t latest_save_version = 184;
 
 vfs::path fullpath_saves(vfs::path filename);
 vfs::path fullpath_maps(char* full, vfs::path filename);
