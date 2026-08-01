@@ -38,28 +38,77 @@ tile2i resolve_entry_tile() {
     return map_edge_spawn_tile();
 }
 
-bool tomb_has_road_access(building &tomb) {
-    // Mastaba/pyramid main->size is only a 2×2 (or similar) part — do NOT use it as
-    // the footprint for map_has_road_access. Prefer entrance / access_point.
+// Road tile the walker should path to. Never returns a non-road footprint tile —
+// finished monuments mark their footprint blocked for citizen routing.
+tile2i resolve_tomb_road_destination(building &tomb) {
     if (auto *m = tomb.dcast_monument()) {
         tile2i ap = m->access_point();
         if (ap.valid()) {
             if (map_terrain_is(ap, TERRAIN_ROAD | TERRAIN_FERRY_ROUTE)) {
-                return true;
+                return ap;
             }
+            // Mastaba entrance is often just outside; mausoleum AP sits on footprint.
             tile2i near = map_closest_road_within_radius(ap, 1, 2);
+            if (!near.valid()) {
+                near = map_closest_road_within_radius(ap, 1, 6);
+            }
             if (near.valid()) {
-                return true;
+                return near;
             }
         }
     }
 
-    if (tomb.has_road_access && tomb.road_access.valid()) {
-        return true;
+    if (tomb.has_road_access && tomb.road_access.valid()
+        && map_terrain_is(tomb.road_access, TERRAIN_ROAD | TERRAIN_FERRY_ROUTE)) {
+        return tomb.road_access;
     }
 
-    // Weak fallback for single-footprint tombs.
-    return map_has_road_access(tomb.tile, tomb.size);
+    // Mastaba/pyramid main->size is often only a 2×2 part — avoid it as footprint.
+    // Prefer map_get_road_access_tile when size looks like a real footprint.
+    if (tomb.size >= 3) {
+        tile2i access = map_get_road_access_tile(tomb.tile, tomb.size);
+        if (access.valid()) {
+            return access;
+        }
+    }
+
+    tile2i near = map_closest_road_within_radius(tomb.tile, 1, 8);
+    if (near.valid()) {
+        return near;
+    }
+
+    return tile2i::invalid;
+}
+
+bool tomb_has_road_access(building &tomb) {
+    return resolve_tomb_road_destination(tomb).valid();
+}
+
+bool is_active_funeral_action(int action) {
+    return action == ACTION_120_FUNERAL_CREATED
+        || action == ACTION_121_FUNERAL_GOING_TO_TOMB
+        || action == ACTION_122_FUNERAL_ARRIVED;
+}
+
+// Revive an inert slot targeting this tomb (action 0 / unknown) instead of spawning a duplicate.
+figure *find_inert_funeral_for_tomb(building_id tomb_id) {
+    if (!tomb_id) {
+        return nullptr;
+    }
+    for (figure *f : map_figures()) {
+        if (!f->is_alive() || f->type != FIGURE_FUNERAL_WALKER) {
+            continue;
+        }
+        if (is_active_funeral_action(f->action_state) || f->action_state == ACTION_123_FUNERAL_ABORT
+            || f->action_state == FIGURE_ACTION_149_CORPSE) {
+            continue;
+        }
+        if (f->destination_building_id == tomb_id
+            || figure_funeral_walker(f).runtime_data().target_tomb_id == tomb_id) {
+            return f;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace
@@ -94,6 +143,10 @@ bool figure_funeral_walker::tomb_has_active_funeral(building_id tomb_id) {
         if (!f->is_alive() || f->type != FIGURE_FUNERAL_WALKER) {
             continue;
         }
+        // Ignore inert / unknown action slots — they must not block daily respawn.
+        if (!is_active_funeral_action(f->action_state)) {
+            continue;
+        }
         if (f->destination_building_id == tomb_id) {
             return true;
         }
@@ -107,25 +160,22 @@ bool figure_funeral_walker::tomb_has_active_funeral(building_id tomb_id) {
 
 tile2i figure_funeral_walker::tomb_destination_tile(building &tomb) {
     // Prefer a road tile near the entrance so finished monuments (blocked footprint)
-    // remain reachable. Fall back to access_point / access_tile / tile.
+    // remain reachable. Never prefer a blocked access_point over road_access.
+    tile2i road = resolve_tomb_road_destination(tomb);
+    if (road.valid()) {
+        return road;
+    }
+
+    // force_ignore_road / no-road maps: still need a non-empty destination.
     if (auto *m = tomb.dcast_monument()) {
         tile2i ap = m->access_point();
         if (ap.valid()) {
-            if (map_terrain_is(ap, TERRAIN_ROAD | TERRAIN_FERRY_ROUTE)) {
-                return ap;
-            }
-            tile2i near = map_closest_road_within_radius(ap, 1, 2);
-            if (near.valid()) {
-                return near;
-            }
             return ap;
         }
     }
-
     if (tomb.has_road_access && tomb.road_access.valid()) {
         return tomb.road_access;
     }
-
     tile2i dest = tomb.access_tile();
     if (dest.valid()) {
         return dest;
@@ -146,6 +196,27 @@ void figure_funeral_walker::on_post_load() {
         d.target_tomb_id = base.destination_building_id;
     } else if (d.target_tomb_id && !base.destination_building_id) {
         base.destination_building_id = d.target_tomb_id;
+    }
+
+    building_id tomb_id = d.target_tomb_id ? d.target_tomb_id : base.destination_building_id;
+    if (!tomb_id) {
+        return;
+    }
+
+    const int a = action_state();
+    const bool known = is_active_funeral_action(a) || a == ACTION_123_FUNERAL_ABORT
+        || a == FIGURE_ACTION_149_CORPSE;
+    if (!known) {
+        // Recover type-only / zeroed action slots so they resume instead of idling
+        // while still holding a tomb id (would otherwise block respawn forever).
+        advance_action(ACTION_120_FUNERAL_CREATED);
+    }
+
+    if (is_active_funeral_action(action_state())) {
+        building *tomb = building_get(tomb_id);
+        if (tomb && tomb->is_valid()) {
+            base.destination_tile = tomb_destination_tile(*tomb);
+        }
     }
 }
 
@@ -250,6 +321,17 @@ int figure_funeral_walker::try_spawn_all(bool force_ignore_road) {
             return;
         }
         if (!force_ignore_road && !tomb_has_road_access(b)) {
+            return;
+        }
+
+        if (figure *inert = find_inert_funeral_for_tomb(b.id)) {
+            figure_funeral_walker fw(inert);
+            fw.runtime_data().target_tomb_id = b.id;
+            fw.set_destination(b.id);
+            fw.advance_action(ACTION_120_FUNERAL_CREATED);
+            if (!first_id) {
+                first_id = inert->id;
+            }
             return;
         }
 

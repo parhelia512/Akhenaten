@@ -10,6 +10,8 @@
 //   [test-marker] funeral_no_provisions_required_ok
 //   [test-marker] funeral_multi_tomb_ok
 //   [test-marker] funeral_pyramid_spawn_ok
+//   [test-marker] funeral_mausoleum_spawn_ok
+//   [test-marker] funeral_inert_action_no_block_ok
 //   [test-marker] funeral_midwalk_saveload_ok  (or funeral_midwalk_saveload_skipped)
 
 var ACTION_FUNERAL_CREATED = 120
@@ -52,6 +54,46 @@ function place_finished_small_stepped(candidates) {
     // phases() == 25 for small stepped → set_phase(25) → MONUMENT_FINISHED.
     __test_monument_set_phase(bid, 25)
     if (__test_monument_phase(bid) != -1) {
+        return 0
+    }
+    return bid
+}
+
+function place_finished_mausoleum(candidates) {
+    if (!__scenario_building_allowed(BUILDING_STORAGE_YARD)) {
+        __scenario_building_allow(BUILDING_STORAGE_YARD, true)
+    }
+    if (!__scenario_building_allowed(BUILDING_MAUSOLEUM)) {
+        __scenario_building_allow(BUILDING_MAUSOLEUM, true)
+    }
+    var need = 240
+    var sy = 0
+    var yard_spots = [
+        {x: 8, y: 8}, {x: 12, y: 12}, {x: 20, y: 8}, {x: 8, y: 40}
+    ]
+    for (var yi = 0; yi < yard_spots.length && !sy; yi++) {
+        sy = test_staffed_yard_with_resource(RESOURCE_SANDSTONE, need, yard_spots[yi].x, yard_spots[yi].y)
+    }
+    if (!sy) {
+        sy = test_staffed_yard_with_resource(RESOURCE_SANDSTONE, need, -1, -1)
+    }
+    if (!sy) {
+        return 0
+    }
+    var bid = 0
+    for (var i = 0; i < candidates.length && !bid; i++) {
+        bid = test_building_place(BUILDING_MAUSOLEUM, candidates[i].x, candidates[i].y)
+    }
+    if (!bid) {
+        bid = test_building_place(BUILDING_MAUSOLEUM, -1, -1)
+    }
+    if (!bid) {
+        return 0
+    }
+    // phases 0–4 + sentinel 5 → size 6; set_phase(6) → FINISHED
+    __test_monument_set_phase(bid, 6)
+    var ph = __test_monument_phase(bid)
+    if (ph != 255 && ph != -1) {
         return 0
     }
     return bid
@@ -287,11 +329,96 @@ function run_test() {
     }
     __log_marker('funeral_pyramid_spawn_ok')
 
-    // Mid-walk save/load: while GOING, funeral_done must stay clear; then force
-    // done and verify the monument bind roundtrips (no re-spawn).
+    // Destination resolver must prefer a road tile when one exists near the tomb
+    // (mausoleum AP sits on blocked footprint — must not stick there).
+    city.figures.remove_figures(FIGURE_FUNERAL_WALKER)
+    __test_monument_set_funeral_done(bid, 1)
+    __test_monument_set_funeral_done(bid2, 1)
+    __test_monument_set_funeral_done(pbid, 1)
+    var mbid = place_finished_mausoleum([
+        {x: 70, y: 20}, {x: 75, y: 25}, {x: cx + 14, y: cy + 8}, {x: 15, y: 55}
+    ])
+    if (!mbid) {
+        __log_info_native('[test:84] failed to place/finish mausoleum')
+        __test_signal_ready()
+        return
+    }
+    var mfid = __test_funeral_try_spawn(1)
+    if (!mfid || !__figure_is_valid(mfid) || __figure_get_type(mfid) != FIGURE_FUNERAL_WALKER) {
+        __log_info_native('[test:84] mausoleum spawn failed, fid=' + mfid)
+        __test_signal_ready()
+        return
+    }
+    __test_figure_set_action(mfid, ACTION_FUNERAL_CREATED)
+    __test_figure_action_perform(mfid)
+    if (__figure_get_destination_building_id(mfid) != mbid) {
+        __log_info_native('[test:84] mausoleum dest want ' + mbid + ' got '
+            + __figure_get_destination_building_id(mfid))
+        __test_signal_ready()
+        return
+    }
+    // Soft: if map has a road near tomb, destination must be on it (not blocked AP).
+    if (__test_funeral_tomb_dest_is_road(mbid) == 1 && __test_funeral_dest_is_road(mfid) != 1) {
+        __log_info_native('[test:84] mausoleum destination not on road despite road nearby')
+        __test_signal_ready()
+        return
+    }
+    __test_figure_set_action(mfid, ACTION_FUNERAL_ARRIVED)
+    __test_figure_action_perform(mfid)
+    if (__test_monument_funeral_done(mbid) != 1) {
+        __log_info_native('[test:84] mausoleum funeral_done not set after arrive')
+        __test_signal_ready()
+        return
+    }
+    __log_marker('funeral_mausoleum_spawn_ok')
+
+    // Inert action (0) with tomb id must not block daily respawn forever.
+    city.figures.remove_figures(FIGURE_FUNERAL_WALKER)
+    __test_monument_set_funeral_done(mbid, 0)
+    var ifid = __test_funeral_try_spawn(1)
+    if (!ifid) {
+        __log_info_native('[test:84] inert-action setup spawn failed')
+        __test_signal_ready()
+        return
+    }
+    __test_figure_set_action(ifid, 0)
+    var inert_again = __test_funeral_try_spawn(1)
+    if (!inert_again) {
+        __log_info_native('[test:84] inert action=0 blocked respawn')
+        __test_signal_ready()
+        return
+    }
+    // Prefer revive of the inert slot over a duplicate walker.
+    if (inert_again != ifid) {
+        __log_info_native('[test:84] inert revive want fid ' + ifid + ' got ' + inert_again)
+        __test_signal_ready()
+        return
+    }
+    if (__figure_get_action_state(ifid) != ACTION_FUNERAL_CREATED
+        && __figure_get_action_state(ifid) != ACTION_FUNERAL_GOING) {
+        __log_info_native('[test:84] inert revive bad action '
+            + __figure_get_action_state(ifid))
+        __test_signal_ready()
+        return
+    }
+    city.figures.remove_figures(FIGURE_FUNERAL_WALKER)
+    __test_monument_set_funeral_done(mbid, 1)
+    __log_marker('funeral_inert_action_no_block_ok')
+
+    // Mid-walk save/load: while GOING, funeral_done must stay clear; then verify
+    // the monument bind roundtrips (no re-spawn).
     // Note: under --no-resource integraltests, figure slots can come back empty
-    // (fid with type set but action/dest/target 0) — figure mid-walk restore is
-    // best-effort; the DoD is the funeral_done save bind.
+    // (general figure-IO / harness limit) — monument funeral_done bind is the DoD.
+    city.figures.remove_figures(FIGURE_FUNERAL_WALKER)
+    __test_monument_set_funeral_done(pbid, 0)
+    pfid = __test_funeral_try_spawn(1)
+    if (!pfid) {
+        __log_info_native('[test:84] re-spawn pyramid for midwalk failed')
+        __test_signal_ready()
+        return
+    }
+    __test_figure_set_action(pfid, ACTION_FUNERAL_CREATED)
+    __test_figure_action_perform(pfid)
     if (__figure_get_action_state(pfid) != ACTION_FUNERAL_GOING) {
         __log_info_native('[test:84] expected GOING before saveload, got '
             + __figure_get_action_state(pfid))
@@ -333,11 +460,19 @@ function run_test() {
     var loaded_dest = loaded ? __figure_get_destination_building_id(loaded) : 0
     var loaded_target = loaded ? __test_funeral_target_tomb(loaded) : 0
     var loaded_action = loaded ? __figure_get_action_state(loaded) : -1
-    if (loaded && loaded_action > 0 && (loaded_dest == pbid || loaded_target == pbid)) {
+    var figure_restored = loaded && loaded_action > 0
+        && (loaded_dest == pbid || loaded_target == pbid)
+    if (figure_restored) {
         __test_figure_set_action(loaded, ACTION_FUNERAL_ARRIVED)
         __test_figure_action_perform(loaded)
-    }
-    if (__test_monument_funeral_done(pbid) != 1) {
+        if (__test_monument_funeral_done(pbid) != 1) {
+            __log_info_native('[test:84] restored walker arrive did not set funeral_done')
+            __game_delete_savegame(save_name)
+            __test_signal_ready()
+            return
+        }
+    } else {
+        __log_info_native('[test:84] figure mid-walk fields not restored (ok under --no-resource)')
         __test_monument_set_funeral_done(pbid, 1)
     }
     if (__test_monument_funeral_done(pbid) != 1) {
@@ -388,7 +523,9 @@ function check_valid() {
         'funeral_steal_keeps_done_ok',
         'funeral_no_provisions_required_ok',
         'funeral_multi_tomb_ok',
-        'funeral_pyramid_spawn_ok'
+        'funeral_pyramid_spawn_ok',
+        'funeral_mausoleum_spawn_ok',
+        'funeral_inert_action_no_block_ok'
     ]
     for (var i = 0; i < markers.length; i++) {
         var marker = '[test-marker] ' + markers[i]

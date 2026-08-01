@@ -162,7 +162,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `79_birds_hunter_registered.js` | `FIGURE_BIRDS_HUNTER` METAINFO + `dcast_hunter` force_shot (BH2/BH3) |
 | `80_birds_hunt.js` | Birds hunter prey filter (ignore ostrich/antelope) → kill → gamemeat (BH3) |
 | `81_construction_blessing.js` | Pyramid Speedup (CB*): OFF/ON; site-prep; masonry +2; delivery clear; min-id; at-cap; halted (+ chain MOTHBALLED) |
-| `84_funeral_procession.js` | BF2 funeral walker: register, provisions gate, goto mastaba, abort leaves `funeral_done` clear, arrive + no re-spawn, steal/re-dispatch keeps done, no-provisions-required spawn, multi-tomb, finished small stepped pyramid spawn, mid-walk save/load (`funeral_done` + dest) |
+| `84_funeral_procession.js` | BF2 funeral walker: register, provisions gate, goto mastaba, abort leaves `funeral_done` clear, arrive + no re-spawn, steal/re-dispatch keeps done, no-provisions-required spawn, multi-tomb, finished small stepped pyramid + mausoleum spawn, inert action=0 revive, mid-walk save/load (`funeral_done` bind; figure fields best-effort under `--no-resource`) |
 | `87_tomb_robber.js` | Tomb robber TR1–TR4: path, steal dispatched, crime-wave, arrest, preexisting threat |
 | `86_pharaoh_figure_smoke.js` | BF4 `FIGURE_PHARAOH`: spawn + type + CREATED→ROAMING + anim `walk` (SprMain 28); neighbor ids 108–110 |
 | `88_flat_buildings.js` | Flat buildings view: On → flatten palace; raise excludes; overlay blocks; Off clears raise |
@@ -252,6 +252,9 @@ After each test script loads, the driver calls `js_vm_sync({})` so any top-level
 | `__test_tomb_robber_arrest(fid, force)` | 0\|1 | TR3: detain robber |
 | `__test_monument_set_preexisting(bid, on)` | undefined | TR4b/CO3: sealed carry-over tomb flag |
 | `__test_funeral_try_spawn(force_road)` | figure id | BF2: spawn funeral walkers (force skips road gate) |
+| `__test_funeral_target_tomb(fid)` | building id | BF2: funeral walker runtime `target_tomb_id` |
+| `__test_funeral_dest_is_road(fid)` | 0\|1 | BF2: figure `destination_tile` is road/ferry |
+| `__test_funeral_tomb_dest_is_road(bid)` | 0\|1 | BF2: resolved tomb destination is road/ferry |
 | `__test_monument_funeral_done(bid)` | 0\|1 | BF2: whether tomb has `funeral_done` |
 | `__test_monument_set_funeral_done(bid, done)` | undefined | BF2: set/clear `funeral_done` |
 | `__test_mummy_spawn_wave(n)` | figure id | BF3: spawn mummy wave + 1× msg 496 |

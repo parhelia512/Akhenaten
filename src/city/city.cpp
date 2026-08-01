@@ -111,6 +111,8 @@ void city_t::reload_objects() {
 void city_t::update_day(simulation_time_t simtime) {
     sentiment.update_day();
     criminals_update_day();
+    // After house-crime day update. Tomb-robber steal is figure-tick;
+    // funeral_done is never cleared by steal, so same-day race is harmless.
     figure_funeral_walker::try_spawn_all(/*force_ignore_road=*/false);
     plague_update_day();
     environment.update_day();

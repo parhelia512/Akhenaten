@@ -645,6 +645,31 @@ static int __test_funeral_target_tomb(int fid) {
 }
 ANK_FUNCTION_1(__test_funeral_target_tomb);
 
+static int __test_funeral_dest_is_road(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_valid() || f->type != FIGURE_FUNERAL_WALKER) {
+        return 0;
+    }
+    if (!f->destination_tile.valid()) {
+        return 0;
+    }
+    return map_terrain_is(f->destination_tile, TERRAIN_ROAD | TERRAIN_FERRY_ROUTE) ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_funeral_dest_is_road);
+
+static int __test_funeral_tomb_dest_is_road(int bid) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return 0;
+    }
+    tile2i dest = figure_funeral_walker::tomb_destination_tile(*b);
+    if (!dest.valid()) {
+        return 0;
+    }
+    return map_terrain_is(dest, TERRAIN_ROAD | TERRAIN_FERRY_ROUTE) ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_funeral_tomb_dest_is_road);
+
 static int __test_monument_funeral_done(int bid) {
     building *b = building_get(bid);
     auto *m = b ? b->dcast_monument() : nullptr;
