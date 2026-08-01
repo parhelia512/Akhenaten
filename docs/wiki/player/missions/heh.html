@@ -71,14 +71,14 @@
           <dt>Trade</dt><dd>Buhen · Byblos · Dakhla · Pwenet; unlock Baki (sandstone) / Sawu / Men-nefer / Itjtawy mid-game</dd>
           <dt>Previous</dt><dd><a href="iken.html">Iken</a> (28) / <a href="sawu.html">Sawu</a> (29) — choice pair</dd>
           <dt>Sibling</dt><dd><a href="bubastis.html">Bubastis</a> (31) — choice B</dd>
-          <dt>Next</dt><dd><a href="index.html#second-intermediate">Khmun</a> (32) / <a href="index.html#second-intermediate">Sauty</a> (33) — choice (B5 until D9)</dd>
+          <dt>Next</dt><dd><a href="khmun.html">Khmun</a> (32) / <a href="sauty.html">Sauty</a> (33) — choice</dd>
           <dt>Status</dt><dd><span class="mission-badge badge-choice">Choice A</span> <span class="mission-badge badge-impl">Implemented</span></dd>
         </dl>
       </div>
 
       <div class="deviation-note">
         <strong>Names:</strong> briefing title is <em>Semna</em> / conquer target <em>Kuban</em>; JS / wiki / history use <em>Heh</em> / <em>Baki</em> (g195). Empire classic (g21): Semna / Kuban.
-        <br /><strong>TEMP:</strong> monuments goal 0 until the mausoleum (pak 15 / gr198:27). Sea invasion points land-proxied at disembark until sea invasions land (loc 3/4 + OOB Kushite).
+        <br /><strong>Soft:</strong> monuments goal <strong>11</strong> (= weight 3 formula); pak Heh goal 15 — weight calib TBD. Sea invasion points land-proxied at disembark until sea invasions land (loc 3/4 + OOB Kushite).
       </div>
 
       <h2 id="objectives">Objectives</h2>
@@ -86,7 +86,7 @@
         <li><span class="obj-label">Population</span><span class="obj-value">6 000</span></li>
         <li><span class="obj-label">Culture</span><span class="obj-value">50</span></li>
         <li><span class="obj-label">Prosperity</span><span class="obj-value">45</span></li>
-        <li><span class="obj-label">Monuments</span><span class="obj-value">TEMP 0 (pak 15 — Mausoleum; not implemented yet)</span></li>
+        <li><span class="obj-label">Monuments</span><span class="obj-value">11 (Mausoleum weight 3; pak 15 soft)</span></li>
         <li><span class="obj-label">Kingdom</span><span class="obj-value">60</span></li>
         <li><span class="obj-label">Housing level</span><span class="obj-value">10</span></li>
         <li><span class="obj-label">Burial</span><span class="obj-value">weapons×16 · pottery×8 · beer×8 · gems×16</span></li>
@@ -102,7 +102,7 @@
           <div class="details-body">
             <p><span class="file-ref">src/scripts/mission/m_030_heh.js</span> · import in <span class="file-ref">src/scripts/missions.js</span></p>
             <p>Empire id <strong>20</strong> (pak). Map <span class="file-ref">data/maps/m_030_heh.map</span>. Rank 10. Scenario enemy <code>ENEMY_6_KUSHITE</code>; favour via <code>ENEMY_3_EGYPTIAN</code>. Dump 2026-07-26.</p>
-            <p><code>choice[]</code> → Khmun/Sauty (g144 64/65/66); sibling Bubastis. SKIP: empty map_obj idx=9. Soft: sea invasion points, mausoleum.</p>
+            <p><code>choice[]</code> → Khmun/Sauty (g144 64/65/66); sibling Bubastis. SKIP: empty map_obj idx=9. Soft: sea invasion points; monuments pak 15 vs goal 11.</p>
           </div>
         </details>
         <details>
@@ -119,7 +119,7 @@
 
       <div class="mission-nav">
         <a href="iken.html">← Iken</a> · <a href="sawu.html">Sawu</a> · <a href="bubastis.html">Bubastis (sibling)</a>
-        <a href="index.html#second-intermediate">Khmun / Sauty →</a>
+        <a href="khmun.html">Khmun</a> / <a href="sauty.html">Sauty →</a>
       </div>
     </div>
   </main>
