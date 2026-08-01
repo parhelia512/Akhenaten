@@ -170,7 +170,7 @@ var building_menu = [
    			BUILDING_SMALL_STEPPED_PYRAMID, BUILDING_MEDIUM_STEPPED_PYRAMID, BUILDING_LARGE_STEPPED_PYRAMID,
    			// Complex = same 20×20 plain as Large until the causeway lands; weight 24 (= large)
    			// while rating is clamped to 100 (W=44 would saturate alone).
-   			BUILDING_STEPPED_PYRAMID_COMPLEX,
+   			BUILDING_STEPPED_PYRAMID_COMPLEX, BUILDING_GRAND_STEPPED_PYRAMID_COMPLEX,
    			BUILDING_SMALL_BENT_PYRAMID, BUILDING_MEDIUM_BENT_PYRAMID,
    			BUILDING_SMALL_MUDBRICK_PYRAMID, BUILDING_MEDIUM_MUDBRICK_PYRAMID, BUILDING_LARGE_MUDBRICK_PYRAMID,
    			// Complex/Grand on-land = 20×20 + causeway; weight shares large (12) / saturates (44).

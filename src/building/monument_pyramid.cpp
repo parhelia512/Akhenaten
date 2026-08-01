@@ -276,6 +276,9 @@ REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_stepped_pyramid_wall)
 static_assert(std::is_same<building_stepped_pyramid_complex::preview,
     building_stepped_pyramid::preview_renderer>::value,
     "complex must inherit stepped pyramid planner preview (causeway gate)");
+static_assert(std::is_same<building_grand_stepped_pyramid_complex::preview,
+    building_stepped_pyramid::preview_renderer>::value,
+    "grand stepped complex must inherit stepped pyramid planner preview");
 static_assert(std::is_same<building_grand_pyramid_complex::preview,
     building_stepped_pyramid::preview_renderer>::value,
     "grand complex must inherit stepped pyramid planner preview");
@@ -290,6 +293,7 @@ static_assert(std::is_same<building_pyramid_complex::preview,
     "true complex must inherit stepped pyramid planner preview");
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_stepped_pyramid_complex)
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_grand_stepped_pyramid_complex)
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_bent_pyramid)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_bent_pyramid_corner)
@@ -703,6 +707,8 @@ const building_pyramid::base_params &get_pyramid_params(e_building_type type) {
 
     case BUILDING_STEPPED_PYRAMID_COMPLEX:
         return pyramid_base_params<building_stepped_pyramid_complex>(params);
+    case BUILDING_GRAND_STEPPED_PYRAMID_COMPLEX:
+        return pyramid_base_params<building_grand_stepped_pyramid_complex>(params);
 
     case BUILDING_SMALL_BENT_PYRAMID:
     case BUILDING_SMALL_BENT_PYRAMID_CORNER:
@@ -1430,7 +1436,7 @@ int building_stepped_pyramid::get_masonry_image(int orientation, tile2i tile, ti
     const bool is_nw_origin = (base.tile == footprint_nw());
     const bool is_floor = building_type_any_of(type(), {
         BUILDING_SMALL_STEPPED_PYRAMID, BUILDING_MEDIUM_STEPPED_PYRAMID, BUILDING_LARGE_STEPPED_PYRAMID,
-        BUILDING_STEPPED_PYRAMID_COMPLEX,
+        BUILDING_STEPPED_PYRAMID_COMPLEX, BUILDING_GRAND_STEPPED_PYRAMID_COMPLEX,
         BUILDING_SMALL_BENT_PYRAMID, BUILDING_MEDIUM_BENT_PYRAMID,
         BUILDING_SMALL_PYRAMID, BUILDING_SMALL_PYRAMID_CONE,
         BUILDING_MEDIUM_PYRAMID, BUILDING_MEDIUM_PYRAMID_CONE,
@@ -2180,6 +2186,47 @@ const monument &building_stepped_pyramid_complex::config() const {
     static monument m = [] {
         monument copy = g_monument_large_stepped_pyramid;
         copy.btype = BUILDING_STEPPED_PYRAMID_COMPLEX;
+        return copy;
+    }();
+    return m;
+}
+
+void building_grand_stepped_pyramid_complex::update_day() {
+    building_impl::update_day();
+
+    if (is_finished()) {
+        return;
+    }
+
+    building_stepped_pyramid::update_day(current_params().init_tiles);
+}
+
+int building_grand_stepped_pyramid_complex::building_image_get() const {
+    switch (phase()) {
+    case MONUMENT_START:
+        return current_params().base_img();
+    default:
+        return current_params().base_img() + 1;
+    }
+
+    return 0;
+}
+
+bool building_grand_stepped_pyramid_complex::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
+    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, current_params().init_tiles);
+}
+
+bool building_grand_stepped_pyramid_complex::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
+    if (is_finished()) {
+        return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, current_params().init_tiles);
+    }
+    return draw_unfinished_height_ornaments(ctx, point, tile, color_mask, current_params().init_tiles);
+}
+
+const monument &building_grand_stepped_pyramid_complex::config() const {
+    static monument m = [] {
+        monument copy = g_monument_large_stepped_pyramid;
+        copy.btype = BUILDING_GRAND_STEPPED_PYRAMID_COMPLEX;
         return copy;
     }();
     return m;

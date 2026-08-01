@@ -117,6 +117,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `70_workers_staffing_ui.js` | Staffing UI smoke: open pottery/firehouse/dock/granary/temple info → `workers_text` contains needed count (WR2/WR4) |
 | `41_city_smoke_run.js` | Broad crash smoke (TS1): place ~12 building types via the real planner path, open each info window (`[es=(info_window_*, init)]`), advance the sim; driver's whole-log `!!! TypeError:` scan catches on_place/update/init crashes broadly. Per-type `smoke_ok:*` markers isolate the culprit; `smoke_skip:*` logged loudly |
 | `46_bridge_placement.js` | Low Bridge on synthetic 3-wide channel: place (`WATER\|ROAD` + `bridge_part`/`bridge_type` + sprite dual-write), floodplain reject, max_length reject, citizen `CITIZEN_0_ROAD` |
+| `116_ship_bridge_placement.js` | SB3: Ship Bridge via `__map_bridge_add(_, true)` (no menu): min_length reject vs low, place len≥5 (parts 7–15), long span 10 OK for ship / reject for low |
 | `47_js_hotreload_stack.js` | Hot-reload MuJS stack stability: 20× `js_register_game_handlers` + 20× reload `:console_commands.js` via `js_vm_sync` must not grow the value stack (former `[console_command=…]` getglobal leak → stackoverflow after ~10 mixed saves) |
 | `42_enemy_config_valid.js` | Static validator (V1) for all 13 `enemy_*` configs in `enemies.js`: `percentage_type1+2+3 == 100`, a nonzero share has a non-NONE `figure_types[i]` (F1), and every declared figure type resolves to a registered enemy class via `__test_enemy_figure_registered` (F2) |
 | `43_sphinx_place.js` | C6 Sphinx: planner-place `BUILDING_SPHINX`, assert 3 linked parts (`next_part_building_id`), open info window without TypeError |
@@ -135,6 +136,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `110_true_pyramid_large_place.js` | C3b large true pyramid (20×20): height→polish 36–40→terminal 41, no-lime polish, saveload, natural finish |
 | `112_true_pyramid_complex_place.js` | C3c true pyramid complex (20×20 on-land): same large polish schedule, parts/phases |
 | `133_pyramid_complex_causeway.js` | Complex causeway: grand east-only (south reject), plain south place+claim, demolish clears strip |
+| `134_grand_stepped_place.js` | C1c grand stepped 252: south reject, east place+claim, type/parts/schedule |
 | `113_frog_plague.js` | CF1 Frog: register/anim walk+idle; Ptah/EVENT/cheat swarm; happiness; house infest + lockout; saveload; timer poof |
 | `114_bridge_editor_allow_dump.js` | UB1/BR1 canary: Bridges/Alexandria Bridge ON; Nubt/Perwadjyt OFF; Nekhen ON (skip `--no-resource`). Table: [`docs/bridge_editor_allow_triage.md`](../docs/bridge_editor_allow_triage.md) |
 | `115_bridge_menu_smoke.js` | BR2: Perwadjyt Low Bridge locked→`use_building` unlock; Bridges.map day-0 ON (else Nekhen hermetic fallback) |

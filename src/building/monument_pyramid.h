@@ -229,6 +229,25 @@ public:
 ANK_CONFIG_STRUCT(building_stepped_pyramid_complex::static_params,
     init_tiles, corner_type, wall_type, cone_type, filler_type, enter_offset, stairs);
 
+// Grand stepped — same on-land 20×20 as complex; separate TYPE for weight 44 + east-only causeway.
+class building_grand_stepped_pyramid_complex : public building_stepped_pyramid {
+public:
+    BUILDING_METAINFO(BUILDING_GRAND_STEPPED_PYRAMID_COMPLEX, building_grand_stepped_pyramid_complex, building_stepped_pyramid)
+
+    struct static_params : public base_params, public building_static_params {
+    } BUILDING_STATIC_DATA_T;
+
+    virtual void update_day() override;
+    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual int building_image_get() const override;
+    virtual const base_params &pyramid_params() const override { return current_params(); }
+
+    virtual const monument &config() const override;
+};
+ANK_CONFIG_STRUCT(building_grand_stepped_pyramid_complex::static_params,
+    init_tiles, corner_type, wall_type, cone_type, filler_type, enter_offset, stairs);
+
 class building_small_bent_pyramid : public building_stepped_pyramid {
 public:
     BUILDING_METAINFO(BUILDING_SMALL_BENT_PYRAMID, building_small_bent_pyramid, building_stepped_pyramid)

@@ -81,6 +81,7 @@ class building_small_stepped_pyramid;
 class building_medium_stepped_pyramid;
 class building_large_stepped_pyramid;
 class building_stepped_pyramid_complex;
+class building_grand_stepped_pyramid_complex;
 class building_small_bent_pyramid;
 class building_medium_bent_pyramid;
 class building_small_pyramid;
@@ -99,6 +100,8 @@ class building_sun_temple;
 class building_abu_simbel;
 class building_caesareum;
 class building_alexandria_library;
+class building_mausoleum;
+class building_pharos_lighthouse;
 
 using e_building_need_rules = uint32_t;
 

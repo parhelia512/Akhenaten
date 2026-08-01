@@ -798,6 +798,261 @@ building_small_stepped_pyramid {
   }
 
 
+  // Grand stepped — same on-land 20x20; own TYPE for weight 44 + east-only causeway.
+  building_grand_stepped_pyramid_complex {
+    animations {
+      _pack { pack:PACK_STEPPED_PYRAMID }
+      preview { pack:PACK_STEPPED_PYRAMID, id:2, offset:7 }
+      base { id:2, offset:7 }
+      base_bricks { path:"stepped_pyramid/stepped_pyramid_00103" }
+      corner_bricks { path:"stepped_pyramid/stepped_pyramid_00001" }
+      wall_bricks { path:"stepped_pyramid/stepped_pyramid_00005" }
+      base_grounded { path:"stepped_pyramid/pyramid_phase_one_00013" }
+      clear_land { id:2, offset:12 }
+      image_stick { path:"stepped_pyramid/pyramid_phase_one_00021" }
+      empty_land {path:"stepped_pyramid/stepped_pyramid_00109"}
+      ditches_phase_1 { path:"stepped_pyramid/pyramid_phase_one_00022" }
+      ditches_phase_2 { path:"stepped_pyramid/pyramid_phase_one_00031" }
+      ditches_phase_3 { path:"stepped_pyramid/pyramid_phase_one_00040" }
+      ditches_phase_4 { path:"stepped_pyramid/pyramid_phase_one_00049" }
+      ground_phase_0 { path:"stepped_pyramid/pyramid_phase_one_00013" }
+      basement { path:"stepped_pyramid/pyramid_phase_one_00058" }
+      enter { path:"pharaoh_general/plazatiles_00064"}
+      stair_0_2 { path:"stepped_pyramid/stepped_pyramid_00112" }
+      stair_0_4 { path:"stepped_pyramid/stepped_pyramid_00110" }
+      stair_0_4_corner { path:"stepped_pyramid/stepped_pyramid_00122" }
+      stair_0_5 { path:"stepped_pyramid/stepped_pyramid_00114" }
+      stair_0_6 { path:"stepped_pyramid/stepped_pyramid_00115" }
+    }
+    build_menu_text : "Grand Stepped Pyramid Complex"
+    building_size : 2
+    info_title_id [198, 12]
+    fire_proof :  true
+    damage_proof : true
+    meta { help_id:375, text_id:178 }
+    init_tiles [20, 20]
+
+    enter_offset : [2, 20]
+
+    // Same 20×20 multi-tier stairs as building_large_stepped_pyramid — keep in sync.
+    stairs [
+      {
+        phase : 7
+        part : [4, 18]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [-20, 20]
+      }
+
+      {
+        phase : 8
+        part : [6, 18]
+        tex { path:"stepped_pyramid/stepped_pyramid_00111" }
+        offset : [-25, 20]
+      }
+
+      {
+        phase : 9
+        part : [8, 18]
+        tex { path:"stepped_pyramid/stepped_pyramid_00112" }
+        offset : [-20, 20]
+      }
+
+      {
+        phase : 10
+        part : [12, 18]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [0, -40]
+      }
+
+      {
+        phase : 11
+        part : [14, 18]
+        tex { path:"stepped_pyramid/stepped_pyramid_00111" }
+        offset : [-5, -40]
+      }
+
+      {
+        phase : 12
+        part : [16, 18]
+        tex { path:"stepped_pyramid/stepped_pyramid_00112" }
+        offset : [-5, -45]
+      }
+
+      {
+        phase : 13
+        part : [18, 14]
+        tex { path:"stepped_pyramid/stepped_pyramid_00113" }
+        offset : [10, -100]
+      }
+
+      {
+        phase : 14
+        part : [18, 12]
+        tex { path:"stepped_pyramid/stepped_pyramid_00114" }
+        offset : [0, -100]
+      }
+
+      {
+        phase : 15
+        part : [18, 10]
+        tex { path:"stepped_pyramid/stepped_pyramid_00115" }
+        offset : [-5, -100]
+      }
+
+      {
+        phase : 16
+        part : [18, 8]
+        tex { path:"stepped_pyramid/stepped_pyramid_00113" }
+        offset : [0, -170]
+      }
+
+      {
+        phase : 17
+        part : [18, 6]
+        tex { path:"stepped_pyramid/stepped_pyramid_00114" }
+        offset : [0, -170]
+      }
+
+      {
+        phase : 18
+        part : [18, 4]
+        tex { path:"stepped_pyramid/stepped_pyramid_00125" }
+        offset : [-5, -170]
+      }
+
+      {
+        phase : 19
+        part : [12, 16]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [15, -200]
+      }
+
+      {
+        phase : 20
+        part : [14, 16]
+        tex { path:"stepped_pyramid/stepped_pyramid_00111" }
+        offset : [10, -200]
+      }
+
+      {
+        phase : 20
+        part : [16, 16]
+        tex { path:"stepped_pyramid/stepped_pyramid_00123" }
+        offset : [15, -205]
+      }
+
+      {
+        phase : 21
+        part : [16, 14]
+        tex { path:"stepped_pyramid/stepped_pyramid_00115" }
+        offset : [20, -200]
+      }
+
+      {
+        phase : 22
+        part : [14, 10]
+        tex { path:"stepped_pyramid/stepped_pyramid_00113" }
+        offset : [20, -210]
+      }
+
+      {
+        phase : 23
+        part : [14, 8]
+        tex { path:"stepped_pyramid/stepped_pyramid_00114" }
+        offset : [20, -210]
+      }
+
+      // --- Layer 2 (third tier): L2 south y=14 (begin+4, size 12) ? SE [14,14].
+      // Offsets ~two tiers up (? -180..-270).
+      {
+        phase : 24
+        part : [14, 6]
+        tex { path:"stepped_pyramid/stepped_pyramid_00115" }
+        offset : [15, -210]
+      }
+
+      {
+        phase : 24
+        part : [14, 4]
+        tex { path:"stepped_pyramid/stepped_pyramid_00127" }
+        offset : [10, -220]
+      }
+
+      {
+        phase : 25
+        part : [8, 14]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [0, -300]
+      }
+
+      {
+        phase : 26
+        part : [10, 14]
+        tex { path:"stepped_pyramid/stepped_pyramid_00111" }
+        offset : [0, -300]
+      }
+
+      {
+        phase : 27
+        part : [12, 14]
+        tex { path:"stepped_pyramid/stepped_pyramid_00112" }
+        offset : [0, -300]
+      }
+
+      {
+        phase : 28
+        part : [12, 10]
+        tex { path:"stepped_pyramid/stepped_pyramid_00113" }
+        offset : [20, -300]
+      }
+
+      {
+        phase : 29
+        part : [12, 8]
+        tex { path:"stepped_pyramid/stepped_pyramid_00114" }
+        offset : [15, -300]
+      }
+
+      {
+        phase : 30
+        part : [12, 6]
+        tex { path:"stepped_pyramid/stepped_pyramid_00127" }
+        offset : [15, -300]
+      }
+
+      {
+        phase : 31
+        part : [10, 12]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [0, -390]
+      }
+
+      {
+        phase : 32
+        part : [12, 12]
+        tex { path:"stepped_pyramid/stepped_pyramid_00122" }
+        offset : [0, -400]
+      }
+
+      {
+        phase : 33
+        part : [10, 12]
+        tex { path:"stepped_pyramid/stepped_pyramid_00114" }
+        offset : [0, -400]
+      }
+    ]
+
+    flags {
+        is_monument: true
+    }
+
+    corner_type : BUILDING_LARGE_STEPPED_PYRAMID_CORNER
+    wall_type : BUILDING_LARGE_STEPPED_PYRAMID_WALL
+    cone_type : BUILDING_LARGE_STEPPED_PYRAMID_CONE
+    filler_type : BUILDING_GRAND_STEPPED_PYRAMID_COMPLEX
+  }
+
+
   // --- Bent pyramids (Snofru's, mission 14 South Dahshur) --------------------
   // The bent_pyramid image pack is structurally identical to stepped_pyramid
   // (159 "Bent_pyramid_*" main sprites at the same indices as "stepped_pyramid_*",
