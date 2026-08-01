@@ -138,7 +138,7 @@ function check_valid() {
     ]
     for (var i = 0; i < markers.length; i++) {
         if (!__test_find_inlog(markers[i])) {
-            __log_info_native('[test:71] missing marker: ' + markers[i])
+            __log_info_native('[test:73] missing marker: ' + markers[i])
             return false
         }
     }

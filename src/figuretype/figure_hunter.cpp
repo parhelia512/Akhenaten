@@ -20,12 +20,21 @@ void figure_hunter::static_params::archive_init() {
 
 static void scared_animals_in_area(tile2i center, int size) {
     map_grid_area_foreach(center, size, [](tile2i tile) {
-        figure *f = map_figure_get(tile);
-        if (!f || !f->is_alive()) {
-            return;
-        }
-        if (auto *animal = f->dcast_animal()) {
-            animal->herd_scare();
+        // Kill tile often has DYING prey as list head — walk next_figure so
+        // living companions on the same tile still get herd_scare.
+        int figure_id = map_figure_id_get(tile);
+        while (figure_id > 0) {
+            figure *f = figure_get(figure_id);
+            if (!f) {
+                break;
+            }
+            const int next_id = (f->next_figure != figure_id) ? f->next_figure : 0;
+            if (f->is_alive()) {
+                if (auto *animal = f->dcast_animal()) {
+                    animal->herd_scare();
+                }
+            }
+            figure_id = next_id;
         }
     });
 }
@@ -123,6 +132,11 @@ void figure_hunter::figure_action() {
         if (!base.target_figure_id) {
             return advance_action(ACTION_8_RECALCULATE);
         }
+        if (!prey->is_alive()) {
+            advance_action(ACTION_11_OSTRICH_HUNTER_GOING_TO_PICKUP_POINT);
+            scared_animals_in_area(prey->tile, /*dist*/16);
+            break;
+        }
 
         base.wait_ticks--;
         if (base.wait_ticks <= 0) {
@@ -133,6 +147,11 @@ void figure_hunter::figure_action() {
     case ACTION_9_OSTRICH_HUNTER_CHASE_PREY:
         if (!base.target_figure_id) {
             return advance_action(ACTION_8_RECALCULATE);
+        }
+        if (!prey->is_alive()) {
+            advance_action(ACTION_11_OSTRICH_HUNTER_GOING_TO_PICKUP_POINT);
+            scared_animals_in_area(prey->tile, /*dist*/16);
+            break;
         }
 
         if (dist >= params.attack_distance) {
@@ -154,7 +173,8 @@ void figure_hunter::figure_action() {
             }
 
             base.wait_ticks = params.missile_delay;
-            if (prey->state == FIGURE_STATE_DYING) {
+            // DYING or already DEAD carcass — do not keep the HUNT shoot loop.
+            if (!prey->is_alive()) {
                 advance_action(ACTION_11_OSTRICH_HUNTER_GOING_TO_PICKUP_POINT);
                 scared_animals_in_area(prey->tile, /*dist*/16);
             } else if (dist >= params.attack_distance) {
@@ -271,6 +291,7 @@ void figure_hunter::update_animation() {
 
     case ACTION_12_OSTRICH_HUNTER_MOVE_PACKED:
     case ACTION_12_OSTRICH_HUNTER_MOVE_RANDOM_PACKED:
+    case ACTION_12_OSTRICH_HUNTER_LOOK_RANDOM_PACKED:
         animkey = animkeys().move_pack;
         break;
 
