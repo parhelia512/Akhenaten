@@ -84,6 +84,8 @@ GENERATE_SMART_CAST_BUILDING(medium_stepped_pyramid)
 GENERATE_SMART_CAST_BUILDING(sphinx)
 GENERATE_SMART_CAST_BUILDING(obelisk)
 GENERATE_SMART_CAST_BUILDING(sun_temple)
+GENERATE_SMART_CAST_BUILDING(abu_simbel)
+GENERATE_SMART_CAST_BUILDING(caesareum)
 
 template <typename dest_type, typename r_type = std::add_pointer_t<std::remove_pointer_t<dest_type>>>
 inline r_type smart_cast(building *b);

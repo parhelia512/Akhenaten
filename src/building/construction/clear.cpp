@@ -4,6 +4,7 @@
 #include "building/building_farm.h"
 #include "building/building_wall.h"
 #include "building/building_dike.h"
+#include "building/building_impl.h"
 #include "city/city.h"
 #include "game/game_events.h"
 #include "city/city_warnings.h"
@@ -53,7 +54,7 @@ static bool has_burning_ruin_nearby(building* b) {
     return false;
 }
 
-static building* get_deletable_building(int grid_offset) {
+static building* get_deletable_building(int grid_offset, bool *warned_blocked = nullptr) {
     int building_id = map_building_at(grid_offset);
     if (!building_id) {
         return nullptr;
@@ -70,6 +71,14 @@ static building* get_deletable_building(int grid_offset) {
     }
 
     if (!b->is_deletable()) {
+        if (warned_blocked && !*warned_blocked) {
+            building_impl *impl = b->dcast();
+            const xstring msg = impl ? impl->demolish_blocked_message() : xstring{};
+            if (!msg.empty()) {
+                events::emit(event_city_warning{ msg });
+                *warned_blocked = true;
+            }
+        }
         return nullptr;
     }
 
@@ -89,10 +98,14 @@ static int clear_land_confirmed(bool measure_only, clear_confirm_t confirm) {
     grid_area area = map_grid_get_area(confirm.cstart, confirm.cend);
 
     const int visual_feedback_on_delete = !!game_features::gameui_visual_feedback_on_delete;
+    bool warned_blocked = false;
     for (int y = area.tmin_y, endy = area.tmax_y; y <= endy; y++) {
         for (int x = area.tmin_x, endx = area.tmax_x; x <= endx; x++) {
             int grid_offset = MAP_OFFSET(x, y);
             if (map_terrain_is(grid_offset, TERRAIN_ROCK | TERRAIN_ELEVATION | TERRAIN_DUNE)) {
+                if (!measure_only) {
+                    get_deletable_building(grid_offset, &warned_blocked);
+                }
                 continue;
             }
 
@@ -124,7 +137,7 @@ static int clear_land_confirmed(bool measure_only, clear_confirm_t confirm) {
             }
 
             if (map_terrain_is(grid_offset, TERRAIN_BUILDING)) {
-                building* b = get_deletable_building(grid_offset);
+                building* b = get_deletable_building(grid_offset, measure_only ? nullptr : &warned_blocked);
                 if (!b) {
                     continue;
                 }

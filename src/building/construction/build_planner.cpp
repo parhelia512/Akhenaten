@@ -606,7 +606,9 @@ void build_planner::update_obstructions_check() {
             tile_blocked_array[row][column] = false;
             const bool blocked_by_floodplain_edge = (can_blocked_by_floodplain_edge && map_get_floodplain_edge(current_tile));
             const bool inside_map = map_grid_is_inside(current_tile, 1);
-            const bool not_clear = inside_map && map_terrain_is(current_tile, restricted_terrain & TERRAIN_NOT_CLEAR);
+            const uint32_t ignore_terrain = preview.ghost_ignore_terrain(*this, current_tile);
+            const uint32_t not_clear_mask = (restricted_terrain & TERRAIN_NOT_CLEAR) & ~ignore_terrain;
+            const bool not_clear = inside_map && map_terrain_is(current_tile, not_clear_mask);
             const bool allow_tile = inside_map && preview.ghost_allow_tile(*this, current_tile);
             if (!inside_map || not_clear || !allow_tile || blocked_by_floodplain_edge) {
                 tile_blocked_array[row][column] = true;

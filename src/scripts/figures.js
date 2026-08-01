@@ -1410,6 +1410,7 @@ figure_sled {
 		limestone { pack:PACK_SPR_MAIN, id:170, max_frames:1 }
 		clay { pack:PACK_SPR_MAIN, id:171, max_frames:1 }
 		bricks { pack:PACK_SPR_MAIN, id:172, max_frames:1 }
+		marble { pack:PACK_SPR_MAIN, id:170, max_frames:1 }
 		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_SLED }
 	}
 

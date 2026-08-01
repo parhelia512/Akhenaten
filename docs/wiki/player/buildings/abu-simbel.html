@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abu Simbel — Akhenaten Wiki</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .bld-infobox {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0;
+    }
+    .bld-infobox h4 {
+      margin: 0 0 0.6rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--gold);
+    }
+    .bld-infobox dl {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.2rem 1rem;
+      margin: 0;
+    }
+    .bld-infobox dt { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; padding-top: 0.1rem; }
+    .bld-infobox dd { margin: 0; font-size: 0.85rem; color: var(--text); }
+    .bld-stat-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.7rem; }
+    .bld-stat { text-align: center; }
+    .bld-stat .val { font-size: 1.3rem; font-weight: 700; color: var(--gold); display: block; }
+    .bld-stat .lbl { font-size: 0.7rem; color: var(--text-muted); }
+    .file-ref { display: inline-block; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.78rem; background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.2); border-radius: 2px; padding: 0.05rem 0.45rem; color: var(--gold); margin: 0 0.1rem; }
+    .bld-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; }
+    .bld-nav a { color: var(--gold); }
+    .dev-section { margin-top: 2.5rem; }
+    .dev-section h2 { color: var(--text-muted); font-size: 1rem; letter-spacing: 0.04em; text-transform: uppercase; border-color: rgba(255,255,255,0.08); }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; }
+    summary { padding: 0.7rem 1rem; cursor: pointer; font-size: 0.875rem; font-weight: 600; color: var(--text); list-style: none; display: flex; align-items: center; gap: 0.6rem; user-select: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: "▶"; font-size: 0.6rem; color: var(--gold); transition: transform 0.15s; flex-shrink: 0; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    details[open] > summary { border-bottom: 1px solid var(--border); }
+    .details-body { padding: 1rem 1.1rem; font-size: 0.85rem; line-height: 1.6; }
+    .tag-cleo { font-size: 0.7rem; color: var(--gold); border: 1px solid rgba(201,168,76,0.35); border-radius: 2px; padding: 0.05rem 0.35rem; margin-left: 0.35rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">Akhenaten</a>
+      <ul>
+        <li><a href="../../../about.html">About</a></li>
+        <li><a href="../../../devblog.html">Devblog</a></li>
+        <li><a href="../../index.html" class="active">Wiki</a></li>
+        <li><a href="../../../screenshots.html">Screenshots</a></li>
+        <li><a href="../../../downloads.html">Downloads</a></li>
+        <li><a href="../../../contributors.html">Contributors</a></li>
+        <li><a href="../../../contact.html">Join us</a></li>
+        <li><a href="../../../reportbug.html">Report Bug</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="wiki-layout">
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title"><a href="index.html">← All Buildings</a></div>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Monuments</div>
+        <ul>
+          <li><a href="monuments.html">Overview</a></li>
+          <li><a href="sphinx.html">Sphinx</a></li>
+          <li><a href="obelisk.html">Obelisk</a></li>
+          <li><a href="abu-simbel.html" class="active">Abu Simbel</a></li>
+          <li><a href="caesareum.html">Caesareum</a></li>
+        </ul>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">On this page</div>
+        <ul>
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#placement">Placement</a></li>
+          <li><a href="#construction">Construction</a></li>
+          <li><a href="#missions">Missions</a></li>
+          <li><a href="#dev">Developer reference</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <div class="wiki-content">
+      <div class="wiki-breadcrumb">
+        <a href="../../index.html">Wiki</a> /
+        <a href="../index.html">Player Guide</a> /
+        <a href="index.html">Buildings</a> /
+        <a href="monuments.html">Monuments</a> /
+        Abu Simbel
+      </div>
+
+      <h1>Abu Simbel <span class="tag-cleo">Cleo</span></h1>
+
+      <p id="overview">
+        <strong>Abu Simbel</strong> is the Cleopatra cliff-carved monument of four seated colossi.
+        The bulk of the footprint sits on elevation (cliffs); a 3×3 entrance juts onto clear land.
+        Construction uses <strong>timber</strong> scaffolding with <strong>Carpenters</strong>, then
+        <strong>Stonemasons</strong> carve top-down. There is no Work Camp, no Artisans guild, and no stone delivery onto the monument — the cliff is the stone.
+        Do not confuse with unused enum <code>BUILDING_COLOSSI</code> (=270) — that is only an editor/win label, not this building.
+      </p>
+
+      <div class="bld-infobox">
+        <h4>Quick facts</h4>
+        <div class="bld-stat-row">
+          <div class="bld-stat"><span class="val">9×21</span><span class="lbl">Cliff bulk</span></div>
+          <div class="bld-stat"><span class="val">+3×3</span><span class="lbl">Entrance</span></div>
+          <div class="bld-stat"><span class="val">44</span><span class="lbl">Monument wt.</span></div>
+          <div class="bld-stat"><span class="val">Timber</span><span class="lbl">Resource</span></div>
+        </div>
+        <dl>
+          <dt>Cost (Normal)</dt>
+          <dd>8&nbsp;000 Db (VE 5k · Easy 6.5k · Hard 11k · VH 16k)</dd>
+          <dt>Guilds</dt>
+          <dd>Carpenters (scaffold) · Stonemasons (carve)</dd>
+          <dt>Type id</dt>
+          <dd><code>BUILDING_ABU_SIMBEL</code> (=230)</dd>
+        </dl>
+      </div>
+
+      <h2 id="placement">Placement</h2>
+      <ul>
+        <li>Bulk tiles must sit on <strong>elevation / access ramp</strong> (cliffs). Use Hide Cliffs (<kbd>H</kbd>) to inspect.</li>
+        <li>The centered 3×3 entrance <strong>protrudes past</strong> the far depth edge onto clear land (total depth 24 at rot 0/2).</li>
+        <li>Only one Abu Simbel on the map (finished still blocks a second).</li>
+        <li>Cannot be demolished (clear land is blocked; shows a warning).</li>
+        <li>Stone in storage is <strong>not</strong> required to place (unlike Sun Temple sandstone).</li>
+      </ul>
+
+      <h2 id="construction">Construction</h2>
+      <ul>
+        <li>Early phases: deliver timber and raise scaffolding (carpenters).</li>
+        <li>Later phases: mason-only carve; paint is baked into finished art (no Artisans).</li>
+        <li>Exact timber loads per phase are still stubbed pending original data dump.</li>
+      </ul>
+
+      <h2 id="missions">Missions</h2>
+      <p>
+        Required on <a href="../missions/abu-simbel.html">mission 43 · Abu Simbel</a>
+        (monuments goal <strong>44</strong> — one finished Abu Simbel satisfies the criterion).
+      </p>
+
+      <div class="dev-section" id="dev">
+        <h2>Developer reference</h2>
+        <details open>
+          <summary>Source files</summary>
+          <div class="details-body">
+            <ul>
+              <li><span class="file-ref">src/building/monument_abu_simbel.{h,cpp}</span></li>
+              <li><span class="file-ref">src/scripts/building/abu_simbel.js</span></li>
+              <li><span class="file-ref">src/window/window_abu_simbel_info.cpp</span></li>
+              <li><span class="file-ref">src/scripts/city/monuments.js</span> — <code>MONUMENT_WEIGHTS[ABU_SIMBEL]=44</code></li>
+              <li><span class="file-ref">tests/118_abu_simbel_place.js</span></li>
+              <li>Help / history message ids: <strong>492</strong> / <strong>493</strong></li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="bld-nav">
+        <a href="monuments.html">← Monuments overview</a>
+        <span><a href="obelisk.html">Obelisk</a> · <a href="sphinx.html">Sphinx</a></span>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Akhenaten is an open-source, non-commercial project. All rights to Pharaoh, its mechanics and setting belong to their respective copyright owners.</p>
+    <p><a href="https://github.com/dalerank/Akhenaten" target="_blank">github.com/dalerank/Akhenaten</a></p>
+  </footer>
+</body>
+</html>

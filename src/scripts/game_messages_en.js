@@ -6349,6 +6349,22 @@ game_messages_en {
             text: "After many months of toil, work on the Sun Temple has finally come to a close. This is a great accomplishment for your city!"
         }
     }
+    abu_simbel_congratulations {
+        id: 525,
+        size [30, 18]
+        title { text: "Abu Simbel finished!" }
+        content {
+            text: "This is a truly spectacular achievement! Your skilled laborers have created an eternal monument that boasts of the glory of our pharaoh and the might of Egypt."
+        }
+    }
+    caesareum_congratulations {
+        id: 526,
+        size [30, 18]
+        title { text: "Caesareum finished!" }
+        content {
+            text: "The holy temple and resplendent gardened courtyards of the Caesareum are at long last complete! Word of its magnificent beauty is already spreading throughout the region."
+        }
+    }
     message_dike_breach {
         id: 524,
         type: 2,

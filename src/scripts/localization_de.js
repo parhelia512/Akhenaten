@@ -660,6 +660,7 @@ localization_de = [
   {key: "#monument_needs_granite", group:19, id:246}
   {key: "#must_be_over_rocks", group:19, id:247}
   {key: "#pharos_not_demolishable", group:19, id:248}
+  {key: "#abu_simbel_not_demolishable", text: "Abu Simbel kann nicht abgerissen werden"}
   {key: "#tomb_robbers_plundered", group:19, id:249}
   {key: "#mausoleum_plundered", group:19, id:250}
   {key: "#tomb_robbers_stole_provisions", group:19, id:251}

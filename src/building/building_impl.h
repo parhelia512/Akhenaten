@@ -35,6 +35,7 @@ public:
     virtual void on_before_flooded() {}
     virtual void on_undo() {}
     virtual void on_post_load();
+    virtual xstring demolish_blocked_message() const { return {}; }
     virtual void spawn_figure();
     virtual void update_animation();
     virtual void update_graphic();
@@ -155,6 +156,8 @@ public:
     ALLOW_SMART_CAST_BUILDING_I(sphinx)
     ALLOW_SMART_CAST_BUILDING_I(obelisk)
     ALLOW_SMART_CAST_BUILDING_I(sun_temple)
+    ALLOW_SMART_CAST_BUILDING_I(abu_simbel)
+    ALLOW_SMART_CAST_BUILDING_I(caesareum)
 
     building_impl *next();
     bool has_next() const;

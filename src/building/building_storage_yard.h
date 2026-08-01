@@ -31,6 +31,13 @@ public:
     BUILDING_METAINFO(BUILDING_STORAGE_YARD, building_storage_yard, building_storage)
     virtual building_storage_yard *dcast_storage_yard() override { return this; }
 
+    struct static_params : public building_static_params {
+        // Pharaoh sled haul: one SY space holds 400; 4 marble blocks = 400.
+        uint16_t monument_sled_max_load = 400;
+        // Caesareum help: do not start marble hauls until ≥ this sits in one SY space.
+        uint16_t marble_monument_min_haul = 400;
+    } BUILDING_STATIC_DATA_T;
+
     struct runtime_data_t {
         int reserved;
         std::array<building_id, 4> police_station_weapon_requests;
@@ -76,6 +83,8 @@ private:
     building *add_storageyard_space(int x, int y, building *prev);
 };
 ANK_CONFIG_PROPERTY(building_storage_yard::runtime_data_t, reserved)
+ANK_CONFIG_STRUCT(building_storage_yard::static_params,
+    monument_sled_max_load, marble_monument_min_haul)
 
 building_storage_yard *storage_yard_cast(building *b);
 

@@ -2,6 +2,7 @@
 
 #include "building/building_house.h"
 #include "building/building_temple_complex.h"
+#include "building/monument_abu_simbel.h"
 #include "grid/random.h"
 #include "grid/road_access.h"
 #include "grid/road_network.h"
@@ -243,6 +244,20 @@ void city_maintenance_t::check_kingdome_access() {
                 apply_building_road_access(b,
                     resolve_building_road_access(b.tile, b.type, b.size, 0, variant, road_access_resolve_mode::Commit));
             }
+        } else if (b.type == BUILDING_ABU_SIMBEL) {
+            // Rectangular 9×21 (or rotated): square size would miss entrance-side roads.
+            vec2i ft{9, 21};
+            if (auto *abu = b.dcast_abu_simbel()) {
+                ft = abu->footprint_size();
+            }
+            int min_value = 12;
+            int min_go = b.tile.grid_offset();
+            building_road_access_result r;
+            if (map_road_find_minimum_tile_xy(b.tile, ft.x, ft.y, &min_value, &min_go) && min_value < 12) {
+                r.tile = tile2i(min_go);
+                r.valid = true;
+            }
+            apply_building_road_access(b, r);
         } else { // other building
             OZZY_PROFILER_SECTION(_, "Game/Run/Tick/Check Road Access/Other");
             apply_building_road_access(b,

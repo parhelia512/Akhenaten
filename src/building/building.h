@@ -435,6 +435,8 @@ public:
     ALLOW_SMART_CAST_BUILDING(sphinx)
     ALLOW_SMART_CAST_BUILDING(obelisk)
     ALLOW_SMART_CAST_BUILDING(sun_temple)
+    ALLOW_SMART_CAST_BUILDING(abu_simbel)
+    ALLOW_SMART_CAST_BUILDING(caesareum)
 
     int get_figures_number(e_figure_type ftype);
 

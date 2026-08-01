@@ -6245,4 +6245,20 @@ game_messages_hu {
                     text: "Sok hónapnyi kemény munka után a Naptemplom építése végre véget ért. Ez városod nagyszerű teljesítménye!"
                 }
             }
+            abu_simbel_congratulations {
+                id: 525,
+                size [30, 18]
+                title { text: "Abu Szimbel elkészült!" }
+                content {
+                    text: "Ez valóban lenyűgöző teljesítmény! Képzett munkásaid egy örök emlékművet alkottak, amely fáraónk dicsőségét és Egyiptom hatalmát hirdeti."
+                }
+            }
+            caesareum_congratulations {
+                id: 526,
+                size [30, 18]
+                title { text: "Caesareum elkészült!" }
+                content {
+                    text: "A Caesareum szent temploma és pompás, kertekkel díszített udvarai végre elkészültek! Csodálatos szépségének híre máris terjed az egész vidéken."
+                }
+            }
 }

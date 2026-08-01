@@ -2,6 +2,8 @@
 
 #include "building/building.h"
 #include "building/monument_pyramid.h"
+#include "building/monument_abu_simbel.h"
+#include "building/monument_caesareum.h"
 #include "graphics/image.h"
 #include "graphics/image_groups.h"
 #include "graphics/view/view.h"
@@ -320,6 +322,10 @@ int building_monument::progress() {
             messages::popup("message_monument_complete", 0, bmain->tile().grid_offset());
         } else if (bmain->dcast_obelisk()) {
             messages::popup("message_monument_complete", 0, bmain->tile().grid_offset());
+        } else if (bmain->dcast_abu_simbel()) {
+            messages::popup("abu_simbel_congratulations", 0, bmain->tile().grid_offset());
+        } else if (bmain->dcast_caesareum()) {
+            messages::popup("caesareum_congratulations", 0, bmain->tile().grid_offset());
         }
     }
     return 1;

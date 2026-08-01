@@ -6234,4 +6234,20 @@ game_messages_de {
             text: "Nach vielen Monaten Mühe ist die Arbeit am Sonnentempel endlich abgeschlossen. Dies ist eine großartige Leistung für Eure Stadt!"
         }
     }
+    abu_simbel_congratulations {
+        id: 525,
+        size [30, 18]
+        title { text: "Abu Simbel fertiggestellt!" }
+        content {
+            text: "Dies ist eine wahrhaft spektakuläre Leistung! Eure qualifizierten Arbeiter haben ein ewiges Monument geschaffen, das von der Herrlichkeit unseres Pharaos und der Macht Ägyptens kündet."
+        }
+    }
+    caesareum_congratulations {
+        id: 526,
+        size [30, 18]
+        title { text: "Caesareum fertiggestellt!" }
+        content {
+            text: "Der heilige Tempel und die prächtigen Gartenhöfe des Caesareums sind endlich vollendet! Die Kunde seiner herrlichen Schönheit verbreitet sich bereits in der ganzen Region."
+        }
+    }
 }

@@ -17,6 +17,8 @@ import building.mastaba
 import building.sphinx
 import building.obelisk
 import building.sun_temple
+import building.abu_simbel
+import building.caesareum
 import building.pyramid
 import building.farm
 import building.fort

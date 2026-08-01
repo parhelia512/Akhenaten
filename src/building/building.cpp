@@ -130,6 +130,7 @@ void building::setup_static_flags() {
     set_flag(e_building_military, params().flags.is_military);
     set_flag(e_building_entertainment, params().flags.is_entertainment);
     set_flag(e_building_food, params().flags.is_food);
+    set_flag(e_building_non_deletable, params().flags.non_deletable);
 }
 
 desirability_t::influence_t building_desirability_t::to_influence() const {

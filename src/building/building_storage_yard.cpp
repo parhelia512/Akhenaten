@@ -785,7 +785,7 @@ storage_worker_task building_storageyard_deliver_to_monuments(building *b) {
                 continue;
             }
             // Remaining after on-site % — without this a full-phase sled can
-            // overshoot / empty the yard in one trip (Pharaoh hauls 4 blocks = 400).
+            // overshoot / empty the yard in one trip.
             auto &d = monument->runtime_data();
             int on_site = needed * (int)d.resources_pct[resource] / 100;
             int in_flight = building_monument_resource_in_delivery(&monument->base, resource);
@@ -793,8 +793,16 @@ storage_worker_task building_storageyard_deliver_to_monuments(building *b) {
             if (remaining <= 0) {
                 continue;
             }
+            const auto &yp = building_storage_yard::current_params();
+            const int sled_max = yp.monument_sled_max_load > 0 ? yp.monument_sled_max_load : 400;
+            const int marble_min = yp.marble_monument_min_haul > 0 ? yp.marble_monument_min_haul : 400;
+            // Caesareum help: WC haul marble only when ≥N sits in one SY space.
+            // Allow a smaller final trip when remaining < marble_min.
+            if (resource == RESOURCE_MARBLE && available < marble_min && remaining >= marble_min) {
+                continue;
+            }
             int amount = std::min(available, remaining);
-            amount = std::min(amount, 400);
+            amount = std::min(amount, sled_max);
             if (amount <= 0) {
                 continue;
             }
