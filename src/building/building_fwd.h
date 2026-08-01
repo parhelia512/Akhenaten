@@ -28,6 +28,7 @@ class building_dock;
 class building_mastaba;
 class building_small_mastaba;
 class building_medium_mastaba;
+class building_large_mastaba;
 class building_wood_cutter;
 class building_work_camp;
 class building_recruiter;

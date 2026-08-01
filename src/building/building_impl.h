@@ -105,6 +105,7 @@ public:
     ALLOW_SMART_CAST_BUILDING_I(mastaba)
     ALLOW_SMART_CAST_BUILDING_I(small_mastaba)
     ALLOW_SMART_CAST_BUILDING_I(medium_mastaba)
+    ALLOW_SMART_CAST_BUILDING_I(large_mastaba)
     ALLOW_SMART_CAST_BUILDING_I(wood_cutter)
     ALLOW_SMART_CAST_BUILDING_I(recruiter)
     ALLOW_SMART_CAST_BUILDING_I(pavilion)

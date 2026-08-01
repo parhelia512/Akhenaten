@@ -42,6 +42,9 @@ city_planner = extend(__city_planner, {
         }
 
         city_planner.global_rotation = rotation
+        // Keep relative_orientation in sync — mastaba (and others) place via absolute_orientation
+        // derived from relative, not global_rotation alone.
+        city_planner.relative_orientation = rotation
         city_planner.road_orientation = city_planner.road_orientation == 1 ? 2 : 1
     }
 })

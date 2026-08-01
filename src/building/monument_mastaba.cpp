@@ -49,6 +49,11 @@ REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_medium_mastaba_part_side);
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_medium_mastaba_part_wall);
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_medium_mastaba_part_entrance);
 
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_mastaba);
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_mastaba_part_side);
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_mastaba_part_wall);
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_mastaba_part_entrance);
+
 declare_console_command_p(monument_up) {
     std::string args; is >> args;
     int amount = atoi(args.empty() ? (pcstr)"0" : args.c_str());
@@ -124,6 +129,21 @@ struct monument_medium_mastaba : public monument {
     }
 } g_monument_medium_mastaba;
 
+// Provisional: medium × (144/84)=×12/7, rounded to 400. No Heaven/OG per-phase dump.
+struct monument_large_mastaba : public monument {
+    monument_large_mastaba() : monument{ BUILDING_LARGE_MASTABA } {
+        phases.push_back({ 0, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
+        phases.push_back({ 1, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
+        phases.push_back({ 2, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_BRICKS, 13600} });
+        phases.push_back({ 3, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_CLAY, 6800}, {RESOURCE_BRICKS, 13600} });
+        phases.push_back({ 4, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_CLAY, 5600}, {RESOURCE_BRICKS, 10800} });
+        phases.push_back({ 5, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_CLAY, 4000}, {RESOURCE_BRICKS, 8400} });
+        phases.push_back({ 6, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_CLAY, 2800}, {RESOURCE_BRICKS, 5600} });
+        phases.push_back({ 7, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_CLAY, 1400}, {RESOURCE_BRICKS, 2800} });
+        phases.push_back({ 8, monument_phase_resource{RESOURCE_NONE, 0} });
+    }
+} g_monument_large_mastaba;
+
 template<typename T>
 const building_mastaba::base_params &mastaba_base_params(const building_static_params &params) {
     using static_params = typename T::static_params;
@@ -131,18 +151,48 @@ const building_mastaba::base_params &mastaba_base_params(const building_static_p
     return (const building_mastaba::base_params &)bparams;
 }
 
-const building_mastaba::base_params &get_mastaba_params(e_building_type type) {
-    const auto &params = building_static_params::get(type);
+static e_building_type mastaba_main_type(e_building_type type) {
+    if (building_type_any_of(type, {BUILDING_SMALL_MASTABA, BUILDING_SMALL_MASTABA_SIDE,
+                                    BUILDING_SMALL_MASTABA_WALL, BUILDING_SMALL_MASTABA_ENTRANCE})) {
+        return BUILDING_SMALL_MASTABA;
+    }
+    if (building_type_any_of(type, {BUILDING_MEDIUM_MASTABA, BUILDING_MEDIUM_MASTABA_SIDE,
+                                    BUILDING_MEDIUM_MASTABA_WALL, BUILDING_MEDIUM_MASTABA_ENTRANCE,
+                                    BUILDING_MEDIUM_MASTABA_RESERVED})) {
+        return BUILDING_MEDIUM_MASTABA;
+    }
+    if (building_type_any_of(type, {BUILDING_LARGE_MASTABA, BUILDING_LARGE_MASTABA_SIDE,
+                                    BUILDING_LARGE_MASTABA_WALL, BUILDING_LARGE_MASTABA_ENTRANCE,
+                                    BUILDING_LARGE_MASTABA_RESERVED})) {
+        return BUILDING_LARGE_MASTABA;
+    }
+    return BUILDING_NONE;
+}
 
-    switch (params.type) {
-    case BUILDING_SMALL_MASTABA: return mastaba_base_params<building_small_mastaba>(params);
-    case BUILDING_MEDIUM_MASTABA: return mastaba_base_params<building_medium_mastaba>(params);
-    //case BUILDING_LARGE_MASTABA: return mastaba_base_params<building_large_mastaba>(params);
+const building_mastaba::base_params &get_mastaba_params(e_building_type type) {
+    switch (mastaba_main_type(type)) {
+    case BUILDING_SMALL_MASTABA: return mastaba_base_params<building_small_mastaba>(building_static_params::get(BUILDING_SMALL_MASTABA));
+    case BUILDING_MEDIUM_MASTABA: return mastaba_base_params<building_medium_mastaba>(building_static_params::get(BUILDING_MEDIUM_MASTABA));
+    case BUILDING_LARGE_MASTABA: return mastaba_base_params<building_large_mastaba>(building_static_params::get(BUILDING_LARGE_MASTABA));
+    default: break;
     }
 
     static building_mastaba::base_params dummy;
     return dummy;
 };
+
+static e_building_type mastaba_side_type(e_building_type main_type) {
+    switch (main_type) {
+    case BUILDING_MEDIUM_MASTABA: return BUILDING_MEDIUM_MASTABA_SIDE;
+    case BUILDING_LARGE_MASTABA: return BUILDING_LARGE_MASTABA_SIDE;
+    default: return BUILDING_SMALL_MASTABA_SIDE;
+    }
+}
+
+static tile2i mastaba_footprint_end(building *main) {
+    const auto &bp = get_mastaba_params(main->type);
+    return main->tile.shifted(bp.init_tiles.y - 1, bp.init_tiles.x - 1);
+}
 
 void building_mastaba::preview::setup_preview_graphics(build_planner &planer) const {
     const auto &params = building_static_params::get(planer.build_type);
@@ -248,8 +298,7 @@ void map_mastaba_tiles_add(int building_id, tile2i tile, int size, int image_id,
 }
 
 tile2i building_small_mastaba_bricks_waiting_tile(building *b) {
-    const bool is_mastaba = building_type_any_of(b->type, make_array(BUILDING_SMALL_MASTABA, BUILDING_MEDIUM_MASTABA));
-    if (!is_mastaba) {
+    if (!b || !smart_cast<building_mastaba>(b)) {
         return tile2i{-1, -1};
     }
 
@@ -376,17 +425,19 @@ int building_small_mastabe_get_bricks_image(int orientation, e_building_type typ
         bricks_type = BUILDING_SMALL_MASTABA;
     } else if (building_type_any_of(type, {BUILDING_MEDIUM_MASTABA_SIDE, BUILDING_MEDIUM_MASTABA_WALL, BUILDING_MEDIUM_MASTABA_ENTRANCE})) {
         bricks_type = BUILDING_MEDIUM_MASTABA;
+    } else if (building_type_any_of(type, {BUILDING_LARGE_MASTABA_SIDE, BUILDING_LARGE_MASTABA_WALL, BUILDING_LARGE_MASTABA_ENTRANCE})) {
+        bricks_type = BUILDING_LARGE_MASTABA;
     }
     int image_base_bricks = building_static_params::get(bricks_type).first_img("base_bricks");
 
     int image_id = image_base_bricks + (layer - 1) * 8 + 4;
     int random = (image_base_bricks + 96 + (layer - 1) + (tile.x() + tile.y()) % 1 * 6);
     int result = random;
-    if (building_type_any_of(type, { BUILDING_SMALL_MASTABA_ENTRANCE, BUILDING_MEDIUM_MASTABA_ENTRANCE })) {
+    if (building_type_any_of(type, { BUILDING_SMALL_MASTABA_ENTRANCE, BUILDING_MEDIUM_MASTABA_ENTRANCE, BUILDING_LARGE_MASTABA_ENTRANCE })) {
         int ids[4] = {image_base_bricks + 110, image_base_bricks + 104, image_base_bricks + 104, image_base_bricks + 109};
         int i = (orientation + (g_camera.orientation / 2)) % 4;
         return ids[i];
-    } else if (building_type_any_of(type, { BUILDING_SMALL_MASTABA_WALL, BUILDING_MEDIUM_MASTABA_WALL })) {
+    } else if (building_type_any_of(type, { BUILDING_SMALL_MASTABA_WALL, BUILDING_MEDIUM_MASTABA_WALL, BUILDING_LARGE_MASTABA_WALL })) {
         return random;
     } else if (tile.y() == start.y()) { // top corner
         result = (image_id + 3);
@@ -415,19 +466,20 @@ void building_mastaba::on_place(int orientation, int variant) {
 
     map_mastaba_tiles_add(id(), tile(), base.size, -1, TERRAIN_BUILDING);
 
-    const auto &bparams = get_mastaba_params(type());
+    const e_building_type main_type = type();
+    const auto &bparams = get_mastaba_params(main_type);
     auto parts = bparams.config_north;
     switch (orientation) {
     case 0: parts = bparams.config_north; break;
     case 1: parts = bparams.config_east; break;
     case 2:
         parts = bparams.config_south;
-        base.type = BUILDING_SMALL_MASTABA_SIDE;
+        base.type = mastaba_side_type(main_type);
         break;
 
     case 3:
         parts = bparams.config_west;
-        base.type = BUILDING_SMALL_MASTABA_SIDE;
+        base.type = mastaba_side_type(main_type);
         break;
     }
 
@@ -668,8 +720,9 @@ bool building_mastaba::draw_ornaments_and_animations_hight_impl(painter &ctx, ve
         }
     }
 
-    if (monumentd.phase > 2 && base.type == BUILDING_SMALL_MASTABA_SIDE) {
-        grid_tiles tile2common = map_grid_get_tiles(main->tile, main->tile.shifted(tiles_size.y - 1, tiles_size.x - 1));
+    if (monumentd.phase > 2 && building_type_any_of(base.type, {
+            BUILDING_SMALL_MASTABA_SIDE, BUILDING_MEDIUM_MASTABA_SIDE, BUILDING_LARGE_MASTABA_SIDE})) {
+        grid_tiles tile2common = map_grid_get_tiles(main->tile, mastaba_footprint_end(main));
         for (auto &t : tile2common) {
             vec2i offset = g_camera.lookup_tile_to_pixel(t);
             g_screen_city.draw_figures(offset, t, ctx, /*force*/true);
@@ -771,7 +824,8 @@ void building_mastaba::update_month() {
 void building_mastaba::update_map_orientation(int map_orientation) {
     if (is_finished()) {
         building *main = base.main();
-        int image_id = building_small_mastabe_get_bricks_image(base.orientation, type(), tile(), main->tile, main->tile.shifted(3, 9), 6);
+        tile2i end = mastaba_footprint_end(main);
+        int image_id = building_small_mastabe_get_bricks_image(base.orientation, type(), tile(), main->tile, end, 6);
         map_building_tiles_add(id(), tile(), base.size, image_id, TERRAIN_BUILDING);
     }
 }
@@ -809,8 +863,9 @@ bool building_mastaba::get_route_citizen_land_type(int grid_offset, int &land_re
             land_result = CITIZEN_N1_BLOCKED;
             return true;
         } else if (phase() > 2) {
-            tile2i maint = main()->tile();
-            tile2i end = maint.shifted(3, 9);
+            building *maint_b = base.main();
+            tile2i maint = maint_b->tile;
+            tile2i end = mastaba_footprint_end(maint_b);
             tile2i tile(grid_offset);
             land_result = (tile.x() == maint.x() || tile.y() == maint.y() || tile.x() == end.x()) ? CITIZEN_N1_BLOCKED : CITIZEN_2_PASSABLE_TERRAIN;
             return true;
@@ -929,6 +984,68 @@ bool building_medium_mastaba::draw_ornaments_and_animations_height(painter &ctx,
 }
 
 void building_medium_mastaba::update_day() {
+    building_impl::update_day();
+
+    if (is_finished()) {
+        return;
+    }
+
+    building_mastaba::update_day(current_params().init_tiles);
+}
+
+const monument &building_large_mastaba::config() const {
+    return g_monument_large_mastaba;
+}
+
+tile2i building_large_mastaba::center_point() const {
+    tile2i main = tile();
+    tile2i end = main.shifted(7, 17);
+    return main.add(end).div(2);
+}
+
+int building_large_mastaba::building_image_get() const {
+    const int base = building_static_params::get(BUILDING_LARGE_MASTABA).base_img();
+    switch (runtime_data().phase) {
+    case MONUMENT_START:
+        return base;
+    default:
+        return base + 1;
+    }
+}
+
+grid_area building_large_mastaba::get_area() const {
+    tile2i main = tile();
+    tile2i end = main.shifted(7, 17);
+
+    return { main, end };
+}
+
+tile2i building_large_mastaba::access_point() const {
+    return main()->tile().shifted(0, 18);
+}
+
+bool building_large_mastaba::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
+    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, get_mastaba_params(BUILDING_LARGE_MASTABA).init_tiles);
+}
+
+bool building_large_mastaba::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
+    if (is_finished()) {
+        return false;
+    }
+
+    if (city_flat_should_flatten_building(base)) {
+        return false;
+    }
+
+    auto &monumentd = runtime_data();
+    if (monumentd.phase < 2) {
+        return false;
+    }
+
+    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, get_mastaba_params(BUILDING_LARGE_MASTABA).init_tiles);
+}
+
+void building_large_mastaba::update_day() {
     building_impl::update_day();
 
     if (is_finished()) {

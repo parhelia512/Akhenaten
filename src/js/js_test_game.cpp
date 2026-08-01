@@ -1531,6 +1531,12 @@ static e_building_type test_mastaba_params_type(building *head) {
     case BUILDING_MEDIUM_MASTABA_ENTRANCE:
     case BUILDING_MEDIUM_MASTABA_RESERVED:
         return BUILDING_MEDIUM_MASTABA;
+    case BUILDING_LARGE_MASTABA:
+    case BUILDING_LARGE_MASTABA_SIDE:
+    case BUILDING_LARGE_MASTABA_WALL:
+    case BUILDING_LARGE_MASTABA_ENTRANCE:
+    case BUILDING_LARGE_MASTABA_RESERVED:
+        return BUILDING_LARGE_MASTABA;
     default:
         return BUILDING_SMALL_MASTABA;
     }

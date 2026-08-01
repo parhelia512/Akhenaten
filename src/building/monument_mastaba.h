@@ -40,10 +40,11 @@ public:
     };
 
     struct base_params {
-        hvector<mastaba_part, 32> config_north;
-        hvector<mastaba_part, 32> config_east;
-        hvector<mastaba_part, 32> config_south;
-        hvector<mastaba_part, 32> config_west;
+        // Large mastaba = 4×9 parts (36); keep headroom above medium's 21.
+        hvector<mastaba_part, 40> config_north;
+        hvector<mastaba_part, 40> config_east;
+        hvector<mastaba_part, 40> config_south;
+        hvector<mastaba_part, 40> config_west;
         vec2i init_tiles;
     };
 
@@ -104,7 +105,7 @@ class building_medium_mastaba : public building_mastaba {
 public:
     BUILDING_METAINFO(BUILDING_MEDIUM_MASTABA, building_medium_mastaba, building_mastaba)
 
-    virtual building_medium_mastaba *dcast_medium_mastaba() override { return nullptr; }
+    virtual building_medium_mastaba *dcast_medium_mastaba() override { return this; }
 
     struct static_params : public base_params, public building_static_params {
     } BUILDING_STATIC_DATA_T;
@@ -136,6 +137,44 @@ public:
 class building_medium_mastaba_part_entrance : public building_medium_mastaba {
 public:
     BUILDING_METAINFO(BUILDING_MEDIUM_MASTABA_ENTRANCE, building_medium_mastaba_part_entrance, building_medium_mastaba)
+};
+
+class building_large_mastaba : public building_mastaba {
+public:
+    BUILDING_METAINFO(BUILDING_LARGE_MASTABA, building_large_mastaba, building_mastaba)
+
+    virtual building_large_mastaba *dcast_large_mastaba() override { return this; }
+
+    struct static_params : public base_params, public building_static_params {
+    } BUILDING_STATIC_DATA_T;
+
+    virtual void update_day() override;
+    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual int building_image_get() const override;
+    virtual grid_area get_area() const override;
+
+    virtual const monument &config() const override;
+    virtual tile2i center_point() const override;
+    virtual tile2i access_point() const override;
+
+};
+ANK_CONFIG_STRUCT(building_large_mastaba::static_params,
+    init_tiles, config_north, config_east, config_south, config_west);
+
+class building_large_mastaba_part_side : public building_large_mastaba {
+public:
+    BUILDING_METAINFO(BUILDING_LARGE_MASTABA_SIDE, building_large_mastaba_part_side, building_large_mastaba)
+};
+
+class building_large_mastaba_part_wall : public building_large_mastaba {
+public:
+    BUILDING_METAINFO(BUILDING_LARGE_MASTABA_WALL, building_large_mastaba_part_wall, building_large_mastaba)
+};
+
+class building_large_mastaba_part_entrance : public building_large_mastaba {
+public:
+    BUILDING_METAINFO(BUILDING_LARGE_MASTABA_ENTRANCE, building_large_mastaba_part_entrance, building_large_mastaba)
 };
 
 void map_mastaba_tiles_add(int building_id, tile2i tile, int size, int image_id, int terrain);

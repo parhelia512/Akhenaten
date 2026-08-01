@@ -339,6 +339,13 @@ enum e_building_type : uint16_t {
 	BUILDING_LARGE_MUDBRICK_PYRAMID_WALL = 354,
 	BUILDING_LARGE_MUDBRICK_PYRAMID_CONE = 355,
 
+	// Large mastaba part runtime-ids. Main type is 260 above.
+	// Appended before BUILDING_MAX to keep savegame compatibility.
+	BUILDING_LARGE_MASTABA_RESERVED = 356,
+	BUILDING_LARGE_MASTABA_SIDE = 357,
+	BUILDING_LARGE_MASTABA_WALL = 358,
+	BUILDING_LARGE_MASTABA_ENTRANCE = 359,
+
 	BUILDING_MAX,
 };
 extern const token_holder<e_building_type, BUILDING_NONE, BUILDING_MAX> e_building_type_tokens;

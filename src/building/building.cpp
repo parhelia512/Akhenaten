@@ -650,6 +650,10 @@ tile2i building::access_tile() {
     case BUILDING_MEDIUM_MUDBRICK_PYRAMID_CONE:
         return main()->tile.shifted(0, 14);
 
+    case BUILDING_LARGE_MASTABA:
+    case BUILDING_LARGE_MASTABA_ENTRANCE:
+    case BUILDING_LARGE_MASTABA_WALL:
+    case BUILDING_LARGE_MASTABA_SIDE:
     // Mudbrick large is 16×16 (true large is 20×20 → shift 22).
     case BUILDING_LARGE_MUDBRICK_PYRAMID:
     case BUILDING_LARGE_MUDBRICK_PYRAMID_CORNER:

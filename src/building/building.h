@@ -386,6 +386,7 @@ public:
     ALLOW_SMART_CAST_BUILDING(work_camp)
     ALLOW_SMART_CAST_BUILDING(mastaba)
     ALLOW_SMART_CAST_BUILDING(small_mastaba)
+    ALLOW_SMART_CAST_BUILDING(large_mastaba)
     ALLOW_SMART_CAST_BUILDING(wood_cutter)
     ALLOW_SMART_CAST_BUILDING(recruiter)
     ALLOW_SMART_CAST_BUILDING(pavilion)
