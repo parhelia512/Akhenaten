@@ -35,6 +35,9 @@ struct request_cleared_snapshot_t {
 
 const request_cleared_snapshot_t &scenario_request_last_cleared();
 
+// Emit factual close for JS (ok/late/refuse policy stays in scripts).
+void scenario_request_emit_cleared(const event_ph_t &event, bool fulfilled);
+
 void scenario_request_init();
 
 void scenario_request_dispatch(int id);

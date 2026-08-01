@@ -17,6 +17,7 @@
 #include "city/city.h"
 #include "scenario/scenario.h"
 #include "scenario/scenario_event_manager.h"
+#include "scenario/request.h"
 
 distant_battles_t g_distant_battle;
 
@@ -397,8 +398,37 @@ bool distant_battles_t::player_has_won() {
     return won;
 }
 
+static bool is_deferred_troop_request(const event_ph_t *ev) {
+    return ev && ev->type == EVENT_TYPE_REQUEST
+        && (e_resource)ev->item.value == RESOURCE_TROOPS
+        && ev->on_defeat_action >= 0
+        && !ev->is_active
+        && ev->event_state <= e_event_state_overdue;
+}
+
+// source_request_event_id is not in the original city_data blob; after load (or if the
+// runtime link was cleared) recover the inactive troop ask awaiting battle resolution.
+static int16_t resolve_source_request_event_id(int16_t linked) {
+    if (linked >= 0 && is_deferred_troop_request(g_scenario.events.at(linked))) {
+        return linked;
+    }
+
+    int16_t found = -1;
+    for (int i = 0; i < g_scenario.events.events_count(); i++) {
+        const event_ph_t *ev = g_scenario.events.at(i);
+        if (!is_deferred_troop_request(ev)) {
+            continue;
+        }
+        if (found >= 0) {
+            return -1; // ambiguous — do not guess
+        }
+        found = (int16_t)ev->event_id;
+    }
+    return found;
+}
+
 void distant_battles_t::fight_distant_battle() {
-    const int16_t req_id = source_request_event_id;
+    const int16_t req_id = resolve_source_request_event_id(source_request_event_id);
     source_request_event_id = -1;
     // Request-linked troop asks: chain leaves own the KR / status fallout — suppress the
     // hardcoded ±kingdom swings and ad-hoc win_distant_battle event so they don't stack.
@@ -464,6 +494,8 @@ void distant_battles_t::fight_distant_battle() {
                     g_scenario.events.process_event(ev->on_defeat_action, true, EVENT_ACTION_DEFEAT, ev->event_id);
                 }
             }
+            // Troop asks defer emit until battle resolves (see scenario_request_dispatch).
+            scenario_request_emit_cleared(*ev, won);
         }
     }
 

@@ -21,8 +21,9 @@
 
 namespace {
 request_cleared_snapshot_t g_last_request_cleared;
+} // namespace
 
-void emit_request_cleared(const event_ph_t &event, bool fulfilled) {
+void scenario_request_emit_cleared(const event_ph_t &event, bool fulfilled) {
     const int tag_id = (int)event.tag_id;
     const int resource = (int)event.item.value;
     const int fulfilled_i = fulfilled ? 1 : 0;
@@ -36,7 +37,6 @@ void emit_request_cleared(const event_ph_t &event, bool fulfilled) {
 
     events::emit(event_request_cleared{ tag_id, resource, fulfilled_i, was_overdue_i });
 }
-} // namespace
 
 const request_cleared_snapshot_t &scenario_request_last_cleared() {
     return g_last_request_cleared;
@@ -94,7 +94,7 @@ void scenario_request_handle(event_ph_t &event, int caller_event_id, e_event_act
         if (event.on_completed_action >= 0) {
             g_scenario.events.process_event(event.on_completed_action, true, EVENT_ACTION_COMPLETED, event.event_id);
         }
-        emit_request_cleared(event, true);
+        scenario_request_emit_cleared(event, true);
         break;
 
     case e_event_state_finished_late:
@@ -106,7 +106,7 @@ void scenario_request_handle(event_ph_t &event, int caller_event_id, e_event_act
         if (event.on_too_late_action >= 0) {
             g_scenario.events.process_event(event.on_too_late_action, true, EVENT_ACTION_TOOLATE, event.event_id);
         }
-        emit_request_cleared(event, true);
+        scenario_request_emit_cleared(event, true);
         break;
 
     case e_event_state_initial:
@@ -180,7 +180,7 @@ void scenario_request_handle(event_ph_t &event, int caller_event_id, e_event_act
             if (event.on_refusal_action >= 0) {
                 g_scenario.events.process_event(event.on_refusal_action, true, EVENT_ACTION_REFUSED, event.event_id);
             }
-            emit_request_cleared(event, false);
+            scenario_request_emit_cleared(event, false);
         }
         break;
     }
