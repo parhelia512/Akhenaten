@@ -13,12 +13,6 @@ building_sun_temple {
       sd2 { pack:PACK_SUN_TEMPLE_3, id:2 }
       preview { pack:PACK_SUN_TEMPLE_1, id:1 }
 
-      // PACK_SUN_TEMPLE_EXTRA inventory (I10):
-      // 1–2  118×127  hall / vestibule composites (orients)
-      // 3–8  ~58×68   wall / pillar pieces
-      // 9–12 ~58×30   path / plaza strips
-      // 13   178×187  larger complex piece
-      // 14–15 50×86   ornaments (used as stake ghost)
       hall1 { pack:PACK_SUN_TEMPLE_EXTRA, id:1 }
       hall2 { pack:PACK_SUN_TEMPLE_EXTRA, id:2 }
       wall_a { pack:PACK_SUN_TEMPLE_EXTRA, id:3 }
@@ -35,16 +29,43 @@ building_sun_temple {
       stake { pack:PACK_SUN_TEMPLE_EXTRA, id:14 }
       ornament { pack:PACK_SUN_TEMPLE_EXTRA, id:15 }
     }
-    // Body square; full AABB via init_tiles (body + path + hall).
     building_size : 10
-    // Heaven: 10×10 body + 8×2 path + 3×3 hall → AABB ~10×15 along axis.
+
     init_tiles [10, 15]
     path_size [8, 2]
     hall_size [3, 3]
-    // Offsets from body origin for placement rotation 0..3 (path then hall).
-    // rot0 +Y: path centered on south edge; hall beyond path.
+
     part_path_offset [[1, 10], [-2, 1], [1, -2], [10, 1]]
     part_hall_offset [[4, 12], [-5, 4], [4, -5], [12, 4]]
+
+    plaza_overlays [
+      // V0–V1 stakes (rot0 footprint edges relative to body)
+      { key: "stake", offset: [0, 0], min_phase: 0, max_phase: 1 }
+      { key: "stake", offset: [9, 0], min_phase: 0, max_phase: 1 }
+      { key: "stake", offset: [0, 14], min_phase: 0, max_phase: 1 }
+      { key: "stake", offset: [9, 14], min_phase: 0, max_phase: 1 }
+      { key: "stake", offset: [4, 0], min_phase: 0, max_phase: 1 }
+      { key: "stake", offset: [4, 14], min_phase: 0, max_phase: 1 }
+      { key: "stake", offset: [0, 7], min_phase: 0, max_phase: 1 }
+      { key: "stake", offset: [9, 7], min_phase: 0, max_phase: 1 }
+      // V4 plaza / courtyard walls around body + path corridor
+      { key: "wall_a", offset: [-1, 2], min_phase: 4 }
+      { key: "wall_b", offset: [10, 2], min_phase: 4 }
+      { key: "wall_c", offset: [-1, 7], min_phase: 4 }
+      { key: "wall_d", offset: [10, 7], min_phase: 4 }
+      { key: "wall_e", offset: [2, -1], min_phase: 4 }
+      { key: "wall_f", offset: [7, -1], min_phase: 4 }
+      // Extra path strips flanking the main path part
+      { key: "path_b", offset: [0, 10], min_phase: 4 }
+      { key: "path_c", offset: [8, 10], min_phase: 4 }
+      // Larger complex / gatehouse near hall
+      { key: "complex", offset: [3, 11], min_phase: 4 }
+      // V5 finished ornaments at courtyard corners
+      { key: "ornament", offset: [-1, -1], min_phase: 5 }
+      { key: "ornament", offset: [10, -1], min_phase: 5 }
+      { key: "ornament", offset: [-1, 14], min_phase: 5 }
+      { key: "ornament", offset: [10, 14], min_phase: 5 }
+    ]
     art_stages : 4
     // Heaven chart: wood = Y for carpenters (no fixed monument load published).
     // Remake keeps a phase-2 delivery gate; provisional 100 until .pak dump.

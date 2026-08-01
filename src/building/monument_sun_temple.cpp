@@ -14,6 +14,7 @@
 #include "game/resource.h"
 #include "game/undo.h"
 #include "graphics/color.h"
+#include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/view/lookup.h"
 #include "graphics/view/view.h"
@@ -122,6 +123,37 @@ int placement_rotation(const building &b) {
 
 int art_orient_idx() {
     return (g_camera.orientation / 2) % 2;
+}
+
+// Rotate a 1×1 overlay offset from placement rot0 relative to body NW.
+// Same transform family as part_path_offset (W=H=body; o may lie outside).
+vec2i rotate_footprint_offset(vec2i o, int rotation, int w, int h) {
+    rotation %= 4;
+    if (rotation < 0) {
+        rotation += 4;
+    }
+    switch (rotation) {
+    case 1:
+        return {h - o.y - 1, o.x};
+    case 2:
+        return {w - o.x - 1, h - o.y - 1};
+    case 3:
+        return {o.y, w - o.x - 1};
+    default:
+        return o;
+    }
+}
+
+// Phase gate for plaza_overlays: finished temple counts as phase 5+.
+bool overlay_phase_visible(int8_t phase, bool finished, int8_t min_phase, int8_t max_phase) {
+    if (max_phase <= 0) {
+        max_phase = 99;
+    }
+    const int p = finished ? 5 : (int)phase;
+    if (p < min_phase || p > max_phase) {
+        return false;
+    }
+    return true;
 }
 
 void advance_phase_all_parts(building_sun_temple *main_st) {
@@ -338,6 +370,56 @@ int building_sun_temple::building_image_get() const {
         return img;
     }
     return params.first_img("preview");
+}
+
+bool building_sun_temple::draw_ornaments_and_animations_height(painter &ctx, vec2i /*point*/, tile2i tile, color color_mask) {
+    // Overlays only from the body NW tile — path/hall parts skip.
+    if (!is_main() || runtime_data().variant != PART_BODY || tile != base.tile) {
+        return false;
+    }
+
+    const auto &params = current_params();
+    const auto &bp = params;
+    if (bp.plaza_overlays.empty()) {
+        return false;
+    }
+
+    // Offsets are always relative to body NW (may be outside the 10×10).
+    // Must rotate with body×body — init_tiles W×H is wrong because body.tile is
+    // not the AABB origin on rot 1/3 (path sticks out to −X / −Y).
+    const int body = base.size > 0 ? base.size : 10;
+    const int rotation = placement_rotation(base);
+    const int8_t phase = runtime_data().phase;
+    const bool finished = is_finished();
+
+    auto draw_layer = [&](int image_id, vec2i pixel) {
+        if (image_id <= 0) {
+            return;
+        }
+        auto &command = ImageDraw::create_command(ctx, render_command_t::ert_drawtile);
+        command.image_id = image_id;
+        command.pixel = pixel;
+        command.mask = color_mask;
+    };
+
+    bool drew = false;
+    for (const auto &ov : bp.plaza_overlays) {
+        if (!overlay_phase_visible(phase, finished, ov.min_phase, ov.max_phase)) {
+            continue;
+        }
+        if (ov.key.empty()) {
+            continue;
+        }
+        const int img = params.first_img(ov.key);
+        if (img <= 0) {
+            continue;
+        }
+        const vec2i off = rotate_footprint_offset(ov.offset, rotation, body, body);
+        const vec2i px = g_camera.lookup_tile_to_pixel(base.tile.shifted(off.x, off.y)) + ov.pixel;
+        draw_layer(img, px);
+        drew = true;
+    }
+    return drew;
 }
 
 void building_sun_temple::refresh_part_tiles() {
