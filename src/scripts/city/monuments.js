@@ -33,9 +33,11 @@ MONUMENT_WEIGHTS[BUILDING_SMALL_OBELISK]                  = 2
 MONUMENT_WEIGHTS[BUILDING_LARGE_OBELISK]                  = 4
 MONUMENT_WEIGHTS[BUILDING_SUN_TEMPLE]                     = 4
 MONUMENT_WEIGHTS[BUILDING_MAUSOLEUM]                      = 3
-MONUMENT_WEIGHTS[BUILDING_ALEXANDRIA_LIBRARY]             = 2
+// Mission 49 goal 28 needs Σw ≥ 11 (trunc(2.25·Σ+4.5)). Library alone must not
+// saturate: W=6 → 18. Pair with Pharos W=5 (PL3) → 29 ≥ 28.
+MONUMENT_WEIGHTS[BUILDING_ALEXANDRIA_LIBRARY]             = 6
 MONUMENT_WEIGHTS[BUILDING_CAESAREUM]                      = 8  // provisional; CZ0/mission 51 recalibrate
-MONUMENT_WEIGHTS[BUILDING_PHAROS_LIGHTHOUSE]              = 0
+MONUMENT_WEIGHTS[BUILDING_PHAROS_LIGHTHOUSE]              = 5  // PL3; pair Library 6 → 29 ≥ mission 49 goal 28
 MONUMENT_WEIGHTS[BUILDING_SMALL_ROYAL_TOMB]               = 4
 MONUMENT_WEIGHTS[BUILDING_ABU_SIMBEL]                     = 44
 MONUMENT_WEIGHTS[BUILDING_MEDIUM_ROYAL_TOMB]              = 1

@@ -58,9 +58,9 @@ function run_test() {
 
     city_update_monthly_monument_rating({})
     var rating_done = city.rating.monument | 0
-    // weight 2 → trunc(2.25*2+4.5)=9; require > 0
-    if (rating_done < 5) {
-        __log_info_native('[test:121] finished rating want >=5 got ' + rating_done)
+    // weight 6 → trunc(2.25*6+4.5)=18; require near that floor
+    if (rating_done < 15) {
+        __log_info_native('[test:121] finished rating want >=15 got ' + rating_done)
         __log_marker('alex_library_rating_fail:' + rating_done)
         __test_signal_ready()
         return
