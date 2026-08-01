@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sauty — Egypt Reclaimed — Akhenaten Wiki</title>
+  <title>Byblos — Expansion and Conquest — Akhenaten Wiki</title>
   <link rel="stylesheet" href="../../../style.css" />
   <style>
     .mission-infobox { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.9rem 1.1rem; }
@@ -45,68 +45,71 @@
         <div class="wiki-sidebar-title"><a href="index.html">← All Missions</a></div>
       </div>
       <div class="wiki-sidebar-section">
-        <div class="wiki-sidebar-title">Second Intermediate Period</div>
+        <div class="wiki-sidebar-title">New Kingdom</div>
         <ul>
-          <li><a href="khmun.html">32 · Khmun</a></li>
-          <li><a href="sauty.html" class="active">33 · Sauty</a></li>
+          <li><a href="byblos.html" class="active">34 · Byblos</a></li>
+          <li><a href="baki.html">35 · Baki</a></li>
         </ul>
       </div>
     </aside>
     <div class="wiki-content">
-      <div class="wiki-breadcrumb"><a href="index.html">Missions</a> / Sauty</div>
-      <h1>Sauty <span style="color:var(--text-muted);font-weight:normal;font-size:0.65em">— Egypt Reclaimed</span></h1>
+      <div class="wiki-breadcrumb"><a href="index.html">Missions</a> / Byblos</div>
+      <h1>Byblos <span style="color:var(--text-muted);font-weight:normal;font-size:0.65em">— Expansion and Conquest</span></h1>
       <div class="mission-infobox">
         <dl>
-          <dt>Mission</dt><dd>33 — choice B after Heh (30) / Bubastis (31)</dd>
-          <dt>Classical name</dt><dd>Sauty / Lykopolis (briefing key <code>message_mission_lykopolis</code>)</dd>
+          <dt>Mission</dt><dd>34 — after Khmun (32) / Sauty (33) choice</dd>
+          <dt>Classical name</dt><dd>Byblos (briefing key <code>message_mission_byblos</code>)</dd>
           <dt>Starting funds</dt>
           <dd><div class="funds-row">
-            <span><strong>Normal</strong> 9 000 Db (pak)</span>
-            <span><strong>loan</strong> 0</span>
+            <span><strong>Normal</strong> 45 000 Db (pak)</span>
+            <span><strong>loan</strong> 5 000</span>
             <span><strong>debt</strong> 20%</span>
           </div></dd>
-          <dt>Deities</dt><dd>Osiris (patron ×2) · Ra · Seth</dd>
-          <dt>Trade</dt><dd>Bubastis · Itjtawy · Men-nefer · Menat Khufu (pak routes); display Heh / Iken / Kerma / Rowarty / …</dd>
-          <dt>Previous</dt><dd><a href="heh.html">Heh</a> (30) / <a href="bubastis.html">Bubastis</a> (31) — choice pair</dd>
-          <dt>Sibling</dt><dd><a href="khmun.html">Khmun</a> (32) — choice A</dd>
-          <dt>Next</dt><dd><a href="byblos.html">Byblos</a> (34) / <a href="baki.html">Baki</a> (35) — choice</dd>
-          <dt>Status</dt><dd><span class="mission-badge badge-choice">Choice B</span> <span class="mission-badge badge-impl">Implemented</span></dd>
+          <dt>Deities</dt><dd>Bast (patron ×2) · Ptah · Seth</dd>
+          <dt>Trade</dt><dd>Abu open at start (sea); NEW_TRADE unlocks Qadesh / Iken / Heh / Men-nefer / Rowarty</dd>
+          <dt>Previous</dt><dd><a href="khmun.html">Khmun</a> (32) / <a href="sauty.html">Sauty</a> (33) — choice</dd>
+          <dt>Next</dt><dd><a href="index.html#new-kingdom">Rowarty</a> (36) — <code>next_mission</code> (B5 until scripted)</dd>
+          <dt>Status</dt><dd><span class="mission-badge badge-impl">Implemented</span></dd>
         </dl>
       </div>
 
       <div class="deviation-note">
-        <strong>Showpiece:</strong> three Medium Mudbrick pyramids, chariots, navy/ferry, Hyksos pushback, troops/oil/henna north.
-        <br /><strong>Enemy:</strong> scenario <code>ENEMY_5_HYKSOS</code> (pak dump <code>ENEMY_0_BARBARIAN</code> ignored).
-        <br /><strong>Topo:</strong> inv land/sea empty — loc 1 entry, 2 disembark[2]; favour Egyptian×50→×50.
-        <br /><strong>Monuments 40:</strong> 3× Medium mudbrick (W=8) →
-        <code>trunc(2.25·24+4.5)=58</code> ≥ pak 40 (keep pak goal).
-        <br /><strong>Soft:</strong> calendar FELL remap Heh/Iken (dump Pwenet/Itjtawy); request loops 2↔4 / 13↔14 / 24↔25 / 40↔44↔45 one bounce then advance; henna refuse→oil-fail hub once-gated; i=43 meat DEMAND recurring; SKIP map_obj idx=7.
+        <strong>Showpiece:</strong> Large + 2× Small obelisks; cedar/copper; navy buildings; Canaanite pressure.
+        <br /><strong>Enemy:</strong> scenario <code>ENEMY_2_CANAANITE</code> (briefing “Hittites” — pak id wins, Sumur pattern).
+        <br /><strong>Climate:</strong> desert (pak). Empire id 33 · map_background PACK_EMPIRE id 33.
+        <br /><strong>Monuments 14:</strong> Large (W=4) + 2× Small (W=2) →
+        <code>trunc(2.25·8+4.5)=22</code> ≥ pak 14 (keep pak goal; Kebet twin).
+        <br /><strong>Soft:</strong> no warship requests in pak (navy allow-list only); no Sea People events;
+        truncate request loops 1↔4 / 6↔8 / 27↔45↔44 / 53↔54; SKIP orphan timber 49↔50;
+        SKIP map_obj idx=9; Men-nefer route remap → orphan sea route 8 for NEW_TRADE;
+        goods defeat→chain_only raids i4/i12/i27 TEMP unwired (engine defeat = troops).
       </div>
 
       <h2 id="objectives">Objectives</h2>
       <ul class="objectives-list">
-        <li><span class="obj-label">Population</span><span class="obj-value">6 500</span></li>
-        <li><span class="obj-label">Culture</span><span class="obj-value">70</span></li>
-        <li><span class="obj-label">Prosperity</span><span class="obj-value">75</span></li>
-        <li><span class="obj-label">Monuments</span><span class="obj-value">40 (3× Medium Mudbrick)</span></li>
-        <li><span class="obj-label">Kingdom</span><span class="obj-value">60</span></li>
-        <li><span class="obj-label">Housing</span><span class="obj-value">level 14</span></li>
+        <li><span class="obj-label">Population</span><span class="obj-value">6 000</span></li>
+        <li><span class="obj-label">Culture</span><span class="obj-value">60</span></li>
+        <li><span class="obj-label">Prosperity</span><span class="obj-value">40</span></li>
+        <li><span class="obj-label">Monuments</span><span class="obj-value">14 (1× Large + 2× Small Obelisk)</span></li>
+        <li><span class="obj-label">Kingdom</span><span class="obj-value">75</span></li>
+        <li><span class="obj-label">Housing</span><span class="obj-value">level 10</span></li>
       </ul>
 
       <h2 id="burial">Burial provisions</h2>
-      <p>Grave goods for the three pyramids: pottery ×32, linen ×16, luxury ×16, chariots ×8 (pak burial block).</p>
+      <p>None (<code>pak_burial_count:0</code>).</p>
 
       <h2 id="events">Scripted events (summary)</h2>
-      <p>FELL Heh (y1) / Iken (y3) → pomegranates ladder → NEW_TRADE Men-nefer → gift oil / LOST Menat. Oil×1000 (y7m7) ladder → troops/henna war graph. Favour Egypt ×50 → ×50. Choice → Byblos/Baki after victory.</p>
+      <p>Henna ladder (y4 / y7 / y8 / y13) with conquer / sea-trade / troops×83 branch; timber + chariots unlocks;
+        Canaanite raids + Beduin×96; favour Egypt ×161 → ×128. Win → Rowarty (36) when playable.</p>
 
       <div class="dev-section">
         <h2 id="dev">Developer reference</h2>
         <details open>
           <summary>Mission script</summary>
           <div class="details-body">
-            <p><span class="file-ref">src/scripts/mission/m_033_sauty.js</span></p>
-            <p><span class="file-ref">data/maps/m_033_sauty.map</span></p>
-            <p><code>choice_title [144, 67]</code> → Byblos (34) / Baki (35). Empire id 21 · map_background PACK_EMPIRE id 21. SKIP map_obj idx=7. Dump 2026-08-01.</p>
+            <p><span class="file-ref">src/scripts/mission/m_034_byblos.js</span></p>
+            <p><span class="file-ref">data/maps/m_034_byblos.map</span></p>
+            <p><code>next_mission : 36</code>. Empire id 33 · SKIP map_obj idx=9. Dump 2026-08-01.</p>
           </div>
         </details>
         <details>
@@ -114,16 +117,16 @@
           <div class="details-body">
             <table class="msg-table">
               <tr><th>Key</th><th>Id</th></tr>
-              <tr><td><code>message_mission_lykopolis</code></td><td>433</td></tr>
-              <tr><td><code>message_history_sauty</code></td><td>233</td></tr>
+              <tr><td><code>message_mission_byblos</code></td><td>434</td></tr>
+              <tr><td><code>message_history_byblos</code></td><td>234</td></tr>
             </table>
           </div>
         </details>
       </div>
 
       <div class="mission-nav">
-        <a href="khmun.html">← Khmun</a>
-        <a href="byblos.html">Byblos</a> / <a href="baki.html">Baki →</a>
+        <a href="sauty.html">← Sauty / Khmun</a>
+        <a href="index.html#new-kingdom">Rowarty →</a>
       </div>
     </div>
   </main>
