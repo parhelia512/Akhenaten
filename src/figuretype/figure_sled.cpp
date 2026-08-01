@@ -39,6 +39,7 @@ void figure_sled::update_animation() {
     case RESOURCE_GRANITE: animkey = "granite"; break;
     case RESOURCE_SANDSTONE: animkey = "sandstone"; break;
     case RESOURCE_MARBLE: animkey = "marble"; break;
+    case RESOURCE_COPPER: animkey = "copper"; break;
     case RESOURCE_CLAY: animkey = "clay"; break;
     case RESOURCE_BRICKS: animkey = "bricks"; break;
 

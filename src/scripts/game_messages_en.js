@@ -6365,6 +6365,14 @@ game_messages_en {
             text: "The holy temple and resplendent gardened courtyards of the Caesareum are at long last complete! Word of its magnificent beauty is already spreading throughout the region."
         }
     }
+    alex_library_congratulations {
+        id: 527,
+        size [30, 18]
+        title { text: "Alexandria Library finished!" }
+        content {
+            text: "After much hard labor the beautiful hand-crafted doors of Alexandria's magnificent Great Library are ready to be opened wide to the scholars of the world."
+        }
+    }
     message_dike_breach {
         id: 524,
         type: 2,

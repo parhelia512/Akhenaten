@@ -92,6 +92,7 @@ class building_obelisk;
 class building_sun_temple;
 class building_abu_simbel;
 class building_caesareum;
+class building_alexandria_library;
 
 using e_building_need_rules = uint32_t;
 

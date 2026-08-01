@@ -19,6 +19,7 @@ import building.obelisk
 import building.sun_temple
 import building.abu_simbel
 import building.caesareum
+import building.alexandria_library
 import building.pyramid
 import building.farm
 import building.fort

@@ -30,6 +30,12 @@ imagepaks = [
   {id: PACK_CAESAREUM_2, name:"caesareum2", index:36360, delayed:true, system:false}, // 36360 --> 36360 + 201 + 9
   {id: PACK_CAESAREUM_3, name:"caesareum3", index:36570, delayed:true, system:false}, // 36570 --> 36570 + 201 + 9
   {id: PACK_CAESAREUM_4, name:"caesareum4", index:36780, delayed:true, system:false}, // 36780 --> 36780 + 201 + 9
+  // LibMaina1..a5 — after Caesareum, before Assyrian@37000 (compact: 2 imgs each).
+  {id: PACK_LIB_MAIN_1, name:"LibMaina1", index:36990, delayed:true, system:false, compact:true}, // 2
+  {id: PACK_LIB_MAIN_2, name:"LibMaina2", index:36992, delayed:true, system:false, compact:true},
+  {id: PACK_LIB_MAIN_3, name:"LibMaina3", index:36994, delayed:true, system:false, compact:true},
+  {id: PACK_LIB_MAIN_4, name:"LibMaina4", index:36996, delayed:true, system:false, compact:true},
+  {id: PACK_LIB_MAIN_5, name:"LibMaina5", index:36998, delayed:true, system:false, compact:true},
   // Obelisk/sphinx: dense indices via compact:true (drop SYSTEM.BMP slots). Do not set
   // compact on classic Pharaoh packs — mission maps store absolute image IDs.
   // EXTRA: 16 entries (id1 = ladder); X3 stages a–d: 1 each; X5 stages a–f: 1 each.
@@ -63,10 +69,10 @@ imagepaks = [
   {id: PACK_SPHINX_6_A, name:"sphinx6a", index:53032, delayed:true, system:false, compact:true},
   {id: PACK_SPHINX_6_B, name:"sphinx6b", index:53034, delayed:true, system:false, compact:true},
   {id: PACK_SPHINX_6_C, name:"sphinx6c", index:53036, delayed:true, system:false, compact:true},
-  {id: PACK_SUN_TEMPLE_EXTRA, name:"sun_temple_extra", index:55000, delayed:true, system:false}, // 55000 --> 55000 + 201 + 15
-  {id: PACK_SUN_TEMPLE_1, name:"suntemple1", index:55220, delayed:true, system:false}, // 55220 --> 55220 + 201 + 2
-  {id: PACK_SUN_TEMPLE_2, name:"suntemple2", index:55440, delayed:true, system:false}, // 55440 --> 55440 + 201 + 2
-  {id: PACK_SUN_TEMPLE_3, name:"suntemple3", index:55660, delayed:true, system:false}, // 55660 --> 55660 + 201 + 2
+  {id: PACK_SUN_TEMPLE_EXTRA, name:"sun_temple_extra", index:55000, delayed:true, system:false, compact:true}, // 15
+  {id: PACK_SUN_TEMPLE_1, name:"suntemple1", index:55015, delayed:true, system:false, compact:true}, // 2
+  {id: PACK_SUN_TEMPLE_2, name:"suntemple2", index:55017, delayed:true, system:false, compact:true},
+  {id: PACK_SUN_TEMPLE_3, name:"suntemple3", index:55019, delayed:true, system:false, compact:true},
   {id: PACK_TOMB_SETI, name:"TombSeti", index:56000, delayed:true, system:false}, // 56000 --> 56000 + 201 + 221
   {id: PACK_TOMB_SETI_FINAL, name:"TombSetiFin", index:56500, delayed:true, system:false}, // 56500 --> 56500 + 201 + 221
   {id: PACK_TOMB_THUTMOS, name:"TombThut", index:57000, delayed:true, system:false}, // 57000 --> 57000 + 201 + 157

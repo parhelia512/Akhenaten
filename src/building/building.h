@@ -437,6 +437,7 @@ public:
     ALLOW_SMART_CAST_BUILDING(sun_temple)
     ALLOW_SMART_CAST_BUILDING(abu_simbel)
     ALLOW_SMART_CAST_BUILDING(caesareum)
+    ALLOW_SMART_CAST_BUILDING(alexandria_library)
 
     int get_figures_number(e_figure_type ftype);
 

@@ -326,6 +326,8 @@ int building_monument::progress() {
             messages::popup("abu_simbel_congratulations", 0, bmain->tile().grid_offset());
         } else if (bmain->dcast_caesareum()) {
             messages::popup("caesareum_congratulations", 0, bmain->tile().grid_offset());
+        } else if (bmain->dcast_alexandria_library()) {
+            messages::popup("alex_library_congratulations", 0, bmain->tile().grid_offset());
         }
     }
     return 1;
