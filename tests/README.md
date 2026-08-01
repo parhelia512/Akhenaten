@@ -144,6 +144,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `76_invasion_auto_resolve.js` | Enhanced auto-resolve invasions (AC*): freeze/pending, lose/win KR, queue timer, flag OFF, natives out, Pharaoh, queue full, save/load, chain spawn |
 | `77_bazaar_multi_buyer.js` | Multi-buyer bazaar (BB*): complementary/fallback/demand freeze/OFF slot1; slots; -3 |
 | `56_medium_stepped_first_stone.js` | Medium stepped first brick tier screenshots (companion/regress for large) |
+| `130_stepped_sm_midphase_saveload.js` | MS1: small+medium stepped mid-phase save/load (phase 10 / 18) |
 | `57_request_cleared.js` | B13 `event_request_cleared`: ok fulfill, overdue fulfill → late, grace expire → refuse |
 | `58_large_stepped_first_tier.js` | C1a first brick tier: place 20×20 large stepped, assert part layout (100 / 3 corners / 32 walls), walk phases →11, screenshot |
 | `60_large_stepped_second_tier.js` | C1a second brick tier screenshots for large stepped pyramid |

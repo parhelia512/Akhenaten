@@ -19,6 +19,11 @@ building_small_stepped_pyramid {
       ground_phase_0 { path:"stepped_pyramid/pyramid_phase_one_00013" }
       basement { path:"stepped_pyramid/pyramid_phase_one_00058" }
       enter { path:"pharaoh_general/plazatiles_00064"}
+      stair_0_2 { path:"stepped_pyramid/stepped_pyramid_00112" }
+      stair_0_4 { path:"stepped_pyramid/stepped_pyramid_00110" }
+      stair_0_4_corner { path:"stepped_pyramid/stepped_pyramid_00122" }
+      stair_0_5 { path:"stepped_pyramid/stepped_pyramid_00114" }
+      stair_0_6 { path:"stepped_pyramid/stepped_pyramid_00115" }
     }
     build_menu_text : "Small Stepped Pyramid"
     building_size : 2
@@ -33,18 +38,71 @@ building_small_stepped_pyramid {
     }
 
     enter_offset : [1, 8]
-    stair_0_0_offset : [2, 8]
-    stair_0_1_offset : [4, 8]
-    stair_0_4_offset : [6, 8]
-    stair_0_4_corner_offset : [6, 6]
-    stair_0_5_offset : [6, 5]
-    stair_0_6_offset : [6, 4]
+
+    // 8×8 parts on even grid (south y=6, east x=6). Tier-0 south→SE→east, then
+    // tier-1 ledge (side 4). Pixel offsets tuned from medium, shortened path.
+    stairs [
+      {
+        phase : 7
+        part : [2, 6]
+        tex { path:"stepped_pyramid/stepped_pyramid_00110" }
+        offset : [-15, 25]
+      }
+
+      {
+        phase : 8
+        part : [4, 6]
+        tex { path:"stepped_pyramid/stepped_pyramid_00111" }
+        offset : [-15, 25]
+      }
+
+      {
+        phase : 9
+        part : [6, 6]
+        tex { path:"stepped_pyramid/stepped_pyramid_00122" }
+        offset : [15, -40]
+      }
+
+      {
+        phase : 10
+        part : [6, 4]
+        tex { path:"stepped_pyramid/stepped_pyramid_00114" }
+        offset : [25, -30]
+      }
+
+      {
+        phase : 11
+        part : [6, 2]
+        tex { path:"stepped_pyramid/stepped_pyramid_00115" }
+        offset : [20, -30]
+      }
+
+      {
+        phase : 16
+        part : [2, 4]
+        tex { path:"stepped_pyramid/stepped_pyramid_00118" }
+        offset : [-28, -155]
+      }
+
+      {
+        phase : 17
+        part : [4, 4]
+        tex { path:"stepped_pyramid/stepped_pyramid_00112" }
+        offset : [-40, -158]
+      }
+
+      {
+        phase : 18
+        part : [4, 2]
+        tex { path:"stepped_pyramid/stepped_pyramid_00113" }
+        offset : [10, -180]
+      }
+    ]
 
     corner_type : BUILDING_SMALL_STEPPED_PYRAMID_CORNER
     wall_type : BUILDING_SMALL_STEPPED_PYRAMID_WALL
     cone_type : BUILDING_SMALL_STEPPED_PYRAMID_CONE
     filler_type : BUILDING_SMALL_STEPPED_PYRAMID
-    // todo
   }
 
   // Parts are 2?2 blocks on the init_tiles grid ? without building_size they stay
@@ -218,7 +276,6 @@ building_small_stepped_pyramid {
     wall_type : BUILDING_MEDIUM_STEPPED_PYRAMID_WALL
     cone_type : BUILDING_MEDIUM_STEPPED_PYRAMID_CONE
     filler_type : BUILDING_MEDIUM_STEPPED_PYRAMID
-    // todo
   }
 
   building_medium_stepped_pyramid_corner = building_medium_stepped_pyramid
@@ -263,9 +320,8 @@ building_small_stepped_pyramid {
 
     enter_offset : [2, 20]
 
-    // Medium-style L-ramp: short approach on south from enter, SE corner, then
-    // climb the east face (decreasing y) up to the tier-1 ledge. Sprites 00114+
-    // are the ascending ramp pieces; offset.y rises ~+28 ? -110 (? one tier).
+    // 20×20 multi-tier L-ramp (south → SE → east climb, then upper ledges).
+    // Keep in sync with building_stepped_pyramid_complex. Optional L2.4: eye-tune offsets.
     stairs [
       {
         phase : 7
@@ -393,8 +449,7 @@ building_small_stepped_pyramid {
         offset : [20, -210]
       }
 
-      // --- Layer 2 (third tier): L2 south y=14 (begin+4, size 12) ? SE [14,14].
-      // Offsets ~two tiers up (? -180..-270).
+      // --- Layer 2 (third tier): L2 south y=14 (begin+4, size 12); SE [14,14].
       {
         phase : 24
         part : [14, 6]
@@ -524,9 +579,7 @@ building_small_stepped_pyramid {
 
     enter_offset : [2, 20]
 
-    // Medium-style L-ramp: short approach on south from enter, SE corner, then
-    // climb the east face (decreasing y) up to the tier-1 ledge. Sprites 00114+
-    // are the ascending ramp pieces; offset.y rises ~+28 ? -110 (? one tier).
+    // Same 20×20 multi-tier stairs as building_large_stepped_pyramid — keep in sync.
     stairs [
       {
         phase : 7

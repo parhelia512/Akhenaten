@@ -58,10 +58,12 @@ MONUMENT_WEIGHTS[BUILDING_GRAND_ROYAL_TOMB]               = 4
 //   1 small mastaba   (sum 2)  -> 2.25*2 +4.5 = 9   (missions 4/13/16, and On x1)
 //   3 small mastabas  (sum 6)  -> 2.25*6 +4.5 = 18  (mission 17 On)
 //   1 medium stepped  (sum 16) -> 2.25*16+4.5 = 40  (>= Saqqara verified goal 19)
-// The exact per-monument point table is NOT yet taken from the original:
-// the weights below are placeholders and will be moved to per-building configs and
-// recalibrated against the real .pak data later. Until then mission monument goals
-// are derived from these constants (see each m_0xx script comment).
+//   1 small stepped   (sum 8)  -> 2.25*8 +4.5 = 22.5 → trunc 22
+//   Meidum S+complex  (8+24)   -> trunc(2.25*32+4.5)=76 (F3a; complex on-land = large)
+//   Bent medium       (sum 8)  -> 22 ≥ m14 goal 21
+// Exact per-type OG points still need a .pak dump (F3 calibration). Until then
+// weights stay placeholders except mission-tuned Cleopatra/Meidum entries above;
+// TEMP goals in m_0xx derive from these constants.
 var MONUMENT_RATING_MULT = 2.25
 var MONUMENT_RATING_OFFSET = 4.5
 
