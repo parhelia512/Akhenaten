@@ -150,9 +150,10 @@ function test_prepare_bridge_channel(cx, cy, water_width, water_length) {
     return { x: cx, y: cy }
 }
 
-// Water strip east of a pyramid complex so the variable-length causeway (+x) can reach it.
-// gap = clear land tiles between pyramid east face and water (causeway length).
-function test_prepare_pyramid_complex_causeway(pyramid_x, pyramid_y, pyramid_size, gap, water_depth) {
+// Water strip so a variable-length causeway can reach it.
+// dir: 0=N 1=E 2=S 3=W (map). Default east — probe prefers east first.
+// gap = clear land tiles between pyramid face and water (causeway length).
+function test_prepare_pyramid_complex_causeway(pyramid_x, pyramid_y, pyramid_size, gap, water_depth, dir) {
     if (typeof pyramid_size !== 'number' || pyramid_size <= 0) {
         pyramid_size = 20
     }
@@ -162,14 +163,56 @@ function test_prepare_pyramid_complex_causeway(pyramid_x, pyramid_y, pyramid_siz
     if (typeof water_depth !== 'number' || water_depth < 2) {
         water_depth = 3
     }
-    var causeway_y = pyramid_y + (((pyramid_size - 2) / 2) | 0)
-    var water_x = pyramid_x + pyramid_size + gap
-    for (var dy = -1; dy < 3; dy++) {
-        for (var dx = 0; dx < water_depth; dx++) {
-            terrain.add({ x: water_x + dx, y: causeway_y + dy }, TERRAIN_WATER)
+    if (typeof dir !== 'number') {
+        dir = 1
+    }
+    dir = dir & 3
+    var half = ((pyramid_size - 2) / 2) | 0
+    var ox
+    var oy
+    var step_x
+    var step_y
+    var perp_x
+    var perp_y
+    // Perp must match C++ k_causeway_perp: N:+x E:+y S:-x W:-y.
+    if (dir == 0) { // north: strip goes -y from north face
+        ox = pyramid_x + half
+        oy = pyramid_y - 1
+        step_x = 0; step_y = -1; perp_x = 1; perp_y = 0
+    } else if (dir == 1) { // east
+        ox = pyramid_x + pyramid_size
+        oy = pyramid_y + half
+        step_x = 1; step_y = 0; perp_x = 0; perp_y = 1
+    } else if (dir == 2) { // south
+        ox = pyramid_x + half
+        oy = pyramid_y + pyramid_size
+        step_x = 0; step_y = 1; perp_x = -1; perp_y = 0
+    } else { // west
+        ox = pyramid_x - 1
+        oy = pyramid_y + half
+        step_x = -1; step_y = 0; perp_x = 0; perp_y = -1
+    }
+    var water_base_x = ox + step_x * gap
+    var water_base_y = oy + step_y * gap
+    for (var w = -1; w < 3; w++) {
+        for (var d = 0; d < water_depth; d++) {
+            terrain.add({
+                x: water_base_x + step_x * d + perp_x * w,
+                y: water_base_y + step_y * d + perp_y * w
+            }, TERRAIN_WATER)
         }
     }
     __map_water_rebuild_shores()
+    // Shore rebuild can paint floodplain onto the approach strip; strip probe
+    // rejects TERRAIN_NOT_CLEAR (includes floodplain). Keep the gap clear.
+    for (var i = 0; i < gap; i++) {
+        for (var ww = 0; ww < 2; ww++) {
+            terrain.remove({
+                x: ox + step_x * i + perp_x * ww,
+                y: oy + step_y * i + perp_y * ww
+            }, TERRAIN_FLOODPLAIN)
+        }
+    }
 }
 
 // Verify east causeway tiles are claimed to the complex main building id.

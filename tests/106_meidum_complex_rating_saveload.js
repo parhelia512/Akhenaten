@@ -14,10 +14,12 @@ function place_pyramid(type, candidates) {
 }
 
 function find_complex_main() {
+    // TYPE building is unique; orientation can put a corner at list-head, so
+    // do not require !prev_part_building_id.
     for (var bi = 1; bi < 500; bi++) {
-        if (__building_type(bi) != BUILDING_STEPPED_PYRAMID_COMPLEX) continue
-        var b = city.get_building(bi)
-        if (b && !b.prev_part_building_id) return bi
+        if (__building_type(bi) == BUILDING_STEPPED_PYRAMID_COMPLEX) {
+            return bi
+        }
     }
     return 0
 }

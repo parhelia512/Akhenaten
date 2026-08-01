@@ -54,7 +54,7 @@ function run_test() {
         parts.push(cur.next_part_building_id)
         cur = city.get_building(cur.next_part_building_id)
     }
-    // 20×20 / 2×2 = 100 body parts (+ causeway tiles as parts)
+    // 20×20 / 2×2 = 100 body parts (causeway is map claim, not linked parts)
     if (parts.length >= 80) {
         __log_marker('mudbrick_pyramid_complex_parts_ok:' + parts.length)
     } else {

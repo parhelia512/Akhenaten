@@ -72,12 +72,18 @@ public:
     virtual bool force_draw_flat_tile(painter &ctx, tile2i tile, vec2i pixel, color mask) override;
     virtual void bind_dynamic(io_buffer *iob, size_t version) override;
 
-    struct preview : building_planer_renderer {
+    // Nested class names are NOT inherited; expose via `using` so every
+    // BUILDING_METAINFO subclass (complex/grand/bent/mudbrick/true) registers
+    // the same planner hooks (causeway gate, init_tiles NW correction).
+    struct preview_renderer : building_planer_renderer {
         virtual void setup_preview_graphics(build_planner &planer) const override;
         virtual void ghost_preview(build_planner &planer, painter &ctx, tile2i tile, tile2i end, vec2i pixel) const override;
         virtual int can_place(build_planner &p, tile2i tile, tile2i end, int state) const override;
         virtual int finalize_check(build_planner &p, tile2i tile, tile2i end, int state) const override;
+        // Use init_tiles for camera→NW (building_size is only the 2×2 part).
+        virtual int construction_place(build_planner &p, tile2i tile, tile2i end, int orientation, int variant) const override;
     };
+    using preview = preview_renderer;
 
     bool draw_ornaments_and_animations_flat_impl(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
     bool draw_ornaments_and_animations_hight_impl(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);

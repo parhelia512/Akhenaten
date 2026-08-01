@@ -62,12 +62,36 @@ bool building_type_is_pyramid_complex(e_building_type t) {
         || t == BUILDING_GRAND_MUDBRICK_PYRAMID_COMPLEX;
 }
 
+bool building_type_is_grand_pyramid_complex(e_building_type t) {
+    // OG: grand causeway is fixed east (map), not player-rotated / multi-dir.
+    return t == BUILDING_GRAND_STEPPED_PYRAMID_COMPLEX
+        || t == BUILDING_GRAND_PYRAMID_COMPLEX
+        || t == BUILDING_GRAND_MUDBRICK_PYRAMID_COMPLEX;
+}
+
 struct pyramid_causeway_probe {
     bool ok = false;
     int dir = 1; // east preferred
     int length = 0;
     tile2i origin;
 };
+
+// Cursor tile → map NW of the multipart footprint. Default construction_place
+// uses building_size (2×2 part) which under-corrects 8–20 tile pyramids.
+tile2i pyramid_place_nw_from_cursor(tile2i end, vec2i init_tiles) {
+    const int sx = init_tiles.x;
+    const int sy = init_tiles.y;
+    switch (g_camera.orientation) {
+    case DIR_2_BOTTOM_RIGHT:
+        return end.shifted(-sx + 1, 0);
+    case DIR_4_BOTTOM_LEFT:
+        return end.shifted(-sx + 1, -sy + 1);
+    case DIR_6_TOP_LEFT:
+        return end.shifted(0, -sy + 1);
+    default:
+        return end;
+    }
+}
 
 bool causeway_strip_clear(tile2i origin, int dir, int length, int width) {
     const vec2i step = k_causeway_dir[dir & 3];
@@ -116,11 +140,14 @@ tile2i causeway_origin_on_face(tile2i pyramid_nw, vec2i size, int dir, int width
     return pyramid_nw;
 }
 
-pyramid_causeway_probe map_pyramid_complex_find_causeway(tile2i pyramid_nw, vec2i size) {
+pyramid_causeway_probe map_pyramid_complex_find_causeway(tile2i pyramid_nw, vec2i size, bool east_only) {
     pyramid_causeway_probe best;
-    // Prefer east (OG grand), then other cardinals.
-    const int order[4] = {1, 2, 3, 0};
-    for (int oi = 0; oi < 4; ++oi) {
+    // Prefer east (OG grand is east-only); plain complex may use other cardinals.
+    const int order_all[4] = {1, 2, 3, 0};
+    const int order_east[1] = {1};
+    const int *order = east_only ? order_east : order_all;
+    const int n_dirs = east_only ? 1 : 4;
+    for (int oi = 0; oi < n_dirs; ++oi) {
         const int dir = order[oi];
         const tile2i origin = causeway_origin_on_face(pyramid_nw, size, dir, k_causeway_width);
         for (int length = 1; length <= k_causeway_max_length; ++length) {
@@ -245,6 +272,22 @@ REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_medium_stepped_pyramid_wall)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_stepped_pyramid)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_stepped_pyramid_corner)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_stepped_pyramid_wall)
+
+static_assert(std::is_same<building_stepped_pyramid_complex::preview,
+    building_stepped_pyramid::preview_renderer>::value,
+    "complex must inherit stepped pyramid planner preview (causeway gate)");
+static_assert(std::is_same<building_grand_pyramid_complex::preview,
+    building_stepped_pyramid::preview_renderer>::value,
+    "grand complex must inherit stepped pyramid planner preview");
+static_assert(std::is_same<building_mudbrick_pyramid_complex::preview,
+    building_stepped_pyramid::preview_renderer>::value,
+    "mudbrick complex must inherit stepped pyramid planner preview");
+static_assert(std::is_same<building_grand_mudbrick_pyramid_complex::preview,
+    building_stepped_pyramid::preview_renderer>::value,
+    "grand mudbrick complex must inherit stepped pyramid planner preview");
+static_assert(std::is_same<building_pyramid_complex::preview,
+    building_stepped_pyramid::preview_renderer>::value,
+    "true complex must inherit stepped pyramid planner preview");
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_stepped_pyramid_complex)
 
@@ -738,7 +781,7 @@ void building_stepped_pyramid::set_tile_progress(tile2i tile, int v) {
     }
 }
 
-void building_stepped_pyramid::preview::setup_preview_graphics(build_planner &planer) const {
+void building_stepped_pyramid::preview_renderer::setup_preview_graphics(build_planner &planer) const {
     const auto &params = building_static_params::get(planer.build_type);
     const auto &base_params = get_pyramid_params(planer.build_type);
 
@@ -752,11 +795,14 @@ void building_stepped_pyramid::preview::setup_preview_graphics(build_planner &pl
     }
 }
 
-void building_stepped_pyramid::preview::ghost_preview(build_planner &planer, painter &ctx, tile2i start, tile2i end, vec2i pixel) const {
+void building_stepped_pyramid::preview_renderer::ghost_preview(build_planner &planer, painter &ctx, tile2i start, tile2i end, vec2i pixel) const {
     const auto &params = building_static_params::get(planer.build_type);
     const auto &base_params = get_pyramid_params(planer.build_type);
 
     int image_id = params.base_img();
+    const vec2i size_b = base_params.init_tiles;
+    tile2i nw = pyramid_place_nw_from_cursor(end, size_b);
+
     auto get_image = [image_id] (tile2i tile, tile2i start, vec2i size) {
         if (tile == start) {
             return image_id;
@@ -782,40 +828,35 @@ void building_stepped_pyramid::preview::ghost_preview(build_planner &planer, pai
         return (image_id + 5 + (tile.x() + tile.y()) % 7);
     };
 
-    vec2i size{ 1, 1 };
-    vec2i size_b = base_params.init_tiles;
-    switch (g_camera.orientation / 2) {
-    case 0: size = { size_b.x, size_b.y }; break;
-    case 1: size = { size_b.y, size_b.x }; break;
-    case 2: size = { size_b.x, size_b.y }; break;
-    case 3: size = { size_b.y, size_b.x }; break;
-    }
+    // Screen pixel of map-NW (cursor `end` may be a different corner under rotation).
+    const vec2i pixel_nw = g_camera.lookup_tile_to_pixel(nw);
 
-    for (int i = 0; i < size.x; ++i) {
-        for (int j = 0; j < size.y; ++j) {
-            vec2i p = pixel + (vec2i(-30, 15) * i) + (vec2i(30, 15) * j);
-            int image_id = get_image(end.shifted(i, j), end, size);
+    for (int i = 0; i < size_b.x; ++i) {
+        for (int j = 0; j < size_b.y; ++j) {
+            vec2i p = pixel_nw + (vec2i(-30, 15) * i) + (vec2i(30, 15) * j);
+            int tile_img = get_image(nw.shifted(i, j), nw, size_b);
 
             auto& command = ImageDraw::create_command(ctx, render_command_t::ert_drawtile_full);
-            command.image_id = image_id;
+            command.image_id = tile_img;
             command.pixel = p;
             command.mask = COLOR_MASK_GREEN;
         }
     }
 
     if (building_type_is_pyramid_complex(planer.build_type)) {
-        pyramid_causeway_probe probe = map_pyramid_complex_find_causeway(end, size_b);
+        const bool east_only = building_type_is_grand_pyramid_complex(planer.build_type);
+        pyramid_causeway_probe probe = map_pyramid_complex_find_causeway(nw, size_b, east_only);
         const bool causeway_ok = probe.ok;
         if (!causeway_ok) {
             probe.dir = 1;
             probe.length = 8;
-            probe.origin = causeway_origin_on_face(end, size_b, probe.dir, k_causeway_width);
+            probe.origin = causeway_origin_on_face(nw, size_b, probe.dir, k_causeway_width);
         }
         draw_causeway_ghost(planer, ctx, probe, !causeway_ok || planer.can_be_placed() != CAN_PLACE);
     }
 }
 
-int building_stepped_pyramid::preview::can_place(build_planner &p, tile2i /*tile*/, tile2i end, int state) const {
+int building_stepped_pyramid::preview_renderer::can_place(build_planner &p, tile2i /*tile*/, tile2i end, int state) const {
     if (state != CAN_PLACE) {
         return state;
     }
@@ -823,7 +864,9 @@ int building_stepped_pyramid::preview::can_place(build_planner &p, tile2i /*tile
         return state;
     }
     const auto &base_params = get_pyramid_params(p.build_type);
-    const pyramid_causeway_probe probe = map_pyramid_complex_find_causeway(end, base_params.init_tiles);
+    tile2i nw = pyramid_place_nw_from_cursor(end, base_params.init_tiles);
+    const bool east_only = building_type_is_grand_pyramid_complex(p.build_type);
+    const pyramid_causeway_probe probe = map_pyramid_complex_find_causeway(nw, base_params.init_tiles, east_only);
     if (!probe.ok) {
         p.set_warning("#causeway_needs_water");
         return CAN_NOT_PLACE;
@@ -831,9 +874,25 @@ int building_stepped_pyramid::preview::can_place(build_planner &p, tile2i /*tile
     return state;
 }
 
-int building_stepped_pyramid::preview::finalize_check(build_planner &p, tile2i tile, tile2i end, int state) const {
+int building_stepped_pyramid::preview_renderer::finalize_check(build_planner &p, tile2i tile, tile2i end, int state) const {
     state = building_planer_renderer::finalize_check(p, tile, end, state);
     return can_place(p, tile, end, state);
+}
+
+int building_stepped_pyramid::preview_renderer::construction_place(build_planner &planer, tile2i /*start*/, tile2i end, int orientation, int variant) const {
+    const auto &base_params = get_pyramid_params(planer.build_type);
+    const tile2i place = pyramid_place_nw_from_cursor(end, base_params.init_tiles);
+
+    planer.last_created_building = nullptr;
+    building *b = building_create(planer.build_type, place, orientation);
+    game_undo_add_building(b);
+    if (!b || b->id <= 0) {
+        return 0;
+    }
+
+    add_building(b, orientation, variant);
+    planer.last_created_building = b;
+    return 1;
 }
 
 void map_pyramid_tiles_add(int building_id, tile2i tile, int size, int image_id, int terrain) {
@@ -1030,18 +1089,16 @@ void building_stepped_pyramid::on_post_load() {
 }
 
 void building_stepped_pyramid::on_destroy() {
-    // Causeway is claimed to the complex TYPE building at geometric NW
-    // (walls/corners also store length/dir copies but must not clear).
+    // Only COMPLEX/GRAND TYPE claims the strip (walls store length/dir copies).
+    // Use tile() as pyramid NW — footprint_nw() walks the part chain and can
+    // collapse toward (0,0) once building_update_state has zeroed siblings.
     const auto &d = runtime_data();
     if (d.causeway_length == 0 || !building_type_is_pyramid_complex(type())) {
         return;
     }
-    if (tile() != footprint_nw()) {
-        return;
-    }
     const auto &pi_params = pyramid_params();
     const pyramid_causeway_probe probe = causeway_probe_from_runtime(
-        footprint_nw(), pi_params.init_tiles, d.causeway_length, d.causeway_dir);
+        tile(), pi_params.init_tiles, d.causeway_length, d.causeway_dir);
     clear_causeway_tiles(id(), probe);
 }
 
@@ -1957,7 +2014,8 @@ void building_stepped_pyramid::on_place(int orientation, int variant) {
 
     if (building_type_is_pyramid_complex(type())) {
         // tile() is the NW place anchor for the 20×20 core.
-        const pyramid_causeway_probe probe = map_pyramid_complex_find_causeway(tile(), pyramid_size);
+        const bool east_only = building_type_is_grand_pyramid_complex(type());
+        const pyramid_causeway_probe probe = map_pyramid_complex_find_causeway(tile(), pyramid_size, east_only);
         for (building *part = base.main(); part; part = part->has_next() ? part->next() : nullptr) {
             if (auto *mon = part->dcast_monument()) {
                 auto &d = mon->runtime_data();
