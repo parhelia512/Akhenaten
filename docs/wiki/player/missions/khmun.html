@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Khmun — Egypt Reclaimed — Akhenaten Wiki</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .mission-infobox { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.9rem 1.1rem; }
+    .mission-infobox dl { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 1rem; margin: 0; }
+    .mission-infobox dt { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; }
+    .mission-infobox dd { margin: 0; font-size: 0.85rem; }
+    .mission-infobox .funds-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .mission-infobox .funds-row span { font-size: 0.75rem; color: var(--text-muted); }
+    .mission-infobox .funds-row span strong { color: var(--text); }
+    .dev-section { margin-top: 2.5rem; }
+    .dev-section h2 { color: var(--text-muted); font-size: 1rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; }
+    summary { padding: 0.7rem 1rem; cursor: pointer; font-size: 0.875rem; font-weight: 600; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    .details-body { padding: 1rem 1.1rem; font-size: 0.85rem; line-height: 1.6; }
+    .file-ref { font-family: Consolas, monospace; font-size: 0.78rem; color: var(--gold); }
+    .msg-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+    .msg-table th, .msg-table td { padding: 0.3rem 0.6rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.8rem; }
+    .objectives-list { list-style: none; padding: 0; }
+    .objectives-list li { display: flex; gap: 0.6rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .obj-label { font-weight: 600; min-width: 8rem; }
+    .deviation-note { background: rgba(201,120,76,0.08); border: 1px solid rgba(201,120,76,0.3); border-radius: 4px; padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--text-muted); margin: 0.75rem 0; }
+    .mission-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; }
+    .mission-nav a { color: var(--gold); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">Akhenaten</a>
+      <ul>
+        <li><a href="../../index.html" class="active">Wiki</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main class="wiki-layout">
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title"><a href="index.html">← All Missions</a></div>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Second Intermediate Period</div>
+        <ul>
+          <li><a href="khmun.html" class="active">32 · Khmun</a></li>
+        </ul>
+      </div>
+    </aside>
+    <div class="wiki-content">
+      <div class="wiki-breadcrumb"><a href="index.html">Missions</a> / Khmun</div>
+      <h1>Khmun <span style="color:var(--text-muted);font-weight:normal;font-size:0.65em">— Egypt Reclaimed</span></h1>
+      <div class="mission-infobox">
+        <dl>
+          <dt>Mission</dt><dd>32 — choice A after Heh (30) / Bubastis (31)</dd>
+          <dt>Classical name</dt><dd>Khmun / Hermopolis (briefing key <code>message_mission_hermopolis</code>)</dd>
+          <dt>Starting funds</dt>
+          <dd><div class="funds-row">
+            <span><strong>Normal</strong> 9 000 Db (pak)</span>
+            <span><strong>loan</strong> 3 500</span>
+            <span><strong>debt</strong> 20%</span>
+          </div></dd>
+          <dt>Deities</dt><dd>Ra (patron ×2) · Ptah · Seth</dd>
+          <dt>Trade</dt><dd>Itjtawy · Tyre · Pwenet · Sharuhen · Men-nefer (pak routes); display Bubastis / Heh / Iken / Rowarty / …</dd>
+          <dt>Previous</dt><dd><a href="heh.html">Heh</a> (30) / <a href="bubastis.html">Bubastis</a> (31) — choice pair</dd>
+          <dt>Sibling</dt><dd><a href="index.html#second-intermediate">Sauty</a> (33) — choice B</dd>
+          <dt>Next</dt><dd><a href="index.html#new-kingdom">Byblos</a> (34) / <a href="index.html#new-kingdom">Baki</a> (35) — choice (B5 until D9)</dd>
+          <dt>Status</dt><dd><span class="mission-badge badge-choice">Choice A</span> <span class="mission-badge badge-impl">Implemented</span></dd>
+        </dl>
+      </div>
+
+      <div class="deviation-note">
+        <strong>Showpiece:</strong> chariots, burial provisions restore, Hyksos pushback, troops/henna to the north.
+        <br /><strong>Enemy:</strong> scenario <code>ENEMY_5_HYKSOS</code> (pak dump <code>ENEMY_0_BARBARIAN</code> ignored).
+        <br /><strong>Topo:</strong> inv land/sea empty — loc 1 entry, 2 disembark[2]; favour Egyptian unset (map entry).
+        <br /><strong>Monuments 13:</strong> Small mudbrick (W=4) →
+        <code>trunc(2.25·4+4.5)=13</code> (pak 18 = soft weight calib).
+        <br /><strong>Soft:</strong> orphan routes 5/10; i=18↔19 loop truncated; i=0/1 FELL Heh/Iken (loc); i=23 NEW_TRADE Kerma cosmetic.
+      </div>
+
+      <h2 id="objectives">Objectives</h2>
+      <ul class="objectives-list">
+        <li><span class="obj-label">Population</span><span class="obj-value">6 000</span></li>
+        <li><span class="obj-label">Culture</span><span class="obj-value">55</span></li>
+        <li><span class="obj-label">Prosperity</span><span class="obj-value">50</span></li>
+        <li><span class="obj-label">Monuments</span><span class="obj-value">13 (Small Mudbrick; pak 18 soft)</span></li>
+        <li><span class="obj-label">Kingdom</span><span class="obj-value">75</span></li>
+        <li><span class="obj-label">Housing</span><span class="obj-value">level 14</span></li>
+      </ul>
+
+      <h2 id="burial">Burial provisions</h2>
+      <p>Restore looted pyramid grave goods: weapons ×5, beer ×20, linen ×32, luxury ×20, papyrus ×10 (pak burial block).</p>
+
+      <h2 id="events">Scripted events (summary)</h2>
+      <p>NEW_TRADE Itjtawy (y1) / Men-nefer (y3m3). Henna ladder → demand beer → Hyksos invasions → troops×32 → gifts / conquer chain / henna×48. Kerma fell (y5). Favour Egypt ×70 → ×35. Choice → Byblos/Baki after victory.</p>
+
+      <div class="dev-section">
+        <h2 id="dev">Developer reference</h2>
+        <details open>
+          <summary>Mission script</summary>
+          <div class="details-body">
+            <p><span class="file-ref">src/scripts/mission/m_032_khmun.js</span></p>
+            <p><span class="file-ref">data/maps/m_032_khmun.map</span></p>
+            <p><code>choice_title [144, 67]</code> → Byblos (34) / Baki (35). Empire id 21 · map_background PACK_EMPIRE id 21. SKIP map_obj idx=9. Dump 2026-08-01.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Messages</summary>
+          <div class="details-body">
+            <table class="msg-table">
+              <tr><th>Key</th><th>Id</th></tr>
+              <tr><td><code>message_mission_hermopolis</code></td><td>432</td></tr>
+              <tr><td><code>message_history_khmun</code></td><td>232</td></tr>
+            </table>
+          </div>
+        </details>
+      </div>
+
+      <div class="mission-nav">
+        <a href="bubastis.html">← Bubastis / Heh</a>
+        <a href="index.html#new-kingdom">Byblos / Baki →</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

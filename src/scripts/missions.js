@@ -268,6 +268,7 @@ import mission.m_028_iken
 import mission.m_029_sawu
 import mission.m_030_heh
 import mission.m_031_bubastis
+import mission.m_032_khmun
 import mission.m_038_valley_thutmose
 import mission.m_039_valley_tut
 import mission.m_040_valley_seti
