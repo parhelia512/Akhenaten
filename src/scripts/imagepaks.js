@@ -25,6 +25,8 @@ imagepaks = [
   {id: PACK_BENT_PYRAMID, name:"bent_pyramid", index:34450, delayed:true, system:false}, // 34250 --> 34250 + 201 + 228
   {id: PACK_MUDBRICK_PYRAMID, name:"mudbrick_pyramid", index:34900, delayed:true, system:false}, // 34900 --> 34900 + 201 + 228
   {id: PACK_STEPPED_PYRAMID, name:"stepped_pyramid", index:35350, delayed:true, system:false}, // 35350 --> 35350 + 201 + 228
+  // AbuSimbel.sg3: 201 SYSTEM + 70 layers (backing/2statue/midcut/stairs/cliffs/scaffold).
+  // Keep system slots (no compact) — JS uses group ids 1..16 (see abu_simbel.js).
   {id: PACK_ABUSIMBEL, name:"AbuSimbel", index:35850, delayed:true, system:false}, // 35850 --> 35850 + 201 + 70
   {id: PACK_CAESAREUM_1, name:"caesareum1", index:36150, delayed:true, system:false}, // 36150 --> 36150 + 201 + 9
   {id: PACK_CAESAREUM_2, name:"caesareum2", index:36360, delayed:true, system:false}, // 36360 --> 36360 + 201 + 9
@@ -36,6 +38,17 @@ imagepaks = [
   {id: PACK_LIB_MAIN_3, name:"LibMaina3", index:36994, delayed:true, system:false, compact:true},
   {id: PACK_LIB_MAIN_4, name:"LibMaina4", index:36996, delayed:true, system:false, compact:true},
   {id: PACK_LIB_MAIN_5, name:"LibMaina5", index:36998, delayed:true, system:false, compact:true},
+  // LtHouse1..9 stages (1 img); LtHouse10 beacon anim (11). Before obelisk@51000.
+  {id: PACK_LTHOUSE_1, name:"LtHouse1", index:50900, delayed:true, system:false, compact:true},
+  {id: PACK_LTHOUSE_2, name:"LtHouse2", index:50901, delayed:true, system:false, compact:true},
+  {id: PACK_LTHOUSE_3, name:"LtHouse3", index:50902, delayed:true, system:false, compact:true},
+  {id: PACK_LTHOUSE_4, name:"LtHouse4", index:50903, delayed:true, system:false, compact:true},
+  {id: PACK_LTHOUSE_5, name:"LtHouse5", index:50904, delayed:true, system:false, compact:true},
+  {id: PACK_LTHOUSE_6, name:"LtHouse6", index:50905, delayed:true, system:false, compact:true},
+  {id: PACK_LTHOUSE_7, name:"LtHouse7", index:50906, delayed:true, system:false, compact:true},
+  {id: PACK_LTHOUSE_8, name:"LtHouse8", index:50907, delayed:true, system:false, compact:true},
+  {id: PACK_LTHOUSE_9, name:"LtHouse9", index:50908, delayed:true, system:false, compact:true},
+  {id: PACK_LTHOUSE_10, name:"LtHouse10", index:50909, delayed:true, system:false, compact:true}, // 11
   // Obelisk/sphinx: dense indices via compact:true (drop SYSTEM.BMP slots). Do not set
   // compact on classic Pharaoh packs — mission maps store absolute image IDs.
   // EXTRA: 16 entries (id1 = ladder); X3 stages a–d: 1 each; X5 stages a–f: 1 each.

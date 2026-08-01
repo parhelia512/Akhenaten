@@ -3,9 +3,11 @@
 #include "game/resource.h"
 
 #include "core/profiler.h"
+#include "core/variant.h"
 #include "js/js_game.h"
 
 #include <algorithm>
+#include <optional>
 
 static bool monument_building_alive(const building *b) {
     return b && building_monument_is_alive(*b);
@@ -19,6 +21,21 @@ static building_monument *monument_from_building(int bid) {
 
     return b->main()->dcast_monument();
 }
+
+std::optional<bvariant> __monument_get_property(int bid, pcstr property) {
+    building_monument *monument = monument_from_building(bid);
+    if (!monument) {
+        return {};
+    }
+
+    auto result = archive_helper::get(monument->runtime_data(), property, true);
+    if (result.has_value()) {
+        return result;
+    }
+
+    return archive_helper::get(monument->base, property, true);
+}
+ANK_FUNCTION_2(__monument_get_property)
 
 bool __monument_need_workers(int bid) {
     building *b = building_get(bid);

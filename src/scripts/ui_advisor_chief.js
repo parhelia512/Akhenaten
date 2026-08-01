@@ -436,35 +436,33 @@ function advisor_chief_window_update_kingdom(window) {
 	advisor_chief_push_wrapped_section_rows(__loc(61, text_id), __loc("#chief_adv_kingdom"), font)
 }
 
+function advisor_chief_push_body_rows(bodyText, font) {
+	var lines = advisor_chief_wrap_lines(bodyText, advisor_chief_report_body_max_chars())
+	var li
+	for (li = 0; li < lines.length; li++) {
+		advisor_chief_window._chief_report_rows.push({
+			title: ""
+			body: lines[li]
+			font: font
+			bullet: false
+		})
+	}
+}
+
 function advisor_chief_window_update_nilometr(window) {
-	var flood_quality = city.floods.expected_quality()
-	var text_id
-	var font
-	if (flood_quality === 100) {
-		text_id = 197
-		font = FONT_NORMAL_BLACK_ON_DARK
-	} else if (flood_quality > 75) {
-		text_id = 196
-		font = FONT_NORMAL_BLACK_ON_DARK
-	} else if (flood_quality > 50) {
-		text_id = 195
-		font = FONT_NORMAL_BLACK_ON_DARK
-	} else if (flood_quality > 25) {
-		text_id = 194
-		font = FONT_NORMAL_BLACK_ON_DARK
-	} else if (flood_quality > 0) {
-		text_id = 193
-		font = FONT_NORMAL_BLACK_ON_DARK
-	} else {
-		text_id = 192 + flood_quality
-		font = FONT_NORMAL_YELLOW
+	if (!floods_ui_should_show()) {
+		return
 	}
 
-	var text = __loc(61, text_id)
-	if (flood_quality > 0) {
-		text += " " + __loc(61, 204 + city.floods.expected_month())
-	}
+	var flood_quality = city.floods.expected_quality()
+	var text = floods_ui_format_next_line(flood_quality)
+	var font = floods_ui_quality_font(flood_quality)
 	advisor_chief_push_wrapped_section_rows(text, __loc("#chief_adv_nilometr"), font)
+
+	if (!!game_features.gameui_enhanced_nilometer) {
+		advisor_chief_push_body_rows(floods_ui_format_phase(), FONT_NORMAL_BLACK_ON_DARK)
+		advisor_chief_push_body_rows(floods_ui_format_last_line(), FONT_NORMAL_BLACK_ON_DARK)
+	}
 }
 
 function advisor_chief_window_fill_report_rows(window) {

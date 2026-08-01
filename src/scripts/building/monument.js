@@ -7,6 +7,12 @@ function Monument(building_id) {
 Monument.prototype = Object.create(Building.prototype)
 Monument.prototype.constructor = Monument
 
+// runtime_data_t fields (ANK_CONFIG_PROPERTY on building_monument::runtime_data_t)
+Monument.prototype.__property_getter = function(property) {
+    return __monument_get_property(this.id, property)
+}
+Monument.property.variant = { }
+
 Monument.prototype.need_workers = function() {
     return __monument_need_workers(this.id)
 }

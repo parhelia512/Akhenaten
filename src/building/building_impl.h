@@ -160,6 +160,8 @@ public:
     ALLOW_SMART_CAST_BUILDING_I(abu_simbel)
     ALLOW_SMART_CAST_BUILDING_I(caesareum)
     ALLOW_SMART_CAST_BUILDING_I(alexandria_library)
+    ALLOW_SMART_CAST_BUILDING_I(mausoleum)
+    ALLOW_SMART_CAST_BUILDING_I(pharos_lighthouse)
 
     building_impl *next();
     bool has_next() const;

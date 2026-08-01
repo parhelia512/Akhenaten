@@ -118,7 +118,6 @@ function file_dialog_save_on_cancel() {
     window_go_back()
 }
 
-// Esc/RMB: same cleanup as Cancel (allow_rmb_goback would skip this).
 [es=(file_dialog_save, go_back)]
 function file_dialog_save_es_go_back(window) {
     app_clear_pending_exit_after_save()

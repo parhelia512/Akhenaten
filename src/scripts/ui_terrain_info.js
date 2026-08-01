@@ -113,7 +113,7 @@ terrain_info_floodplain {
     ui : baseui(terrain_info_window, {
         title         : text({pos: [0, 16], size: [px(29), 13], text:[70, 29], font:FONT_LARGE_BLACK_ON_LIGHT, align:"center"})
         describe      : text({pos: [30, 78], text:[70, 55], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
-        basin_status  : text({pos: [30, 170], size: [px(26), 40], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
+        basin_status  : text({pos: [30, 170], size: [px(26), 80], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
     })
 }
 
@@ -121,6 +121,30 @@ terrain_info_floodplain {
 function terrain_info_floodplain_on_init(window) {
     window.basin_status.text = terrain_info_format_basin_status_at_tile(
         __map_tile_at_grid_offset(window.grid_offset), true)
+
+    if (floods_ui_enhanced_active()) {
+        var extra = floods_ui_format_phase() + "\n" + floods_ui_format_next_line()
+        if (window.basin_status.text && window.basin_status.text.length > 0) {
+            window.basin_status.text = window.basin_status.text + "\n" + extra
+        } else {
+            window.basin_status.text = extra
+        }
+    }
+}
+
+// Same UI/init as dry floodplain — used while the tile is under water.
+terrain_info_floodplain_submerged {
+    help_id           : 45
+    ui : baseui(terrain_info_window, {
+        title         : text({pos: [0, 16], size: [px(29), 13], text:[70, 29], font:FONT_LARGE_BLACK_ON_LIGHT, align:"center"})
+        describe      : text({pos: [30, 78], text:[70, 55], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
+        basin_status  : text({pos: [30, 170], size: [px(26), 80], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
+    })
+}
+
+[es=terrain_info_floodplain_submerged_init]
+function terrain_info_floodplain_submerged_on_init(window) {
+    terrain_info_floodplain_on_init(window)
 }
 
 terrain_info_water = {

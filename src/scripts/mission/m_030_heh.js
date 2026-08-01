@@ -71,14 +71,15 @@ mission30 { // Heh (Semna) — The Gauntlet
 		BUILDING_FESTIVAL_SQUARE, BUILDING_BOOTH, BUILDING_JUGGLER_SCHOOL, BUILDING_BANDSTAND,
 		BUILDING_CONSERVATORY, BUILDING_PAVILLION, BUILDING_DANCE_SCHOOL,
 		BUILDING_SCRIBAL_SCHOOL, BUILDING_LIBRARY,
+		BUILDING_MAUSOLEUM,
 	]
 
-	// Monuments TEMP 0 (pak 15; mausoleum gr198:27 — not implemented yet).
+	// Monuments goal 11 = weight 3 → trunc(2.25*3+4.5); pak 15 = soft weight calib.
 	win_criteria {
 		population    {enabled : true, goal : 6000 }
 		culture       {enabled : true, goal : 50 }
 		prosperity    {enabled : true, goal : 45 }
-		monuments     {enabled : true, goal : 0 }
+		monuments     {enabled : true, goal : 11 }
 		kingdom       {enabled : true, goal : 60 }
 		housing_level {enabled : true, goal : 10 }
 	}

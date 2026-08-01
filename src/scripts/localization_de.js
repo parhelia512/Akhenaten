@@ -74,6 +74,15 @@ localization_de = [
   {key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Ptah-Zorn: Skorpionüberfall aus Tempeln ohne Industrie (TEMP Enhanced)"}
   {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Invasionen automatisch lösen: Feinde warten am Eingang, Schnellkampf in 8 Tagen (Mauern/Türme zählen nicht; Pharao inklusive; keine Aufstände)"}
   {key:"#TR_CONFIG_FLOOD_BASINS", text:"Enhanced: Deiche / Becken (Kontur schließen — bessere Erträge nach der Flut)"}
+  {key:"#TR_CONFIG_ENHANCED_NILOMETER", text:"Enhanced: Nilometer-HUD (Flutqualität, Phase, Auen-Info)"}
+  {key:"#flood_phase_imminent", text:"Flut steht bevor"}
+  {key:"#flood_phase_flooding", text:"Hochwasser"}
+  {key:"#flood_phase_inundated", text:"Überflutet"}
+  {key:"#flood_phase_contracting", text:"Wasser weicht zurück"}
+  {key:"#flood_phase_resting", text:"Flut ruht"}
+  {key:"#flood_phase_farmable", text:"Aue bewirtschaftbar"}
+  {key:"#nilometer_last_prefix", text:"Letzte Flut:"}
+  {key:"#nilometer_hud_tooltip", text:"Nilometer — nächste Flut und aktuelle Auenphase"}
   {key:"#building_dike", text:"Deich"}
   {key:"#building_dike_info", text:"Erdwall zur Beckenbewässerung auf der Überschwemmungsebene. Schließt einen Kontur um die Felder — höhere Erträge nach der Überschwemmung."}
   {key:"#terrain_dike_sealed", text:"Geschlossenes Becken"}

@@ -71,6 +71,16 @@ localization_ru = [
     { key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Гнев Птаха: набег скорпионов из храмов, если нет промышленности (TEMP Enhanced)"}
     { key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Автобой вторжений: враги ждут на входе, быстрая битва через 8 дней (стены/башни не считаются; фараон включён; не восстания)"}
     { key:"#TR_CONFIG_FLOOD_BASINS", text:"Enhanced: дамбы / бассейны на пойме (замкните контур — лучше урожай после разлива)"}
+
+    { key:"#TR_CONFIG_ENHANCED_NILOMETER", text:"Enhanced: нилометр HUD (качество разлива, фаза, инфо поймы)"}
+    { key:"#flood_phase_imminent", text:"Разлив скоро"}
+    { key:"#flood_phase_flooding", text:"Разлив"}
+    { key:"#flood_phase_inundated", text:"Затоплено"}
+    { key:"#flood_phase_contracting", text:"Вода спадает"}
+    { key:"#flood_phase_resting", text:"Пауза разлива"}
+    { key:"#flood_phase_farmable", text:"Пойма доступна"}
+    { key:"#nilometer_last_prefix", text:"Прошлый разлив:"}
+    { key:"#nilometer_hud_tooltip", text:"Нилометр — прогноз следующего разлива и текущая фаза поймы"}
     { key:"#building_dike", text:"Дамба"}
     { key:"#building_dike_info", text:"Земляной вал для ирригации бассейнов на пойме. Замкните контур вокруг ферм — урожай после разлива будет выше."}
     { key:"#terrain_dike_sealed", text:"Замкнутый бассейн"}
@@ -941,6 +951,7 @@ localization_ru = [
     { key: "#canaan", text: "ХАНААН" }
     { key: "#need_220_blocks_of_sandstone_for_sun_temple", group:19, id:88 }
     { key: "#only_one_sun_temple_at_a_time", group:19, id:89 }
+    { key: "#causeway_needs_water", group:19, id:212 }
     { key: "#one_caesareum_only", group:19, id:243 }
     { key: "#abu_simbel_not_demolishable", text: "Абу-Симбел нельзя снести" }
 ]

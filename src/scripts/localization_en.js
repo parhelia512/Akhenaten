@@ -166,6 +166,15 @@ localization_en = [
   {key:"#TR_CONFIG_REBALANCE_WORKSHOP_OUTPUT", text:"Workshop output scales with difficulty"}
   {key:"#TR_CONFIG_PREVENT_DELETE_NEAR_BURNING_RUINS", text:"Prevent deleting buildings near burning ruins"}
   {key:"#TR_CONFIG_DISABLE_NILOMETER_POPUPS", text:"Disable nilometer flood prediction pop-ups"}
+  {key:"#TR_CONFIG_ENHANCED_NILOMETER", text:"Enhanced: nilometer HUD (flood quality, phase, floodplain info)"}
+  {key:"#flood_phase_imminent", text:"Flood imminent"}
+  {key:"#flood_phase_flooding", text:"Flooding"}
+  {key:"#flood_phase_inundated", text:"Inundated"}
+  {key:"#flood_phase_contracting", text:"Waters receding"}
+  {key:"#flood_phase_resting", text:"Flood resting"}
+  {key:"#flood_phase_farmable", text:"Floodplain farmable"}
+  {key:"#nilometer_last_prefix", text:"Last flood:"}
+  {key:"#nilometer_hud_tooltip", text:"Nilometer — next flood prediction and current floodplain phase"}
   {key:"#TR_CONFIG_HEADER_SCENARIO_CHANGES", text:"Change scenarios"}
   {key:"#TR_CONFIG_HEADER_RESOURCES", text:"Change resources"}
   {key:"#TR_CONFIG_ANIMALS", text:"Change animals"}

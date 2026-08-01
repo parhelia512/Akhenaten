@@ -164,6 +164,7 @@ namespace game_features {
     extern game_feature gameopt_player_name;
     extern game_feature gameplay_change_empire_map_runs_simulation;
     extern game_feature gameui_disable_nilometer_popups;
+    extern game_feature gameui_enhanced_nilometer;
     extern game_feature gameui_building_mothball_button;
     extern game_feature gameui_prompt_save_on_exit;
     extern game_feature gameplay_pause_sim_while_building;

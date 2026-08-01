@@ -84,6 +84,15 @@ localization_hu = [
   {key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Ptah haragja: skorpiórajtaütés templomokból ipar nélkül (TEMP Enhanced)"}
   {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Inváziók auto-megoldása: az ellenség a bejáratnál vár, gyorscsata 8 nap múlva (fal/torony nem számít; fáraó benne; nem felkelés)"}
   {key:"#TR_CONFIG_FLOOD_BASINS", text:"Enhanced: gátak / medencék (zárd körbe — jobb termés áradás után)"}
+  {key:"#TR_CONFIG_ENHANCED_NILOMETER", text:"Enhanced: nilométer HUD (áradás minősége, fázis, ártér info)"}
+  {key:"#flood_phase_imminent", text:"Áradás közelít"}
+  {key:"#flood_phase_flooding", text:"Áradás"}
+  {key:"#flood_phase_inundated", text:"Elárasztva"}
+  {key:"#flood_phase_contracting", text:"Víz visszahúzódik"}
+  {key:"#flood_phase_resting", text:"Áradás pihen"}
+  {key:"#flood_phase_farmable", text:"Ártér művelhető"}
+  {key:"#nilometer_last_prefix", text:"Előző áradás:"}
+  {key:"#nilometer_hud_tooltip", text:"Nilométer — következő áradás és aktuális ártéri fázis"}
   {key:"#building_dike", text:"Gát"}
   {key:"#building_dike_info", text:"Földsánc az ártéri medence-öntözéshez. Zárd körbe a földeket — jobb termés az áradás után."}
   {key:"#terrain_dike_sealed", text:"Zárt medence"}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Abu Simbel — Akhenaten Wiki</title>
+  <title>Pharos Lighthouse — Akhenaten Wiki</title>
   <link rel="stylesheet" href="../../../style.css" />
   <style>
     .bld-infobox {
@@ -75,9 +75,10 @@
           <li><a href="monuments.html">Overview</a></li>
           <li><a href="sphinx.html">Sphinx</a></li>
           <li><a href="obelisk.html">Obelisk</a></li>
-          <li><a href="abu-simbel.html" class="active">Abu Simbel</a></li>
+          <li><a href="abu-simbel.html">Abu Simbel</a></li>
           <li><a href="caesareum.html">Caesareum</a></li>
-          <li><a href="mausoleum.html">Mausoleum</a></li>
+          <li><a href="alexandria-library.html">Alexandria's Library</a></li>
+          <li><a href="pharos-lighthouse.html" class="active">Pharos Lighthouse</a></li>
         </ul>
       </div>
       <div class="wiki-sidebar-section">
@@ -98,58 +99,58 @@
         <a href="../index.html">Player Guide</a> /
         <a href="index.html">Buildings</a> /
         <a href="monuments.html">Monuments</a> /
-        Abu Simbel
+        Pharos Lighthouse
       </div>
 
-      <h1>Abu Simbel <span class="tag-cleo">Cleo</span></h1>
+      <h1>Pharos Lighthouse <span class="tag-cleo">Cleo</span></h1>
 
       <p id="overview">
-        <strong>Abu Simbel</strong> is the Cleopatra cliff-carved monument of four seated colossi.
-        The bulk of the footprint sits on elevation (cliffs); a 3×3 entrance juts onto clear land.
-        Construction uses <strong>timber</strong> scaffolding with <strong>Carpenters</strong>, then
-        <strong>Stonemasons</strong> carve top-down. There is no Work Camp, no Artisans guild, and no stone delivery onto the monument — the cliff is the stone.
-        Do not confuse with unused enum <code>BUILDING_COLOSSI</code> (=270) — that is only an editor/win label, not this building.
+        The <strong>Pharos Lighthouse</strong> is Alexandria’s three-tier beacon on
+        <strong>rocky ground</strong> (Pharos Island). Guilds:
+        <strong>Work Camp</strong> (clear), <strong>Stonemasons</strong> (marble tiers), and
+        <strong>Carpenters</strong> (scaffolding). <strong>Not</strong> Artisans.
+        Materials: imported <strong>white marble</strong> (~108) and <strong>timber</strong>.
+        Finished Pharos <strong>cannot be demolished</strong>.
       </p>
 
       <div class="bld-infobox">
         <h4>Quick facts</h4>
         <div class="bld-stat-row">
-          <div class="bld-stat"><span class="val">9×21</span><span class="lbl">Cliff bulk</span></div>
-          <div class="bld-stat"><span class="val">+3×3</span><span class="lbl">Entrance</span></div>
-          <div class="bld-stat"><span class="val">44</span><span class="lbl">Monument wt.</span></div>
-          <div class="bld-stat"><span class="val">Timber</span><span class="lbl">Resource</span></div>
+          <div class="bld-stat"><span class="val">6×6</span><span class="lbl">Footprint</span></div>
+          <div class="bld-stat"><span class="val">~108</span><span class="lbl">Marble</span></div>
+          <div class="bld-stat"><span class="val">rock</span><span class="lbl">Terrain</span></div>
+          <div class="bld-stat"><span class="val">5</span><span class="lbl">Monument wt.</span></div>
         </div>
         <dl>
           <dt>Cost (Normal)</dt>
           <dd>8&nbsp;000 Db (VE 5k · Easy 6.5k · Hard 11k · VH 16k)</dd>
           <dt>Guilds</dt>
-          <dd>Carpenters (scaffold) · Stonemasons (carve)</dd>
+          <dd>Work Camp · Carpenters (scaffold) · Stonemasons</dd>
           <dt>Type id</dt>
-          <dd><code>BUILDING_ABU_SIMBEL</code> (=230)</dd>
+          <dd><code>BUILDING_PHAROS_LIGHTHOUSE</code> (=228)</dd>
         </dl>
       </div>
 
       <h2 id="placement">Placement</h2>
       <ul>
-        <li>Bulk tiles must sit on <strong>elevation / access ramp</strong> (cliffs). Use Hide Cliffs (<kbd>H</kbd>) to inspect.</li>
-        <li>The centered 3×3 entrance <strong>protrudes past</strong> the far depth edge onto clear land (total depth 24 at rot 0/2).</li>
-        <li>Only one Abu Simbel on the map (finished still blocks a second).</li>
-        <li>Cannot be demolished (clear land is blocked; shows a warning).</li>
-        <li>Stone in storage is <strong>not</strong> required to place (unlike Sun Temple sandstone).</li>
+        <li>Entire 6×6 footprint must be <strong>rocky ground</strong> (all green). Not clear land / water.</li>
+        <li>Only one unfinished Pharos at a time (<code>#one_pharos_only</code>).</li>
+        <li>Finished: not demolishable (<code>#pharos_not_demolishable</code>).</li>
+        <li>Marble haul from a Storage Yard with ≥4 blocks in one yard (help).</li>
       </ul>
 
       <h2 id="construction">Construction</h2>
       <ul>
-        <li>Early phases: deliver timber and raise scaffolding (carpenters).</li>
-        <li>Later phases: mason-only carve; paint is baked into finished art (no Artisans).</li>
-        <li>Art layers from <code>AbuSimbel.sg3</code>: progressive <code>2statue</code> façade, midcut niche, scaffold overlays, entrance stairs.</li>
-        <li>Exact timber loads per phase are still provisional (Heaven chart only marks wood = Y; no counts in pack/exe).</li>
+        <li>Work Camp peasants clear the rock pad.</li>
+        <li>Stonemasons: foundation → floor → square tier → octagonal tier → cupola.</li>
+        <li>Carpenters raise and later remove timber scaffolding.</li>
+        <li>Art packs: <code>LtHouse1</code>…<code>LtHouse9</code> (beacon <code>LtHouse10</code> optional).</li>
       </ul>
 
       <h2 id="missions">Missions</h2>
       <p>
-        Required on <a href="../missions/abu-simbel.html">mission 43 · Abu Simbel</a>
-        (monuments goal <strong>44</strong> — one finished Abu Simbel satisfies the criterion).
+        Consumer mission <strong>49</strong> (A Beacon of Light / Ptolemy's Alexandria) — with Library;
+        sandbox: <code>m_128_alexandria.js</code>.
       </p>
 
       <div class="dev-section" id="dev">
@@ -158,12 +159,15 @@
           <summary>Source files</summary>
           <div class="details-body">
             <ul>
-              <li><span class="file-ref">src/building/monument_abu_simbel.{h,cpp}</span></li>
-              <li><span class="file-ref">src/scripts/building/abu_simbel.js</span></li>
-              <li><span class="file-ref">src/window/window_abu_simbel_info.cpp</span></li>
-              <li><span class="file-ref">src/scripts/city/monuments.js</span> — <code>MONUMENT_WEIGHTS[ABU_SIMBEL]=44</code></li>
-              <li><span class="file-ref">tests/118_abu_simbel_place.js</span></li>
-              <li>Help / history message ids: <strong>492</strong> / <strong>493</strong></li>
+              <li><span class="file-ref">src/building/monument_pharos_lighthouse.{h,cpp}</span></li>
+              <li><span class="file-ref">src/scripts/building/pharos_lighthouse.js</span></li>
+              <li><span class="file-ref">src/window/window_pharos_lighthouse_info.cpp</span></li>
+              <li><span class="file-ref">src/scripts/city/monuments.js</span> — <code>MONUMENT_WEIGHTS[PHAROS]=5</code></li>
+              <li><span class="file-ref">tests/123_pharos_lighthouse_place.js</span></li>
+              <li>Art: <span class="file-ref">tools/pharos_lighthouse_stages/</span>; packs <code>LtHouse1..10</code></li>
+              <li>Help / history: <strong>489</strong> / <strong>487</strong>; foreman gr178:132–140</li>
+              <li>Congrats: <code>lighthouse_congratulations</code> (id 529)</li>
+              <li>Notes: <span class="file-ref">REMAKE_NOTES.md</span> §13.12</li>
             </ul>
           </div>
         </details>
@@ -171,14 +175,9 @@
 
       <div class="bld-nav">
         <a href="monuments.html">← Monuments overview</a>
-        <span><a href="obelisk.html">Obelisk</a> · <a href="sphinx.html">Sphinx</a></span>
+        <span><a href="alexandria-library.html">Library</a> · <a href="caesareum.html">Caesareum</a></span>
       </div>
     </div>
   </main>
-
-  <footer>
-    <p>Akhenaten is an open-source, non-commercial project. All rights to Pharaoh, its mechanics and setting belong to their respective copyright owners.</p>
-    <p><a href="https://github.com/dalerank/Akhenaten" target="_blank">github.com/dalerank/Akhenaten</a></p>
-  </footer>
 </body>
 </html>

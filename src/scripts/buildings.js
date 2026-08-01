@@ -20,6 +20,8 @@ import building.sun_temple
 import building.abu_simbel
 import building.caesareum
 import building.alexandria_library
+import building.mausoleum
+import building.pharos_lighthouse
 import building.pyramid
 import building.farm
 import building.fort

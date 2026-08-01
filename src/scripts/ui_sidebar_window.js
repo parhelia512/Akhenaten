@@ -170,6 +170,9 @@ sidebar_window_expanded {
 
         extra_background  : inner_panel({pos[0, 480], size[10, 19]})
 
+        nilometer_quality : text({pos[11, 485], size[148, 14], font:FONT_NORMAL_WHITE_ON_DARK, tooltip:"#nilometer_hud_tooltip"})
+        nilometer_phase   : text({pos[11, 501], size[148, 14], font:FONT_NORMAL_WHITE_ON_DARK, tooltip:"#nilometer_hud_tooltip"})
+
         speed_header      : text({pos[11, 485], text:"#sidebar_speed_header", font:FONT_NORMAL_WHITE_ON_DARK})
         speed_current     : text({pos[65, 480 + 28], font:FONT_NORMAL_WHITE_ON_DARK})
         dec_speed         : arrowdown({pos[11, 470 + 30], tiny:false, allow_repeat: true, onclick: function () { emit event_change_gamespeed{ increase: false } } })

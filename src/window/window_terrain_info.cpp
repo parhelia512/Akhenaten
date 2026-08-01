@@ -82,6 +82,7 @@ void terrain_info_window::init(object_info &c) {
     case terrain_info_ore_rock:
     case terrain_info_rock:
     case terrain_info_floodplain:
+    case terrain_info_floodplain_submerged:
     case terrain_info_garden:
     case terrain_info_water:
     case terrain_info_rubble:

@@ -145,6 +145,7 @@ namespace game_features {
     game_feature gameopt_player_name{"gameopt_player_name", "", ""};
     game_feature gameplay_change_empire_map_runs_simulation{ "gameplay_change_empire_map_runs_simulation", "#TR_CONFIG_EMPIRE_MAP_RUNS_SIMULATION", false };
     game_feature gameui_disable_nilometer_popups{ "gameui_disable_nilometer_popups", "#TR_CONFIG_DISABLE_NILOMETER_POPUPS", false };
+    game_feature gameui_enhanced_nilometer{ "gameui_enhanced_nilometer", "#TR_CONFIG_ENHANCED_NILOMETER", false };
     game_feature gameui_building_mothball_button{ "gameui_building_mothball_button", "#TR_CONFIG_BUILDING_MOTHBALL_BUTTON", true };
     game_feature gameui_prompt_save_on_exit{ "gameui_prompt_save_on_exit", "#TR_CONFIG_PROMPT_SAVE_ON_EXIT", true };
     game_feature gameplay_pause_sim_while_building{ "gameplay_pause_sim_while_building", "#TR_CONFIG_PAUSE_SIM_WHILE_BUILDING", true };

@@ -6373,6 +6373,22 @@ game_messages_en {
             text: "After much hard labor the beautiful hand-crafted doors of Alexandria's magnificent Great Library are ready to be opened wide to the scholars of the world."
         }
     }
+    lighthouse_congratulations {
+        id: 529,
+        size [30, 18]
+        title { text: "Pharos Lighthouse finished!" }
+        content {
+            text: "After much sweat and not a little shed blood, workmen have carefully placed the final block of marble for the wondrous Pharos Lighthouse! Already its towering bright beacon is attracting traders from all over."
+        }
+    }
+    mausoleum_congratulations {
+        id: 530,
+        size [30, 18]
+        title { text: "Mausoleum finished!" }
+        content {
+            text: "The sacred Mausoleum is finally complete! This is a remarkable achievement for your city."
+        }
+    }
     mudbrick_pyramid_congratulations {
         id: 528,
         size [30, 18]

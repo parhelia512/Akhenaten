@@ -26,8 +26,12 @@ scenario = extend(__scenario, {
     map: __scenario_map,
     has_animals: __scenario_has_animals
     flotsam_enabled: __scenario_flotsam_enabled
-    alt_predator_type: __scenario_alt_predator_type
     building_allowed: __scenario_building_allowed
+    // Live bind (extend would snapshot a bool and desync from C++ / map load).
+    @hide_nilometer: {
+        get: function() { return __scenario_hide_nilometer }
+        set: function(v) { __scenario_hide_nilometer = !!v }
+    }
     // => is_open_play
     // => kingdom_supplies_grain
     // => climate
@@ -36,6 +40,12 @@ scenario = extend(__scenario, {
     // => campaign_scenario_id
     // => subtitle
     // => player_rank
+
+    // Live bind (extend would snapshot a bool and desync from C++ / map load).
+    @alt_predator_type: {
+        get: function() { return __scenario_alt_predator_type }
+        set: function(v) { __scenario_alt_predator_type = !!v }
+    }
 
     @culture_goal: { get: function() { return scenario_win_criteria_goal(__win_criteria.culture); } }
     @prosperity_goal: { get: function() { return scenario_win_criteria_goal(__win_criteria.prosperity); } }

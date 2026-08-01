@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Abu Simbel — Akhenaten Wiki</title>
+  <title>Mausoleum â€” Akhenaten Wiki</title>
   <link rel="stylesheet" href="../../../style.css" />
   <style>
     .bld-infobox {
@@ -40,11 +40,10 @@
     details { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; }
     summary { padding: 0.7rem 1rem; cursor: pointer; font-size: 0.875rem; font-weight: 600; color: var(--text); list-style: none; display: flex; align-items: center; gap: 0.6rem; user-select: none; }
     summary::-webkit-details-marker { display: none; }
-    summary::before { content: "▶"; font-size: 0.6rem; color: var(--gold); transition: transform 0.15s; flex-shrink: 0; }
+    summary::before { content: "â–¶"; font-size: 0.6rem; color: var(--gold); transition: transform 0.15s; flex-shrink: 0; }
     details[open] > summary::before { transform: rotate(90deg); }
     details[open] > summary { border-bottom: 1px solid var(--border); }
     .details-body { padding: 1rem 1.1rem; font-size: 0.85rem; line-height: 1.6; }
-    .tag-cleo { font-size: 0.7rem; color: var(--gold); border: 1px solid rgba(201,168,76,0.35); border-radius: 2px; padding: 0.05rem 0.35rem; margin-left: 0.35rem; }
   </style>
 </head>
 <body>
@@ -67,7 +66,7 @@
   <main class="wiki-layout">
     <aside class="wiki-sidebar">
       <div class="wiki-sidebar-section">
-        <div class="wiki-sidebar-title"><a href="index.html">← All Buildings</a></div>
+        <div class="wiki-sidebar-title"><a href="index.html">â† All Buildings</a></div>
       </div>
       <div class="wiki-sidebar-section">
         <div class="wiki-sidebar-title">Monuments</div>
@@ -75,9 +74,10 @@
           <li><a href="monuments.html">Overview</a></li>
           <li><a href="sphinx.html">Sphinx</a></li>
           <li><a href="obelisk.html">Obelisk</a></li>
-          <li><a href="abu-simbel.html" class="active">Abu Simbel</a></li>
+          <li><a href="mudbrick-pyramid.html">Brick-core pyramid</a></li>
+          <li><a href="abu-simbel.html">Abu Simbel</a></li>
           <li><a href="caesareum.html">Caesareum</a></li>
-          <li><a href="mausoleum.html">Mausoleum</a></li>
+          <li><a href="mausoleum.html" class="active">Mausoleum</a></li>
         </ul>
       </div>
       <div class="wiki-sidebar-section">
@@ -98,58 +98,58 @@
         <a href="../index.html">Player Guide</a> /
         <a href="index.html">Buildings</a> /
         <a href="monuments.html">Monuments</a> /
-        Abu Simbel
+        Mausoleum
       </div>
 
-      <h1>Abu Simbel <span class="tag-cleo">Cleo</span></h1>
+      <h1>Mausoleum</h1>
 
       <p id="overview">
-        <strong>Abu Simbel</strong> is the Cleopatra cliff-carved monument of four seated colossi.
-        The bulk of the footprint sits on elevation (cliffs); a 3×3 entrance juts onto clear land.
-        Construction uses <strong>timber</strong> scaffolding with <strong>Carpenters</strong>, then
-        <strong>Stonemasons</strong> carve top-down. There is no Work Camp, no Artisans guild, and no stone delivery onto the monument — the cliff is the stone.
-        Do not confuse with unused enum <code>BUILDING_COLOSSI</code> (=270) — that is only an editor/win label, not this building.
+        The <strong>Mausoleum</strong> is a sandstone burial monument on clear land.
+        Footprint <strong>8×22</strong> (rotates to 22×8). Guilds:
+        <strong>Work Camp</strong> (clear + haul), <strong>Stonemasons</strong> (two stories),
+        and <strong>Carpenters</strong> (wooden ramps between stories). <strong>Not</strong> Artisans.
+        Three visual skins share the same gameplay (My Palace / mission pick).
+        Finished mausoleums are <strong>burial tombs</strong> (provisions + funeral).
       </p>
 
       <div class="bld-infobox">
         <h4>Quick facts</h4>
         <div class="bld-stat-row">
-          <div class="bld-stat"><span class="val">9×21</span><span class="lbl">Cliff bulk</span></div>
-          <div class="bld-stat"><span class="val">+3×3</span><span class="lbl">Entrance</span></div>
-          <div class="bld-stat"><span class="val">44</span><span class="lbl">Monument wt.</span></div>
-          <div class="bld-stat"><span class="val">Timber</span><span class="lbl">Resource</span></div>
+          <div class="bld-stat"><span class="val">8×22</span><span class="lbl">Footprint</span></div>
+          <div class="bld-stat"><span class="val">240</span><span class="lbl">SS to place</span></div>
+          <div class="bld-stat"><span class="val">~220</span><span class="lbl">SS to finish</span></div>
+          <div class="bld-stat"><span class="val">3</span><span class="lbl">Monument wt.</span></div>
         </div>
         <dl>
-          <dt>Cost (Normal)</dt>
-          <dd>8&nbsp;000 Db (VE 5k · Easy 6.5k · Hard 11k · VH 16k)</dd>
           <dt>Guilds</dt>
-          <dd>Carpenters (scaffold) · Stonemasons (carve)</dd>
+          <dd>Work Camp · Carpenters (ramps) · Stonemasons</dd>
           <dt>Type id</dt>
-          <dd><code>BUILDING_ABU_SIMBEL</code> (=230)</dd>
+          <dd><code>BUILDING_MAUSOLEUM</code> (=222); skins 265/266/261</dd>
         </dl>
       </div>
 
       <h2 id="placement">Placement</h2>
       <ul>
-        <li>Bulk tiles must sit on <strong>elevation / access ramp</strong> (cliffs). Use Hide Cliffs (<kbd>H</kbd>) to inspect.</li>
-        <li>The centered 3×3 entrance <strong>protrudes past</strong> the far depth edge onto clear land (total depth 24 at rot 0/2).</li>
-        <li>Only one Abu Simbel on the map (finished still blocks a second).</li>
-        <li>Cannot be demolished (clear land is blocked; shows a warning).</li>
-        <li>Stone in storage is <strong>not</strong> required to place (unlike Sun Temple sandstone).</li>
+        <li>Requires <strong>240 sandstone</strong> in staffed Storage Yards (<code>#mausoleum_needs_sandstone</code> / gr19:188).</li>
+        <li>Sandstone is consumed on successful place.</li>
+        <li>Only one unfinished mausoleum at a time.</li>
+        <li>Entire 8×22 (or 22×8) footprint must be clear land.</li>
+        <li>Three art skins (same size): cycle with <strong>Ctrl+R</strong> before place (titles gr198:25/26/27).</li>
       </ul>
 
       <h2 id="construction">Construction</h2>
       <ul>
-        <li>Early phases: deliver timber and raise scaffolding (carpenters).</li>
-        <li>Later phases: mason-only carve; paint is baked into finished art (no Artisans).</li>
-        <li>Art layers from <code>AbuSimbel.sg3</code>: progressive <code>2statue</code> façade, midcut niche, scaffold overlays, entrance stairs.</li>
-        <li>Exact timber loads per phase are still provisional (Heaven chart only marks wood = Y; no counts in pack/exe).</li>
+        <li>Work Camp peasants clear and level the site.</li>
+        <li>Stonemasons build the <strong>first story</strong> (sandstone haul).</li>
+        <li>Carpenters raise <strong>wooden ramps</strong> (timber).</li>
+        <li>Stonemasons complete the <strong>second story</strong>.</li>
+        <li>Haul mid-build when a Storage Yard holds ≥4 sandstone blocks (peasant sledge).</li>
       </ul>
 
       <h2 id="missions">Missions</h2>
       <p>
-        Required on <a href="../missions/abu-simbel.html">mission 43 · Abu Simbel</a>
-        (monuments goal <strong>44</strong> — one finished Abu Simbel satisfies the criterion).
+        Primary: <strong>30 Heh</strong> (monuments goal 11 with weight 3; pak 15 = weight calib soft).
+        Also Alexandria₁ (48), later Baki/Rowarty/Alexandria₃.
       </p>
 
       <div class="dev-section" id="dev">
@@ -158,12 +158,14 @@
           <summary>Source files</summary>
           <div class="details-body">
             <ul>
-              <li><span class="file-ref">src/building/monument_abu_simbel.{h,cpp}</span></li>
-              <li><span class="file-ref">src/scripts/building/abu_simbel.js</span></li>
-              <li><span class="file-ref">src/window/window_abu_simbel_info.cpp</span></li>
-              <li><span class="file-ref">src/scripts/city/monuments.js</span> — <code>MONUMENT_WEIGHTS[ABU_SIMBEL]=44</code></li>
-              <li><span class="file-ref">tests/118_abu_simbel_place.js</span></li>
-              <li>Help / history message ids: <strong>492</strong> / <strong>493</strong></li>
+              <li><span class="file-ref">src/building/monument_mausoleum.{h,cpp}</span></li>
+              <li><span class="file-ref">src/scripts/building/mausoleum.js</span></li>
+              <li><span class="file-ref">src/window/window_mausoleum_info.cpp</span></li>
+              <li><span class="file-ref">src/scripts/city/monuments.js</span> — <code>MONUMENT_WEIGHTS[MAUSOLEUM]=3</code></li>
+              <li><span class="file-ref">tests/122_mausoleum_place.js</span></li>
+              <li>Art: <span class="file-ref">tools/mausoleum_stages/</span></li>
+              <li>Help message id: <strong>368</strong>; foreman gr178:58–60,97; gr199:51–55</li>
+              <li>Congrats: <code>mausoleum_congratulations</code></li>
             </ul>
           </div>
         </details>
@@ -171,7 +173,7 @@
 
       <div class="bld-nav">
         <a href="monuments.html">← Monuments overview</a>
-        <span><a href="obelisk.html">Obelisk</a> · <a href="sphinx.html">Sphinx</a></span>
+        <span><a href="caesareum.html">Caesareum</a> · <a href="abu-simbel.html">Abu Simbel</a></span>
       </div>
     </div>
   </main>

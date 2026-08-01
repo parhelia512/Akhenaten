@@ -65,6 +65,19 @@ function run_test() {
     }
     __log_marker('abu_simbel_reject_second_ok')
 
+    // Walk progressive 2statue art stages (layered pack) before finish.
+    for (var stage = 1; stage <= 8; stage++) {
+        __test_monument_set_phase(bid, stage - 1)
+        __test_process_events()
+        __test_pump_frames(1)
+        __log_marker('abu_simbel_art_stage:' + stage)
+    }
+    __test_camera_center_building(bid)
+    __test_process_events()
+    __test_pump_frames(6)
+    __game_save_screenshot(SCREENSHOT_DISPLAY)
+    __log_marker('abu_simbel_art_screenshot_ok')
+
     // 8 art stages + terminal → phases().size()==9; set_phase(9) → FINISHED
     __test_monument_set_phase(bid, 9)
     __test_process_events()
@@ -110,6 +123,7 @@ function check_valid() {
         'abu_simbel_reject_no_cliff_ok',
         'abu_simbel_placed_ok',
         'abu_simbel_reject_second_ok',
+        'abu_simbel_art_screenshot_ok',
         'abu_simbel_finished_ok',
         'abu_simbel_rating_ok',
         'abu_simbel_reject_after_finish_ok',

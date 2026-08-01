@@ -181,6 +181,23 @@ info_window_sun_temple = {
     }
 }
 
+info_window_mausoleum = {
+    ui : {
+        background    : outer_panel({size: [29, 16]}),
+        title         : text({pos: [0, 16], text:"${building.name}", size: [px(29), 20], font : FONT_LARGE_BLACK_ON_LIGHT, align:"center"}),
+        subtitle      : text({pos: [32, 46], text:"${text.12}", size: [px(27), -1], wrap:px(27), font : FONT_NORMAL_BLACK_ON_LIGHT, multiline:true }),
+        progress_text : text({pos: [32, 66], size:[px(20), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        progress_pct  : text({pos: [200, 66], size:[px(8), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        warning_text  : text({pos: [32, 96], size:[px(27), -1], wrap:px(27), multiline:true, font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        timber_icon   : resource_icon({pos: [32, 200], resource: RESOURCE_TIMBER }),
+        timber_text   : text({pos: [70, 204], size:[px(15), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        sandstone_icon: resource_icon({pos: [180, 200], resource: RESOURCE_SANDSTONE }),
+        sandstone_text: text({pos: [218, 204], size:[px(15), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        button_help   : help_button({}),
+        button_close  : close_button({}),
+    }
+}
+
 info_window_abu_simbel = {
     ui : {
         background    : outer_panel({size: [29, 16]}),
@@ -215,7 +232,6 @@ info_window_caesareum = {
     }
 }
 
-
 info_window_alexandria_library = {
     ui : {
         background    : outer_panel({size: [29, 18]}),
@@ -230,6 +246,23 @@ info_window_alexandria_library = {
         timber_text   : text({pos: [188, 204], size:[px(10), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
         copper_icon   : resource_icon({pos: [268, 200], resource: RESOURCE_COPPER }),
         copper_text   : text({pos: [306, 204], size:[px(10), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        button_help   : help_button({}),
+        button_close  : close_button({}),
+    }
+}
+
+info_window_pharos_lighthouse = {
+    ui : {
+        background    : outer_panel({size: [29, 16]}),
+        title         : text({pos: [0, 16], text:"${building.name}", size: [px(29), 20], font : FONT_LARGE_BLACK_ON_LIGHT, align:"center"}),
+        subtitle      : text({pos: [32, 46], text:"${text.12}", size: [px(27), -1], wrap:px(27), font : FONT_NORMAL_BLACK_ON_LIGHT, multiline:true }),
+        progress_text : text({pos: [32, 66], size:[px(20), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        progress_pct  : text({pos: [200, 66], size:[px(8), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        warning_text  : text({pos: [32, 96], size:[px(27), -1], wrap:px(27), multiline:true, font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        marble_icon   : resource_icon({pos: [32, 200], resource: RESOURCE_MARBLE }),
+        marble_text   : text({pos: [70, 204], size:[px(15), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
+        timber_icon   : resource_icon({pos: [180, 200], resource: RESOURCE_TIMBER }),
+        timber_text   : text({pos: [218, 204], size:[px(15), 20], font : FONT_NORMAL_BLACK_ON_LIGHT }),
         button_help   : help_button({}),
         button_close  : close_button({}),
     }

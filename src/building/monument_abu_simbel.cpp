@@ -10,6 +10,7 @@
 #include "figure/figure.h"
 #include "game/undo.h"
 #include "graphics/color.h"
+#include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/view/lookup.h"
 #include "graphics/view/view.h"
@@ -165,6 +166,11 @@ int building_abu_simbel::art_stage() const {
     return std::min(p + 1, max_stage);
 }
 
+int building_abu_simbel::art_orient_pair() const {
+    // 2statue / midcut store two camera variants as even/odd frames.
+    return (g_camera.orientation / 2) % 2;
+}
+
 xstring building_abu_simbel::anim_key_for(int stage) const {
     const auto &bp = current_params();
     const int max_stage = bp.art_stages > 0 ? bp.art_stages : 8;
@@ -175,7 +181,12 @@ xstring building_abu_simbel::anim_key_for(int stage) const {
         stage = max_stage;
     }
     bstring32 key;
-    key.printf("s%c", 'a' + (stage - 1));
+    // Finished art uses dedicated finish1/finish2 (last 2statue pair).
+    if (is_finished()) {
+        key.printf("finish%d", art_orient_pair() + 1);
+        return xstring(key.c_str());
+    }
+    key.printf("s%c%d", 'a' + (stage - 1), art_orient_pair() + 1);
     return xstring(key.c_str());
 }
 
@@ -272,13 +283,90 @@ void building_abu_simbel::remove_worker(figure_id fid) {
 }
 
 int building_abu_simbel::building_image_get() const {
-    const xstring key = anim_key_for(art_stage());
     const auto &params = current_params();
+    const xstring key = anim_key_for(art_stage());
     int img = params.first_img(key);
     if (img > 0) {
         return img;
     }
-    return params.first_img("preview");
+    // Fallback: unoriented sa..sh keys removed — use preview / first 2statue.
+    img = params.first_img("preview");
+    if (img > 0) {
+        return img;
+    }
+    return params.first_img("sa1");
+}
+
+bool building_abu_simbel::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
+    // Layered draw only from the main (NW) tile — other footprint tiles hold image_id 0.
+    if (tile != base.tile) {
+        return false;
+    }
+
+    const auto &params = current_params();
+    const int stage = art_stage();
+    const int cam = art_orient_pair();
+    const vec2i bulk = bulk_size();
+
+    auto draw_layer = [&](int image_id, vec2i pixel) {
+        if (image_id <= 0) {
+            return;
+        }
+        auto &command = ImageDraw::create_command(ctx, render_command_t::ert_drawtile);
+        command.image_id = image_id;
+        command.pixel = pixel;
+        command.mask = color_mask;
+    };
+
+    // Niche / midcut: 14 frames = 7 progress × 2 orients (height shrinks as carve advances).
+    const int mid_progress = std::min(std::max(stage - 1, 0), 6);
+    const int mid_off = mid_progress * 2 + cam;
+    const int mid_back = params.first_img("midcut_back");
+    const int mid_front = params.first_img("midcut_front");
+    if (mid_back > 0) {
+        draw_layer(mid_back + mid_off, point);
+    }
+    if (mid_front > 0) {
+        draw_layer(mid_front + mid_off, point);
+    }
+
+    // Second colossi pair — 2statue sprite is already two figures (~6 tiles wide);
+    // place a twin along the bulk width for the full four-colossi façade.
+    const int twin_dx = std::min(3, std::max(bulk.x - 1, 0));
+    if (twin_dx > 0) {
+        const vec2i twin_px = g_camera.lookup_tile_to_pixel(base.tile.shifted(twin_dx, 0));
+        draw_layer(building_image_get(), twin_px);
+    }
+
+    // Scaffold ornaments during timber / early carve (matches GIF scaffold-heavy mid frames).
+    if (!is_finished() && stage <= 6) {
+        const char *scaffold_keys[] = {"scaffold_a", "scaffold_b", "scaffold_c", "scaffold_d"};
+        const int n_scaf = (stage <= 2) ? 2 : 4;
+        for (int i = 0; i < n_scaf; ++i) {
+            const int scaf = params.first_img(scaffold_keys[i]);
+            if (scaf <= 0) {
+                continue;
+            }
+            // Spread along façade: feet of left/right statue pairs.
+            const int sx = (bulk.x * (i + 1)) / (n_scaf + 1);
+            const int sy = std::max(bulk.y - 2, 0);
+            const vec2i scaf_px = g_camera.lookup_tile_to_pixel(base.tile.shifted(sx, sy));
+            // Small overlay — nudge up so ladders sit against the cliff face.
+            draw_layer(scaf, scaf_px + vec2i{8, -48});
+        }
+    }
+
+    // Entrance stairs on the clear-land protrusion.
+    if (stage >= 2) {
+        const int stairs_base = params.first_img("stairs");
+        if (stairs_base > 0) {
+            const int stairs_off = std::min(stage - 2, 5);
+            const vec2i stairs_px = g_camera.lookup_tile_to_pixel(access_point());
+            draw_layer(stairs_base + stairs_off, stairs_px);
+        }
+    }
+
+    return true;
 }
 
 static void abu_simbel_add_tile(int building_id, tile2i origin, int dx, int dy, int image_id, bool is_main) {
@@ -528,7 +616,7 @@ void building_abu_simbel::preview::ghost_preview(build_planner &planer, painter 
     }
 
     const int preview = params.first_img("preview");
-    const int img = params.first_img("sa");
+    const int img = params.first_img("sa1");
     // Anchor sprite on map-NW (same as place), not the raw cursor tile.
     const vec2i origin_pixel = g_camera.lookup_tile_to_pixel(origin);
     planer.draw_building_ghost(ctx, img > 0 ? img : preview, origin_pixel);
