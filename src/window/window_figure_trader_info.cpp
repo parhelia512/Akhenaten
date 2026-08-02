@@ -25,20 +25,33 @@ void figure_trader_info_window::init(object_info &c) {
 
     empire_trader_handle trader;
     empire_city_handle city;
+    int capacity_value = 0;
 
     if (auto donkey = f->dcast<figure_caravan_donkey>(); donkey != nullptr) {
         auto head = donkey->head_of_caravan()->dcast<figure_trade_caravan>();
         trader = head ? head->empire_trader() : empire_trader_handle{};
         city =  head ? head->empire_city() : empire_city_handle{};
+        capacity_value = head ? head->max_capacity() : 0;
     } else if(auto caravan = f->dcast<figure_trade_caravan>(); caravan != nullptr) {
         trader = caravan->empire_trader();
         city = caravan->empire_city();
+        capacity_value = caravan->max_capacity();
     } else if(auto ship = f->dcast<figure_trade_ship>(); ship != nullptr) {
         trader = ship->empire_trader();
         city = ship->empire_city();
+        capacity_value = ship->max_capacity();
     }
 
     assert(trader.valid());
+
+    const bool per_good = empire_trader_ignore_total_bag();
+    if (per_good) {
+        capacity_value = empire_trader_per_good_cap();
+    }
+    ui["capacity"].text_var("%s %d",
+        per_good ? "#trader_capacity_per_good" : "#trader_capacity",
+        capacity_value);
+
     if (trader.has_traded()) {
         ui["buy"] = "#trader_bought";
         ui["sell"] = "#trader_sold";

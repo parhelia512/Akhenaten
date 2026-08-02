@@ -6,10 +6,23 @@
 #include "building/building_storage_yard.h"
 #include "building/building_storage_room.h"
 #include "city/city.h"
+#include "game/game_config.h"
 #include "game/game_events.h"
 #include "io/io_buffer.h"
 #include "empire/empire_map.h"
 #include "figure/figure.h"
+
+namespace {
+    constexpr int PER_GOOD_CAP_NEW_ERA = 1600;
+}
+
+int empire_trader_per_good_cap() {
+    return game_features::gameplay_change_trader_per_good_1600.to_bool() ? PER_GOOD_CAP_NEW_ERA : 0;
+}
+
+bool empire_trader_ignore_total_bag() {
+    return game_features::gameplay_change_trader_per_good_1600.to_bool();
+}
 
 int empire_trader_handle::record_bought_resource(e_resource resource) {
     auto& traders = g_empire_traders.traders;
@@ -40,12 +53,50 @@ int empire_trader_handle::sold_resources(e_resource resource) {
     return traders[handle].sold_resources[resource];
 }
 
+bool empire_trader_handle::buy_full(e_resource resource) const {
+    const int cap = empire_trader_per_good_cap();
+    if (!valid() || cap <= 0 || resource == RESOURCE_NONE) {
+        return false;
+    }
+    return g_empire_traders.traders[handle].bought_resources[resource] >= cap;
+}
+
+bool empire_trader_handle::sell_full(e_resource resource) const {
+    const int cap = empire_trader_per_good_cap();
+    if (!valid() || cap <= 0 || resource == RESOURCE_NONE) {
+        return false;
+    }
+    return g_empire_traders.traders[handle].sold_resources[resource] >= cap;
+}
+
+int empire_trader_handle::buy_room(e_resource resource) const {
+    const int cap = empire_trader_per_good_cap();
+    if (!valid() || cap <= 0 || resource == RESOURCE_NONE) {
+        return 100000;
+    }
+    const int bought = g_empire_traders.traders[handle].bought_resources[resource];
+    return std::max(0, cap - bought);
+}
+
+int empire_trader_handle::sell_room(e_resource resource) const {
+    const int cap = empire_trader_per_good_cap();
+    if (!valid() || cap <= 0 || resource == RESOURCE_NONE) {
+        return 100000;
+    }
+    const int sold = g_empire_traders.traders[handle].sold_resources[resource];
+    return std::max(0, cap - sold);
+}
+
 bool empire_trader_handle::has_traded() {
     auto& traders = g_empire_traders.traders;
     return traders[handle].bought_amount || traders[handle].sold_amount;
 }
 
 bool empire_trader_handle::has_traded_max(int capacity) {
+    // Per-good mode: no total-bag "full" signal — leave via idle / no work.
+    if (empire_trader_ignore_total_bag()) {
+        return false;
+    }
     if (capacity <= 0) {
         return false;
     }
@@ -81,7 +132,9 @@ e_resource empire_trader_handle::get_buy_resource(building* b, empire_city_handl
     building_storage_room* space = warehouse->room();
     while (space) {
         e_resource resource = space->resource();
-        if (space->stored_amount(resource) >= amount && g_empire.can_export_resource_to_city(city.handle, resource)) {
+        if (space->stored_amount(resource) >= amount
+            && buy_room(resource) >= amount
+            && g_empire.can_export_resource_to_city(city.handle, resource)) {
             // update stocks
             events::emit(event_stats_remove_resource{ resource, amount });
             space->take_resource(amount);
@@ -108,7 +161,9 @@ e_resource empire_trader_handle::get_sell_resource(building* b, empire_city_hand
 
     e_resource resource_to_import = city_trade_current_caravan_import_resource();
     int imp = RESOURCES_MIN;
-    while (imp < RESOURCES_MAX && !g_empire.can_import_resource_from_city(city.handle, resource_to_import)) {
+    while (imp < RESOURCES_MAX
+           && (!g_empire.can_import_resource_from_city(city.handle, resource_to_import)
+               || sell_full(resource_to_import))) {
         imp++;
         resource_to_import = city_trade_next_caravan_import_resource();
     }
@@ -141,7 +196,8 @@ e_resource empire_trader_handle::get_sell_resource(building* b, empire_city_hand
     // find another importable resource that can be added to this warehouse
     for (int r = RESOURCES_MIN; r < RESOURCES_MAX; r++) {
         resource_to_import = city_trade_next_caravan_backup_import_resource();
-        if (g_empire.can_import_resource_from_city(city.handle, resource_to_import)) {
+        if (g_empire.can_import_resource_from_city(city.handle, resource_to_import)
+            && !sell_full(resource_to_import)) {
             space = warehouse->room();
             while (space) {
                 if (space->stored_amount(resource_to_import) < 400) {
@@ -196,4 +252,3 @@ io_buffer* iob_empire_traders = new io_buffer([](io_buffer* iob, size_t version)
 
     iob->bind____skip(4);
 });
-

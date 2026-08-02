@@ -151,6 +151,7 @@ namespace game_features {
     game_feature gameplay_pause_sim_while_building{ "gameplay_pause_sim_while_building", "#TR_CONFIG_PAUSE_SIM_WHILE_BUILDING", true };
     game_feature gameplay_change_disaster_events_use_amount{ "gameplay_change_disaster_events_use_amount", "#TR_CONFIG_DISASTER_EVENTS_USE_AMOUNT", false };
     game_feature gameplay_change_trader_capacity_1600{ "gameplay_change_trader_capacity_1600", "#TR_CONFIG_TRADER_CAPACITY_1600", false };
+    game_feature gameplay_change_trader_per_good_1600{ "gameplay_change_trader_per_good_1600", "#TR_CONFIG_TRADER_PER_GOOD_1600", false };
     game_feature gameplay_bast_lion_raid{ "gameplay_bast_lion_raid", "#TR_CONFIG_BAST_LION_RAID", false };
     game_feature gameplay_seth_asp_raid{ "gameplay_seth_asp_raid", "#TR_CONFIG_SETH_ASP_RAID", false };
     game_feature gameplay_ptah_scorpion_raid{ "gameplay_ptah_scorpion_raid", "#TR_CONFIG_PTAH_SCORPION_RAID", false };

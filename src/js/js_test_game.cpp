@@ -2326,6 +2326,48 @@ static int __test_empire_trader_has_traded_max(int bought, int sold, int capacit
 }
 ANK_FUNCTION_3(__test_empire_trader_has_traded_max);
 
+static int __test_empire_trader_per_good_cap() {
+    return empire_trader_per_good_cap();
+}
+ANK_FUNCTION(__test_empire_trader_per_good_cap);
+
+static int __test_empire_trader_ignore_total_bag() {
+    return empire_trader_ignore_total_bag() ? 1 : 0;
+}
+ANK_FUNCTION(__test_empire_trader_ignore_total_bag);
+
+// Sets bought_resources[resource]=amount (and totals), returns buy_full(resource) as 0/1.
+static int __test_empire_trader_buy_full_at(int resource, int amount) {
+    empire_trader_handle h = empire_create_trader();
+    if (!h.valid()) {
+        return -1;
+    }
+    auto &t = g_empire_traders.traders[h.handle];
+    const e_resource r = (e_resource)std::clamp(resource, 0, (int)RESOURCES_MAX - 1);
+    t.bought_resources[r] = (uint16_t)std::max(0, amount);
+    t.bought_amount = t.bought_resources[r];
+    const int result = h.buy_full(r) ? 1 : 0;
+    t.is_active = false;
+    return result;
+}
+ANK_FUNCTION_2(__test_empire_trader_buy_full_at);
+
+// pottery_amt / beer_amt on one trader; returns buy_full(pottery)*10 + buy_full(beer).
+static int __test_empire_trader_two_goods_buy_full(int pottery_amt, int beer_amt) {
+    empire_trader_handle h = empire_create_trader();
+    if (!h.valid()) {
+        return -1;
+    }
+    auto &t = g_empire_traders.traders[h.handle];
+    t.bought_resources[RESOURCE_POTTERY] = (uint16_t)std::max(0, pottery_amt);
+    t.bought_resources[RESOURCE_BEER] = (uint16_t)std::max(0, beer_amt);
+    t.bought_amount = (uint16_t)(t.bought_resources[RESOURCE_POTTERY] + t.bought_resources[RESOURCE_BEER]);
+    const int result = (h.buy_full(RESOURCE_POTTERY) ? 10 : 0) + (h.buy_full(RESOURCE_BEER) ? 1 : 0);
+    t.is_active = false;
+    return result;
+}
+ANK_FUNCTION_2(__test_empire_trader_two_goods_buy_full);
+
 static int __test_empire_trader_buy_room_at(int resource, int amount) {
     empire_trader_handle h = empire_create_trader();
     if (!h.valid()) {

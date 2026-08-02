@@ -33,5 +33,6 @@ public:
     //virtual sound_key phrase_key() const override;
     //virtual figure_sound_t get_sound_reaction(pcstr key) const override;
 
-    empire_trader_handle empire_trader();
+    empire_trader_handle empire_trader() const;
+    virtual empire_trader_handle trade_session() const override { return empire_trader(); }
 };

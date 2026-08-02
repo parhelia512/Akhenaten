@@ -19,7 +19,9 @@ bool figure_trader::can_buy(building* b, empire_city_handle city) const {
         return false;
     }
 
-    if (total_bought() >= max_capacity()) {
+    empire_trader_handle session = trade_session();
+    // Per-good mode drops the total bag only for real empire traders (native keeps max_capacity).
+    if (!(empire_trader_ignore_total_bag() && session.valid()) && total_bought() >= max_capacity()) {
         return false;
     }
 
@@ -29,7 +31,10 @@ bool figure_trader::can_buy(building* b, empire_city_handle city) const {
 
     building_storage_room* space = warehouse->room();
     while (space) {
-        if (space->stored_first().value >= 100 && g_empire.can_export_resource_to_city(city.handle, space->resource())) {
+        const e_resource resource = space->resource();
+        if (space->stored_first().value >= 100
+            && !session.buy_full(resource)
+            && g_empire.can_export_resource_to_city(city.handle, resource)) {
             return true;
         }
         space = space->next_room();
@@ -44,7 +49,8 @@ bool figure_trader::can_sell(building* b, empire_city_handle city) const {
         return false;
     }
 
-    if (base.trader_total_sold() >= max_capacity()) {
+    empire_trader_handle session = trade_session();
+    if (!(empire_trader_ignore_total_bag() && session.valid()) && base.trader_total_sold() >= max_capacity()) {
         return false;
     }
 
@@ -58,7 +64,7 @@ bool figure_trader::can_sell(building* b, empire_city_handle city) const {
 
     int num_importable = 0;
     for (e_resource r = RESOURCES_MIN; r < RESOURCES_MAX; ++r) {
-        if (!warehouse->is_not_accepting(r)) {
+        if (!warehouse->is_not_accepting(r) && !session.sell_full(r)) {
             if (g_empire.can_import_resource_from_city(city.handle, r))
                 num_importable++;
         }
@@ -69,12 +75,16 @@ bool figure_trader::can_sell(building* b, empire_city_handle city) const {
 
     int can_import = 0;
     e_resource resource = city_trade_current_caravan_import_resource();
-    if (!warehouse->is_not_accepting(resource) && g_empire.can_import_resource_from_city(city.handle, resource)) {
+    if (!warehouse->is_not_accepting(resource)
+        && !session.sell_full(resource)
+        && g_empire.can_import_resource_from_city(city.handle, resource)) {
         can_import = 1;
     } else {
         for (int i = RESOURCES_MIN; i < RESOURCES_MAX; i++) {
             resource = city_trade_next_caravan_import_resource();
-            if (!warehouse->is_not_accepting(resource) && g_empire.can_import_resource_from_city(city.handle, resource)) {
+            if (!warehouse->is_not_accepting(resource)
+                && !session.sell_full(resource)
+                && g_empire.can_import_resource_from_city(city.handle, resource)) {
                 can_import = 1;
                 break;
             }
@@ -92,7 +102,8 @@ bool figure_trader::can_sell(building* b, empire_city_handle city) const {
                     return true;
                 }
 
-                if (g_empire.can_import_resource_from_city(city.handle, space->resource())) {
+                if (!session.sell_full(space->resource())
+                    && g_empire.can_import_resource_from_city(city.handle, space->resource())) {
                     return true;
                 }
             }
@@ -103,15 +114,35 @@ bool figure_trader::can_sell(building* b, empire_city_handle city) const {
 }
 
 int figure_trader::get_closest_storageyard(tile2i tile, empire_city_handle city, int distance_from_entry, tile2i &warehouse) {
-    const resource_list exportable = total_bought() < max_capacity()
-                                        ? g_empire.exportable_resources_from_city(city.handle)
-                                        : resource_list{};
+    empire_trader_handle session = trade_session();
+    const bool drop_total = empire_trader_ignore_total_bag() && session.valid();
 
-    const resource_list importable = base.get_carrying_amount() < max_capacity()
-                                        ? g_empire.importable_resources_from_city(city.handle)
-                                        : resource_list{};
+    resource_list exportable;
+    if (drop_total || total_bought() < max_capacity()) {
+        exportable = g_empire.exportable_resources_from_city(city.handle);
+        for (auto &entry : exportable) {
+            if (entry.value && session.buy_full(entry.type)) {
+                entry.value = 0;
+            }
+        }
+    }
 
-    int num_importable = importable.size();
+    resource_list importable;
+    if (drop_total || base.get_carrying_amount() < max_capacity()) {
+        importable = g_empire.importable_resources_from_city(city.handle);
+        for (auto &entry : importable) {
+            if (entry.value && session.sell_full(entry.type)) {
+                entry.value = 0;
+            }
+        }
+    }
+
+    int num_importable = 0;
+    for (const auto &entry : importable) {
+        if (entry.value) {
+            num_importable++;
+        }
+    }
 
     int min_distance = 10000;
     building* min_building = 0;
@@ -132,7 +163,9 @@ int figure_trader::get_closest_storageyard(tile2i tile, empire_city_handle city,
         const storage_t* s = warehouse->storage();
         int num_imports_for_warehouse = 0;
         for (e_resource r = RESOURCES_MIN; r < RESOURCES_MAX; ++r) {
-            if (!warehouse->is_not_accepting(r) && g_empire.can_import_resource_from_city(city.handle, r)) {
+            if (!warehouse->is_not_accepting(r)
+                && importable[r]
+                && g_empire.can_import_resource_from_city(city.handle, r)) {
                 num_imports_for_warehouse++;
             }
         }
@@ -151,7 +184,7 @@ int figure_trader::get_closest_storageyard(tile2i tile, empire_city_handle city,
                 }
 
                 e_resource resource = city_trade_current_caravan_import_resource();
-                if (!warehouse->is_not_accepting(resource)) {
+                if (!warehouse->is_not_accepting(resource) && importable[resource]) {
                     if (space->resource() == RESOURCE_NONE)
                         distance_penalty -= 16;
 

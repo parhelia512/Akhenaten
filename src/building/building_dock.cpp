@@ -26,6 +26,7 @@
 #include "game/game.h"
 #include "graphics/elements/lang_text.h"
 #include "figuretype/figure_trader_ship.h"
+#include "empire/trader_handler.h"
 #include "city/city.h"
 #include "js/js_game.h"
 
@@ -270,18 +271,33 @@ int building_dock::match_score_for_ship(int ship_id) const {
         budgets_populated = true;
         if (slot.remaining_chunks > 0) {
             const e_resource r = (e_resource)slot.resource;
-            // Only count goods the city can still import (quota/stock gates).
-            if (importable[r]) {
+            // Only count goods the city can still import (quota/stock gates) and per-good room.
+            if (importable[r] && !ship->empire_trader().sell_full(r)) {
                 import_focus[r] = 1;
             }
         }
     }
 
-    // Need at least one docker haul chunk of free buy capacity for exports to matter.
+    // Need free buy capacity for exports: total bag (TC) or any per-good room (B).
     resource_list export_for_score;
-    const int buy_room = ship->max_capacity() - (int)ship->total_bought();
-    if (buy_room >= 100) {
-        export_for_score = exportable;
+    bool export_room = false;
+    if (empire_trader_ignore_total_bag()) {
+        empire_trader_handle session = ship->empire_trader();
+        for (const auto &entry : exportable) {
+            if (entry.value && !session.buy_full(entry.type)) {
+                export_for_score[entry.type] = entry.value;
+                export_room = true;
+            }
+        }
+    } else {
+        const int buy_room = ship->max_capacity() - (int)ship->total_bought();
+        if (buy_room >= 100) {
+            export_for_score = exportable;
+            export_room = true;
+        }
+    }
+    if (!export_room) {
+        export_for_score = {};
     }
 
     if (!budgets_populated) {

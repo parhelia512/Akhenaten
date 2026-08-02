@@ -69,6 +69,8 @@ localization_de = [
   {key:"#TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD", text:"Karrenschieber von abholenden Kornkammern können abseits der Straße gehen"}
   {key:"#TR_CONFIG_GRANARIES_GET_DOUBLE", text:"Doppelte Kapazität für Karrenschieber von abholenden Kornkammern"}
   {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Größere Händlerkapazität (1600 pro Besuch; kein Jahreslimit der Handelsroute)"}
+  {key:"#TR_CONFIG_TRADER_PER_GOOD_1600", text:"New Era: bis 1600 je Ware pro Besuch (kein Jahreslimit; nicht nur Gesamtkapazität)"}
+  {key:"#trader_capacity_per_good", text:"Kapazität (pro Ware)"}
   {key:"#TR_CONFIG_BAST_LION_RAID", text:"Bast-Zorn: Löwenüberfall aus Tempeln/Zoo (TEMP Enhanced)"}
   {key:"#TR_CONFIG_SETH_ASP_RAID", text:"Seth-Zorn: Schlangenüberfall aus Tempeln ohne Kompanie (TEMP Enhanced)"}
   {key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Ptah-Zorn: Skorpionüberfall aus Tempeln ohne Industrie (TEMP Enhanced)"}

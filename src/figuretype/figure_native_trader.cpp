@@ -108,6 +108,6 @@ void figure_native_trader::debug_show_properties() {
     game_debug_show_property("trader_id", 0);
 }
 
-empire_trader_handle figure_native_trader::empire_trader() { 
-    return empire_trader_handle{}; 
+empire_trader_handle figure_native_trader::empire_trader() const {
+    return empire_trader_handle{};
 }

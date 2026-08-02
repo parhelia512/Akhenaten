@@ -142,6 +142,9 @@ void figure_trade_ship::populate_import_budgets() {
     const resource_list importable = g_empire.importable_resources_from_city(d.empire_city.handle);
     auto& route = emp_city->get_route();
 
+    const bool per_good = empire_trader_ignore_total_bag();
+    const int per_good_chunks = empire_trader_per_good_cap() / 100;
+
     // Total weight = sum of per-resource yearly trade limits across all importable goods.
     int total_weight = 0;
     for (const auto& r : resource_list::all) {
@@ -154,7 +157,7 @@ void figure_trade_ship::populate_import_budgets() {
         return;
     }
 
-    const int total_chunks = max_capacity() / 100;  // 1200 / 100 = 12
+    const int total_chunks = max_capacity() / 100;  // 1200 / 100 = 12 (TC / legacy shared pool)
     int slot_idx = 0;
     for (const auto& r : resource_list::all) {
         if (slot_idx >= VISIT_BUDGET_SLOTS) {
@@ -164,8 +167,14 @@ void figure_trade_ship::populate_import_budgets() {
             continue;
         }
         const int weight = route.limit(r.type);
-        // Proportional share, floored to a whole 100-unit chunk.
-        const int chunks = (weight * total_chunks) / total_weight;
+        int chunks;
+        if (per_good) {
+            // New Era: up to 1600 of each good, still capped by yearly route limit chunks.
+            chunks = std::min(per_good_chunks, weight / 100);
+        } else {
+            // Proportional share, floored to a whole 100-unit chunk.
+            chunks = (weight * total_chunks) / total_weight;
+        }
         if (chunks <= 0) {
             continue;
         }
@@ -228,8 +237,20 @@ void figure_trade_ship::figure_action() {
     //    cart_image_id = 0;
     auto& d = runtime_data();
     switch (action_state()) {
-    case ACTION_110_TRADE_SHIP_CREATED:
-        load_resource(base.resource_id, max_capacity());
+    case ACTION_110_TRADE_SHIP_CREATED: {
+        int cargo = max_capacity();
+        if (empire_trader_ignore_total_bag()) {
+            int budget_units = 0;
+            for (const auto &slot : d.import_budgets) {
+                if (slot.resource != 0) {
+                    budget_units += (int)slot.remaining_chunks * 100;
+                }
+            }
+            if (budget_units > 0) {
+                cargo = budget_units;
+            }
+        }
+        load_resource(base.resource_id, cargo);
         d.amount_bought = 0;
         //            is_ghost = true;
         base.wait_ticks++;
@@ -255,6 +276,7 @@ void figure_trade_ship::figure_action() {
         }
         base.animctx.frame = 0;
         break;
+    }
 
     case ACTION_111_TRADE_SHIP_GOING_TO_DOCK:
         base.move_ticks(1);
@@ -540,6 +562,9 @@ void figure_trade_ship::update_day() {
 
 bvariant figure_trade_ship::get_property(const xstring& domain, const xstring& name) const {
     if (domain == tags().figure && name == tags().capacity) {
+        if (empire_trader_ignore_total_bag()) {
+            return bvariant(empire_trader_per_good_cap());
+        }
         return bvariant(max_capacity());
     }
 

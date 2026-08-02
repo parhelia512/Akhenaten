@@ -11,7 +11,7 @@ figure_trader_info_window {
         typename: text({ pos[92, 86], text: "${figure.class_name} @Y${figure.city_name}&", font: FONT_NORMAL_BLACK_ON_DARK, rich: true, scroll: false })
 
         action: text({ pos[92, 106], text: "(${figure.action_tip})", font: FONT_NORMAL_YELLOW })
-        capacity: text({ pos[92, 130], text: "${loc.trader_capacity} ${figure.capacity}", font: FONT_NORMAL_BLACK_ON_DARK })
+        capacity: text({ pos[92, 130], font: FONT_NORMAL_BLACK_ON_DARK })
 
         buy: text({ pos[92, 150], text: "${loc.trader_bought}", font: FONT_NORMAL_BLACK_ON_DARK })
         buy_text: text({ pos[150, 150], font: FONT_NORMAL_BLACK_ON_DARK, rich: true, scroll: false })

@@ -69,6 +69,8 @@ localization_ru_f = [
     { key:"#TR_CONFIG_GETTING_GRANARIES_GO_OFFROAD", text:"Тележки в амбар могут покидать дорогу"}
     { key:"#TR_CONFIG_GRANARIES_GET_DOUBLE", text:"Удвоить вместимость тележек распределяющих еду между амбарами"}
     { key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Большая вместимость торговцев (1600 за визит; не годовой лимит империи)"}
+    { key:"#TR_CONFIG_TRADER_PER_GOOD_1600", text:"New Era: до 1600 каждого товара за визит (не годовой лимит; не только общий мешок)"}
+    { key:"#trader_capacity_per_good", text:"Вместимость (за товар)"}
     { key:"#TR_CONFIG_BAST_LION_RAID", text:"Гнев Бастет: набег львов из храмов/зоопарка (TEMP Enhanced)"}
     { key:"#TR_CONFIG_SETH_ASP_RAID", text:"Гнев Сета: набег змей из храмов, если нет роты для проклятия (TEMP Enhanced)"}
     { key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Гнев Птаха: набег скорпионов из храмов, если нет промышленности (TEMP Enhanced)"}

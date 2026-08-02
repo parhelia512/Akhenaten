@@ -170,6 +170,7 @@ namespace game_features {
     extern game_feature gameplay_pause_sim_while_building;
     extern game_feature gameplay_change_disaster_events_use_amount;
     extern game_feature gameplay_change_trader_capacity_1600;
+    extern game_feature gameplay_change_trader_per_good_1600;
     extern game_feature gameplay_bast_lion_raid;
     extern game_feature gameplay_seth_asp_raid;
     extern game_feature gameplay_ptah_scorpion_raid;

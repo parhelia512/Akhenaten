@@ -74,7 +74,16 @@ int figure_docker::try_import_resource(building* b, e_resource resource, empire_
     };
 
     int delivered = 0;
-    const int target_chunks = dock_haul_amount() / DOCKER_HAUL_CHUNK;
+    int target_chunks = dock_haul_amount() / DOCKER_HAUL_CHUNK;
+    // Double-haul must not push past per-good cap or remaining visit budget.
+    target_chunks = std::min(target_chunks, trader().sell_room(resource) / DOCKER_HAUL_CHUNK);
+    if (auto *dock = home()->dcast_dock()) {
+        if (dock->runtime_data().trade_ship) {
+            if (auto *ship = figure_get<figure_trade_ship>(dock->runtime_data().trade_ship)) {
+                target_chunks = std::min(target_chunks, ship->import_budget_remaining(resource));
+            }
+        }
+    }
     for (int i = 0; i < target_chunks; i++) {
         if (!place_one_chunk()) {
             break;
@@ -113,7 +122,9 @@ int figure_docker::try_export_resource(building* b, e_resource resource, empire_
 
     auto &trade_route = city.get_route();
     int taken = 0;
-    const int target_chunks = dock_haul_amount() / DOCKER_HAUL_CHUNK;
+    int target_chunks = dock_haul_amount() / DOCKER_HAUL_CHUNK;
+    // Double-haul must not push past per-good buy cap for this resource.
+    target_chunks = std::min(target_chunks, trader().buy_room(resource) / DOCKER_HAUL_CHUNK);
     for (int i = 0; i < target_chunks; i++) {
         if (!take_one_chunk()) {
             break;
@@ -127,9 +138,15 @@ int figure_docker::try_export_resource(building* b, e_resource resource, empire_
 building_dest figure_docker::get_closest_warehouse_for_import(tile2i pos, empire_city_handle city, int distance_from_entry, int road_network_id, building_dock *dock, e_resource& import_resource) {
     const resource_list importable = g_empire.importable_resources_from_city(city.handle);
 
+    figure_trade_ship* ship = nullptr;
+    if (dock && dock->runtime_data().trade_ship) {
+        ship = figure_get<figure_trade_ship>(dock->runtime_data().trade_ship);
+    }
+    empire_trader_handle session = ship ? ship->empire_trader() : empire_trader_handle{};
+
     // Dock orders: zero bitmask = accept none (same as Accept none button).
     auto allowed = [&](e_resource r) {
-        if (!importable[r]) {
+        if (!importable[r] || session.sell_full(r)) {
             return false;
         }
         if (!dock) {
@@ -137,13 +154,6 @@ building_dest figure_docker::get_closest_warehouse_for_import(tile2i pos, empire
         }
         return dock->is_trade_accepted(r);
     };
-
-    // If the dock's ship has per-good budgets populated, pick from those (preserves per-visit
-    // proportional split). Otherwise fall back to the legacy global round-robin.
-    figure_trade_ship* ship = nullptr;
-    if (dock && dock->runtime_data().trade_ship) {
-        ship = figure_get<figure_trade_ship>(dock->runtime_data().trade_ship);
-    }
 
     bool budgets_populated = false;
     if (ship) {
@@ -272,8 +282,14 @@ building_dest figure_docker::get_closest_warehouse_for_import(tile2i pos, empire
 building_dest figure_docker::get_closest_warehouse_for_export(tile2i pos, empire_city_handle city, int distance_from_entry, int road_network_id, building_dock *dock, e_resource &export_resource) {
     const resource_list exportable = g_empire.exportable_resources_from_city(city.handle);
 
+    figure_trade_ship* ship = nullptr;
+    if (dock && dock->runtime_data().trade_ship) {
+        ship = figure_get<figure_trade_ship>(dock->runtime_data().trade_ship);
+    }
+    empire_trader_handle session = ship ? ship->empire_trader() : empire_trader_handle{};
+
     auto allowed = [&](e_resource r) {
-        if (!exportable[r]) {
+        if (!exportable[r] || session.buy_full(r)) {
             return false;
         }
         if (!dock) {
@@ -408,7 +424,10 @@ bool figure_docker::fetch_export_resource(building* b) {
     }
 
     auto ship = figure_get<figure_trade_ship>(ship_id);
-    if (ship->action_state() != ACTION_112_TRADE_SHIP_MOORED || ship->total_bought() >= ship->max_capacity()) {
+    if (ship->action_state() != ACTION_112_TRADE_SHIP_MOORED) {
+        return false;
+    }
+    if (!empire_trader_ignore_total_bag() && ship->total_bought() >= ship->max_capacity()) {
         return false;
     }
 

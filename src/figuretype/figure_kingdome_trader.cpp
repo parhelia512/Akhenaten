@@ -254,6 +254,12 @@ void figure_trade_caravan::update_animation() {
 }
 
 bvariant figure_trade_caravan::get_property(const xstring& domain, const xstring& name) const {
+    if (domain == tags().figure && name == tags().capacity) {
+        if (empire_trader_ignore_total_bag()) {
+            return bvariant(empire_trader_per_good_cap());
+        }
+    }
+
     auto result = archive_helper::get(runtime_data(), name, domain == tags().figure);
     if (result) {
         return result.value();

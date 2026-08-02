@@ -83,6 +83,8 @@ localization_en = [
   {key:"#TR_CONFIG_DOCK_DOUBLE_HAUL", text:"Double the haul amount of dockers (200 per trip)"}
   {key:"#TR_CONFIG_BAZAAR_MULTI_BUYERS", text:"Bazaars can send two buyers at once (food + goods)"}
   {key:"#TR_CONFIG_TRADER_CAPACITY_1600", text:"Larger trader capacity (1600 per visit; not yearly empire limit)"}
+  {key:"#TR_CONFIG_TRADER_PER_GOOD_1600", text:"New Era: traders buy/sell up to 1600 of each good per visit (not yearly limit; not total-bag only)"}
+  {key:"#trader_capacity_per_good", text:"Capacity (per good)"}
   {key:"#TR_CONFIG_BAST_LION_RAID", text:"Bast major curse: lion raid from temples/zoo (TEMP Enhanced)"}
   {key:"#TR_CONFIG_SETH_ASP_RAID", text:"Seth major curse: asp raid from temples when no company to curse (TEMP Enhanced)"}
   {key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Ptah major curse: scorpion raid from temples when no industry to smash (TEMP Enhanced)"}

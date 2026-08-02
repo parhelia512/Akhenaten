@@ -2,6 +2,7 @@
 
 #include "figure/figure.h"
 #include "empire/empire_city.h"
+#include "empire/trader_handler.h"
 
 class figure_trader : public figure_impl {
 public:
@@ -17,4 +18,5 @@ public:
 
     virtual uint16_t total_bought() const = 0;
     virtual uint16_t max_capacity() const = 0;
+    virtual empire_trader_handle trade_session() const { return {}; }
 };
