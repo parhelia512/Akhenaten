@@ -13,6 +13,12 @@ void game_file_editor_clear_data(void);
 void game_file_editor_create_scenario(int size);
 
 /**
+ * Create a blank scenario then fill it with procedural terrain (CaesarIA-style).
+ * @param size Size index 0..5 (same as create_scenario)
+ */
+void game_file_editor_generate_scenario(int size);
+
+/**
  * Load scenario from disk and init it for using in the editor
  * @param scenario_file File to load
  * @return Boolean true on success, false on failure

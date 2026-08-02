@@ -7,6 +7,7 @@ localization_en = [
   {key:"#TR_MISSING_FONTS_MESSAGE", text:"Pharahoh installation requires extra font files. "}
   {key:"#TR_NO_EDITOR_TITLE", text:"Editor not installed"}
   {key:"#TR_NO_EDITOR_MESSAGE", text:"Your Pharahoh installation does not contain the editor files. "}
+  {key:"#editor_generate_map", text:"Generate map"}
   {key:"#TR_INVALID_LANGUAGE_TITLE", text:"Invalid language directory"}
   {key:"#TR_INVALID_LANGUAGE_MESSAGE", text:"The directory you selected does not contain a valid language pack. Please check the log for errors."}
   {key:"#TR_BUTTON_OK", text:"OK"}

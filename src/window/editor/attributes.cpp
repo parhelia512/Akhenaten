@@ -1,6 +1,8 @@
 #include "attributes.h"
 
 #include "core/string.h"
+#include "core/custom_span.hpp"
+#include "game/file_editor.h"
 #include "game/resource.h"
 #include "graphics/graphics.h"
 #include "graphics/elements/arrow_button.h"
@@ -14,6 +16,7 @@
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "io/gamefiles/lang.h"
 #include "scenario/editor.h"
 #include "scenario/scenario.h"
 #include "widget/input_box.h"
@@ -40,6 +43,7 @@ static void button_win_criteria(int param1, int param2);
 static void button_special_events(int param1, int param2);
 static void button_price_changes(int param1, int param2);
 static void button_demand_changes(int param1, int param2);
+static void button_generate_map(int param1, int param2);
 static void change_climate(int param1, int param2);
 static void change_image(int forward, int param2);
 
@@ -54,6 +58,7 @@ static generic_button buttons[] = {
   {212, 356, 250, 30, button_special_events, button_none, 8, 0},
   {212, 396, 250, 30, button_price_changes, button_none, 9, 0},
   {212, 436, 250, 30, button_demand_changes, button_none, 10, 0},
+  {18, 248, 184, 26, button_generate_map, button_none, 11, 0},
 };
 
 static arrow_button image_arrows[] = {
@@ -152,6 +157,9 @@ static void draw_foreground(int) {
     button_border_draw({ 212, 436 }, { 250, 30 }, data.focus_button_id == 10);
     lang_text_draw_centered(44, 94, 212, 445, 250, FONT_NORMAL_BLACK_ON_LIGHT);
 
+    button_border_draw({ 18, 248 }, { 184, 26 }, data.focus_button_id == 11);
+    lang_text_draw_centered(ui::str_from_key("#editor_generate_map"), 18, 254, 184, FONT_NORMAL_BLACK_ON_LIGHT);
+
     button_border_draw({ 18, 278 }, { 184, 144 }, 0);
     ctx.img_generic(image_id_from_group(GROUP_EDITOR_SCENARIO_IMAGE) + g_scenario.image_id, { 20, 280 });
 
@@ -163,7 +171,7 @@ static void draw_foreground(int) {
 static void handle_input(const mouse* m, const hotkeys* h) {
     const mouse* m_dialog = mouse_in_dialog(m);
     if (input_box_handle_mouse(m_dialog, &scenario_description_input)
-        || generic_buttons_handle_mouse(m_dialog, {0, 0}, buttons, 10, &data.focus_button_id, nullptr)
+        || generic_buttons_handle_mouse(m_dialog, {0, 0}, buttons, 11, &data.focus_button_id, nullptr)
         || arrow_buttons_handle_mouse(m_dialog, image_arrows, 2, 0)
         || widget_sidebar_editor_handle_mouse_attributes(m))
         return;
@@ -221,6 +229,25 @@ static void button_price_changes(int param1, int param2) {
 static void button_demand_changes(int param1, int param2) {
     stop(1);
     window_editor_demand_changes_show();
+}
+
+static xstring s_landscape_sizes[6];
+
+static void landscape_size_selected(int size) {
+    if (size < 0 || size > 5)
+        return;
+    stop(0);
+    game_file_editor_generate_scenario(size);
+    window_editor_map_show();
+}
+
+static void button_generate_map(int param1, int param2) {
+    for (int i = 0; i < 6; i++) {
+        s_landscape_sizes[i] = lang_get_string(44, 121 + i);
+    }
+    stop(1);
+    window_select_list_show_text(g_screen.dialog_offset.x + 50, g_screen.dialog_offset.y + 50,
+                                 make_span(s_landscape_sizes), landscape_size_selected);
 }
 
 static void change_climate(int param1, int param2) {

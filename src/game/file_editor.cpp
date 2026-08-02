@@ -41,6 +41,7 @@
 #include "scenario/distant_battle.h"
 #include "scenario/earthquake.h"
 #include "scenario/editor.h"
+#include "scenario/editor_map_gen.h"
 #include "scenario/editor_map_meta.h"
 #include "scenario/empire.h"
 #include "scenario/scenario_invasion.h"
@@ -138,6 +139,14 @@ static void prepare_map_for_editing(void) {
 void game_file_editor_create_scenario(int size) {
     create_blank_map(size);
     prepare_map_for_editing();
+}
+
+void game_file_editor_generate_scenario(int size) {
+    game_file_editor_clear_data();
+    create_blank_map(size);
+    editor_map_generate();
+    prepare_map_for_editing();
+    g_scenario.is_saved = 0;
 }
 
 static bool path_looks_absolute(const char *path) {
