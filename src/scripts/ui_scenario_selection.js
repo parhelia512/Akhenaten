@@ -56,7 +56,7 @@ function window_scenario_selection_on_init(ev) {
 
 [es=(window_scenario_selection, mission_changed)]
 function window_scenario_selection_on_mission_changed(ev) {
-    ev.img_scenario_thumb.image = get_image({ pack:PACK_UNLOADED, id:28, offset:scenario.campaign_scenario_id }).tid
+    ui.invalidate_minimap_preview()
 
     var sub = window_scenario_selection.campaign_sub_dialog
     if (window_scenario_selection.individual_missions) {
@@ -68,6 +68,15 @@ function window_scenario_selection_on_mission_changed(ev) {
     ev.side_mission_title.text = mission_selection_title(scenario.campaign_scenario_id)
     ev.side_subtitle.text = __lang_message_subtitle_text(200 + scenario.campaign_scenario_id)
     ev.side_year.text = scenario_selection_format_start_year(scenario.start_year)
+}
+
+[es=(window_scenario_selection, draw_minimap)]
+function window_scenario_selection_draw_minimap(ev) {
+    var elm = ev[ev.active_id]
+    if (!elm) {
+        return
+    }
+    ui.draw_minimap_preview(elm.screen_pos, elm.size)
 }
 
 [es=(window_scenario_selection, mission_changed)]
@@ -281,7 +290,7 @@ window_scenario_selection {
         img_background         : image({ pos[0, 0], pack:PACK_UNLOADED, id:33, offset:0 })
 
         debug_file_schema      : text({ pos[265, 170], size[160, 20], text:"", font:FONT_NORMAL_BLACK_ON_DARK })
-        img_scenario_thumb     : image({ pos[270, 200], size[256, 152], fit:true, pack:PACK_UNLOADED, id:28, offset:0 })
+        scenario_minimap       : dummy({ pos[270, 200], size[256, 152], ondraw_event: "draw_minimap" })
 
         scenario_map_list      : scrollable_list({
             pos[210, 360]

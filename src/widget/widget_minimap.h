@@ -62,3 +62,6 @@ void widget_minimap_init();
 void widget_minimap_invalidate();
 void widget_minimap_draw(vec2i offset, int force);
 bool widget_minimap_handle_mouse(const mouse* m);
+
+void widget_minimap_invalidate_preview();
+void widget_minimap_queue_preview(vec2i box_pos, vec2i box_size);

@@ -24,6 +24,7 @@
 #include "city/city_message.h"
 #include "game/undo.h"
 #include "scenario/scenario.h"
+#include "widget/widget_minimap.h"
 #include "core/log.h"
 #include "core/flat_map.h"
 #include "game/game.h"
@@ -271,6 +272,16 @@ void __ui_draw_texture(vec2i pos, int img_id) {
     ctx.img_generic(img_id, pos);
 }
 ANK_FUNCTION_2(__ui_draw_texture)
+
+void __ui_invalidate_minimap_preview() {
+    widget_minimap_invalidate_preview();
+}
+ANK_FUNCTION(__ui_invalidate_minimap_preview)
+
+void __ui_draw_minimap_preview(vec2i pos, vec2i size) {
+    widget_minimap_queue_preview(pos, size);
+}
+ANK_FUNCTION_2(__ui_draw_minimap_preview)
 
 void __ui_widget_sidebar_set_type(int id) {
     widget_sidebar_set_type(id);

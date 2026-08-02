@@ -2,8 +2,11 @@
 
 #include "building/building.h"
 #include "core/profiler.h"
+#include "graphics/elements/ui.h"
 #include "graphics/graphics.h"
+#include "graphics/screen.h"
 #include "graphics/view/lookup.h"
+#include "graphics/view/view.h"
 #include "grid/bridge.h"
 #include "grid/figure.h"
 #include "grid/property.h"
@@ -12,9 +15,12 @@
 #include "input/scroll.h"
 #include "city/city_buildings.h"
 #include "game/game_events.h"
+#include "scenario/map.h"
 #include "scenario/scenario.h"
 #include "game/game.h"
 #include "dev/debug.h"
+
+#include <algorithm>
 
 static const color ENEMY_COLOR_BY_CLIMATE[] = {COLOR_MINIMAP_ENEMY_CENTRAL, COLOR_MINIMAP_ENEMY_NORTHERN, COLOR_MINIMAP_ENEMY_DESERT};
 minimap_window g_minimap_window;
@@ -376,4 +382,107 @@ void widget_minimap_draw(vec2i offset, int force) {
 
 bool widget_minimap_handle_mouse(const mouse* m) {
     return g_minimap_window.handle_mouse(m);
+}
+
+namespace {
+
+struct minimap_preview_cache {
+    int texture_id = 0;
+    vec2i native_size = {0, 0};
+    bool dirty = true;
+};
+
+minimap_preview_cache g_minimap_preview;
+
+void rebuild_minimap_preview() {
+    const map_data_t *map = scenario_map_data();
+    if (!map || map->width <= 0 || map->height <= 0) {
+        g_minimap_preview.native_size = {0, 0};
+        return;
+    }
+
+    if (g_camera.screentile_lookup.tables.empty()) {
+        g_camera.init();
+    }
+
+    // Full map in minimap tile space (see set_bounds camera-tracking conditions).
+    int ds_x = map->width;
+    int ds_y = 2 * map->height;
+    ds_y &= ~1;
+
+    const int max_ds_x = std::max(8, screen_width() / 2);
+    const int max_ds_y = std::max(8, screen_height() & ~1);
+    ds_x = std::min(ds_x, max_ds_x);
+    ds_y = std::min(ds_y, max_ds_y);
+    ds_y &= ~1;
+
+    const vec2i native = {2 * ds_x, ds_y};
+    const vec2i capture_pos = {0, 0};
+
+    const vec2i saved_draw_size = g_minimap_window.draw_size;
+    const tile2i saved_absolute = g_minimap_window.absolute_tile;
+    const vec2i saved_size = g_minimap_window.size;
+    const vec2i saved_offset = g_minimap_window.screen_offset;
+    const int saved_texture = g_minimap_window.cached_texture;
+    const int saved_refresh = g_minimap_window.refresh_requested;
+
+    g_minimap_window.draw_size = {ds_x, ds_y};
+    g_minimap_window.size = native;
+    g_minimap_window.absolute_tile = tile2i((GRID_LENGTH - ds_x) / 2 + 1, ((2 * GRID_LENGTH) + 1 - ds_y) / 2);
+    g_minimap_window.absolute_tile.set_y(g_minimap_window.absolute_tile.y() & ~1);
+    g_minimap_window.screen_offset = capture_pos;
+    g_minimap_window.enemy_color = ENEMY_COLOR_BY_CLIMATE[g_scenario.climate];
+    g_minimap_window.cached_texture = g_minimap_preview.texture_id;
+
+    graphics_set_clip_rectangle(capture_pos, native);
+    g_minimap_window.draw(UiFlags_None);
+    g_minimap_preview.texture_id = graphics_save_to_texture(g_minimap_preview.texture_id, capture_pos, native);
+    // Wipe capture scratch so it cannot linger outside the centered dialog on large screens.
+    game.painter().fill_rect(capture_pos, native, COLOR_BLACK);
+    graphics_reset_clip_rectangle();
+
+    g_minimap_window.draw_size = saved_draw_size;
+    g_minimap_window.absolute_tile = saved_absolute;
+    g_minimap_window.size = saved_size;
+    g_minimap_window.screen_offset = saved_offset;
+    g_minimap_window.cached_texture = saved_texture;
+    g_minimap_window.refresh_requested = saved_refresh;
+
+    g_minimap_preview.native_size = native;
+    g_minimap_preview.dirty = false;
+}
+
+} // namespace
+
+void widget_minimap_invalidate_preview() {
+    g_minimap_preview.dirty = true;
+}
+
+void widget_minimap_queue_preview(vec2i box_pos, vec2i box_size) {
+    if (box_size.x <= 0 || box_size.y <= 0) {
+        return;
+    }
+
+    if (g_minimap_preview.dirty || g_minimap_preview.texture_id <= 0) {
+        rebuild_minimap_preview();
+    }
+
+    if (g_minimap_preview.texture_id <= 0 || g_minimap_preview.native_size.x <= 0) {
+        return;
+    }
+
+    const float sx = (float)box_size.x / (float)g_minimap_preview.native_size.x;
+    const float sy = (float)box_size.y / (float)g_minimap_preview.native_size.y;
+    const float scale = std::min(sx, sy);
+    const vec2i disp = {
+        std::max(1, (int)(g_minimap_preview.native_size.x * scale)),
+        std::max(1, (int)(g_minimap_preview.native_size.y * scale)),
+    };
+    const vec2i centered = {
+        box_pos.x + (box_size.x - disp.x) / 2,
+        box_pos.y + (box_size.y - disp.y) / 2,
+    };
+
+    using namespace ui::opt;
+    ui::push(ui::cmd_t::saved_texture, Pos{centered}, Size{disp}, ImageId{g_minimap_preview.texture_id});
 }
