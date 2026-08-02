@@ -269,7 +269,13 @@ bool map_orientation_for_venue(int x, int y, e_venue_mode_orientation mode, int*
     // check the final count and return orientation
     for (int orientation_check = 0; orientation_check < 8; orientation_check++) {
         if (num_correct_road_tiles[orientation_check] == (mode + 2) * (mode + 2)) { // check if the num of correct tiles is ALL of them (n x n)
-            if (mode == 0) {
+            if (mode == e_venue_mode_booth) {
+                // Booth has 4 orientations stored as even indices; odds share the
+                // same road mask. Skipping odds avoids the fallthrough that used
+                // offset {0,0} (= map tile 0) for the exterior-road check.
+                if (orientation_check & 1) {
+                    continue;
+                }
                 std::pair<int, int> offset = {0, 0};
                 switch (orientation_check) {
                 case 0: offset = {grid_offset + GRID_OFFSET(1, 2), grid_offset + GRID_OFFSET(2, 1)}; break;
@@ -308,6 +314,19 @@ bool map_orientation_for_venue_with_map_orientation(tile2i tile, e_venue_mode_or
         break;
     }
     return map_orientation_for_venue(x, y, mode, building_orientation);
+}
+
+int map_venue_orient_to_view(int map_orientation) {
+    return (map_orientation + (8 - g_camera.orientation)) % 8;
+}
+
+bool map_venue_ghost_orientation(tile2i tile, e_venue_mode_orientation mode, int* view_orientation) {
+    int map_orientation = 0;
+    if (!map_orientation_for_venue_with_map_orientation(tile, mode, &map_orientation)) {
+        return false;
+    }
+    *view_orientation = map_venue_orient_to_view(map_orientation);
+    return true;
 }
 
 int map_orientation_for_gatehouse(int x, int y) {

@@ -78,6 +78,17 @@ int building_entertainment::bandstand_add_img_offset(int orientation) {
     return offset;
 }
 
+void building_entertainment::map_add_bandstand_tiles(int stand_orientation) {
+    auto &d = runtime_data();
+    if (!d.latched_venue_main_grid_offset || !d.latched_venue_add_grid_offset) {
+        return;
+    }
+
+    int stand_sn_s = anim("stand_sn_s").first_img();
+    map_image_set(d.latched_venue_main_grid_offset, stand_sn_s + bandstand_main_img_offset(stand_orientation));
+    map_image_set(d.latched_venue_add_grid_offset, stand_sn_s + bandstand_add_img_offset(stand_orientation));
+}
+
 void building_entertainment::place_latch_on_venue(e_building_type type, int dx, int dy, int orientation, bool main_venue) {
     tile2i point = base.tile.shifted(dx, dy);
     // set map graphics accordingly

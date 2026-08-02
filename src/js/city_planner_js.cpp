@@ -135,12 +135,11 @@ void __city_planner_draw_from_below(vec2i pixel, int image_id) {
 ANK_FUNCTION_2(__city_planner_draw_from_below);
 
 int __map_venue_build_orientation(tile2i tile, int mode) {
-    int orientation = 0;
-    const bool ok = map_orientation_for_venue_with_map_orientation(tile, (e_venue_mode_orientation)mode, &orientation);
-    if (!ok) {
+    int view_orientation = 0;
+    if (!map_venue_ghost_orientation(tile, (e_venue_mode_orientation)mode, &view_orientation)) {
         return -1;
     }
-    return abs(orientation + (8 - g_camera.orientation)) % 8;
+    return view_orientation;
 }
 ANK_FUNCTION_2(__map_venue_build_orientation);
 

@@ -19,3 +19,6 @@ enum e_venue_mode_orientation {
 
 bool map_orientation_for_venue(int x, int y, e_venue_mode_orientation mode, int* building_orientation);
 bool map_orientation_for_venue_with_map_orientation(tile2i tile, e_venue_mode_orientation mode, int* building_orientation);
+
+int map_venue_orient_to_view(int map_orientation);
+bool map_venue_ghost_orientation(tile2i tile, e_venue_mode_orientation mode, int* view_orientation);

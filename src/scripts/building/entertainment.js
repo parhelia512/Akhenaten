@@ -17,6 +17,9 @@ EntertainmentBuilding.property.juggler_visited = { }
 EntertainmentBuilding.property.musician_visited = { }
 EntertainmentBuilding.property.dancer_visited = { }
 EntertainmentBuilding.property.play_index = { }
+EntertainmentBuilding.property.booth_corner_grid_offset = { }
+EntertainmentBuilding.property.latched_venue_main_grid_offset = { }
+EntertainmentBuilding.property.latched_venue_add_grid_offset = { }
 
 // end prototype for entertainment buildings
 

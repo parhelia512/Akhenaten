@@ -37,6 +37,4 @@ public:
     virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
     void draw_shows_musicians(painter &ctx, vec2i pixel, tile2i tile, int direction, color color_mask);
     void draw_shows_juggler(painter &ctx, vec2i pixel, tile2i tile, int direction, color color_mask);
-
-    void map_add_bandstand_tiles();
 };

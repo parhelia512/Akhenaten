@@ -15,6 +15,7 @@
 #include "grid/building.h"
 #include "grid/figure.h"
 #include "grid/image.h"
+#include "grid/orientation.h"
 #include "window/building/common.h"
 #include "window/building/figures.h"
 #include "widget/city/ornaments.h"
@@ -50,7 +51,8 @@ bool building_booth::target_route_tile_blocked(int grid_offset) const {
 }
 
 void building_booth::preview::setup_preview_graphics(build_planner &planer) const {
-    planer.init_tiles(2, 2);
+    const int s = building_static_params::get(planer.build_type).building_size;
+    planer.init_tiles(s, s);
 }
 
 void building_booth::update_day() {
@@ -78,19 +80,20 @@ void building_booth::on_place(int orientation, int variant) {
     building_impl::on_place(orientation, variant);
 }
 
-void building_booth::on_place_update_tiles(int orientation, int variant) {
+void building_booth::on_place_update_tiles(int /*orientation*/, int /*variant*/) {
     int image_id = anim(animkeys().square).first_img();
 
-    // add underlying plaza first
-    map_add_venue_plaza_tiles(id(), current_params().building_size, tile(), image_id, false);
-    int absolute_orientation = (abs(orientation * 2 + (8 - g_camera.orientation)) % 8) / 2;
+    // Match roads before plaza marks TERRAIN_BUILDING (matcher rejects buildings).
+    int map_orientation = 0;
+    map_orientation_for_venue(tile().x(), tile().y(), e_venue_mode_booth, &map_orientation);
+    base.orientation = map_orientation / 2;
 
-    // add additional building parts, update graphics accordingly
-    switch (absolute_orientation) {
-    case 0: place_latch_on_venue(BUILDING_BOOTH, 0, 0, orientation, true); break;
-    case 1: place_latch_on_venue(BUILDING_BOOTH, 1, 0, orientation, true); break;
-    case 2: place_latch_on_venue(BUILDING_BOOTH, 1, 1, orientation, true); break;
-    case 3: place_latch_on_venue(BUILDING_BOOTH, 0, 1, orientation, true); break;
+    map_add_venue_plaza_tiles(id(), current_params().building_size, tile(), image_id, false);
+    switch (base.orientation) {
+    case 0: place_latch_on_venue(BUILDING_BOOTH, 0, 0, base.orientation, true); break;
+    case 1: place_latch_on_venue(BUILDING_BOOTH, 1, 0, base.orientation, true); break;
+    case 2: place_latch_on_venue(BUILDING_BOOTH, 1, 1, base.orientation, true); break;
+    case 3: place_latch_on_venue(BUILDING_BOOTH, 0, 1, base.orientation, true); break;
     }
 }
 
@@ -158,8 +161,9 @@ void building_booth::update_map_orientation(int map_orientation) {
 
 void building_booth::on_undo() {
     auto &d = runtime_data();
-    for (int dy = 0; dy < 2; dy++) {
-        for (int dx = 0; dx < 2; dx++) {
+    const int s = size();
+    for (int dy = 0; dy < s; dy++) {
+        for (int dx = 0; dx < s; dx++) {
             if (map_building_at(d.booth_corner_grid_offset + GRID_OFFSET(dx, dy)) == 0) {
                 map_building_set(d.booth_corner_grid_offset + GRID_OFFSET(dx, dy), id());
             }

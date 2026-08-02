@@ -29,9 +29,11 @@ public:
 
     virtual void bind_dynamic(io_buffer *iob, size_t version) override;
     void place_latch_on_venue(e_building_type type, int dx, int dy, int orientation, bool main_venue = false);
+    void map_add_bandstand_tiles(int stand_orientation);
     int bandstand_main_img_offset(int orientation);
     int bandstand_add_img_offset(int orientation);
 };
 
 ANK_CONFIG_PROPERTY(building_entertainment::runtime_data_t,
-    num_shows, juggler_visited, musician_visited, dancer_visited, play_index)
+    num_shows, juggler_visited, musician_visited, dancer_visited, play_index,
+    booth_corner_grid_offset, latched_venue_main_grid_offset, latched_venue_add_grid_offset)

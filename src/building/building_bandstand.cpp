@@ -49,7 +49,8 @@ bool building_bandstand::preview::ghost_allow_tile(build_planner& p, tile2i tile
 }
 
 void building_bandstand::preview::setup_preview_graphics(build_planner &planer) const {
-    planer.init_tiles(3, 3);
+    const int s = building_static_params::get(planer.build_type).building_size;
+    planer.init_tiles(s, s);
 }
 
 bool building_bandstand::get_route_citizen_land_type(int grid_offset, int &land_result) const {
@@ -69,16 +70,13 @@ bool building_bandstand::target_route_tile_blocked(int grid_offset) const {
 void building_bandstand::preview::ghost_preview(build_planner &planer, painter &ctx, tile2i start, tile2i end, vec2i pixel) const {
     const auto &params = building_static_params::get(planer.build_type);
     int orientation = 0;
+    const bool can_build = map_venue_ghost_orientation(end, e_venue_mode_bandstand, &orientation);
 
-    int can_build = map_orientation_for_venue_with_map_orientation(end, e_venue_mode_bandstand, &orientation);
-    // TODO: proper correct for map orientation (for now, just use a different orientation)
-    orientation = abs(orientation + (8 - g_camera.orientation)) % 8;
-
-    if (can_build != 1) { // no can place
+    if (!can_build) {
         for (int i = 0; i < params.building_size * params.building_size; i++) {
             planer.draw_flat_tile(ctx, pixel + VIEW_OFFSETS[i], COLOR_MASK_RED);
         }
-    } else { // can place (theoretically)
+    } else {
         int square_id = params.first_img(animkeys().square);
         for (int i = 0; i < params.building_size * params.building_size; i++) {
             const int x = ((i % params.building_size) - (i / params.building_size)) * 30;
@@ -145,15 +143,17 @@ void building_bandstand::on_place_checks() {
     warnings.add_if(!has_jungles, "#build_juggling_school");
 }
 
-void building_bandstand::on_place_update_tiles(int orientation, int variant) {
+void building_bandstand::on_place_update_tiles(int /*orientation*/, int /*variant*/) {
     int size = current_params().building_size;
     int image_id = anim(animkeys().square).first_img();
 
-    // add underlying plaza first
+    // Match roads before plaza marks TERRAIN_BUILDING (matcher rejects buildings).
+    int map_orientation = 0;
+    map_orientation_for_venue(tile().x(), tile().y(), e_venue_mode_bandstand, &map_orientation);
+    base.orientation = map_orientation / 2;
+
     map_add_venue_plaza_tiles(id(), size, tile(), image_id, false);
-    int absolute_orientation = (abs(orientation * 2 + (8 - g_camera.orientation)) % 8) / 2;
-    // add additional building parts, update graphics accordingly
-    switch (absolute_orientation) {
+    switch (base.orientation) {
     case 0:
         place_latch_on_venue(BUILDING_GARDENS, 2, 1, 0);
         place_latch_on_venue(BUILDING_BOOTH, 2, 0, 0);
@@ -184,24 +184,13 @@ void building_bandstand::on_place_update_tiles(int orientation, int variant) {
     }
 }
 
-void building_bandstand::map_add_bandstand_tiles() {
-    int offset = bandstand_main_img_offset(base.orientation);
-    int offset_add = bandstand_add_img_offset(base.orientation);
-
-    int stand_sn_s = first_img("stand_sn_s");
-    auto &d = runtime_data();
-    map_image_set(d.latched_venue_main_grid_offset, stand_sn_s + offset);
-    map_image_set(d.latched_venue_add_grid_offset, stand_sn_s + offset_add);
-}
-
-
 void building_bandstand::update_map_orientation(int map_orientation) {
     int plaza_image_id = anim(animkeys().square).first_img();
     auto &d = runtime_data();
 
     tile2i btile(d.booth_corner_grid_offset);
     map_add_venue_plaza_tiles(id(), base.size, btile, plaza_image_id, true);
-    map_add_bandstand_tiles();
+    map_add_bandstand_tiles(base.orientation);
 }
 
 void building_bandstand::spawn_figure() {
@@ -254,8 +243,9 @@ bool building_bandstand::force_draw_height_tile(painter &ctx, tile2i tile, vec2i
 
 void building_bandstand::on_undo() {
     auto &d = runtime_data();
-    for (int dy = 0; dy < 3; dy++) {
-        for (int dx = 0; dx < 3; dx++) {
+    const int s = size();
+    for (int dy = 0; dy < s; dy++) {
+        for (int dx = 0; dx < s; dx++) {
             if (map_building_at(d.booth_corner_grid_offset + GRID_OFFSET(dx, dy)) == 0)
                 map_building_set(d.booth_corner_grid_offset + GRID_OFFSET(dx, dy), id());
         }

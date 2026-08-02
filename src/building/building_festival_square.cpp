@@ -18,22 +18,21 @@ BUILDING_RUNTIME_DATA_IMPL(building_festival_square)
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_festival_square);
 
 void building_festival_square::preview::setup_preview_graphics(build_planner &planer) const {
-    planer.init_tiles(5, 5); // TODO
+    const int s = building_static_params::get(planer.build_type).building_size;
+    planer.init_tiles(s, s);
 }
 
 void building_festival_square::preview::ghost_preview(build_planner &planer, painter &ctx, tile2i start, tile2i end, vec2i pixel) const {
     const auto &params = building_static_params::get(planer.build_type);
-    int orientation = 0;
+    int ignored = 0;
+    // Festival has a single road mask — orientation unused; matcher is can_place only.
+    const bool can_build = map_orientation_for_venue_with_map_orientation(end, e_venue_mode_festival_square, &ignored);
 
-    bool can_build = map_orientation_for_venue_with_map_orientation(end, e_venue_mode_festival_square, &orientation);
-    // TODO: proper correct for map orientation (for now, just use a different orientation)
-    orientation = abs(orientation + (8 - g_camera.orientation)) % 8;
-
-    if (can_build != 1) { // no can place
+    if (!can_build) {
         for (int i = 0; i < params.building_size * params.building_size; i++) {
             planer.draw_flat_tile(ctx, pixel + VIEW_OFFSETS[i], COLOR_MASK_RED);
         }
-    } else { // can place (theoretically)
+    } else {
         int square_id = params.first_img(animkeys().square);
         bool is_exist = g_city.buildings.count_total(BUILDING_FESTIVAL_SQUARE);
         int color_mask = is_exist ? COLOR_MASK_RED : COLOR_MASK_GREEN;
@@ -89,9 +88,10 @@ void building_festival_square::update_day() {
 
 void building_festival_square::on_undo() {
     auto &d = runtime_data();
+    const int s = size();
 
-    for (int dy = 0; dy < 5; dy++) {
-        for (int dx = 0; dx < 5; dx++) {
+    for (int dy = 0; dy < s; dy++) {
+        for (int dx = 0; dx < s; dx++) {
             if (map_building_at(d.booth_corner_grid_offset + GRID_OFFSET(dx, dy)) == 0)
                 map_building_set(d.booth_corner_grid_offset + GRID_OFFSET(dx, dy), id());
         }

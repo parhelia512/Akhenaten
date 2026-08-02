@@ -41,7 +41,8 @@ void building_pavilion::static_params::archive_load(archive arch) {
 }
 
 void building_pavilion::preview::setup_preview_graphics(build_planner &planer) const {
-    planer.init_tiles(4, 4);
+    const int s = building_static_params::get(planer.build_type).building_size;
+    planer.init_tiles(s, s);
 }
 
 bool building_pavilion::get_route_citizen_land_type(int grid_offset, int &land_result) const {
@@ -60,19 +61,14 @@ bool building_pavilion::target_route_tile_blocked(int grid_offset) const {
 
 void building_pavilion::preview::ghost_preview(build_planner &planer, painter &ctx, tile2i start, tile2i end, vec2i pixel) const {
     const auto &params = building_static_params::get(planer.build_type);
-    int can_build = 0;
-
     int orientation = 0;
+    const bool can_build = map_venue_ghost_orientation(end, e_venue_mode_pavilion, &orientation);
 
-    can_build = map_orientation_for_venue_with_map_orientation(end, e_venue_mode_pavilion, &orientation);
-    // TODO: proper correct for map orientation (for now, just use a different orientation)
-    orientation = abs(orientation + (8 - g_camera.orientation)) % 8;
-
-    if (can_build != 1) { // no can place
+    if (!can_build) {
         for (int i = 0; i < params.building_size * params.building_size; i++) {
             planer.draw_flat_tile(ctx, pixel + VIEW_OFFSETS[i], COLOR_MASK_RED);
         }
-    } else { // can place (theoretically)
+    } else {
         int square_id = params.first_img(animkeys().square);
         for (int i = 0; i < params.building_size * params.building_size; i++) {
             const int x = ((i % params.building_size) - (i / params.building_size)) * 30;
@@ -114,21 +110,20 @@ void building_pavilion::update_day() {
     d.num_shows = shows;
 }
 
-void building_pavilion::on_place_update_tiles(int orientation, int variant) {
+void building_pavilion::on_place_update_tiles(int /*orientation*/, int /*variant*/) {
     runtime_data().booth_corner_grid_offset = tile().grid_offset();
-    base.orientation = orientation;
 
     int size = current_params().building_size;
     int image_id = anim(animkeys().square).first_img();
 
-    int basic_orientation;
-    map_orientation_for_venue_with_map_orientation(tile(), e_venue_mode_pavilion, &basic_orientation);
+    int map_orientation = 0;
+    map_orientation_for_venue(tile().x(), tile().y(), e_venue_mode_pavilion, &map_orientation);
+    base.orientation = map_orientation;
 
-    // add underlying plaza first
     map_add_venue_plaza_tiles(id(), size, tile(), image_id, false);
-    int absolute_orientation = abs(basic_orientation + (8 - g_camera.orientation)) % 8;
-    for (const auto &item: current_params().place_dir[absolute_orientation].items) {
-        place_latch_on_venue(item.type, item.offset.x, item.offset.y, orientation, item.main);
+    const int stand_ori = map_orientation / 2;
+    for (const auto &item: current_params().place_dir[map_orientation].items) {
+        place_latch_on_venue(item.type, item.offset.x, item.offset.y, stand_ori, item.main);
     }
 }
 
@@ -200,8 +195,9 @@ void building_pavilion::spawn_figure() {
 
 void building_pavilion::on_undo() {
     auto &d = runtime_data();
-    for (int dy = 0; dy < 4; dy++) {
-        for (int dx = 0; dx < 4; dx++) {
+    const int s = size();
+    for (int dy = 0; dy < s; dy++) {
+        for (int dx = 0; dx < s; dx++) {
             const uint32_t offset = d.booth_corner_grid_offset + GRID_OFFSET(dx, dy);
             if (map_building_at(offset) == 0)
                 map_building_set(offset, id());
@@ -217,4 +213,5 @@ void building_pavilion::update_map_orientation(int map_orientation) {
     int plaza_image_id = anim("square").first_img();
     tile2i btile(runtime_data().booth_corner_grid_offset);
     map_add_venue_plaza_tiles(id(), size(), btile, plaza_image_id, true);
+    map_add_bandstand_tiles(base.orientation / 2);
 }
