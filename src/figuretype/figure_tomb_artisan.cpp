@@ -58,6 +58,11 @@ void figure_tomb_artisan::figure_action() {
         if (auto *m = b_dest->dcast_monument()) {
             const uint8_t ph = m->phase();
             if (rd.delivered_materials && rd.delivered_phase != ph) {
+                // Free the monument slot now — otherwise max_artisans blocks guild
+                // refill while this walker walks home after a phase advance.
+                if (auto *impl = b_dest->dcast()) {
+                    impl->remove_worker(base.id);
+                }
                 if (bhome && bhome->is_valid()) {
                     advance_action(ACTION_16_TOMB_ARTISAN_RETURN_HOME);
                 } else {
