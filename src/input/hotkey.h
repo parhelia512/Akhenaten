@@ -16,6 +16,8 @@ struct event_rotate_map { int value; };
 struct event_rotate_map_reset { int value; };
 struct event_save_city { int value; };
 struct event_load_city { int value; };
+struct event_save_scenario { int value; };
+struct event_load_scenario { int value; };
 struct event_quicksave { int value; };
 struct event_quickload { int value; };
 struct event_debug_tile_change { int value; };

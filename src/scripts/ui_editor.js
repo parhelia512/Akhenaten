@@ -1,15 +1,15 @@
 log_info("akhenaten: ui editor started")
 
-[es=event_load_city]
-function editor_on_load_city(ev) {
-    if (!game.editor_is_active())
+[es=event_load_scenario]
+function editor_on_load_scenario(ev) {
+    if (!ui.window_is("window_editor_map"))
         return
-    window_file_dialog_load_show(FILE_TYPE_SCENARIO)
+    window_file_dialog_load_scenario_show()
 }
 
-[es=event_save_city]
-function editor_on_save_city(ev) {
-    if (!game.editor_is_active())
+[es=event_save_scenario]
+function editor_on_save_scenario(ev) {
+    if (!ui.window_is("window_editor_map"))
         return
-    window_file_dialog_save_show(FILE_TYPE_SCENARIO)
+    window_file_dialog_save_scenario_show()
 }

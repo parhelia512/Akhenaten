@@ -1,9 +1,6 @@
 log_info("akhenaten: game started")
 
 game = extend(__game, {
-    // -> pending_load_type
-    // -> pending_save_type
-    // -> pending_delete_type
     // -> mission_choice_open_scenario_id
     // -> debug_properties
     // -> debug_terrain_paint
@@ -324,7 +321,7 @@ function app_clear_pending_exit_after_save() {
 function app_open_save_dialog_for_exit() {
     app_pending_exit_after_save = true
     ui.window_city_show()
-    window_file_dialog_save_show(FILE_TYPE_SAVED_GAME)
+    window_file_dialog_save_show()
 }
 
 function app_finish_exit_after_save() {

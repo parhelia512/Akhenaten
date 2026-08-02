@@ -22,9 +22,6 @@ void ank_global_obj_bind_field(js_State *J, js_StringNode name, tile2i *ptr) {
 }
 
 ANK_GLOBAL_OBJECT(game, __game,
-    pending_load_type,
-    pending_save_type,
-    pending_delete_type,
     logo_show_patch_message,
     mission_choice_open_scenario_id,
     debug_properties,

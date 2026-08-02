@@ -1,6 +1,4 @@
 #pragma once
 
-#include "file_dialog_common.h"
-
-void window_file_dialog_save_show(int type);
-
+void window_file_dialog_save_show();
+void window_file_dialog_save_scenario_show();

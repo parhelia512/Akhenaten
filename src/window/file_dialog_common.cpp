@@ -10,11 +10,15 @@ file_type_data saved_game_data = {"sav"};
 file_type_data saved_game_data_expanded = {"svx"};
 file_type_data map_file_data = {"map"};
 
-void window_file_dialog_load_show(int type) {
-    game.pending_load_type = (file_type)type;
+void window_file_dialog_load_show() {
     autoconfig_window::show("file_dialog_load");
 }
-ANK_FUNCTION_1(window_file_dialog_load_show)
+ANK_FUNCTION(window_file_dialog_load_show)
+
+void window_file_dialog_load_scenario_show() {
+    autoconfig_window::show("file_dialog_load_scenario");
+}
+ANK_FUNCTION(window_file_dialog_load_scenario_show)
 
 file_type_data *file_data_for_file_type(file_type t) {
     return t == FILE_TYPE_SCENARIO ? &map_file_data : &saved_game_data;

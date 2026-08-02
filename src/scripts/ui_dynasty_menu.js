@@ -25,7 +25,7 @@ function dynasty_menu_btn_explore() {
 }
 
 function dynasty_menu_btn_load() {
-    window_file_dialog_load_show(FILE_TYPE_SAVED_GAME)
+    window_file_dialog_load_show()
 }
 
 function dynasty_menu_btn_custom() {

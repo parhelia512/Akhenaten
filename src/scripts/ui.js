@@ -61,9 +61,12 @@ import ui_advisor_monuments
 import ui_labor_priority_window
 import ui_window_features
 import ui_hotkey_config_window
+import ui_file_dialog_common
 import ui_file_dialog_save
 import ui_file_dialog_load
 import ui_file_dialog_delete
+import ui_file_dialog_load_scenario
+import ui_file_dialog_save_scenario
 import ui_overlay_menu
 import ui_build_menu
 import ui_market_buyer_window

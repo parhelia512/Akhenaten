@@ -77,9 +77,6 @@ struct game_t {
     uint32_t frame = 0;
     uint16_t last_frame_tick = 0;
     bool system_language_changed = false;
-    uint8_t pending_load_type = 0;
-    uint8_t pending_save_type = 0;
-    uint8_t pending_delete_type = 0;
     uint8_t logo_show_patch_message = 0;
     int mission_choice_open_scenario_id = 0;
     int tick_timer_ms = 37;

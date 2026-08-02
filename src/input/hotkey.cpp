@@ -137,11 +137,21 @@ static void add_definition(const hotkey_mapping& mapping, bool alt) {
         def->callback = [action = mapping.action] { events::emit(event_editor_toggle_battle_info{ action }); };
         break;
     case HOTKEY_LOAD_FILE:
-        def->callback = [action = mapping.action] { events::emit(event_load_city{ action }); };
+        def->callback = [action = mapping.action] {
+            if (editor_is_active())
+                events::emit(event_load_scenario{ action });
+            else
+                events::emit(event_load_city{ action });
+        };
         break;
 
     case HOTKEY_SAVE_FILE:
-        def->callback = [action = mapping.action] { events::emit(event_save_city{ action }); };
+        def->callback = [action = mapping.action] {
+            if (editor_is_active())
+                events::emit(event_save_scenario{ action });
+            else
+                events::emit(event_save_city{ action });
+        };
         break;
     case HOTKEY_QUICKSAVE:
         def->callback = [action = mapping.action] { events::emit(event_quicksave{ action }); };

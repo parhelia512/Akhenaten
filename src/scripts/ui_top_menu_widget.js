@@ -162,7 +162,7 @@ function top_menu_load_map() {
 	widget_top_menu_clear_state()
 	__ui_city_planner_reset()
 	ui.window_city_show()
-	window_file_dialog_load_show(FILE_TYPE_SAVED_GAME)
+	window_file_dialog_load_show()
 }
 
 function top_menu_save_map() {
@@ -173,13 +173,13 @@ function top_menu_save_map() {
 	}
 	widget_top_menu_clear_state()
 	ui.window_city_show()
-	window_file_dialog_save_show(FILE_TYPE_SAVED_GAME)
+	window_file_dialog_save_show()
 }
 
 function top_menu_delete_map() {
 	widget_top_menu_clear_state()
 	ui.window_city_show()
-	window_file_dialog_delete_show(FILE_TYPE_SAVED_GAME)
+	window_file_dialog_delete_show()
 }
 
 function top_menu_exit_game() {
