@@ -770,20 +770,5 @@ function mission16_event_i17_hittite(ev) {
 // pak i=19→20→21→22: favour 15→45→30→30.
 [es=event_advance_month, mission=mission16]
 function mission16_pharaoh_favour_invasion(ev) {
-	if (mission.pharaoh_favour_wave_next < 0) {
-		var n = 0
-		if (mission.pharaoh_favour_invasion_done) { n = 1 }
-		if (mission.pharaoh_favour_wave2_done) { n = 2 }
-		if (mission.pharaoh_favour_wave3_done) { n = 3 }
-		if (mission.pharaoh_favour_wave4_done) { n = 4 }
-		mission.pharaoh_favour_wave_next = n
-		if (n == 1 && mission.pharaoh_favour_wave2_enemies_seen) {
-			mission.pharaoh_favour_enemies_seen = true
-		} else if (n == 2 && mission.pharaoh_favour_wave3_enemies_seen) {
-			mission.pharaoh_favour_enemies_seen = true
-		} else if (n == 3 && mission.pharaoh_favour_wave4_enemies_seen) {
-			mission.pharaoh_favour_enemies_seen = true
-		}
-	}
 	mission_pharaoh_favour_invasion_tick(mission, [15, 45, 30, 30])
 }

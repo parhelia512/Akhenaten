@@ -202,15 +202,12 @@ function mission_pharaoh_favour_invasion_tick(mission, army_size_or_waves, chain
 
 	var next = mission.pharaoh_favour_wave_next
 	if (typeof next !== "number" || next < 0) {
-		// Mid-save: map legacy 1–2 wave flags (pre-B7). -1 = unset.
-		if (!mission.pharaoh_favour_invasion_done) {
-			next = 0
-		} else if (waves.length > 1 && !mission.pharaoh_favour_chain_done) {
-			next = 1
-		} else {
-			next = waves.length
-		}
+		// Mid-save / unset (-1): prefer waveN_done (N-wave), else chain_done (2-wave).
+		next = mission_pharaoh_favour_remigrate_next(mission, waves.length)
 		mission.pharaoh_favour_wave_next = next
+		if (!mission.pharaoh_favour_enemies_seen) {
+			mission_pharaoh_favour_remigrate_enemies_seen(mission, next)
+		}
 	}
 	if (next >= waves.length) {
 		return
@@ -239,9 +236,56 @@ function mission_pharaoh_favour_invasion_tick(mission, army_size_or_waves, chain
 	if (next == 1) {
 		mission.pharaoh_favour_chain_done = true
 	}
+	// Mirror into legacy waveN_done (N-wave missions remigrate from these if wave_next lost).
+	mission_pharaoh_favour_mark_wave_done(mission, next)
 	var size = waves[next]
 	mission.pharaoh_favour_wave_next = next + 1
 	mission_pharaoh_favour_fire_wave(size, 24 + next, targets ? targets[next] : undefined)
+}
+
+function mission_pharaoh_favour_mark_wave_done(mission, wave_index) {
+	// wave_index is 0-based; local polls used wave2_done for the second wave.
+	if (wave_index == 1) {
+		mission.pharaoh_favour_wave2_done = true
+	} else if (wave_index == 2) {
+		mission.pharaoh_favour_wave3_done = true
+	} else if (wave_index == 3) {
+		mission.pharaoh_favour_wave4_done = true
+	} else if (wave_index == 4) {
+		mission.pharaoh_favour_wave5_done = true
+	}
+}
+
+function mission_pharaoh_favour_remigrate_next(mission, wave_count) {
+	if (!mission.pharaoh_favour_invasion_done) {
+		return 0
+	}
+	var next = 1
+	if (mission.pharaoh_favour_wave2_done) { next = 2 }
+	if (mission.pharaoh_favour_wave3_done) { next = 3 }
+	if (mission.pharaoh_favour_wave4_done) { next = 4 }
+	if (mission.pharaoh_favour_wave5_done) { next = 5 }
+	// 2-wave legacy: chain_done without wave2_done means the chain finished.
+	if (next == 1 && mission.pharaoh_favour_chain_done && !mission.pharaoh_favour_wave2_done) {
+		return wave_count
+	}
+	if (next > wave_count) {
+		return wave_count
+	}
+	return next
+}
+
+function mission_pharaoh_favour_remigrate_enemies_seen(mission, next) {
+	// next = index of wave waiting to fire; prior wave's enemies_seen lived in wave{N}_enemies_seen.
+	if (next == 1 && mission.pharaoh_favour_wave2_enemies_seen) {
+		mission.pharaoh_favour_enemies_seen = true
+	} else if (next == 2 && mission.pharaoh_favour_wave3_enemies_seen) {
+		mission.pharaoh_favour_enemies_seen = true
+	} else if (next == 3 && mission.pharaoh_favour_wave4_enemies_seen) {
+		mission.pharaoh_favour_enemies_seen = true
+	} else if (next == 4 && mission.pharaoh_favour_wave5_enemies_seen) {
+		mission.pharaoh_favour_enemies_seen = true
+	}
 }
 
 function mission_pharaoh_favour_fire_wave(size, invasion_id, attack_target) {

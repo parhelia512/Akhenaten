@@ -615,24 +615,6 @@ function mission17_event_i5_limestone_recurring(ev) {
 // pak i=15→16→17→18→19: favour 20×5; last wave attack=FOOD.
 [es=event_advance_month, mission=mission17]
 function mission17_pharaoh_favour_invasion(ev) {
-	if (mission.pharaoh_favour_wave_next < 0) {
-		var n = 0
-		if (mission.pharaoh_favour_invasion_done) { n = 1 }
-		if (mission.pharaoh_favour_wave2_done) { n = 2 }
-		if (mission.pharaoh_favour_wave3_done) { n = 3 }
-		if (mission.pharaoh_favour_wave4_done) { n = 4 }
-		if (mission.pharaoh_favour_wave5_done) { n = 5 }
-		mission.pharaoh_favour_wave_next = n
-		if (n == 1 && mission.pharaoh_favour_wave2_enemies_seen) {
-			mission.pharaoh_favour_enemies_seen = true
-		} else if (n == 2 && mission.pharaoh_favour_wave3_enemies_seen) {
-			mission.pharaoh_favour_enemies_seen = true
-		} else if (n == 3 && mission.pharaoh_favour_wave4_enemies_seen) {
-			mission.pharaoh_favour_enemies_seen = true
-		} else if (n == 4 && mission.pharaoh_favour_wave5_enemies_seen) {
-			mission.pharaoh_favour_enemies_seen = true
-		}
-	}
 	var on_targets = []
 	on_targets[4] = EVENT_ATTACK_TARGET_FOOD
 	mission_pharaoh_favour_invasion_tick(mission, [20, 20, 20, 20, 20], { targets: on_targets })

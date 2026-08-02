@@ -417,6 +417,8 @@ mission18 { // Rostja (Giza) — The Great Pyramid and Sphinx
 		event37_hyksos_last_year : -1
 
 		gems_crisis_raid_done : false
+		troops_rearm_seq : 0
+		troops_kr_seq : 0
 
 		pharaoh_favour_invasion_done : false
 		pharaoh_favour_chain_done : false
@@ -565,8 +567,9 @@ function mission18_ensure_pharaoh_gift_leaves() {
 	mission18_make_leaf(1029, EVENT_TYPE_REPUTATION_DECREASE, undefined, 1, 2)
 }
 
-// Troops chain: ok→31 KR+3→32 NEW_TRADE Iunet; late→33 SEA→34 troops×47;
-// refuse/defeat→1035 KR−2 + JS Hyksos×9 (pak i=35) via event_request_cleared → on_completed→1034.
+// Troops chain: ok→31 KR+3→32 NEW_TRADE Iunet; late→33 SEA→34 troops×47 (first re-arm only).
+// Refuse/defeat → JS Hyksos×9 + unique KR−2 + fresh re-arm tag (shared ONLY_VIA burns — B14).
+// 1035: silent defeat-deferral stub (on_defeat_action >= 0); HAILSTORM is a no-op handler.
 function mission18_ensure_troops_chain_leaves() {
 	if (mission.troops_chain_leaves_wired) {
 		return
@@ -576,19 +579,56 @@ function mission18_ensure_troops_chain_leaves() {
 	mission18_make_leaf(1032, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 7, 2,
 		EVENT_SUBTYPE_NEW_TRADE_ROUTE, "Iunet")
 	var sea = mission18_make_leaf(1033, EVENT_TYPE_SEA_TRADE_PROBLEM, undefined, 5, 2)
-	// KR−2 on refuse/defeat (EVENT_TYPE_INVASION i=35 is engine no-op → JS raid).
-	mission18_make_leaf(1035, EVENT_TYPE_REPUTATION_DECREASE, undefined, 2, 2)
+	mission18_make_leaf(1035, EVENT_TYPE_HAILSTORM, undefined, 0, 2)
 	var troops2 = city.create_good_request({
 		tag_id: 1034, resource: RESOURCE_TROOPS, amount: 47, months_initial: 8, subtype: 1,
 		trigger: EVENT_TRIGGER_ONLY_VIA_EVENT, city: "Men-nefer"
 	})
 	troops2.set_sender_faction(0)
 	troops2.set_completed_action_tag(1032)
-	troops2.set_refusal_action_tag(1035)
 	troops2.set_too_late_action_tag(1033)
 	troops2.set_defeat_action_tag(1035)
 	kr_ok.set_completed_action_tag(1032)
 	sea.set_completed_action_tag(1034)
+}
+
+function mission18_fire_unique_kr(delta) {
+	mission.troops_kr_seq = (mission.troops_kr_seq | 0) + 1
+	var type = delta >= 0 ? EVENT_TYPE_REPUTATION_INCREASE : EVENT_TYPE_REPUTATION_DECREASE
+	var amount = delta >= 0 ? delta : -delta
+	city.create_chain_event({
+		tag_id: 4200 + mission.troops_kr_seq,
+		type: type,
+		amount: amount,
+		trigger: EVENT_TRIGGER_ONCE
+	}).execute()
+}
+
+function mission18_create_troops_rearm_request(tag) {
+	var troops2 = city.create_good_request({
+		tag_id: tag, resource: RESOURCE_TROOPS, amount: 47, months_initial: 8, subtype: 1,
+		trigger: EVENT_TRIGGER_ONLY_VIA_EVENT, city: "Men-nefer"
+	})
+	troops2.set_sender_faction(0)
+	troops2.set_completed_action_tag(1032)
+	troops2.set_too_late_action_tag(1033)
+	troops2.set_defeat_action_tag(1035)
+	return troops2
+}
+
+function mission18_troops_refuse_raid(tag) {
+	mission18_fire_unique_kr(-2)
+	mission.troops_rearm_seq = (mission.troops_rearm_seq | 0) + 1
+	var rearm_tag = 4100 + mission.troops_rearm_seq
+	mission18_create_troops_rearm_request(rearm_tag)
+	// High band: avoid colliding with calendar Hyksos (0 / 3+year%20) and favour (24+).
+	var invasion_id = 60 + (mission.troops_rearm_seq % 20)
+	log_info("akhenaten: mission 18 rostja hyksos×9 after troops refuse/defeat tag=" + tag + " rearm=" + rearm_tag)
+	mission18_hyksos_raid(invasion_id, 9, EVENT_ATTACK_TARGET_FOOD, rearm_tag)
+}
+
+function mission18_is_troops_rearm_tag(tag) {
+	return tag >= 4100 && tag < 4200
 }
 
 [es=event_mission_start, mission=mission18]
@@ -873,10 +913,11 @@ function mission18_event_i30_troops(ev) {
 	mission.event30_troops_done = true
 	mission18_ensure_troops_chain_leaves()
 	log_info("akhenaten: mission 18 rostja troops×40", {ev:ev})
-	mission18_fire_request(2030, RESOURCE_TROOPS, 40, 12, 1031, 1035, 1033, 1, 0, 1035, "Men-nefer")
+	// refuse_tag 0: KR from cleared (unique). defeat_tag 1035: defer-to-battle gate only.
+	mission18_fire_request(2030, RESOURCE_TROOPS, 40, 12, 1031, 0, 1033, 1, 0, 1035, "Men-nefer")
 }
 
-// Factual request close — invasions from JS (no KR-snap). Leaf KR still via wired tags.
+// Factual request close — invasions from JS (no KR-snap).
 // Defeat of deferred troop asks also emits event_request_cleared (fulfilled=0) → "refuse".
 [es=event_request_cleared, mission=mission18]
 function mission18_on_request_cleared(ev) {
@@ -891,10 +932,10 @@ function mission18_on_request_cleared(ev) {
 		return
 	}
 
-	// pak i=35 Hyksos×9 after troops refuse/defeat (not late→SEA). Covers 2030 and re-arm 1034.
-	if ((tag == 2030 || tag == 1034) && outcome == "refuse") {
-		log_info("akhenaten: mission 18 rostja hyksos×9 after troops refuse/defeat tag=" + tag, {ev:ev})
-		mission18_hyksos_raid(2, 9, EVENT_ATTACK_TARGET_FOOD, 1034)
+	// pak i=35 Hyksos×9 after troops refuse/defeat (not late→SEA).
+	// 2030 / SEA-armed 1034 / fresh re-arm tags 4100+.
+	if ((tag == 2030 || tag == 1034 || mission18_is_troops_rearm_tag(tag)) && outcome == "refuse") {
+		mission18_troops_refuse_raid(tag)
 	}
 }
 
@@ -995,17 +1036,5 @@ function mission18_event_i43_new_trade_route(ev) {
 // pak i=18→40→41: favour Pharaoh 50→20→50.
 [es=event_advance_month, mission=mission18]
 function mission18_pharaoh_favour_invasion(ev) {
-	if (mission.pharaoh_favour_wave_next < 0) {
-		var n = 0
-		if (mission.pharaoh_favour_invasion_done) { n = 1 }
-		if (mission.pharaoh_favour_wave2_done) { n = 2 }
-		if (mission.pharaoh_favour_wave3_done) { n = 3 }
-		mission.pharaoh_favour_wave_next = n
-		if (n == 1 && mission.pharaoh_favour_wave2_enemies_seen) {
-			mission.pharaoh_favour_enemies_seen = true
-		} else if (n == 2 && mission.pharaoh_favour_wave3_enemies_seen) {
-			mission.pharaoh_favour_enemies_seen = true
-		}
-	}
 	mission_pharaoh_favour_invasion_tick(mission, [50, 20, 50])
 }

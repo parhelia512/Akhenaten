@@ -944,17 +944,5 @@ function mission13_clay_pit_flood_recurring(ev) {
 // pak i=48/49/50: by_favour Pharaoh army size=22 → 21 → 28.
 [es=event_advance_month, mission=mission13]
 function mission13_pharaoh_favour_invasion(ev) {
-	if (mission.pharaoh_favour_wave_next < 0) {
-		var n = 0
-		if (mission.pharaoh_favour_invasion_done) { n = 1 }
-		if (mission.pharaoh_favour_wave2_done) { n = 2 }
-		if (mission.pharaoh_favour_wave3_done) { n = 3 }
-		mission.pharaoh_favour_wave_next = n
-		if (n == 1 && mission.pharaoh_favour_wave2_enemies_seen) {
-			mission.pharaoh_favour_enemies_seen = true
-		} else if (n == 2 && mission.pharaoh_favour_wave3_enemies_seen) {
-			mission.pharaoh_favour_enemies_seen = true
-		}
-	}
 	mission_pharaoh_favour_invasion_tick(mission, [22, 21, 28])
 }

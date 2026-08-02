@@ -453,6 +453,10 @@ mission32 { // Khmun (Hermopolis) — Egypt Reclaimed
 		inv_loop_done : false
 		pending_inv13 : false
 		pending_inv4_after_demand : false
+		pharaoh_favour_invasion_done : false
+		pharaoh_favour_chain_done : false
+		pharaoh_favour_enemies_seen : false
+		pharaoh_favour_wave_next : -1
 		start_message_shown : false
 	}
 }
