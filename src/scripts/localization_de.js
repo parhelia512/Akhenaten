@@ -357,6 +357,7 @@ localization_de = [
   {key:"#TR_ADVISOR_TOTAL_POPULATION", text:"Einwohner insgesamt"}
 
   {key: "#main_menu_mods", text:"Mods"}
+  {key: "#main_menu_editor", text:"Editor"}
   {key: "#mission2_store_figs", text:"Baut eine Kornkammer und füllt sie mit Feigen"}
 
   {key: "#message_population_title", text:"Bevölkerungsmeilenstein"}

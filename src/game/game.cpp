@@ -378,6 +378,10 @@ bool game_init(game_opts opts) {
 
     game.init_state();
 
+    if (g_args.is_editor()) {
+        return game_init_editor();
+    }
+
     if (g_args.no_logo()) {
         events::emit(event_show_main_menu{ true });
     } else {

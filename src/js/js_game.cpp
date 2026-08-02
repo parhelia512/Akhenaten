@@ -21,6 +21,7 @@
 #include "game/file_editor.h"
 #include "game/game.h"
 #include "game/game_config.h"
+#include "editor/editor.h"
 #include "game/mission.h"
 #include "game/game_events.h"
 #include "game/player.h"
@@ -504,6 +505,8 @@ bool __game_delete_savegame(pcstr filename_short) { return GamestateIO::delete_s
 bool __game_delete_map(pcstr filename_short) { return GamestateIO::delete_map(filename_short); } ANK_FUNCTION_1(__game_delete_map)
 bool __game_editor_load_scenario(pcstr path) { return game_file_editor_load_scenario(path) != 0; } ANK_FUNCTION_1(__game_editor_load_scenario)
 bool __game_editor_write_scenario(pcstr path) { return game_file_editor_write_scenario(path) != 0; } ANK_FUNCTION_1(__game_editor_write_scenario)
+bool __game_init_editor() { return game_init_editor(); } ANK_FUNCTION(__game_init_editor)
+bool __editor_is_active() { return editor_is_active() != 0; } ANK_FUNCTION(__editor_is_active)
 void __game_load_mission(int scenario_id, int start_immediately) { GamestateIO::load_mission(scenario_id, !!start_immediately); } ANK_FUNCTION_2(__game_load_mission)
 bool __game_load_map(pcstr filename_short, int start_immediately) { return GamestateIO::load_map(filename_short, true, !!start_immediately); } ANK_FUNCTION_2(__game_load_map)
 void __game_start_loaded_file() { GamestateIO::start_loaded_file(); } ANK_FUNCTION(__game_start_loaded_file)

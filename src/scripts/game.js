@@ -51,6 +51,8 @@ game = extend(__game, {
     get_last_loaded_file: __game_get_last_loaded_file
     editor_load_scenario: __game_editor_load_scenario
     editor_write_scenario: __game_editor_write_scenario
+    init_editor: __game_init_editor
+    editor_is_active: __editor_is_active
     last_advisor: ADVISOR_NONE
 })
 

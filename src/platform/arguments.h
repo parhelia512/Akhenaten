@@ -89,6 +89,7 @@ public:
     [[nodiscard]] bool config_file_exists() const { return is("config_file_exists", false); }
     [[nodiscard]] bool should_unpack_scripts() const { return is("unpack_scripts", false); }
     [[nodiscard]] bool is_integral_tests() const { return is("integral_tests", false); }
+    [[nodiscard]] bool is_editor() const { return is("editor", false); }
     [[nodiscard]] bool no_logo() const { return is("no_logo", false); }
     [[nodiscard]] bool no_intro() const { return is("nointro", false); }
     [[nodiscard]] bool no_mouse() const { return is("nomouse", false); }

@@ -215,7 +215,6 @@ void figure::action_perform() {
         }
 
         switch (type) {
-        case 36: editor_flag_action(); break;
         case FIGURE_CHARIOR_RACER: hippodrome_horse_action(); break;
 
         default:

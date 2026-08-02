@@ -1971,6 +1971,16 @@ figure_explosion = {
 	terrain_usage : TERRAIN_USAGE_ANY,
 }
 
+figure_map_flag = {
+	animations : {
+		big_image : { pack:PACK_UNLOADED, id:25, offset:FIGURE_MAP_FLAG }
+	}
+
+	category: figure_category_inactive
+	max_damage : 0
+	terrain_usage : TERRAIN_USAGE_ANY,
+}
+
 figure_tax_collector {
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:41, max_frames:12 }

@@ -409,8 +409,7 @@ void hotkey_handle_escape(void) {
     if (editor_is_active()) {
         popup_dialog::show_yesno("#popup_dialog_quit", [](bool accepted) {
             if (accepted) {
-                widget_top_menu_clear_state();
-                events::emit(event_show_main_menu{ true });
+                game_exit_editor();
             }
         });
         return;

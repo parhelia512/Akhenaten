@@ -13,7 +13,8 @@ window_main_menu {
 		show_records  : large_button({ pos:mbutton(2), size[256, 25], text[30, 5], onclick: show_window_by_id("records_window") })
 		show_config   : large_button({ pos:mbutton(3), size[256, 25], text[2,  0], onclick: show_window_by_id("window_features") })
 		show_mods     : large_button({ pos:mbutton(4), size[256, 25], text:"#main_menu_mods", onclick: show_window_by_id("mods_window") })
-		quit_game     : large_button({ pos:mbutton(5), size[256, 25], text[30, 4], onclick: main_menu_quit_game })
+		show_editor   : large_button({ pos:mbutton(5), size[256, 25], text:"#main_menu_editor", onclick: main_menu_start_editor })
+		quit_game     : large_button({ pos:mbutton(6), size[256, 25], text[30, 4], onclick: main_menu_quit_game })
 
 		discord 	  : image_button({ pos[sw(-100), sh(-50)], size[48, 48], icon_texture:"!discord", scale:0.75
 							           	onclick: function() { __platform_open_url("https://discord.gg/HS4njmBvpb") }
@@ -60,6 +61,10 @@ function main_menu_quit_game() {
     ui.show_yesno("#popup_dialog_quit", function() {
 		emit event_request_exit{ value: true }
 	})
+}
+
+function main_menu_start_editor() {
+    game.init_editor()
 }
 
 [es=event_show_main_menu]

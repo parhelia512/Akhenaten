@@ -79,11 +79,7 @@ function file_dialog_save_last_extension(path) {
 }
 
 function file_dialog_save_scenario_disk_path(basename_no_ext) {
-    var p = "Save/" + game.dynasty_name + "/" + basename_no_ext + ".svx"
-    if (file_dialog_save_last_extension(p) !== "map")
-        p = p + ".map"
-
-    return p
+    return "Maps/" + basename_no_ext + ".map"
 }
 
 function file_dialog_save_handle_commit(ev) {

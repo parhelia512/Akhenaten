@@ -36,6 +36,8 @@
 #include "grid/bridge_grid.h"
 #include "grid/terrain.h"
 #include "grid/tiles.h"
+#include "grid/grid.h"
+#include "io/gamestate/boilerplate.h"
 #include "scenario/distant_battle.h"
 #include "scenario/earthquake.h"
 #include "scenario/editor.h"
@@ -48,7 +50,16 @@
 #include "game/game.h"
 #include "empire/empire_traders.h"
 
+#include <cstring>
+
+#if defined(_MSC_VER)
+#define strncasecmp _strnicmp
+#endif
+
+
 void game_file_editor_clear_data(void) {
+    grid_xx::init_all_grids();
+
     g_city.victory.reset();
     g_city.migration.reset();
     g_city_planner.reset();
@@ -101,9 +112,6 @@ static void create_blank_map(int size) {
 }
 
 static void prepare_map_for_editing(void) {
-    //    image_load_main_paks(scenario_property_climate(), 1, 0);
-
-    //    empire_load_external_c3(1, scenario_empire_id());
     g_empire.init_cities();
 
     g_city.figures.init_figures();
@@ -131,16 +139,36 @@ void game_file_editor_create_scenario(int size) {
     prepare_map_for_editing();
 }
 
+static bool path_looks_absolute(const char *path) {
+    if (!path || !path[0]) {
+        return false;
+    }
+    if (path[0] == '/' || path[0] == '\\') {
+        return true;
+    }
+    return path[1] == ':' && ((path[0] >= 'A' && path[0] <= 'Z') || (path[0] >= 'a' && path[0] <= 'z'));
+}
+
 int game_file_editor_load_scenario(const char* scenario_file) {
-    clear_map_data();
-    //    if (!game_file_io_read_scenario(scenario_file)) TODO
-    //        return 0;
+    if (!scenario_file || !scenario_file[0]) {
+        return 0;
+    }
+
+    const bool relative = !path_looks_absolute(scenario_file);
+    if (!GamestateIO::load_map(scenario_file, relative, false)) {
+        return 0;
+    }
 
     prepare_map_for_editing();
+    g_scenario.is_saved = true;
     return 1;
 }
 
 int game_file_editor_write_scenario(const char* scenario_file) {
+    if (!scenario_file || !scenario_file[0]) {
+        return 0;
+    }
+
     scenario_editor_set_native_images(image_id_from_group(GROUP_EDITOR_BUILDING_NATIVE),
                                       image_id_from_group(GROUP_EDITOR_BUILDING_NATIVE) + 2,
                                       image_id_from_group(GROUP_EDITOR_BUILDING_CROPS));
@@ -151,6 +179,17 @@ int game_file_editor_write_scenario(const char* scenario_file) {
     int kenemy = g_empire.init_distant_battle_travel_months(EMPIRE_OBJECT_ENEMY_ARMY);
     g_scenario.distant_battle_set_enemy_travel_months(kenemy);
 
-    //    return game_file_io_write_scenario(scenario_file); TODO
-    return 0;
+    bool ok = false;
+    if (path_looks_absolute(scenario_file)
+        || strncasecmp(scenario_file, "Maps/", 5) == 0
+        || strncasecmp(scenario_file, "Maps\\", 5) == 0) {
+        ok = GamestateIO::write_map_path(scenario_file);
+    } else {
+        ok = GamestateIO::write_map(scenario_file);
+    }
+
+    if (ok) {
+        g_scenario.is_saved = true;
+    }
+    return ok ? 1 : 0;
 }

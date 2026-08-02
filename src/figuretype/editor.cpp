@@ -4,8 +4,11 @@
 #include "graphics/image_groups.h"
 #include "grid/figure.h"
 #include "grid/grid.h"
+#include "js/js_game.h"
 #include "scenario/editor_map.h"
 #include "scenario/map.h"
+
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_map_flag);
 
 void figure_create_editor_flags() {
     for (int id = MAP_FLAG_MIN; id < MAP_FLAG_MAX; id++) {
@@ -14,9 +17,11 @@ void figure_create_editor_flags() {
     }
 }
 
+void figure_map_flag::figure_action() {
+    base.editor_flag_action();
+}
+
 void figure::editor_flag_action() {
-    // each flag figure tracks one stored scenario point (selected by resource_id);
-    // reposition it onto that point every tick so placed points are visualized.
     map_figure_remove();
 
     const int id = resource_id;
@@ -44,8 +49,6 @@ void figure::editor_flag_action() {
         icon_offset = 1;
     } else if (id >= MAP_FLAG_FISHING_MIN && id < MAP_FLAG_FISHING_MAX) {
         point = scenario_editor_fishing_point(id - MAP_FLAG_FISHING_MIN);
-        // original used GROUP_FIGURE_FORT_STANDARD_ICONS (unavailable here); the
-        // flag number drawn by draw_map_flag disambiguates fishing/herd points
         icon_offset = 1;
     } else if (id >= MAP_FLAG_HERD_MIN && id < MAP_FLAG_HERD_MAX) {
         point = scenario_editor_predator_herd_point(id - MAP_FLAG_HERD_MIN);
@@ -53,7 +56,6 @@ void figure::editor_flag_action() {
     }
 
     if (!point.valid()) {
-        // not placed yet: hide (draw_map_flag is skipped when cart_image_id == 0)
         cart_image_id = 0;
         tile = tile2i::invalid;
         return;

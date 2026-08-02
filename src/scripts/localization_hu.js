@@ -387,6 +387,7 @@ localization_hu = [
   {key:"#TR_ADVISOR_TOTAL_POPULATION", text:"összes lakos"}
 
   {key: "#main_menu_mods", text:"Módosítások"}
+  {key: "#main_menu_editor", text:"Szerkesztő"}
   {key: "#mission2_store_figs", text:"Építs magtárat, és töltsd fel fügével"}
 
   {key: "#message_population_title", text:"Népességi mérföldkő"}
