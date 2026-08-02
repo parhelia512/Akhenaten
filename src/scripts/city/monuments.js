@@ -45,11 +45,11 @@ MONUMENT_WEIGHTS[BUILDING_MAUSOLEUM]                      = 5
 MONUMENT_WEIGHTS[BUILDING_ALEXANDRIA_LIBRARY]             = 6
 MONUMENT_WEIGHTS[BUILDING_CAESAREUM]                      = 8  // mission 51: +Mausoleum 5 → rating 33 ≥ goal 24
 MONUMENT_WEIGHTS[BUILDING_PHAROS_LIGHTHOUSE]              = 5  // PL3; pair Library 6 → rating 29 ≥ goal 28
-MONUMENT_WEIGHTS[BUILDING_SMALL_ROYAL_TOMB]               = 4
+MONUMENT_WEIGHTS[BUILDING_SMALL_ROYAL_TOMB]               = 4  // m38 goal 13
 MONUMENT_WEIGHTS[BUILDING_ABU_SIMBEL]                     = 44
-MONUMENT_WEIGHTS[BUILDING_MEDIUM_ROYAL_TOMB]              = 1
-MONUMENT_WEIGHTS[BUILDING_LARGE_ROYAL_TOMB]               = 1
-MONUMENT_WEIGHTS[BUILDING_GRAND_ROYAL_TOMB]               = 4
+MONUMENT_WEIGHTS[BUILDING_MEDIUM_ROYAL_TOMB]              = 8  // m39 goal 22
+MONUMENT_WEIGHTS[BUILDING_LARGE_ROYAL_TOMB]               = 13 // m40 goal 32 → trunc(33)
+MONUMENT_WEIGHTS[BUILDING_GRAND_ROYAL_TOMB]               = 18 // m44 goal 45
 
 // Monument rating is APPROXIMATE and additive, not concave. The original Pharaoh
 // aggregates monument points roughly linearly across the built monuments; the old

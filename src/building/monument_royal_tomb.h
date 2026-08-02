@@ -43,6 +43,7 @@ public:
     virtual int building_image_get() const override;
     virtual bool need_stonemason() override;
     virtual bool need_artisan() override;
+    virtual bool need_workers() override;
     virtual bool need_workers() const override;
     virtual bool needs_resources() const override;
     virtual void add_workers(figure_id fid) override;
@@ -57,11 +58,13 @@ public:
     vec2i bulk_size() const;
     vec2i total_size() const;
     vec2i footprint_size() const { return total_size(); }
+    const base_params &tomb_params() const;
 
     static bool is_bulk_local(int dx, int dy, vec2i bulk);
     static bool is_entrance_local(int dx, int dy, vec2i bulk, vec2i entrance);
     static bool is_padding_local(int dx, int dy, vec2i bulk, vec2i entrance);
     static bool has_unfinished_royal_tomb(e_building_type type);
+    static const base_params &params_for(e_building_type type);
 };
 
 class building_small_royal_tomb : public building_royal_tomb {
@@ -73,3 +76,33 @@ public:
     virtual const monument &config() const override;
 };
 ANK_CONFIG_STRUCT(building_small_royal_tomb::static_params, init_tiles, entrance_size, art_stages, lamp_loads)
+
+class building_medium_royal_tomb : public building_royal_tomb {
+public:
+    BUILDING_METAINFO(BUILDING_MEDIUM_ROYAL_TOMB, building_medium_royal_tomb, building_royal_tomb)
+    struct static_params : public building_royal_tomb::static_params {
+        void archive_load(archive arch);
+    } BUILDING_STATIC_DATA_T;
+    virtual const monument &config() const override;
+};
+ANK_CONFIG_STRUCT(building_medium_royal_tomb::static_params, init_tiles, entrance_size, art_stages, lamp_loads)
+
+class building_large_royal_tomb : public building_royal_tomb {
+public:
+    BUILDING_METAINFO(BUILDING_LARGE_ROYAL_TOMB, building_large_royal_tomb, building_royal_tomb)
+    struct static_params : public building_royal_tomb::static_params {
+        void archive_load(archive arch);
+    } BUILDING_STATIC_DATA_T;
+    virtual const monument &config() const override;
+};
+ANK_CONFIG_STRUCT(building_large_royal_tomb::static_params, init_tiles, entrance_size, art_stages, lamp_loads)
+
+class building_grand_royal_tomb : public building_royal_tomb {
+public:
+    BUILDING_METAINFO(BUILDING_GRAND_ROYAL_TOMB, building_grand_royal_tomb, building_royal_tomb)
+    struct static_params : public building_royal_tomb::static_params {
+        void archive_load(archive arch);
+    } BUILDING_STATIC_DATA_T;
+    virtual const monument &config() const override;
+};
+ANK_CONFIG_STRUCT(building_grand_royal_tomb::static_params, init_tiles, entrance_size, art_stages, lamp_loads)

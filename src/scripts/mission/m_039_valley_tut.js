@@ -1,15 +1,5 @@
 log_info("akhenaten: mission 39 valley tut started")
 
-// Cleop mission1.pak scenario 39 (dump 2026-07-28). Empire id=21.
-// Enemy ENEMY_6_KUSHITE. Gods: Osiris(1), Ra(2). Start year -1325.
-// MM subtitle: Death of Tutankhamun. Rank 6 (pak). Funds Normal 8500 / loan 3000 / debt 12.
-// Win: pop 1500 / culture OFF / prosperity OFF / monuments TEMP 22 (pak first=34 Medium
-//   Royal Tomb; weight 1 undercounts — TODO(C10)) / kingdom 45 / housing level 14.
-// Time limit 8 years (explicit; also in map/pak).
-// Climate desert; map_background empire pack id 23. Our city: Deir el-Medina.
-// Burial: weapons×3 pottery×6 linen×2 luxury×6 chariots×1.
-// Empire/events in JS (hide_pak_cities/routes/objects + events[]). next_mission 40.
-
 mission39 { // Tut in the Valley — Death of Tutankhamun
 	map_file : "data/maps/m_039_valley_tut.map"
 	start_message : "message_mission_tutankhamun_valley"

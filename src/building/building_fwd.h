@@ -104,6 +104,9 @@ class building_mausoleum;
 class building_pharos_lighthouse;
 class building_royal_tomb;
 class building_small_royal_tomb;
+class building_medium_royal_tomb;
+class building_large_royal_tomb;
+class building_grand_royal_tomb;
 
 using e_building_need_rules = uint32_t;
 

@@ -26,15 +26,53 @@
 #include <algorithm>
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_small_royal_tomb);
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_medium_royal_tomb);
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_royal_tomb);
+REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_grand_royal_tomb);
 
 static monument g_monument_small_royal_tomb{BUILDING_SMALL_ROYAL_TOMB};
+static monument g_monument_medium_royal_tomb{BUILDING_MEDIUM_ROYAL_TOMB};
+static monument g_monument_large_royal_tomb{BUILDING_LARGE_ROYAL_TOMB};
+static monument g_monument_grand_royal_tomb{BUILDING_GRAND_ROYAL_TOMB};
 
 static constexpr uint32_t k_cliff_terrain = TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP;
+
+template <typename T>
+static const building_royal_tomb::base_params &rt_base_params(const building_static_params &p) {
+    return static_cast<const typename T::static_params &>(p);
+}
+
+const building_royal_tomb::base_params &building_royal_tomb::params_for(e_building_type type) {
+    switch (type) {
+    case BUILDING_SMALL_ROYAL_TOMB:
+        return rt_base_params<building_small_royal_tomb>(building_static_params::get(type));
+    case BUILDING_MEDIUM_ROYAL_TOMB:
+        return rt_base_params<building_medium_royal_tomb>(building_static_params::get(type));
+    case BUILDING_LARGE_ROYAL_TOMB:
+        return rt_base_params<building_large_royal_tomb>(building_static_params::get(type));
+    case BUILDING_GRAND_ROYAL_TOMB:
+        return rt_base_params<building_grand_royal_tomb>(building_static_params::get(type));
+    default:
+        break;
+    }
+    static base_params dummy;
+    return dummy;
+}
+
+const building_royal_tomb::base_params &building_royal_tomb::tomb_params() const {
+    return params_for(type());
+}
 
 void building_royal_tomb::static_params::rebuild_construction(e_building_type type) {
     monument *m = nullptr;
     if (type == BUILDING_SMALL_ROYAL_TOMB) {
         m = &g_monument_small_royal_tomb;
+    } else if (type == BUILDING_MEDIUM_ROYAL_TOMB) {
+        m = &g_monument_medium_royal_tomb;
+    } else if (type == BUILDING_LARGE_ROYAL_TOMB) {
+        m = &g_monument_large_royal_tomb;
+    } else if (type == BUILDING_GRAND_ROYAL_TOMB) {
+        m = &g_monument_grand_royal_tomb;
     }
     if (!m) {
         return;
@@ -59,22 +97,44 @@ void building_small_royal_tomb::static_params::archive_load(archive /*arch*/) {
     rebuild_construction(BUILDING_SMALL_ROYAL_TOMB);
 }
 
+void building_medium_royal_tomb::static_params::archive_load(archive /*arch*/) {
+    rebuild_construction(BUILDING_MEDIUM_ROYAL_TOMB);
+}
+
+void building_large_royal_tomb::static_params::archive_load(archive /*arch*/) {
+    rebuild_construction(BUILDING_LARGE_ROYAL_TOMB);
+}
+
+void building_grand_royal_tomb::static_params::archive_load(archive /*arch*/) {
+    rebuild_construction(BUILDING_GRAND_ROYAL_TOMB);
+}
+
 const monument &building_small_royal_tomb::config() const {
     return g_monument_small_royal_tomb;
+}
+
+const monument &building_medium_royal_tomb::config() const {
+    return g_monument_medium_royal_tomb;
+}
+
+const monument &building_large_royal_tomb::config() const {
+    return g_monument_large_royal_tomb;
+}
+
+const monument &building_grand_royal_tomb::config() const {
+    return g_monument_grand_royal_tomb;
 }
 
 static vec2i rt_entrance_size(vec2i entrance) {
     if (entrance.x > 0 && entrance.y > 0) {
         return entrance;
     }
-    const vec2i cfg = building_small_royal_tomb::current_params().entrance_size;
-    return (cfg.x > 0 && cfg.y > 0) ? cfg : vec2i{1, 1};
+    return {1, 1};
 }
 
 static vec2i rt_oriented_bulk(vec2i init_tiles, int rotation) {
     if (init_tiles.x <= 0 || init_tiles.y <= 0) {
-        const vec2i cfg = building_small_royal_tomb::current_params().init_tiles;
-        init_tiles = (cfg.x > 0 && cfg.y > 0) ? cfg : vec2i{11, 20};
+        init_tiles = {11, 20};
     }
     rotation %= 4;
     if (rotation == 1 || rotation == 3) {
@@ -106,8 +166,8 @@ static void rt_local_xy(tile2i tile, tile2i origin, int *dx, int *dy) {
     *dy = tile.y() - origin.y();
 }
 
-static void rt_preview_geometry(vec2i *bulk_out, vec2i *ent_out, vec2i *total_out) {
-    const auto &bp = building_small_royal_tomb::current_params();
+static void rt_preview_geometry(e_building_type type, vec2i *bulk_out, vec2i *ent_out, vec2i *total_out) {
+    const auto &bp = building_royal_tomb::params_for(type);
     const int rot = building_rotation_global_rotation() % 4;
     *bulk_out = rt_oriented_bulk(bp.init_tiles, rot);
     *ent_out = rt_entrance_size(bp.entrance_size);
@@ -150,15 +210,15 @@ bool building_royal_tomb::has_unfinished_royal_tomb(e_building_type type) {
 }
 
 vec2i building_royal_tomb::bulk_size() const {
-    return rt_oriented_bulk(building_small_royal_tomb::current_params().init_tiles, base.orientation);
+    return rt_oriented_bulk(tomb_params().init_tiles, base.orientation);
 }
 
 vec2i building_royal_tomb::total_size() const {
-    return rt_total_size(bulk_size(), building_small_royal_tomb::current_params().entrance_size);
+    return rt_total_size(bulk_size(), tomb_params().entrance_size);
 }
 
 int building_royal_tomb::art_stage() const {
-    const auto &bp = building_small_royal_tomb::current_params();
+    const auto &bp = tomb_params();
     const int max_stage = bp.art_stages > 0 ? bp.art_stages : 9;
     const int p = runtime_data().phase;
     if (p == MONUMENT_FINISHED || p >= max_stage) {
@@ -171,7 +231,7 @@ int building_royal_tomb::art_stage() const {
 }
 
 xstring building_royal_tomb::anim_key_for(int stage) const {
-    const auto &bp = building_small_royal_tomb::current_params();
+    const auto &bp = tomb_params();
     const int max_stage = bp.art_stages > 0 ? bp.art_stages : 9;
     if (stage < 1) {
         stage = 1;
@@ -204,36 +264,67 @@ bool building_royal_tomb::needs_resources() const {
 }
 
 bool building_royal_tomb::need_stonemason() {
-    if (is_finished()) {
+    if (is_finished() || runtime_data().phase < 1) {
         return false;
     }
-    // After first lamp delivery, masons carve chambers.
-    return runtime_data().phase >= 1;
-}
-
-bool building_royal_tomb::need_artisan() {
-    if (is_finished()) {
-        return false;
-    }
-    // Artisans after first carve phase (AG7 fidelity later).
-    return runtime_data().phase >= 2;
-}
-
-bool building_royal_tomb::need_workers() const {
-    if (is_finished() || needs_resources()) {
+    // Free slot required — without it guilds spawn walkers that add_workers drops.
+    if (!need_workers()) {
         return false;
     }
     for (auto wid : runtime_data().workers) {
-        if (wid) {
+        figure *f = wid > 0 ? figure_get(wid) : nullptr;
+        if (f && f->is_alive() && f->type == FIGURE_STONEMASON) {
             return false;
         }
     }
     return true;
 }
 
+bool building_royal_tomb::need_artisan() {
+    if (is_finished() || runtime_data().phase < 2) {
+        return false;
+    }
+    if (!need_workers()) {
+        return false;
+    }
+    for (auto wid : runtime_data().workers) {
+        figure *f = wid > 0 ? figure_get(wid) : nullptr;
+        if (f && f->is_alive() && f->type == FIGURE_TOMB_ARTISAN) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool building_royal_tomb::need_workers() {
+    return static_cast<const building_royal_tomb *>(this)->need_workers();
+}
+
+bool building_royal_tomb::need_workers() const {
+    if (is_finished()) {
+        return false;
+    }
+    // Match building_monument / mastaba: true iff a free worker slot exists.
+    for (auto wid : runtime_data().workers) {
+        if (!wid) {
+            return true;
+        }
+        figure *f = figure_get(wid);
+        if (!f || !f->is_alive()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void building_royal_tomb::add_workers(figure_id fid) {
     for (auto &wid : runtime_data().workers) {
         if (!wid) {
+            wid = fid;
+            return;
+        }
+        figure *f = figure_get(wid);
+        if (!f || !f->is_alive()) {
             wid = fid;
             return;
         }
@@ -250,7 +341,7 @@ void building_royal_tomb::remove_worker(figure_id fid) {
 }
 
 int building_royal_tomb::building_image_get() const {
-    const auto &params = building_small_royal_tomb::current_params();
+    const auto &params = building_static_params::get(type());
     int img = params.first_img(anim_key_for(art_stage()));
     if (img > 0) {
         return img;
@@ -273,24 +364,29 @@ static void rt_add_tile(int building_id, tile2i origin, int dx, int dy, int imag
     map_building_set(grid_offset, building_id);
     map_property_clear_constructing(grid_offset);
     map_property_set_multi_tile_size(grid_offset, 1);
-    map_image_set(grid_offset, is_main ? image_id : 0);
+    map_image_set(grid_offset, image_id);
     map_property_set_multi_tile_xy(grid_offset, dx, dy, is_main);
 }
 
-static void rt_place_tiles(int building_id, tile2i origin, vec2i bulk, vec2i entrance, int image_id) {
+static void rt_place_tiles(int building_id, tile2i origin, vec2i bulk, vec2i entrance, int image_id, int entrance_img) {
     entrance = rt_entrance_size(entrance);
     for (int dy = 0; dy < bulk.y; dy++) {
         for (int dx = 0; dx < bulk.x; dx++) {
-            rt_add_tile(building_id, origin, dx, dy, image_id, dx == 0 && dy == 0);
+            const bool is_main = dx == 0 && dy == 0;
+            rt_add_tile(building_id, origin, dx, dy, is_main ? image_id : 0, is_main);
         }
     }
     const int x0 = (bulk.x - entrance.x) / 2;
     for (int dy = 0; dy < entrance.y; dy++) {
         for (int dx = 0; dx < entrance.x; dx++) {
-            rt_add_tile(building_id, origin, x0 + dx, bulk.y + dy, image_id, false);
+            rt_add_tile(building_id, origin, x0 + dx, bulk.y + dy, entrance_img, false);
         }
     }
     map_property_mark_draw_tile(origin.grid_offset());
+}
+
+static int rt_entrance_img(e_building_type type) {
+    return building_static_params::get(type).first_img("entrance");
 }
 
 static bool rt_tile_is_cliff(tile2i t) {
@@ -342,7 +438,7 @@ static int rt_validate_cliff_entrance(tile2i origin, vec2i bulk, vec2i entrance,
 
 void building_royal_tomb::preview::setup_preview_graphics(build_planner &planer) const {
     vec2i bulk, ent, total;
-    rt_preview_geometry(&bulk, &ent, &total);
+    rt_preview_geometry(planer.build_type, &bulk, &ent, &total);
     const int cam = g_camera.orientation / 2;
     if (cam == 1 || cam == 3) {
         planer.init_tiles(total.y, total.x);
@@ -353,7 +449,7 @@ void building_royal_tomb::preview::setup_preview_graphics(build_planner &planer)
 
 uint32_t building_royal_tomb::preview::ghost_ignore_terrain(build_planner &p, tile2i tile) const {
     vec2i bulk, ent, total;
-    rt_preview_geometry(&bulk, &ent, &total);
+    rt_preview_geometry(p.build_type, &bulk, &ent, &total);
     const tile2i origin = rt_map_origin(p.end, total);
     int dx = 0, dy = 0;
     rt_local_xy(tile, origin, &dx, &dy);
@@ -371,7 +467,7 @@ uint32_t building_royal_tomb::preview::ghost_ignore_terrain(build_planner &p, ti
 
 bool building_royal_tomb::preview::ghost_allow_tile(build_planner &p, tile2i tile) const {
     vec2i bulk, ent, total;
-    rt_preview_geometry(&bulk, &ent, &total);
+    rt_preview_geometry(p.build_type, &bulk, &ent, &total);
     const tile2i origin = rt_map_origin(p.end, total);
     int dx = 0, dy = 0;
     rt_local_xy(tile, origin, &dx, &dy);
@@ -384,7 +480,7 @@ bool building_royal_tomb::preview::ghost_allow_tile(build_planner &p, tile2i til
 
 int building_royal_tomb::preview::construction_place(build_planner &planer, tile2i /*start*/, tile2i end, int orientation, int variant) const {
     vec2i bulk, ent, total;
-    rt_preview_geometry(&bulk, &ent, &total);
+    rt_preview_geometry(planer.build_type, &bulk, &ent, &total);
     end = rt_map_origin(end, total);
 
     planer.last_created_building = nullptr;
@@ -408,7 +504,7 @@ int building_royal_tomb::preview::can_place(build_planner &p, tile2i /*tile*/, t
         return CAN_NOT_PLACE;
     }
     vec2i bulk, ent, total;
-    rt_preview_geometry(&bulk, &ent, &total);
+    rt_preview_geometry(p.build_type, &bulk, &ent, &total);
     const tile2i origin = rt_map_origin(end, total);
     xstring warn;
     const int cliff_state = rt_validate_cliff_entrance(origin, bulk, ent, &warn);
@@ -435,7 +531,7 @@ int building_royal_tomb::preview::finalize_check(build_planner &p, tile2i tile, 
         return CAN_NOT_PLACE;
     }
     vec2i bulk, ent, total;
-    rt_preview_geometry(&bulk, &ent, &total);
+    rt_preview_geometry(p.build_type, &bulk, &ent, &total);
     const tile2i origin = rt_map_origin(end, total);
     xstring warn;
     const int cliff_state = rt_validate_cliff_entrance(origin, bulk, ent, &warn);
@@ -452,7 +548,7 @@ int building_royal_tomb::preview::finalize_check(build_planner &p, tile2i tile, 
 void building_royal_tomb::preview::ghost_preview(build_planner &planer, painter &ctx, tile2i /*start*/, tile2i end, vec2i /*pixel*/) const {
     const auto &params = building_static_params::get(planer.build_type);
     vec2i bulk, ent, total;
-    rt_preview_geometry(&bulk, &ent, &total);
+    rt_preview_geometry(planer.build_type, &bulk, &ent, &total);
     tile2i origin = rt_map_origin(end, total);
 
     const bool force_red = has_unfinished_royal_tomb(planer.build_type);
@@ -512,8 +608,8 @@ void building_royal_tomb::on_place_update_tiles(int /*orientation*/, int /*varia
     base.orientation = (uint8_t)(building_rotation_global_rotation() % 4);
     const vec2i total = total_size();
     base.size = (uint8_t)std::max({total.x, total.y, 1});
-    const auto &bp = building_small_royal_tomb::current_params();
-    rt_place_tiles(id(), tile(), bulk_size(), bp.entrance_size, building_image_get());
+    const auto &bp = tomb_params();
+    rt_place_tiles(id(), tile(), bulk_size(), bp.entrance_size, building_image_get(), rt_entrance_img(type()));
     const vec2i bulk = bulk_size();
     const vec2i ent = rt_entrance_size(bp.entrance_size);
     for (int dy = 0; dy < total.y; dy++) {
@@ -553,8 +649,8 @@ void building_royal_tomb::on_destroy() {
 }
 
 void building_royal_tomb::on_phase_changed(int /*old_phase*/, int current) {
-    const auto &bp = building_small_royal_tomb::current_params();
-    rt_place_tiles(id(), tile(), bulk_size(), bp.entrance_size, building_image_get());
+    const auto &bp = tomb_params();
+    rt_place_tiles(id(), tile(), bulk_size(), bp.entrance_size, building_image_get(), rt_entrance_img(type()));
     if (current != MONUMENT_FINISHED) {
         auto &d = runtime_data();
         for (e_resource resource = RESOURCE_NONE; resource < RESOURCES_MAX; ++resource) {
@@ -568,7 +664,8 @@ void building_royal_tomb::update_day() {
     if (is_finished()) {
         return;
     }
-    for (auto &wid : runtime_data().workers) {
+    auto &d = runtime_data();
+    for (auto &wid : d.workers) {
         if (!wid) {
             continue;
         }
@@ -580,12 +677,36 @@ void building_royal_tomb::update_day() {
     if (needs_resources()) {
         return;
     }
+    // Phase 0 = lamp delivery only. Later phases need living guild workers on site
+    // (∥ Abu Simbel / mausoleum) — otherwise the tomb finishes with no guilds.
+    if (d.phase >= 1) {
+        bool has_mason = false;
+        bool has_artisan = false;
+        for (auto wid : d.workers) {
+            figure *f = wid > 0 ? figure_get(wid) : nullptr;
+            if (!f || !f->is_alive()) {
+                continue;
+            }
+            if (f->type == FIGURE_STONEMASON) {
+                has_mason = true;
+            }
+            if (f->type == FIGURE_TOMB_ARTISAN) {
+                has_artisan = true;
+            }
+        }
+        if (!has_mason) {
+            return;
+        }
+        if (d.phase >= 2 && !has_artisan) {
+            return;
+        }
+    }
     progress();
 }
 
 void building_royal_tomb::update_map_orientation(int /*map_orientation*/) {
-    const auto &bp = building_small_royal_tomb::current_params();
-    rt_place_tiles(id(), tile(), bulk_size(), bp.entrance_size, building_image_get());
+    const auto &bp = tomb_params();
+    rt_place_tiles(id(), tile(), bulk_size(), bp.entrance_size, building_image_get(), rt_entrance_img(type()));
 }
 
 tile2i building_royal_tomb::center_point() const {
@@ -595,7 +716,7 @@ tile2i building_royal_tomb::center_point() const {
 
 tile2i building_royal_tomb::access_point() const {
     const vec2i bulk = bulk_size();
-    const vec2i ent = rt_entrance_size(building_small_royal_tomb::current_params().entrance_size);
+    const vec2i ent = rt_entrance_size(tomb_params().entrance_size);
     const int x0 = (bulk.x - ent.x) / 2;
     return tile().shifted(x0 + ent.x / 2, bulk.y + ent.y / 2);
 }
