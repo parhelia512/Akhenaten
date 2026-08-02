@@ -1,4 +1,4 @@
-// Abu Simbel — reject clear land; place cliff bulk 9×21 + external 3×3 entrance; finish → rating.
+// Abu Simbel — composite 9×21 (OG/Heaven); cliff bulk + clear entrance; finish → rating.
 
 function run_test() {
     __log_info_native('[test:118] abu simbel cliff place + finish rating')
@@ -12,17 +12,17 @@ function run_test() {
 
     var cx = 40
     var cy = 40
+    // Heaven bulk 9×21: cliff under X0..5; midcut_front at (6,9)..(8,11) stays clear.
     var w = 9
     var h = 21
-    // Entrance protrudes past far depth (outside bulk); rows y=h..h+2 stay clear.
 
     function paint_cliff_site(ox, oy) {
         for (var dy = 0; dy < h; dy++) {
-            for (var dx = 0; dx < w; dx++) {
+            for (var dx = 0; dx < 6; dx++) {
                 terrain.add({ x: ox + dx, y: oy + dy }, TERRAIN_ELEVATION)
             }
         }
-        // Entrance rows stay clear land (no elevation).
+        // X6..8 approach column stays clear (midcut_front / entrance).
     }
 
     // Reject on clear land (no cliffs).
@@ -56,8 +56,8 @@ function run_test() {
     __log_marker('abu_simbel_placed_ok:' + bid)
 
     // Second (while unfinished) must be rejected — only one ever.
-    paint_cliff_site(cx + 30, cy)
-    var second = test_building_place(BUILDING_ABU_SIMBEL, cx + 30, cy)
+    paint_cliff_site(cx + 20, cy)
+    var second = test_building_place(BUILDING_ABU_SIMBEL, cx + 20, cy)
     if (second) {
         __log_info_native('[test:118] unexpected second unfinished place bid=' + second)
         __test_signal_ready()
@@ -65,28 +65,29 @@ function run_test() {
     }
     __log_marker('abu_simbel_reject_second_ok')
 
-    // Walk progressive 2statue art stages (layered pack) before finish.
-    for (var stage = 1; stage <= 8; stage++) {
-        __test_monument_set_phase(bid, stage - 1)
-        __test_process_events()
-        __test_pump_frames(1)
-        __log_marker('abu_simbel_art_stage:' + stage)
-    }
+    // Walk progressive art stages (10 GIF milestones); screenshot each.
     __test_camera_center_building(bid)
     __test_process_events()
-    __test_pump_frames(6)
-    __game_save_screenshot(SCREENSHOT_DISPLAY)
+    __test_pump_frames(2)
+    for (var stage = 1; stage <= 10; stage++) {
+        __test_monument_set_phase(bid, stage - 1)
+        __test_process_events()
+        __test_pump_frames(4)
+        var stage_name = (stage < 10) ? ('abu_simbel_stage_0' + stage) : ('abu_simbel_stage_' + stage)
+        __game_save_screenshot_as(SCREENSHOT_DISPLAY, stage_name)
+        __log_marker('abu_simbel_art_stage:' + stage)
+    }
     __log_marker('abu_simbel_art_screenshot_ok')
 
-    // 8 art stages + terminal → phases().size()==9; set_phase(9) → FINISHED
-    __test_monument_set_phase(bid, 9)
+    // 10 art stages + terminal → phases().size()==11; set_phase(11) → FINISHED
+    __test_monument_set_phase(bid, 11)
     __test_process_events()
-    __test_pump_frames(2)
+    __test_pump_frames(4)
+    __game_save_screenshot_as(SCREENSHOT_DISPLAY, 'abu_simbel_stage_finish')
 
     var ph = __test_monument_phase(bid)
-    // FINISHED is -1 stored as uint8 255
     if (ph != 255 && ph != -1) {
-        __log_info_native('[test:118] not finished after set_phase(9) ph=' + ph)
+        __log_info_native('[test:118] not finished after set_phase(11) ph=' + ph)
         __test_signal_ready()
         return
     }
@@ -94,7 +95,6 @@ function run_test() {
 
     city_update_monthly_monument_rating({})
     var rating_done = city.rating.monument | 0
-    // weight 44 → trunc(2.25*44+4.5)=103 → clamp 100
     if (rating_done < 90) {
         __log_info_native('[test:118] finished rating want >=90 got ' + rating_done)
         __log_marker('abu_simbel_rating_fail:' + rating_done)
@@ -103,9 +103,8 @@ function run_test() {
     }
     __log_marker('abu_simbel_rating_ok:' + rating_done)
 
-    // Finished still blocks another Abu Simbel on the map.
-    paint_cliff_site(cx + 30, cy)
-    var third = test_building_place(BUILDING_ABU_SIMBEL, cx + 30, cy)
+    paint_cliff_site(cx + 20, cy)
+    var third = test_building_place(BUILDING_ABU_SIMBEL, cx + 20, cy)
     if (third) {
         __log_info_native('[test:118] unexpected place after finish bid=' + third)
         __test_signal_ready()

@@ -5,17 +5,30 @@
 #include "core/svector.h"
 #include "core/vec2i.h"
 
+// Abu Simbel: linked square parts (mastaba/sphinx style).
+// Rot0 matches Heaven/OG bulk 9×21 — façade along +Y, entrance toward +X:
+//   Y0: cliffL 3 | Y3: statueL 6 | Y9: midcut_back 3 | Y12: statueR 6 | Y18: cliffR 3  @ X0
+//   midcut_front 3 at (6,9) — clear-land approach past the cliff bulk
 class building_abu_simbel : public building_monument {
 public:
     BUILDING_METAINFO(BUILDING_ABU_SIMBEL, building_abu_simbel, building_monument)
     virtual building_abu_simbel *dcast_abu_simbel() override { return this; }
 
+    enum part_variant : uint8_t {
+        PART_CLIFF_L = 0,
+        PART_STATUE_L = 1,
+        PART_MIDCUT_BACK = 2,
+        PART_MIDCUT_FRONT = 3,
+        PART_STATUE_R = 4,
+        PART_CLIFF_R = 5,
+        PART_COUNT = 6,
+    };
+
     struct base_params {
-        vec2i init_tiles = {9, 21}; // cliff bulk width × depth (orientation swaps)
-        vec2i entrance_size = {3, 3}; // clear-land protrusion past far depth edge
-        uint8_t art_stages = 8;
+        vec2i init_tiles = {9, 21};
+        uint8_t art_stages = 10;
         // AS0.6: no OG counts found (Heaven W=Y; SG3/exe lack load tables). Mason phases = 0.
-        svector<uint16_t, 8> timber_loads{400, 400, 400, 200, 0, 0, 0, 0};
+        svector<uint16_t, 10> timber_loads{400, 400, 400, 200, 200, 0, 0, 0, 0, 0};
     };
 
     struct static_params : public base_params, public building_static_params {
@@ -55,23 +68,16 @@ public:
     virtual void bind_dynamic(io_buffer *iob, size_t version) override;
 
     int art_stage() const;
-    xstring anim_key_for(int stage) const;
-    // 0/1 — 2statue & midcut camera pair (even/odd frames in pack).
     int art_orient_pair() const;
-    vec2i bulk_size() const;  // oriented cliff bulk (9×21 / 21×9)
-    vec2i total_size() const; // bulk + entrance depth (9×24 / 24×9)
-    vec2i footprint_size() const { return total_size(); }
+    void refresh_part_tiles();
+    int part_size() const;
+    bool part_needs_cliff() const;
+    vec2i footprint_size() const;
 
-    // Any Abu Simbel on the map (finished or not) — only one allowed ever.
     static bool has_abu_simbel_on_map();
-
-    // Local (dx,dy) in total footprint coords (origin = planner NW).
-    static bool is_bulk_local(int dx, int dy, vec2i bulk);
-    static bool is_entrance_local(int dx, int dy, vec2i bulk, vec2i entrance);
-    static bool is_padding_local(int dx, int dy, vec2i bulk, vec2i entrance);
 
     bool need_carpenter_phase() const;
     bool has_stonemason_worker() const;
     bool has_carpenter_worker() const;
 };
-ANK_CONFIG_STRUCT(building_abu_simbel::static_params, init_tiles, entrance_size, art_stages, timber_loads)
+ANK_CONFIG_STRUCT(building_abu_simbel::static_params, init_tiles, art_stages, timber_loads)
