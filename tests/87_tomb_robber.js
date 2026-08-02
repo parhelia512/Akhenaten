@@ -8,6 +8,7 @@
 //   [test-marker] tomb_robber_crime_wave_ok
 //   [test-marker] tomb_robber_arrest_ok
 //   [test-marker] tomb_robber_preexisting_threat_ok
+//   [test-marker] tomb_robber_prefer_steal_over_preexisting_ok
 
 var ACTION_TOMB_ROBBER_CREATED = 120
 var ACTION_TOMB_ROBBER_GOING = 121
@@ -233,10 +234,17 @@ function run_test() {
 
     kill_tomb_robbers()
 
-    // TR4b: preexisting → threat-only, kingdom −25, dispatched unchanged.
+    // TR4b: only preexisting (no stealable tomb) → threat-only, kingdom −25.
     __test_monument_set_preexisting(bid, 1)
     if (!__test_monument_is_preexisting(bid)) {
         __log_info_native('[test:87] preexisting flag not set')
+        __test_signal_ready()
+        return
+    }
+    // City pool with no non-preexisting tomb: spawn still allowed; no ledger steal.
+    __test_burial_provisions_clear()
+    if (!__test_burial_provisions_set(RESOURCE_LINEN, 8)) {
+        __log_info_native('[test:87] burial set failed (preexisting)')
         __test_signal_ready()
         return
     }
@@ -275,6 +283,53 @@ function run_test() {
     }
     __log_marker('tomb_robber_preexisting_threat_ok')
 
+    kill_tomb_robbers()
+
+    // Stealable finished tomb wins over preexisting threat target.
+    var bid_steal = place_finished_mastaba()
+    if (!bid_steal || bid_steal == bid) {
+        __log_info_native('[test:87] second mastaba for prefer-steal failed')
+        __test_signal_ready()
+        return
+    }
+    __test_burial_provisions_clear()
+    if (!__test_burial_provisions_set(RESOURCE_LINEN, 8)) {
+        __log_info_native('[test:87] burial set failed (prefer steal)')
+        __test_signal_ready()
+        return
+    }
+    if (__test_monument_add_burial_stock(bid_steal, RESOURCE_LINEN, 3) != 3) {
+        __log_info_native('[test:87] add stock on steal tomb failed')
+        __test_signal_ready()
+        return
+    }
+    var prefer_fid = __test_tomb_robber_try_spawn(1)
+    if (!prefer_fid) {
+        __log_info_native('[test:87] prefer-steal spawn failed')
+        __test_signal_ready()
+        return
+    }
+    __test_figure_set_action(prefer_fid, ACTION_TOMB_ROBBER_CREATED)
+    __test_figure_action_perform(prefer_fid)
+    if (__figure_get_destination_building_id(prefer_fid) != bid_steal) {
+        __log_info_native('[test:87] prefer steal tomb want ' + bid_steal
+            + ' got ' + __figure_get_destination_building_id(prefer_fid))
+        __test_signal_ready()
+        return
+    }
+    var stock_before = __test_monument_burial_stock(bid_steal, RESOURCE_LINEN)
+    if (!__test_tomb_robber_commit_plunder(prefer_fid)) {
+        __log_info_native('[test:87] prefer-steal plunder failed')
+        __test_signal_ready()
+        return
+    }
+    if (__test_monument_burial_stock(bid_steal, RESOURCE_LINEN) != stock_before - 1) {
+        __log_info_native('[test:87] prefer-steal stock want ' + (stock_before - 1))
+        __test_signal_ready()
+        return
+    }
+    __log_marker('tomb_robber_prefer_steal_over_preexisting_ok')
+
     __test_signal_ready()
 }
 
@@ -287,7 +342,8 @@ function check_valid() {
         'tomb_robber_steal_ok',
         'tomb_robber_crime_wave_ok',
         'tomb_robber_arrest_ok',
-        'tomb_robber_preexisting_threat_ok'
+        'tomb_robber_preexisting_threat_ok',
+        'tomb_robber_prefer_steal_over_preexisting_ok'
     ]
     for (var i = 0; i < markers.length; i++) {
         var marker = '[test-marker] ' + markers[i]

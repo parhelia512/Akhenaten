@@ -174,7 +174,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `80_birds_hunt.js` | Birds hunter prey filter (ignore ostrich/antelope) → kill → gamemeat (BH3) |
 | `81_construction_blessing.js` | Pyramid Speedup (CB*): OFF/ON; site-prep; masonry +2; delivery clear; min-id; at-cap; halted (+ chain MOTHBALLED) |
 | `84_funeral_procession.js` | BF2 funeral walker: register, provisions gate, goto mastaba, abort leaves `funeral_done` clear, arrive + no re-spawn, steal/re-dispatch keeps done, no-provisions-required spawn, multi-tomb, finished small stepped pyramid + mausoleum spawn, inert action=0 revive, mid-walk save/load (`funeral_done` bind; figure fields best-effort under `--no-resource`) |
-| `87_tomb_robber.js` | Tomb robber TR1–TR4: path, steal dispatched, crime-wave, arrest, preexisting threat |
+| `87_tomb_robber.js` | Tomb robber TR1–TR4: path, steal ledger, crime-wave, arrest, preexisting threat, prefer-steal-over-preexisting |
 | `135_carry_personal_savings.js` | CL-X/CO4: carry savings apply on mission load; `player_rank` from JS not scenario_id; menu clear |
 | `136_troop_carry.js` | CL-X/CO2: troop snapshot activate → fort fill; CO2b expire; menu clear |
 | `137_monument_carry.js` | CL-X/CO1+CO1b: monument store set/apply + preexisting; survives troop activate(mask=0); bad tile → clear-land fallback |

@@ -673,8 +673,19 @@ static void __test_burial_provisions_force_dispatched(int resource, int dispatch
     if (resource <= RESOURCE_NONE || resource >= RESOURCES_MAX) {
         return;
     }
+    // Reset this resource on non-preexisting tombs, then deposit exactly `dispatched`.
+    // Otherwise a prior steal leaves tomb stock > 0 and migrate skips — city/tomb desync.
+    buildings_valid_do([&](building &b) {
+        auto *m = b.dcast_monument();
+        if (!m || !b.is_main() || m->is_preexisting()) {
+            return;
+        }
+        auto &d = m->runtime_data();
+        if (resource >= 0 && resource < RESOURCES_MAX) {
+            d.burial_stock[resource] = 0;
+        }
+    });
     g_scenario.monuments.burial_provisions[resource].dispatched = std::max(0, dispatched);
-    // Deposit city pool onto finished tombs so robber steal hits the ledger.
     burial_provisions_migrate_city_pool_to_tombs();
 }
 ANK_FUNCTION_2(__test_burial_provisions_force_dispatched);

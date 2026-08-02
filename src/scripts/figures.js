@@ -103,7 +103,8 @@ figure_tomb_robber {
 	}
 
 	category : figure_category_criminal
-	max_damage : 12
+	max_damage : 10
+	speed_mult : 2
 	terrain_usage : TERRAIN_USAGE_ANY
 	max_amount : 25
 }

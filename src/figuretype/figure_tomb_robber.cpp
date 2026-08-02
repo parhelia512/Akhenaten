@@ -180,14 +180,18 @@ building *figure_tomb_robber::find_target_tomb(bool *out_threat_only) {
         }
     });
 
-    // Prefer preexisting sealed tombs for the threat-only kingdom hit.
+    // Steal player provisions first. Preexisting sealed tombs are threat-only
+    // and must not shadow a finished tomb that still has burial_stock.
+    if (best_steal) {
+        return best_steal;
+    }
     if (best_threat) {
         if (out_threat_only) {
             *out_threat_only = true;
         }
         return best_threat;
     }
-    return best_steal ? best_steal : best_steal_empty;
+    return best_steal_empty;
 }
 
 void figure_tomb_robber::on_create() {
@@ -209,9 +213,8 @@ bool figure_tomb_robber::commit_plunder() {
         return false;
     }
 
-    rd.stole = 1;
-
     if (rd.threat_only || monument_is_preexisting(*tomb)) {
+        rd.stole = 1;
         g_city.kingdome.change(-k_preexisting_kingdom_penalty);
         events::emit(event_city_warning{ "#tomb_robbers_plundered" });
         return true;
@@ -220,30 +223,16 @@ bool figure_tomb_robber::commit_plunder() {
     burial_provisions_migrate_city_pool_to_tombs();
 
     auto *mon = tomb->dcast_monument();
-    e_resource stolen = RESOURCE_NONE;
-    if (mon) {
-        for (int r = RESOURCES_MIN; r < RESOURCES_MAX; ++r) {
-            auto res = (e_resource)r;
-            if (mon->burial_stock(res) > 0 && mon->take_burial_stock(res, 1)) {
-                auto &bp = g_scenario.monuments.burial_provisions[r];
-                if (bp.dispatched > 0) {
-                    bp.dispatched -= 1;
-                }
-                stolen = res;
-                break;
-            }
-        }
+    if (!mon) {
+        return false;
     }
 
-    // Fallback: city pool only (no finished tomb ledger yet).
-    if (stolen == RESOURCE_NONE) {
-        for (int r = RESOURCES_MIN; r < RESOURCES_MAX; ++r) {
-            auto &bp = g_scenario.monuments.burial_provisions[r];
-            if (bp.dispatched > 0) {
-                bp.dispatched -= 1;
-                stolen = (e_resource)r;
-                break;
-            }
+    e_resource stolen = RESOURCE_NONE;
+    for (int r = RESOURCES_MIN; r < RESOURCES_MAX; ++r) {
+        auto res = (e_resource)r;
+        if (mon->burial_stock(res) > 0 && mon->take_burial_stock(res, 1)) {
+            stolen = res;
+            break;
         }
     }
 
@@ -251,6 +240,9 @@ bool figure_tomb_robber::commit_plunder() {
         return false;
     }
 
+    // Keep city dispatched == sum of tomb ledgers (no city-only steal).
+    burial_provisions_sync_city_dispatched();
+    rd.stole = 1;
     g_city.kingdome.change(-k_steal_kingdom_penalty);
     events::emit(event_city_warning{ "#tomb_robbers_stole_provisions" });
     return true;
@@ -263,8 +255,11 @@ bool figure_tomb_robber::arrest(bool force) {
     if (action_state() == ACTION_124_TOMB_ROBBER_CAUGHT) {
         return true;
     }
-    if (action_state() == ACTION_123_TOMB_ROBBER_FLEEING && runtime_data().stole) {
-        return false; // already got away with goods
+    // After a successful steal, fleeing means goods are gone — no detain.
+    // Threat-only (preexisting) never took stock; constable may still catch.
+    if (action_state() == ACTION_123_TOMB_ROBBER_FLEEING && runtime_data().stole
+        && !runtime_data().threat_only) {
+        return false;
     }
 
     // TEMP ~75% catch; force for tests.
