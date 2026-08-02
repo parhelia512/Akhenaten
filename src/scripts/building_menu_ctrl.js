@@ -35,10 +35,13 @@ building_menu_ctrl.is_visible = function(type) {
 
 building_menu_ctrl.is_enabled = function(type) {
     // Enhanced dikes: hide from menus while the flood-basins flag is off.
-    if (type == BUILDING_DIKE && game_features.get('gameplay_enhanced_flood_basins') !== true) {
+    if (type == BUILDING_DIKE && !game_features.gameplay_enhanced_flood_basins) {
         return false
     }
-    if (type == BUILDING_FOOD_MILL && game_features.get('gameplay_enhanced_food_mill') !== true) {
+    if (type == BUILDING_FOOD_MILL && !game_features.gameplay_enhanced_food_mill) {
+        return false
+    }
+    if (type == BUILDING_INDUSTRY_OFFICE && !game_features.gameplay_enhanced_industry_office) {
         return false
     }
     var e = building_menu_ctrl.enabled[type]
@@ -225,11 +228,9 @@ building_menu_ctrl.update_gods_available = function(god, available) {
 
 // Enhanced buildings not listed in campaign `buildings[]`: unlock when their flag is ON.
 building_menu_ctrl.apply_enhanced_buildings = function() {
-    if (game_features.get('gameplay_enhanced_food_mill') === true) {
-        building_menu_ctrl.use_building(BUILDING_FOOD_MILL, true)
-    } else {
-        building_menu_ctrl.use_building(BUILDING_FOOD_MILL, false)
-    }
+    building_menu_ctrl.use_building(BUILDING_DIKE, !!game_features.gameplay_enhanced_flood_basins)
+    building_menu_ctrl.use_building(BUILDING_FOOD_MILL, !!game_features.gameplay_enhanced_food_mill)
+    building_menu_ctrl.use_building(BUILDING_INDUSTRY_OFFICE, !!game_features.gameplay_enhanced_industry_office)
 }
 
 building_menu_ctrl.update = function(stage) {

@@ -159,9 +159,12 @@ namespace game_features {
     game_feature gameplay_enhanced_flood_basins{ "gameplay_enhanced_flood_basins", "#TR_CONFIG_FLOOD_BASINS", false };
     game_feature gameplay_enhanced_historical_economy{ "gameplay_enhanced_historical_economy", "#TR_CONFIG_HISTORICAL_ECONOMY", false };
     game_feature gameplay_enhanced_food_mill{ "gameplay_enhanced_food_mill", "#TR_CONFIG_FOOD_MILL", false };
+    game_feature gameplay_enhanced_industry_office{ "gameplay_enhanced_industry_office", "#TR_CONFIG_INDUSTRY_OFFICE", false };
     game_feature gameplay_enhanced_labor_category_split{ "gameplay_enhanced_labor_category_split", "#TR_CONFIG_LABOR_CATEGORY_SPLIT", false };
     game_feature gameplay_enhanced_walker_spawn_boost{ "gameplay_enhanced_walker_spawn_boost", "#TR_CONFIG_WALKER_SPAWN_BOOST", false };
     game_feature gameplay_enhanced_walker_move_boost{ "gameplay_enhanced_walker_move_boost", "#TR_CONFIG_WALKER_MOVE_BOOST", false };
+    game_feature gameplay_enhanced_festival_calendar{ "gameplay_enhanced_festival_calendar", "#TR_CONFIG_FESTIVAL_CALENDAR", false };
+    game_feature gameplay_enhanced_local_cults{ "gameplay_enhanced_local_cults", "#TR_CONFIG_LOCAL_CULTS", false };
 
     xspan<game_feature*> all() {
         return { _features.data(), _features.size() };

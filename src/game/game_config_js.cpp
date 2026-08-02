@@ -20,8 +20,10 @@ void on_bool_feature_maybe_changed(xstring feature_name) {
         map_basin_mark_dirty();
         // Rebuild restamps IRRIGATION_RANGE and refreshes irrigation_value.
         map_basin_rebuild_dirty();
+        events::emit(event_building_menu_update{ "apply_enhanced" });
     }
-    if (feature_name == "gameplay_enhanced_food_mill") {
+    if (feature_name == "gameplay_enhanced_food_mill"
+        || feature_name == "gameplay_enhanced_industry_office") {
         events::emit(event_building_menu_update{ "apply_enhanced" });
     }
 }

@@ -111,9 +111,12 @@ game_features {
     @gameplay_enhanced_flood_basins {}
     @gameplay_enhanced_historical_economy {}
     @gameplay_enhanced_food_mill {}
+    @gameplay_enhanced_industry_office {}
     @gameplay_enhanced_labor_category_split {}
     @gameplay_enhanced_walker_spawn_boost {}
     @gameplay_enhanced_walker_move_boost {}
+    @gameplay_enhanced_festival_calendar {}
+    @gameplay_enhanced_local_cults {}
     @gameplay_change_fixed_workers {}
     @gameplay_fixed_worker_percent {}
     @gameopt_display_size {}

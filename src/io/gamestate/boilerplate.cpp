@@ -663,6 +663,10 @@ static void file_schema(e_file_format file_format, const int file_version) {
             // STORAGE labor category priority (workers_* recomputed each tick)
             FILEIO.push_chunk(4, false, "labor_storage_priority", iob_labor_storage_priority);
         }
+        if (file_version > 186) {
+            // local cults + festival calendar theme state (Enhanced PC2)
+            FILEIO.push_chunk(64, false, "enhanced_religion", iob_enhanced_religion);
+        }
 
         break;
     }

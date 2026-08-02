@@ -442,6 +442,8 @@ public:
     ALLOW_SMART_CAST_BUILDING(mausoleum)
     ALLOW_SMART_CAST_BUILDING(pharos_lighthouse)
     ALLOW_SMART_CAST_BUILDING(royal_tomb)
+    ALLOW_SMART_CAST_BUILDING(food_mill)
+    ALLOW_SMART_CAST_BUILDING(industry_office)
 
     int get_figures_number(e_figure_type ftype);
 

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "core/tokenum.h"
 
@@ -348,6 +348,8 @@ enum e_building_type : uint16_t {
 
 	// Enhanced: food mill (placeholder art). Appended before BUILDING_MAX.
 	BUILDING_FOOD_MILL = 360,
+	// Enhanced: industry office (papyrus + scribes, radius mothball). Appended before BUILDING_MAX.
+	BUILDING_INDUSTRY_OFFICE = 361,
 
 	BUILDING_MAX,
 };

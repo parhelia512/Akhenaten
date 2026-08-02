@@ -9,6 +9,8 @@ city.festival = extend(__city_festival, {
 
     selected_god : GOD_UNKNOWN
     selected_size : FESTIVAL_NONE
+    selected_theme : 0
+    selected_cult : 0
 
 
     @is_planned : { get:function() { return __city_festival.planned_size != 0 } },
@@ -81,6 +83,10 @@ city.festival.schedule = function() {
 	__city_festival.planned_god = god
 	__city_festival.planned_size = size
 	__city_festival.months_till_next = months
+	if (typeof __city_local_cults !== "undefined") {
+		__city_local_cults.planned_theme = city.festival.selected_theme || 0
+		__city_local_cults.planned_cult = city.festival.selected_cult || 0
+	}
 
 	emit event_finance_request{ type: efinance_request_festival, deben: cost }
 	emit event_festival_hold{ god: god, type: size }

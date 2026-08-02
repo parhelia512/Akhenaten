@@ -63,6 +63,7 @@ import building.road
 import building.bridge
 import building.dike
 import building.food_mill
+import building.industry_office
 import building.well
 import building.water_lift
 import building.water_supply

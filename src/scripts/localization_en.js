@@ -96,6 +96,14 @@ localization_en = [
   {key:"#TR_CONFIG_LABOR_CATEGORY_SPLIT", text:"Enhanced: split Storage yards/docks from Industry in the labor advisor"}
   {key:"#TR_CONFIG_WALKER_SPAWN_BOOST", text:"Enhanced: faster service walker respawn (understaffed less harsh)"}
   {key:"#TR_CONFIG_WALKER_MOVE_BOOST", text:"Enhanced: faster citizen walkers / shorter cart wait"}
+  {key:"#TR_CONFIG_FESTIVAL_CALENDAR", text:"Enhanced: seasonal calendar rites (extra festival themes)"}
+  {key:"#TR_CONFIG_LOCAL_CULTS", text:"Enhanced: local cults via temple complex altar/oracle"}
+  {key:"#local_cult_anubis", text:"Anubis"}
+  {key:"#local_cult_thoth", text:"Thoth"}
+  {key:"#local_cult_hathor", text:"Hathor"}
+  {key:"#local_cult_inactive", text:"Build the matching altar or oracle on the host complex"}
+  {key:"#local_cults_header", text:"Local cults"}
+  {key:"#festival_calendar_upcoming", text:"Upcoming rite"}
   {key:"#labor_category_storage", text:"Storage & distribution"}
   {key:"#labor_category_industry", text:"Industry"}
   {key:"#labor_category_industry_commerce", text:"Industry & Commerce"}

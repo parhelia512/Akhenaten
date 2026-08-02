@@ -25,6 +25,7 @@
 #include "grid/point.h"
 #include "city/city_trade.h"
 #include "city/city_festival.h"
+#include "city/city_local_cults.h"
 #include "city/city_victory.h"
 #include "grid/desirability.h"
 #include "city/city_buildings.h"
@@ -67,6 +68,7 @@ struct city_t {
     city_monuments_t monuments;
 
     city_festival_t festival;
+    city_local_cults_t local_cults;
     city_victory_t victory;
     city_coverage_t coverage;
     e_overlay current_overlay = OVERLAY_NONE;

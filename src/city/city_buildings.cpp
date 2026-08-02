@@ -19,6 +19,7 @@
 #include "building/building_wall.h"
 #include "io/io_buffer.h"
 #include "grid/road_access.h"
+#include "grid/grid_area.h"
 
 building g_all_buildings[5000];
 xspan<building> g_city_buildings = make_span(g_all_buildings);
@@ -108,6 +109,61 @@ hvector<building_id, 16> buildings_find_monuments_in_radius(tile2i center, int r
             continue;
         }
         if (b.tile.dist_sq(center) <= max_dist_sq) {
+            result.push_back(b.id);
+        }
+    }
+    return result;
+}
+
+bool building_is_manageable_industry(const building &b) {
+    if (b.type == BUILDING_NONE) {
+        return false;
+    }
+    if (b.state != BUILDING_STATE_VALID && b.state != BUILDING_STATE_MOTHBALLED) {
+        return false;
+    }
+    if (!b.is_industry() || b.is_farm() || b.is_guild()) {
+        return false;
+    }
+    // SY / granary / food mill / dock also set is_industry in config — carve out (IO0).
+    switch (b.type) {
+    case BUILDING_STORAGE_YARD:
+    case BUILDING_STORAGE_ROOM:
+    case BUILDING_GRANARY:
+    case BUILDING_FOOD_MILL:
+    case BUILDING_DOCK:
+        return false;
+    default:
+        break;
+    }
+    return true;
+}
+
+hvector<building_id, 64> buildings_find_manageable_industry_in_radius(tile2i tile, int size, int radius) {
+    hvector<building_id, 64> result;
+    if (size < 1) {
+        size = 1;
+    }
+    if (radius < 0) {
+        return result;
+    }
+
+    const grid_area area = map_grid_get_area(tile, size, radius);
+    for (auto &b : city_buildings()) {
+        if (!building_is_manageable_industry(b)) {
+            continue;
+        }
+
+        bool covered = false;
+        for (int dy = 0; dy < b.size && !covered; dy++) {
+            for (int dx = 0; dx < b.size && !covered; dx++) {
+                const tile2i t = b.tile.shifted(dx, dy);
+                if (t.x() >= area.tmin_x && t.x() <= area.tmax_x && t.y() >= area.tmin_y && t.y() <= area.tmax_y) {
+                    covered = true;
+                }
+            }
+        }
+        if (covered) {
             result.push_back(b.id);
         }
     }

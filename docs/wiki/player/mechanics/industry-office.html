@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Industry Office — Akhenaten Wiki</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .file-ref { display: inline-block; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.78rem; background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.2); border-radius: 2px; padding: 0.05rem 0.45rem; color: var(--gold); margin: 0 0.1rem; }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; }
+    summary { padding: 0.7rem 1rem; cursor: pointer; font-size: 0.875rem; font-weight: 600; color: var(--text); list-style: none; display: flex; align-items: center; gap: 0.6rem; user-select: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: "▶"; font-size: 0.6rem; color: var(--gold); transition: transform 0.15s; flex-shrink: 0; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    details[open] > summary { border-bottom: 1px solid var(--border); }
+    .details-body { padding: 1rem 1.1rem; font-size: 0.85rem; line-height: 1.6; }
+    .bld-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; }
+    .bld-nav a { color: var(--gold); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">Akhenaten</a>
+      <ul>
+        <li><a href="../../../about.html">About</a></li>
+        <li><a href="../../../devblog.html">Devblog</a></li>
+        <li><a href="../../index.html" class="active">Wiki</a></li>
+        <li><a href="../../../screenshots.html">Screenshots</a></li>
+        <li><a href="../../../downloads.html">Downloads</a></li>
+        <li><a href="../../../contributors.html">Contributors</a></li>
+        <li><a href="../../../contact.html">Join us</a></li>
+        <li><a href="../../../reportbug.html">Report Bug</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="wiki-layout">
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title"><a href="../index.html">← Player Guide</a></div>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Mechanics</div>
+        <ul>
+          <li><a href="labor.html">Labor</a></li>
+          <li><a href="auto-resolve-invasions.html">Auto-resolve invasions</a></li>
+          <li><a href="flood-basins.html">Flood basins &amp; dikes</a></li>
+          <li><a href="food-mill.html">Food Mill &amp; variety</a></li>
+          <li><a href="industry-office.html" class="active">Industry Office</a></li>
+        </ul>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">On this page</div>
+        <ul>
+          <li><a href="#what">What it does</a></li>
+          <li><a href="#scope">What it manages</a></li>
+          <li><a href="#supply">Papyrus &amp; labor</a></li>
+          <li><a href="#ui">Office panel</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <div class="wiki-content">
+      <div class="wiki-breadcrumb"><a href="../../index.html">Wiki</a> / <a href="../index.html">Player Guide</a> / Industry Office</div>
+      <h1>Industry Office</h1>
+      <p class="section-intro">Optional Enhanced building: staffed scribes with papyrus can mothball or resume nearby workshops from one panel. Default is <strong>OFF</strong> (not in original Pharaoh).</p>
+
+      <h2 id="what">What it does</h2>
+      <ol>
+        <li>Enable <em>Industry Office</em> under Features → Gameplay (<span class="file-ref">gameplay_enhanced_industry_office</span>).</li>
+        <li>Build from Administration (after Courthouse) — placeholder green cubes + “OFFICE” until art lands.</li>
+        <li>Stock papyrus (storage-yard delivery, same pattern as scribal school) and keep workers.</li>
+        <li>Open the office info panel → <strong>Mothball all</strong> / <strong>Resume all</strong> for covered industry.</li>
+      </ol>
+      <p>Placement ghost shows a blue management radius. Without papyrus or workers the buttons stay disabled; already-mothballed workshops are not auto-resumed.</p>
+
+      <h2 id="scope">What it manages</h2>
+      <p>Chebyshev radius <strong>7</strong> from the 2×2 footprint. Includes mothballed workshops so you can turn them back on.</p>
+      <ul>
+        <li><strong>In:</strong> workshops, mines, quarries, clay / reed / timber gatherers, and other <span class="file-ref">is_industry</span> producers.</li>
+        <li><strong>Out:</strong> farms, monument guilds, storage yards / granaries / Food Mill, docks, hunting lodge.</li>
+      </ul>
+
+      <h2 id="supply">Papyrus &amp; labor</h2>
+      <ul>
+        <li>Labor category: Government (UI copy calls them scribes).</li>
+        <li>Monthly papyrus drain ≈ half a worker’s “units” (same formula as scribal school).</li>
+        <li>Schools still take papyrus first when a cart chooses a destination.</li>
+      </ul>
+
+      <h2 id="ui">Office panel</h2>
+      <p>Shows papyrus stock, worker count, managed workshop count, and bulk mothball / resume. Inactive offices show why (needs papyrus, needs workers, or flag off).</p>
+
+      <details>
+        <summary>Developer Reference</summary>
+        <div class="details-body">
+          <p>Flag: <span class="file-ref">gameplay_enhanced_industry_office</span> (default OFF)</p>
+          <p>Engine: <span class="file-ref">src/building/building_industry_office.*</span>, <span class="file-ref">city_buildings.cpp</span> (coverage), <span class="file-ref">figure_cartpusher.cpp</span> / <span class="file-ref">building_storage_yard.cpp</span> (papyrus)</p>
+          <p>UI: <span class="file-ref">src/scripts/ui_industry_office_window.js</span></p>
+          <p>Tests: <span class="file-ref">tests/154_industry_office.js</span></p>
+          <p>Plan: <span class="file-ref">REMAKE_INDUSTRY_OFFICE_PLAN.md</span> (PC2 / IO0–IO4)</p>
+        </div>
+      </details>
+
+      <div class="bld-nav">
+        <a href="food-mill.html">← Food Mill &amp; variety</a>
+        <a href="labor.html">Labor →</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

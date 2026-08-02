@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Local cults &amp; festival calendar — Akhenaten Wiki</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .cp-table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+    .cp-table th, .cp-table td { padding: 0.35rem 0.6rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .cp-table th { color: var(--text-muted); font-weight: normal; }
+    .file-ref { display: inline-block; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.78rem; background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.2); border-radius: 2px; padding: 0.05rem 0.45rem; color: var(--gold); margin: 0 0.1rem; }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; }
+    summary { padding: 0.7rem 1rem; cursor: pointer; font-size: 0.875rem; font-weight: 600; color: var(--text); list-style: none; display: flex; align-items: center; gap: 0.6rem; user-select: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: "▶"; font-size: 0.6rem; color: var(--gold); transition: transform 0.15s; flex-shrink: 0; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    details[open] > summary { border-bottom: 1px solid var(--border); }
+    .details-body { padding: 1rem 1.1rem; font-size: 0.85rem; line-height: 1.6; }
+    .bld-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; }
+    .bld-nav a { color: var(--gold); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">Akhenaten</a>
+      <ul>
+        <li><a href="../../../about.html">About</a></li>
+        <li><a href="../../../devblog.html">Devblog</a></li>
+        <li><a href="../../index.html" class="active">Wiki</a></li>
+        <li><a href="../../../screenshots.html">Screenshots</a></li>
+        <li><a href="../../../downloads.html">Downloads</a></li>
+        <li><a href="../../../contributors.html">Contributors</a></li>
+        <li><a href="../../../contact.html">Join us</a></li>
+        <li><a href="../../../reportbug.html">Report Bug</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="wiki-layout">
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title"><a href="../index.html">← Player Guide</a></div>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Mechanics</div>
+        <ul>
+          <li><a href="labor.html">Labor</a></li>
+          <li><a href="auto-resolve-invasions.html">Auto-resolve invasions</a></li>
+          <li><a href="flood-basins.html">Flood basins &amp; dikes</a></li>
+          <li><a href="food-mill.html">Food Mill &amp; variety</a></li>
+          <li><a href="lazy-walkers.html">Walker responsiveness</a></li>
+          <li><a href="religion-cults.html" class="active">Local cults &amp; festivals</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <div class="wiki-content">
+      <div class="wiki-breadcrumb"><a href="../../index.html">Wiki</a> / <a href="../index.html">Player Guide</a> / Local cults</div>
+      <h1>Local cults &amp; festival calendar</h1>
+      <p class="section-intro">Optional Enhanced features (default OFF). The five major gods stay unchanged; local cults and calendar rites add light flavor on top of existing temple-complex altars/oracles.</p>
+
+      <h2>Flags</h2>
+      <table class="cp-table">
+        <tr><th>Flag</th><th>Effect</th></tr>
+        <tr><td><code>gameplay_enhanced_local_cults</code></td><td>Anubis / Thoth / Hathor as local cults wired to existing altar/oracle buildings</td></tr>
+        <tr><td><code>gameplay_enhanced_festival_calendar</code></td><td>Seasonal auto rites (e.g. flood thanksgiving) that do not consume the player festival slot</td></tr>
+      </table>
+
+      <h2>Local cults (v1)</h2>
+      <table class="cp-table">
+        <tr><th>Cult</th><th>Building</th><th>Host complex</th></tr>
+        <tr><td>Anubis</td><td>Altar of Anubis</td><td>Seth</td></tr>
+        <tr><td>Thoth</td><td>Oracle of Thoth</td><td>Osiris</td></tr>
+        <tr><td>Hathor</td><td>Oracle of Hathor</td><td>Bast</td></tr>
+      </table>
+      <p>A cult is <strong>active</strong> when unlocked for the mission and the matching building exists. Mission script may list <code>local_cults: ["anubis", …]</code> to restrict; omit or empty list → all three unlockable. Festivals to a cult set short <em>appeased</em> months and lightly help the host major god. No housing evolve requirements, no wrath bolts.</p>
+
+      <h2>Festival themes</h2>
+      <p>Player festivals may carry a theme (Harvest / War / Craft) that sets short bonus counters. Calendar rites apply the same theme effects automatically in their month.</p>
+
+      <details>
+        <summary>Developer reference</summary>
+        <div class="details-body">
+          <p>SoT: <span class="file-ref">REMAKE_NOTES.md</span> §RC. Core:
+            <span class="file-ref">src/city/city_local_cults.*</span>,
+            <span class="file-ref">src/game/local_cults.h</span></p>
+          <p>Save chunk <code>enhanced_religion</code> (version ≥ 187). Test:
+            <span class="file-ref">tests/164_religion_cults.js</span></p>
+        </div>
+      </details>
+
+      <div class="bld-nav">
+        <a href="lazy-walkers.html">← Walker responsiveness</a>
+        <a href="../index.html">Player Guide →</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

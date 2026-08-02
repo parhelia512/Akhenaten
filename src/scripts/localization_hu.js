@@ -89,6 +89,8 @@ localization_hu = [
   {key:"#TR_CONFIG_LABOR_CATEGORY_SPLIT", text:"Enhanced: raktárak/dokkok külön az ipartól a munkaügyi tanácsadóban"}
   {key:"#TR_CONFIG_WALKER_SPAWN_BOOST", text:"Enhanced: gyakoribb szolgálati járók (alacsony létszám kevésbé szigorú)"}
   {key:"#TR_CONFIG_WALKER_MOVE_BOOST", text:"Enhanced: gyorsabb polgárok / rövidebb taliga-várakozás"}
+  {key:"#TR_CONFIG_FESTIVAL_CALENDAR", text:"Enhanced: szezonális naptári szertartások (fesztivál témák)"}
+  {key:"#TR_CONFIG_LOCAL_CULTS", text:"Enhanced: helyi kultuszok a templomkomplexum oltárán/orákulumán"}
   {key:"#labor_category_storage", text:"Tárolás és elosztás"}
   {key:"#labor_category_industry", text:"Ipar"}
   {key:"#labor_category_industry_commerce", text:"Ipar és kereskedelem"}

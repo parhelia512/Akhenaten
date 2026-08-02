@@ -5,6 +5,7 @@ import city.kingdome
 import city.finance
 import city.ratings
 import city.festival
+import city.local_cults
 import city.floods
 import city.monuments
 import city.warnings

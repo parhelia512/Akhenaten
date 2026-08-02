@@ -14,6 +14,7 @@
 #include "figuretype/festival_guy.h"
 #include "graphics/image_groups.h"
 #include "core/tokenum.h"
+#include "game/local_cults.h"
 
 using e_festival_type_tokens = token_holder<e_festival_type, FESTIVAL_NONE, FESTIVAL_MAX>;
 e_festival_type_tokens ANK_CONFIG_ENUM(festival_type_tokens);
@@ -104,7 +105,23 @@ void city_festival_t::execute_festival() {
 
     months_since_festival = 1;
 
-    g_city.religion.gods[planned_god].months_since_festival = 0;
+    if (game_features::gameplay_enhanced_local_cults.to_bool()) {
+        g_city.local_cults.refresh_active();
+    }
+    const bool cult_festival = g_city.local_cults.planned_cult != LOCAL_CULT_NONE
+        && game_features::gameplay_enhanced_local_cults.to_bool()
+        && g_city.local_cults.is_active((e_local_cult)g_city.local_cults.planned_cult);
+    if (cult_festival) {
+        g_city.local_cults.apply_cult_festival(
+            (e_local_cult)g_city.local_cults.planned_cult,
+            (e_festival_theme)g_city.local_cults.planned_theme);
+    } else if (planned_god < MAX_GODS) {
+        g_city.religion.gods[planned_god].months_since_festival = 0;
+        if (game_features::gameplay_enhanced_festival_calendar.to_bool()
+            || game_features::gameplay_enhanced_local_cults.to_bool()) {
+            g_city.local_cults.apply_theme((e_festival_theme)g_city.local_cults.planned_theme, 2);
+        }
+    }
     switch (planned_size) {
     case FESTIVAL_SMALL:
         messages::popup("message_common_festival", 0, 0);
@@ -117,7 +134,9 @@ void city_festival_t::execute_festival() {
     case FESTIVAL_GRAND:
         messages::popup("message_grand_festival", 0, 0);
 
-        if (!!game_features::gameplay_change_grandfestival) {
+        if (!!game_features::gameplay_change_grandfestival
+            && planned_god < MAX_GODS
+            && !cult_festival) {
             g_city.religion.gods[planned_god].blessing_done = 0;
         }
 
@@ -125,7 +144,9 @@ void city_festival_t::execute_festival() {
     }
 
     planned_size = FESTIVAL_NONE;
-    months_till_next= 0;
+    months_till_next = 0;
+    g_city.local_cults.planned_theme = FESTIVAL_THEME_NONE;
+    g_city.local_cults.planned_cult = LOCAL_CULT_NONE;
 }
 
 void city_festival_t::advance_month() {

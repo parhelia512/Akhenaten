@@ -164,6 +164,7 @@ public:
     ALLOW_SMART_CAST_BUILDING_I(pharos_lighthouse)
     ALLOW_SMART_CAST_BUILDING_I(royal_tomb)
     ALLOW_SMART_CAST_BUILDING_I(food_mill)
+    ALLOW_SMART_CAST_BUILDING_I(industry_office)
 
     building_impl *next();
     bool has_next() const;

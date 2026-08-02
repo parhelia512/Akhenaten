@@ -18,6 +18,8 @@ building_id building_id_closest(e_building_type type, tile2i center, int8_t radi
 
 hvector<building_id, 16> buildings_find_farms_in_radius(tile2i center, int radius);
 hvector<building_id, 16> buildings_find_monuments_in_radius(tile2i center, int radius);
+hvector<building_id, 64> buildings_find_manageable_industry_in_radius(tile2i tile, int size, int radius);
+bool building_is_manageable_industry(const building &b);
 
 building *building_first(e_building_type type);
 

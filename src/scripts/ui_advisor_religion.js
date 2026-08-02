@@ -186,6 +186,50 @@ function advisor_religion_window_init(window) {
 	advisors_toolbar_refresh(window, ADVISOR_RELIGION)
 }
 
+function advisor_religion_enhanced_extra_text() {
+	var parts = []
+	if (game_features.gameplay_enhanced_local_cults && city.local_cults) {
+		city.local_cults.refresh()
+		var cult_bits = []
+		var ids = city.local_cults.ids
+		for (var i = 0; i < ids.length; i++) {
+			var id = ids[i]
+			if (!city.local_cults.is_unlocked(id)) {
+				continue
+			}
+			var name = __loc(city.local_cults.loc_key(id))
+			if (city.local_cults.is_active(id)) {
+				cult_bits.push(name + " (" + city.local_cults.appeased_months(id) + "m)")
+			} else {
+				cult_bits.push(name + "*")
+			}
+		}
+		if (cult_bits.length > 0) {
+			parts.push(__loc("#local_cults_header") + ": " + cult_bits.join(", "))
+		}
+	}
+	if (game_features.gameplay_enhanced_festival_calendar && city.local_cults) {
+		var month = game.simtime.month
+		var year = game.simtime.year
+		for (var m = 0; m < 12; m++) {
+			var check = (month + m) % 12
+			var rid = city.local_cults.next_rite_id(check)
+			if (!rid || rid.length === 0) {
+				continue
+			}
+			// Skip rite already fired this year for the current month.
+			if (m === 0
+				&& __city_local_cults.last_rite_year === year
+				&& __city_local_cults.last_rite_month === check) {
+				continue
+			}
+			parts.push(__loc("#festival_calendar_upcoming") + ": " + rid)
+			break
+		}
+	}
+	return parts.join(" — ")
+}
+
 [es=(advisor_religion_window, draw_background)]
 function advisor_religion_window_draw_background(window) {
 	if (!advisor_religion_window.needs_sync) {
@@ -212,6 +256,11 @@ function advisor_religion_window_draw_background(window) {
 		window.festival_advice.text = __loc(58, 18 + city.festival.get_advice())
 	}
 
-	window.advice_text.text = __loc(59, 9 + advisor_religion_advice_index())
+	var advice = __loc(59, 9 + advisor_religion_advice_index())
+	var extra = advisor_religion_enhanced_extra_text()
+	if (extra && extra.length > 0) {
+		advice = advice + "\n" + extra
+	}
+	window.advice_text.text = advice
 	advisor_religion_window.needs_sync = false
 }

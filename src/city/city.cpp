@@ -85,6 +85,7 @@ void city_t::init() {
     festival.months_since_festival = 1;
     g_distant_battle.clear();
     religion.reset();
+    local_cults.reset();
     buildings.init();
     figure_clear_all();
     maintenance.init();
@@ -134,6 +135,9 @@ void city_t::update_month(simulation_time_t simtime) {
     update_allowed_foods();
 
     population.record_monthly();
+    // Local cults first: drain old counters, then festival execute can grant fresh ones
+    // without same-tick steal.
+    local_cults.advance_month();
     festival.advance_month();
     buildings.update_month();
 
@@ -1365,6 +1369,30 @@ io_buffer* iob_city_data_extra = new io_buffer([](io_buffer* iob, size_t version
 
 io_buffer *iob_labor_storage_priority = new io_buffer([](io_buffer *iob, size_t version) {
     iob->bind(BIND_SIGNATURE_INT32, &g_city.labor.categories[LABOR_CATEGORY_STORAGE].priority);
+});
+
+io_buffer *iob_enhanced_religion = new io_buffer([](io_buffer *iob, size_t version) {
+    auto &lc = g_city.local_cults;
+    for (int i = 0; i < LOCAL_CULT_MAX; ++i) {
+        iob->bind(BIND_SIGNATURE_UINT8, &lc.cults[i].unlocked);
+        iob->bind(BIND_SIGNATURE_UINT8, &lc.cults[i].active);
+        iob->bind(BIND_SIGNATURE_UINT8, &lc.cults[i].appeased_months);
+        iob->bind(BIND_SIGNATURE_UINT8, &lc.cults[i].reserved);
+    }
+    iob->bind(BIND_SIGNATURE_UINT8, &lc.mission_restricts);
+    iob->bind(BIND_SIGNATURE_UINT8, &lc.farm_bonus_months);
+    iob->bind(BIND_SIGNATURE_UINT8, &lc.war_bonus_months);
+    iob->bind(BIND_SIGNATURE_UINT8, &lc.craft_bonus_months);
+    iob->bind(BIND_SIGNATURE_UINT8, &lc.planned_theme);
+    iob->bind(BIND_SIGNATURE_UINT8, &lc.planned_cult);
+    iob->bind(BIND_SIGNATURE_UINT8, &lc.last_rite_month);
+    iob->bind(BIND_SIGNATURE_INT16, &lc.last_rite_year);
+    iob->bind(BIND_SIGNATURE_UINT8, &lc.last_rite_index);
+    iob->bind(BIND_SIGNATURE_UINT8, &lc.reserved_pad[0]);
+    iob->bind(BIND_SIGNATURE_UINT8, &lc.reserved_pad[1]);
+    iob->bind(BIND_SIGNATURE_UINT8, &lc.reserved_pad[2]);
+    // 4*4 + 13 = 29; pad to 64
+    iob->bind____skip(35);
 });
 
 io_buffer* iob_city_graph_order = new io_buffer([](io_buffer* iob, size_t version) {
