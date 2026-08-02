@@ -441,6 +441,7 @@ public:
     ALLOW_SMART_CAST_BUILDING(alexandria_library)
     ALLOW_SMART_CAST_BUILDING(mausoleum)
     ALLOW_SMART_CAST_BUILDING(pharos_lighthouse)
+    ALLOW_SMART_CAST_BUILDING(royal_tomb)
 
     int get_figures_number(e_figure_type ftype);
 

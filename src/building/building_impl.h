@@ -162,6 +162,7 @@ public:
     ALLOW_SMART_CAST_BUILDING_I(alexandria_library)
     ALLOW_SMART_CAST_BUILDING_I(mausoleum)
     ALLOW_SMART_CAST_BUILDING_I(pharos_lighthouse)
+    ALLOW_SMART_CAST_BUILDING_I(royal_tomb)
 
     building_impl *next();
     bool has_next() const;

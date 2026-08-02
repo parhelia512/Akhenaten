@@ -5,6 +5,7 @@
 #include "building/monument_abu_simbel.h"
 #include "building/monument_caesareum.h"
 #include "building/monument_mausoleum.h"
+#include "building/monument_royal_tomb.h"
 #include "graphics/image.h"
 #include "graphics/image_groups.h"
 #include "graphics/view/view.h"
@@ -333,6 +334,8 @@ int building_monument::progress() {
             messages::popup("mausoleum_congratulations", 0, bmain->tile().grid_offset());
         } else if (bmain->dcast_pharos_lighthouse()) {
             messages::popup("lighthouse_congratulations", 0, bmain->tile().grid_offset());
+        } else if (bmain->dcast_royal_tomb()) {
+            messages::popup("message_monument_complete", 0, bmain->tile().grid_offset());
         }
     }
     return 1;
