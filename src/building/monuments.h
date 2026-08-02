@@ -49,6 +49,8 @@ public:
         uint8_t causeway_length; // complex only: land tiles along strip (save v182+)
         uint8_t causeway_dir;    // 0=N 1=E 2=S 3=W
         uint16_t lamp_stock;     // royal tomb working stock (≤700); unused elsewhere
+        // Burial goods loads at this tomb (BP1 ledger). Fits former bind____skip(36).
+        uint8_t burial_stock[RESOURCES_MAX];
     } BUILDING_RUNTIME_DATA_T;
 
     // Tall monument ornaments (tiers/cones) - skip in flat buildings view.
@@ -97,7 +99,19 @@ public:
 
     bool is_preexisting() const;
     void set_preexisting(bool preexisting = true);
+
+    int burial_stock(e_resource r) const;
+    int burial_stock_total() const;
+    int add_burial_stock(e_resource r, int n);
+    bool take_burial_stock(e_resource r, int n);
 };
+
+// City required/dispatched stay UI/win SoT; tomb burial_stock is the steal ledger.
+building *burial_provisions_pick_dispatch_tomb();
+int burial_provisions_tomb_stock_total(e_resource r);
+void burial_provisions_sync_city_dispatched();
+// Old saves / test force_dispatched: city pool with empty tomb ledgers → deposit.
+void burial_provisions_migrate_city_pool_to_tombs();
 
 ANK_CONFIG_PROPERTY(building_monument::runtime_data_t, variant)
 

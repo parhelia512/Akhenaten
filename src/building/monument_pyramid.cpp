@@ -1778,7 +1778,9 @@ bool building_stepped_pyramid::force_draw_flat_tile(painter &ctx, tile2i tile, v
 void building_stepped_pyramid::bind_dynamic(io_buffer *iob, size_t version) {
     auto &monumentd = runtime_data();
 
-    iob->bind____skip(36);
+    for (int i = 0; i < RESOURCES_MAX; i++) {
+        iob->bind_u8(monumentd.burial_stock[i]);
+    }
     iob->bind_u16(monumentd.alt_image);
     iob->bind_u8(base.orientation);
     for (int i = 0; i < 5; i++) {

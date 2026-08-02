@@ -842,7 +842,10 @@ bool building_mastaba::force_draw_flat_tile(painter &ctx, tile2i tile, vec2i pix
 void building_mastaba::bind_dynamic(io_buffer *iob, size_t version) {
     auto &monumentd = runtime_data();
 
-    iob->bind____skip(38);
+    for (int i = 0; i < RESOURCES_MAX; i++) {
+        iob->bind(BIND_SIGNATURE_UINT8, &monumentd.burial_stock[i]);
+    }
+    iob->bind____skip(2); // was skip(38); 36 = burial_stock
     iob->bind(BIND_SIGNATURE_UINT8, &base.orientation);
     for (int i = 0; i < 5; i++) {
         iob->bind(BIND_SIGNATURE_UINT16, &monumentd.workers[i]);

@@ -22,7 +22,9 @@
 #include "core/calc.h"
 #include "core/log.h"
 #include "city/city.h"
+#include "city/city_buildings.h"
 #include "io/io_buffer.h"
+#include "scenario/scenario.h"
 
 #include "js/js_game.h"
 
@@ -692,6 +694,136 @@ void building_monument::set_preexisting(bool preexisting) {
     }
     auto &d = *reinterpret_cast<runtime_data_t *>(mb->runtime_data);
     d.preexisting = preexisting ? 1 : 0;
+}
+
+int building_monument::burial_stock(e_resource r) const {
+    if (r <= RESOURCE_NONE || r >= RESOURCES_MAX) {
+        return 0;
+    }
+    const building *mb = base.main();
+    if (!mb) {
+        mb = &base;
+    }
+    const auto &d = *reinterpret_cast<const runtime_data_t *>(mb->runtime_data);
+    return d.burial_stock[r];
+}
+
+int building_monument::burial_stock_total() const {
+    const building *mb = base.main();
+    if (!mb) {
+        mb = &base;
+    }
+    const auto &d = *reinterpret_cast<const runtime_data_t *>(mb->runtime_data);
+    int total = 0;
+    for (int r = RESOURCES_MIN; r < RESOURCES_MAX; ++r) {
+        total += d.burial_stock[r];
+    }
+    return total;
+}
+
+int building_monument::add_burial_stock(e_resource r, int n) {
+    if (n <= 0 || r <= RESOURCE_NONE || r >= RESOURCES_MAX) {
+        return 0;
+    }
+    building *mb = base.main();
+    if (!mb) {
+        mb = &base;
+    }
+    auto &d = *reinterpret_cast<runtime_data_t *>(mb->runtime_data);
+    const int room = 255 - (int)d.burial_stock[r];
+    const int added = std::min(n, room);
+    d.burial_stock[r] = (uint8_t)(d.burial_stock[r] + added);
+    return added;
+}
+
+bool building_monument::take_burial_stock(e_resource r, int n) {
+    if (n <= 0 || r <= RESOURCE_NONE || r >= RESOURCES_MAX) {
+        return false;
+    }
+    building *mb = base.main();
+    if (!mb) {
+        mb = &base;
+    }
+    auto &d = *reinterpret_cast<runtime_data_t *>(mb->runtime_data);
+    if (d.burial_stock[r] < n) {
+        return false;
+    }
+    d.burial_stock[r] = (uint8_t)(d.burial_stock[r] - n);
+    return true;
+}
+
+building *burial_provisions_pick_dispatch_tomb() {
+    building *best = nullptr;
+    int best_stock = 0x7fffffff;
+    buildings_valid_do([&](building &b) {
+        if (!building_monument_is_finished_burial_tomb(b)) {
+            return;
+        }
+        auto *m = b.dcast_monument();
+        if (!m || m->is_preexisting()) {
+            return;
+        }
+        const int stock = m->burial_stock_total();
+        if (stock < best_stock) {
+            best_stock = stock;
+            best = &b;
+        }
+    });
+    return best;
+}
+
+int burial_provisions_tomb_stock_total(e_resource r) {
+    if (r <= RESOURCE_NONE || r >= RESOURCES_MAX) {
+        return 0;
+    }
+    int total = 0;
+    buildings_valid_do([&](building &b) {
+        if (!building_monument_is_finished_burial_tomb(b)) {
+            return;
+        }
+        auto *m = b.dcast_monument();
+        if (!m || m->is_preexisting()) {
+            return;
+        }
+        total += m->burial_stock(r);
+    });
+    return total;
+}
+
+void burial_provisions_sync_city_dispatched() {
+    for (int r = RESOURCES_MIN; r < RESOURCES_MAX; ++r) {
+        g_scenario.monuments.burial_provisions[r].dispatched = burial_provisions_tomb_stock_total((e_resource)r);
+    }
+}
+
+void burial_provisions_migrate_city_pool_to_tombs() {
+    bool needs = false;
+    for (int r = RESOURCES_MIN; r < RESOURCES_MAX; ++r) {
+        const int city = g_scenario.monuments.burial_provisions[r].dispatched;
+        if (city > 0 && burial_provisions_tomb_stock_total((e_resource)r) == 0) {
+            needs = true;
+            break;
+        }
+    }
+    if (!needs) {
+        return;
+    }
+
+    building *tomb = burial_provisions_pick_dispatch_tomb();
+    if (!tomb) {
+        return;
+    }
+    auto *m = tomb->dcast_monument();
+    if (!m) {
+        return;
+    }
+    for (int r = RESOURCES_MIN; r < RESOURCES_MAX; ++r) {
+        const int city = g_scenario.monuments.burial_provisions[r].dispatched;
+        if (city <= 0 || burial_provisions_tomb_stock_total((e_resource)r) > 0) {
+            continue;
+        }
+        m->add_burial_stock((e_resource)r, city);
+    }
 }
 
 building *city_has_unfinished_monuments() {

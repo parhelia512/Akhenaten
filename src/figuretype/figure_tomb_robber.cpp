@@ -123,6 +123,7 @@ int create_one_robber(tile2i spawn) {
 } // namespace
 
 bool figure_tomb_robber::city_has_stealable_provisions() {
+    burial_provisions_migrate_city_pool_to_tombs();
     for (int r = 0; r < RESOURCES_MAX; ++r) {
         if (g_scenario.monuments.burial_provisions[r].dispatched > 0) {
             return true;
@@ -144,9 +145,13 @@ building *figure_tomb_robber::find_target_tomb(bool *out_threat_only) {
         *out_threat_only = false;
     }
 
+    burial_provisions_migrate_city_pool_to_tombs();
+
     building *best_steal = nullptr;
+    building *best_steal_empty = nullptr;
     building *best_threat = nullptr;
     int best_steal_dist = 0x7fffffff;
+    int best_steal_empty_dist = 0x7fffffff;
     int best_threat_dist = 0x7fffffff;
     tile2i origin = resolve_entry_tile();
 
@@ -162,9 +167,16 @@ building *figure_tomb_robber::find_target_tomb(bool *out_threat_only) {
             }
             return;
         }
-        if (d < best_steal_dist) {
-            best_steal_dist = d;
-            best_steal = &b;
+        auto *m = b.dcast_monument();
+        const bool has_stock = m && m->burial_stock_total() > 0;
+        if (has_stock) {
+            if (d < best_steal_dist) {
+                best_steal_dist = d;
+                best_steal = &b;
+            }
+        } else if (d < best_steal_empty_dist) {
+            best_steal_empty_dist = d;
+            best_steal_empty = &b;
         }
     });
 
@@ -175,7 +187,7 @@ building *figure_tomb_robber::find_target_tomb(bool *out_threat_only) {
         }
         return best_threat;
     }
-    return best_steal;
+    return best_steal ? best_steal : best_steal_empty;
 }
 
 void figure_tomb_robber::on_create() {
@@ -205,13 +217,33 @@ bool figure_tomb_robber::commit_plunder() {
         return true;
     }
 
+    burial_provisions_migrate_city_pool_to_tombs();
+
+    auto *mon = tomb->dcast_monument();
     e_resource stolen = RESOURCE_NONE;
-    for (int r = 0; r < RESOURCES_MAX; ++r) {
-        auto &bp = g_scenario.monuments.burial_provisions[r];
-        if (bp.dispatched > 0) {
-            bp.dispatched -= 1;
-            stolen = (e_resource)r;
-            break;
+    if (mon) {
+        for (int r = RESOURCES_MIN; r < RESOURCES_MAX; ++r) {
+            auto res = (e_resource)r;
+            if (mon->burial_stock(res) > 0 && mon->take_burial_stock(res, 1)) {
+                auto &bp = g_scenario.monuments.burial_provisions[r];
+                if (bp.dispatched > 0) {
+                    bp.dispatched -= 1;
+                }
+                stolen = res;
+                break;
+            }
+        }
+    }
+
+    // Fallback: city pool only (no finished tomb ledger yet).
+    if (stolen == RESOURCE_NONE) {
+        for (int r = RESOURCES_MIN; r < RESOURCES_MAX; ++r) {
+            auto &bp = g_scenario.monuments.burial_provisions[r];
+            if (bp.dispatched > 0) {
+                bp.dispatched -= 1;
+                stolen = (e_resource)r;
+                break;
+            }
         }
     }
 

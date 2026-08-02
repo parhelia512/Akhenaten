@@ -674,6 +674,8 @@ static void __test_burial_provisions_force_dispatched(int resource, int dispatch
         return;
     }
     g_scenario.monuments.burial_provisions[resource].dispatched = std::max(0, dispatched);
+    // Deposit city pool onto finished tombs so robber steal hits the ledger.
+    burial_provisions_migrate_city_pool_to_tombs();
 }
 ANK_FUNCTION_2(__test_burial_provisions_force_dispatched);
 
@@ -2034,6 +2036,14 @@ static void __test_burial_provisions_clear() {
         g_scenario.monuments.burial_provisions[r].required = 0;
         g_scenario.monuments.burial_provisions[r].dispatched = 0;
     }
+    buildings_valid_do([](building &b) {
+        auto *m = b.dcast_monument();
+        if (!m || !b.is_main()) {
+            return;
+        }
+        auto &d = m->runtime_data();
+        memset(d.burial_stock, 0, sizeof(d.burial_stock));
+    });
 }
 ANK_FUNCTION(__test_burial_provisions_clear);
 
@@ -2046,6 +2056,30 @@ static bool __test_burial_provisions_set(int resource, int required) {
     return true;
 }
 ANK_FUNCTION_2(__test_burial_provisions_set);
+
+static int __test_monument_burial_stock(int bid, int resource) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    auto *m = head ? head->dcast_monument() : nullptr;
+    if (!m || resource <= RESOURCE_NONE || resource >= RESOURCES_MAX) {
+        return -1;
+    }
+    return m->burial_stock((e_resource)resource);
+}
+ANK_FUNCTION_2(__test_monument_burial_stock);
+
+static int __test_monument_add_burial_stock(int bid, int resource, int amount) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    auto *m = head ? head->dcast_monument() : nullptr;
+    if (!m || resource <= RESOURCE_NONE || resource >= RESOURCES_MAX || amount <= 0) {
+        return 0;
+    }
+    const int added = m->add_burial_stock((e_resource)resource, amount);
+    g_scenario.monuments.burial_provisions[resource].dispatched += added;
+    return added;
+}
+ANK_FUNCTION_3(__test_monument_add_burial_stock);
 
 // Return the current resolved image id for a monument building (per phase + variant + camera).
 static int __test_building_current_image(int bid) {
@@ -2291,6 +2325,20 @@ static int __test_empire_trader_has_traded_max(int bought, int sold, int capacit
     return result;
 }
 ANK_FUNCTION_3(__test_empire_trader_has_traded_max);
+
+static int __test_empire_trader_buy_room_at(int resource, int amount) {
+    empire_trader_handle h = empire_create_trader();
+    if (!h.valid()) {
+        return -1;
+    }
+    auto &t = g_empire_traders.traders[h.handle];
+    const e_resource r = (e_resource)std::clamp(resource, 0, (int)RESOURCES_MAX - 1);
+    t.bought_resources[r] = (uint16_t)std::max(0, amount);
+    const int result = h.buy_room(r);
+    t.is_active = false;
+    return result;
+}
+ANK_FUNCTION_2(__test_empire_trader_buy_room_at);
 
 // Attach FIGURE_MARKET_BUYER to a bazaar slot and run before_action.
 // Returns figure id if still alive, else 0.

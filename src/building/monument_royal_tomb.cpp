@@ -825,7 +825,9 @@ void building_royal_tomb::bind_dynamic(io_buffer *iob, size_t /*version*/) {
     auto &monumentd = runtime_data();
 
     iob->bind(BIND_SIGNATURE_UINT16, &monumentd.lamp_stock);
-    iob->bind____skip(36);
+    for (int i = 0; i < RESOURCES_MAX; i++) {
+        iob->bind(BIND_SIGNATURE_UINT8, &monumentd.burial_stock[i]);
+    }
     iob->bind(BIND_SIGNATURE_UINT8, &base.orientation);
     for (int i = 0; i < 5; i++) {
         iob->bind(BIND_SIGNATURE_UINT16, &monumentd.workers[i]);

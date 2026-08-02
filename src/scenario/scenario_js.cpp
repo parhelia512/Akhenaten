@@ -3,6 +3,7 @@
 #include "building/building.h"
 #include "building/building_storage_yard.h"
 #include "building/building_type.h"
+#include "building/monuments.h"
 #include "city/city.h"
 #include "city/city_buildings.h"
 #include "city/city_resource.h"
@@ -150,6 +151,13 @@ int __scenario_burial_provisions_dispatch(int resource, int amount) {
     const int removed = take - ev.amount;
     if (removed <= 0) {
         return -1;
+    }
+
+    // City counter = win/UI SoT; tomb ledger gets the stealable stock (prefer emptiest).
+    if (building *tomb = burial_provisions_pick_dispatch_tomb()) {
+        if (auto *m = tomb->dcast_monument()) {
+            m->add_burial_stock(res, removed);
+        }
     }
     bp.dispatched += removed;
     g_city.resource.calculate_stocks();
