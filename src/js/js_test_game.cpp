@@ -52,6 +52,7 @@
 #include "figuretype/figure_enemy_transport.h"
 #include "figuretype/figure_enemy_warship.h"
 #include "figuretype/figure_enemy_elephant.h"
+#include "figuretype/figure_enemy_spearman.h"
 #include "figuretype/figure_transport_ship.h"
 #include "figuretype/figure_soldier.h"
 #include "building/building_transport_wharf.h"
@@ -515,6 +516,12 @@ static int __test_figure_get_damage(int fid) {
 }
 ANK_FUNCTION_1(__test_figure_get_damage);
 
+static int __test_figure_is_alive(int fid) {
+    figure *f = figure_get(fid);
+    return (f && f->is_alive()) ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_figure_is_alive);
+
 static int __test_elephant_trample(int fid) {
     figure *f = figure_get(fid);
     if (!f || !f->is_alive() || f->type != FIGURE_ENEMY_EGYPTIAN_ELEPHANT) {
@@ -529,6 +536,39 @@ static int __test_elephant_trample(int fid) {
     return 1;
 }
 ANK_FUNCTION_1(__test_elephant_trample);
+
+// Verify Julius-parity missile spawn args: create(shooter_id, shooter_tile, dst).
+// Returns 1 if a FIGURE_SPEAR/ARROW exists with shooter_id == fid on the spearman's tile.
+static int __test_spearman_fire_initial_missile(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive()) {
+        return 0;
+    }
+    auto *sp = smart_cast<figure_enemy_spearman>(f);
+    if (!sp) {
+        return 0;
+    }
+
+    const e_figure_type want = sp->missile_type();
+    auto target = figure_combat_get_missile_target_for_enemy(f, 10, g_city.figures.soldiers < 4);
+    if (!target.fid || !target.tile.valid()) {
+        return 0;
+    }
+
+    // Same create args as fixed figure_enemy_spearman::enemy_initial.
+    auto *missile = figure_missile::create(fid, f->tile, target.tile, want);
+    if (!missile) {
+        return 0;
+    }
+    if (missile->runtime_data().shooter_id != fid) {
+        return 0;
+    }
+    if (missile->base.tile != f->tile) {
+        return 0;
+    }
+    return 1;
+}
+ANK_FUNCTION_1(__test_spearman_fire_initial_missile);
 
 static int __test_count_figures(int type) {
     int count = 0;

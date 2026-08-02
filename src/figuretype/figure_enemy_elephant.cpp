@@ -1,6 +1,7 @@
 #include "figure_enemy_elephant.h"
 
 #include "city/city_figures.h"
+#include "figure/formation.h"
 #include "figuretype/figure_soldier.h"
 #include "grid/figure.h"
 #include "grid/grid.h"
@@ -53,6 +54,14 @@ void figure_enemy_elephant::trample_adjacent(bool force) {
                 }
 
                 f->apply_damage(splash, id());
+                if (f->damage > f->max_damage()) {
+                    f->kill();
+                    f->wait_ticks = 0;
+                    f->play_die_sound();
+                    if (f->formation_id > 0) {
+                        formation_update_morale_after_death(formation_get(f->formation_id));
+                    }
+                }
                 hit_any = true;
             }
         }

@@ -8,6 +8,7 @@
 #include "city/city_buildings.h"
 #include "city/city_figures.h"
 #include "figuretype/figure_enemy_archer.h"
+#include "figuretype/figure_enemy_spearman.h"
 #include "figuretype/figure_war_ship.h"
 #include "game/game_events.h"
 #include "js/js_game.h"
@@ -27,23 +28,28 @@ figure_missile* figure_missile::create(figure_id fid, tile2i src, tile2i dst, e_
         missile->base.missile_damage = (type == FIGURE_BOLT ? 60 : 10);
         missile->base.destination_tile = dst;
         missile->base.set_cross_country_direction(missile->base.cc_coords.x, missile->base.cc_coords.y, 15 * dst.x(), 15 * dst.y(), 1);
-        missile->runtime_data().shooter_id = fid;
+        // on_create ran inside figure_create before shooter_id existed — set then refresh.
+        auto &d = missile->runtime_data();
+        d.shooter_id = fid;
+        int attack = 10;
+        if (figure *shooter = figure_get(fid)) {
+            if (auto archer = smart_cast<figure_enemy_archer>(shooter)) {
+                attack = archer->missile_attack_value();
+            } else if (auto spearman = smart_cast<figure_enemy_spearman>(shooter)) {
+                attack = spearman->missile_attack_value();
+            } else if (auto warship = smart_cast<figure_warship>(shooter)) {
+                attack = warship->missile_attack_value();
+            }
+        }
+        d.missile_attack_value = attack;
     }
 
     return missile;
 }
 
 void figure_missile::on_create() {
-    auto &d = runtime_data();
-    int attack = 10;
-    if (figure *shooter = figure_get(d.shooter_id)) {
-        if (auto archer = smart_cast<figure_enemy_archer>(shooter)) {
-            attack = archer->missile_attack_value();
-        } else if (auto warship = smart_cast<figure_warship>(shooter)) {
-            attack = warship->missile_attack_value();
-        }
-    }
-    d.missile_attack_value = attack;
+    // Default; create() refreshes from shooter after shooter_id is assigned.
+    runtime_data().missile_attack_value = 10;
 }
 
 void figure_missile::figure_before_action() {

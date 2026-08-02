@@ -53,7 +53,7 @@ void figure_enemy_spearman::enemy_initial(formation *m) {
     }
 
     assert(is_archer() || is_mounted_archer() || is_spearman());
-    // missile throwers
+    // Missile throwers (Julius enemy_initial): scan range 10 is OG, not attack_distance.
     base.wait_ticks_missile++;
     target_figure target;
     if (base.wait_ticks_missile > missile_delay()) {
@@ -61,7 +61,7 @@ void figure_enemy_spearman::enemy_initial(formation *m) {
         target = figure_combat_get_missile_target_for_enemy(&base, 10, g_city.figures.soldiers < 4);
         if (target.fid) {
             base.attack_image_offset = 1;
-            base.direction = calc_missile_shooter_direction(target.tile, base.destination_tile);
+            base.direction = calc_missile_shooter_direction(tile(), target.tile);
         } else {
             base.attack_image_offset = 0;
         }
@@ -69,18 +69,21 @@ void figure_enemy_spearman::enemy_initial(formation *m) {
 
     if (base.attack_image_offset) {
         e_figure_type missilet = missile_type();
-        assert(missilet != FIGURE_NONE && "archer should has missile");
+        assert(missilet != FIGURE_NONE && "spearman should has missile");
         if (missilet == FIGURE_NONE) {
             missilet = FIGURE_SPEAR;
         }
 
         if (base.attack_image_offset == 1) {
-            if (!target.tile.valid()) {
-                map_point_get_last_result(target.tile);
+            tile2i dst = target.tile;
+            if (!dst.valid()) {
+                map_point_get_last_result(dst);
             }
-
-            figure *f = figure_get(base.target_figure_id);
-            figure_missile::create(base.home_building_id, target.tile, f->tile, missilet);
+            // Julius: figure_create_missile(f->id, f->x, f->y, tile.x, tile.y, …)
+            auto *missile = figure_missile::create(id(), tile(), dst, missilet);
+            if (missile) {
+                missile->runtime_data().missile_attack_value = missile_attack_value();
+            }
             formation_record_missile_fired(m);
         }
 
@@ -160,7 +163,10 @@ void figure_enemy_spearman::enemy_fighting(formation *m) {
         float dist = tile().dist(b->tile);
         if (dist < attack_distance()) {
             base.direction = calc_missile_shooter_direction(tile(), b->tile);
-            figure_missile::create(id(), tile(), b->tile, missile_type());
+            auto *missile = figure_missile::create(id(), tile(), b->tile, missile_type());
+            if (missile) {
+                missile->runtime_data().missile_attack_value = missile_attack_value();
+            }
             base.wait_ticks = missile_delay();
             advance_action(ACTION_155_ENEMY_SPEARMAN_RELOAD);
             return;

@@ -962,7 +962,9 @@ void scenario_invasion_process() {
                 opts.kind = (enemy_id == ENEMY_3_EGYPTIAN) ? INVASION_KIND_PHARAOH : INVASION_KIND_FOREIGN;
                 tile2i invasion_tile = scenario_start_invasion_impl(opts);
                 if (invasion_tile.valid()) {
-                    emit_local_invasion_attack_message("message_barbarians_attack",
+                    const bool egyptian = (enemy_id == ENEMY_3_EGYPTIAN);
+                    emit_local_invasion_attack_message(
+                        egyptian ? "message_legion_attacks" : "message_barbarians_attack",
                         g_invasions.last_internal_invasion_id, invasion_tile.grid_offset());
                 }
             }

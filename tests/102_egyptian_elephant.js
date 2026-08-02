@@ -7,6 +7,7 @@
 //   [test-marker] egyptian_elephant_spawn_ok
 //   [test-marker] egyptian_elephant_soldier_target_ok
 //   [test-marker] egyptian_elephant_trample_ok
+//   [test-marker] egyptian_elephant_trample_kill_ok
 //   [test-marker] egyptian_elephant_all_ok
 
 function run_test() {
@@ -83,9 +84,32 @@ function run_test() {
     }
     __log_marker('egyptian_elephant_trample_ok')
 
+    // Lethal splash: stack until damage exceeds max — must kill (not only accumulate).
+    var splash = d1_after - d1_before
+    if (splash <= 0) {
+        __log_info_native('[test:102] splash delta unexpected')
+        __test_signal_ready()
+        return
+    }
+    var guard = 0
+    while (__test_figure_is_alive(s1) && guard < 64) {
+        if (!__test_elephant_trample(eid)) {
+            break
+        }
+        guard++
+    }
+    if (__test_figure_is_alive(s1)) {
+        __log_info_native('[test:102] trample never killed soldier after ' + guard + ' hits, damage='
+            + __test_figure_get_damage(s1))
+        __test_signal_ready()
+        return
+    }
+    __log_marker('egyptian_elephant_trample_kill_ok')
+
     __test_figure_kill(eid)
-    __test_figure_kill(s1)
-    __test_figure_kill(s2)
+    if (__test_figure_is_alive(s2)) {
+        __test_figure_kill(s2)
+    }
     __log_marker('egyptian_elephant_all_ok')
 
     __test_signal_ready()
@@ -98,6 +122,7 @@ function check_valid() {
         'egyptian_elephant_spawn_ok',
         'egyptian_elephant_soldier_target_ok',
         'egyptian_elephant_trample_ok',
+        'egyptian_elephant_trample_kill_ok',
         'egyptian_elephant_all_ok'
     ]
     for (var i = 0; i < markers.length; i++) {
