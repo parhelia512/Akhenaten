@@ -396,6 +396,47 @@ bool figure_impl::do_goto(tile2i dest, int terrainchoice, short next_action, sho
     return base.do_goto(dest, terrainchoice, next_action, fail_action);
 }
 
+bool figure_impl::is_follower_runaway() const {
+    return action_state() == FIGURE_ACTION_132_FOLLOWER_RUNAWAY;
+}
+
+void figure_impl::start_follower_runaway() {
+    if (is_follower_runaway()) {
+        return;
+    }
+
+    base.leading_figure_id = 0;
+    route_remove();
+    base.destination_tile = g_city.map.exit_point;
+    if (!base.destination_tile.valid()) {
+        base.destination_tile = g_city.map.closest_exit_tile_within_radius();
+    }
+    base.routing_try_reroute_counter = 0;
+    advance_action(FIGURE_ACTION_132_FOLLOWER_RUNAWAY);
+}
+
+void figure_impl::do_follower_runaway_tick() {
+    if (do_goto(base.destination_tile, TERRAIN_USAGE_ANY)) {
+        poof();
+        return;
+    }
+
+    if (direction() == DIR_FIGURE_CAN_NOT_REACH) {
+        base.routing_try_reroute_counter++;
+        if (base.routing_try_reroute_counter > 20) {
+            poof();
+            return;
+        }
+        route_remove();
+        base.destination_tile = g_city.map.closest_exit_tile_within_radius();
+        if (!base.destination_tile.valid()) {
+            base.destination_tile = g_city.map.exit_point;
+        }
+        base.direction = DIR_0_TOP_RIGHT;
+        advance_action(FIGURE_ACTION_132_FOLLOWER_RUNAWAY);
+    }
+}
+
 tile2i figure_impl::tile() const {
     return base.tile;
 }

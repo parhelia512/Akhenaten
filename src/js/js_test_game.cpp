@@ -489,6 +489,24 @@ static void __test_figure_set_home(int fid, int bid) {
 }
 ANK_FUNCTION_2(__test_figure_set_home);
 
+static void __test_figure_set_leading(int fid, int leader_id) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive()) {
+        return;
+    }
+    f->leading_figure_id = (short)std::max(0, leader_id);
+}
+ANK_FUNCTION_2(__test_figure_set_leading);
+
+static void __test_figure_set_collecting_item(int fid, int item) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive()) {
+        return;
+    }
+    f->collecting_item_id = (uint8_t)std::clamp(item, 0, INVENTORY_MAX - 1);
+}
+ANK_FUNCTION_2(__test_figure_set_collecting_item);
+
 static void __test_figure_set_speed(int fid, int speed) {
     figure *f = figure_get(fid);
     if (!f || !f->is_alive()) {
@@ -2229,6 +2247,25 @@ static int __test_bazaar_pick_next_inventory(int bid) {
     return bazaar->runtime_data().fetch_inventory_id;
 }
 ANK_FUNCTION_1(__test_bazaar_pick_next_inventory);
+
+static int __test_bazaar_set_inventory(int bid, int inv, int amount) {
+    auto *bazaar = building_get(bid)->dcast_bazaar();
+    if (!bazaar || inv < 0 || inv >= INVENTORY_MAX) {
+        return 0;
+    }
+    bazaar->runtime_data().inventory[inv].value = (uint16_t)std::max(0, amount);
+    return 1;
+}
+ANK_FUNCTION_3(__test_bazaar_set_inventory);
+
+static int __test_bazaar_get_inventory(int bid, int inv) {
+    auto *bazaar = building_get(bid)->dcast_bazaar();
+    if (!bazaar || inv < 0 || inv >= INVENTORY_MAX) {
+        return -1;
+    }
+    return bazaar->runtime_data().inventory[inv].value;
+}
+ANK_FUNCTION_2(__test_bazaar_get_inventory);
 
 static void __test_bazaar_set_good_demands(int bid, int pottery, int luxury, int linen, int beer) {
     auto *bazaar = building_get(bid)->dcast_bazaar();

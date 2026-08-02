@@ -140,6 +140,9 @@ public:
     bool do_exitbuilding(bool invisible, short next_action = -1, short fail_action = -1);
     bool do_roam(int terrainchoice, short next_action);
     bool do_goto(tile2i dest, int terrainchoice = TERRAIN_USAGE_ROADS, short next_action = -1, short fail_action = -1);
+    bool is_follower_runaway() const;
+    void start_follower_runaway();
+    void do_follower_runaway_tick();
     tile2i tile() const;
     int tilex() const;
     int tiley() const;
