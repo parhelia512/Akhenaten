@@ -385,6 +385,9 @@ mission17 { // On (Heliopolis) — Ivory from the East
 		event1_perfect_flood_last_year : -1
 
 		pharaoh_favour_invasion_done : false
+		pharaoh_favour_chain_done : false
+		pharaoh_favour_enemies_seen : false
+		pharaoh_favour_wave_next : -1
 		pharaoh_favour_wave2_done : false
 		pharaoh_favour_wave3_done : false
 		pharaoh_favour_wave4_done : false
@@ -609,87 +612,28 @@ function mission17_event_i5_limestone_recurring(ev) {
 	mission17_fire_request(3000 + 5 * 100 + ev.years_since_start, RESOURCE_LIMESTONE, 25, 36, 1009, 1007, 1008, 4, 0)
 }
 
-function mission17_favour_wave(size, invasion_id, attack_target) {
-	if (attack_target === undefined) {
-		attack_target = EVENT_ATTACK_TARGET_RANDOM
-	}
-	log_info("akhenaten: mission 17 on favour wave size=" + size + " kr=" + city.rating_kingdom)
-	__image_request_pak(PACK_ENEMY_EGYPTIAN)
-	city.start_foreign_army_invasion({
-		mode: ATTACK_TYPE_ENEMIES,
-		enemy: ENEMY_3_EGYPTIAN,
-		kind: INVASION_KIND_KINGDOME,
-		size: size,
-		invasion_id: invasion_id,
-		tilex: -1,
-		tiley: -1,
-		want_destroy_buildings: 0,
-		invasion_attack_target: attack_target
-	})
-}
-
-// pak i=15→16→17→18→19: favour 20×5 (helper only supports two waves).
+// pak i=15→16→17→18→19: favour 20×5; last wave attack=FOOD.
 [es=event_advance_month, mission=mission17]
 function mission17_pharaoh_favour_invasion(ev) {
-	if (mission.pharaoh_favour_wave4_done && !mission.pharaoh_favour_wave5_done) {
-		if (city.num_enemy_formations > 0) {
-			mission.pharaoh_favour_wave5_enemies_seen = true
-			return
+	if (mission.pharaoh_favour_wave_next < 0) {
+		var n = 0
+		if (mission.pharaoh_favour_invasion_done) { n = 1 }
+		if (mission.pharaoh_favour_wave2_done) { n = 2 }
+		if (mission.pharaoh_favour_wave3_done) { n = 3 }
+		if (mission.pharaoh_favour_wave4_done) { n = 4 }
+		if (mission.pharaoh_favour_wave5_done) { n = 5 }
+		mission.pharaoh_favour_wave_next = n
+		if (n == 1 && mission.pharaoh_favour_wave2_enemies_seen) {
+			mission.pharaoh_favour_enemies_seen = true
+		} else if (n == 2 && mission.pharaoh_favour_wave3_enemies_seen) {
+			mission.pharaoh_favour_enemies_seen = true
+		} else if (n == 3 && mission.pharaoh_favour_wave4_enemies_seen) {
+			mission.pharaoh_favour_enemies_seen = true
+		} else if (n == 4 && mission.pharaoh_favour_wave5_enemies_seen) {
+			mission.pharaoh_favour_enemies_seen = true
 		}
-		if (!mission.pharaoh_favour_wave5_enemies_seen) {
-			return
-		}
-		mission.pharaoh_favour_wave5_done = true
-		// pak i=19 attack=0 (FOOD); earlier waves attack=4 (RANDOM).
-		mission17_favour_wave(20, 29, EVENT_ATTACK_TARGET_FOOD)
-		return
 	}
-
-	if (mission.pharaoh_favour_wave3_done && !mission.pharaoh_favour_wave4_done) {
-		if (city.num_enemy_formations > 0) {
-			mission.pharaoh_favour_wave4_enemies_seen = true
-			return
-		}
-		if (!mission.pharaoh_favour_wave4_enemies_seen) {
-			return
-		}
-		mission.pharaoh_favour_wave4_done = true
-		mission17_favour_wave(20, 28)
-		return
-	}
-
-	if (mission.pharaoh_favour_wave2_done && !mission.pharaoh_favour_wave3_done) {
-		if (city.num_enemy_formations > 0) {
-			mission.pharaoh_favour_wave3_enemies_seen = true
-			return
-		}
-		if (!mission.pharaoh_favour_wave3_enemies_seen) {
-			return
-		}
-		mission.pharaoh_favour_wave3_done = true
-		mission17_favour_wave(20, 27)
-		return
-	}
-
-	if (mission.pharaoh_favour_invasion_done && !mission.pharaoh_favour_wave2_done) {
-		if (city.num_enemy_formations > 0) {
-			mission.pharaoh_favour_wave2_enemies_seen = true
-			return
-		}
-		if (!mission.pharaoh_favour_wave2_enemies_seen) {
-			return
-		}
-		mission.pharaoh_favour_wave2_done = true
-		mission17_favour_wave(20, 26)
-		return
-	}
-
-	if (mission.pharaoh_favour_invasion_done) {
-		return
-	}
-	if (city.rating_kingdom > 0) {
-		return
-	}
-	mission.pharaoh_favour_invasion_done = true
-	mission17_favour_wave(20, 25)
+	var on_targets = []
+	on_targets[4] = EVENT_ATTACK_TARGET_FOOD
+	mission_pharaoh_favour_invasion_tick(mission, [20, 20, 20, 20, 20], { targets: on_targets })
 }

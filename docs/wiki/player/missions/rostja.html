@@ -272,10 +272,11 @@
               <li><strong>NEW_TRADE Nekhen</strong> (i=32/42/43) remapped → <strong>Iunet</strong> (route 3).</li>
               <li><strong>Orphan routes 5/6/25</strong> skipped; empty map_obj idx=6 skipped.</li>
               <li><strong>Kyrene route 7 / Men-nefer route 19</strong> — no pak polyline; 2-pt stubs.</li>
-              <li><strong>Troops refuse/defeat</strong> → JS Hyksos×9 (FOOD) then re-arm ×47 via <code>on_completed_tag</code> (pak i=35 INVASION no-op).</li>
-              <li><strong>Gems crisis refuse</strong> → JS Hyksos×11 via KR−1 sentinel.</li>
-              <li><strong>Favour</strong> JS-proxied until B2-migrate (three waves; helper only supports two).</li>
-              <li><strong>Choice 19/20</strong> (Bahariya / Djedu) not scripted yet (task B5).</li>
+              <li><strong>Troops refuse/defeat</strong> → JS Hyksos×9 (FOOD) then re-arm ×47 via <code>event_request_cleared</code> (pak i=35 INVASION no-op; defeat also emits cleared).</li>
+              <li><strong>Gems crisis refuse/late</strong> → JS Hyksos×11 via <code>event_request_cleared</code> (leaf 1029 still applies KR−1).</li>
+              <li><strong>Shared ONLY_VIA burn (B14)</strong> — leaf 1035 / request 1034 burn after first via; second troops refuse may miss KR−2 / re-arm until B14.</li>
+              <li><strong>Favour</strong> JS-proxied via <code>mission_pharaoh_favour_invasion_tick([50,20,50])</code> (B7).</li>
+              <li><strong>Choice 19/20</strong> (Bahariya / Djedu) — see D6 / mission scripts.</li>
             </ul>
           </div>
         </details>

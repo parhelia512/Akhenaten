@@ -7,8 +7,8 @@ log_info("akhenaten: mission 18 rostja started")
 // Triage: SKIP orphan routes 5/6/25; SKIP map_obj idx=6 empty;
 // Kyrene route 7 / Men-nefer route 19 — no polyline → 2-pt stubs + deviation.
 // NEW_TRADE i=20 copy Men-nefer; i=32/42/43 Nekhen→remap Iunet (route 3).
-// EVENT_TYPE_INVASION chain leaves no-op → gems crisis refuse JS Hyksos×11;
-// troops refuse/defeat i=35 → JS Hyksos×9 then on_completed → re-arm ×47.
+// EVENT_TYPE_INVASION chain leaves no-op → JS via event_request_cleared:
+// gems crisis refuse/late → Hyksos×11; troops refuse/defeat → Hyksos×9 → re-arm ×47.
 // Monuments goal 53 (Sphinx + complex + medium true pyramid).
 //
 // Tag_id scheme:
@@ -416,15 +416,13 @@ mission18 { // Rostja (Giza) — The Great Pyramid and Sphinx
 
 		event37_hyksos_last_year : -1
 
-		gems_crisis_req_seen : false
-		gems_crisis_outcome_handled : false
 		gems_crisis_raid_done : false
-		gems_crisis_kr_snap : 0
-
-		troops_req_seen : false
-		troops_kr_snap : 0
 
 		pharaoh_favour_invasion_done : false
+		pharaoh_favour_chain_done : false
+		pharaoh_favour_enemies_seen : false
+		pharaoh_favour_wave_next : -1
+		// Legacy mid-save (pre-B7 local poll):
 		pharaoh_favour_wave2_done : false
 		pharaoh_favour_wave3_done : false
 		pharaoh_favour_wave2_enemies_seen : false
@@ -561,14 +559,14 @@ function mission18_ensure_pharaoh_gift_leaves() {
 	mission18_make_leaf(1013, EVENT_TYPE_GIFT_FROM_PHARAOH, RESOURCE_LIMESTONE, 14, 2)
 	mission18_make_leaf(1017, EVENT_TYPE_GIFT_FROM_PHARAOH, RESOURCE_TIMBER, 14, 2)
 	mission18_make_leaf(1039, EVENT_TYPE_GIFT_FROM_PHARAOH, RESOURCE_POTTERY, 7, 2)
-	// i=28 MESSAGE ack; i=29 invasion no-op → JS after KR−1 sentinel (1029).
+	// i=28 MESSAGE ack; i=29 invasion no-op → JS raid via event_request_cleared; 1029 = KR−1.
 	mission18_make_leaf(1028, EVENT_TYPE_MESSAGE, undefined, 7, 2,
 		EVENT_SUBTYPE_MSG_ACKNOWLEDGEMENT, "Nekhen")
 	mission18_make_leaf(1029, EVENT_TYPE_REPUTATION_DECREASE, undefined, 1, 2)
 }
 
 // Troops chain: ok→31 KR+3→32 NEW_TRADE Iunet; late→33 SEA→34 troops×47;
-// refuse/defeat→1035 KR−2 sentinel → JS Hyksos×9 (pak i=35) → on_completed→1034.
+// refuse/defeat→1035 KR−2 + JS Hyksos×9 (pak i=35) via event_request_cleared → on_completed→1034.
 function mission18_ensure_troops_chain_leaves() {
 	if (mission.troops_chain_leaves_wired) {
 		return
@@ -578,7 +576,7 @@ function mission18_ensure_troops_chain_leaves() {
 	mission18_make_leaf(1032, EVENT_TYPE_CITY_STATUS_CHANGE, undefined, 7, 2,
 		EVENT_SUBTYPE_NEW_TRADE_ROUTE, "Iunet")
 	var sea = mission18_make_leaf(1033, EVENT_TYPE_SEA_TRADE_PROBLEM, undefined, 5, 2)
-	// Sentinel for refuse/defeat (EVENT_TYPE_INVASION i=35 is engine no-op).
+	// KR−2 on refuse/defeat (EVENT_TYPE_INVASION i=35 is engine no-op → JS raid).
 	mission18_make_leaf(1035, EVENT_TYPE_REPUTATION_DECREASE, undefined, 2, 2)
 	var troops2 = city.create_good_request({
 		tag_id: 1034, resource: RESOURCE_TROOPS, amount: 47, months_initial: 8, subtype: 1,
@@ -857,36 +855,9 @@ function mission18_event_i27_gems_crisis(ev) {
 		return
 	}
 	mission.event27_gems_done = true
-	mission.gems_crisis_req_seen = false
-	mission.gems_crisis_outcome_handled = false
 	mission18_ensure_pharaoh_gift_leaves()
 	log_info("akhenaten: mission 18 rostja gems×13 crisis", {ev:ev})
 	mission18_fire_request(2027, RESOURCE_GEMS, 13, 3, 1028, 1029, 1029, 6, 0)
-}
-
-// pak i=29: Hyksos×11 after gems crisis refuse/late (EVENT_TYPE_INVASION no-op).
-// Detect via KR−1 sentinel leaf 1029.
-[es=event_advance_month, mission=mission18]
-function mission18_gems_crisis_refuse_raid(ev) {
-	if (mission.gems_crisis_raid_done || !mission.event27_gems_done || mission.gems_crisis_outcome_handled) {
-		return
-	}
-	if (city.has_active_request(RESOURCE_GEMS)) {
-		mission.gems_crisis_req_seen = true
-		mission.gems_crisis_kr_snap = city.rating_kingdom
-		return
-	}
-	if (!mission.gems_crisis_req_seen) {
-		return
-	}
-	mission.gems_crisis_outcome_handled = true
-	var drop = mission.gems_crisis_kr_snap - city.rating_kingdom
-	if (drop < 1 || drop > 2) {
-		return
-	}
-	mission.gems_crisis_raid_done = true
-	log_info("akhenaten: mission 18 rostja hyksos×11 after gems crisis (kr drop=" + drop + ")", {ev:ev})
-	mission18_hyksos_raid(1, 11, EVENT_ATTACK_TARGET_VAULTS)
 }
 
 // pak i=30: troops×40/12mo once y8m3 subtype=1 city=Men-nefer;
@@ -900,36 +871,31 @@ function mission18_event_i30_troops(ev) {
 		return
 	}
 	mission.event30_troops_done = true
-	mission.troops_req_seen = false
 	mission18_ensure_troops_chain_leaves()
 	log_info("akhenaten: mission 18 rostja troops×40", {ev:ev})
 	mission18_fire_request(2030, RESOURCE_TROOPS, 40, 12, 1031, 1035, 1033, 1, 0, 1035, "Men-nefer")
 }
 
-// pak i=35: Hyksos×9 after troops refuse/defeat (EVENT_TYPE_INVASION no-op).
-// Detect via KR−2 sentinel 1035; on wipe re-arm troops×47 (1034). Also covers
-// troops2 refuse/defeat (pak loops i=35→34).
-[es=event_advance_month, mission=mission18]
-function mission18_troops_refuse_raid(ev) {
-	if (!mission.event30_troops_done) {
+// Factual request close — invasions from JS (no KR-snap). Leaf KR still via wired tags.
+// Defeat of deferred troop asks also emits event_request_cleared (fulfilled=0) → "refuse".
+[es=event_request_cleared, mission=mission18]
+function mission18_on_request_cleared(ev) {
+	var outcome = mission_request_outcome(ev)
+	var tag = ev.tag_id
+
+	// pak i=29 Hyksos×11 after gems crisis refuse/late (EVENT_TYPE_INVASION no-op).
+	if (tag == 2027 && outcome != "ok" && !mission.gems_crisis_raid_done) {
+		mission.gems_crisis_raid_done = true
+		log_info("akhenaten: mission 18 rostja hyksos×11 after gems crisis (" + outcome + ")", {ev:ev})
+		mission18_hyksos_raid(1, 11, EVENT_ATTACK_TARGET_VAULTS)
 		return
 	}
-	if (city.has_active_request(RESOURCE_TROOPS)) {
-		mission.troops_req_seen = true
-		mission.troops_kr_snap = city.rating_kingdom
-		return
+
+	// pak i=35 Hyksos×9 after troops refuse/defeat (not late→SEA). Covers 2030 and re-arm 1034.
+	if ((tag == 2030 || tag == 1034) && outcome == "refuse") {
+		log_info("akhenaten: mission 18 rostja hyksos×9 after troops refuse/defeat tag=" + tag, {ev:ev})
+		mission18_hyksos_raid(2, 9, EVENT_ATTACK_TARGET_FOOD, 1034)
 	}
-	if (!mission.troops_req_seen) {
-		return
-	}
-	mission.troops_req_seen = false
-	var drop = mission.troops_kr_snap - city.rating_kingdom
-	// Sentinel −2, or KR floored at 0 with a clear drop past ok (+3) / late (0).
-	if (drop < 2 && !(city.rating_kingdom <= 0 && drop >= 1)) {
-		return
-	}
-	log_info("akhenaten: mission 18 rostja hyksos×9 after troops refuse/defeat (kr drop=" + drop + ")", {ev:ev})
-	mission18_hyksos_raid(2, 9, EVENT_ATTACK_TARGET_FOOD, 1034)
 }
 
 // pak i=36: gamemeat×15/8mo recurring y12m8+ sender=city; ok→1 refuse→2 late→3.
@@ -1026,57 +992,20 @@ function mission18_event_i43_new_trade_route(ev) {
 	}).execute()
 }
 
-function mission18_favour_wave(size, invasion_id) {
-	log_info("akhenaten: mission 18 rostja favour wave size=" + size + " kr=" + city.rating_kingdom)
-	__image_request_pak(PACK_ENEMY_EGYPTIAN)
-	city.start_foreign_army_invasion({
-		mode: ATTACK_TYPE_ENEMIES,
-		enemy: ENEMY_3_EGYPTIAN,
-		kind: INVASION_KIND_KINGDOME,
-		size: size,
-		invasion_id: invasion_id,
-		tilex: -1,
-		tiley: -1,
-		want_destroy_buildings: 0,
-		invasion_attack_target: EVENT_ATTACK_TARGET_RANDOM
-	})
-}
-
-// pak i=18→40→41: favour Pharaoh 50→20→50 (helper only supports two waves).
+// pak i=18→40→41: favour Pharaoh 50→20→50.
 [es=event_advance_month, mission=mission18]
 function mission18_pharaoh_favour_invasion(ev) {
-	if (mission.pharaoh_favour_wave2_done && !mission.pharaoh_favour_wave3_done) {
-		if (city.num_enemy_formations > 0) {
-			mission.pharaoh_favour_wave3_enemies_seen = true
-			return
+	if (mission.pharaoh_favour_wave_next < 0) {
+		var n = 0
+		if (mission.pharaoh_favour_invasion_done) { n = 1 }
+		if (mission.pharaoh_favour_wave2_done) { n = 2 }
+		if (mission.pharaoh_favour_wave3_done) { n = 3 }
+		mission.pharaoh_favour_wave_next = n
+		if (n == 1 && mission.pharaoh_favour_wave2_enemies_seen) {
+			mission.pharaoh_favour_enemies_seen = true
+		} else if (n == 2 && mission.pharaoh_favour_wave3_enemies_seen) {
+			mission.pharaoh_favour_enemies_seen = true
 		}
-		if (!mission.pharaoh_favour_wave3_enemies_seen) {
-			return
-		}
-		mission.pharaoh_favour_wave3_done = true
-		mission18_favour_wave(50, 27)
-		return
 	}
-
-	if (mission.pharaoh_favour_invasion_done && !mission.pharaoh_favour_wave2_done) {
-		if (city.num_enemy_formations > 0) {
-			mission.pharaoh_favour_wave2_enemies_seen = true
-			return
-		}
-		if (!mission.pharaoh_favour_wave2_enemies_seen) {
-			return
-		}
-		mission.pharaoh_favour_wave2_done = true
-		mission18_favour_wave(20, 26)
-		return
-	}
-
-	if (mission.pharaoh_favour_invasion_done) {
-		return
-	}
-	if (city.rating_kingdom > 0) {
-		return
-	}
-	mission.pharaoh_favour_invasion_done = true
-	mission18_favour_wave(50, 25)
+	mission_pharaoh_favour_invasion_tick(mission, [50, 20, 50])
 }

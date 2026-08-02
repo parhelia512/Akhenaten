@@ -176,64 +176,91 @@ function mission_request_outcome(ev) {
 	return "ok"
 }
 
-function mission_pharaoh_favour_invasion_tick(mission, army_size, chain_army_size) {
-    // Favour-KR: ENEMIES + Egyptian enemy pack + INVASION_KIND_KINGDOME → figures 55–57.
-    // Avoid ATTACK_TYPE_KINGDOME / force_attack (cheated_invasion skips pause/retreat).
-    if (typeof chain_army_size === "undefined") {
-        chain_army_size = 0
-    }
+// Favour-KR Pharaoh army waves. Call each month.
+//   mission_pharaoh_favour_invasion_tick(mission, 51)
+//   mission_pharaoh_favour_invasion_tick(mission, 25, 60)           // 2 waves (legacy)
+//   mission_pharaoh_favour_invasion_tick(mission, [50, 20, 50])     // N waves
+//   mission_pharaoh_favour_invasion_tick(mission, [20,20,20,20,20], { targets: [..., FOOD] })
+// First wave when rating_kingdom <= 0; later waves after prior enemies seen then cleared.
+function mission_pharaoh_favour_invasion_tick(mission, army_size_or_waves, chain_or_opts) {
+	var waves
+	var targets = null
+	if (army_size_or_waves && typeof army_size_or_waves.length === "number") {
+		waves = army_size_or_waves
+		if (chain_or_opts && chain_or_opts.targets) {
+			targets = chain_or_opts.targets
+		}
+	} else {
+		waves = [army_size_or_waves]
+		if (typeof chain_or_opts === "number" && chain_or_opts > 0) {
+			waves.push(chain_or_opts)
+		}
+	}
+	if (!waves || waves.length == 0) {
+		return
+	}
 
-    // pak: by_favour ok→chain_only Pharaoh army. After the first wave clears, fire the child once.
-    if (mission.pharaoh_favour_invasion_done && chain_army_size > 0 && !mission.pharaoh_favour_chain_done) {
-        var enemies = city.num_enemy_formations
-        if (enemies > 0) {
-            mission.pharaoh_favour_enemies_seen = true
-            return
-        }
-        if (!mission.pharaoh_favour_enemies_seen) {
-            return
-        }
-        mission.pharaoh_favour_chain_done = true
-        log_info("akhenaten: pharaoh favour chain invasion size=" + chain_army_size + " kr=" + city.rating_kingdom)
-        __image_request_pak(PACK_ENEMY_EGYPTIAN)
-        city.start_foreign_army_invasion({
-            mode: ATTACK_TYPE_ENEMIES,
-            enemy: ENEMY_3_EGYPTIAN,
-            kind: INVASION_KIND_KINGDOME,
-            size: chain_army_size,
-            invasion_id: 25,
-            tilex: -1,
-            tiley: -1,
-            want_destroy_buildings: 0,
-            invasion_attack_target: EVENT_ATTACK_TARGET_RANDOM
-        })
-        return
-    }
+	var next = mission.pharaoh_favour_wave_next
+	if (typeof next !== "number" || next < 0) {
+		// Mid-save: map legacy 1–2 wave flags (pre-B7). -1 = unset.
+		if (!mission.pharaoh_favour_invasion_done) {
+			next = 0
+		} else if (waves.length > 1 && !mission.pharaoh_favour_chain_done) {
+			next = 1
+		} else {
+			next = waves.length
+		}
+		mission.pharaoh_favour_wave_next = next
+	}
+	if (next >= waves.length) {
+		return
+	}
 
-    if (mission.pharaoh_favour_invasion_done) {
-        return
-    }
-    if (city.rating_kingdom > 0) {
-        return
-    }
-    mission.pharaoh_favour_invasion_done = true
-    if (chain_army_size > 0) {
-        mission.pharaoh_favour_enemies_seen = false
-        mission.pharaoh_favour_chain_done = false
-    }
-    log_info("akhenaten: pharaoh favour invasion size=" + army_size + " kr=" + city.rating_kingdom)
-    __image_request_pak(PACK_ENEMY_EGYPTIAN)
-    city.start_foreign_army_invasion({
-        mode: ATTACK_TYPE_ENEMIES,
-        enemy: ENEMY_3_EGYPTIAN,
-        kind: INVASION_KIND_KINGDOME,
-        size: army_size,
-        invasion_id: 24,
-        tilex: -1,
-        tiley: -1,
-        want_destroy_buildings: 0,
-        invasion_attack_target: EVENT_ATTACK_TARGET_RANDOM
-    })
+	if (next == 0) {
+		if (city.rating_kingdom > 0) {
+			return
+		}
+		mission.pharaoh_favour_invasion_done = true
+		mission.pharaoh_favour_enemies_seen = false
+		mission.pharaoh_favour_chain_done = (waves.length < 2)
+		mission.pharaoh_favour_wave_next = 1
+		mission_pharaoh_favour_fire_wave(waves[0], 24, targets ? targets[0] : undefined)
+		return
+	}
+
+	if (city.num_enemy_formations > 0) {
+		mission.pharaoh_favour_enemies_seen = true
+		return
+	}
+	if (!mission.pharaoh_favour_enemies_seen) {
+		return
+	}
+	mission.pharaoh_favour_enemies_seen = false
+	if (next == 1) {
+		mission.pharaoh_favour_chain_done = true
+	}
+	var size = waves[next]
+	mission.pharaoh_favour_wave_next = next + 1
+	mission_pharaoh_favour_fire_wave(size, 24 + next, targets ? targets[next] : undefined)
+}
+
+function mission_pharaoh_favour_fire_wave(size, invasion_id, attack_target) {
+	if (attack_target === undefined) {
+		attack_target = EVENT_ATTACK_TARGET_RANDOM
+	}
+	log_info("akhenaten: pharaoh favour invasion size=" + size + " id=" + invasion_id + " kr=" + city.rating_kingdom)
+	__image_request_pak(PACK_ENEMY_EGYPTIAN)
+	city.start_foreign_army_invasion({
+		mode: ATTACK_TYPE_ENEMIES,
+		enemy: ENEMY_3_EGYPTIAN,
+		kind: INVASION_KIND_KINGDOME,
+		size: size,
+		invasion_id: invasion_id,
+		tilex: -1,
+		tiley: -1,
+		want_destroy_buildings: 0,
+		invasion_attack_target: attack_target
+	})
 }
 
 import mission.m_000_nubt
