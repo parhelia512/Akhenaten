@@ -58,6 +58,22 @@ bool scenario_has_prey_points() {
     return false;
 }
 
+// Cleopatra Killer Type: climate pair + alt_predator_type flag.
+// Arid: hyena | scorpion; Normal: crocodile | lion; Humid: hippo | asp.
+e_figure_type climate_predator_type() {
+    const bool alt = g_scenario.alt_predator_type;
+    switch (g_scenario.climate) {
+    case CLIMATE_CENTRAL:
+        return alt ? FIGURE_LION : FIGURE_CROCODILE;
+    case CLIMATE_NORTHERN:
+        return alt ? FIGURE_ASP : FIGURE_HIPPO;
+    case CLIMATE_DESERT:
+        return alt ? FIGURE_SCORPION : FIGURE_HYENA;
+    default:
+        return FIGURE_NONE;
+    }
+}
+
 e_figure_type hunting_lodge_default_hunter_type() {
     e_figure_type prey = FIGURE_NONE;
     if (scenario_has_prey_points()) {
@@ -99,23 +115,6 @@ int herd_impassable_mask(e_figure_type herd_type) {
     default:
         // Hyenas: sand dunes (editor); mask matches historical hyena impassable set.
         return TERRAIN_IMPASSABLE_HYENA;
-    }
-}
-
-// Cleopatra Killer Type: climate pair + alt_predator_type flag.
-// Arid: hyena | scorpion; Normal: crocodile | lion; Humid: hippo | asp.
-e_figure_type climate_predator_type() {
-    const bool alt = g_scenario.alt_predator_type;
-    switch (g_scenario.climate) {
-    case CLIMATE_CENTRAL:
-        return alt ? FIGURE_LION : FIGURE_CROCODILE;
-    case CLIMATE_NORTHERN:
-        // Humid pair: hippo | asp.
-        return alt ? FIGURE_ASP : FIGURE_HIPPO;
-    case CLIMATE_DESERT:
-        return alt ? FIGURE_SCORPION : FIGURE_HYENA;
-    default:
-        return FIGURE_NONE;
     }
 }
 

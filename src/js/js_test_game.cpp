@@ -65,6 +65,7 @@
 #include "city/city_religion_seth.h"
 #include "grid/road_access.h"
 #include "grid/road_network.h"
+#include "grid/routing/routing_terrain.h"
 #include "game/autosave_module.h"
 #include "core/bstring.h"
 #include "game/game.h"
@@ -1058,6 +1059,56 @@ static void __test_set_scenario_prey_point(int index, int x, int y) {
     g_scenario.herd_points_prey[index] = tile2i(x, y);
 }
 ANK_FUNCTION_3(__test_set_scenario_prey_point);
+
+static void __test_clear_scenario_herd_points() {
+    g_scenario.herd_points_animals.clear();
+}
+ANK_FUNCTION(__test_clear_scenario_herd_points);
+
+static void __test_set_scenario_herd_point(int index, int x, int y) {
+    if (index < 0 || index >= MAX_PREDATOR_HERD_POINTS) {
+        return;
+    }
+    if ((int)g_scenario.herd_points_animals.size() <= index) {
+        g_scenario.herd_points_animals.resize(index + 1, tile2i::invalid);
+    }
+    g_scenario.herd_points_animals[index] = tile2i(x, y);
+}
+ANK_FUNCTION_3(__test_set_scenario_herd_point);
+
+static int __test_climate_predator_type() {
+    return (int)climate_predator_type();
+}
+ANK_FUNCTION(__test_climate_predator_type);
+
+static void __test_create_herds() {
+    g_city.animals.create_herds();
+}
+ANK_FUNCTION(__test_create_herds);
+
+// Pack (x << 16) | y for a land tile where is_herd_spawn_accessible(ftype) holds; -1 if none.
+static int __test_find_accessible_herd_tile(int ftype) {
+    if (ftype <= FIGURE_NONE || ftype >= FIGURE_MAX) {
+        return -1;
+    }
+    map_routing_update_land();
+    const e_figure_type herd_type = (e_figure_type)ftype;
+    const int w = g_scenario.map.width;
+    const int h = g_scenario.map.height;
+    for (int y = 8; y < h - 8; y += 2) {
+        for (int x = 8; x < w - 8; x += 2) {
+            tile2i tile(x, y);
+            if (!tile.valid()) {
+                continue;
+            }
+            if (g_city.animals.is_herd_spawn_accessible(tile, herd_type)) {
+                return (x << 16) | (y & 0xffff);
+            }
+        }
+    }
+    return -1;
+}
+ANK_FUNCTION_1(__test_find_accessible_herd_tile);
 
 static int __test_hunting_lodge_default_hunter_type() {
     return (int)hunting_lodge_default_hunter_type();

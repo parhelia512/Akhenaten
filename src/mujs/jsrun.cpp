@@ -1066,6 +1066,16 @@ static void js_setvar(js_State* J, const js_StringNode name) {
                 js_pop(J, 1);
                 return;
             }
+            // JS_CPTR / JS_CPTROFF globals (ANK_BOUND_*): write through *ptr.
+            // Plain replace would destroy the binding and leave C++ unchanged
+            // (broke scenario.alt_predator_type = true and similar setters).
+            if (ref->value.type == JS_TOBJECT) {
+                js_Object *o = ref->value.u.object;
+                if (o->type == JS_CPTR || o->type == JS_CPTROFF) {
+                    jsR_setproperty(J, E->variables, name);
+                    return;
+                }
+            }
             if (!(ref->atts & JS_READONLY))
                 ref->value = *stackidx(J, -1);
             else if (J->strict)
