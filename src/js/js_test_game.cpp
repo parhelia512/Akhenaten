@@ -77,7 +77,9 @@
 #include "core/bstring.h"
 #include "game/game.h"
 #include "game/resource.h"
+#include "content/vfs.h"
 #include "io/gamestate/boilerplate.h"
+#include "scenario/editor.h"
 #include "game/game_events.h"
 #include "scenario/scenario.h"
 #include "scenario/scenario_event_manager.h"
@@ -300,6 +302,63 @@ int __test_request_cleared_was_overdue() {
     return scenario_request_last_cleared().was_overdue;
 }
 ANK_FUNCTION(__test_request_cleared_was_overdue);
+
+// ED4a: editor request slots ↔ EVENT_TYPE_REQUEST (tag 8000+slot).
+int __test_editor_request_roundtrip() {
+    g_scenario.events.clear_for_editor();
+
+    editor_request in{};
+    in.year = 2;
+    in.resource = RESOURCE_CLAY;
+    in.amount = 10;
+    in.deadline_years = 1;
+    in.kingdom = 8;
+    g_scenario.events.editor_request_save(0, &in);
+
+    editor_request out{};
+    g_scenario.events.editor_request_get(0, &out);
+    if (out.year != 2 || out.resource != RESOURCE_CLAY || out.amount != 10
+        || out.deadline_years != 1 || out.kingdom != 8) {
+        return 0;
+    }
+
+    // Sparse slot: save 3 without filling 1/2; slot 0 must stay put.
+    editor_request sparse{};
+    sparse.year = 5;
+    sparse.resource = RESOURCE_POTTERY;
+    sparse.amount = 20;
+    sparse.deadline_years = 2;
+    sparse.kingdom = 4;
+    g_scenario.events.editor_request_save(3, &sparse);
+
+    editor_request slot0{};
+    g_scenario.events.editor_request_get(0, &slot0);
+    if (slot0.resource != RESOURCE_CLAY || slot0.amount != 10) {
+        return 0;
+    }
+    editor_request gap{};
+    g_scenario.events.editor_request_get(1, &gap);
+    if (gap.resource != RESOURCE_NONE) {
+        return 0;
+    }
+    editor_request slot3{};
+    g_scenario.events.editor_request_get(3, &slot3);
+    if (slot3.year != 5 || slot3.resource != RESOURCE_POTTERY || slot3.amount != 20
+        || slot3.deadline_years != 2 || slot3.kingdom != 4) {
+        return 0;
+    }
+
+    g_scenario.events.editor_request_delete(0);
+    editor_request empty{};
+    g_scenario.events.editor_request_get(0, &empty);
+    if (empty.resource != RESOURCE_NONE) {
+        return 0;
+    }
+    // Deleting slot 0 must not shift tag-stable slot 3.
+    g_scenario.events.editor_request_get(3, &slot3);
+    return (slot3.resource == RESOURCE_POTTERY && slot3.amount == 20) ? 1 : 0;
+}
+ANK_FUNCTION(__test_editor_request_roundtrip);
 
 static event_ph_t *__test_find_request_by_tag(int tag) {
     for (int i = 0; i < g_scenario.events.events_count(); ++i) {

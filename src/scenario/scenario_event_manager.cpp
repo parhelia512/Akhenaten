@@ -24,6 +24,7 @@
 #include "game/game.h"
 #include "game/game_events.h"
 #include "request.h"
+#include "scenario/editor.h"
 #include "js/js_game.h"
 #include "city/city.h"
 #include "city/city_resource.h"
@@ -338,6 +339,134 @@ void event_manager_t::set_request_defeat_action(int master_tag, int slave_tag) {
     if (master && slave) {
         master->on_defeat_action = slave->event_id;
     }
+}
+
+static void editor_reindex_events() {
+    auto &list = g_scenario_events.event_list;
+    for (int i = 0; i < (int)list.size(); ++i) {
+        list[i].event_id = i;
+    }
+    if (!list.empty()) {
+        list.front().num_total_header = (int16_t)list.size();
+    }
+}
+
+static void editor_ensure_header() {
+    auto &list = g_scenario_events.event_list;
+    if (list.empty()) {
+        list.push_back({});
+    }
+    list.front().num_total_header = (int16_t)list.size();
+}
+
+static int editor_request_tag(int slot) {
+    return 8000 + slot;
+}
+
+static int editor_request_event_id(int slot) {
+    if (slot < 0 || slot >= event_manager_t::editor_request_slots) {
+        return -1;
+    }
+    const int tag = editor_request_tag(slot);
+    auto &list = g_scenario_events.event_list;
+    for (int i = 1; i < (int)list.size(); ++i) {
+        if (list[i].type == EVENT_TYPE_REQUEST && list[i].tag_id == tag) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static void editor_fill_from_event(const event_ph_t &e, editor_request *out) {
+    out->year = e.time.year;
+    out->resource = (e_resource)e.item.value;
+    out->amount = e.amount.value;
+    out->deadline_years = e.months_initial > 0 ? (e.months_initial + 11) / 12 : 0;
+    out->kingdom = e.param1;
+}
+
+static void editor_apply_to_event(event_ph_t &e, const editor_request *in, int event_id, int tag_id) {
+    memset(&e, 0, sizeof(event_ph_t));
+    e.type = EVENT_TYPE_REQUEST;
+    e.event_id = event_id;
+    e.tag_id = (uint16_t)tag_id;
+    e.time.year = (int16_t)in->year;
+    e.time.month = 0;
+    e.item.value = (int16_t)in->resource;
+    e.amount.value = (int16_t)in->amount;
+    e.amount.f_fixed = (int16_t)in->amount;
+    int months = in->deadline_years * 12;
+    if (months < 1) {
+        months = 12;
+    }
+    if (months > 255) {
+        months = 255;
+    }
+    e.months_initial = (uint8_t)months;
+    e.param1 = in->kingdom;
+    e.event_trigger_type = EVENT_TRIGGER_ONCE;
+    e.sender_faction = EVENT_FACTION_REQUEST_FROM_PHARAOH;
+    e.location_fields = { -1, -1, -1, -1 };
+    e.on_completed_action = -1;
+    e.on_refusal_action = -1;
+    e.on_too_late_action = -1;
+    e.on_defeat_action = -1;
+    e.subtype = EVENT_SUBTYPE_GENERIC_REQUEST;
+    e.city_id = -1;
+}
+
+void event_manager_t::clear_for_editor() {
+    g_scenario_events.event_list.clear();
+    g_scenario_events.event_list.push_back({});
+    g_scenario_events.event_list.front().num_total_header = 1;
+}
+
+void event_manager_t::editor_request_get(int slot, editor_request *out) const {
+    if (!out) {
+        return;
+    }
+    memset(out, 0, sizeof(*out));
+    const int eid = editor_request_event_id(slot);
+    if (eid < 0) {
+        return;
+    }
+    editor_fill_from_event(g_scenario_events.event_list[eid], out);
+}
+
+void event_manager_t::editor_request_save(int slot, const editor_request *in) {
+    if (!in || slot < 0 || slot >= editor_request_slots) {
+        return;
+    }
+    editor_ensure_header();
+    auto &list = g_scenario_events.event_list;
+
+    if (in->resource == RESOURCE_NONE || in->amount <= 0) {
+        editor_request_delete(slot);
+        return;
+    }
+
+    const int tag = editor_request_tag(slot);
+    int eid = editor_request_event_id(slot);
+    if (eid < 0) {
+        if ((int)list.size() >= MAX_EVENTS) {
+            return;
+        }
+        list.push_back({});
+        eid = (int)list.size() - 1;
+    }
+    editor_apply_to_event(list[eid], in, eid, tag);
+    editor_reindex_events();
+}
+
+void event_manager_t::editor_request_delete(int slot) {
+    const int eid = editor_request_event_id(slot);
+    if (eid < 0) {
+        return;
+    }
+    auto &list = g_scenario_events.event_list;
+    list.erase(list.begin() + eid);
+    editor_ensure_header();
+    editor_reindex_events();
 }
 
 void event_manager_t::execute_event(int tag) {

@@ -78,10 +78,8 @@ void scenario_editor_create(int map_size) {
 
     g_scenario.herd_points_prey.assign(MAX_PREY_HERD_POINTS, tile2i::invalid);
 
-    //for (int i = 0; i < MAX_REQUESTS; i++) {
-    //    g_scenario.requests[i].deadline_years = 5;
-    //    g_scenario.requests[i].kingdom = 8;
-    //}
+    g_scenario.events.clear_for_editor();
+
     for (int i = 0; i < MAX_INVASIONS; i++) {
         g_scenario.invasions[i].from = 8;
     }
@@ -96,44 +94,16 @@ void scenario_editor_set_native_images(int image_hut, int image_meeting, int ima
 }
 
 void scenario_editor_request_get(int index, editor_request* request) {
-    //request->year = g_scenario.requests[index].year;
-    //request->amount = g_scenario.requests[index].amount;
-    //request->resource = g_scenario.requests[index].resource;
-    //request->deadline_years = g_scenario.requests[index].deadline_years;
-    //request->kingdom = g_scenario.requests[index].kingdom;
-}
-
-static void sort_requests(void) {
-    //for (int i = 0; i < MAX_REQUESTS; i++) {
-    //    for (int j = MAX_REQUESTS - 1; j > 0; j--) {
-    //        request_t* current = &g_scenario.requests[j];
-    //        request_t* prev = &g_scenario.requests[j - 1];
-    //        if (current->resource && (!prev->resource || prev->year > current->year)) {
-    //            request_t tmp = *current;
-    //            *current = *prev;
-    //            *prev = tmp;
-    //        }
-    //    }
-    //}
+    g_scenario.events.editor_request_get(index, request);
 }
 
 void scenario_editor_request_delete(int index) {
-    //g_scenario.requests[index].year = 0;
-    //g_scenario.requests[index].amount = 0;
-    //g_scenario.requests[index].resource = RESOURCE_NONE;
-    //g_scenario.requests[index].deadline_years = 5;
-    //g_scenario.requests[index].kingdom = 8;
-    sort_requests();
+    g_scenario.events.editor_request_delete(index);
     g_scenario.is_saved = 0;
 }
 
 void scenario_editor_request_save(int index, editor_request* request) {
-    //g_scenario.requests[index].year = request->year;
-    //g_scenario.requests[index].amount = request->amount;
-    //g_scenario.requests[index].resource = request->resource;
-    //g_scenario.requests[index].deadline_years = request->deadline_years;
-    //g_scenario.requests[index].kingdom = request->kingdom;
-    sort_requests();
+    g_scenario.events.editor_request_save(index, request);
     g_scenario.is_saved = 0;
 }
 

@@ -257,4 +257,12 @@ struct event_manager_t {
     void set_request_refusal_action(int master_tag, int slave_tag);
     void set_request_too_late_action(int master_tag, int slave_tag);
     void set_request_defeat_action(int master_tag, int slave_tag);
+
+    // Editor UI slots 0..19 ↔ EVENT_TYPE_REQUEST with tag 8000+slot (in-memory buffer).
+    // Campaign SoT remains mission JS; ED4b will export/sidecar rather than map chunk.
+    static constexpr int editor_request_slots = 20;
+    void clear_for_editor();
+    void editor_request_get(int slot, struct editor_request *out) const;
+    void editor_request_save(int slot, const struct editor_request *in);
+    void editor_request_delete(int slot);
 };
