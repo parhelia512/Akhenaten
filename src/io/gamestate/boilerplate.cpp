@@ -896,11 +896,12 @@ bool GamestateIO::load_map(pcstr filename, bool relative, bool start_immediately
     cities[0].in_use = true;
     // temp hack
 
-    // ED5: custom-map play loads *.meta.js (requests + invasions) before
-    // g_invasions.init() in start_loaded_file. Editor load applies meta itself
-    // after stripping map-embedded events.
+    // ED5: custom-map play loads *.meta.js (requests/invasions/price/demand)
+    // before start_loaded_file inits. Editor load applies meta itself after strip.
     if (!editor_is_active()) {
         editor_invasions_clear();
+        editor_price_changes_clear();
+        editor_demand_changes_clear();
         if (vfs::file_exists(editor_map_meta_path(fullpath.c_str()))) {
             g_scenario.events.clear_for_editor();
             editor_map_meta_load(fullpath.c_str());

@@ -364,11 +364,13 @@ int __test_editor_request_roundtrip() {
 ANK_FUNCTION(__test_editor_request_roundtrip);
 
 // ED4b/ED5: map write strips scenario_events; sidecar *.meta.js round-trips
-// editor request slots + invasion schedule.
+// editor request slots + invasion/price/demand schedules.
 // Returns 1 on success; on failure logs a step tag and returns 0.
 int __test_editor_map_meta_roundtrip() {
     g_scenario.events.clear_for_editor();
     editor_invasions_clear();
+    editor_price_changes_clear();
+    editor_demand_changes_clear();
 
     editor_request in{};
     in.year = 3;
@@ -402,6 +404,20 @@ int __test_editor_map_meta_roundtrip() {
     inv_sparse.attack_type = FORMATION_ATTACK_FOOD_CHAIN;
     scenario_editor_invasion_save(2, &inv_sparse);
 
+    editor_price_change price_in{};
+    price_in.year = 4;
+    price_in.resource = RESOURCE_CLAY;
+    price_in.amount = 10;
+    price_in.is_rise = 1;
+    scenario_editor_price_change_save(0, &price_in);
+
+    editor_demand_change demand_in{};
+    demand_in.year = 6;
+    demand_in.resource = RESOURCE_POTTERY;
+    demand_in.route_id = 2;
+    demand_in.is_rise = 0;
+    scenario_editor_demand_change_save(0, &demand_in);
+
     const char *map_path = "Maps/_editor_meta_rt.map";
     if (!game_file_editor_write_scenario(map_path)) {
         logs::info("[test:172] step=write_failed");
@@ -424,6 +440,8 @@ int __test_editor_map_meta_roundtrip() {
     editor_map_meta_remove(map_path);
     g_scenario.events.clear_for_editor();
     editor_invasions_clear();
+    editor_price_changes_clear();
+    editor_demand_changes_clear();
     if (!game_file_editor_load_scenario(map_path)) {
         logs::info("[test:172] step=load_map_only_failed");
         return 0;
@@ -438,17 +456,25 @@ int __test_editor_map_meta_roundtrip() {
         logs::info("[test:172] step=map_still_has_invasions type=%d", g_scenario.invasions[0].type);
         return 0;
     }
+    if (g_scenario.price_changes[0].resource != RESOURCE_NONE || g_scenario.demand_changes[0].resource != RESOURCE_NONE) {
+        logs::info("[test:172] step=map_still_has_trade_schedules");
+        return 0;
+    }
 
     g_scenario.events.editor_request_save(0, &in);
     g_scenario.events.editor_request_save(3, &sparse);
     scenario_editor_invasion_save(0, &inv_in);
     scenario_editor_invasion_save(2, &inv_sparse);
+    scenario_editor_price_change_save(0, &price_in);
+    scenario_editor_demand_change_save(0, &demand_in);
     if (!game_file_editor_write_scenario(map_path)) {
         logs::info("[test:172] step=rewrite_failed");
         return 0;
     }
     g_scenario.events.clear_for_editor();
     editor_invasions_clear();
+    editor_price_changes_clear();
+    editor_demand_changes_clear();
     if (!game_file_editor_load_scenario(map_path)) {
         logs::info("[test:172] step=load_with_meta_failed");
         return 0;
@@ -461,6 +487,8 @@ int __test_editor_map_meta_roundtrip() {
     // sort_invasions() packs filled slots by year — expect years 2 then 5 at 0/1.
     const invasion_t &out_inv0 = g_scenario.invasions[0];
     const invasion_t &out_inv1 = g_scenario.invasions[1];
+    const price_change_t &out_price = g_scenario.price_changes[0];
+    const demand_change_t &out_demand = g_scenario.demand_changes[0];
     const bool ok = out0.year == 3 && out0.resource == RESOURCE_CLAY && out0.amount == 12
                     && out0.deadline_years == 2 && out0.kingdom == 5
                     && out3.year == 7 && out3.resource == RESOURCE_POTTERY && out3.amount == 4
@@ -470,13 +498,19 @@ int __test_editor_map_meta_roundtrip() {
                     && out_inv0.attack_type == FORMATION_ATTACK_TROOPS
                     && out_inv1.year == 5 && out_inv1.type == INVASION_TYPE_LOCAL_UPRISING
                     && out_inv1.amount == 8 && out_inv1.from == 1
-                    && out_inv1.attack_type == FORMATION_ATTACK_FOOD_CHAIN;
+                    && out_inv1.attack_type == FORMATION_ATTACK_FOOD_CHAIN
+                    && out_price.year == 4 && out_price.resource == RESOURCE_CLAY
+                    && out_price.amount == 10 && out_price.is_rise == 1
+                    && out_demand.year == 6 && out_demand.resource == RESOURCE_POTTERY
+                    && out_demand.route_id == 2 && out_demand.is_rise == 0;
     if (!ok) {
-        logs::info("[test:172] step=slot_mismatch s0=%d/%d/%d s3=%d/%d/%d inv0=%d/%d/%d inv1=%d/%d/%d",
+        logs::info("[test:172] step=slot_mismatch s0=%d/%d/%d s3=%d/%d/%d inv0=%d/%d/%d inv1=%d/%d/%d p=%d/%d/%d d=%d/%d/%d",
                    out0.year, (int)out0.resource, out0.amount,
                    out3.year, (int)out3.resource, out3.amount,
                    out_inv0.year, out_inv0.type, out_inv0.amount,
-                   out_inv1.year, out_inv1.type, out_inv1.amount);
+                   out_inv1.year, out_inv1.type, out_inv1.amount,
+                   out_price.year, (int)out_price.resource, out_price.amount,
+                   out_demand.year, (int)out_demand.resource, out_demand.route_id);
     }
 
     GamestateIO::delete_map("_editor_meta_rt.map");
@@ -531,6 +565,172 @@ int __test_editor_invasion_meta_play() {
     return ok ? 1 : 0;
 }
 ANK_FUNCTION(__test_editor_invasion_meta_play);
+
+// ED5: custom-map play loads sidecar price/demand before scenario_*_change_init().
+int __test_editor_price_demand_meta_play() {
+    g_scenario.events.clear_for_editor();
+    editor_price_changes_clear();
+    editor_demand_changes_clear();
+
+    editor_price_change price{};
+    price.year = 3;
+    price.resource = RESOURCE_CLAY;
+    price.amount = 7;
+    price.is_rise = 1;
+    scenario_editor_price_change_save(0, &price);
+
+    editor_demand_change demand{};
+    demand.year = 4;
+    demand.resource = RESOURCE_POTTERY;
+    demand.route_id = 1;
+    demand.is_rise = 0;
+    scenario_editor_demand_change_save(0, &demand);
+
+    const char *map_path = "Maps/_editor_trade_play.map";
+    if (!game_file_editor_write_scenario(map_path)) {
+        logs::info("[test:174] step=write_failed");
+        return 0;
+    }
+
+    editor_price_changes_clear();
+    editor_demand_changes_clear();
+    game_exit_editor();
+    if (!GamestateIO::load_map("_editor_trade_play.map", true, true)) {
+        logs::info("[test:174] step=load_play_failed");
+        GamestateIO::delete_map("_editor_trade_play.map");
+        return 0;
+    }
+
+    const price_change_t &got_p = g_scenario.price_changes[0];
+    const demand_change_t &got_d = g_scenario.demand_changes[0];
+    const bool ok = got_p.year == 3 && got_p.resource == RESOURCE_CLAY && got_p.amount == 7 && got_p.is_rise == 1
+                    && got_d.year == 4 && got_d.resource == RESOURCE_POTTERY && got_d.route_id == 1
+                    && got_d.is_rise == 0;
+    if (!ok) {
+        logs::info("[test:174] step=mismatch p=%d/%d/%d/%d d=%d/%d/%d/%d",
+                   got_p.year, (int)got_p.resource, got_p.amount, got_p.is_rise,
+                   got_d.year, (int)got_d.resource, got_d.route_id, got_d.is_rise);
+    }
+
+    GamestateIO::delete_map("_editor_trade_play.map");
+    return ok ? 1 : 0;
+}
+ANK_FUNCTION(__test_editor_price_demand_meta_play);
+
+// ED5: win_criteria round-trip via map scenario_info + *.meta.js override.
+int __test_editor_win_criteria_meta() {
+    scenario_editor_set_culture(35);
+    if (!g_scenario.win_criteria.culture.enabled) {
+        scenario_editor_toggle_culture();
+    }
+    scenario_editor_set_prosperity(40);
+    if (!g_scenario.win_criteria.prosperity.enabled) {
+        scenario_editor_toggle_prosperity();
+    }
+    scenario_editor_set_population(2500);
+    if (!g_scenario.win_criteria.population.enabled) {
+        scenario_editor_toggle_population();
+    }
+    scenario_editor_set_time_limit(12);
+    if (!g_scenario.win_criteria.time_limit.enabled) {
+        scenario_editor_toggle_time_limit();
+    }
+    g_scenario.win_criteria.milestone25_year = 3;
+    g_scenario.win_criteria.milestone50_year = 6;
+    g_scenario.win_criteria.milestone75_year = 9;
+    g_scenario.is_open_play = false;
+
+    const char *map_path = "Maps/_editor_win_rt.map";
+    if (!game_file_editor_write_scenario(map_path)) {
+        logs::info("[test:175] step=write_failed");
+        return 0;
+    }
+
+    vfs::path meta = editor_map_meta_path(map_path);
+    if (!vfs::file_exists(meta)) {
+        logs::info("[test:175] step=meta_missing");
+        return 0;
+    }
+
+    // Map-alone: wipe meta + mutate RAM, load must restore from scenario_info.
+    editor_map_meta_remove(map_path);
+    g_scenario.win_criteria.culture.goal = 1;
+    g_scenario.win_criteria.prosperity.goal = 1;
+    g_scenario.win_criteria.population.goal = 1;
+    g_scenario.win_criteria.population.enabled = 0;
+    g_scenario.win_criteria.time_limit.enabled = 0;
+    g_scenario.win_criteria.time_limit.years = 0;
+    if (!game_file_editor_load_scenario(map_path)) {
+        logs::info("[test:175] step=load_map_only_failed");
+        return 0;
+    }
+    if (g_scenario.win_criteria.culture.goal != 35 || g_scenario.win_criteria.prosperity.goal != 40
+        || !g_scenario.win_criteria.population.enabled || g_scenario.win_criteria.population.goal != 2500
+        || !g_scenario.win_criteria.time_limit.enabled || g_scenario.win_criteria.time_limit.years != 12) {
+        logs::info("[test:175] step=map_mismatch c=%d p=%d pop=%d/%d tl=%d/%d",
+                   g_scenario.win_criteria.culture.goal,
+                   g_scenario.win_criteria.prosperity.goal,
+                   g_scenario.win_criteria.population.enabled,
+                   g_scenario.win_criteria.population.goal,
+                   g_scenario.win_criteria.time_limit.enabled,
+                   g_scenario.win_criteria.time_limit.years);
+        GamestateIO::delete_map("_editor_win_rt.map");
+        return 0;
+    }
+
+    // Rewrite with meta; mutate; editor load applies sidecar over map.
+    scenario_editor_set_culture(35);
+    scenario_editor_set_prosperity(40);
+    scenario_editor_set_population(2500);
+    if (!g_scenario.win_criteria.population.enabled) {
+        scenario_editor_toggle_population();
+    }
+    scenario_editor_set_time_limit(12);
+    if (!g_scenario.win_criteria.time_limit.enabled) {
+        scenario_editor_toggle_time_limit();
+    }
+    if (!game_file_editor_write_scenario(map_path)) {
+        logs::info("[test:175] step=rewrite_failed");
+        return 0;
+    }
+    g_scenario.win_criteria.culture.goal = 99;
+    g_scenario.win_criteria.population.goal = 9;
+    if (!game_file_editor_load_scenario(map_path)) {
+        logs::info("[test:175] step=load_with_meta_failed");
+        return 0;
+    }
+    if (g_scenario.win_criteria.culture.goal != 35 || g_scenario.win_criteria.population.goal != 2500) {
+        logs::info("[test:175] step=meta_mismatch c=%d pop=%d",
+                   g_scenario.win_criteria.culture.goal, g_scenario.win_criteria.population.goal);
+        GamestateIO::delete_map("_editor_win_rt.map");
+        return 0;
+    }
+
+    // Play path: meta overrides after map unserialize.
+    g_scenario.win_criteria.culture.goal = 2;
+    game_exit_editor();
+    if (!GamestateIO::load_map("_editor_win_rt.map", true, true)) {
+        logs::info("[test:175] step=load_play_failed");
+        GamestateIO::delete_map("_editor_win_rt.map");
+        return 0;
+    }
+    const bool ok = g_scenario.win_criteria.culture.goal == 35 && g_scenario.win_criteria.prosperity.goal == 40
+                    && g_scenario.win_criteria.population.enabled && g_scenario.win_criteria.population.goal == 2500
+                    && g_scenario.win_criteria.time_limit.enabled && g_scenario.win_criteria.time_limit.years == 12
+                    && g_scenario.win_criteria.milestone25_year == 3;
+    if (!ok) {
+        logs::info("[test:175] step=play_mismatch c=%d p=%d pop=%d tl=%d m25=%d",
+                   g_scenario.win_criteria.culture.goal,
+                   g_scenario.win_criteria.prosperity.goal,
+                   g_scenario.win_criteria.population.goal,
+                   g_scenario.win_criteria.time_limit.years,
+                   g_scenario.win_criteria.milestone25_year);
+    }
+
+    GamestateIO::delete_map("_editor_win_rt.map");
+    return ok ? 1 : 0;
+}
+ANK_FUNCTION(__test_editor_win_criteria_meta);
 
 // Procedural editor map: generate medium landscape and require water + road tiles + entry point.
 int __test_editor_map_generate() {

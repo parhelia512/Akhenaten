@@ -1,4 +1,4 @@
-// ED4b/ED5: editor map write strips scenario_events; requests + invasions in Maps/*.meta.js.
+// ED4b/ED5: editor map write strips scenario_events; requests/invasions/price/demand in Maps/*.meta.js.
 // Markers:
 //   [test-marker] editor_map_meta_roundtrip_ok
 

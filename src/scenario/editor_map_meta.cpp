@@ -82,6 +82,20 @@ void restore_slots(const request_slot_snap *slots) {
     }
 }
 
+bool has_key(pcstr block, pcstr key) {
+    bstring64 needle(key, ":");
+    for (pcstr p = block; (p = std::strstr(p, needle.c_str())) != nullptr; ++p) {
+        if (p > block) {
+            const char prev = p[-1];
+            if (std::isalnum((unsigned char)prev) || prev == '_') {
+                continue;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
 bool read_int_field(pcstr block, pcstr key, int *out) {
     // Match "key:" but not as a suffix of another identifier (e.g. type vs attack_type).
     bstring64 needle(key, ":");
@@ -107,7 +121,20 @@ bool read_int_field(pcstr block, pcstr key, int *out) {
 }
 
 bool read_resource_field(pcstr block, e_resource *out) {
+    if (!has_key(block, "resource")) {
+        return false;
+    }
     pcstr p = std::strstr(block, "resource:");
+    // has_key already validated a word-boundary match; find that occurrence.
+    for (; p; p = std::strstr(p + 1, "resource:")) {
+        if (p > block) {
+            const char prev = p[-1];
+            if (std::isalnum((unsigned char)prev) || prev == '_') {
+                continue;
+            }
+        }
+        break;
+    }
     if (!p) {
         return false;
     }
@@ -143,6 +170,82 @@ int count_filled_invasions() {
     return n;
 }
 
+int count_filled_price_changes() {
+    int n = 0;
+    for (int i = 0; i < MAX_PRICE_CHANGES; ++i) {
+        if (g_scenario.price_changes[i].resource != RESOURCE_NONE && g_scenario.price_changes[i].year) {
+            ++n;
+        }
+    }
+    return n;
+}
+
+int count_filled_demand_changes() {
+    int n = 0;
+    for (int i = 0; i < MAX_DEMAND_CHANGES; ++i) {
+        if (g_scenario.demand_changes[i].resource != RESOURCE_NONE && g_scenario.demand_changes[i].year) {
+            ++n;
+        }
+    }
+    return n;
+}
+
+bool win_criteria_active() {
+    const auto &w = g_scenario.win_criteria;
+    return w.culture.enabled || w.prosperity.enabled || w.monuments.enabled || w.kingdom.enabled
+           || w.population.enabled || w.housing_count.enabled || w.housing_level.enabled
+           || w.time_limit.enabled || w.survival_time.enabled || g_scenario.is_open_play;
+}
+
+void apply_win_criteria_block(pcstr block) {
+    auto &w = g_scenario.win_criteria;
+    int v = 0;
+    if (read_int_field(block, "culture_enabled", &v))
+        w.culture.enabled = v ? 1 : 0;
+    if (read_int_field(block, "culture_goal", &v))
+        w.culture.goal = v;
+    if (read_int_field(block, "prosperity_enabled", &v))
+        w.prosperity.enabled = v ? 1 : 0;
+    if (read_int_field(block, "prosperity_goal", &v))
+        w.prosperity.goal = v;
+    if (read_int_field(block, "monuments_enabled", &v))
+        w.monuments.enabled = v ? 1 : 0;
+    if (read_int_field(block, "monuments_goal", &v))
+        w.monuments.goal = v;
+    if (read_int_field(block, "kingdom_enabled", &v))
+        w.kingdom.enabled = v ? 1 : 0;
+    if (read_int_field(block, "kingdom_goal", &v))
+        w.kingdom.goal = v;
+    if (read_int_field(block, "population_enabled", &v))
+        w.population.enabled = v ? 1 : 0;
+    if (read_int_field(block, "population_goal", &v))
+        w.population.goal = v;
+    if (read_int_field(block, "housing_count_enabled", &v))
+        w.housing_count.enabled = v ? 1 : 0;
+    if (read_int_field(block, "housing_count_goal", &v))
+        w.housing_count.goal = v;
+    if (read_int_field(block, "housing_level_enabled", &v))
+        w.housing_level.enabled = v ? 1 : 0;
+    if (read_int_field(block, "housing_level_goal", &v))
+        w.housing_level.goal = v;
+    if (read_int_field(block, "time_limit_enabled", &v))
+        w.time_limit.enabled = v ? 1 : 0;
+    if (read_int_field(block, "time_limit_years", &v))
+        w.time_limit.years = v;
+    if (read_int_field(block, "survival_enabled", &v))
+        w.survival_time.enabled = v ? 1 : 0;
+    if (read_int_field(block, "survival_years", &v))
+        w.survival_time.years = v;
+    if (read_int_field(block, "milestone25", &v))
+        w.milestone25_year = v;
+    if (read_int_field(block, "milestone50", &v))
+        w.milestone50_year = v;
+    if (read_int_field(block, "milestone75", &v))
+        w.milestone75_year = v;
+    if (read_int_field(block, "open_play", &v))
+        g_scenario.is_open_play = v != 0;
+}
+
 } // namespace
 
 void editor_invasions_clear() {
@@ -150,6 +253,18 @@ void editor_invasions_clear() {
         g_scenario.invasions[i] = {};
         g_scenario.invasions[i].from = 8;
         g_scenario.invasions[i].attack_type = FORMATION_ATTACK_FOOD_CHAIN;
+    }
+}
+
+void editor_price_changes_clear() {
+    for (int i = 0; i < MAX_PRICE_CHANGES; ++i) {
+        g_scenario.price_changes[i] = {};
+    }
+}
+
+void editor_demand_changes_clear() {
+    for (int i = 0; i < MAX_DEMAND_CHANGES; ++i) {
+        g_scenario.demand_changes[i] = {};
     }
 }
 
@@ -196,8 +311,11 @@ bool editor_map_meta_write(pcstr map_path) {
     snapshot_slots(slots);
     const int req_n = count_filled_requests(slots);
     const int inv_n = count_filled_invasions();
+    const int price_n = count_filled_price_changes();
+    const int demand_n = count_filled_demand_changes();
+    const bool win_n = win_criteria_active();
 
-    if (req_n == 0 && inv_n == 0) {
+    if (req_n == 0 && inv_n == 0 && price_n == 0 && demand_n == 0 && !win_n) {
         editor_map_meta_remove(map_path);
         return true;
     }
@@ -213,8 +331,8 @@ bool editor_map_meta_write(pcstr map_path) {
     }
 
     std::fputs(META_HEADER, fp);
-    std::fputs("// Editor / custom-map SoT (not stored in .map).\n", fp);
-    std::fputs("// requests[] + invasions[] — paste into mission JS or keep as sidecar.\n", fp);
+    std::fputs("// Editor / custom-map sidecar (schedules not in .map; win also in scenario_info).\n", fp);
+    std::fputs("// requests / invasions / price_changes / demand_changes / win_criteria.\n", fp);
     std::fputs("editor_map_meta {\n", fp);
 
     std::fputs("\trequests [\n", fp);
@@ -252,6 +370,80 @@ bool editor_map_meta_write(pcstr map_path) {
     }
     std::fputs("\t]\n", fp);
 
+    std::fputs("\tprice_changes [\n", fp);
+    for (int i = 0; i < MAX_PRICE_CHANGES; ++i) {
+        const price_change_t &pc = g_scenario.price_changes[i];
+        if (pc.resource == RESOURCE_NONE || !pc.year) {
+            continue;
+        }
+        bstring64 res_tok = resource_js_token(pc.resource);
+        std::fprintf(fp,
+                     "\t\t{ slot: %d, year: %d, resource: %s, amount: %d, is_rise: %d }\n",
+                     i,
+                     pc.year,
+                     res_tok.c_str(),
+                     pc.amount,
+                     pc.is_rise ? 1 : 0);
+    }
+    std::fputs("\t]\n", fp);
+
+    std::fputs("\tdemand_changes [\n", fp);
+    for (int i = 0; i < MAX_DEMAND_CHANGES; ++i) {
+        const demand_change_t &dc = g_scenario.demand_changes[i];
+        if (dc.resource == RESOURCE_NONE || !dc.year) {
+            continue;
+        }
+        bstring64 res_tok = resource_js_token(dc.resource);
+        std::fprintf(fp,
+                     "\t\t{ slot: %d, year: %d, resource: %s, route_id: %d, is_rise: %d }\n",
+                     i,
+                     dc.year,
+                     res_tok.c_str(),
+                     dc.route_id,
+                     dc.is_rise ? 1 : 0);
+    }
+    std::fputs("\t]\n", fp);
+
+    if (win_n) {
+        const auto &w = g_scenario.win_criteria;
+        std::fputs("\twin_criteria {\n", fp);
+        std::fprintf(fp,
+                     "\t\tculture_enabled: %d, culture_goal: %d\n"
+                     "\t\tprosperity_enabled: %d, prosperity_goal: %d\n"
+                     "\t\tmonuments_enabled: %d, monuments_goal: %d\n"
+                     "\t\tkingdom_enabled: %d, kingdom_goal: %d\n"
+                     "\t\tpopulation_enabled: %d, population_goal: %d\n"
+                     "\t\thousing_count_enabled: %d, housing_count_goal: %d\n"
+                     "\t\thousing_level_enabled: %d, housing_level_goal: %d\n"
+                     "\t\ttime_limit_enabled: %d, time_limit_years: %d\n"
+                     "\t\tsurvival_enabled: %d, survival_years: %d\n"
+                     "\t\tmilestone25: %d, milestone50: %d, milestone75: %d\n"
+                     "\t\topen_play: %d\n",
+                     w.culture.enabled ? 1 : 0,
+                     w.culture.goal,
+                     w.prosperity.enabled ? 1 : 0,
+                     w.prosperity.goal,
+                     w.monuments.enabled ? 1 : 0,
+                     w.monuments.goal,
+                     w.kingdom.enabled ? 1 : 0,
+                     w.kingdom.goal,
+                     w.population.enabled ? 1 : 0,
+                     w.population.goal,
+                     w.housing_count.enabled ? 1 : 0,
+                     w.housing_count.goal,
+                     w.housing_level.enabled ? 1 : 0,
+                     w.housing_level.goal,
+                     w.time_limit.enabled ? 1 : 0,
+                     w.time_limit.years,
+                     w.survival_time.enabled ? 1 : 0,
+                     w.survival_time.years,
+                     w.milestone25_year,
+                     w.milestone50_year,
+                     w.milestone75_year,
+                     g_scenario.is_open_play ? 1 : 0);
+        std::fputs("\t}\n", fp);
+    }
+
     std::fputs("}\n", fp);
     std::fclose(fp);
     return true;
@@ -286,6 +478,8 @@ bool editor_map_meta_load(pcstr map_path) {
     text.resize(nread);
 
     editor_invasions_clear();
+    editor_price_changes_clear();
+    editor_demand_changes_clear();
 
     bool any = false;
     pcstr p = text.c_str();
@@ -296,14 +490,63 @@ bool editor_map_meta_load(pcstr map_path) {
         }
 
         std::string block(p, end - p + 1);
+
+        // Flat win_criteria { culture_enabled: … } — no slot field.
+        if (has_key(block.c_str(), "culture_goal") || has_key(block.c_str(), "culture_enabled")
+            || has_key(block.c_str(), "population_goal") || has_key(block.c_str(), "open_play")) {
+            apply_win_criteria_block(block.c_str());
+            any = true;
+            p = end + 1;
+            continue;
+        }
+
         int slot = -1;
         if (!read_int_field(block.c_str(), "slot", &slot)) {
             p = end + 1;
             continue;
         }
 
-        // Request rows carry resource:; invasion rows carry type: (INVASION_TYPE_*).
-        if (std::strstr(block.c_str(), "resource:")) {
+        // Discriminate rows that share resource: — route_id=demand, is_rise=price,
+        // deadline_years=request; invasions use type:/attack_type: without resource.
+        if (has_key(block.c_str(), "route_id")) {
+            int year = 0;
+            int route_id = 0;
+            int is_rise = 0;
+            e_resource resource = RESOURCE_NONE;
+            read_int_field(block.c_str(), "year", &year);
+            read_int_field(block.c_str(), "route_id", &route_id);
+            read_int_field(block.c_str(), "is_rise", &is_rise);
+            read_resource_field(block.c_str(), &resource);
+
+            if (slot >= 0 && slot < MAX_DEMAND_CHANGES && resource != RESOURCE_NONE && year > 0) {
+                demand_change_t &dc = g_scenario.demand_changes[slot];
+                dc.year = year;
+                dc.resource = resource;
+                dc.route_id = route_id;
+                dc.is_rise = is_rise ? 1 : 0;
+                dc.month = 0;
+                any = true;
+            }
+        } else if (has_key(block.c_str(), "is_rise")) {
+            int year = 0;
+            int amount = 0;
+            int is_rise = 0;
+            e_resource resource = RESOURCE_NONE;
+            read_int_field(block.c_str(), "year", &year);
+            read_int_field(block.c_str(), "amount", &amount);
+            read_int_field(block.c_str(), "is_rise", &is_rise);
+            read_resource_field(block.c_str(), &resource);
+
+            if (slot >= 0 && slot < MAX_PRICE_CHANGES && resource != RESOURCE_NONE && year > 0) {
+                price_change_t &pc = g_scenario.price_changes[slot];
+                pc.year = year;
+                pc.resource = resource;
+                pc.amount = amount;
+                pc.is_rise = is_rise ? 1 : 0;
+                pc.month = 0;
+                any = true;
+            }
+        } else if (has_key(block.c_str(), "resource")) {
             int year = 0;
             int amount = 0;
             int deadline_years = 1;
@@ -325,18 +568,14 @@ bool editor_map_meta_load(pcstr map_path) {
                 g_scenario.events.editor_request_save(slot, &r);
                 any = true;
             }
-        } else {
-            // Invasion rows: type: (INVASION_TYPE_*) + attack_type:; requests use resource: above.
+        } else if (has_key(block.c_str(), "type")) {
             int year = 0;
             int type = 0;
             int amount = 0;
             int from = 8;
             int attack_type = FORMATION_ATTACK_FOOD_CHAIN;
-            if (!read_int_field(block.c_str(), "type", &type)) {
-                p = end + 1;
-                continue;
-            }
             read_int_field(block.c_str(), "year", &year);
+            read_int_field(block.c_str(), "type", &type);
             read_int_field(block.c_str(), "amount", &amount);
             read_int_field(block.c_str(), "from", &from);
             read_int_field(block.c_str(), "attack_type", &attack_type);

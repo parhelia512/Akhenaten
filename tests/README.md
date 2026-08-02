@@ -118,8 +118,10 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `163_nubt_ostrich_spawn.js` | #616/#621: mission 0 load must spawn ostriches via `[es=(city_animals, create_herds)]` (ANK_ESID must hash caller `__func__`) |
 | `168_editor_map_roundtrip.js` | ED1–ED3/ED6: `game.init_editor` → write/load `Maps/_editor_rt.map` → `editor_is_active` |
 | `171_editor_request_slots.js` | ED4a: editor request slots (tag 8000+N) ↔ `EVENT_TYPE_REQUEST` save/get/delete + sparse |
-| `172_editor_map_meta_roundtrip.js` | ED4b/ED5: map write strips events; `*.meta.js` requests+invasions round-trip; map alone empty |
+| `172_editor_map_meta_roundtrip.js` | ED4b/ED5: map write strips events; `*.meta.js` requests/invasions/price/demand round-trip |
 | `173_editor_invasion_meta_play.js` | ED5: custom-map play loads sidecar invasions before `g_invasions.init` |
+| `174_editor_price_demand_meta_play.js` | ED5: custom-map play loads sidecar price/demand before `scenario_*_change_init` |
+| `175_editor_win_criteria_meta.js` | ED5: win_criteria map round-trip + `*.meta.js` mirror/override on editor/play load |
 | `142_invasion_bribe.js` | Enhanced bribe (BO*): flag OFF refuse; ON pay+despawn+KR−2; no COMPLETED tag; kingdom army banned |
 | `67_fixed_workers.js` | Fixed worker ratio: `gameplay_fixed_worker_percent` (default 38% plebs), advisor % of total, age-skew ON/OFF (WR1/WR4) |
 | `70_workers_staffing_ui.js` | Staffing UI smoke: open pottery/firehouse/dock/granary/temple info → `workers_text` contains needed count (WR2/WR4) |
