@@ -832,7 +832,7 @@ io_buffer* iob_city_data = new io_buffer([](io_buffer* iob, size_t version) {
     iob->bind(BIND_SIGNATURE_INT32, &data.population.percentage_plebs);
     iob->bind(BIND_SIGNATURE_INT32, &data.population.working_age);
     iob->bind(BIND_SIGNATURE_INT32, &data.labor.workers_available);
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < LABOR_CATEGORY_SAVE_SLOTS; i++) {
         iob->bind(BIND_SIGNATURE_INT32, &data.labor.categories[i].workers_needed);
         iob->bind(BIND_SIGNATURE_INT32, &data.labor.categories[i].workers_allocated);
         iob->bind(BIND_SIGNATURE_INT32, &data.labor.categories[i].total_houses_covered);
@@ -1361,6 +1361,10 @@ io_buffer* iob_city_data_extra = new io_buffer([](io_buffer* iob, size_t version
     iob->bind(BIND_SIGNATURE_XSTR, data.kingdome.player_name_adversary, MAX_PLAYER_NAME);
     iob->bind(BIND_SIGNATURE_XSTR, data.kingdome.player_name, MAX_PLAYER_NAME);
     iob->bind(BIND_SIGNATURE_INT32, &data.unused.faction_id);
+});
+
+io_buffer *iob_labor_storage_priority = new io_buffer([](io_buffer *iob, size_t version) {
+    iob->bind(BIND_SIGNATURE_INT32, &g_city.labor.categories[LABOR_CATEGORY_STORAGE].priority);
 });
 
 io_buffer* iob_city_graph_order = new io_buffer([](io_buffer* iob, size_t version) {

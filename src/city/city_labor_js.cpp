@@ -14,6 +14,16 @@ int __city_labor_max_selectable_priority(int category) {
 }
 ANK_FUNCTION_1(__city_labor_max_selectable_priority)
 
+int __city_labor_priority_rank_max() {
+    return g_city.labor.priority_rank_max();
+}
+ANK_FUNCTION(__city_labor_priority_rank_max)
+
+bool __city_labor_category_split_enabled() {
+    return labor_category_split_enabled();
+}
+ANK_FUNCTION(__city_labor_category_split_enabled)
+
 int __city_labor_calc_fixed_workers_available(int num_plebs) {
     return city_labor_t::calc_fixed_workers_available(num_plebs);
 }
@@ -23,6 +33,11 @@ void __city_labor_calculate_workers(int num_plebs, int num_patricians) {
     g_city.labor.calculate_workers(num_plebs, num_patricians);
 }
 ANK_FUNCTION_2(__city_labor_calculate_workers)
+
+void __city_labor_update() {
+    g_city.labor.update();
+}
+ANK_FUNCTION(__city_labor_update)
 
 ANK_GLOBAL_OBJECT(g_city.labor, __city_labor,
     workers_available,

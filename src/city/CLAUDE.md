@@ -10,7 +10,7 @@ The city simulation aggregate root. Owns all macro-level state: population, labo
 | `buildings.h` | Template API for building iteration and queries |
 | `city_buildings.h / .cpp` | Building registry, active counts per type |
 | `city_population.h / .cpp` | Population dynamics: aging, births/deaths, migration |
-| `city_labor.h / .cpp` | Worker allocation across 10 labor categories |
+| `city_labor.h / .cpp` | Worker allocation across labor categories (OG 9 + Culture/House; Enhanced Storage split) |
 | `city_finance.h / .cpp` | Treasury, taxes, wages, tribute, interest |
 | `city_resource.h / .cpp` | Food/goods storage, consumption, production tracking |
 | `city_religion.h / .cpp` | 5 god moods (Osiris, Ptah, Ra, Seth, Bast), blessings/curses |
@@ -57,7 +57,7 @@ Subscribers (UI, scripts) react without polling. Treasury wrapper auto-emits on 
 
 **Population** — 10 age buckets, circular history (2400 months), immigration caps per reason.
 
-**Labor** — 10 fixed categories, priority-based allocation. Buildings declare `labor_category` in static params.
+**Labor** — Fixed categories with priority-based allocation (OG: food…military). Buildings declare `labor_category` in static params. Enhanced flag `gameplay_enhanced_labor_category_split` moves storage yards/docks into `LABOR_CATEGORY_STORAGE`.
 
 **Finance** — `city_finance_t::treasury` emits events on change. Monthly: taxes, wages, tribute, interest, festival costs.
 

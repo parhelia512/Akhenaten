@@ -33,7 +33,9 @@
 //  182 akhenaten: pyramid complex causeway_length / causeway_dir
 //  183 akhenaten: campaign_carry_troops (Cleopatra fort carry CO2)
 //  184 akhenaten: campaign_carry_monuments (Cleopatra monument carry CO1)
-constexpr uint32_t latest_save_version = 184;
+//  185 akhenaten: (reserved / in-tree)
+//  186 akhenaten: labor STORAGE category priority (enhanced labor split LC4)
+constexpr uint32_t latest_save_version = 186;
 
 vfs::path fullpath_saves(vfs::path filename);
 vfs::path fullpath_maps(char* full, vfs::path filename);

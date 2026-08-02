@@ -13,8 +13,11 @@ city.labor = extend(__city_labor, {
     get_category: get_labor_category
     set_priority: __city_labor_set_priority
     max_selectable_priority: __city_labor_max_selectable_priority
+    priority_rank_max: __city_labor_priority_rank_max
+    category_split_enabled: __city_labor_category_split_enabled
     calc_fixed_workers_available: __city_labor_calc_fixed_workers_available
     calculate_workers: __city_labor_calculate_workers
+    update: __city_labor_update
 
     food_production : get_labor_category(LABOR_CATEGORY_FOOD_PRODUCTION)
     industry_commerce : get_labor_category(LABOR_CATEGORY_INDUSTRY_COMMERCE)
@@ -27,6 +30,7 @@ city.labor = extend(__city_labor, {
     military : get_labor_category(LABOR_CATEGORY_MILITARY)
     culture : get_labor_category(LABOR_CATEGORY_CULTURE)
     house : get_labor_category(LABOR_CATEGORY_HOUSE)
+    storage : get_labor_category(LABOR_CATEGORY_STORAGE)
 })
 
 [es=(city_warnings, update_monthly)]

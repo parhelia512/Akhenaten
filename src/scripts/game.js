@@ -110,6 +110,7 @@ game_features {
     @gameplay_enhanced_invasion_bribe {}
     @gameplay_enhanced_flood_basins {}
     @gameplay_enhanced_historical_economy {}
+    @gameplay_enhanced_labor_category_split {}
     @gameplay_change_fixed_workers {}
     @gameplay_fixed_worker_percent {}
     @gameopt_display_size {}

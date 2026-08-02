@@ -29,9 +29,11 @@
 #include "city/city_floods.h"
 #include "grid/terrain.h"
 #include "grid/water_supply.h"
+#include "city/labor_category.h"
 
 e_advisor_tokens_t ANK_CONFIG_ENUM(e_advisor_tokens);
 e_trade_status_tokens_t ANK_CONFIG_ENUM(e_trade_status_tokens);
+e_labor_category_tokens_t ANK_CONFIG_ENUM(e_labor_category_tokens);
 
 js_State* js_vm_state();
 #define _R(name)            \
@@ -59,9 +61,8 @@ void js_register_game_constants(js_State* J) {
     _R(RESOURCE_DEBEN)
     _R(RESOURCE_TROOPS)
     _R(RESOURCE_WATER)
+    // NONE/INVALID = -1; rest via e_labor_category_tokens
     _R(LABOR_CATEGORY_NONE)
-    _R(LABOR_CATEGORY_SIZE)
-    _R(LABOR_CATEGORY_CULTURE)
 
     _R(COLOR_FONT_RED)
     _R(COLOR_FONT_BLUE)

@@ -55,10 +55,37 @@ function advisor_labors_window_inc_wages() {
     emit event_finance_change_wages{ value:1 }
 }
 
-function labor_category_name(cat) {
-    if (cat === LABOR_CATEGORY_CULTURE)
-        return "Culture"
+function labor_advisor_category_list() {
+    // Food..Military. Insert Storage after Industry when split ON.
+    // Culture/House unused by buildings — omit from advisor (no priority pool).
+    var list = [
+        LABOR_CATEGORY_FOOD_PRODUCTION,
+        LABOR_CATEGORY_INDUSTRY_COMMERCE
+    ]
+    if (city.labor.category_split_enabled()) {
+        list.push(LABOR_CATEGORY_STORAGE)
+    }
+    list.push(LABOR_CATEGORY_ENTERTAINMENT)
+    list.push(LABOR_CATEGORY_RELIGION)
+    list.push(LABOR_CATEGORY_EDUCATION)
+    list.push(LABOR_CATEGORY_WATER_HEALTH)
+    list.push(LABOR_CATEGORY_INFRASTRUCTURE)
+    list.push(LABOR_CATEGORY_GOVERNMENT)
+    list.push(LABOR_CATEGORY_MILITARY)
+    return list
+}
 
+function labor_category_name(cat) {
+    if (cat === LABOR_CATEGORY_STORAGE) {
+        return __loc("#labor_category_storage")
+    }
+    if (cat === LABOR_CATEGORY_INDUSTRY_COMMERCE) {
+        if (city.labor.category_split_enabled()) {
+            return __loc("#labor_category_industry")
+        }
+        return __loc(50, 2)
+    }
+    // group 50 ids 1..9 = Food..Military (cat 0..8)
     return __loc(50, cat + 1)
 }
 
@@ -71,32 +98,35 @@ function advisor_labors_window_init(window) {
 
 [es=(advisor_labors_window, ui_draw_foreground)]
 function advisor_labors_window_draw(window) {
-    var item_pos = {x:40, y:25}
+    var categories = labor_advisor_category_list()
+    var row_h = (categories.length > 10) ? 22 : 25
+    var item_pos = {x:40, y:row_h}
     var items_area = window.items_area.screen_pos
     var item_image = {x:40, y:4}
     var item_priority = {x:55, y:5}
     var item_category = {x:100, y:5}
     var item_needed = {x:370, y:5}
     var item_allocated = {x:470, y:5}
-    var item_size = {x:px(35), y:22}
+    var item_size = {x:px(35), y:row_h}
 
     var priority_icon = get_image({ pack: PACK_GENERAL, id: 94 })
 
-    for (var i = 0; i < LABOR_CATEGORY_SIZE - 1; i++) {
+    for (var i = 0; i < categories.length; i++) {
+        var cat_id = categories[i]
         var pos = {x: item_pos.x + items_area.x, y: item_pos.y * i + items_area.y}
 
         var clicked = ui.button({ text: "", pos: pos, size: item_size, border: true, body: false })
         if (clicked == ui.button_clicked) {
-            show_labor_priority_window(i)
+            show_labor_priority_window(cat_id)
         }
 
-        var cat = city.labor.get_category(i)
+        var cat = city.labor.get_category(cat_id)
         if (cat.priority) {
             ui.image(priority_icon, [pos.x + item_image.x, pos.y + item_image.y])
             ui.label(String(cat.priority), [pos.x + item_priority.x, pos.y + item_priority.y], FONT_NORMAL_WHITE_ON_DARK)
         }
 
-        ui.label(labor_category_name(i), [pos.x + item_category.x, pos.y + item_category.y], FONT_NORMAL_WHITE_ON_DARK)
+        ui.label(labor_category_name(cat_id), [pos.x + item_category.x, pos.y + item_category.y], FONT_NORMAL_WHITE_ON_DARK)
         ui.label(String(cat.workers_needed), [pos.x + item_needed.x, pos.y + item_needed.y], FONT_NORMAL_WHITE_ON_DARK)
 
         var allocated_font = (cat.workers_needed !== cat.workers_allocated) ? FONT_NORMAL_WHITE_ON_DARK : FONT_NORMAL_YELLOW

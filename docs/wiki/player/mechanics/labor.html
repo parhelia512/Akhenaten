@@ -93,9 +93,14 @@
             <td>Buildings no longer need nearby housing / labor seekers for access — coverage is treated as global.</td>
             <td>Does not change the <em>size</em> of the worker pool (fixed or OG).</td>
           </tr>
+          <tr>
+            <td>Labor category split</td>
+            <td>Splits <strong>Storage &amp; distribution</strong> (storage yards, docks) from <strong>Industry</strong> in the Overseer of Workers, so each can have its own priority.</td>
+            <td>Does not add per-building-type priority inside a category (later). Granaries stay Infrastructure; bazaars stay Food.</td>
+          </tr>
         </tbody>
       </table>
-      <p>Both options can be enabled together: Fixed sets <em>how many</em> workers exist; Global changes <em>how</em> buildings reach them. They appear under Features → Gameplay changes.</p>
+      <p>Fixed and Global can be enabled together: Fixed sets <em>how many</em> workers exist; Global changes <em>how</em> buildings reach them. Category split is independent. They appear under Features → Gameplay changes.</p>
 
       <h2 id="staffing">Building staffing display</h2>
       <p>Building info panels show current staff and laborers needed (for example <code>5 Employee ( 10 needed )</code>). Hovering the worker icon shows a short <code>N / max</code> tooltip with the same numbers. Buildings that take no laborers (plazas, gardens, statues, …) do not show a fake staffing row.</p>
@@ -103,11 +108,11 @@
       <details>
         <summary>Developer Reference</summary>
         <div class="details-body">
-          <p>Flags: <span class="file-ref">gameplay_change_fixed_workers</span>, <span class="file-ref">gameplay_fixed_worker_percent</span> (default 38), <span class="file-ref">gameplay_change_global_labour</span>.</p>
-          <p>Pool calc: <span class="file-ref">src/city/city_labor.cpp</span> (<code>calc_fixed_workers_available</code>, <code>calculate_workers</code>).</p>
+          <p>Flags: <span class="file-ref">gameplay_change_fixed_workers</span>, <span class="file-ref">gameplay_fixed_worker_percent</span> (default 38), <span class="file-ref">gameplay_change_global_labour</span>, <span class="file-ref">gameplay_enhanced_labor_category_split</span>.</p>
+          <p>Pool calc / categories: <span class="file-ref">src/city/city_labor.cpp</span> (<code>calc_fixed_workers_available</code>, <code>calculate_workers</code>, <code>category_for_building</code>).</p>
           <p>Info staffing / tooltip: <span class="file-ref">src/window/window_building_info.cpp</span>, <span class="file-ref">src/window/window_info.cpp</span> (<code>draw_tooltip</code>), image hover in <span class="file-ref">src/graphics/elements/ui.cpp</span> (<code>eimg</code>; hit-box must match fit/centering — WR9).</p>
-          <p>Tests: <span class="file-ref">tests/67_fixed_workers.js</span>, <span class="file-ref">tests/70_workers_staffing_ui.js</span>.</p>
-          <p>Open follow-ups (tracker): map/ghost staffing (WR5), chrome ids (WR6), percent UI (WR7), RE 40% check (WR8), eimg hit-box (WR9), integral restore (IT1).</p>
+          <p>Tests: <span class="file-ref">tests/67_fixed_workers.js</span>, <span class="file-ref">tests/70_workers_staffing_ui.js</span>, <span class="file-ref">tests/160_labor_category_split.js</span>.</p>
+          <p>Open follow-ups (tracker): map/ghost staffing (WR5), chrome ids (WR6), percent UI (WR7), RE 40% check (WR8), eimg hit-box (WR9), integral restore (IT1); within-category type priority <strong>LC2</strong>.</p>
         </div>
       </details>
 

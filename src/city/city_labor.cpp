@@ -12,11 +12,8 @@
 #include "scenario/scenario.h"
 #include "city/city_industry.h"
 #include "grid/terrain.h"
-#include "js/js_game.h"
 
 #include <algorithm>
-
-const e_labor_category_tokens_t ANK_CONFIG_ENUM(e_labor_category_tokens);
 
 static int category_for_int_arr[300] = {
   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0
@@ -250,6 +247,17 @@ void city_labor_t::set_category(e_building_type type, int category) {
     category_for_int_arr_ph[type] = category;
 }
 
+bool labor_category_split_enabled() {
+    return game_features::gameplay_enhanced_labor_category_split.to_bool();
+}
+
+bool is_enhanced_storage_labor_type(e_building_type type) {
+    return type == BUILDING_STORAGE_YARD
+        || type == BUILDING_STORAGE_YARD_UP
+        || type == BUILDING_DOCK
+        || type == BUILDING_DOCK_UP;
+}
+
 struct building_type_category {
     e_building_type btype;
     e_labor_category category;
@@ -278,8 +286,16 @@ e_labor_category category_for_building(building* b) {
         }
     }
 
+    if (labor_category_split_enabled() && is_enhanced_storage_labor_type(b->type)) {
+        return LABOR_CATEGORY_STORAGE;
+    }
+
     e_labor_category cat = category_alias[b->type];
-    return cat >= 0 ? cat : (e_labor_category)category_for_int_arr_ph[b->type];
+    cat = cat >= 0 ? cat : (e_labor_category)category_for_int_arr_ph[b->type];
+    if (cat == LABOR_CATEGORY_STORAGE) {
+        return LABOR_CATEGORY_INDUSTRY_COMMERCE;
+    }
+    return cat;
 }
 
 struct labor_priority_t {
@@ -287,17 +303,27 @@ struct labor_priority_t {
     int workers;
 };
 
-labor_priority_t DEFAULT_PRIORITY[] = {
+static labor_priority_t DEFAULT_PRIORITY[] = {
   {LABOR_CATEGORY_INFRASTRUCTURE, 3},
   {LABOR_CATEGORY_WATER_HEALTH, 1},
   {LABOR_CATEGORY_GOVERNMENT, 3},
   {LABOR_CATEGORY_MILITARY, 2},
   {LABOR_CATEGORY_FOOD_PRODUCTION, 4},
+  {LABOR_CATEGORY_STORAGE, 3},
   {LABOR_CATEGORY_INDUSTRY_COMMERCE, 2},
   {LABOR_CATEGORY_ENTERTAINMENT, 1},
   {LABOR_CATEGORY_EDUCATION, 1},
   {LABOR_CATEGORY_RELIGION, 1},
 };
+
+static constexpr int DEFAULT_PRIORITY_COUNT = sizeof(DEFAULT_PRIORITY) / sizeof(DEFAULT_PRIORITY[0]);
+
+static bool labor_category_in_priority_pool(e_labor_category cat) {
+    if (cat >= LABOR_CATEGORY_FOOD_PRODUCTION && cat <= LABOR_CATEGORY_MILITARY) {
+        return true;
+    }
+    return cat == LABOR_CATEGORY_STORAGE && labor_category_split_enabled();
+}
 
 static bool is_industry_disabled(building* b) {
     int resource = b->output.resource;
@@ -339,7 +365,9 @@ static bool should_have_workers(building* b, int category, int check_access) {
     if (category == LABOR_CATEGORY_ENTERTAINMENT) {
         if (b->type == BUILDING_SENET_HOUSE && b->prev_part_building_id)
             return false;
-    } else if (category == LABOR_CATEGORY_FOOD_PRODUCTION || category == LABOR_CATEGORY_INDUSTRY_COMMERCE) {
+    } else if (category == LABOR_CATEGORY_FOOD_PRODUCTION
+               || category == LABOR_CATEGORY_INDUSTRY_COMMERCE
+               || category == LABOR_CATEGORY_STORAGE) {
         if (is_industry_disabled(b))
             return false;
     }
@@ -404,6 +432,7 @@ void city_labor_t::allocate_workers_to_categories() {
         workers_needed_l += categories[i].workers_needed;
     }
     workers_needed = 0;
+    const int rank_max = priority_rank_max();
     if (workers_needed_l <= workers_available) {
         for (int i = 0; i < LABOR_CATEGORY_SIZE; i++) {
             categories[i].workers_allocated = categories[i].workers_needed;
@@ -413,8 +442,11 @@ void city_labor_t::allocate_workers_to_categories() {
         // not enough workers
         int available = workers_available;
         // distribute by user-defined priority
-        for (int p = 1; p <= 9 && available > 0; p++) {
-            for (int c = 0; c < 9; c++) {
+        for (int p = 1; p <= rank_max && available > 0; p++) {
+            for (int c = 0; c < LABOR_CATEGORY_SIZE; c++) {
+                if (!labor_category_in_priority_pool((e_labor_category)c)) {
+                    continue;
+                }
                 if (p == categories[c].priority) {
                     int to_allocate = categories[c].workers_needed;
                     if (to_allocate > available)
@@ -434,8 +466,11 @@ void city_labor_t::allocate_workers_to_categories() {
                 break;
             }
 
-            for (int p = 0; p < 9; p++) {
+            for (int p = 0; p < DEFAULT_PRIORITY_COUNT; p++) {
                 int cat = DEFAULT_PRIORITY[p].category;
+                if (!labor_category_in_priority_pool((e_labor_category)cat)) {
+                    continue;
+                }
                 if (!categories[cat].priority) {
                     int needed = categories[cat].workers_needed - categories[cat].workers_allocated;
                     if (needed > 0) {
@@ -456,7 +491,7 @@ void city_labor_t::allocate_workers_to_categories() {
         } while (available > 0);
 
         workers_employed = workers_available;
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < LABOR_CATEGORY_SIZE; i++) {
             workers_needed += categories[i].workers_needed - categories[i].workers_allocated;
         }
     }
@@ -627,15 +662,30 @@ void city_labor_t::allocate_workers() {
 
 void city_labor_t::update() {
     OZZY_PROFILER_FUNCTION();
+    clear_storage_priority_if_split_off();
     calculate_workers_needed_per_category();
     check_employment();
     allocate_workers_to_buildings();
 }
 
 void city_labor_t::set_priority(int category, int new_priority) {
+    if (category < 0 || category >= LABOR_CATEGORY_SIZE) {
+        return;
+    }
+    if (category == LABOR_CATEGORY_STORAGE && !labor_category_split_enabled()) {
+        return;
+    }
+    if (!labor_category_in_priority_pool((e_labor_category)category)) {
+        return;
+    }
+
     int old_priority = categories[category].priority;
     if (old_priority == new_priority)
         return;
+    const int rank_max = priority_rank_max();
+    if (new_priority < 0 || new_priority > rank_max) {
+        return;
+    }
     int shift;
     int from_prio;
     int to_prio;
@@ -643,12 +693,12 @@ void city_labor_t::set_priority(int category, int new_priority) {
         // shift all bigger than 'new_priority' by one down (+1)
         shift = 1;
         from_prio = new_priority;
-        to_prio = 9;
+        to_prio = rank_max;
     } else if (old_priority && !new_priority) {
         // shift all bigger than 'old_priority' by one up (-1)
         shift = -1;
         from_prio = old_priority;
-        to_prio = 9;
+        to_prio = rank_max;
     } else if (new_priority < old_priority) {
         // shift all between new and old by one down (+1)
         shift = 1;
@@ -661,9 +711,12 @@ void city_labor_t::set_priority(int category, int new_priority) {
         to_prio = new_priority;
     }
     categories[category].priority = new_priority;
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < LABOR_CATEGORY_SIZE; i++) {
         if (i == category)
             continue;
+        if (!labor_category_in_priority_pool((e_labor_category)i)) {
+            continue;
+        }
 
         int current_priority = categories[i].priority;
         if (from_prio <= current_priority && current_priority <= to_prio)
@@ -672,13 +725,42 @@ void city_labor_t::set_priority(int category, int new_priority) {
     g_city.labor.allocate_workers();
 }
 
+int city_labor_t::priority_rank_max() const {
+    return labor_category_split_enabled()
+        ? (LABOR_CATEGORY_PRIORITY_RANK_OG + 1)
+        : LABOR_CATEGORY_PRIORITY_RANK_OG;
+}
+
+void city_labor_t::clear_storage_priority_if_split_off() {
+    if (labor_category_split_enabled()) {
+        return;
+    }
+    int old_priority = categories[LABOR_CATEGORY_STORAGE].priority;
+    if (!old_priority) {
+        return;
+    }
+    categories[LABOR_CATEGORY_STORAGE].priority = 0;
+    for (int i = 0; i < LABOR_CATEGORY_SIZE; i++) {
+        if (i == LABOR_CATEGORY_STORAGE) {
+            continue;
+        }
+        if (categories[i].priority > old_priority) {
+            categories[i].priority -= 1;
+        }
+    }
+}
+
 int city_labor_t::max_selectable_priority(int category) {
+    const int rank_max = priority_rank_max();
     int max = 0;
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < LABOR_CATEGORY_SIZE; i++) {
+        if (!labor_category_in_priority_pool((e_labor_category)i)) {
+            continue;
+        }
         if (categories[i].priority > 0)
             ++max;
     }
-    if (max < 9 && !categories[category].priority) {
+    if (max < rank_max && category >= 0 && category < LABOR_CATEGORY_SIZE && !categories[category].priority) {
         // allow space for new priority
         ++max;
     }

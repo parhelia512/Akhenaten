@@ -659,6 +659,10 @@ static void file_schema(e_file_format file_format, const int file_version) {
             // 8 monument slots × 12 = 96
             FILEIO.push_chunk(96, false, "campaign_carry_monuments", iob_campaign_carry_monuments);
         }
+        if (file_version > 185) {
+            // STORAGE labor category priority (workers_* recomputed each tick)
+            FILEIO.push_chunk(4, false, "labor_storage_priority", iob_labor_storage_priority);
+        }
 
         break;
     }

@@ -22,7 +22,7 @@ struct city_labor_t {
     int32_t workers_needed;
     int8_t unemployment_percentage_for_goverment;
     int8_t unemployment_percentage;
-    labor_category categories[10];
+    labor_category categories[LABOR_CATEGORY_SIZE];
 
     int workers_allocated(int category) const;
     static int calc_fixed_workers_available(int num_plebs);
@@ -38,13 +38,17 @@ struct city_labor_t {
     void update();
     void set_priority(int category, int new_priority);
     int max_selectable_priority(int category);
+    int priority_rank_max() const;
+    void clear_storage_priority_if_split_off();
     const labor_category* category(int category);
     static void set_category(e_building_type type, int category);
 };
 
 e_labor_category category_for_building(building* b);
+bool labor_category_split_enabled();
+bool is_enhanced_storage_labor_type(e_building_type type);
 
 template<class T>
 void city_labor_set_category(const T &model) {
-    city_labor_set_category(model.TYPE, model.labor_category);
+    city_labor_t::set_category(model.TYPE, model.labor_category);
 }

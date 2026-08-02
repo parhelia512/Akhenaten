@@ -36,11 +36,12 @@ function labor_priority_window_init(window) {
 [es=(labor_priority_window, ui_draw_foreground)]
 function labor_priority_window_draw(window) {
     var max_items = city.labor.max_selectable_priority(labor_priority_window.category)
+    var rank_max = city.labor.priority_rank_max()
     var areas = window.btn_areas.pos
     var btn = window.btn_priority
     var size = btn.size
 
-    for (var i = 0; i < LABOR_CATEGORY_SIZE; i++) {
+    for (var i = 0; i < rank_max; i++) {
         var pos = { x: areas.x + btn.pos.x * i, y: areas.y + btn.pos.y }
         var flags = UiFlags_NoBody | UiFlags_ThinBorder
         if (i >= max_items) {

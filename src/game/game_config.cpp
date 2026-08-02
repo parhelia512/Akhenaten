@@ -158,6 +158,7 @@ namespace game_features {
     game_feature gameplay_enhanced_invasion_bribe{ "gameplay_enhanced_invasion_bribe", "#TR_CONFIG_INVASION_BRIBE", false };
     game_feature gameplay_enhanced_flood_basins{ "gameplay_enhanced_flood_basins", "#TR_CONFIG_FLOOD_BASINS", false };
     game_feature gameplay_enhanced_historical_economy{ "gameplay_enhanced_historical_economy", "#TR_CONFIG_HISTORICAL_ECONOMY", false };
+    game_feature gameplay_enhanced_labor_category_split{ "gameplay_enhanced_labor_category_split", "#TR_CONFIG_LABOR_CATEGORY_SPLIT", false };
 
     xspan<game_feature*> all() {
         return { _features.data(), _features.size() };
