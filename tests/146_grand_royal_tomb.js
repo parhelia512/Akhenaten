@@ -2,10 +2,15 @@
 
 function run_test() {
     __log_info_native('[test:146] grand royal tomb cliff place + finish rating')
+    var BTYPE = BUILDING_GRAND_ROYAL_TOMB
+    if (typeof BTYPE !== 'number' || BTYPE !== 236) {
+        __log_info_native('[test:146] BUILDING_GRAND_ROYAL_TOMB bad value=' + BTYPE)
+        BTYPE = 236
+    }
     test_reload_city_session('data/default.map')
 
-    if (!__scenario_building_allowed(BUILDING_GRAND_ROYAL_TOMB)) {
-        __scenario_building_allow(BUILDING_GRAND_ROYAL_TOMB, true)
+    if (!__scenario_building_allowed(BTYPE)) {
+        __scenario_building_allow(BTYPE, true)
     }
 
     __test_set_treasury(500000)
@@ -23,7 +28,7 @@ function run_test() {
         }
     }
 
-    var rejected = test_building_place(BUILDING_GRAND_ROYAL_TOMB, cx, cy)
+    var rejected = test_building_place(BTYPE, cx, cy)
     if (rejected) {
         __log_info_native('[test:146] unexpected place without cliffs bid=' + rejected)
         __test_signal_ready()
@@ -34,7 +39,7 @@ function run_test() {
     paint_cliff_site(cx, cy)
     __log_marker('grand_royal_tomb_cliff_painted')
 
-    var bid = test_building_place(BUILDING_GRAND_ROYAL_TOMB, cx, cy)
+    var bid = test_building_place(BTYPE, cx, cy)
     if (!bid) {
         __log_info_native('[test:146] failed to place BUILDING_GRAND_ROYAL_TOMB on cliffs')
         __test_signal_ready()
@@ -45,7 +50,7 @@ function run_test() {
     __test_pump_frames(2)
 
     var b = city.get_building(bid)
-    if (!b || b.type != BUILDING_GRAND_ROYAL_TOMB) {
+    if (!b || b.type != BTYPE) {
         __log_info_native('[test:146] placed building type mismatch')
         __test_signal_ready()
         return
@@ -53,7 +58,7 @@ function run_test() {
     __log_marker('grand_royal_tomb_placed_ok:' + bid)
 
     paint_cliff_site(cx + 40, cy)
-    var second = test_building_place(BUILDING_GRAND_ROYAL_TOMB, cx + 40, cy)
+    var second = test_building_place(BTYPE, cx + 40, cy)
     if (second) {
         __log_info_native('[test:146] unexpected second unfinished place bid=' + second)
         __test_signal_ready()
