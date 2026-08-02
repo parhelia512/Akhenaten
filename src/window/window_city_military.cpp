@@ -7,6 +7,7 @@
 #include "widget/widget_top_menu_game.h"
 #include "widget/sidebar/common.h"
 #include "widget/widget_sidebar.h"
+#include "widget/widget_figure_follow.h"
 #include "graphics/window.h"
 #include "grid/point.h"
 #include "figure/formation.h"
@@ -21,6 +22,7 @@ void draw_foreground_military(int) {
     widget_sidebar_city_draw_foreground_military();
     g_window_city.draw_paused_panel();
     window_city_draw_time_left_panel();
+    figure_follow_draw_panel();
 }
 
 void window_city_military_show(int legion_formation_id) {
@@ -32,6 +34,9 @@ void window_city_military_show(int legion_formation_id) {
         draw_foreground_military,
         [] (auto m, auto h) {
           window_city_handle_hotkeys(h);
+          if (figure_follow_handle_escape(h) || figure_follow_handle_mouse(m)) {
+              return;
+          }
           g_screen_city.handle_input_military(m, h, selected_legion_formation_id);
         },
         [] (auto c) { g_screen_city.draw_tooltip(c); }

@@ -14,6 +14,7 @@
 #include "game/game.h"
 #include "sound/sound.h"
 #include "widget/widget_city.h"
+#include "widget/widget_figure_follow.h"
 
 declare_console_var_int(figure_small_image_x, -32)
 declare_console_var_int(figure_small_image_y, -48)
@@ -99,6 +100,10 @@ void figure_info_window::window_info_background(object_info &c) {
     ui.check_errors = false;
     ui["show_path"] = ( !!(f->draw_mode & e_figure_draw_routing) ? "P" : "p");
 
+    if (ui.contains("show_follow")) {
+        ui["show_follow"] = (figure_follow_enabled() && figure_follow_figure_id() == f->id) ? "F" : "f";
+    }
+
     for (int i = 0; i < c.nfigure.ids.size(); i++) {
         ui[{"button_figure", i}].select(i == c.nfigure.selected_index);
     }
@@ -174,6 +179,12 @@ void figure_info_window::init(object_info &c) {
     ui["show_path"].onclick([f] {
         f->draw_mode ^= e_figure_draw_routing;
     });
+
+    if (ui.contains("show_follow")) {
+        ui["show_follow"].onclick([fid = figure_id] {
+            figure_follow_start(fid);
+        });
+    }
 }
 
 bool figure_info_window::check(object_info &c) {

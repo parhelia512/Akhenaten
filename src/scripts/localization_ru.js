@@ -98,6 +98,9 @@ localization_ru = [
     { key:"#overlay_flood_basin_none", text:"Здесь нет пойменного бассейна"}
     { key:"#warning_auto_resolve_orders_blocked", text:"Нельзя вести роту на замороженную волну вторжения"}
     { key:"#warning_auto_resolve_queue_full", text:"Слишком много ожидающих вторжений — эта волна идёт боем на карте"}
+    { key:"#follow_walker", text:"Следить за ходоком"}
+    { key:"#stop_following", text:"Стоп"}
+    { key:"#warning_follow_walker_lost", text:"Потерян след выбранного ходока"}
     { key:"#invasion_quick_battle_title", text:"Быстрая битва"}
     { key:"#invasion_quick_battle_hint", text:"Враги ждут у входа. Можно донабрать войска. Сразиться сейчас или ждать таймер."}
     { key:"#invasion_quick_battle_resolve", text:"Сразиться"}

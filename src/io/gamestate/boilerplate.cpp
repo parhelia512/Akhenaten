@@ -75,6 +75,7 @@
 #include "sound/sound_city.h"
 #include "sound/sound.h"
 #include "widget/widget_top_menu_game.h"
+#include "widget/widget_figure_follow.h"
 #include "window/window_city.h"
 #include "window/file_dialog.h"
 #include "game/game_events.h"
@@ -189,6 +190,8 @@ static void pre_load() { // do we NEED this...?
 
     events::emit(event_game_mission_pre_load{});
     events::process();
+
+    figure_follow_stop(false);
 }
 
 static void post_load() {

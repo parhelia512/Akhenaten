@@ -107,6 +107,9 @@ localization_hu = [
   {key:"#overlay_flood_basin_none", text:"Itt nincs ártéri medence"}
   {key:"#warning_auto_resolve_orders_blocked", text:"A századok nem vonulhatnak befagyasztott inváziós hullámra"}
   {key:"#warning_auto_resolve_queue_full", text:"Túl sok várakozó invázió — ez a hullám a térképen harcol"}
+  {key:"#follow_walker", text:"Gyalogos követése"}
+  {key:"#stop_following", text:"Stop"}
+  {key:"#warning_follow_walker_lost", text:"A követett gyalogos elveszett"}
   {key:"#invasion_quick_battle_title", text:"Gyorscsata"}
   {key:"#invasion_quick_battle_hint", text:"A támadók a bejáratnál várnak. Toborozz, ha kell. Harcolj most, vagy várd ki az időzítőt."}
   {key:"#invasion_quick_battle_resolve", text:"Harcolj most"}

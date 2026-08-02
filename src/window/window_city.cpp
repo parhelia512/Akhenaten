@@ -23,6 +23,7 @@
 #include "widget/widget_sidebar.h"
 #include "widget/widget_top_menu_game.h"
 #include "widget/widget_city.h"
+#include "widget/widget_figure_follow.h"
 #include "window/window_advisors.h"
 #include "window/file_dialog.h"
 #include "graphics/elements/ui.h"
@@ -142,6 +143,7 @@ void window_city_draw_foreground(int) {
         g_window_city.draw_paused_panel();
         window_city_draw_time_left_panel();
         draw_cancel_construction();
+        figure_follow_draw_panel();
     }
 
     window_city_draw_construction_cost_and_size();
@@ -188,11 +190,27 @@ int window_city::handle_mouse(const mouse* m) {
 void window_city::handle_input(const mouse* m, const hotkeys* h) {
     window_city_handle_hotkeys(h);
 
+    if (h && h->escape_pressed && g_city_planner.build_type) {
+        g_city_planner.construction_cancel();
+        city_has_loaded = true;
+        return;
+    }
+
+    if (figure_follow_handle_escape(h)) {
+        city_has_loaded = true;
+        return;
+    }
+
     if (!g_city_planner.in_progress) {
         int top_menu_handled = widget_top_menu_handle_input(m, h);
         if (!top_menu_handled) {
             widget_sidebar_city_handle_mouse(m);
         }
+    }
+
+    if (figure_follow_handle_mouse(m)) {
+        city_has_loaded = true;
+        return;
     }
 
     g_screen_city.handle_input(m, h);
@@ -210,6 +228,7 @@ void window_city_draw_panels() {
 
 void window_city_draw() {
     OZZY_PROFILER_FUNCTION();
+    figure_follow_capture_if_due();
     painter ctx = game.painter();
     g_screen_city.draw(ctx);
 

@@ -105,6 +105,9 @@ localization_en = [
   {key:"#overlay_flood_basin_none", text:"No flood basin here"}
   {key:"#warning_auto_resolve_orders_blocked", text:"Cannot march companies onto a frozen invasion wave"}
   {key:"#warning_auto_resolve_queue_full", text:"Too many pending invasions — this wave fights on the map"}
+  {key:"#follow_walker", text:"Follow walker"}
+  {key:"#stop_following", text:"Stop"}
+  {key:"#warning_follow_walker_lost", text:"Lost track of followed walker"}
   {key:"#invasion_quick_battle_title", text:"Quick battle"}
   {key:"#invasion_quick_battle_hint", text:"Invaders wait at the entry point. Recruit if you need to. Resolve now or wait for the timer."}
   {key:"#invasion_quick_battle_resolve", text:"Resolve now"}

@@ -25,5 +25,6 @@ figure_trader_info_window {
         button_close: close_button({})
 
         show_path: button({ margin{right: -64, bottom: -40}, size[23, 23] })
+        show_follow: button({ margin{right: -90, bottom: -40}, size[23, 23], text:"F", tooltip:"#follow_walker" })
     }
 }

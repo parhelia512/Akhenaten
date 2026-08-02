@@ -45,6 +45,7 @@ figure_warship_info_window = {
 
         button_help      : help_button({}),
         button_close     : close_button({}),
+        show_follow      : button({margin:{right:-64, bottom:-40}, size:[23, 23], text:"F", tooltip:"#follow_walker"}),
     }
 }
 
@@ -66,6 +67,7 @@ figure_transport_ship_info_window = {
 
         button_help      : help_button({}),
         button_close     : close_button({}),
+        show_follow      : button({margin:{right:-64, bottom:-40}, size:[23, 23], text:"F", tooltip:"#follow_walker"}),
     }
 }
 

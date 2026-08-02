@@ -97,6 +97,9 @@ localization_de = [
   {key:"#overlay_flood_basin_none", text:"Kein Überschwemmungsbecken hier"}
   {key:"#warning_auto_resolve_orders_blocked", text:"Kompanien können nicht auf eine eingefrorene Invasionswelle marschieren"}
   {key:"#warning_auto_resolve_queue_full", text:"Zu viele ausstehende Invasionen — diese Welle kämpft auf der Karte"}
+  {key:"#follow_walker", text:"Wanderer verfolgen"}
+  {key:"#stop_following", text:"Stopp"}
+  {key:"#warning_follow_walker_lost", text:"Verfolgter Wanderer verloren"}
   {key:"#invasion_quick_battle_title", text:"Schnellkampf"}
   {key:"#invasion_quick_battle_hint", text:"Angreifer warten am Eingangspunkt. Werbt bei Bedarf nach. Sofort kämpfen oder den Timer abwarten."}
   {key:"#invasion_quick_battle_resolve", text:"Jetzt kämpfen"}

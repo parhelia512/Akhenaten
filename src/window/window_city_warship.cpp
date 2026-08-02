@@ -7,6 +7,7 @@
 #include "widget/widget_top_menu_game.h"
 #include "widget/sidebar/common.h"
 #include "widget/widget_sidebar.h"
+#include "widget/widget_figure_follow.h"
 #include "graphics/window.h"
 #include "grid/point.h"
 
@@ -18,6 +19,7 @@ static void draw_foreground_warship(int) {
     widget_sidebar_city_draw_foreground();
     g_window_city.draw_paused_panel();
     window_city_draw_time_left_panel();
+    figure_follow_draw_panel();
 }
 
 void window_city_warship_show(int warship_figure_id) {
@@ -29,6 +31,9 @@ void window_city_warship_show(int warship_figure_id) {
         draw_foreground_warship,
         [] (auto m, auto h) {
           window_city_handle_hotkeys(h);
+          if (figure_follow_handle_escape(h) || figure_follow_handle_mouse(m)) {
+              return;
+          }
           g_screen_city.handle_input_warship(m, h, selected_warship_figure_id);
         },
         [] (auto c) { g_screen_city.draw_tooltip(c); }
