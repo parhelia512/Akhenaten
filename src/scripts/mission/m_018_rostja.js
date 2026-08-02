@@ -568,7 +568,7 @@ function mission18_ensure_pharaoh_gift_leaves() {
 }
 
 // Troops chain: ok→31 KR+3→32 NEW_TRADE Iunet; late→33 SEA→34 troops×47 (first re-arm only).
-// Refuse/defeat → JS Hyksos×9 + unique KR−2 + fresh re-arm tag (shared ONLY_VIA burns — B14).
+// Refuse/defeat → JS Hyksos×9 + unique KR−2 + fresh re-arm tag (unique tags remain hygiene; B14 allows shared).
 // 1035: silent defeat-deferral stub (on_defeat_action >= 0); HAILSTORM is a no-op handler.
 function mission18_ensure_troops_chain_leaves() {
 	if (mission.troops_chain_leaves_wired) {

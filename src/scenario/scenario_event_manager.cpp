@@ -754,9 +754,16 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
     }
 
     assert(event.event_id == id);
-    if (event.event_trigger_type == EVENT_TRIGGER_ALREADY_FIRED
-     || event.event_trigger_type == EVENT_TRIGGER_BY_FAVOUR_IN_USE) {
+    if (event.event_trigger_type == EVENT_TRIGGER_BY_FAVOUR_IN_USE) {
         return;
+    }
+
+    // Mid-save / pre-B14: burned ONLY_VIA facades revive so shared leaves can re-fire.
+    if (event.event_trigger_type == EVENT_TRIGGER_ALREADY_FIRED) {
+        if (!via_event_trigger) {
+            return;
+        }
+        event.event_trigger_type = EVENT_TRIGGER_ONLY_VIA_EVENT;
     }
 
     if (event.event_trigger_type == EVENT_TRIGGER_ONLY_VIA_EVENT && !via_event_trigger) {
@@ -777,8 +784,7 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         } else {
             create(&event, at(caller_event_id), EVENT_TRIGGER_ACTIVATED_12);
         }
-        // Master facade spent — clone carries ACTIVATED_*; re-via must not multi-clone.
-        event.event_trigger_type = EVENT_TRIGGER_ALREADY_FIRED;
+        // Clone-on-fire: keep the ONLY_VIA master as a reusable template (Iunet 1011 etc.).
         return;
     }
 

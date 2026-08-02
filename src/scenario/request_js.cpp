@@ -89,15 +89,27 @@ ANK_FUNCTION_1(__city_has_active_request)
 
 // Fire an ONLY_VIA_EVENT master (chain child) from JS — e.g. force troops×4 if luxury late never came.
 void __city_event_fire_chain(int tag) {
+    event_ph_t *only_via = nullptr;
+    event_ph_t *burned = nullptr;
     for (int i = 0; i < g_scenario.events.events_count(); ++i) {
         event_ph_t *e = g_scenario.events.at(i);
         if (!e || e->tag_id != tag) {
             continue;
         }
-        // caller_event_id=0: header slot (always valid); used only for activation date math.
-        g_scenario.events.process_event(e->event_id, true, EVENT_ACTION_COMPLETED, 0);
+        if (e->event_trigger_type == EVENT_TRIGGER_ONLY_VIA_EVENT) {
+            only_via = e;
+            break;
+        }
+        if (e->event_trigger_type == EVENT_TRIGGER_ALREADY_FIRED && !burned) {
+            burned = e;
+        }
+    }
+    event_ph_t *e = only_via ? only_via : burned;
+    if (!e) {
         return;
     }
+    // caller_event_id=0: header slot (always valid); used only for activation date math.
+    g_scenario.events.process_event(e->event_id, true, EVENT_ACTION_COMPLETED, 0);
 }
 ANK_FUNCTION_1(__city_event_fire_chain)
 

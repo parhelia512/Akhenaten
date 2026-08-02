@@ -193,17 +193,29 @@ static void fire_chain_by_tag(uint16_t tag) {
     if (!tag) {
         return;
     }
+    event_ph_t *only_via = nullptr;
+    event_ph_t *burned = nullptr;
     for (int i = 0; i < g_scenario.events.events_count(); ++i) {
         event_ph_t *e = g_scenario.events.at(i);
         if (!e || e->tag_id != tag) {
             continue;
         }
-        const int before = g_scenario.events.events_count();
-        g_scenario.events.process_event(e->event_id, true, EVENT_ACTION_COMPLETED, 0);
-        drain_activated_events(before);
+        if (e->event_trigger_type == EVENT_TRIGGER_ONLY_VIA_EVENT) {
+            only_via = e;
+            break;
+        }
+        if (e->event_trigger_type == EVENT_TRIGGER_ALREADY_FIRED && !burned) {
+            burned = e;
+        }
+    }
+    event_ph_t *e = only_via ? only_via : burned;
+    if (!e) {
+        logs::warn("invasion bind: chain tag %u not found", tag);
         return;
     }
-    logs::warn("invasion bind: chain tag %u not found", tag);
+    const int before = g_scenario.events.events_count();
+    g_scenario.events.process_event(e->event_id, true, EVENT_ACTION_COMPLETED, 0);
+    drain_activated_events(before);
 }
 
 void invasion_data_t::record_spawn(const invasion_opts_t &opts, tile2i tile, int size_after_clamp) {
