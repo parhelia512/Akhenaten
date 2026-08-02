@@ -74,12 +74,12 @@ mission30 { // Heh (Semna) — The Gauntlet
 		BUILDING_MAUSOLEUM,
 	]
 
-	// Monuments goal 11 = weight 3 → trunc(2.25*3+4.5); pak 15 = soft weight calib.
+	// Monuments goal 15 = pak; Mausoleum W=5 → trunc(2.25*5+4.5)=15.
 	win_criteria {
 		population    {enabled : true, goal : 6000 }
 		culture       {enabled : true, goal : 50 }
 		prosperity    {enabled : true, goal : 45 }
-		monuments     {enabled : true, goal : 11 }
+		monuments     {enabled : true, goal : 15 }
 		kingdom       {enabled : true, goal : 60 }
 		housing_level {enabled : true, goal : 10 }
 	}

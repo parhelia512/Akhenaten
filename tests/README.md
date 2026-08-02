@@ -172,7 +172,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `87_tomb_robber.js` | Tomb robber TR1–TR4: path, steal dispatched, crime-wave, arrest, preexisting threat |
 | `135_carry_personal_savings.js` | CL-X/CO4: carry savings apply on mission load; `player_rank` from JS not scenario_id; menu clear |
 | `136_troop_carry.js` | CL-X/CO2: troop snapshot activate → fort fill; CO2b expire; menu clear |
-| `137_monument_carry.js` | CL-X/CO1: monument store set/apply + preexisting; survives troop activate(mask=0) |
+| `137_monument_carry.js` | CL-X/CO1+CO1b: monument store set/apply + preexisting; survives troop activate(mask=0); bad tile → clear-land fallback |
 | `140_prosperity_finance_estimate.js` | PF0/FN1: `estimated_uncollected` ≥0, rises with uncovered pop / tax%, falls when covered |
 | `86_pharaoh_figure_smoke.js` | BF4 `FIGURE_PHARAOH`: spawn + type + CREATED→ROAMING + anim `walk` (SprMain 28); neighbor ids 108–110 |
 | `88_flat_buildings.js` | Flat buildings view: On → flatten palace; raise excludes; overlay blocks; Off clears raise |

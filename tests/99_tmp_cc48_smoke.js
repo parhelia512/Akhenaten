@@ -69,6 +69,8 @@ function run_test() {
     check("48.year", scenario.start_year == -331)
     check("48.first", __scenario_monuments.first == 25)
     check("48.second", __scenario_monuments.second == 0)
+    check("maus_weight", MONUMENT_WEIGHTS[BUILDING_MAUSOLEUM] == 5)
+    check("maus_covers_goal", Math.floor(2.25 * 5 + 4.5) >= 14)
 
     log_info("CC48 smoke fails=" + fails)
     __test_signal_ready()

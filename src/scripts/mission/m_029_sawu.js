@@ -72,7 +72,7 @@ mission29 { // Sawu (Mersa Gawasis) — Shores of the Red Sea; briefing key = me
 		BUILDING_MAUSOLEUM, BUILDING_SMALL_MUDBRICK_PYRAMID,
 	]
 
-	// Monuments: Mausoleum (W=3) + Small Mudbrick (W=4) → trunc(2.25·7+4.5)=20.
+	// Monuments: Mausoleum (W=5) + Small Mudbrick (W=4) → trunc(2.25·9+4.5)=24 ≥ goal 20.
 	// pak goal 21 = soft weight calib (same pattern as Heh pak 15 → goal 11).
 	// pak housing count enabled with goal 0 (no-op) -> only housing_level is kept.
 	win_criteria {

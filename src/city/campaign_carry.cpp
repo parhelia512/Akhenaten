@@ -5,9 +5,12 @@
 #include "city/city.h"
 #include "city/city_buildings.h"
 #include "city/city_message.h"
+#include "core/vec2i.h"
 #include "figure/formation.h"
 #include "figuretype/figure_soldier.h"
 #include "grid/building.h"
+#include "grid/figure.h"
+#include "grid/grid.h"
 #include "grid/point.h"
 #include "grid/terrain.h"
 #include "io/io_buffer.h"
@@ -347,6 +350,161 @@ void campaign_carry_t::snapshot_monuments_from_city() {
     }
 }
 
+namespace {
+
+vec2i carry_oriented_wh(vec2i size, int rotation) {
+    if ((rotation % 2) != 0) {
+        return {size.y, size.x};
+    }
+    return size;
+}
+
+vec2i carry_monument_init_tiles(e_building_type type) {
+    switch (type) {
+    case BUILDING_MAUSOLEUM:
+        return {8, 22};
+    case BUILDING_ALEXANDRIA_LIBRARY:
+        return {13, 14};
+    case BUILDING_PHAROS_LIGHTHOUSE:
+        return {6, 6};
+    default:
+        return {0, 0};
+    }
+}
+
+vec2i carry_monument_footprint(e_building_type type, int orientation) {
+    const vec2i init = carry_monument_init_tiles(type);
+    if (init.x <= 0 || init.y <= 0) {
+        return {0, 0};
+    }
+    return carry_oriented_wh(init, orientation % 4);
+}
+
+bool carry_tile_not_clear(tile2i t) {
+    return map_terrain_is(t, TERRAIN_NOT_CLEAR)
+        || (map_terrain_count_directly_adjacent_with_type(t, TERRAIN_FLOODPLAIN) > 0)
+        || (map_terrain_count_diagonally_adjacent_with_type(t, TERRAIN_FLOODPLAIN) > 0)
+        || map_has_figure_at(t)
+        || map_building_at(t);
+}
+
+bool carry_tile_not_rock(tile2i t) {
+    if (!map_terrain_is(t, TERRAIN_ROCK)) {
+        return true;
+    }
+    if (map_terrain_is(t, TERRAIN_WATER | TERRAIN_BUILDING | TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP
+                           | TERRAIN_TREE | TERRAIN_SHRUB | TERRAIN_GARDEN | TERRAIN_ROAD | TERRAIN_CANAL)) {
+        return true;
+    }
+    if (map_has_figure_at(t) || map_building_at(t)) {
+        return true;
+    }
+    return false;
+}
+
+bool carry_area_ok(e_building_type type, tile2i origin, int w, int h) {
+    if (w < 1 || h < 1 || !origin.valid()) {
+        return false;
+    }
+    const bool need_rock = (type == BUILDING_PHAROS_LIGHTHOUSE);
+    for (int dy = 0; dy < h; dy++) {
+        for (int dx = 0; dx < w; dx++) {
+            tile2i t = origin.shifted(dx, dy);
+            if (!map_grid_is_inside(t, 1)) {
+                return false;
+            }
+            if (need_rock ? carry_tile_not_rock(t) : carry_tile_not_clear(t)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool carry_footprint_ok(e_building_type type, tile2i tile, int orientation) {
+    const vec2i ft = carry_monument_footprint(type, orientation);
+    return carry_area_ok(type, tile, ft.x, ft.y);
+}
+
+// CO1b: stored tile is from the previous map — try it first, then scan clear land / rock.
+bool carry_find_place_tile(e_building_type type, uint8_t &orientation, tile2i preferred, tile2i &out_tile) {
+    const vec2i init = carry_monument_init_tiles(type);
+    if (init.x <= 0) {
+        return false;
+    }
+
+    const bool square = (init.x == init.y);
+    const uint8_t orients[2] = {orientation, (uint8_t)((orientation + 1) % 4)};
+    const int orient_n = square ? 1 : 2;
+
+    for (int oi = 0; oi < orient_n; oi++) {
+        const uint8_t o = orients[oi];
+        if (preferred.valid() && carry_footprint_ok(type, preferred, o)) {
+            orientation = o;
+            out_tile = preferred;
+            return true;
+        }
+    }
+
+    const int map_w = map_grid_width();
+    const int map_h = map_grid_height();
+    for (int oi = 0; oi < orient_n; oi++) {
+        const uint8_t o = orients[oi];
+        const vec2i ft = carry_monument_footprint(type, o);
+        if (ft.x <= 0 || ft.y <= 0) {
+            continue;
+        }
+        for (int y = 0; y <= map_h - ft.y; y++) {
+            for (int x = 0; x <= map_w - ft.x; x++) {
+                tile2i t(x, y);
+                if (!carry_area_ok(type, t, ft.x, ft.y)) {
+                    continue;
+                }
+                orientation = o;
+                out_tile = t;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool carry_monument_already_finished(e_building_type type) {
+    for (building &b : city_buildings()) {
+        if (!b.is_main() || b.type != type) {
+            continue;
+        }
+        auto *mon = b.dcast_monument();
+        if (mon && mon->is_finished()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool carry_place_finished_monument(e_building_type type, tile2i tile, uint8_t orientation, uint8_t variant) {
+    building *b = building_create(type, tile, orientation);
+    if (!b || b->id <= 0) {
+        return false;
+    }
+
+    auto *impl = b->dcast();
+    auto *mon = b->dcast_monument();
+    if (!impl || !mon) {
+        b->state = BUILDING_STATE_UNUSED;
+        return false;
+    }
+
+    b->state = BUILDING_STATE_VALID;
+    mon->runtime_data().variant = variant;
+    impl->on_place_update_tiles(orientation, variant);
+    mon->set_phase(mon->phases());
+    mon->set_preexisting(true);
+    return true;
+}
+
+} // namespace
+
 void campaign_carry_t::apply_monuments() {
     for (int i = 0; i < CAMPAIGN_CARRY_MONUMENT_MAX; i++) {
         auto &slot = monuments[i];
@@ -357,48 +515,24 @@ void campaign_carry_t::apply_monuments() {
         if (!campaign_carry_is_monument_type(type)) {
             continue;
         }
-
-        tile2i tile(slot.tile_x, slot.tile_y);
-        if (!tile.valid()) {
+        if (carry_monument_already_finished(type)) {
             continue;
         }
 
-        // Already present (same type finished) — keep store, skip place.
-        bool already = false;
-        for (building &b : city_buildings()) {
-            if (b.is_main() && b.type == type) {
-                auto *mon = b.dcast_monument();
-                if (mon && mon->is_finished()) {
-                    already = true;
-                    break;
-                }
-            }
+        tile2i preferred(slot.tile_x, slot.tile_y);
+        tile2i tile;
+        uint8_t orientation = slot.orientation;
+        if (!carry_find_place_tile(type, orientation, preferred, tile)) {
+            continue;
         }
-        if (already) {
+        if (!carry_place_finished_monument(type, tile, orientation, slot.variant)) {
             continue;
         }
 
-        if (map_building_at(tile)) {
-            continue;
-        }
-
-        building *b = building_create(type, tile, slot.orientation);
-        if (!b || b->id <= 0) {
-            continue;
-        }
-
-        auto *impl = b->dcast();
-        auto *mon = b->dcast_monument();
-        if (!impl || !mon) {
-            b->state = BUILDING_STATE_UNUSED;
-            continue;
-        }
-
-        b->state = BUILDING_STATE_VALID;
-        mon->runtime_data().variant = slot.variant;
-        impl->on_place_update_tiles(slot.orientation, slot.variant);
-        mon->set_phase(mon->phases());
-        mon->set_preexisting(true);
+        // Remember actual place — next snapshot / remount uses this map's coords.
+        slot.tile_x = (int16_t)tile.x();
+        slot.tile_y = (int16_t)tile.y();
+        slot.orientation = orientation;
     }
 }
 
