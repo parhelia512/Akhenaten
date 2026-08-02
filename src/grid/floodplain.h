@@ -27,6 +27,7 @@ void map_set_floodplain_growth(int grid_offset, int growth);
 void map_clear_floodplain_growth();
 void map_tiles_update_floodplain_images();
 int map_get_fertility(int grid_offset, int tally_type);
+bool map_is_irrigated_for_farm(tile2i tile);
 uint8_t map_get_fertility_for_farm(int grid_offset);
 inline uint8_t map_get_fertility_for_farm(tile2i tile) { return map_get_fertility_for_farm(tile.grid_offset()); }
 void map_soil_set_depletion(int grid_offset, int malus);

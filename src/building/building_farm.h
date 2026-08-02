@@ -45,6 +45,7 @@ public:
 
     virtual void on_create(int orientation) override;
     virtual void on_place_update_tiles(int orientration, int variant) override;
+    virtual void on_post_load() override;
     virtual bool force_draw_flat_tile(painter &ctx, tile2i tile, vec2i pixel, color mask) override;
     virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
     virtual void draw_normal_anim(painter &ctx, vec2i point, tile2i tile, color mask) override;

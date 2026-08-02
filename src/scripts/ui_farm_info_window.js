@@ -35,9 +35,11 @@ info_window_farm {
 function info_window_farm_on_init(window) {
     var b = city.get_building(window.bid)
     var gid = b.meta_text_id
+    var on_floodplain = terrain.is(b.tile, TERRAIN_FLOODPLAIN)
     var reason = { group: gid, id: 0 }
     if (!b.num_workers) {
-        reason = { group: 177, id: 5 }
+        // Floodplain farms need Work Camp laborers (177:5); meadow uses crop-group id 5.
+        reason = on_floodplain ? { group: 177, id: 5 } : { group: gid, id: 5 }
     } else {
         if (!b.has_road_access) {
             reason = { key: "#building_no_road_access" }
@@ -52,14 +54,25 @@ function info_window_farm_on_init(window) {
     window.workers_desc.text = __loc(reason)
 
     var farm = city.get_farm(window.bid)
+    if (!farm) {
+        window.farm_desc.text = ""
+        window.farm_state.text = ""
+        window.flood_info.text = ""
+        window.basin_info.text = ""
+        return
+    }
     window.progress_desc.text = farm_info_window_format_progress_desc(b, farm)
+    window.farm_desc.text = __loc(gid, 1)
+    var irrigated = __building_farm_is_irrigated(farm.id)
+    window.farm_state.text = __loc(177, irrigated ? 0 : 1)
 
-    if (farm.is_floodplain) {
-        var month_id = 8 // TODO: fetch flood info
-        window.flood_info.text = __loc(177, 2) + " " + __loc(160, month_id)
-        var is_not_irrigated = 0 // TODO: fetch irrigation info
-        window.farm_state.text = __loc(177, is_not_irrigated)
-        window.farm_desc.text = __loc(gid, 1)
+    if (on_floodplain) {
+        // During inundation the "next floods in …" line is not shown (water already up).
+        if (floods_ui_show_water_bar()) {
+            window.flood_info.text = ""
+        } else {
+            window.flood_info.text = __loc(177, 2) + " " + floods_ui_format_farm_flood_month()
+        }
         if (game_features.get('gameplay_enhanced_flood_basins') === true
             && terrain.basin_sealed(b.tile)) {
             window.basin_info.text = __loc("#farm_in_flood_basin")
@@ -67,7 +80,7 @@ function info_window_farm_on_init(window) {
             window.basin_info.text = ""
         }
     } else {
-        window.farm_state.text = __loc(gid, 1)
+        window.flood_info.text = ""
         window.basin_info.text = ""
     }
 }

@@ -840,8 +840,9 @@ function building_farm_draw_crops(type, progress, tile, point) {
   var params = city.get_building_params_by_type(type)
   var image_crops = params.first_img("crops")
   var is_floodplain = terrain.is(tile, TERRAIN_FLOODPLAIN)
+  // Same SoT as C++ draw_crops: terrain picks floodplain vs meadow offset table.
   var offsets = is_floodplain ? building_floodplain_farm_tile_offsets : building_meadow_farm_tile_offsets
-  var step = is_floodplain ? 200 : 400
+  var step = offsets.length >= 9 ? 200 : 400
   for (var i = 0; i < offsets.length; i++) {
     var growth = Math.min(5, Math.max(0, Math.floor((progress - i * step) / 100)))
     city.planner.draw_from_below(

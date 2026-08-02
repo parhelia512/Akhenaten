@@ -112,13 +112,15 @@ terrain_info_floodplain {
     help_id           : 45
     ui : baseui(terrain_info_window, {
         title         : text({pos: [0, 16], size: [px(29), 13], text:[70, 29], font:FONT_LARGE_BLACK_ON_LIGHT, align:"center"})
-        describe      : text({pos: [30, 78], text:[70, 55], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
+        describe      : text({pos: [30, 78], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
         basin_status  : text({pos: [30, 170], size: [px(26), 80], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
     })
 }
 
 [es=terrain_info_floodplain_init]
 function terrain_info_floodplain_on_init(window) {
+    // 177:3 — river has subsided (dry floodplain). Submerged init overrides to 177:4.
+    window.describe.text = __loc(177, 3)
     window.basin_status.text = terrain_info_format_basin_status_at_tile(
         __map_tile_at_grid_offset(window.grid_offset), true)
 
@@ -137,7 +139,7 @@ terrain_info_floodplain_submerged {
     help_id           : 45
     ui : baseui(terrain_info_window, {
         title         : text({pos: [0, 16], size: [px(29), 13], text:[70, 29], font:FONT_LARGE_BLACK_ON_LIGHT, align:"center"})
-        describe      : text({pos: [30, 78], text:[70, 55], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
+        describe      : text({pos: [30, 78], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
         basin_status  : text({pos: [30, 170], size: [px(26), 80], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(26) })
     })
 }
@@ -145,6 +147,8 @@ terrain_info_floodplain_submerged {
 [es=terrain_info_floodplain_submerged_init]
 function terrain_info_floodplain_submerged_on_init(window) {
     terrain_info_floodplain_on_init(window)
+    // 177:4 — will be fertile once the river subsides (tile currently under water).
+    window.describe.text = __loc(177, 4)
 }
 
 terrain_info_water = {

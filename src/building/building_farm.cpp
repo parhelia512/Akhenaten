@@ -110,35 +110,24 @@ void building_farm::draw_farm_worker(painter &ctx, int direction, int action, ve
 void building_farm::draw_crops(painter &ctx, e_building_type type, int progress, tile2i tile, vec2i point, color color_mask) {
     int image_crops = get_crops_image(type, 0);
 
-    // crop sprite positions depend on the terrain the farm sits on, not on the
-    // farm's building type — a floodplain farm placed on meadow draws the meadow
-    // layout and vice versa (values mirror src/scripts/building_farm.js)
-    static const vec2i meadow_offsets[5] = {
-        {0, 30}, {30, 45}, {60, 60}, {90, 45}, {120, 30}
-    };
-    static const vec2i floodplain_offsets[9] = {
-        {60, 0}, {90, 15}, {120, 30}, {30, 15}, {60, 30}, {90, 45}, {0, 30}, {30, 45}, {60, 60}
-    };
+    // Layout follows terrain (not building type). Offset tables SoT = JS tile_offsets on
+    // canonical grain farms — cast to shared farm_params_t so ?: branches share one type.
+    const farm_params_t &layout = map_terrain_is(tile, TERRAIN_FLOODPLAIN)
+        ? static_cast<const farm_params_t &>(building_farm_grain::current_params())
+        : static_cast<const farm_params_t &>(building_meadow_farm_grain::current_params());
+    const auto &offsets = layout.tile_offsets;
+    if (offsets.empty()) {
+        return;
+    }
 
-    if (map_terrain_is(tile, TERRAIN_FLOODPLAIN)) {
-        // on floodplains - all 9 tiles
-        for (int i = 0; i < 9; i++) {
-            int growth_offset = fmin(5, fmax(0, (progress - i * 200) / 100));
+    const int step = offsets.size() >= 9 ? 200 : 400;
+    for (int i = 0; i < (int)offsets.size(); i++) {
+        int growth_offset = fmin(5, fmax(0, (progress - i * step) / 100));
 
-            auto& command = ImageDraw::create_subcommand(ctx, render_command_t::ert_from_below);
-            command.image_id = image_crops + growth_offset;
-            command.pixel = point + floodplain_offsets[i];
-            command.mask = color_mask;
-        }
-    } else {
-        // on meadows
-        for (int i = 0; i < 5; i++) {
-            int growth_offset = fmin(5, fmax(0, (progress - i * 400) / 100));
-            auto& command = ImageDraw::create_subcommand(ctx, render_command_t::ert_from_below);
-            command.image_id = image_crops + growth_offset;
-            command.pixel = point + meadow_offsets[i];
-            command.mask = color_mask;
-        }
+        auto& command = ImageDraw::create_subcommand(ctx, render_command_t::ert_from_below);
+        command.image_id = image_crops + growth_offset;
+        command.pixel = point + offsets[i];
+        command.mask = color_mask;
     }
 }
 
@@ -178,7 +167,14 @@ bool building_farm::time_to_deliver(bool floodplains, int resource_id) {
 }
 
 void building_farm::on_create(int orientation) {
-    runtime_data().progress_max = 2000;
+    auto &d = runtime_data();
+    d.progress_max = 2000;
+    d.is_floodplain = base.is_floodplain_farm();
+}
+
+void building_farm::on_post_load() {
+    building_impl::on_post_load();
+    runtime_data().is_floodplain = base.is_floodplain_farm();
 }
 
 void building_farm::on_place_update_tiles(int orientation, int variant) {

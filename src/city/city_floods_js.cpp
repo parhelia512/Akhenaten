@@ -24,4 +24,5 @@ ANK_GLOBAL_OBJECT(g_floods, __city_floods,
     quality_next,
     quality_last,
     season,
+    season_initial,
     duration);

@@ -7,6 +7,15 @@
 
 #include <algorithm>
 
+bool __building_farm_is_irrigated(int bid) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid() || !b->is_farm()) {
+        return false;
+    }
+    return map_is_irrigated_for_farm(b->tile);
+}
+ANK_FUNCTION_1(__building_farm_is_irrigated)
+
 int __building_farm_progress_pct(int bid) {
     building_farm *farm = building_get(bid)->dcast_farm();
     if (!farm) {
