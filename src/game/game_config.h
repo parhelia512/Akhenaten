@@ -174,6 +174,7 @@ namespace game_features {
     extern game_feature gameplay_seth_asp_raid;
     extern game_feature gameplay_ptah_scorpion_raid;
     extern game_feature gameplay_enhanced_auto_resolve_invasions;
+    extern game_feature gameplay_enhanced_invasion_bribe;
     extern game_feature gameplay_enhanced_flood_basins;
 
     xspan<game_feature*> all();

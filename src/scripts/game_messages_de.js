@@ -6226,6 +6226,13 @@ game_messages_de {
         title { text: "Niederlage" }
         content { text: "Eure Generäle melden eine Niederlage. Die Invasionsstreitmacht war zu stark. Viele eurer Soldaten sind gefallen — doch der Feind zieht vom Feld ab." }
     }
+    message_invasion_bribe_withdraw {
+        id: 531,
+        type: 2,
+        size [30, 16]
+        title { text: "Tribut angenommen" }
+        content { text: "Die Eindringlinge nahmen euren Tribut an und zogen ab. Die Stadtkasse ist leichter — doch die Stadt steht." }
+    }
     sun_temple_congratulations {
         id: 523,
         size [30, 18]

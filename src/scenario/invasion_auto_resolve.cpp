@@ -81,7 +81,10 @@ static void despawn_sea_fleet_by_seq(uint16_t seq) {
     }
 }
 
-static void despawn_invasion_by_seq(uint16_t seq) {
+void invasion_despawn_by_seq(uint16_t seq) {
+    if (!seq) {
+        return;
+    }
     for (int fi = 1; fi < MAX_FORMATIONS; ++fi) {
         formation *m = formation_get(fi);
         if (!m || !m->in_use || m->own_batalion || m->is_herd) {
@@ -453,7 +456,7 @@ bool invasion_auto_resolve_t::try_resolve_now(uint16_t seq) {
         g_city.kingdome.invasion.soldiers_killed = 0;
     }
 
-    despawn_invasion_by_seq(seq);
+    invasion_despawn_by_seq(seq);
 
     if (kingdom_seq) {
         const int left = count_alive_kingdome_army_figures();

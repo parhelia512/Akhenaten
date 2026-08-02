@@ -6243,6 +6243,13 @@ game_messages_ru_f {
         title { text: "Поражение" }
         content { text: "Полководы сообщают о поражении. Вражеская сила была слишком велика. Многие солдаты пали — но враг уходит с поля." }
     }
+    message_invasion_bribe_withdraw {
+        id: 531,
+        type: 2,
+        size [30, 16]
+        title { text: "Дань принята" }
+        content { text: "Захватчики приняли вашу дань и ушли. Казна полегчала — но город устоял." }
+    }
     message_wrath_of_seth_asps {
         id: 501,
         type: 2,

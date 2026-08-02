@@ -6244,6 +6244,13 @@ game_messages_en {
         title { text: "Defeat" }
         content { text: "Your generals report defeat. The invading force was too strong. Many of your soldiers have fallen — but the enemy withdraws from the field." }
     }
+    message_invasion_bribe_withdraw {
+        id: 531,
+        type: 2,
+        size [30, 16]
+        title { text: "Tribute Accepted" }
+        content { text: "The invaders accepted your tribute and withdrew. Your treasury is lighter — but the city stands." }
+    }
     message_wrath_of_seth_asps {
         id: 501,
         type: 2,

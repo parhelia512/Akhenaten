@@ -70,6 +70,9 @@ localization_ru = [
     { key:"#TR_CONFIG_SETH_ASP_RAID", text:"Гнев Сета: набег змей из храмов, если нет роты для проклятия (TEMP Enhanced)"}
     { key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Гнев Птаха: набег скорпионов из храмов, если нет промышленности (TEMP Enhanced)"}
     { key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Автобой вторжений: враги ждут на входе, быстрая битва через 8 дней (стены/башни не считаются; фараон включён; не восстания)"}
+    { key:"#TR_CONFIG_INVASION_BRIBE", text:"Откуп от вторжений: заплатить deben, чтобы чужая/фараонова армия ушла (не армия царства и не восстания)"}
+    { key:"#invasion_bribe_button", text:"Откуп"}
+    { key:"#invasion_bribe_cost_line", text:"Откуп: {cost} Db   В казне: {treasury}"}
     { key:"#TR_CONFIG_FLOOD_BASINS", text:"Enhanced: дамбы / бассейны на пойме (замкните контур — лучше урожай после разлива)"}
 
     { key:"#TR_CONFIG_ENHANCED_NILOMETER", text:"Enhanced: нилометр HUD (качество разлива, фаза, инфо поймы)"}

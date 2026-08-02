@@ -70,3 +70,6 @@ extern io_buffer *iob_invasion_auto_resolve;
 bool invasion_auto_resolve_figure_immune(const figure *f);
 // True if tile/figure belongs to a pending frozen invasion wave (for order targeting).
 bool invasion_auto_resolve_target_blocked(tile2i tile);
+
+// Shared despawn for auto-resolve / bribe / cheats (land formations + sea fleet).
+void invasion_despawn_by_seq(uint16_t seq);

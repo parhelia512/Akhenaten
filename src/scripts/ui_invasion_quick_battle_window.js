@@ -12,6 +12,40 @@ function invasion_quick_battle_wait() {
     ui.window_city_show()
 }
 
+function invasion_quick_battle_bribe_feature_on() {
+    return game_features.get('gameplay_enhanced_invasion_bribe') === true
+}
+
+function invasion_quick_battle_bribe_text() {
+    if (!invasion_quick_battle_bribe_feature_on() || __invasion_bribe_allowed(0) != 1) {
+        return ""
+    }
+    var cost = __invasion_bribe_cost(0)
+    var tre = city.finance.treasury
+    return __loc("#invasion_bribe_cost_line")
+        .replace("{cost}", "" + cost)
+        .replace("{treasury}", "" + tre)
+}
+
+function invasion_quick_battle_bribe_now() {
+    if (!invasion_quick_battle_bribe_feature_on()) {
+        return
+    }
+    // seq 0 = auto-resolve queue head only (same as cost/allowed display).
+    if (__invasion_bribe_allowed(0) != 1) {
+        return
+    }
+    var cost = __invasion_bribe_cost(0)
+    if (cost <= 0 || city.finance.treasury < cost) {
+        return
+    }
+    if (__invasion_bribe_try(0) == 1) {
+        if (__invasion_auto_resolve_pending_count() == 0) {
+            ui.window_city_show()
+        }
+    }
+}
+
 function invasion_quick_battle_strength_text() {
     var p = __invasion_auto_resolve_player_strength()
     var e = __invasion_auto_resolve_enemy_strength()
@@ -37,17 +71,18 @@ function invasion_quick_battle_days_text() {
 
 [es=(invasion_quick_battle_window, init)]
 function invasion_quick_battle_window_init(window) {
+    window.btn_bribe.enabled = invasion_quick_battle_bribe_feature_on()
 }
 
 [es=modal_window]
 invasion_quick_battle_window {
-    pos [(sw(0) - px(30)) / 2, (sh(0) - px(12)) / 2]
+    pos [(sw(0) - px(30)) / 2, (sh(0) - px(14)) / 2]
     allow_rmb_goback : true
     draw_underlying : true
 
     ui {
         background_image : background({pack:PACK_UNLOADED, id:11})
-        background       : outer_panel({size[30, 12]})
+        background       : outer_panel({size[30, 14]})
         title            : text_center({pos[16, 16], size[px(30) - 32, 20],
                                         text: "#invasion_quick_battle_title",
                                         font: FONT_LARGE_BLACK_ON_LIGHT})
@@ -59,12 +94,18 @@ invasion_quick_battle_window {
         hint_label       : text({pos[32, 108], size[px(30) - 64, 40],
                                  text: "#invasion_quick_battle_hint",
                                  font: FONT_NORMAL_BLACK_ON_LIGHT})
+        bribe_label      : label({pos[32, 148], font: FONT_NORMAL_BLACK_ON_LIGHT
+                                  textfn: invasion_quick_battle_bribe_text})
 
-        btn_resolve      : button({pos[40, 160], size[180, 24],
+        btn_resolve      : button({pos[40, 180], size[140, 24],
                                    text: "#invasion_quick_battle_resolve",
                                    font: FONT_NORMAL_BLACK_ON_LIGHT
                                    onclick: invasion_quick_battle_resolve_now})
-        btn_wait         : button({pos[240, 160], size[180, 24],
+        btn_bribe        : button({pos[190, 180], size[140, 24],
+                                   text: "#invasion_bribe_button",
+                                   font: FONT_NORMAL_BLACK_ON_LIGHT
+                                   onclick: invasion_quick_battle_bribe_now})
+        btn_wait         : button({pos[340, 180], size[120, 24],
                                    text: "#invasion_quick_battle_wait",
                                    font: FONT_NORMAL_BLACK_ON_LIGHT
                                    onclick: invasion_quick_battle_wait})

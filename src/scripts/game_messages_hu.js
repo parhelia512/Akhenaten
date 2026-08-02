@@ -6237,6 +6237,13 @@ game_messages_hu {
                 title { text: "Vereség" }
                 content { text: "A tábornokok vereségről számolnak be. A támadó sereg túl erős volt. Sok katonád elesett — de az ellenség elvonul a mezőről." }
             }
+            message_invasion_bribe_withdraw {
+                id: 531,
+                type: 2,
+                size [30, 16]
+                title { text: "Az adó elfogadva" }
+                content { text: "A támadók elfogadták az adót és elvonultak. A kincstár könnyebb — de a város áll." }
+            }
             sun_temple_congratulations {
                 id: 523,
                 size [30, 18]

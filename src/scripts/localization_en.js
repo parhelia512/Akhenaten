@@ -87,6 +87,9 @@ localization_en = [
   {key:"#TR_CONFIG_SETH_ASP_RAID", text:"Seth major curse: asp raid from temples when no company to curse (TEMP Enhanced)"}
   {key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Ptah major curse: scorpion raid from temples when no industry to smash (TEMP Enhanced)"}
   {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Auto-resolve invasions: freeze at entry, quick battle in 8 days (walls/towers ignored; Pharaoh included; not uprisings)"}
+  {key:"#TR_CONFIG_INVASION_BRIBE", text:"Bribe invaders: pay deben to make a foreign/Pharaoh invasion withdraw (not kingdom army or uprisings)"}
+  {key:"#invasion_bribe_button", text:"Bribe"}
+  {key:"#invasion_bribe_cost_line", text:"Bribe: {cost} Db   Treasury: {treasury}"}
   {key:"#TR_CONFIG_FLOOD_BASINS", text:"Enhanced: floodplain dikes / basin irrigation (seal farms for better post-flood yields)"}
   {key:"#building_dike", text:"Dike"}
   {key:"#building_dike_info", text:"Earth embankment for floodplain basin irrigation. Seal a contour around farms to improve yields after the inundation."}

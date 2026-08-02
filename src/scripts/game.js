@@ -107,6 +107,7 @@ game_features {
     @gameplay_seth_asp_raid {}
     @gameplay_ptah_scorpion_raid {}
     @gameplay_enhanced_auto_resolve_invasions {}
+    @gameplay_enhanced_invasion_bribe {}
     @gameplay_enhanced_flood_basins {}
     @gameplay_change_fixed_workers {}
     @gameplay_fixed_worker_percent {}
