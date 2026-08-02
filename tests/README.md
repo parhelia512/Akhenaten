@@ -185,6 +185,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `131_birds_herd_scare.js` | Birds companion gets `e_figure_flag_scared` after kill in range (BH0b) |
 | `132_nilometer_ui.js` | Enhanced nilometer helpers: flag OFF default, hide/floodplain gates, quality tiers, phase keys, water bar |
 | `169_invasion_warnings_saveload.js` | B3/B4: invasion_warnings saveload + MESSAGE phrase from reasons / fallback |
+| `170_iunet_request_outcomes.js` | B13a: Iunet meat/pottery late→hittite×10 once; ok leaf; limestone refuse→egypt×24 ≠ favour |
 
 Farm **placement** tests (34/35) cover `can_place` / terrain rules; **37** covers preview image helpers.
 When adding more preview draw coverage, follow JS draw conventions in
