@@ -354,7 +354,7 @@ mission6 { // Behdet — The Royal Navy
 		pharaoh_beer_late_requested : false
 		papyrus_demand_increased : false
 		clay_pit_flood_done : false
-		failed_flood_done : false
+		failed_flood_last_year : -1
 		kushite_invasion_1 : false
 		kushite_invasion_2 : false
 		kushite_invasion_3 : false
@@ -505,18 +505,20 @@ function mission6_clay_pit_flood(ev) {
 	}).execute()
 }
 
-// pak: year=10 month=0 FAILED_FLOOD recurring — force next inundation quality to 0
+// pak: year=10 month=0 FAILED_FLOOD recurring — force next inundation quality to 0.
+// Calendar proxy: yearly at m0 from y10+ (amount=8 from pak; months_initial not dumped).
 [es=event_advance_month, mission=mission6]
 function mission6_failed_flood(ev) {
-	if (mission.failed_flood_done) {
+	if (ev.years_since_start < 10 || ev.month != 0) {
 		return
 	}
-	if (ev.years_since_start < 10) {
+	if (mission.failed_flood_last_year == ev.years_since_start) {
 		return
 	}
-	mission.failed_flood_done = true
+	mission.failed_flood_last_year = ev.years_since_start
+	log_info("akhenaten: mission 6 behdet failed flood y" + ev.years_since_start, {ev:ev})
 	city.create_chain_event({
-		tag_id: 802,
+		tag_id: 3800 + ev.years_since_start,
 		type: EVENT_TYPE_FAILED_FLOOD,
 		amount: 8,
 		trigger: EVENT_TRIGGER_ONCE
