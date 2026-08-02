@@ -5,6 +5,7 @@ log_info("akhenaten: mission 35 baki started")
 // Win: pop 10000 / culture 70 / prosperity 70 / monuments 35 (Mausoleum+Med+Small mudbrick W=5+8+4→42) / kingdom 85 / housing 19.
 // Burial ×5 all 32. SKIP map_obj idx=11. Orphan routes 25/26.
 // Truncate i=18→0. Remap i=1 ok=85. Favour egypt 60→5→15→20→20.
+// Inv: land×1 + sea×1 packed → loc2=sea[0] via_sea (E3c); loc3/4/8 OOB navy→sea0.
 // Tag_id: 1000+i leaves; 2000+i roots; 3000+i*100+year recurring.
 
 mission35 { // Baki (Kuban) — The Glory of Egypt
@@ -77,7 +78,7 @@ mission35 { // Baki (Kuban) — The Glory of Egypt
 	river_exit_point [37, 76]
 	disembark_points [ [-1, -1], [-1, -1], [53, 111] ]
 	invasion_points_land [ [187, 137] ]
-	// pak inv_sea [75,198] (water). Until E3c: land-proxy at disembark [53,111].
+	// pak inv_sea [75,198] (water). Packed loc2=sea[0] → via_sea (E3c).
 	invasion_points_sea [ [75, 198] ]
 
 	herd_points_animals [
@@ -681,38 +682,36 @@ function mission35_ensure_all_leaves() {
 	mission35_ensure_heh_gems_leaves()
 }
 
-// pak location_fields = 1-based invasion point index (land first, then sea).
-// land[0]=[187,137]; sea[0]=[75,198] (water — cannot spawn a land army).
-// Sea / OOB → disembark[2]=[53,111] until E3c. Favour loc1 prefers land.
-function mission35_loc_tile(loc, prefer_land) {
-	if (loc == 1) {
-		return prefer_land ? [187, 137] : [53, 111]
-	}
-	if (loc == 2 || loc == 3 || loc == 4 || loc == 8) {
-		return [53, 111]
-	}
-	if (prefer_land) {
-		return [187, 137]
-	}
-	return [53, 111]
-}
-
+// pak location_fields = 1-based packed (land first, then sea).
+// land[0]=[187,137] → loc1; sea[0]=[75,198] → loc2. Loc 3/4/8 = OOB navy → sea0.
 function mission35_favour_wave(size, invasion_id, loc) {
-	var tile = mission35_loc_tile(loc === undefined ? 1 : loc, loc == 1)
-	log_info("akhenaten: mission 35 favour wave size=" + size + " kr=" + city.rating_kingdom
-		+ " id=" + invasion_id + " loc=" + loc + " tile=" + tile[0] + "," + tile[1])
-	__image_request_pak(PACK_ENEMY_EGYPTIAN)
-	city.start_foreign_army_invasion({
+	if (loc === undefined) {
+		loc = 1
+	}
+	var opts = {
 		mode: ATTACK_TYPE_ENEMIES,
 		enemy: ENEMY_3_EGYPTIAN,
 		kind: INVASION_KIND_KINGDOME,
 		size: size,
 		invasion_id: invasion_id,
-		tilex: tile[0],
-		tiley: tile[1],
 		want_destroy_buildings: 0,
 		invasion_attack_target: EVENT_ATTACK_TARGET_RANDOM
-	})
+	}
+	var via_sea = loc != 1
+	if (via_sea) {
+		opts.via_sea = 1
+		opts.sea_point = 0
+		opts.tilex = 75
+		opts.tiley = 198
+	} else {
+		opts.tilex = 187
+		opts.tiley = 137
+	}
+	log_info("akhenaten: mission 35 favour wave size=" + size + " kr=" + city.rating_kingdom
+		+ " id=" + invasion_id + " loc=" + loc + " sea=" + via_sea
+		+ " tile=" + opts.tilex + "," + opts.tiley)
+	__image_request_pak(PACK_ENEMY_EGYPTIAN)
+	return city.start_foreign_army_invasion(opts)
 }
 
 [es=event_mission_start, mission=mission35]

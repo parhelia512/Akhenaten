@@ -90,8 +90,7 @@ mission29 { // Sawu (Mersa Gawasis) — Shores of the Red Sea; briefing key = me
 	river_exit_point [99, 15]
 	disembark_points [ [126, 54], [95, 50], [43, 85] ]
 	invasion_points_land [ [13, 100] ]
-	// pak inv_sea [74,16] (water). Until E3c: land-proxy at nearest disembark [95,50]
-	// (see mission29_loc_tile — Heh / Waset pattern).
+	// pak inv_sea [74,16] (water). Packed loc2=sea[0] → via_sea (E3c).
 	invasion_points_sea [ [74, 16] ]
 
 	// pak burial_provisions (scenario 29 dump).
@@ -672,60 +671,72 @@ function mission29_ensure_all_leaves() {
 	mission29_ensure_kerma_chain_leaves()
 }
 
-// pak location_fields = 1-based invasion point index (land first, then sea).
-// land[0]=[13,100]; sea[0]=[74,16] (water — cannot spawn a land army).
-// Sea → nearest disembark [95,50] until E3c (Heh / Waset pattern).
-// OOB loc (3/5/8/9): Libyan → sea land-proxy; Egyptian favour → unset (map entry).
-function mission29_loc_tile(loc, prefer_sea) {
+// pak location_fields = 1-based packed (land first, then sea).
+// land[0]=[13,100] → loc1; sea[0]=[74,16] → loc2.
+// Libyan OOB navy (3/5/8/9) → via_sea sea0. Egyptian favour OOB → map entry.
+function mission29_apply_invasion_loc(opts, loc, prefer_sea) {
 	if (loc == 1) {
-		return [13, 100]
+		opts.tilex = 13
+		opts.tiley = 100
+		return false
 	}
 	if (loc == 2) {
-		return [95, 50] // sea[0]=[74,16] → disembark[1] (nearest coastal)
+		opts.via_sea = 1
+		opts.sea_point = 0
+		opts.tilex = 74
+		opts.tiley = 16
+		return true
 	}
 	if (prefer_sea) {
-		if (loc == 3 || loc == 5) {
-			return [43, 85] // disembark[2]
-		}
-		// loc 8/9 editor default → navy land-proxy at the sea disembark
-		return [95, 50]
+		opts.via_sea = 1
+		opts.sea_point = 0
+		opts.tilex = 74
+		opts.tiley = 16
+		return true
 	}
-	return [-1, -1]
+	opts.tilex = -1
+	opts.tiley = -1
+	return false
 }
 
 // pak beduins(4) and the scenario enemy(1) both resolve to ENEMY_7_LIBIAN in this scenario.
 function mission29_libyan_raid(invasion_id, size, loc, attack_target) {
-	var tile = mission29_loc_tile(loc === undefined ? 9 : loc, true)
-	log_info("akhenaten: mission 29 libyan raid id=" + invasion_id + " size=" + size
-		+ " loc=" + loc + " tile=" + tile[0] + "," + tile[1])
-	__image_request_pak(PACK_ENEMY_LIBIAN)
-	city.start_foreign_army_invasion({
+	if (loc === undefined) {
+		loc = 9
+	}
+	var opts = {
 		invasion_id: invasion_id,
 		enemy: ENEMY_7_LIBIAN,
 		size: size,
-		tilex: tile[0],
-		tiley: tile[1],
 		want_destroy_buildings: size,
 		invasion_attack_target: attack_target === undefined ? EVENT_ATTACK_TARGET_RANDOM : attack_target
-	})
+	}
+	var via_sea = mission29_apply_invasion_loc(opts, loc, true)
+	log_info("akhenaten: mission 29 libyan raid id=" + invasion_id + " size=" + size
+		+ " loc=" + loc + " sea=" + via_sea + " tile=" + opts.tilex + "," + opts.tiley)
+	__image_request_pak(PACK_ENEMY_LIBIAN)
+	return city.start_foreign_army_invasion(opts)
 }
 
 function mission29_favour_wave(size, invasion_id, loc, attack_target) {
-	var tile = mission29_loc_tile(loc === undefined ? 1 : loc, false)
-	log_info("akhenaten: mission 29 favour wave size=" + size + " kr=" + city.rating_kingdom
-		+ " id=" + invasion_id + " loc=" + loc + " tile=" + tile[0] + "," + tile[1])
-	__image_request_pak(PACK_ENEMY_EGYPTIAN)
-	city.start_foreign_army_invasion({
+	if (loc === undefined) {
+		loc = 1
+	}
+	var opts = {
 		mode: ATTACK_TYPE_ENEMIES,
 		enemy: ENEMY_3_EGYPTIAN,
 		kind: INVASION_KIND_KINGDOME,
 		size: size,
 		invasion_id: invasion_id,
-		tilex: tile[0],
-		tiley: tile[1],
 		want_destroy_buildings: 0,
 		invasion_attack_target: attack_target === undefined ? EVENT_ATTACK_TARGET_RANDOM : attack_target
-	})
+	}
+	var via_sea = mission29_apply_invasion_loc(opts, loc, false)
+	log_info("akhenaten: mission 29 favour wave size=" + size + " kr=" + city.rating_kingdom
+		+ " id=" + invasion_id + " loc=" + loc + " sea=" + via_sea
+		+ " tile=" + opts.tilex + "," + opts.tiley)
+	__image_request_pak(PACK_ENEMY_EGYPTIAN)
+	return city.start_foreign_army_invasion(opts)
 }
 
 [es=event_mission_start, mission=mission29]

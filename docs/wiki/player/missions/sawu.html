@@ -81,7 +81,7 @@
         <strong>Names:</strong> briefing title is <em>Mersa Gawasis</em> / <em>Punt</em>; JS / wiki / history use <em>Sawu</em> / <em>Pwenet</em>. History popup is <code>message_history_sawu</code> (229).
         <br/><strong>Monuments 20:</strong> Mausoleum (W=5) + Small mudbrick (W=4) →
         <code>trunc(2.25·9+4.5)=24</code> ≥ 20 (pak 21 soft).
-        <br/><strong>Enemy:</strong> scenario enemy is <code>ENEMY_7_LIBIAN</code> — timed beduin and “enemy” waves share Libyan sprites; favour uses Egyptian. Sea inv <code>[74,16]</code> land-proxies at disembark <code>[95,50]</code> until sea invasions land.
+        <br/><strong>Enemy:</strong> scenario enemy is <code>ENEMY_7_LIBIAN</code> — timed beduin and “enemy” waves share Libyan sprites; favour uses Egyptian. Sea inv <code>[74,16]</code> packed loc2 → <code>via_sea</code> (E3c); OOB navy → sea0.
       </div>
 
       <h2 id="objectives">Objectives</h2>
@@ -105,7 +105,7 @@
           <div class="details-body">
             <p><span class="file-ref">src/scripts/mission/m_029_sawu.js</span> · import in <span class="file-ref">src/scripts/missions.js</span></p>
             <p>Empire id <strong>1</strong> (pak). Map <span class="file-ref">data/maps/m_029_sawu.map</span>. Rank 10. Scenario enemy <code>ENEMY_7_LIBIAN</code>; favour <code>ENEMY_3_EGYPTIAN</code>. Dump 2026-07-27.</p>
-            <p><code>choice[]</code> → Heh/Bubastis (g144 61/62/63). SKIP: empty map_obj idx=11; orphan MESSAGE i=14/20/29–31; orphan routes 20–22. Sea inv <code>[74,16]</code> → disembark <code>[95,50]</code> until sea invasions land.</p>
+            <p><code>choice[]</code> → Heh/Bubastis (g144 61/62/63). SKIP: empty map_obj idx=11; orphan MESSAGE i=14/20/29–31; orphan routes 20–22. Sea inv <code>[74,16]</code> packed loc2 → <code>via_sea</code> (E3c).</p>
           </div>
         </details>
         <details>

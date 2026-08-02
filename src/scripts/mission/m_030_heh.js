@@ -90,7 +90,7 @@ mission30 { // Heh (Semna) — The Gauntlet
 	river_exit_point [75, 7]
 	disembark_points [ [80, 84], [54, 67], [61, 46] ]
 	invasion_points_land [ [80, 123], [112, 71] ]
-	// pak inv_sea — water; armies land-proxy at disembark until E3c (see mission30_loc_tile).
+	// pak inv_sea water; packed loc3/4 = sea[0]/sea[1] → via_sea (E3c).
 	invasion_points_sea [ [127, 84], [95, 4] ]
 
 	hide_pak_burial : true
@@ -663,65 +663,84 @@ function mission30_fire_request(tag, resource, amount, months, ok_tag, refuse_ta
 	return request
 }
 
-// pak location_fields = 1-based invasion point index (MAX 8).
-// land[0]=[80,123] land[1]=[112,71]; sea[0]=[127,84] sea[1]=[95,4] (water — cannot spawn).
-// Sea → disembark land-proxy until E3c (Waset / E3 pattern).
-// OOB loc (6/8/9/10): Kushite → disembark (navy); Egyptian → unset (map entry).
-function mission30_loc_tile(loc, prefer_sea) {
+// pak location_fields = 1-based packed (land first, then sea). MAX editor slots 8+.
+// land[0]=[80,123] land[1]=[112,71]; sea[0]=[127,84] sea[1]=[95,4].
+// loc3/4 = sea → via_sea. OOB navy (prefer_sea) → sea0. Egyptian OOB → map entry.
+function mission30_apply_invasion_loc(opts, loc, prefer_sea) {
 	if (loc == 1) {
-		return [80, 123]
+		opts.tilex = 80
+		opts.tiley = 123
+		return false
 	}
 	if (loc == 2) {
-		return [112, 71]
+		opts.tilex = 112
+		opts.tiley = 71
+		return false
 	}
 	if (loc == 3) {
-		return [80, 84] // sea[0] → disembark[0]
+		opts.via_sea = 1
+		opts.sea_point = 0
+		opts.tilex = 127
+		opts.tiley = 84
+		return true
 	}
 	if (loc == 4) {
-		return [54, 67] // sea[1] → disembark[1]
+		opts.via_sea = 1
+		opts.sea_point = 1
+		opts.tilex = 95
+		opts.tiley = 4
+		return true
 	}
 	if (prefer_sea) {
-		if (loc == 6 || loc == 8) {
-			return [61, 46] // disembark[2]
-		}
-		return [80, 84] // loc 9/10 editor default → navy land-proxy
+		opts.via_sea = 1
+		opts.sea_point = 0
+		opts.tilex = 127
+		opts.tiley = 84
+		return true
 	}
-	return [-1, -1]
+	opts.tilex = -1
+	opts.tiley = -1
+	return false
 }
 
 function mission30_kushite_raid(invasion_id, size, loc, on_completed_tag) {
-	var tile = mission30_loc_tile(loc === undefined ? 9 : loc, true)
-	log_info("akhenaten: mission 30 kushite raid id=" + invasion_id + " size=" + size
-		+ " loc=" + loc + " tile=" + tile[0] + "," + tile[1])
-	city.start_foreign_army_invasion({
+	if (loc === undefined) {
+		loc = 9
+	}
+	var opts = {
 		enemy: ENEMY_6_KUSHITE,
 		amount: size,
 		size: size,
 		invasion_id: invasion_id,
-		tilex: tile[0],
-		tiley: tile[1],
 		want_destroy_buildings: 0,
 		invasion_attack_target: EVENT_ATTACK_TARGET_RANDOM,
 		on_completed_tag: on_completed_tag
-	})
+	}
+	var via_sea = mission30_apply_invasion_loc(opts, loc, true)
+	log_info("akhenaten: mission 30 kushite raid id=" + invasion_id + " size=" + size
+		+ " loc=" + loc + " sea=" + via_sea + " tile=" + opts.tilex + "," + opts.tiley)
+	return city.start_foreign_army_invasion(opts)
 }
 
 function mission30_pharaoh_raid(invasion_id, size, loc, on_completed_tag) {
-	var tile = mission30_loc_tile(loc === undefined ? 4 : loc, false)
-	log_info("akhenaten: mission 30 pharaoh raid id=" + invasion_id + " size=" + size
-		+ " loc=" + loc + " tile=" + tile[0] + "," + tile[1])
-	city.start_foreign_army_invasion({
+	if (loc === undefined) {
+		loc = 4
+	}
+	var opts = {
 		enemy: ENEMY_3_EGYPTIAN,
 		kind: INVASION_KIND_KINGDOME,
 		amount: size,
 		size: size,
 		invasion_id: invasion_id,
-		tilex: tile[0],
-		tiley: tile[1],
 		want_destroy_buildings: 0,
 		invasion_attack_target: EVENT_ATTACK_TARGET_RANDOM,
 		on_completed_tag: on_completed_tag
-	})
+	}
+	// Sea locs (3/4) still via_sea; OOB without prefer_sea → map entry.
+	var via_sea = mission30_apply_invasion_loc(opts, loc, false)
+	log_info("akhenaten: mission 30 pharaoh raid id=" + invasion_id + " size=" + size
+		+ " loc=" + loc + " sea=" + via_sea + " tile=" + opts.tilex + "," + opts.tiley)
+	return city.start_foreign_army_invasion(opts)
 }
 
 function mission30_ensure_troops_i1_leaves() {
@@ -865,7 +884,7 @@ function mission30_requests_and_events(ev) {
 		log_info("akhenaten: mission 30 gift sandstone×32 (i=26)")
 		mission30_fire_simple_event(2026, EVENT_TYPE_GIFT_FROM_PHARAOH, RESOURCE_SANDSTONE, 32)
 	}
-	// Kushite invasions — loc from pak; sea/OOB → disembark land-proxy until E3c
+	// Kushite invasions — loc from pak; packed sea/OOB-navy → via_sea (E3c)
 	if (!mission.event18_invasion_done && ev.years_since_start == 6 && ev.month == 11) {
 		mission.event18_invasion_done = true
 		log_info("akhenaten: mission 30 kushite×16 (i=18)")
