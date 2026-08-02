@@ -1,6 +1,7 @@
 #include "city/campaign_carry.h"
 
 #include "building/building.h"
+#include "building/monument_royal_tomb.h"
 #include "building/monuments.h"
 #include "city/city.h"
 #include "city/city_buildings.h"
@@ -62,10 +63,21 @@ bool campaign_carry_is_monument_type(e_building_type type) {
     case BUILDING_MAUSOLEUM:
     case BUILDING_ALEXANDRIA_LIBRARY:
     case BUILDING_PHAROS_LIGHTHOUSE:
+    case BUILDING_SMALL_ROYAL_TOMB:
+    case BUILDING_MEDIUM_ROYAL_TOMB:
+    case BUILDING_LARGE_ROYAL_TOMB:
+    case BUILDING_GRAND_ROYAL_TOMB:
         return true;
     default:
         return false;
     }
+}
+
+static bool campaign_carry_is_royal_tomb(e_building_type type) {
+    return type == BUILDING_SMALL_ROYAL_TOMB
+        || type == BUILDING_MEDIUM_ROYAL_TOMB
+        || type == BUILDING_LARGE_ROYAL_TOMB
+        || type == BUILDING_GRAND_ROYAL_TOMB;
 }
 
 uint8_t troop_carry_mask_parse_name(pcstr name) {
@@ -367,6 +379,22 @@ vec2i carry_monument_init_tiles(e_building_type type) {
         return {13, 14};
     case BUILDING_PHAROS_LIGHTHOUSE:
         return {6, 6};
+    case BUILDING_SMALL_ROYAL_TOMB:
+    case BUILDING_MEDIUM_ROYAL_TOMB:
+    case BUILDING_LARGE_ROYAL_TOMB:
+    case BUILDING_GRAND_ROYAL_TOMB: {
+        // Cliff bulk + entrance depth (Heaven chart); oriented later.
+        const auto &bp = building_royal_tomb::params_for(type);
+        vec2i bulk = bp.init_tiles;
+        if (bulk.x <= 0 || bulk.y <= 0) {
+            bulk = {11, 20};
+        }
+        vec2i ent = bp.entrance_size;
+        if (ent.x <= 0 || ent.y <= 0) {
+            ent = {1, 1};
+        }
+        return {bulk.x, bulk.y + ent.y};
+    }
     default:
         return {0, 0};
     }
@@ -402,6 +430,49 @@ bool carry_tile_not_rock(tile2i t) {
     return false;
 }
 
+bool carry_royal_tomb_area_ok(e_building_type type, tile2i origin, int orientation) {
+    const auto &bp = building_royal_tomb::params_for(type);
+    vec2i bulk = bp.init_tiles;
+    if (bulk.x <= 0 || bulk.y <= 0) {
+        bulk = {11, 20};
+    }
+    orientation %= 4;
+    if (orientation == 1 || orientation == 3) {
+        bulk = {bulk.y, bulk.x};
+    }
+    vec2i ent = bp.entrance_size;
+    if (ent.x <= 0 || ent.y <= 0) {
+        ent = {1, 1};
+    }
+    const vec2i total = {bulk.x, bulk.y + ent.y};
+    for (int dy = 0; dy < total.y; dy++) {
+        for (int dx = 0; dx < total.x; dx++) {
+            if (building_royal_tomb::is_padding_local(dx, dy, bulk, ent)) {
+                continue;
+            }
+            tile2i t = origin.shifted(dx, dy);
+            if (!map_grid_is_inside(t, 1)) {
+                return false;
+            }
+            if (building_royal_tomb::is_entrance_local(dx, dy, bulk, ent)) {
+                if (map_terrain_is(t, TERRAIN_NOT_CLEAR) || map_has_figure_at(t) || map_building_at(t)) {
+                    return false;
+                }
+            } else {
+                const uint32_t cliff = TERRAIN_ELEVATION | TERRAIN_ACCESS_RAMP;
+                if (!map_terrain_is(t, cliff) || map_has_figure_at(t) || map_building_at(t)) {
+                    return false;
+                }
+                const uint32_t blocked = TERRAIN_NOT_CLEAR & ~cliff;
+                if (map_terrain_is(t, blocked)) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
 bool carry_area_ok(e_building_type type, tile2i origin, int w, int h) {
     if (w < 1 || h < 1 || !origin.valid()) {
         return false;
@@ -422,11 +493,14 @@ bool carry_area_ok(e_building_type type, tile2i origin, int w, int h) {
 }
 
 bool carry_footprint_ok(e_building_type type, tile2i tile, int orientation) {
+    if (campaign_carry_is_royal_tomb(type)) {
+        return carry_royal_tomb_area_ok(type, tile, orientation);
+    }
     const vec2i ft = carry_monument_footprint(type, orientation);
     return carry_area_ok(type, tile, ft.x, ft.y);
 }
 
-// CO1b: stored tile is from the previous map — try it first, then scan clear land / rock.
+// CO1b: stored tile is from the previous map — try it first, then scan clear land / rock / cliff.
 bool carry_find_place_tile(e_building_type type, uint8_t &orientation, tile2i preferred, tile2i &out_tile) {
     const vec2i init = carry_monument_init_tiles(type);
     if (init.x <= 0) {
@@ -457,7 +531,11 @@ bool carry_find_place_tile(e_building_type type, uint8_t &orientation, tile2i pr
         for (int y = 0; y <= map_h - ft.y; y++) {
             for (int x = 0; x <= map_w - ft.x; x++) {
                 tile2i t(x, y);
-                if (!carry_area_ok(type, t, ft.x, ft.y)) {
+                if (campaign_carry_is_royal_tomb(type)) {
+                    if (!carry_royal_tomb_area_ok(type, t, o)) {
+                        continue;
+                    }
+                } else if (!carry_area_ok(type, t, ft.x, ft.y)) {
                     continue;
                 }
                 orientation = o;
@@ -500,6 +578,10 @@ bool carry_place_finished_monument(e_building_type type, tile2i tile, uint8_t or
     impl->on_place_update_tiles(orientation, variant);
     mon->set_phase(mon->phases());
     mon->set_preexisting(true);
+    // Carried tombs already held their funeral in the prior Valley mission.
+    if (campaign_carry_is_royal_tomb(type)) {
+        mon->set_funeral_done(true);
+    }
     return true;
 }
 
