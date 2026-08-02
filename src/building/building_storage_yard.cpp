@@ -625,20 +625,32 @@ storage_worker_task building_storageyard_deliver_resource_to_zoo(building *b) {
 }
 
 storage_worker_task building_storageyard_deliver_papyrus_to_scribal_school(building *b) {
-    if (g_city.buildings.count_active(BUILDING_SCRIBAL_SCHOOL) <= 0 || g_city.resource.is_stockpiled(RESOURCE_PAPYRUS)) {
+    if (g_city.resource.is_stockpiled(RESOURCE_PAPYRUS)) {
         return { STORAGEYARD_TASK_NONE };
     }
 
     auto warehouse = b->dcast_storage_yard();
-    auto result = building_get_asker_for_resource(warehouse->tile(), BUILDING_SCRIBAL_SCHOOL, RESOURCE_PAPYRUS, warehouse->road_network(), warehouse->distance_from_entry());
-    auto scribal_school = building_get_ex<building_scribal_school>(result.building_id);
-    if (!scribal_school) {
+    if (!warehouse) {
         return { STORAGEYARD_TASK_NONE };
     }
 
-    const int school_want = scribal_school->need_resource_amount(RESOURCE_PAPYRUS);
+    const e_building_type consumers[] = { BUILDING_SCRIBAL_SCHOOL, BUILDING_INDUSTRY_OFFICE };
+    for (e_building_type consumer : consumers) {
+        if (g_city.buildings.count_active(consumer) <= 0) {
+            continue;
+        }
 
-    if (school_want > 0 && warehouse->road_network() == scribal_school->road_network()) {
+        auto result = building_get_asker_for_resource(warehouse->tile(), consumer, RESOURCE_PAPYRUS, warehouse->road_network(), warehouse->distance_from_entry());
+        building *dest = building_get(result.building_id);
+        if (!dest || !dest->is_valid()) {
+            continue;
+        }
+
+        const int want = dest->need_resource_amount(RESOURCE_PAPYRUS);
+        if (want <= 0 || warehouse->road_network() != dest->road_network_id) {
+            continue;
+        }
+
         int available = 0;
         auto space = warehouse->room();
         while (space) {
@@ -649,7 +661,7 @@ storage_worker_task building_storageyard_deliver_papyrus_to_scribal_school(build
         }
 
         if (available > 0) {
-            int amount = std::min(available, school_want);
+            int amount = std::min(available, want);
             return {STORAGEYARD_TASK_DELIVERING, &warehouse->base, amount, RESOURCE_PAPYRUS};
         }
     }
