@@ -52,11 +52,20 @@ void figure_tomb_artisan::figure_action() {
         break;
 
     case ACTION_14_TOMB_ARTISAN_WORK: {
-        // Guild consumed 100 clay+paint at spawn — credit monument; again if phase reset mid-work.
+        // Guild consumed 100 clay+paint at spawn — credit monument once for this trip.
+        // If the tomb phase advanced after delivery, this load is spent: go home for a refill.
         auto &rd = runtime_data();
         if (auto *m = b_dest->dcast_monument()) {
             const uint8_t ph = m->phase();
-            if (!rd.delivered_materials || rd.delivered_phase != ph) {
+            if (rd.delivered_materials && rd.delivered_phase != ph) {
+                if (bhome && bhome->is_valid()) {
+                    advance_action(ACTION_16_TOMB_ARTISAN_RETURN_HOME);
+                } else {
+                    advance_action(ACTION_20_TOMB_ARTISAN_DESTROY);
+                }
+                break;
+            }
+            if (!rd.delivered_materials) {
                 m->deliver_resource(RESOURCE_CLAY, 100);
                 m->deliver_resource(RESOURCE_PAINT, 100);
                 rd.delivered_materials = 1;

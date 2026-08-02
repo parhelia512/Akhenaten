@@ -280,7 +280,7 @@ int building_royal_tomb::lamp_stock_room() const {
     if (is_finished()) {
         return 0;
     }
-    // Phase 0 fills via resources_pct; stock top-up starts once carving begins.
+    // Yards only top up stock once carving begins; phase-0 leftovers still accept via deliver_resource.
     if (runtime_data().phase < 1) {
         return 0;
     }
@@ -288,9 +288,11 @@ int building_royal_tomb::lamp_stock_room() const {
 }
 
 int building_royal_tomb::accept_lamp_stock(int amount) {
-    if (amount <= 0 || is_finished() || runtime_data().phase < 1) {
+    if (amount <= 0 || is_finished()) {
         return 0;
     }
+    // Stock top-up from yards starts at phase≥1 (lamp_stock_room); leftover from a
+    // phase-0 sled that overshoots the 400 gate must still land in stock or lamps vanish.
     auto &d = runtime_data();
     const int room = k_lamp_stock_max - (int)d.lamp_stock;
     if (room <= 0) {
@@ -309,18 +311,19 @@ bool building_royal_tomb::deliver_resource(e_resource resource, int amount) {
     // Phase need first (help 478 / lamp_loads), leftover maintains working stock ≤700.
     const int phase_need = building_monument::needs_resource(RESOURCE_LAMPS);
     auto &d = runtime_data();
+    int accepted = 0;
     if (phase_need > 0 && d.resources_pct[RESOURCE_LAMPS] < 100) {
         const int on_site = phase_need * (int)d.resources_pct[RESOURCE_LAMPS] / 100;
         const int phase_remaining = std::max(0, phase_need - on_site);
         const int to_phase = std::min(amount, phase_remaining);
-        if (to_phase > 0) {
-            building_monument::deliver_resource(RESOURCE_LAMPS, to_phase);
+        if (to_phase > 0 && building_monument::deliver_resource(RESOURCE_LAMPS, to_phase)) {
+            accepted += to_phase;
         }
         const int leftover = amount - to_phase;
         if (leftover > 0) {
-            accept_lamp_stock(leftover);
+            accepted += accept_lamp_stock(leftover);
         }
-        return true;
+        return accepted > 0;
     }
     return accept_lamp_stock(amount) > 0;
 }
