@@ -3,6 +3,7 @@
 #include "building/building_barracks.h"
 #include "building/building_delivery_path.h"
 #include "building/building_granary.h"
+#include "building/building_food_mill.h"
 #include "city/city_industry.h"
 #include "building/building_type.h"
 #include "building/building_storage_yard.h"
@@ -86,6 +87,7 @@ void figure_cartpusher::do_deliver(bool warehouseman, int action_done, int actio
 
             switch (dest->type) {
             case BUILDING_GRANARY:
+            case BUILDING_FOOD_MILL:
             case BUILDING_STORAGE_YARD:
             case BUILDING_STORAGE_ROOM: {
                     building_storage *storage = dest->dcast_storage();
@@ -117,7 +119,8 @@ void figure_cartpusher::do_deliver(bool warehouseman, int action_done, int actio
 
             case BUILDING_RECRUITER:
             case BUILDING_SHIPWRIGHT:
-            case BUILDING_SCRIBAL_SCHOOL: 
+            case BUILDING_SCRIBAL_SCHOOL:
+            case BUILDING_INDUSTRY_OFFICE:
             case BUILDING_SENET_HOUSE:
             case BUILDING_ZOO:
             case BUILDING_POLICE_STATION: {
@@ -177,7 +180,7 @@ void figure_cartpusher::calculate_destination(bool warehouseman) {
         building* b = home();
         if (base.wait_ticks > 2) {
             base.wait_ticks = 0;
-            if (home()->type == BUILDING_GRANARY) {
+            if (home()->type == BUILDING_GRANARY || home()->type == BUILDING_FOOD_MILL) {
                 determine_granaryman_destination();
             } else {
                 determine_storageyard_cart_destination();
@@ -237,11 +240,20 @@ void figure_cartpusher::determine_deliveryman_destination() {
 
 void figure_cartpusher::determine_granaryman_destination() {
     int road_network_id = map_road_network_get(tile());
-    building_granary* granary = home()->dcast_granary();
+    building_granary *granary = home()->dcast_granary();
+    building_food_mill *mill = home()->dcast_food_mill();
 
     if (!base.resource_id) {
-        // getting granaryman
-        granary_getting_result dest = granary->find_storage_for_getting();
+        granary_getting_result dest = {0, tile2i::invalid};
+        if (granary) {
+            dest = granary->find_storage_for_getting();
+        } else if (mill) {
+            dest = mill->find_storage_for_getting();
+        } else {
+            poof();
+            return;
+        }
+
         set_destination(dest.building_id);
         if (has_destination()) {
             advance_action(ACTION_54_CARTPUSHER_GETTING_FOOD);
@@ -251,6 +263,12 @@ void figure_cartpusher::determine_granaryman_destination() {
         } else {
             poof();
         }
+        return;
+    }
+
+    // Emptying / redistribution — granary only (mill does not empty-out in v1).
+    if (!granary) {
+        advance_action(ACTION_56_CARTPUSHER_RETURNING_WITH_FOOD);
         return;
     }
 
@@ -322,12 +340,15 @@ void figure_cartpusher::determine_storageyard_cart_destination() {
         }
     }
 
-    // priority 2: paryrus to scribal school
+    // priority 2: papyrus to scribal school / industry office
     if (base.resource_id == RESOURCE_PAPYRUS) {
-        auto result = building_get_asker_for_resource(tile(), BUILDING_SCRIBAL_SCHOOL, base.resource_id, road_network_id, warehouse->distance_from_entry);
-        set_destination(result.building_id);
-        if (has_destination()) {
-            return advance_action(ACTION_51_CARTPUSHER_DELIVERING_RESOURCE);
+        const e_building_type consumers[] = { BUILDING_SCRIBAL_SCHOOL, BUILDING_INDUSTRY_OFFICE };
+        for (e_building_type consumer : consumers) {
+            auto result = building_get_asker_for_resource(tile(), consumer, base.resource_id, road_network_id, warehouse->distance_from_entry);
+            set_destination(result.building_id);
+            if (has_destination()) {
+                return advance_action(ACTION_51_CARTPUSHER_DELIVERING_RESOURCE);
+            }
         }
     }
 
