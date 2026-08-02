@@ -11,8 +11,7 @@ namespace ui {
         virtual void draw_background_video() override;
         virtual void draw_background_content() override;
         virtual void init_data(xstring text_id, int message_id, void (*background_callback)(void)) override;
-        
+
         void button_go_to_problem();
     };
 }
-

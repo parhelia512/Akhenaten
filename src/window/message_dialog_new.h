@@ -37,9 +37,9 @@ namespace ui {
     struct message_dialog_base : public autoconfig_window {
         message_dialog_base(pcstr config_name);
         
-        virtual int handle_mouse(const mouse *m) override = 0;
+        virtual int handle_mouse(const mouse *m) override;
         virtual int get_tooltip_text() override { return 0; }
-        virtual void draw_foreground(UiFlags flags) override = 0;
+        virtual void draw_foreground(UiFlags flags) override;
         virtual int draw_background(UiFlags flags) override;
         virtual void ui_draw_foreground(UiFlags flags) override {}
         virtual int ui_handle_mouse(const mouse *m) override;
@@ -48,11 +48,6 @@ namespace ui {
         void show(xstring text_id, int message_id, void (*background_callback)(void));
         void show_city_message(xstring text_id, int message_id, int year, int month, int param1, int param2, int message_advisor, bool use_popup);
         void setup_help_id(xstring helpid);
-
-        struct history_item {
-            int text_id;
-            int scroll_position;
-        };       
 
         xstring debug_text_id;
 
@@ -98,11 +93,13 @@ namespace ui {
         void draw_image(const lang_message& msg);
         virtual void draw_content(const lang_message& msg);
         virtual void draw_city_message_text(const lang_message& msg);
+
+        xstring resolve_message_body(const lang_message& msg) const;
+        void format_city_message_header(bstring1024& out) const;
         
         virtual bool handle_input_normal(const mouse* m_dialog, const lang_message& msg);
         bool handle_input_video(const mouse* m_dialog, const lang_message& msg);
         
-        void button_back();
         void button_close();
         void button_help();
         void button_advisor(int advisor);
@@ -116,11 +113,8 @@ namespace ui {
         xstring config_name;
     };
 
-    // Derived classes for each message type
     struct message_dialog_general : public message_dialog_base {
         message_dialog_general() : message_dialog_base("message_dialog_window_general") {}
-        virtual int handle_mouse(const mouse *m) override;
-        virtual void draw_foreground(UiFlags flags) override;
     };
 }
 

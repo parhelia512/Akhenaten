@@ -1,26 +1,13 @@
 ﻿#include "message_dialog_disaster.h"
 
-#include "city/city_message.h"
 #include "city/city.h"
-#include "city/constants.h"
-#include "graphics/graphics.h"
-#include "graphics/image.h"
-#include "graphics/image_groups.h"
-#include "graphics/elements/lang_text.h"
-#include "graphics/elements/panel.h"
-#include "graphics/elements/rich_text.h"
-#include "graphics/text.h"
-#include "graphics/video.h"
 #include "graphics/view/view.h"
 #include "graphics/window.h"
 #include "input/input.h"
 #include "io/gamefiles/lang.h"
-#include "scenario/scenario.h"
-#include "scenario/request.h"
 #include "window/window_city.h"
-#include "message_dialog.h"
 #include "core/string.h"
-#include "game/game.h"
+#include "message_dialog.h"
 
 int ui::message_dialog_disaster::handle_mouse(const mouse *m) {
     const hotkeys *h = hotkey_state();
@@ -28,7 +15,7 @@ int ui::message_dialog_disaster::handle_mouse(const mouse *m) {
     const lang_message &msg = lang_get_message(text_id);
 
     bool handled = handle_input_normal(m_dialog, msg);
-       
+
     assert(msg.message_type == MESSAGE_TYPE_DISASTER);
     if (!handled) {
         ui.begin_widget(pos);
@@ -54,13 +41,7 @@ void ui::message_dialog_disaster::init_data(xstring text_id, int message_id, voi
     ui["button_go_to_problem"].enabled = true;
     ui["button_go_to_problem"].onclick([this] { button_go_to_problem(); });
 
-    xstring text = msg.content.text;
-    painter ctx = game.painter();
-
-    if (is_eventmsg) {
-        text = body_text;
-    }
-
+    xstring text = resolve_message_body(msg);
     if (!text) {
         return;
     }
@@ -75,7 +56,7 @@ void ui::message_dialog_disaster::init_data(xstring text_id, int message_id, voi
             header.printf("%s %d %s %s %s", ui::str(25, player_msg.month), player_msg.year, ui::str(63, 5), city_player_name(), ui::str(41, player_msg.param1));
         }
     } else {
-        header.printf("%s %d %s %s", ui::str(25, player_msg.month), player_msg.year, ui::str(63, 5), city_player_name());
+        format_city_message_header(header);
     }
 
     bstring1024 full_text;
@@ -91,15 +72,12 @@ void ui::message_dialog_disaster::draw_foreground(UiFlags flags) {
 }
 
 void ui::message_dialog_disaster::draw_city_message_text(const lang_message& msg) {
-    // ???
 }
 
 void ui::message_dialog_disaster::draw_background_video() {
-    // ???
 }
 
 void ui::message_dialog_disaster::draw_background_content() {
-    // ???
 }
 
 void ui::message_dialog_disaster::button_go_to_problem() {
@@ -112,4 +90,3 @@ void ui::message_dialog_disaster::button_go_to_problem() {
 
     window_city_show();
 }
-

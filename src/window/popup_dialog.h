@@ -80,18 +80,19 @@ enum e_popup_dialog_btns { e_popup_btns_ok = 0, e_popup_btns_yes = 1, e_popup_bt
 using window_popup_dialog_callback = std::function<void(bool)>;
 using window_yes_dialog_callback = std::function<void()>;
 
-struct popup_dialog : public ui::widget {
-    xstring text;
-    xstring body;
-    int ok_clicked;
-    window_popup_dialog_callback close_func;
-    e_popup_dialog_btns num_buttons;
+struct popup_dialog : public autoconfig_window {
+    popup_dialog(pcstr section);
 
-    void draw_background(int flags);
-    void draw_foreground(int flags);
-    void handle_input(const mouse *m, const hotkeys *h);
-    bool init(const xstring scheme, xstring loc, xstring custom_text, window_popup_dialog_callback close_func, e_popup_dialog_btns buttons);
+    virtual int handle_mouse(const mouse *m) override { return 0; }
+    virtual int get_tooltip_text() override { return 0; }
+    virtual void draw_foreground(UiFlags flags) override {}
+    virtual bool is_modal() const override { return true; }
+    virtual int ui_handle_mouse(const mouse *m) override;
+    virtual xstring get_section() const override { return section_name; }
 
+    void prepare(xstring header, xstring body, window_popup_dialog_callback close_cb, e_popup_dialog_btns buttons);
+
+    static bool is_open();
     static void show(pcstr loc_id, e_popup_dialog_btns buttons, window_popup_dialog_callback close_func);
     static void show(textid text, textid custom, e_popup_dialog_btns buttons, window_popup_dialog_callback close_func);
     static void show(textid text, e_popup_dialog_btns buttons, window_popup_dialog_callback close_func);
@@ -121,4 +122,12 @@ struct popup_dialog : public ui::widget {
             if (accepted) { close_func(); }
         });
     }
+
+private:
+    xstring section_name;
+    window_popup_dialog_callback close_func;
+    e_popup_dialog_btns num_buttons = e_popup_btns_ok;
+
+    void accept();
+    void reject();
 };

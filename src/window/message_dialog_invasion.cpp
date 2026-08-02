@@ -1,65 +1,31 @@
 ﻿#include "message_dialog_invasion.h"
 
-#include "city/city_message.h"
-#include "city/city.h"
-#include "city/constants.h"
 #include "figure/formation.h"
-#include "graphics/graphics.h"
-#include "graphics/image.h"
-#include "graphics/image_groups.h"
-#include "graphics/elements/lang_text.h"
-#include "graphics/elements/panel.h"
-#include "graphics/elements/rich_text.h"
-#include "graphics/text.h"
-#include "graphics/video.h"
 #include "graphics/view/view.h"
 #include "graphics/window.h"
-#include "input/input.h"
 #include "io/gamefiles/lang.h"
 #include "window/window_city.h"
 #include "window/autoconfig_window.h"
-#include "message_dialog.h"
 #include "core/string.h"
-#include "game/game.h"
 #include "scenario/invasion_auto_resolve.h"
 
-int ui::message_dialog_invasion::handle_mouse(const mouse *m) {
-    return ui_handle_mouse(m);
-}
+void ui::message_dialog_invasion::init_data(xstring text_id, int message_id, void (*background_callback)(void)) {
+    message_dialog_base::init_data(text_id, message_id, background_callback);
 
-void ui::message_dialog_invasion::init() {
-    message_dialog_base::init();
-}
-
-void ui::message_dialog_invasion::draw_foreground(UiFlags flags) {
-    draw_foreground_content();
-
-    // Enable go_to_problem button for invasions in normal mode
     const lang_message& msg = lang_get_message(text_id);
     assert(msg.message_type == MESSAGE_TYPE_INVASION);
     ui["button_go_to_problem"].enabled = true;
-    //ui["button_go_to_problem"].pos = {pos.x + 64, y_text + 36};
     ui["button_go_to_problem"].onclick([this] { button_go_to_problem(); });
-
-    ui.begin_widget(pos);
-    ui.draw(flags);
-    ui.end_widget();
 }
 
 void ui::message_dialog_invasion::draw_city_message_text(const lang_message& msg) {
-    xstring text = msg.content.text;
-    painter ctx = game.painter();
-
-    if (is_eventmsg) {
-        text = body_text;
-    }
-
+    xstring text = resolve_message_body(msg);
     if (!text) {
         return;
     }
 
     bstring1024 header;
-    header.printf("%s %d %s %s", ui::str(25, player_msg.month), player_msg.year, ui::str(63, 5), city_player_name());
+    format_city_message_header(header);
 
     bstring1024 full_text;
     full_text.printf("%s @P%s @P%s", header.c_str(), text.c_str(), ui::str(12, 1));
@@ -80,9 +46,7 @@ void ui::message_dialog_invasion::button_go_to_problem() {
 
     window_city_show();
 
-    // Quick-battle message param1 = seq — reopen resolve UI if still pending.
     if (g_invasion_auto_resolve.is_seq_frozen((uint16_t)player_msg.param1)) {
         autoconfig_window::show("invasion_quick_battle_window");
     }
 }
-

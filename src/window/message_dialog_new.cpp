@@ -232,7 +232,7 @@ int ui::message_dialog_base::get_message_image_id(const lang_message& msg) {
 
 void ui::message_dialog_base::draw_image(const lang_message& msg) {
     const city_message& city_msg = city_message_get(message_id);
-    
+
     int image_id = get_message_image_id(msg);
     const image_t* img = image_id ? image_get(image_id) : 0;
 
@@ -244,21 +244,25 @@ void ui::message_dialog_base::draw_image(const lang_message& msg) {
     }
 }
 
-void ui::message_dialog_base::draw_city_message_text(const lang_message& msg) {
-    xstring text = msg.content.text;
-    painter ctx = game.painter();
- 
+xstring ui::message_dialog_base::resolve_message_body(const lang_message& msg) const {
     if (is_eventmsg) {
-        text = body_text;
+        return xstring(body_text.c_str());
     }
-    
+    return msg.content.text;
+}
+
+void ui::message_dialog_base::format_city_message_header(bstring1024& out) const {
+    out.printf("%s %d %s %s", ui::str(25, player_msg.month), player_msg.year, ui::str(63, 5), city_player_name());
+}
+
+void ui::message_dialog_base::draw_city_message_text(const lang_message& msg) {
+    xstring text = resolve_message_body(msg);
     if (!text) {
         return;
     }
-    
 
     bstring1024 header;
-    header.printf("%s %d %s %s", ui::str(25, player_msg.month), player_msg.year, ui::str(63, 5), city_player_name());
+    format_city_message_header(header);
 
     bstring1024 full_text;
     full_text.printf("%s\n %s", header.c_str(), text.c_str());
@@ -267,11 +271,7 @@ void ui::message_dialog_base::draw_city_message_text(const lang_message& msg) {
 }
 
 void ui::message_dialog_base::draw_content(const lang_message& msg) {
-    xstring text = msg.content.text;
-    if (is_eventmsg) {
-        text = body_text;
-    }
-
+    xstring text = resolve_message_body(msg);
     if (!text) {
         return;
     }
@@ -363,7 +363,14 @@ int ui::message_dialog_base::ui_handle_mouse(const mouse *m) {
 }
 
 int ui::message_dialog_base::handle_mouse(const mouse *m) {
-    return 0;
+    return ui_handle_mouse(m);
+}
+
+void ui::message_dialog_base::draw_foreground(UiFlags flags) {
+    draw_foreground_content();
+    ui.begin_widget(pos);
+    ui.draw(flags);
+    ui.end_widget();
 }
 
 void ui::message_dialog_base::cleanup() {
@@ -372,14 +379,6 @@ void ui::message_dialog_base::cleanup() {
         show_video = false;
     }
     player_msg.message_advisor = 0;
-}
-
-void ui::message_dialog_base::button_back() {
-    // if (num_history > 0) {
-    //     num_history--;
-    //     text_id = history[num_history].text_id;
-    //     rich_text.reset(history[num_history].scroll_position);
-    // }
 }
 
 void ui::message_dialog_base::button_close() {
@@ -513,15 +512,4 @@ void window_show_help() {
     if (g_message_dialog_instance && !g_message_dialog_instance->help_id.empty()) {
         window_message_dialog_show(g_message_dialog_instance->help_id.c_str(), -1, nullptr);
     }
-}
-
-int ui::message_dialog_general::handle_mouse(const mouse *m) {
-    return ui_handle_mouse(m);
-}
-
-void ui::message_dialog_general::draw_foreground(UiFlags flags) {
-    draw_foreground_content();
-    ui.begin_widget(pos);
-    ui.draw(flags);
-    ui.end_widget();
 }
