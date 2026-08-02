@@ -190,11 +190,8 @@ int message_manager_t::new_message_id() {
 }
 
 static bool has_video(const lang_message& template_id) {
-    if (template_id.video.text.empty()) {
-        return false;
-    }
-
-    return vfs::file_exists(template_id.video.text.c_str());
+    bstring256 path = ui::message_dialog_base::resolve_message_video_path(template_id);
+    return !path.empty() && vfs::file_exists(path.c_str());
 }
 
 static void enqueue_message(int sequence) {

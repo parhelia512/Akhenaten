@@ -32,6 +32,3 @@ void ui::message_dialog_imperial::draw_city_message_text(const lang_message& msg
 
     ui["content_text"] = full_text;
 }
-
-void ui::message_dialog_imperial::draw_background_video() {
-}

@@ -27,6 +27,8 @@
 #include "graphics/video.h"
 #include "graphics/view/view.h"
 #include "graphics/window.h"
+#include "graphics/screen.h"
+#include "content/vfs.h"
 #include "input/input.h"
 #include "input/scroll.h"
 #include "io/gamefiles/lang.h"
@@ -149,14 +151,116 @@ void ui::message_dialog_base::init_data(xstring text_id, int message_id, void (*
     // Config is already loaded by the derived class constructor
     _is_inited = false;
 
-    if (!player_msg.use_popup) {
+    apply_video_ui(false);
+
+    const bool allow_video = player_msg.use_popup || !video_override.empty();
+    if (!allow_video) {
         return;
     }
 
-    if (!msg.video.text.empty() && video_start(msg.video.text.c_str())) {
-        show_video = true;
-        video_init();
+    bstring256 video_path = !video_override.empty() ? video_override : resolve_message_video_path(msg);
+    if (video_path.empty()) {
+        return;
     }
+
+    // Steam uses BINKS/High; some installs use BINKS/high or Video/High.
+    bstring256 candidates[4];
+    int n_candidates = 0;
+    candidates[n_candidates++] = video_path;
+    if (strncmp(video_path.c_str(), "BINKS/High/", 11) == 0) {
+        candidates[n_candidates].printf("BINKS/high/%s", video_path.c_str() + 11);
+        n_candidates++;
+        candidates[n_candidates].printf("Video/High/%s", video_path.c_str() + 11);
+        n_candidates++;
+    } else if (strncmp(video_path.c_str(), "BINKS/high/", 11) == 0) {
+        candidates[n_candidates].printf("BINKS/High/%s", video_path.c_str() + 11);
+        n_candidates++;
+    }
+
+    pcstr opened = nullptr;
+    for (int i = 0; i < n_candidates; ++i) {
+        if (!vfs::file_exists(candidates[i].c_str())) {
+            continue;
+        }
+        if (video_start(candidates[i].c_str())) {
+            opened = candidates[i].c_str();
+            break;
+        }
+        logs::info("Message video: failed to open '%s'", candidates[i].c_str());
+    }
+
+    if (!opened) {
+        logs::info("Message video: missing '%s' for '%s'", video_path.c_str(), text_id.c_str());
+        return;
+    }
+
+    show_video = true;
+    video_init();
+    apply_video_ui(true);
+    if (!video_override.empty()) {
+        ui["bottom_title"] = video_override_title.empty() ? "Video" : video_override_title.c_str();
+        ui["bottom_text"] = opened;
+    }
+    logs::info("Message video: playing '%s' for '%s'", opened, text_id.c_str());
+}
+
+bstring256 ui::message_dialog_base::normalize_video_path(pcstr raw) {
+    if (!raw || !*raw || raw[0] == '@') {
+        return {};
+    }
+
+    bstring256 path = raw;
+    char* p = path.data();
+    for (char* s = p; *s; ++s) {
+        if (*s == '\\') {
+            *s = '/';
+        }
+    }
+
+    char* write = p;
+    for (char* read = p; *read; ++read) {
+        if (read[0] == '/' && read[1] == '/') {
+            continue;
+        }
+        *write++ = *read;
+    }
+    *write = 0;
+    return path;
+}
+
+bstring256 ui::message_dialog_base::resolve_message_video_path(const lang_message& msg) {
+    return normalize_video_path(msg.video.text.c_str());
+}
+
+void ui::message_dialog_base::apply_video_ui(bool enabled) {
+    const vec2i video_dialog_blocks{26, 28};
+
+    ui["video_area"].enabled = enabled;
+    ui["bottom_title"].enabled = enabled;
+    ui["bottom_content"].enabled = enabled;
+    ui["bottom_text"].enabled = enabled;
+
+    ui["content_panel"].enabled = !enabled;
+    ui["content_text"].enabled = !enabled;
+    ui["title"].enabled = !enabled;
+    ui["subtitle"].enabled = !enabled && !subtitle_text.empty();
+
+    if (!enabled) {
+        return;
+    }
+
+    ui["background"].size = video_dialog_blocks;
+    pos = {
+        (screen_width() - video_dialog_blocks.x * 16) / 2,
+        (screen_height() - video_dialog_blocks.y * 16) / 2
+    };
+
+    const lang_message& msg = lang_get_message(text_id);
+    ui["bottom_title"] = (is_eventmsg && !title_text.empty()) ? title_text : msg.title.text;
+
+    // Compose caption via the normal content path (type-specific overrides included).
+    draw_content(msg);
+    ui["bottom_text"] = ui["content_text"].text().c_str();
 }
 
 void ui::message_dialog_base::set_city_message(int year, int month, int param1, int param2, int message_advisor, bool use_popup) {
@@ -293,15 +397,9 @@ void ui::message_dialog_base::draw_background_content() {
 }
 
 void ui::message_dialog_base::draw_background_video() {
-    painter ctx = game.painter();
-    const lang_message& msg = lang_get_message(text_id);
-    pos = { 32, 28 };
-
-    graphics_draw_rect(pos + vec2i{7, 7}, vec2i{402, 294}, COLOR_BLACK);
-
-    ui["content_text"] = msg.content.text;
-
-    draw_foreground_video();
+    const vec2i video_pos = pos + ui["video_area"].pos;
+    const vec2i video_size = ui["video_area"].pxsize();
+    graphics_draw_rect(video_pos + vec2i{-1, -1}, video_size + vec2i{2, 2}, COLOR_BLACK);
 }
 
 int ui::message_dialog_base::draw_background(UiFlags flags) {
@@ -315,8 +413,9 @@ int ui::message_dialog_base::draw_background(UiFlags flags) {
 
     if (show_video) {
         draw_background_video();
-    } 
-    draw_background_content();
+    } else {
+        draw_background_content();
+    }
 
     return 0;
 }
@@ -325,7 +424,8 @@ void ui::message_dialog_base::draw_foreground_content() {
 }
 
 void ui::message_dialog_base::draw_foreground_video() {
-    video_draw(pos.x + 8, pos.y + 8);
+    const vec2i video_pos = pos + ui["video_area"].pos;
+    video_draw(video_pos.x, video_pos.y);
 }
 
 bool ui::message_dialog_base::handle_input_normal(const mouse* m_dialog, const lang_message& msg) {
@@ -367,7 +467,11 @@ int ui::message_dialog_base::handle_mouse(const mouse *m) {
 }
 
 void ui::message_dialog_base::draw_foreground(UiFlags flags) {
-    draw_foreground_content();
+    if (show_video) {
+        draw_foreground_video();
+    } else {
+        draw_foreground_content();
+    }
     ui.begin_widget(pos);
     ui.draw(flags);
     ui.end_widget();
@@ -377,8 +481,12 @@ void ui::message_dialog_base::cleanup() {
     if (show_video) {
         video_stop();
         show_video = false;
+        apply_video_ui(false);
     }
+    video_override.clear();
+    video_override_title.clear();
     player_msg.message_advisor = 0;
+    player_msg.use_popup = false;
 }
 
 void ui::message_dialog_base::button_close() {
@@ -417,6 +525,12 @@ void ui::message_dialog_base::show(xstring text_id, int message_id, void (*backg
 void ui::message_dialog_base::show_city_message(xstring text_id, int message_id, int year, int month, int param1, int param2, int message_advisor, bool use_popup) {
     set_city_message(year, month, param1, param2, message_advisor, use_popup);
     show(text_id, message_id, window_city_draw_all);
+}
+
+void ui::message_dialog_base::show_with_video(pcstr video_path, pcstr title) {
+    video_override = normalize_video_path(video_path);
+    video_override_title = title ? title : "";
+    show_city_message("message_illness_video", -1, 1250, 0, 0, 0, 0, true);
 }
 
 void ui::message_dialog_base::setup_help_id(xstring helpid) {
@@ -487,12 +601,21 @@ static ui::message_dialog_base* create_message_dialog(xstring text_id, int messa
 
 void window_message_dialog_show(xstring text_id, int message_id, void (*background_callback)(void)) {
     g_message_dialog_instance = create_message_dialog(text_id, message_id);
+    g_message_dialog_instance->video_override.clear();
+    g_message_dialog_instance->video_override_title.clear();
     g_message_dialog_instance->show(text_id, message_id, background_callback);
 }
 
 void window_message_dialog_show_city_message(xstring text_id, int message_id, int year, int month, int param1, int param2, int message_advisor, bool use_popup) {
     g_message_dialog_instance = create_message_dialog(text_id, message_id);
+    g_message_dialog_instance->video_override.clear();
+    g_message_dialog_instance->video_override_title.clear();
     g_message_dialog_instance->show_city_message(text_id, message_id, year, month, param1, param2, message_advisor, use_popup);
+}
+
+void window_message_dialog_show_with_video(pcstr video_path, pcstr title) {
+    g_message_dialog_instance = &message_dialog_general_window;
+    message_dialog_general_window.show_with_video(video_path, title);
 }
 
 void window_message_setup_help_id(xstring helpid) {
@@ -513,3 +636,4 @@ void window_show_help() {
         window_message_dialog_show(g_message_dialog_instance->help_id.c_str(), -1, nullptr);
     }
 }
+

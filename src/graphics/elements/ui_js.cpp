@@ -645,10 +645,18 @@ void __ui_window_message_dialog(pcstr template_name) {
 }
 ANK_FUNCTION_1(__ui_window_message_dialog)
 
-void __ui_window_message_dialog_show_city_message(xstring text_id, int message_id, int year, int month, int param1, int param2, int message_advisor) {
-    window_message_dialog_show_city_message(text_id, message_id, year, month, param1, param2, message_advisor, false);
+void __ui_window_message_dialog_show_city_message(xstring text_id, int message_id, int year, int month, int param1, int param2, int /*message_advisor*/) {
+    // Advisor comes from the message template (JS used to pass mm_text_id by mistake).
+    // use_popup=true so embedded SMK can play (live popups + archive, same as Julius).
+    const lang_message& msg = lang_get_message(text_id);
+    window_message_dialog_show_city_message(text_id, message_id, year, month, param1, param2, msg.advisor, true);
 }
 ANK_FUNCTION_7(__ui_window_message_dialog_show_city_message)
+
+void __ui_window_message_dialog_show_with_video(pcstr video_path, pcstr title) {
+    window_message_dialog_show_with_video(video_path, title ? title : "");
+}
+ANK_FUNCTION_2(__ui_window_message_dialog_show_with_video)
 
 int __image_id_resource_icon_int(int resource) {
     return image_id_resource_icon((e_resource)resource);

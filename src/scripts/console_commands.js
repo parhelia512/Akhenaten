@@ -169,7 +169,8 @@ function console_command_show_video(args) {
     var a0 = (args && args[0]) || ""
     if (!a0 || a0.indexOf("message_") === 0) {
         var msgid = a0 || "message_illness_video"
-        ui.window_message_dialog(msgid)
+        // City-popup path (use_popup) — required for in-dialog SMK playback.
+        __ui_window_message_dialog_show_city_message(msgid, -1, 1250, 0, 0, 0, 0)
         return
     }
     var w = parseInt((args && args[1]) || "400", 10)
@@ -177,6 +178,16 @@ function console_command_show_video(args) {
     if (!(w > 0)) { w = 400 }
     if (!(h > 0)) { h = 292 }
     __game_victory_video_show(a0, w, h, "")
+}
+
+// show_dialog_video                         → dialog + BINKS/High/Intro_big.bik
+// show_dialog_video <path> [title]          → dialog + arbitrary .bik/.smk
+// Steam campaign clips live under BINKS/High/ (Intro_big, Archaic_big, …).
+[console_command=show_dialog_video]
+function console_command_show_dialog_video(args) {
+    var path = (args && args[0]) || "BINKS/High/Intro_big.bik"
+    var title = (args && args[1]) || path
+    __ui_window_message_dialog_show_with_video(path, title)
 }
 
 [console_command=show_intro_video]

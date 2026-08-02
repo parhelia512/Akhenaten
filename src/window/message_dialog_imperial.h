@@ -6,7 +6,6 @@ namespace ui {
     struct message_dialog_imperial : public message_dialog_base {
         message_dialog_imperial() : message_dialog_base("message_dialog_window_imperial") {}
         virtual void draw_city_message_text(const lang_message& msg) override;
-        virtual void draw_background_video() override;
         virtual void draw_content(const lang_message &msg) override;
     };
 }

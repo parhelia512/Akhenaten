@@ -40,7 +40,7 @@ function message_list_window_open_entry(index) {
     var month = __city_message_month(index)
     var param1 = __city_message_param1(index)
     var param2 = __city_message_param2(index)
-    __ui_window_message_dialog_show_city_message(mmMsg, index, year, month, param1, param2, mmTextId)
+    __ui_window_message_dialog_show_city_message(mmMsg, index, year, month, param1, param2, 0)
 }
 
 function message_list_window_on_click_item(p) {

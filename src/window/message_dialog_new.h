@@ -47,6 +47,7 @@ namespace ui {
 
         void show(xstring text_id, int message_id, void (*background_callback)(void));
         void show_city_message(xstring text_id, int message_id, int year, int month, int param1, int param2, int message_advisor, bool use_popup);
+        void show_with_video(pcstr video_path, pcstr title);
         void setup_help_id(xstring helpid);
 
         xstring debug_text_id;
@@ -62,10 +63,12 @@ namespace ui {
 
         void (*background_callback)();
         bool show_video;
+        bstring256 video_override;
+        bstring256 video_override_title;
 
         int text_height_blocks;
         int text_width_blocks;
-        xstring help_id;        
+        xstring help_id;
         xstring subtitle_text;
 
         struct player_message {
@@ -83,30 +86,33 @@ namespace ui {
         template<typename T>
         void eventmsg_template_combine(pcstr template_ptr, T& out_ptr, bool phrase_modifier);
         void cleanup();
-        
+
         virtual void draw_background_content();
         virtual void draw_background_video();
 
         virtual void draw_foreground_content();
         virtual void draw_foreground_video();
-        
+
         void draw_image(const lang_message& msg);
         virtual void draw_content(const lang_message& msg);
         virtual void draw_city_message_text(const lang_message& msg);
 
         xstring resolve_message_body(const lang_message& msg) const;
+        static bstring256 normalize_video_path(pcstr raw);
+        static bstring256 resolve_message_video_path(const lang_message& msg);
+        void apply_video_ui(bool enabled);
         void format_city_message_header(bstring1024& out) const;
-        
+
         virtual bool handle_input_normal(const mouse* m_dialog, const lang_message& msg);
         bool handle_input_video(const mouse* m_dialog, const lang_message& msg);
-        
+
         void button_close();
         void button_help();
         void button_advisor(int advisor);
-        
+
         int resource_image(int resource);
         int get_message_image_id(const lang_message& msg);
-        
+
         virtual xstring get_section() const override;
 
     protected:
@@ -120,6 +126,7 @@ namespace ui {
 
 void window_message_dialog_show(xstring text_id, int message_id, void (*background_callback)(void));
 void window_message_dialog_show_city_message(xstring text_id, int message_id, int year, int month, int param1, int param2, int message_advisor, bool use_popup);
+void window_message_dialog_show_with_video(pcstr video_path, pcstr title);
 void window_message_setup_help_id(xstring helpid);
 void window_show_help();
 

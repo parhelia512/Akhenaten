@@ -63,18 +63,12 @@ void ui::message_dialog_disaster::init_data(xstring text_id, int message_id, voi
     full_text.printf("%s @P%s", header.c_str(), text.c_str());
 
     ui["content_text"] = full_text;
-}
-
-void ui::message_dialog_disaster::draw_foreground(UiFlags flags) {
-    ui.begin_widget(pos);
-    ui.draw(flags);
-    ui.end_widget();
+    if (show_video) {
+        ui["bottom_text"] = full_text.c_str();
+    }
 }
 
 void ui::message_dialog_disaster::draw_city_message_text(const lang_message& msg) {
-}
-
-void ui::message_dialog_disaster::draw_background_video() {
 }
 
 void ui::message_dialog_disaster::draw_background_content() {
