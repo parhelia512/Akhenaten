@@ -27,16 +27,17 @@ void info_window_royal_tomb::init(object_info &c) {
     }
 
     auto &d = st->runtime_data();
+    auto *rt = c.building_get()->dcast_royal_tomb();
 
     if (st->is_unfinished()) {
         textid reason = {178, 144}; // artisans/masons progressing
         int stonemasons = g_city.buildings.count_active(BUILDING_STONEMASONS_GUILD);
         int artisans = g_city.buildings.count_active(BUILDING_ARTISANS_GUILD);
 
-        if (d.phase == 0) {
-            reason = {199, 75}; // not begun — need stonemasons…
-        } else if (st->needs_resource(RESOURCE_LAMPS) > 0) {
+        if (d.phase == 0 || st->needs_resource(RESOURCE_LAMPS) > 0) {
             reason = {178, 143}; // refuse without lamps
+        } else if (rt && rt->lamp_stock() <= 0) {
+            reason = {178, 143};
         } else if (st->need_stonemason() && stonemasons == 0) {
             reason = {178, 14};
         } else if (st->need_artisan() && artisans == 0) {
@@ -56,7 +57,7 @@ void info_window_royal_tomb::init(object_info &c) {
             min_pct = std::min(min_pct, (int)d.resources_pct[r]);
         }
         if (!any_resource) {
-            const int art_phases = std::max(1, st->phases() - 1);
+            const int art_phases = std::max(1, st->phases());
             min_pct = std::min(99, (d.phase * 100) / art_phases);
         }
 

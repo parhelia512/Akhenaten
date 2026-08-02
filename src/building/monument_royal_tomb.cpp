@@ -7,6 +7,8 @@
 #include "construction/build_planner.h"
 #include "core/direction.h"
 #include "figure/figure.h"
+#include "figuretype/figure_stonemason.h"
+#include "figuretype/figure_tomb_artisan.h"
 #include "game/undo.h"
 #include "graphics/color.h"
 #include "graphics/image.h"
@@ -83,14 +85,25 @@ void building_royal_tomb::static_params::rebuild_construction(e_building_type ty
     const int stages = art_stages > 0 ? art_stages : 9;
     for (int i = 0; i < stages; ++i) {
         const uint16_t lamps = (i < (int)lamp_loads.size()) ? lamp_loads[i] : 0;
-        if (lamps > 0) {
-            m->phases.push_back({(uint8_t)i, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_LAMPS, lamps}});
-        } else {
-            // Chamber carve / decorate — tile progress; guilds via need_stonemason/artisan.
-            m->phases.push_back({(uint8_t)i, monument_phase_resource{ARCHITECTS, 1}});
+        const uint16_t clay = (i < (int)clay_loads.size()) ? clay_loads[i] : 0;
+        const uint16_t paint = (i < (int)paint_loads.size()) ? paint_loads[i] : 0;
+
+        monument_phase ph{};
+        ph.id = (uint8_t)i;
+        int ri = 0;
+        ph.resources[ri++] = {ARCHITECTS, 1};
+        if (lamps > 0 && ri < (int)ph.resources.size()) {
+            ph.resources[ri++] = {RESOURCE_LAMPS, lamps};
         }
+        if (clay > 0 && ri < (int)ph.resources.size()) {
+            ph.resources[ri++] = {RESOURCE_CLAY, clay};
+        }
+        if (paint > 0 && ri < (int)ph.resources.size()) {
+            ph.resources[ri++] = {RESOURCE_PAINT, paint};
+        }
+        m->phases.push_back(ph);
     }
-    m->phases.push_back({(uint8_t)stages, monument_phase_resource{RESOURCE_NONE, 0}});
+    // Last art phase → set_phase(stages) == phases() → MONUMENT_FINISHED (no empty sentinel).
 }
 
 void building_small_royal_tomb::static_params::archive_load(archive /*arch*/) {
@@ -263,6 +276,55 @@ bool building_royal_tomb::needs_resources() const {
     return false;
 }
 
+int building_royal_tomb::lamp_stock_room() const {
+    if (is_finished()) {
+        return 0;
+    }
+    // Phase 0 fills via resources_pct; stock top-up starts once carving begins.
+    if (runtime_data().phase < 1) {
+        return 0;
+    }
+    return std::max(0, k_lamp_stock_max - (int)runtime_data().lamp_stock);
+}
+
+int building_royal_tomb::accept_lamp_stock(int amount) {
+    if (amount <= 0 || is_finished() || runtime_data().phase < 1) {
+        return 0;
+    }
+    auto &d = runtime_data();
+    const int room = k_lamp_stock_max - (int)d.lamp_stock;
+    if (room <= 0) {
+        return 0;
+    }
+    const int added = std::min(amount, room);
+    d.lamp_stock = (uint16_t)(d.lamp_stock + added);
+    return added;
+}
+
+bool building_royal_tomb::deliver_resource(e_resource resource, int amount) {
+    if (resource != RESOURCE_LAMPS || amount <= 0) {
+        return building_monument::deliver_resource(resource, amount);
+    }
+
+    // Phase need first (help 478 / lamp_loads), leftover maintains working stock ≤700.
+    const int phase_need = building_monument::needs_resource(RESOURCE_LAMPS);
+    auto &d = runtime_data();
+    if (phase_need > 0 && d.resources_pct[RESOURCE_LAMPS] < 100) {
+        const int on_site = phase_need * (int)d.resources_pct[RESOURCE_LAMPS] / 100;
+        const int phase_remaining = std::max(0, phase_need - on_site);
+        const int to_phase = std::min(amount, phase_remaining);
+        if (to_phase > 0) {
+            building_monument::deliver_resource(RESOURCE_LAMPS, to_phase);
+        }
+        const int leftover = amount - to_phase;
+        if (leftover > 0) {
+            accept_lamp_stock(leftover);
+        }
+        return true;
+    }
+    return accept_lamp_stock(amount) > 0;
+}
+
 bool building_royal_tomb::need_stonemason() {
     if (is_finished() || runtime_data().phase < 1) {
         return false;
@@ -271,29 +333,34 @@ bool building_royal_tomb::need_stonemason() {
     if (!need_workers()) {
         return false;
     }
+    const int max_masons = std::max(1, (int)tomb_params().max_masons);
+    int masons = 0;
     for (auto wid : runtime_data().workers) {
         figure *f = wid > 0 ? figure_get(wid) : nullptr;
         if (f && f->is_alive() && f->type == FIGURE_STONEMASON) {
-            return false;
+            masons++;
         }
     }
-    return true;
+    return masons < max_masons;
 }
 
 bool building_royal_tomb::need_artisan() {
-    if (is_finished() || runtime_data().phase < 2) {
+    // My Palace: Stairway onward needs artisans (after Help-478 lamp gate = phase 0).
+    if (is_finished() || runtime_data().phase < 1) {
         return false;
     }
     if (!need_workers()) {
         return false;
     }
+    const int max_artisans = std::max(1, (int)tomb_params().max_artisans);
+    int artisans = 0;
     for (auto wid : runtime_data().workers) {
         figure *f = wid > 0 ? figure_get(wid) : nullptr;
         if (f && f->is_alive() && f->type == FIGURE_TOMB_ARTISAN) {
-            return false;
+            artisans++;
         }
     }
-    return true;
+    return artisans < max_artisans;
 }
 
 bool building_royal_tomb::need_workers() {
@@ -604,8 +671,12 @@ void building_royal_tomb::preview::ghost_preview(build_planner &planer, painter 
     planer.draw_building_ghost(ctx, img > 0 ? img : preview, origin_pixel);
 }
 
-void building_royal_tomb::on_place_update_tiles(int /*orientation*/, int /*variant*/) {
-    base.orientation = (uint8_t)(building_rotation_global_rotation() % 4);
+void building_royal_tomb::on_place_update_tiles(int orientation, int /*variant*/) {
+    // Prefer explicit place/carry orientation; fall back to global rotation (ghost click).
+    if (orientation < 0) {
+        orientation = building_rotation_global_rotation();
+    }
+    base.orientation = (uint8_t)(orientation % 4);
     const vec2i total = total_size();
     base.size = (uint8_t)std::max({total.x, total.y, 1});
     const auto &bp = tomb_params();
@@ -659,6 +730,23 @@ void building_royal_tomb::on_phase_changed(int /*old_phase*/, int current) {
     }
 }
 
+static bool rt_mason_onsite(figure *f) {
+    if (!f || !f->is_alive() || f->type != FIGURE_STONEMASON) {
+        return false;
+    }
+    // Mastaba tile-work OR sphinx/royal on-site linger (ACTION_17).
+    const int a = f->action_state;
+    return a == FIGURE_ACTION_14_MASON_WORK_GROUND
+        || a == FIGURE_ACTION_17_MASON_LOOKING_FOR_WORK_TILE
+        || a == FIGURE_ACTION_12_MASON_GOING_TO_PLACE
+        || a == FIGURE_ACTION_15_MASON_WORK_WALL;
+}
+
+static bool rt_artisan_onsite(figure *f) {
+    return f && f->is_alive() && f->type == FIGURE_TOMB_ARTISAN
+        && f->action_state == ACTION_14_TOMB_ARTISAN_WORK;
+}
+
 void building_royal_tomb::update_day() {
     building_impl::update_day();
     if (is_finished()) {
@@ -684,22 +772,24 @@ void building_royal_tomb::update_day() {
         bool has_artisan = false;
         for (auto wid : d.workers) {
             figure *f = wid > 0 ? figure_get(wid) : nullptr;
-            if (!f || !f->is_alive()) {
-                continue;
-            }
-            if (f->type == FIGURE_STONEMASON) {
+            if (rt_mason_onsite(f)) {
                 has_mason = true;
             }
-            if (f->type == FIGURE_TOMB_ARTISAN) {
+            if (rt_artisan_onsite(f)) {
                 has_artisan = true;
             }
         }
         if (!has_mason) {
             return;
         }
-        if (d.phase >= 2 && !has_artisan) {
+        if (!has_artisan) {
             return;
         }
+        // My Palace: masons/artisans burn lamps from the tomb stock while carving.
+        if (d.lamp_stock <= 0) {
+            return;
+        }
+        d.lamp_stock--;
     }
     progress();
 }
@@ -731,7 +821,8 @@ grid_area building_royal_tomb::get_area() const {
 void building_royal_tomb::bind_dynamic(io_buffer *iob, size_t /*version*/) {
     auto &monumentd = runtime_data();
 
-    iob->bind____skip(38);
+    iob->bind(BIND_SIGNATURE_UINT16, &monumentd.lamp_stock);
+    iob->bind____skip(36);
     iob->bind(BIND_SIGNATURE_UINT8, &base.orientation);
     for (int i = 0; i < 5; i++) {
         iob->bind(BIND_SIGNATURE_UINT16, &monumentd.workers[i]);

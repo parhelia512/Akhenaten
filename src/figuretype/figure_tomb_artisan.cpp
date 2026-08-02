@@ -1,6 +1,7 @@
 #include "figure_tomb_artisan.h"
 
 #include "building/monuments.h"
+#include "game/resource.h"
 #include "game/simulation_time.h"
 #include "js/js_game.h"
 
@@ -11,7 +12,15 @@ void figure_tomb_artisan::figure_action() {
     base.max_roam_length = 384;
     building *bhome = home();
     building *b_dest = destination();
-    if (!bhome->is_valid() || !b_dest->is_valid()) {
+    if ((!b_dest || !b_dest->is_valid()) && runtime_data().destination_bid) {
+        b_dest = building_get(runtime_data().destination_bid);
+    }
+    if (!b_dest || !b_dest->is_valid()) {
+        poof();
+        return;
+    }
+    // Home required to path back; WORK can finish deliver without a guild (test attach).
+    if ((!bhome || !bhome->is_valid()) && action_state() != ACTION_14_TOMB_ARTISAN_WORK) {
         poof();
         return;
     }
@@ -42,15 +51,34 @@ void figure_tomb_artisan::figure_action() {
         }
         break;
 
-    case ACTION_14_TOMB_ARTISAN_WORK:
-        // Stub: decorate for a short while, then return. Phase-gate fidelity is a follow-up.
+    case ACTION_14_TOMB_ARTISAN_WORK: {
+        // Guild consumed 100 clay+paint at spawn — credit monument; again if phase reset mid-work.
+        auto &rd = runtime_data();
+        if (auto *m = b_dest->dcast_monument()) {
+            const uint8_t ph = m->phase();
+            if (!rd.delivered_materials || rd.delivered_phase != ph) {
+                m->deliver_resource(RESOURCE_CLAY, 100);
+                m->deliver_resource(RESOURCE_PAINT, 100);
+                rd.delivered_materials = 1;
+                rd.delivered_phase = ph;
+            }
+        }
         base.wait_ticks++;
         if (base.wait_ticks > simulation_time_t::ticks_in_day * 2) {
-            advance_action(ACTION_16_TOMB_ARTISAN_RETURN_HOME);
+            if (bhome && bhome->is_valid()) {
+                advance_action(ACTION_16_TOMB_ARTISAN_RETURN_HOME);
+            } else {
+                advance_action(ACTION_20_TOMB_ARTISAN_DESTROY);
+            }
         }
         break;
+    }
 
     case ACTION_16_TOMB_ARTISAN_RETURN_HOME:
+        if (!bhome || !bhome->is_valid()) {
+            poof();
+            break;
+        }
         if (do_gotobuilding(home(), true, TERRAIN_USAGE_PREFER_ROADS, -1, ACTION_20_TOMB_ARTISAN_DESTROY)) {
             poof();
         }

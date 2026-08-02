@@ -17,6 +17,8 @@ public:
 
     struct runtime_data_t {
         building_id destination_bid;
+        uint8_t delivered_materials = 0; // clay+paint handed to monument on WORK
+        uint8_t delivered_phase = 0xff;  // re-deliver if tomb phase advances while on-site
     } FIGURE_RUNTIME_DATA_T;
 
     virtual void on_create() override {}

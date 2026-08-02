@@ -57,8 +57,10 @@ void figure_stonemason::figure_action() {
         break;
 
     case FIGURE_ACTION_11_MASON_GOING:
-        do_goto(base.destination_tile, terrain_usage,
-                FIGURE_ACTION_17_MASON_LOOKING_FOR_WORK_TILE, FIGURE_ACTION_20_MASON_DESTROY);
+        if (do_goto(base.destination_tile, terrain_usage,
+                    FIGURE_ACTION_17_MASON_LOOKING_FOR_WORK_TILE, FIGURE_ACTION_20_MASON_DESTROY)) {
+            base.wait_ticks = 0;
+        }
         break;
 
     case FIGURE_ACTION_17_MASON_LOOKING_FOR_WORK_TILE: {

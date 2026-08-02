@@ -27,8 +27,13 @@ building_small_royal_tomb {
     init_tiles [11, 20]
     entrance_size [1, 1]
     art_stages : 9
-    // Help 478: 400 lamps before work. Later phase loads TODO(orig-data) vs My Palace.
+    max_masons : 1
+    max_artisans : 2
+    // Help 478: 400 lamps before work. Later phase loads burn from stock (≤700).
+    // Clay/paint from Stairway (phase≥1): 1 guild-load (=100) — provisional vs My Palace totals.
     lamp_loads [ 400, 0, 0, 0, 0, 0, 0, 0, 0 ]
+    clay_loads [ 0, 100, 100, 100, 100, 100, 100, 100, 100 ]
+    paint_loads [ 0, 100, 100, 100, 100, 100, 100, 100, 100 ]
     fire_proof : true
     damage_proof : true
     info_title_id [198, 33]
@@ -65,7 +70,11 @@ building_medium_royal_tomb {
     init_tiles [14, 16]
     entrance_size [1, 1]
     art_stages : 8
+    max_masons : 1
+    max_artisans : 2
     lamp_loads [ 400, 0, 0, 0, 0, 0, 0, 0 ]
+    clay_loads [ 0, 100, 100, 100, 100, 100, 100, 100 ]
+    paint_loads [ 0, 100, 100, 100, 100, 100, 100, 100 ]
     fire_proof : true
     damage_proof : true
     info_title_id [198, 34]
@@ -102,7 +111,11 @@ building_large_royal_tomb {
     init_tiles [17, 33]
     entrance_size [1, 1]
     art_stages : 8
+    max_masons : 1
+    max_artisans : 2
     lamp_loads [ 400, 0, 0, 0, 0, 0, 0, 0 ]
+    clay_loads [ 0, 100, 100, 100, 100, 100, 100, 100 ]
+    paint_loads [ 0, 100, 100, 100, 100, 100, 100, 100 ]
     fire_proof : true
     damage_proof : true
     info_title_id [198, 35]
@@ -138,7 +151,11 @@ building_grand_royal_tomb {
     init_tiles [23, 29]
     entrance_size [1, 1]
     art_stages : 8
+    max_masons : 1
+    max_artisans : 2
     lamp_loads [ 400, 0, 0, 0, 0, 0, 0, 0 ]
+    clay_loads [ 0, 100, 100, 100, 100, 100, 100, 100 ]
+    paint_loads [ 0, 100, 100, 100, 100, 100, 100, 100 ]
     fire_proof : true
     damage_proof : true
     info_title_id [198, 36]

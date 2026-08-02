@@ -9,6 +9,7 @@
 #include "city/city_industry.h"
 #include "building/rotation.h"
 #include "building/monuments.h"
+#include "building/monument_royal_tomb.h"
 #include "city/buildings.h"
 #include "city/city_finance.h"
 #include "city/city.h"
@@ -792,16 +793,26 @@ storage_worker_task building_storageyard_deliver_to_monuments(building *b) {
         }
 
         for (auto monument : monuments) {
-            int needed = monument->needs_resource(resource);
-            if (needed <= 0) {
-                continue;
+            int remaining = 0;
+            if (resource == RESOURCE_LAMPS) {
+                if (auto *tomb = monument->dcast_royal_tomb()) {
+                    // RT1: top up working lamp stock (≤700) after phase-0 carve begins.
+                    remaining = tomb->lamp_stock_room();
+                    remaining -= building_monument_resource_in_delivery(&monument->base, resource);
+                }
             }
-            // Remaining after on-site % — without this a full-phase sled can
-            // overshoot / empty the yard in one trip.
-            auto &d = monument->runtime_data();
-            int on_site = needed * (int)d.resources_pct[resource] / 100;
-            int in_flight = building_monument_resource_in_delivery(&monument->base, resource);
-            int remaining = needed - on_site - in_flight;
+            if (remaining <= 0) {
+                int needed = monument->needs_resource(resource);
+                if (needed <= 0) {
+                    continue;
+                }
+                // Remaining after on-site % — without this a full-phase sled can
+                // overshoot / empty the yard in one trip.
+                auto &d = monument->runtime_data();
+                int on_site = needed * (int)d.resources_pct[resource] / 100;
+                int in_flight = building_monument_resource_in_delivery(&monument->base, resource);
+                remaining = needed - on_site - in_flight;
+            }
             if (remaining <= 0) {
                 continue;
             }

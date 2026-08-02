@@ -101,6 +101,10 @@ void building_artisans_guild::spawn_figure() {
         return;
     }
 
+    // Artisan carries a load of paint+clay from the guild to the tomb.
+    consume_resource(RESOURCE_PAINT, 100);
+    consume_resource(RESOURCE_CLAY, 100);
+
     // Set destination_tile before figures.update(): TERRAIN_USAGE_ROADS poofs walkers
     // that are off-road with an empty destination_tile (action_perform runs that check
     // before figure_action, so ACTION_10 would be too late).
