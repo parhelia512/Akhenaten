@@ -72,13 +72,13 @@
           <dt>Trade</dt><dd>Athens (pottery/lux/copper ↔ grain) · Alexandria (food/pottery ↔ lux/timber)</dd>
           <dt>Previous</dt><dd><a href="alexandria-3.html">Alexandria₃ (51)</a></dd>
           <dt>Next</dt><dd>Campaign end (<code>next_mission: -1</code>)</dd>
-          <dt>Status</dt><dd><span class="mission-badge badge-impl">Full empire redefine</span> · naval fidelity <span style="color:var(--text-muted)">TODO CC52.N</span></dd>
+          <dt>Status</dt><dd><span class="mission-badge badge-impl">Full empire redefine</span> · sea invasions <code>via_sea</code> (CC52.N)</dd>
         </dl>
       </div>
 
       <div class="deviation-note">
         <strong>Briefing:</strong> Camp near Actium with Antony; build military especially the navy before Octavian returns in September 31 BC.
-        Pak enemy id = <strong>Persian</strong> (not Roman). Warship wharf is <strong>off</strong> in pak editor — Akhenaten TEMP-enables it for the navy briefing (same pattern as Tanis). Full Actium-style sea battle is a separate naval track.
+        Pak enemy id = <strong>Persian</strong> (not Roman). Warship wharf is <strong>off</strong> in pak editor — Akhenaten TEMP-enables it for the navy briefing (same pattern as Tanis). Calendar sea invasions use <code>via_sea</code>.
       </div>
 
       <h2>Objectives</h2>
@@ -93,7 +93,7 @@
       </ul>
 
       <h2>Events (pak)</h2>
-      <p>20 timed events: timber/copper/fish requests, price/demand/status chains, sea-trade problem, two enemy invasions (land-proxy <code>loc=9</code>; amounts 19 and 40). Sea + land invasion points and three disembark slots are present for a future naval path.</p>
+      <p>20 timed events: timber/copper/fish requests, price/demand/status chains, sea-trade problem, two Persian sea invasions (<code>via_sea</code> loc=9 → sea_point 0; amounts 19 then 40 after wipe; then city-status i=18). Engine <code>EVENT_TYPE_INVASION</code> is a no-op — JS calendar fires the fleet.</p>
 
       <div class="dev-section">
         <h2>Developer Reference</h2>

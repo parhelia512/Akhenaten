@@ -8,8 +8,8 @@ log_info("akhenaten: mission 52 actium started")
 //      kingdom 50 / housing 0x lv5 / survival 6y (m 2/4/6).
 // Monuments: none. Burial: none. Gods: Ra(2).
 // Env: alt_predator=1 (northern); set in on_start.
-// Invasions x2 land-proxy (loc 9); sea/land inv + disembark points present.
-// Warship editor slot 43 OFF — TEMP on for navy briefing (TODO NV / CC52.N).
+// Invasions x2 via_sea (loc 9 → sea_point 0); calendar JS (events[] INVASION = no-op).
+// Warship editor slot 43 OFF — TEMP on for navy briefing (Tanis pattern).
 // SKIP empty map_obj idx=6. Orphan Waset route 17 -> 0.
 // next_mission -1 (campaign end — must not spill past 52).
 
@@ -385,7 +385,7 @@ mission52 { // Actium - Antony and Cleopatra
 			city_id : 5
 			invasion_attack_target : 3
 		}
-		{ // pak i=18
+		{ // pak i=18 — LOST_TRADE after i=17 wipe (CC52.N fires via tag)
 			type : EVENT_TYPE_CITY_STATUS_CHANGE
 			time { year : 1, month : 0 }
 			item { value : 1 }
@@ -393,6 +393,7 @@ mission52 { // Actium - Antony and Cleopatra
 			months_initial : 12
 			location_fields [ 1, 1, -1, -1 ]
 			event_trigger_type : EVENT_TRIGGER_ONLY_VIA_EVENT
+			tag_id : 18
 			on_completed_action : -1
 			on_refusal_action : -1
 			on_too_late_action : -1
@@ -619,7 +620,39 @@ mission52 { // Actium - Antony and Cleopatra
 
 	vars {
 		start_message_shown : false
+		inv12_done : false
+		inv12_active : false
+		inv12_enemies_seen : false
+		inv17_done : false
 	}
+}
+
+function mission52_sea(i) {
+	var pts = [[52, 56], [38, 66]]
+	if (i < 0 || i >= pts.length) { return [-1, -1] }
+	return pts[i]
+}
+
+function mission52_enemy_raid(invasion_id, size, sea_point, on_completed_tag) {
+	var sea = mission52_sea(sea_point === undefined ? 0 : sea_point)
+	__image_request_pak(PACK_ENEMY_PERSIAN)
+	var opts = {
+		mode: ATTACK_TYPE_ENEMIES,
+		enemy: ENEMY_9_PERSIAN,
+		size: size,
+		invasion_id: invasion_id,
+		want_destroy_buildings: size,
+		invasion_attack_target: EVENT_ATTACK_TARGET_TROOPS,
+		via_sea: 1,
+		sea_point: sea_point === undefined ? 0 : sea_point,
+		tilex: sea[0],
+		tiley: sea[1]
+	}
+	// C++ bind fire_chain_by_tag (+ drain) — not __city_event_fire_chain from JS.
+	if (on_completed_tag !== undefined && on_completed_tag > 0) {
+		opts.on_completed_tag = on_completed_tag
+	}
+	return city.start_foreign_army_invasion(opts)
 }
 
 [es=event_mission_start, mission=mission52]
@@ -638,5 +671,32 @@ function mission52_on_start(ev) {
 	city.set_scenario_enemy_id(ENEMY_9_PERSIAN)
 	for (var i = ADVISOR_NONE + 1; i <= ADVISOR_DIPLOMACY; i++) {
 		city.set_advisor_available(i, 1)
+	}
+}
+
+// Calendar invasions (events[] EVENT_TYPE_INVASION is engine no-op — B2 / CC52.N).
+// pak i=12 y4m4 ×19 loc9 sea → wipe → i=17 ×40 → wipe bind → i=18 LOST_TRADE (tag_id 18).
+[es=event_advance_month, mission=mission52]
+function mission52_calendar_invasions(ev) {
+	if (!mission.inv12_done && ev.years_since_start == 4 && ev.month == 4) {
+		mission.inv12_done = true
+		mission.inv12_active = true
+		mission.inv12_enemies_seen = false
+		log_info("akhenaten: mission 52 sea invasion ×19 (i=12)")
+		mission52_enemy_raid(12, 19, 0)
+	}
+
+	if (mission.inv12_active && !mission.inv17_done) {
+		if (city.num_enemy_formations > 0) {
+			mission.inv12_enemies_seen = true
+			return
+		}
+		if (!mission.inv12_enemies_seen) {
+			return
+		}
+		mission.inv12_active = false
+		mission.inv17_done = true
+		log_info("akhenaten: mission 52 sea invasion ×40 (i=17) → chain tag 18")
+		mission52_enemy_raid(17, 40, 0, 18)
 	}
 }

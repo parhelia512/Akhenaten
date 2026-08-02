@@ -11,7 +11,7 @@ log_info("akhenaten: mission 24 waset started")
 // Triage: SKIP empty map_obj idx=6; SKIP orphan route 19.
 // Events: fish/granite recurring; oil extortion + egypt chain refuse; troops ladders; failed flood;
 // favour 66@loc1→40@loc2→40@loc9. Invasion loc 1-based land point (only land[0]=[23,48] exists).
-// i=7 subtype=3 = Is Naval (editor); land-proxy at disembark[0] until E3c (sea tile [63,37] is water).
+// i=7 subtype=3 = Is Naval (editor); via_sea sea[0]=[63,37] + transports (E3c).
 //
 // Tag_id scheme:
 //   1000 + i               chain-only leaves
@@ -518,11 +518,7 @@ function mission24_fire_request(tag, resource, amount, months, ok_tag, fail_tag,
 
 // pak location_fields after randomize = 1-based land invasion point index (MAX 8).
 // Map only has land[0]=[23,48] and sea[0]=[63,37]. Missing/OOB → -1 (Egyptian → map entry).
-// Naval (invasion subtype=3): land-proxy at disembark[0] — sea point is water (spawn would fail).
-function mission24_loc_tile(loc, naval) {
-	if (naval) {
-		return [77, 73] // disembark_points[0]; E3c → sea [63,37] + transports
-	}
+function mission24_loc_tile(loc) {
 	if (loc == 1) {
 		return [23, 48]
 	}
@@ -532,17 +528,26 @@ function mission24_loc_tile(loc, naval) {
 }
 
 function mission24_egypt_raid(invasion_id, size, attack_target, loc, naval) {
-	var tile = mission24_loc_tile(loc === undefined ? 9 : loc, naval)
 	__image_request_pak(PACK_ENEMY_EGYPTIAN)
-	city.start_foreign_army_invasion({
+	var opts = {
 		invasion_id: invasion_id,
 		enemy: ENEMY_3_EGYPTIAN,
 		size: size,
-		tilex: tile[0],
-		tiley: tile[1],
 		want_destroy_buildings: size,
 		invasion_attack_target: attack_target
-	})
+	}
+	if (naval) {
+		// pak subtype=3 Is Naval → via_sea at invasion_points_sea[0]
+		opts.via_sea = 1
+		opts.sea_point = 0
+		opts.tilex = 63
+		opts.tiley = 37
+	} else {
+		var tile = mission24_loc_tile(loc === undefined ? 9 : loc)
+		opts.tilex = tile[0]
+		opts.tiley = tile[1]
+	}
+	city.start_foreign_army_invasion(opts)
 }
 
 function mission24_ensure_fish_leaves() {
@@ -805,7 +810,7 @@ function mission24_on_request_cleared(ev) {
 	var outcome = mission_request_outcome(ev)
 	if (ev.tag_id == 2004 && outcome == "refuse" && !mission.oil_i4_egypt_done) {
 		mission.oil_i4_egypt_done = true
-		log_info("akhenaten: mission 24 egypt×6 naval land-proxy after oil×884 refuse (i=7 subtype=3)", {ev:ev})
+		log_info("akhenaten: mission 24 egypt×6 via_sea after oil×884 refuse (i=7 subtype=3)", {ev:ev})
 		// pak subtype=3 Is Naval; i=21 refuse raid is land (subtype=0).
 		mission24_egypt_raid(7, 6, EVENT_ATTACK_TARGET_VAULTS, 9, true)
 		return
