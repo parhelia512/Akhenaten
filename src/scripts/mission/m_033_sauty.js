@@ -412,6 +412,7 @@ mission33 { // Sauty (Lykopolis) — Egypt Reclaimed
 		pharaoh_favour_chain_done : false
 		pharaoh_favour_enemies_seen : false
 		pharaoh_favour_wave_next : -1
+		pharaoh_favour_wave_seq : 0
 		start_message_shown : false
 	}
 }

@@ -345,6 +345,7 @@ mission8 { // Selima — The Road to Africa
 		reeds_price_increased : false
 		wage_increase_done : false
 		hyksos_raid_small_last_year : -1
+		hyksos_raid_small_seq : 0
 		hyksos_invasion_2 : false
 		pharaoh_favour_invasion_done : false
 		start_message_shown : false
@@ -367,7 +368,7 @@ function mission8_hyksos_raid(invasion_id, size, on_completed_tag, on_refusal_ta
 	if (on_refusal_tag) {
 		opts.on_refusal_tag = on_refusal_tag
 	}
-	city.start_foreign_army_invasion(opts)
+	return city.start_foreign_army_invasion(opts)
 }
 
 [es=event_mission_start, mission=mission8]
@@ -441,7 +442,7 @@ function mission8_pharaoh_request_luxury(ev) {
 }
 
 // pak: year=2 month=4 enemy size=9 recurring (months=12 → yearly m4). ok→KR+2.
-// Bind on_completed_tag; engine fires after wipe (ok-only). Tag 1000+year avoids 801/802.
+// Bind on_completed_tag; skip while prior small-raid seq still NONE (B2-migrate).
 [es=event_advance_month, mission=mission8]
 function mission8_hyksos_invasion_1(ev) {
 	if (ev.years_since_start < 2 || ev.month != 4) {
@@ -450,8 +451,12 @@ function mission8_hyksos_invasion_1(ev) {
 	if (mission.hyksos_raid_small_last_year == ev.years_since_start) {
 		return
 	}
-	if (city.num_enemy_formations > 0) {
-		return
+	var prev = mission.hyksos_raid_small_seq | 0
+	if (prev > 0) {
+		var prev_out = mission_pharaoh_favour_invasion_outcome(prev)
+		if (prev_out < 0 || prev_out == 0) {
+			return
+		}
 	}
 	mission.hyksos_raid_small_last_year = ev.years_since_start
 	var ok_tag = 1000 + ev.years_since_start
@@ -461,7 +466,7 @@ function mission8_hyksos_invasion_1(ev) {
 		amount: 2
 	})
 	log_info("akhenaten: mission 8 selima hyksos raid size=9 year=" + ev.years_since_start + " ok_tag=" + ok_tag, {ev:ev})
-	mission8_hyksos_raid(0, 9, ok_tag, 0)
+	mission.hyksos_raid_small_seq = mission8_hyksos_raid(0, 9, ok_tag, 0)
 }
 
 // pak: year=7 month=0 enemy size=22 once.

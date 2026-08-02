@@ -388,6 +388,7 @@ mission17 { // On (Heliopolis) — Ivory from the East
 		pharaoh_favour_chain_done : false
 		pharaoh_favour_enemies_seen : false
 		pharaoh_favour_wave_next : -1
+		pharaoh_favour_wave_seq : 0
 		pharaoh_favour_wave2_done : false
 		pharaoh_favour_wave3_done : false
 		pharaoh_favour_wave4_done : false

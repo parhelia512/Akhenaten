@@ -240,12 +240,8 @@ void invasion_data_t::record_spawn(const invasion_opts_t &opts, tile2i tile, int
         history_count++;
     }
 
-    const bool want_bind = opts.on_completed_tag || opts.on_refusal_tag || opts.on_defeat_tag;
-    if (!want_bind) {
-        return;
-    }
-
-    // Warn if another active bind already owns this invasion_id (formations share the id).
+    // Always arm a bind so wipe/refuse updates history.outcome (favour multi-wave /
+    // overlap gates). Chain tags remain optional.
     for (const auto &b : binds) {
         if (b.in_use && b.invasion_id == (uint8_t)opts.invasion_id) {
             logs::warn("invasion bind: invasion_id %d already has active bind (seq %u); new seq %u",

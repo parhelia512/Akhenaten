@@ -487,6 +487,7 @@ mission34 { // Byblos — Expansion and Conquest
 		pharaoh_favour_chain_done : false
 		pharaoh_favour_enemies_seen : false
 		pharaoh_favour_wave_next : -1
+		pharaoh_favour_wave_seq : 0
 		start_message_shown : false
 	}
 }

@@ -435,6 +435,7 @@ mission13 { // Buhen — Expansion to Nubia
 		pharaoh_favour_chain_done : false
 		pharaoh_favour_enemies_seen : false
 		pharaoh_favour_wave_next : -1
+		pharaoh_favour_wave_seq : 0
 		pharaoh_favour_wave2_enemies_seen : false
 		pharaoh_favour_wave2_done : false
 		pharaoh_favour_wave3_enemies_seen : false
