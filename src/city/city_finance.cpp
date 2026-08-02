@@ -169,34 +169,48 @@ void city_finance_t::update_estimate_taxes() {
     auto &taxes = g_city.taxes;
     taxes.monthly.collected_citizens = 0;
     taxes.monthly.collected_nobles = 0;
+    taxes.monthly.uncollected_citizens = 0;
+    taxes.monthly.uncollected_nobles = 0;
 
     buildings_house_do([&taxes] (auto house) {
-        auto &housed = house->runtime_data();
-        if (!housed.tax_coverage) {
+        if (!house->hsize()) {
             return;
         }
 
-        const int house_tax_multiplier = house->model().tax_multiplier;
-        const int scenario_tax_rate_multiplier = g_scenario.house_tax_multiplier(house_tax_multiplier);
+        auto &housed = house->runtime_data();
+        const int scenario_tax_rate_multiplier = g_scenario.house_tax_multiplier(house->model().tax_multiplier);
+        const int tax = housed.population * scenario_tax_rate_multiplier;
 
-        if (house->is_nobles()) {
-            taxes.monthly.collected_nobles += housed.population * scenario_tax_rate_multiplier;
+        if (housed.tax_coverage) {
+            if (house->is_nobles()) {
+                taxes.monthly.collected_nobles += tax;
+            } else {
+                taxes.monthly.collected_citizens += tax;
+            }
         } else {
-            taxes.monthly.collected_citizens += housed.population * scenario_tax_rate_multiplier;
+            if (house->is_nobles()) {
+                taxes.monthly.uncollected_nobles += tax;
+            } else {
+                taxes.monthly.uncollected_citizens += tax;
+            }
         }
     });
 
     int monthly_patricians = calc_adjust_with_percentage<int>(taxes.monthly.collected_nobles / 2, tax_percentage);
-    int monthly_plebs = calc_adjust_with_percentage<int>(taxes.monthly.collected_citizens/ 2, tax_percentage);
+    int monthly_plebs = calc_adjust_with_percentage<int>(taxes.monthly.collected_citizens / 2, tax_percentage);
     int estimated_rest_of_year = (12 - game.simtime.month) * (monthly_patricians + monthly_plebs);
 
     this_year.income.taxes = taxes.yearly.collected_citizens + taxes.yearly.collected_nobles;
     taxes.estimated_income = this_year.income.taxes + estimated_rest_of_year;
 
-    // TODO: fix this calculation
     int uncollected_patricians = calc_adjust_with_percentage<int>(taxes.monthly.uncollected_nobles / 2, tax_percentage);
     int uncollected_plebs = calc_adjust_with_percentage<int>(taxes.monthly.uncollected_citizens / 2, tax_percentage);
-    taxes.estimated_uncollected = (game.simtime.month) * (uncollected_patricians + uncollected_plebs) - this_year.income.taxes;
+    int uncollected_rest_of_year = (12 - game.simtime.month) * (uncollected_patricians + uncollected_plebs);
+    int uncollected_ytd = taxes.yearly.uncollected_citizens + taxes.yearly.uncollected_nobles;
+    taxes.estimated_uncollected = uncollected_ytd + uncollected_rest_of_year;
+    if (taxes.estimated_uncollected < 0) {
+        taxes.estimated_uncollected = 0;
+    }
 }
 
 void city_finance_t::collect_monthly_taxes() {
@@ -344,7 +358,7 @@ static void reset_taxes() {
     data.taxes.yearly.collected_citizens = 0;
     data.taxes.yearly.collected_nobles = 0;
     data.taxes.yearly.uncollected_citizens = 0;
-    data.taxes.yearly.uncollected_citizens = 0;
+    data.taxes.yearly.uncollected_nobles = 0;
 
     // reset tax income in building list
     for (int i = 1; i < MAX_BUILDINGS; i++) {

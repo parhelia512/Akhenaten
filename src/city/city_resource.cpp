@@ -334,6 +334,7 @@ void city_resource_determine_available() {
 void city_resources_t::calculate_available_food() {
     for (int i = 0; i < RESOURCES_FOODS_MAX; i++) {
         granary_food_stored[i] = 0;
+        food_types_available[i] = 0;
     }
 
     granary_total_stored = 0;
@@ -375,8 +376,8 @@ void city_resources_t::calculate_available_food() {
     }, BUILDING_GRANARY);
 
     for (int i = RESOURCES_FOOD_MIN; i < RESOURCES_FOODS_MAX; i++) {
-        const bool hasInCity = granary_food_stored[i];
         granary_total_stored += granary_food_stored[i];
+        food_types_available[i] = granary_food_stored[i] > 0 ? 1 : 0;
     }
 
     food_needed_per_month = calc_adjust_with_percentage(g_city.population.current, 50);
@@ -388,6 +389,10 @@ void city_resources_t::calculate_available_food() {
 
     if (g_scenario.kingdom_supplies_grain) {
         food_supply_months = 12;
+        for (int i = 0; i < RESOURCES_FOODS_MAX; i++) {
+            food_types_available[i] = 0;
+        }
+        food_types_available[RESOURCE_GRAIN] = 1;
     }
 }
 
@@ -418,10 +423,27 @@ void city_resources_t::consume_goods_weekly(const simulation_time_t& t) {
 
 void city_resources_t::consume_food_weekly(const simulation_time_t& t) {
     calculate_available_food();
+
+    for (int i = 0; i < RESOURCES_FOODS_MAX; i++) {
+        food_types_eaten[i] = 0;
+    }
+    food_types_eaten_max_value = 0;
+
     resource_list consumed_food;
     buildings_house_do([&] (building_house *house) {
         resource_list consumed = house->consume_food_weekly();
         consumed_food.append(consumed);
+
+        const uint8_t num_foods = house->runtime_data().num_foods;
+        if (num_foods > food_types_eaten_max_value) {
+            food_types_eaten_max_value = num_foods;
+        }
+
+        for (const auto &item : consumed) {
+            if (item.type > RESOURCE_NONE && item.type < RESOURCES_FOODS_MAX) {
+                food_types_eaten[item.type] = 1;
+            }
+        }
     });
 
     res_this_month.consumed.append(consumed_food);
@@ -433,14 +455,29 @@ void city_resources_t::advance_month() {
     res_this_month.clear();
 }
 
-int city_resources_t::food_types_available_num() {
+int city_resources_t::food_types_available_num() const {
     int total_available = 0;
-    for (int t = INVENTORY_MIN_FOOD; t < INVENTORY_MAX_FOOD; t++) {
-        const bool available = food_types_available[t] > 0;
-        total_available += (available ? 1 : 0);
+    for (e_resource r = RESOURCES_FOOD_MIN; r < RESOURCES_FOODS_MAX; ++r) {
+        if (resource_is_food(r) && food_types_available[r] > 0) {
+            total_available++;
+        }
     }
-
     return total_available;
+}
+
+int city_resources_t::food_types_eaten_max() {
+    int max_foods = 0;
+    buildings_house_do([&](building_house *house) {
+        if (!house->hsize()) {
+            return;
+        }
+        const int n = house->runtime_data().num_foods;
+        if (n > max_foods) {
+            max_foods = n;
+        }
+    });
+    food_types_eaten_max_value = (uint8_t)max_foods;
+    return max_foods;
 }
 
 void city_resource_add_items(e_resource res, int amount) {
@@ -449,7 +486,7 @@ void city_resource_add_items(e_resource res, int amount) {
     buildings_valid_do<building_storage_yard>([&] (auto warehouse) {
         int total_stored = warehouse->amount(res);
         int free_space = warehouse->freespace(res);
-        
+
         if (free_space >= amount && total_stored < lowest_stock_found) {
             lowest_stock_found = total_stored;
             chosen_yard = warehouse;

@@ -214,6 +214,11 @@ int __city_resource_food_types_available_num() {
 }
 ANK_FUNCTION(__city_resource_food_types_available_num)
 
+int __city_resource_food_types_eaten_max() {
+    return g_city.resource.food_types_eaten_max();
+}
+ANK_FUNCTION(__city_resource_food_types_eaten_max)
+
 int __city_resource_granary_total_stored() {
     return g_city.resource.granary_total_stored;
 }

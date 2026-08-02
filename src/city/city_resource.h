@@ -31,6 +31,7 @@ struct city_resources_t {
     uint8_t beer_types_available;
     svector<uint16_t, RESOURCES_FOODS_MAX> food_types_available;
     svector<uint16_t, RESOURCES_FOODS_MAX> food_types_eaten;
+    uint8_t food_types_eaten_max_value = 0;
     e_resource food_types_allowed[RESOURCES_FOODS_MAX];
     uint32_t granary_food_stored[RESOURCES_FOODS_MAX];
     uint32_t granary_total_stored;
@@ -86,7 +87,8 @@ struct city_resources_t {
     void toggle_stockpiled(e_resource resource);
     int is_stockpiled(e_resource resource);
 
-    int food_types_available_num();
+    int food_types_available_num() const;
+    int food_types_eaten_max();
 
     void init();
     void advance_month();

@@ -89,6 +89,10 @@ city.rating.get_prosperity_explanation = function() {
 		change -= 1
 	}
 
+	if (__city_resource_food_types_eaten_max() >= 2) {
+		change += 1
+	}
+
 	var wages_kingdome = city.finance.wages_kingdome
 	var avg_wage = (city.finance.wage_rate_paid_last_year / 12) | 0
 	if (avg_wage >= wages_kingdome + 2) {

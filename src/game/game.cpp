@@ -184,6 +184,8 @@ void game_t::advance_month() {
         advance_year();
     }
 
+    g_city.finance.update_estimate_taxes();
+
     events::emit(event_advance_month::from_simtime(game.simtime));
 }
 

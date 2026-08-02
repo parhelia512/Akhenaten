@@ -22,9 +22,10 @@ void city_t::update_prosperity_rating() {
         change -= 1;
     }
     ratings.prosperity_treasury_last_year = finance.treasury;
-    // food types: +1 for multiple foods
-    //    if (city_data.resource.food_types_eaten >= 2) todo
-    //        change += 1;
+    // max house.num_foods across city after consume; kingdom grain → 1 → no bonus
+    if (resource.food_types_eaten_max() >= 2) {
+        change += 1;
+    }
 
     // wages: +1 for wages 2+ above Rome, -1 for wages below Rome
     int avg_wage = finance.wage_rate_paid_last_year / 12;

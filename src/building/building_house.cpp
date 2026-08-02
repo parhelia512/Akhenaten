@@ -295,24 +295,31 @@ resource_list building_house::consume_food_weekly() {
     }
 
     int16_t want_consumed = amount_per_type * food_types;
+    bool slot_counted[INVENTORY_MAX_FOOD] = {};
     auto consume_food_impl = [&] {
         for (int t = INVENTORY_MIN_FOOD; t < INVENTORY_MAX_FOOD; t++) {
+            if (d.num_foods >= food_types && !slot_counted[t]) {
+                continue;
+            }
+
             const uint16_t exist_amount = std::min(d.foods[t], amount_per_type);
-            if (exist_amount > 0) {
-                want_consumed -= exist_amount;
-                d.foods[t] -= exist_amount;
-                d.num_foods += (exist_amount > 0) ? 1 : 0;
-                e_resource food_res = g_city.allowed_foods(t);
-                food_types_eaten.push_back({ food_res, amount_per_type });
+            if (exist_amount <= 0) {
+                continue;
+            }
+
+            want_consumed -= exist_amount;
+            d.foods[t] -= exist_amount;
+            e_resource food_res = g_city.allowed_foods(t);
+            food_types_eaten[food_res] += exist_amount;
+            if (!slot_counted[t]) {
+                slot_counted[t] = true;
+                d.num_foods++;
             }
         }
     };
 
-    // normal consumption, guess we have enough food
     consume_food_impl();
-
     if (want_consumed > 0) {
-        // not enough food, try to consume more from available foods
         consume_food_impl();
     }
 
@@ -323,7 +330,7 @@ resource_list building_house::consume_goods_weekly() {
     if (!hsize()) {
         return {};
     }
-    
+
     resource_list good_types_consumed;
     auto &d = runtime_data();
     const model_house& model = get_model(house_level());

@@ -121,6 +121,7 @@ function advisor_financial_window_update_expenses(window) {
 
 [es=(advisor_financial_window, init)]
 function advisor_financial_window_on_init(window) {
+    __city_finance_update_estimate_taxes()
     __city_finance_calculate_totals()
     advisors_toolbar_refresh(window, ADVISOR_FINANCIAL)
 }
