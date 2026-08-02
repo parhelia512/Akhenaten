@@ -107,6 +107,7 @@ class building_small_royal_tomb;
 class building_medium_royal_tomb;
 class building_large_royal_tomb;
 class building_grand_royal_tomb;
+class building_food_mill;
 
 using e_building_need_rules = uint32_t;
 

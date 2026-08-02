@@ -91,6 +91,7 @@ GENERATE_SMART_CAST_BUILDING(alexandria_library)
 GENERATE_SMART_CAST_BUILDING(mausoleum)
 GENERATE_SMART_CAST_BUILDING(pharos_lighthouse)
 GENERATE_SMART_CAST_BUILDING(royal_tomb)
+GENERATE_SMART_CAST_BUILDING(food_mill)
 
 template <typename dest_type, typename r_type = std::add_pointer_t<std::remove_pointer_t<dest_type>>>
 inline r_type smart_cast(building *b);

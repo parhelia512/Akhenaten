@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Food Mill &amp; bazaar variety — Akhenaten Wiki</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .cp-table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+    .cp-table th, .cp-table td { padding: 0.35rem 0.6rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .cp-table th { color: var(--text-muted); font-weight: normal; }
+    .file-ref { display: inline-block; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.78rem; background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.2); border-radius: 2px; padding: 0.05rem 0.45rem; color: var(--gold); margin: 0 0.1rem; }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; }
+    summary { padding: 0.7rem 1rem; cursor: pointer; font-size: 0.875rem; font-weight: 600; color: var(--text); list-style: none; display: flex; align-items: center; gap: 0.6rem; user-select: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: "▶"; font-size: 0.6rem; color: var(--gold); transition: transform 0.15s; flex-shrink: 0; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    details[open] > summary { border-bottom: 1px solid var(--border); }
+    .details-body { padding: 1rem 1.1rem; font-size: 0.85rem; line-height: 1.6; }
+    .bld-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; }
+    .bld-nav a { color: var(--gold); }
+    .chain-box {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+      padding: 0.8rem 1.1rem; margin: 1rem 0; font-size: 0.88rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">Akhenaten</a>
+      <ul>
+        <li><a href="../../../about.html">About</a></li>
+        <li><a href="../../../devblog.html">Devblog</a></li>
+        <li><a href="../../index.html" class="active">Wiki</a></li>
+        <li><a href="../../../screenshots.html">Screenshots</a></li>
+        <li><a href="../../../downloads.html">Downloads</a></li>
+        <li><a href="../../../contributors.html">Contributors</a></li>
+        <li><a href="../../../contact.html">Join us</a></li>
+        <li><a href="../../../reportbug.html">Report Bug</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="wiki-layout">
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title"><a href="../index.html">← Player Guide</a></div>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Mechanics</div>
+        <ul>
+          <li><a href="labor.html">Labor</a></li>
+          <li><a href="auto-resolve-invasions.html">Auto-resolve invasions</a></li>
+          <li><a href="flood-basins.html">Flood basins &amp; dikes</a></li>
+          <li><a href="food-mill.html" class="active">Food Mill &amp; variety</a></li>
+        </ul>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">On this page</div>
+        <ul>
+          <li><a href="#what">What it does</a></li>
+          <li><a href="#slice-b">Without a mill</a></li>
+          <li><a href="#mill">Food Mill</a></li>
+          <li><a href="#orders">Bazaar orders</a></li>
+          <li><a href="#chain">Supply chain</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <div class="wiki-content">
+      <div class="wiki-breadcrumb"><a href="../../index.html">Wiki</a> / <a href="../index.html">Player Guide</a> / Food Mill &amp; variety</div>
+      <h1>Food Mill &amp; bazaar variety</h1>
+      <p class="section-intro">Optional Enhanced feature: bazaars fill food variety before pottery, and a <strong>Food Mill</strong> stages mixed foods for smarter buyers. Default is <strong>OFF</strong> (original Pharaoh buyer priorities).</p>
+
+      <h2 id="what">What it does</h2>
+      <ol>
+        <li>Enable <em>bazaar food variety + Food Mill</em> under Features → Gameplay (<span class="file-ref">gameplay_enhanced_food_mill</span>).</li>
+        <li>Even without a mill, bazaars prefer understocked foods over empty goods until they hold enough distinct food types.</li>
+        <li>Build a <strong>Food Mill</strong> from Distribution (next to Granary) when the flag is on — placeholder green cubes until art lands.</li>
+        <li>Set mill orders to <strong>GET</strong> foods from granaries / storage yards. Farms still deliver to granaries first.</li>
+        <li>On the bazaar Orders panel, set <em>Desired</em> / <em>Minimum</em> food variety (defaults 2 / 1).</li>
+      </ol>
+      <p>This is <strong>not</strong> Pharaoh/Cleopatra parity — inspired by Emperor: Rise of the Middle Kingdom mills, without salt/spices. House evolution still uses ordinary food slots (no quality token in homes).</p>
+
+      <h2 id="slice-b">Without a mill (Slice B)</h2>
+      <p>While the bazaar inventory has fewer than <em>Desired</em> food types (capped by how many foods the city allows and the bazaar accepts), buyers fetch foods before empty pottery/linen/etc. If no food is available anywhere, they still fall back to goods so the city does not soft-lock.</p>
+      <p>With multi-buyer bazaars also enabled, complementary “goods first while a food buyer is out” is suspended until variety is satisfied.</p>
+
+      <h2 id="mill">Food Mill</h2>
+      <table class="cp-table">
+        <thead>
+          <tr><th>Field</th><th>v1</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Size / labor</td><td>3×3, Food Production category (~12 workers)</td></tr>
+          <tr><td>Capacity</td><td>Food only; per-type cap (default 800) + total capacity</td></tr>
+          <tr><td>Quality label</td><td>Number of distinct foods in stock: Bland → Tasty (0–4)</td></tr>
+          <tr><td>City food months</td><td>Staffed mill stock (≥50% workers, road access) counts like granary food</td></tr>
+        </tbody>
+      </table>
+      <p>Bazaars prefer a staffed mill on the same road network for foods it holds; missing types still come from granary/yard. If some mill has partial variety below your <em>Minimum</em> and none meet the minimum, buyers wait (no pottery substitute). Empty mills do not block granary fetches.</p>
+
+      <h2 id="orders">Bazaar orders (flag ON)</h2>
+      <ul>
+        <li><strong>Desired food types</strong> — Slice B target and how many distinct foods a mill visit may take in one trip (loop pickup with delivery boys).</li>
+        <li><strong>Minimum mill variety</strong> — wait while mills are partially stocked below this level (default 1 → wait mainly when you raise it to 2+).</li>
+      </ul>
+      <p>The bazaar info panel shows <em>Waiting for mill food variety</em> when that wait is active.</p>
+
+      <h2 id="chain">Supply chain</h2>
+      <div class="chain-box">
+        Farms → Granary / Storage Yard → <strong>Food Mill (GET)</strong> → Bazaar buyer → Houses
+      </div>
+      <p>Related: <a href="../buildings/bazaar.html">Bazaar</a> (multi-buyer is a separate flag).</p>
+
+      <details>
+        <summary>Developer Reference</summary>
+        <div class="details-body">
+          <p>Flag: <span class="file-ref">gameplay_enhanced_food_mill</span> (default OFF)</p>
+          <p>Engine: <span class="file-ref">src/building/building_food_mill.*</span>, <span class="file-ref">building_bazaar.*</span>, <span class="file-ref">figure_market_buyer.*</span>, <span class="file-ref">city_resource.cpp</span> (mill in food months)</p>
+          <p>UI: <span class="file-ref">src/scripts/ui_food_mill_info.js</span>, <span class="file-ref">ui_bazaar_orders_window.js</span></p>
+          <p>Overlay: Food Stocks lists <span class="file-ref">BUILDING_FOOD_MILL</span></p>
+          <p>Tests: <span class="file-ref">tests/149_bazaar_food_variety.js</span>, <span class="file-ref">153|155|156_food_mill*.js</span>, <span class="file-ref">159_bazaar_mill_buyer.js</span></p>
+          <p>Save: bazaar <code>desired_variety</code> / <code>min_variety</code> from version <strong>185</strong></p>
+        </div>
+      </details>
+
+      <div class="bld-nav">
+        <a href="flood-basins.html">← Flood basins &amp; dikes</a>
+        <a href="../buildings/bazaar.html">Bazaar →</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -105,6 +105,7 @@ void city_resource_calculate_storageyard_stocks();
 void city_resource_determine_available();
 void city_resource_add_items(e_resource res, int amount);
 void city_resource_was_added_warning(e_resource res);
+void city_granaries_remove_resource(event_granaries_remove_resource &ev);
 void city_storageyards_remove_resource(event_storageyards_remove_resource &ev);
 
 template<e_resource R>

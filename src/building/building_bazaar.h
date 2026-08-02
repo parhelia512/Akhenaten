@@ -19,6 +19,7 @@ public:
         uint8_t fancy_treshold_desirability;
         uint8_t minimal_pick_food_amount;
         uint8_t max_buyers;
+        uint8_t food_variety_target; // Slice B: prefer foods until this many food slots stocked
         std::array<uint16_t, 4> pick_food_below;
         std::array<uint16_t, 4> pick_good_below;
     } BUILDING_STATIC_DATA_T;
@@ -31,6 +32,9 @@ public:
         short beer_demand;
         short fetch_inventory_id;
         sbitarray16 market_goods;
+        // FM3: per-bazaar variety orders (flag ON). Seeded from food_variety_target.
+        uint8_t desired_variety;
+        uint8_t min_variety;
     } BUILDING_RUNTIME_DATA_T;
 
     virtual void on_create(int orientation) override;
@@ -61,8 +65,15 @@ public:
     uint16_t get_resource_amount(e_resource res) const;
     int max_food_stock();
     int max_goods_stock();
-    bool idx_accepted(uint8_t index);
-    bool res_accepted(e_resource res);
+    int food_types_in_inventory() const;
+    bool needs_food_variety() const;
+    bool waiting_for_mill_variety() const;
+    uint8_t desired_variety() const;
+    uint8_t min_variety() const;
+    void set_desired_variety(uint8_t value);
+    void set_min_variety(uint8_t value);
+    bool idx_accepted(uint8_t index) const;
+    bool res_accepted(e_resource res) const;
     void toggle_res_accepted(e_resource index);
     void toggle_idx_accepted(uint8_t index);
     void unaccept_all_goods();
@@ -72,4 +83,4 @@ public:
 ANK_CONFIG_PROPERTY(building_bazaar::runtime_data_t, pottery_demand)
 ANK_CONFIG_STRUCT(building_bazaar::static_params,
                     max_search_distance, fancy_treshold_desirability, minimal_pick_food_amount,
-                    max_buyers, pick_food_below, pick_good_below)
+                    max_buyers, food_variety_target, pick_food_below, pick_good_below)

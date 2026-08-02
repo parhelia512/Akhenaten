@@ -211,6 +211,7 @@ building_bazaar {
   pick_food_below [600, 400, 200, 100]
   pick_good_below [150, 100, 50, 25]
   max_buyers : 2
+  food_variety_target : 2
 
   building_size : 2
   meta { help_id: 2, text_id: 97 }

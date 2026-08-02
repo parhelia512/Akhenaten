@@ -94,7 +94,7 @@ int building_granary::add_resource(e_resource resource, int amount, bool force) 
         return -1; // no space
     }
 
-    if (is_not_accepting(resource)) {
+    if (!force && is_not_accepting(resource)) {
         return -1;
     }
 
@@ -360,6 +360,11 @@ int building_granary::better_getting_storage() {
     int min_building_id = 0;
 
     for (auto &b : city_buildings()) {
+        // Mill pulls from granary/SY; granaries must not treat mills as sources.
+        if (b.type == BUILDING_FOOD_MILL) {
+            continue;
+        }
+
         building_storage* dest = b.dcast_storage();
 
         if (!game_features::gameplay_change_getting_granaries_go_offroad) {

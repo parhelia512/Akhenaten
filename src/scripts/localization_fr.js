@@ -87,7 +87,7 @@ localization_fr = [
   { key:"#finance_historical_economy_hint", text:"Les debens mesurent la valeur (poids de métal). Une partie du travail est payée en grain des greniers si disponible."},
   { key:"#finance_wages_paid_in_grain", text:"Salaires en grain (éq. deben)"},
   { key:"#building_food_mill", text:"Moulin (prov.)"},
-  { key:"#building_food_mill_info", text:"Placeholder temporaire. Les cubes verts marquent l'empreinte. Stocke la nourriture et indique la variété."},
+  { key:"#building_food_mill_info", text:"Entrepôt alimentaire pour les bazars. Les fermes remplissent les greniers ; mettez le moulin en GET depuis grenier/entrepôt. Les bazars préfèrent un moulin pourvu et peuvent prendre plusieurs types en une visite. Graphisme provisoire (cubes verts)."},
   { key:"#food_mill_no_road_access", text:"Ce moulin n'a pas d'accès à la route. Les ouvriers ne peuvent pas apporter de nourriture."},
   { key:"#food_mill_storing", text:"Stockage"},
   { key:"#food_mill_space_for", text:"Place pour"},

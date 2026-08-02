@@ -114,6 +114,10 @@ function bazaar_info_window_init_warning_text(window) {
        warning_text = __loc(meta_text_id, 4)
     }
 
+    if (bazaar.waiting_for_mill_variety && bazaar.waiting_for_mill_variety()) {
+        warning_text = __loc("#bazaar_waiting_mill_variety")
+    }
+
     window.warning_text.text = warning_text
 }
 

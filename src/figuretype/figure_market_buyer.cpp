@@ -3,6 +3,7 @@
 #include "market.h"
 #include "building/building_house.h"
 #include "building/building_granary.h"
+#include "building/building_food_mill.h"
 #include "window/building/figures.h"
 #include "core/log.h"
 #include "building/building_storage_yard.h"
@@ -23,6 +24,8 @@
 #include "city/city.h"
 #include "core/object_property.h"
 #include "js/js_game.h"
+
+#include <algorithm>
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_market_buyer);
 
@@ -345,39 +348,102 @@ int figure_market_buyer::take_food_from_storage(building* market, building* b) {
         return 0;
     }
 
-    e_resource resource;
-    switch (base.collecting_item_id) {
-    case 0: resource = g_city.allowed_foods(0); break;
-    case 1: resource = g_city.allowed_foods(1); break;
-    case 2: resource = g_city.allowed_foods(2); break;
-    case 3: resource = g_city.allowed_foods(3); break;
-
-    default:
-        return 0;
-    }
-
     building_storage *storage = b->dcast_storage();
     if (!storage) {
         return 0;
     }
 
-    uint16_t market_units = bazaar->runtime_data().inventory[base.collecting_item_id].value;
-    int storage_units = storage->amount(resource);
+    auto take_one_type = [&](int inv) -> int {
+        if (inv < INVENTORY_FOOD1 || inv > INVENTORY_FOOD4) {
+            return 0;
+        }
+        e_resource resource = g_city.allowed_foods(inv);
+        if (!resource) {
+            return 0;
+        }
 
-    const int max_units = (base.collecting_item_id == 0 ? 700 : 600) - market_units;
-    const int max_num_loads = max_units / 100;
-    const int num_loads = std::clamp(storage_units / 100, 0, max_num_loads);
+        uint16_t market_units = bazaar->runtime_data().inventory[inv].value;
+        int storage_units = storage->amount(resource);
 
-    if (num_loads <= 0) {
-        return 0;
+        const int max_units = (inv == 0 ? 700 : 600) - market_units;
+        const int max_num_loads = max_units / 100;
+        const int num_loads = std::clamp(storage_units / 100, 0, max_num_loads);
+
+        if (num_loads <= 0) {
+            return 0;
+        }
+
+        storage->remove_resource(resource, 100 * num_loads);
+
+        base.collecting_item_id = (uint8_t)inv;
+        int previous_boy = id();
+        for (int i = 0; i < num_loads; i++) {
+            previous_boy = create_delivery_boy(previous_boy);
+        }
+        return 1;
+    };
+
+    auto pick_next_understocked = [&](const bool *taken_slots) -> int {
+        int best = -1;
+        int min_stock = 999;
+        const auto &pick_food_below = bazaar->current_params().pick_food_below;
+        for (int foodi = INVENTORY_FOOD1; foodi <= INVENTORY_FOOD4; ++foodi) {
+            if ((taken_slots && taken_slots[foodi]) || !bazaar->idx_accepted(foodi)) {
+                continue;
+            }
+            e_resource res = g_city.allowed_foods(foodi);
+            if (!res || storage->amount(res) < 100) {
+                continue;
+            }
+            const int stock = bazaar->runtime_data().inventory[foodi].value;
+            if (stock > pick_food_below[foodi]) {
+                continue;
+            }
+            if (stock < min_stock) {
+                min_stock = stock;
+                best = foodi;
+            }
+        }
+        return best;
+    };
+
+    const int primary = base.collecting_item_id;
+    bool taken[INVENTORY_MAX_FOOD] = {};
+    int taken_types = 0;
+
+    if (take_one_type(primary)) {
+        if (primary >= INVENTORY_FOOD1 && primary <= INVENTORY_FOOD4) {
+            taken[primary] = true;
+        }
+        taken_types = 1;
+    } else {
+        // Mill only: primary may be gone by arrival — try another understocked food.
+        // Granary/SY keep single-type OG behavior on primary fail.
+        if (!b->dcast_food_mill()) {
+            return 0;
+        }
+        const int alt = pick_next_understocked(nullptr);
+        if (alt < 0 || !take_one_type(alt)) {
+            return 0;
+        }
+        taken[alt] = true;
+        taken_types = 1;
     }
 
-    storage->remove_resource(resource, 100 * num_loads);
+    // FM3: at a food mill, loop additional understocked foods up to desired variety.
+    auto *mill = b->dcast_food_mill();
+    if (!mill || !game_features::gameplay_enhanced_food_mill.to_bool()) {
+        return 1;
+    }
 
-    // create delivery boys
-    int previous_boy = id();
-    for (int i = 0; i < num_loads; i++) {
-        previous_boy = create_delivery_boy(previous_boy);
+    const int desired = bazaar->desired_variety();
+    while (taken_types < desired) {
+        const int best = pick_next_understocked(taken);
+        if (best < 0 || !take_one_type(best)) {
+            break;
+        }
+        taken[best] = true;
+        taken_types++;
     }
 
     return 1;

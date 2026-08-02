@@ -96,7 +96,7 @@ localization_hu = [
   {key:"#finance_historical_economy_hint", text:"A deben értékmérő (fémsúly), nem érme. A munka egy része magtári gabonából fizethető, ha van."}
   {key:"#finance_wages_paid_in_grain", text:"Gabonában fizetett bér (deben-egyenérték)"}
   {key:"#building_food_mill", text:"Malom (ideiglenes)"}
-  {key:"#building_food_mill_info", text:"Ideiglenes helyőrző. Zöld kockák jelölik a malmot. Élelmiszert tárol és változatosságot jelez."}
+  {key:"#building_food_mill_info", text:"Élelmiszerraktár a bazárokhoz. A farmok a magtárakat töltik; a malmon állíts GET-et magtárból/raktárból. A bazárok a feltöltött malmot részesítik előnyben, és egy látogatáson több ételtípust vihetnek. Ideiglenes grafika (zöld kockák)."}
   {key:"#food_mill_no_road_access", text:"A malomnak nincs útcsatlakozása. A munkások nem tudnak ételt szállítani."}
   {key:"#food_mill_storing", text:"Tárolva"}
   {key:"#food_mill_space_for", text:"Hely"}

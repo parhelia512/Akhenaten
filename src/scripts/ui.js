@@ -29,6 +29,7 @@ import ui_widgets
 import ui_bazaar_orders_window
 import ui_bazaar_window
 import ui_granary_info
+import ui_food_mill_info
 import ui_granary_orders_window
 import ui_advisor_chief
 import ui_mission_briefing_window

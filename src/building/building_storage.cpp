@@ -56,7 +56,7 @@ void building_storage_reset_building_ids(void) {
         if (b->state == BUILDING_STATE_UNUSED)
             continue;
 
-        if (b->type == BUILDING_GRANARY || b->type == BUILDING_STORAGE_YARD) {
+        if (b->type == BUILDING_GRANARY || b->type == BUILDING_STORAGE_YARD || b->type == BUILDING_FOOD_MILL) {
             if (b->storage_id) {
                 if (g_storages[b->storage_id].building_id) {
                     // storage is already connected to a building: corrupt, create new
@@ -95,6 +95,7 @@ int building_storage_create(int building_type) {
                     break;
 
                 case BUILDING_GRANARY:
+                case BUILDING_FOOD_MILL:
                     if (resource < 9)
                         g_storages[i].storage.resource_state[resource] = STORAGE_STATE_ACCEPT;
                     else

@@ -346,6 +346,9 @@ enum e_building_type : uint16_t {
 	BUILDING_LARGE_MASTABA_WALL = 358,
 	BUILDING_LARGE_MASTABA_ENTRANCE = 359,
 
+	// Enhanced: food mill (placeholder art). Appended before BUILDING_MAX.
+	BUILDING_FOOD_MILL = 360,
+
 	BUILDING_MAX,
 };
 extern const token_holder<e_building_type, BUILDING_NONE, BUILDING_MAX> e_building_type_tokens;

@@ -1,5 +1,7 @@
 #include "game_config.h"
 
+#include "building/construction/build_planner.h"
+#include "game/game_events.h"
 #include "game/game.h"
 #include "core/calc.h"
 #include "js/js_game.h"
@@ -18,6 +20,9 @@ void on_bool_feature_maybe_changed(xstring feature_name) {
         map_basin_mark_dirty();
         // Rebuild restamps IRRIGATION_RANGE and refreshes irrigation_value.
         map_basin_rebuild_dirty();
+    }
+    if (feature_name == "gameplay_enhanced_food_mill") {
+        events::emit(event_building_menu_update{ "apply_enhanced" });
     }
 }
 

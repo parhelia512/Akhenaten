@@ -237,7 +237,10 @@ void building_static_params::register_model(e_building_type e, const building_st
 }
 
 const building_static_params &building_static_params::get(e_building_type e) {
-    auto p = building_impl_params->at(e);
+    if (!building_impl_params || e < BUILDING_NONE || e >= BUILDING_MAX) {
+        return building_static_params::dummy;
+    }
+    auto p = (*building_impl_params)[e];
     return (p == nullptr) ? building_static_params::dummy : *p;
 }
 

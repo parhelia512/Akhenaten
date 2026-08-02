@@ -38,6 +38,9 @@ building_menu_ctrl.is_enabled = function(type) {
     if (type == BUILDING_DIKE && game_features.get('gameplay_enhanced_flood_basins') !== true) {
         return false
     }
+    if (type == BUILDING_FOOD_MILL && game_features.get('gameplay_enhanced_food_mill') !== true) {
+        return false
+    }
     var e = building_menu_ctrl.enabled[type]
     return (e !== undefined && e !== null) ? e : false
 }
@@ -220,6 +223,15 @@ building_menu_ctrl.update_gods_available = function(god, available) {
     }
 }
 
+// Enhanced buildings not listed in campaign `buildings[]`: unlock when their flag is ON.
+building_menu_ctrl.apply_enhanced_buildings = function() {
+    if (game_features.get('gameplay_enhanced_food_mill') === true) {
+        building_menu_ctrl.use_building(BUILDING_FOOD_MILL, true)
+    } else {
+        building_menu_ctrl.use_building(BUILDING_FOOD_MILL, false)
+    }
+}
+
 building_menu_ctrl.update = function(stage) {
     if (stage == "disable_all") {
         building_menu_ctrl.set_all(false)
@@ -235,6 +247,10 @@ building_menu_ctrl.update = function(stage) {
         building_menu_ctrl.update_temple_complexes()
     } else if (stage == "enable_all") {
         building_menu_ctrl.set_all(true)
+    } else if (stage == "apply_enhanced") {
+        building_menu_ctrl.apply_enhanced_buildings()
+        emit event_building_menu_changed{ temp: true }
+        return
     }
 
     for (var i = 0; i < building_menu.length; i++) {
@@ -245,6 +261,10 @@ building_menu_ctrl.update = function(stage) {
             }
             break
         }
+    }
+
+    if (stage != "disable_all") {
+        building_menu_ctrl.apply_enhanced_buildings()
     }
 
     emit event_building_menu_changed{ temp: true }

@@ -86,7 +86,7 @@ localization_de = [
   {key:"#finance_historical_economy_hint", text:"Debens messen Wert (Metallgewicht). Ein Teil der Arbeit wird aus Getreidespeichern gezahlt, wenn vorhanden."}
   {key:"#finance_wages_paid_in_grain", text:"Löhne in Getreide (Deben-Äquiv.)"}
   {key:"#building_food_mill", text:"Mühle (temp.)"}
-  {key:"#building_food_mill_info", text:"Vorläufiger Platzhalter. Grüne Würfel markieren die Mühle. Lagert Nahrung und meldet Vielfalt."}
+  {key:"#building_food_mill_info", text:"Nahrungslager für Basare. Farmen füllen Speicher; Mühle auf GET aus Speicher/Lagerhof stellen. Basare bevorzugen eine besetzte Mühle und können mehrere Nahrungstypen pro Besuch holen. Grafik vorläufig (grüne Würfel)."}
   {key:"#food_mill_no_road_access", text:"Diese Mühle hat keinen Straßenanschluss. Arbeiter können keine Nahrung anliefern."}
   {key:"#food_mill_storing", text:"Gelagert"}
   {key:"#food_mill_space_for", text:"Platz für"}

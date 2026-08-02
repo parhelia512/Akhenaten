@@ -103,7 +103,7 @@ localization_en = [
   {key:"#finance_historical_economy_hint", text:"Debens measure value (metal-weight account). Part of labour is paid from granary grain when available."}
   {key:"#finance_wages_paid_in_grain", text:"Wages paid in grain (deben-eq)"}
   {key:"#building_food_mill", text:"Food Mill (temp)"}
-  {key:"#building_food_mill_info", text:"Temporary placeholder. Green cubes mark the mill footprint until art lands. Stores food and reports variety."}
+  {key:"#building_food_mill_info", text:"Food staging for bazaars. Farms fill granaries; set the mill to GET food from granaries or yards. Bazaars prefer a staffed mill and can take several food types in one visit. Art is temporary (green cubes)."}
   {key:"#building_industry_office", text:"Industry Office (temp)"}
   {key:"#building_industry_office_info", text:"Scribes manage nearby industry while stocked with papyrus. Green cubes mark the footprint until art lands."}
   {key:"#industry_office_managing", text:"Managing workshops:"}

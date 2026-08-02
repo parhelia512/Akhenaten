@@ -62,6 +62,7 @@ import building.work_camp
 import building.road
 import building.bridge
 import building.dike
+import building.food_mill
 import building.well
 import building.water_lift
 import building.water_supply

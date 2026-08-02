@@ -96,7 +96,11 @@ granary_orders_window {
 
 [es=(granary_orders_window, init)]
 function granary_orders_window_init(window) {
-    granary_orders_window.granary = city.get_granary(city.object_info.bid)
+    var bid = city.object_info.bid
+    granary_orders_window.granary = city.get_granary(bid)
+    if (!granary_orders_window.granary) {
+        granary_orders_window.granary = city.get_food_mill(bid)
+    }
 
     window.goods_list.clear()
     for (var name in city.resources.available_foods) {

@@ -5,7 +5,7 @@ overlay_food_stocks {
   id:OVERLAY_FOOD_STOCKS
   title: "#overlay_food_stocks"
   walkers:[FIGURE_MARKET_TRADER, FIGURE_MARKET_BUYER]
-  buildings:[BUILDING_BAZAAR, BUILDING_FISHING_WHARF, BUILDING_GRANARY, BUILDING_ROADBLOCK]
+  buildings:[BUILDING_BAZAAR, BUILDING_FISHING_WHARF, BUILDING_GRANARY, BUILDING_FOOD_MILL, BUILDING_ROADBLOCK]
   column_type: COLUMN_TYPE_POSITIVE
   column_anim: {pack:PACK_GENERAL, id:103}
 
@@ -62,7 +62,7 @@ function food_stocks_show_figure(ev) {
         return
     }
 
-    if (fig.type == FIGURE_CART_PUSHER) {
+    if (fig.type == FIGURE_CART_PUSHER || fig.type == FIGURE_STORAGEYARD_CART) {
         city.overlay_show_figure = food_stocks_is_food_resource(fig.resource) ? 1 : 0
         return
     }

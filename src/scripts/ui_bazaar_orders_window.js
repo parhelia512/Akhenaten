@@ -18,6 +18,50 @@ function bazaar_orders_window_accept_none() {
     city.get_bazaar(city.object_info.bid).unaccept_all_goods()
 }
 
+function bazaar_orders_variety_enabled() {
+    return !!game_features.get("gameplay_enhanced_food_mill")
+}
+
+function bazaar_orders_cycle_desired() {
+    if (!bazaar_orders_variety_enabled()) {
+        return
+    }
+    var bazaar = city.get_bazaar(city.object_info.bid)
+    var next = bazaar.desired_variety() + 1
+    if (next > 4) {
+        next = 1
+    }
+    bazaar.set_desired_variety(next)
+}
+
+function bazaar_orders_cycle_min() {
+    if (!bazaar_orders_variety_enabled()) {
+        return
+    }
+    var bazaar = city.get_bazaar(city.object_info.bid)
+    var next = bazaar.min_variety() + 1
+    if (next > bazaar.desired_variety()) {
+        next = 1
+    }
+    bazaar.set_min_variety(next)
+}
+
+function bazaar_orders_text_desired() {
+    if (!bazaar_orders_variety_enabled()) {
+        return ""
+    }
+    var bazaar = city.get_bazaar(city.object_info.bid)
+    return __loc("#bazaar_desired_variety") + " " + bazaar.desired_variety()
+}
+
+function bazaar_orders_text_min() {
+    if (!bazaar_orders_variety_enabled()) {
+        return ""
+    }
+    var bazaar = city.get_bazaar(city.object_info.bid)
+    return __loc("#bazaar_min_variety") + " " + bazaar.min_variety()
+}
+
 function bazaar_orders_list_on_click_item(p) {
     if (!bazaar_orders_good_available(p.user_data)) {
         return
@@ -58,17 +102,17 @@ function bazaar_orders_list_on_render_item(p) {
 
 [es=modal_window]
 bazaar_orders_window {
-    pos: [(sw(0) - px(29)) / 2, (sh(0) - px(22)) / 2]
+    pos: [(sw(0) - px(29)) / 2, (sh(0) - px(24)) / 2]
     draw_underlying: true
     allow_rmb_goback: true
 
     ui {
-        background   : outer_panel({size[29, 22]}),
+        background   : outer_panel({size[29, 24]}),
         title        : text({pos[0, 12], size[px(28), 0], text:{group:98, id:5}, font : FONT_LARGE_BLACK_ON_LIGHT, align:"center"})
         goods_list   : scrollable_list({
             pos[16, 42]
-            size[27, 16]
-            view_items: 12
+            size[27, 14]
+            view_items: 10
             buttons_size_y: 20
             buttons_margin_x: 0
             buttons_margin_y: 5
@@ -79,6 +123,8 @@ bazaar_orders_window {
             onrender_item: bazaar_orders_list_on_render_item
             onclick_item: bazaar_orders_list_on_click_item
         })
+        desired_btn  : button({pos[16, -1], size[200, 24], textfn: bazaar_orders_text_desired, margin{bottom:-64}, onclick: bazaar_orders_cycle_desired })
+        min_btn      : button({pos[226, -1], size[200, 24], textfn: bazaar_orders_text_min, margin{bottom:-64}, onclick: bazaar_orders_cycle_min })
         accept_none  : button({pos[80, -1], size[300, 24], text:{group:99, id:7}, margin{bottom:-38}, onclick: bazaar_orders_window_accept_none })
 
         button_help   : help_button({})
@@ -100,4 +146,8 @@ function bazaar_orders_window_init(window) {
         var resId = bazaar_orders_all_goods[i]
         window.goods_list.add_item(__loc(23, resId), resId)
     }
+
+    var show_variety = bazaar_orders_variety_enabled()
+    window.desired_btn.enabled = show_variety
+    window.min_btn.enabled = show_variety
 }

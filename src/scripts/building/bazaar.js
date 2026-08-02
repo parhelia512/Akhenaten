@@ -13,6 +13,11 @@ Bazaar.prototype.idx_accepted = function(index) { return __bazaar_idx_accepted(t
 Bazaar.prototype.res_accepted = function(resource_type) { return __bazaar_res_accepted(this.id, resource_type) }
 Bazaar.prototype.unaccept_all_goods = function() { __bazaar_unaccept_all_goods(this.id) }
 Bazaar.prototype.toggle_res_accepted = function(resource_type) { __bazaar_toggle_res_accepted(this.id, resource_type) }
+Bazaar.prototype.desired_variety = function() { return __bazaar_desired_variety(this.id) }
+Bazaar.prototype.min_variety = function() { return __bazaar_min_variety(this.id) }
+Bazaar.prototype.set_desired_variety = function(v) { __bazaar_set_desired_variety(this.id, v) }
+Bazaar.prototype.set_min_variety = function(v) { __bazaar_set_min_variety(this.id, v) }
+Bazaar.prototype.waiting_for_mill_variety = function() { return __bazaar_waiting_for_mill_variety(this.id) }
 
 city.get_bazaar = function(building_id) {
     if (!__building_is_bazaar(building_id)) {

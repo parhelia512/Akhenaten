@@ -52,6 +52,10 @@ function run_test() {
     __log_marker('bazaar_multi_flag_off_ok')
     __test77_ok.flag = true
 
+    // Pin foods for --no-resource / empty empire maps.
+    __test_set_allowed_food(0, RESOURCE_GRAIN)
+    __test_set_allowed_food(1, RESOURCE_FIGS)
+
     game_features.set('gameplay_change_bazaar_multi_buyers', false)
 
     function finish() {

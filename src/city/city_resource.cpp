@@ -5,6 +5,7 @@
 #include "building/building_storage_yard.h"
 #include "building/building_storage_room.h"
 #include "building/building_granary.h"
+#include "building/building_food_mill.h"
 #include "building/building_bazaar.h"
 #include "building/building_house.h"
 #include "city/city.h"
@@ -374,6 +375,22 @@ void city_resources_t::calculate_available_food() {
             }
         }
     }, BUILDING_GRANARY);
+
+    // Enhanced Food Mill: stock counts toward city food months / types available.
+    buildings_valid_do([this](building &b) {
+        auto *mill = b.dcast_food_mill();
+        if (!mill || !map_has_road_access(b.tile, b.size)) {
+            return;
+        }
+        if (calc_percentage<int>(b.num_workers, b.max_workers) < 50) {
+            return;
+        }
+        for (e_resource r = RESOURCES_FOOD_MIN; r < RESOURCES_FOODS_MAX; ++r) {
+            if (resource_is_food(r)) {
+                granary_food_stored[r] += mill->amount(r);
+            }
+        }
+    }, BUILDING_FOOD_MILL);
 
     for (int i = RESOURCES_FOOD_MIN; i < RESOURCES_FOODS_MAX; i++) {
         granary_total_stored += granary_food_stored[i];
