@@ -328,31 +328,33 @@ void video_draw(int x_offset, int y_offset) {
     g_render.draw_custom_texture(CUSTOM_IMAGE_VIDEO, x_offset, y_offset, 1.0f);
 }
 
-void video_draw_fullscreen(void) {
+void video_draw_in_rect(int x_offset, int y_offset, int width, int height) {
     if (get_next_frame())
         update_video_frame();
 
-    int width = screen_width();
-    int height = screen_height();
     if (width <= 0 || height <= 0 || data.video.width <= 0 || data.video.height <= 0) {
         return;
     }
 
-    float scale_w = data.video.width / (float) width;
-    float scale_h = data.video.height / (float) height;
+    // draw_custom_texture uses dst = size/scale and pos = arg/scale.
+    float scale_w = data.video.width / (float)width;
+    float scale_h = data.video.height / (float)height;
     float scale = std::max(scale_w, scale_h);
     if (scale <= 0.0f) {
         return;
     }
 
-    int x = 0;
-    int y = 0;
-    if (scale == scale_h) {
-        x = (int)(((width - data.video.width / scale) / 2.0f) * scale);
-    }
-    if (scale == scale_w) {
-        y = (int)(((height - data.video.height / scale) / 2.0f) * scale);
+    int x = (int)(x_offset * scale);
+    int y = (int)(y_offset * scale);
+    if (scale_w < scale_h) {
+        x += (int)(((width - data.video.width / scale) / 2.0f) * scale);
+    } else if (scale_h < scale_w) {
+        y += (int)(((height - data.video.height / scale) / 2.0f) * scale);
     }
 
     g_render.draw_custom_texture(CUSTOM_IMAGE_VIDEO, x, y, scale);
+}
+
+void video_draw_fullscreen(void) {
+    video_draw_in_rect(0, 0, screen_width(), screen_height());
 }

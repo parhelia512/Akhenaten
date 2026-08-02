@@ -425,7 +425,8 @@ void ui::message_dialog_base::draw_foreground_content() {
 
 void ui::message_dialog_base::draw_foreground_video() {
     const vec2i video_pos = pos + ui["video_area"].pos;
-    video_draw(video_pos.x, video_pos.y);
+    const vec2i video_size = ui["video_area"].pxsize();
+    video_draw_in_rect(video_pos.x, video_pos.y, video_size.x, video_size.y);
 }
 
 bool ui::message_dialog_base::handle_input_normal(const mouse* m_dialog, const lang_message& msg) {
@@ -440,7 +441,7 @@ int ui::message_dialog_base::ui_handle_mouse(const mouse *m) {
     const hotkeys *h = hotkey_state();
     const mouse* m_dialog = mouse_in_dialog(m);
     const lang_message& msg = lang_get_message(text_id);
-    
+
     bool handled = false;
     if (show_video) {
         handled = handle_input_video(m_dialog, msg);

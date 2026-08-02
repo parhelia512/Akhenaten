@@ -44,6 +44,12 @@ void video_shutdown(void);
 void video_draw(int x_offset, int y_offset);
 
 /**
+ * Draws the current video scaled to fit inside a rectangle while preserving
+ * aspect ratio (letterboxed / pillarboxed as needed).
+ */
+void video_draw_in_rect(int x_offset, int y_offset, int width, int height);
+
+/**
  * Draws the current video scaled to fit inside the window while preserving
  * aspect ratio.
  */
