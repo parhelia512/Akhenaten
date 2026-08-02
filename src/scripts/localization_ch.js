@@ -159,5 +159,9 @@ localization_ch = [
      { key: "#TR_PALACE_TOOLTIP_CULTURE_RATING", text: "文化評分" }
      { key: "#TR_PALACE_TOOLTIP_PROSPERITY_RATING", text: "繁榮評分" }
      { key: "#TR_PALACE_TOOLTIP_MONUMENT_RATING", text: "紀念碑評分" }
-     { key: "#TR_PALACE_TOOLTIP_KINGDOM_RATING", text: "王國評分" }
+     { key: "#TR_PALACE_TOOLTIP_KINGDOM_RATING", text: "王國評分" },
+     { key: "#TR_CONFIG_HISTORICAL_ECONOMY", text: "Enhanced: historical economy — deben as unit of account; part of wages paid in granary grain" },
+     { key: "#finance_deben_unit_of_account", text: "deben-weight" },
+     { key: "#finance_historical_economy_hint", text: "Debens measure value (metal-weight account). Part of labour is paid from granary grain when available." },
+     { key: "#finance_wages_paid_in_grain", text: "Wages paid in grain (deben-eq)" },
 ]

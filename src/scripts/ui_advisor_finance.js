@@ -26,12 +26,12 @@ advisor_financial_window {
                     }
                 })
 
-                // table headers
-                last_year          : text({text[60, 6], pos[270, 133], font:FONT_NORMAL_BLACK_ON_LIGHT})
-                this_year          : text({text[60, 7], pos[400, 133], font:FONT_NORMAL_BLACK_ON_LIGHT})
+                // table headers (HE grain expense row needs ~15px — pull tables up)
+                last_year          : text({text[60, 6], pos[270, 128], font:FONT_NORMAL_BLACK_ON_LIGHT})
+                this_year          : text({text[60, 7], pos[400, 128], font:FONT_NORMAL_BLACK_ON_LIGHT})
 
-                incomes_base       : text({margin:{left:10, top:150}})
-                expenses_base      : text({margin:{left:10, top:240}})
+                incomes_base       : text({margin:{left:10, top:145}})
+                expenses_base      : text({margin:{left:10, top:228}})
 
                 button_help   : help_button({})
             }
@@ -47,6 +47,9 @@ function advisor_financial_window_update(window) {
     var prefix = (ctreasury < 0) ? __loc(60, 3) : __loc(60, 2)
 
     window.treasury.text = prefix + " " + Math.abs(ctreasury)
+    if (game_features.get('gameplay_enhanced_historical_economy')) {
+        window.treasury.text = window.treasury.text + " (" + __loc("#finance_deben_unit_of_account") + ")"
+    }
     window.treasury.font = (ctreasury < 0) ? FONT_NORMAL_YELLOW : FONT_NORMAL_WHITE_ON_DARK
 
     window.tax_value.text = city.finance.tax_percentage + "% " + __loc(60, 4) + " " + __loc("#debens") + " " + city.taxes.estimated_income
@@ -104,6 +107,11 @@ function advisor_financial_window_update_expenses(window) {
     // EXPENSES rows
     line_y = draw_row(__loc(60, 11), line_y, last_year.expenses.imports, this_year.expenses.imports)
     line_y = draw_row(__loc(60, 12), line_y, last_year.expenses.wages, this_year.expenses.wages)
+    if (game_features.get('gameplay_enhanced_historical_economy')) {
+        line_y = draw_row(__loc("#finance_wages_paid_in_grain"), line_y,
+            city.finance.wages_grain_deben_last_year | 0,
+            city.finance.wages_grain_deben_so_far | 0)
+    }
     line_y = draw_row(__loc(60, 13), line_y, last_year.expenses.construction, this_year.expenses.construction)
     line_y = draw_row(__loc(60, 14), line_y, last_year.expenses.interest, this_year.expenses.interest)
     line_y = draw_row(__loc(60, 16), line_y, last_year.expenses.stolen, this_year.expenses.stolen)
@@ -117,6 +125,10 @@ function advisor_financial_window_update_expenses(window) {
 
     line_y = draw_row(__loc(60, 17), line_y, last_year.expenses.total, this_year.expenses.total)
     line_y = draw_row(__loc(60, 18), line_y, last_year.net_in_out, this_year.net_in_out)
+
+    if (game_features.get('gameplay_enhanced_historical_economy')) {
+        ui.label(__loc("#finance_historical_economy_hint"), vec2i(row_text_x, line_y + 4), FONT_NORMAL_BLACK_ON_LIGHT)
+    }
 }
 
 [es=(advisor_financial_window, init)]

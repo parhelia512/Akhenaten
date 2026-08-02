@@ -16,10 +16,17 @@ ANK_GLOBAL_OBJECT(g_city.finance, __city_finance,
     tax_percentage,
     estimated_wages,
     wages_so_far,
+    wages_grain_deben_so_far,
+    wages_grain_deben_last_year,
     cheated_money,
     tribute_not_paid_last_year,
     wage_rate_paid_this_year,
     wage_rate_paid_last_year);
+
+void __city_finance_pay_monthly_wages() {
+    g_city.finance.pay_monthly_wages();
+}
+ANK_FUNCTION(__city_finance_pay_monthly_wages)
 
 std::optional<bvariant> __city_finance_income(pcstr property, bool this_year) {
     auto &year = this_year ? g_city.finance.this_year.income : g_city.finance.last_year.income;

@@ -74,6 +74,32 @@ localization_de = [
   {key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Ptah-Zorn: Skorpionüberfall aus Tempeln ohne Industrie (TEMP Enhanced)"}
   {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Invasionen automatisch lösen: Feinde warten am Eingang, Schnellkampf in 8 Tagen (Mauern/Türme zählen nicht; Pharao inklusive; keine Aufstände)"}
   {key:"#TR_CONFIG_FLOOD_BASINS", text:"Enhanced: Deiche / Becken (Kontur schließen — bessere Erträge nach der Flut)"}
+  {key:"#TR_CONFIG_FOOD_MILL", text:"Enhanced: Basar-Nahrungsmittelvielfalt + Mühlengebäude (Platzhalter-Grafik)"}
+  {key:"#TR_CONFIG_INDUSTRY_OFFICE", text:"Enhanced: Industrieamt — Werkstätten im Radius stilllegen (Papyrus + Schreiber)"}
+  {key:"#TR_CONFIG_LABOR_CATEGORY_SPLIT", text:"Enhanced: Lagerhäuser/Docks getrennt von Industrie im Arbeitsberater"}
+  {key:"#labor_category_storage", text:"Lager & Verteilung"}
+  {key:"#labor_category_industry", text:"Industrie"}
+  {key:"#labor_category_industry_commerce", text:"Industrie & Handel"}
+  {key:"#labor_category_culture", text:"Kultur"}
+  {key:"#TR_CONFIG_HISTORICAL_ECONOMY", text:"Enhanced: historische Wirtschaft — Deben als Rechnungseinheit; Teil der Löhne aus Getreidespeichern"}
+  {key:"#finance_deben_unit_of_account", text:"Deben-Gewicht"}
+  {key:"#finance_historical_economy_hint", text:"Debens messen Wert (Metallgewicht). Ein Teil der Arbeit wird aus Getreidespeichern gezahlt, wenn vorhanden."}
+  {key:"#finance_wages_paid_in_grain", text:"Löhne in Getreide (Deben-Äquiv.)"}
+  {key:"#building_food_mill", text:"Mühle (temp.)"}
+  {key:"#building_food_mill_info", text:"Vorläufiger Platzhalter. Grüne Würfel markieren die Mühle. Lagert Nahrung und meldet Vielfalt."}
+  {key:"#food_mill_no_road_access", text:"Diese Mühle hat keinen Straßenanschluss. Arbeiter können keine Nahrung anliefern."}
+  {key:"#food_mill_storing", text:"Gelagert"}
+  {key:"#food_mill_space_for", text:"Platz für"}
+  {key:"#food_mill_units", text:"Einheiten"}
+  {key:"#food_mill_quality_now", text:"Nahrungsqualität:"}
+  {key:"#food_mill_variety_none", text:"keine (leer)"}
+  {key:"#food_mill_variety_bland", text:"Fade"}
+  {key:"#food_mill_variety_plain", text:"Schlicht"}
+  {key:"#food_mill_variety_appetizing", text:"Appetitlich"}
+  {key:"#food_mill_variety_tasty", text:"Lecker"}
+  {key:"#bazaar_desired_variety", text:"Gewünschte Nahrungstypen:"}
+  {key:"#bazaar_min_variety", text:"Min. Mühlenvielfalt:"}
+  {key:"#bazaar_waiting_mill_variety", text:"Warte auf Nahrungssorten in der Mühle."}
   {key:"#TR_CONFIG_ENHANCED_NILOMETER", text:"Enhanced: Nilometer-HUD (Flutqualität, Phase, Auen-Info)"}
   {key:"#flood_phase_imminent", text:"Flut steht bevor"}
   {key:"#flood_phase_flooding", text:"Hochwasser"}

@@ -74,6 +74,41 @@ localization_ru = [
     { key:"#invasion_bribe_button", text:"Откуп"}
     { key:"#invasion_bribe_cost_line", text:"Откуп: {cost} Db   В казне: {treasury}"}
     { key:"#TR_CONFIG_FLOOD_BASINS", text:"Enhanced: дамбы / бассейны на пойме (замкните контур — лучше урожай после разлива)"}
+    { key:"#TR_CONFIG_FOOD_MILL", text:"Enhanced: разнообразие еды у базара + здание мельницы (арт-заглушка)"}
+    { key:"#TR_CONFIG_INDUSTRY_OFFICE", text:"Enhanced: офис индустрии — mothball цехов в радиусе (папирус + писцы)"}
+    { key:"#TR_CONFIG_LABOR_CATEGORY_SPLIT", text:"Enhanced: склады и доки отдельно от индустрии в советнике по труду"}
+    { key:"#labor_category_storage", text:"Склады и снабжение"}
+    { key:"#labor_category_industry", text:"Индустрия"}
+    { key:"#labor_category_industry_commerce", text:"Индустрия и торговля"}
+    { key:"#labor_category_culture", text:"Культура"}
+    { key:"#TR_CONFIG_HISTORICAL_ECONOMY", text:"Enhanced: историчная экономика — deben как мера ценности; часть зарплат из зерна амбаров"}
+    { key:"#finance_deben_unit_of_account", text:"мера deben"}
+    { key:"#finance_historical_economy_hint", text:"Deben — мера ценности (вес металла), не монеты. Часть труда оплачивается зерном из амбаров, если оно есть."}
+    { key:"#finance_wages_paid_in_grain", text:"Зарплата зерном (экв. deben)"}
+    { key:"#building_food_mill", text:"Мельница (врем.)"}
+    { key:"#building_food_mill_info", text:"Временная заглушка. Зелёные кубы — контур мельницы. Склад еды и разнообразие уже работают."}
+    { key:"#building_industry_office", text:"Офис индустрии (врем.)"}
+    { key:"#building_industry_office_info", text:"Писцы управляют соседней индустрией, пока есть папирус. Зелёные кубы — контур, пока нет арта."}
+    { key:"#industry_office_managing", text:"Управляет цехами:"}
+    { key:"#industry_office_needs_papyrus", text:"Нужен папирус"}
+    { key:"#industry_office_needs_workers", text:"Нужны писцы (рабочие)"}
+    { key:"#industry_office_inactive", text:"Офис неактивен"}
+    { key:"#industry_office_working", text:"Разосланы распоряжения"}
+    { key:"#industry_office_mothball_all", text:"Остановить все"}
+    { key:"#industry_office_unmothball_all", text:"Возобновить все"}
+    { key:"#food_mill_no_road_access", text:"У мельницы нет доступа к дороге. Рабочие не могут подвозить еду."}
+    { key:"#food_mill_storing", text:"Хранится"}
+    { key:"#food_mill_space_for", text:"Места на"}
+    { key:"#food_mill_units", text:"ед."}
+    { key:"#food_mill_quality_now", text:"Качество еды:"}
+    { key:"#food_mill_variety_none", text:"нет (пусто)"}
+    { key:"#food_mill_variety_bland", text:"Пресная"}
+    { key:"#food_mill_variety_plain", text:"Простая"}
+    { key:"#food_mill_variety_appetizing", text:"Аппетитная"}
+    { key:"#food_mill_variety_tasty", text:"Вкусная"}
+    { key:"#bazaar_desired_variety", text:"Желаемые типы еды:"}
+    { key:"#bazaar_min_variety", text:"Мин. разнообразие мельницы:"}
+    { key:"#bazaar_waiting_mill_variety", text:"Ждём разнообразия еды на мельнице."}
 
     { key:"#TR_CONFIG_ENHANCED_NILOMETER", text:"Enhanced: нилометр HUD (качество разлива, фаза, инфо поймы)"}
     { key:"#flood_phase_imminent", text:"Разлив скоро"}

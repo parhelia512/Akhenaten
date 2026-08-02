@@ -176,6 +176,7 @@ namespace game_features {
     extern game_feature gameplay_enhanced_auto_resolve_invasions;
     extern game_feature gameplay_enhanced_invasion_bribe;
     extern game_feature gameplay_enhanced_flood_basins;
+    extern game_feature gameplay_enhanced_historical_economy;
 
     xspan<game_feature*> all();
     game_feature* find(const xstring& name);

@@ -157,6 +157,7 @@ namespace game_features {
     game_feature gameplay_enhanced_auto_resolve_invasions{ "gameplay_enhanced_auto_resolve_invasions", "#TR_CONFIG_AUTO_RESOLVE_INVASIONS", false };
     game_feature gameplay_enhanced_invasion_bribe{ "gameplay_enhanced_invasion_bribe", "#TR_CONFIG_INVASION_BRIBE", false };
     game_feature gameplay_enhanced_flood_basins{ "gameplay_enhanced_flood_basins", "#TR_CONFIG_FLOOD_BASINS", false };
+    game_feature gameplay_enhanced_historical_economy{ "gameplay_enhanced_historical_economy", "#TR_CONFIG_HISTORICAL_ECONOMY", false };
 
     xspan<game_feature*> all() {
         return { _features.data(), _features.size() };

@@ -91,6 +91,41 @@ localization_en = [
   {key:"#invasion_bribe_button", text:"Bribe"}
   {key:"#invasion_bribe_cost_line", text:"Bribe: {cost} Db   Treasury: {treasury}"}
   {key:"#TR_CONFIG_FLOOD_BASINS", text:"Enhanced: floodplain dikes / basin irrigation (seal farms for better post-flood yields)"}
+  {key:"#TR_CONFIG_FOOD_MILL", text:"Enhanced: bazaar food variety + Food Mill building (placeholder art)"}
+  {key:"#TR_CONFIG_INDUSTRY_OFFICE", text:"Enhanced: Industry Office — radius mothball for workshops (papyrus + scribes)"}
+  {key:"#TR_CONFIG_LABOR_CATEGORY_SPLIT", text:"Enhanced: split Storage yards/docks from Industry in the labor advisor"}
+  {key:"#labor_category_storage", text:"Storage & distribution"}
+  {key:"#labor_category_industry", text:"Industry"}
+  {key:"#labor_category_industry_commerce", text:"Industry & Commerce"}
+  {key:"#labor_category_culture", text:"Culture"}
+  {key:"#TR_CONFIG_HISTORICAL_ECONOMY", text:"Enhanced: historical economy — deben as unit of account; part of wages paid in granary grain"}
+  {key:"#finance_deben_unit_of_account", text:"deben-weight"}
+  {key:"#finance_historical_economy_hint", text:"Debens measure value (metal-weight account). Part of labour is paid from granary grain when available."}
+  {key:"#finance_wages_paid_in_grain", text:"Wages paid in grain (deben-eq)"}
+  {key:"#building_food_mill", text:"Food Mill (temp)"}
+  {key:"#building_food_mill_info", text:"Temporary placeholder. Green cubes mark the mill footprint until art lands. Stores food and reports variety."}
+  {key:"#building_industry_office", text:"Industry Office (temp)"}
+  {key:"#building_industry_office_info", text:"Scribes manage nearby industry while stocked with papyrus. Green cubes mark the footprint until art lands."}
+  {key:"#industry_office_managing", text:"Managing workshops:"}
+  {key:"#industry_office_needs_papyrus", text:"Needs papyrus"}
+  {key:"#industry_office_needs_workers", text:"Needs scribes (workers)"}
+  {key:"#industry_office_inactive", text:"Office inactive"}
+  {key:"#industry_office_working", text:"Issuing production orders"}
+  {key:"#industry_office_mothball_all", text:"Mothball all"}
+  {key:"#industry_office_unmothball_all", text:"Resume all"}
+  {key:"#food_mill_no_road_access", text:"This mill has no road access. Workers cannot bring food in."}
+  {key:"#food_mill_storing", text:"Storing"}
+  {key:"#food_mill_space_for", text:"Space for"}
+  {key:"#food_mill_units", text:"units"}
+  {key:"#food_mill_quality_now", text:"Food quality now:"}
+  {key:"#food_mill_variety_none", text:"none (empty)"}
+  {key:"#food_mill_variety_bland", text:"Bland"}
+  {key:"#food_mill_variety_plain", text:"Plain"}
+  {key:"#food_mill_variety_appetizing", text:"Appetizing"}
+  {key:"#food_mill_variety_tasty", text:"Tasty"}
+  {key:"#bazaar_desired_variety", text:"Desired food types:"}
+  {key:"#bazaar_min_variety", text:"Minimum mill variety:"}
+  {key:"#bazaar_waiting_mill_variety", text:"Waiting for mill food variety."}
   {key:"#building_dike", text:"Dike"}
   {key:"#building_dike_info", text:"Earth embankment for floodplain basin irrigation. Seal a contour around farms to improve yields after the inundation."}
   {key:"#terrain_dike_sealed", text:"Sealed basin"}

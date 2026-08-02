@@ -112,6 +112,8 @@ struct city_finance_t {
     finance_overview this_year;
     int16_t interest_so_far;
     int32_t wages_so_far;
+    int32_t wages_grain_deben_so_far;
+    int32_t wages_grain_deben_last_year;
     int32_t cheated_money;
     bool tribute_not_paid_last_year;
     uint8_t tribute_not_paid_total_years;

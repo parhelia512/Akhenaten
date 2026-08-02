@@ -84,6 +84,32 @@ localization_hu = [
   {key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Ptah haragja: skorpiórajtaütés templomokból ipar nélkül (TEMP Enhanced)"}
   {key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Inváziók auto-megoldása: az ellenség a bejáratnál vár, gyorscsata 8 nap múlva (fal/torony nem számít; fáraó benne; nem felkelés)"}
   {key:"#TR_CONFIG_FLOOD_BASINS", text:"Enhanced: gátak / medencék (zárd körbe — jobb termés áradás után)"}
+  {key:"#TR_CONFIG_FOOD_MILL", text:"Enhanced: bazár ételváltozatosság + malom épület (ideiglenes grafika)"}
+  {key:"#TR_CONFIG_INDUSTRY_OFFICE", text:"Enhanced: ipari hivatal — műhelyek leállítása sugárban (papirusz + írnokok)"}
+  {key:"#TR_CONFIG_LABOR_CATEGORY_SPLIT", text:"Enhanced: raktárak/dokkok külön az ipartól a munkaügyi tanácsadóban"}
+  {key:"#labor_category_storage", text:"Tárolás és elosztás"}
+  {key:"#labor_category_industry", text:"Ipar"}
+  {key:"#labor_category_industry_commerce", text:"Ipar és kereskedelem"}
+  {key:"#labor_category_culture", text:"Kultúra"}
+  {key:"#TR_CONFIG_HISTORICAL_ECONOMY", text:"Enhanced: történelmi gazdaság — a deben értékmérő; a bérek egy része magtári gabonából"}
+  {key:"#finance_deben_unit_of_account", text:"deben-súly"}
+  {key:"#finance_historical_economy_hint", text:"A deben értékmérő (fémsúly), nem érme. A munka egy része magtári gabonából fizethető, ha van."}
+  {key:"#finance_wages_paid_in_grain", text:"Gabonában fizetett bér (deben-egyenérték)"}
+  {key:"#building_food_mill", text:"Malom (ideiglenes)"}
+  {key:"#building_food_mill_info", text:"Ideiglenes helyőrző. Zöld kockák jelölik a malmot. Élelmiszert tárol és változatosságot jelez."}
+  {key:"#food_mill_no_road_access", text:"A malomnak nincs útcsatlakozása. A munkások nem tudnak ételt szállítani."}
+  {key:"#food_mill_storing", text:"Tárolva"}
+  {key:"#food_mill_space_for", text:"Hely"}
+  {key:"#food_mill_units", text:"egység"}
+  {key:"#food_mill_quality_now", text:"Élelmiszer minősége:"}
+  {key:"#food_mill_variety_none", text:"nincs (üres)"}
+  {key:"#food_mill_variety_bland", text:"Ízetlen"}
+  {key:"#food_mill_variety_plain", text:"Egyszerű"}
+  {key:"#food_mill_variety_appetizing", text:"Ínycsiklandó"}
+  {key:"#food_mill_variety_tasty", text:"Ízletes"}
+  {key:"#bazaar_desired_variety", text:"Kívánt ételtípusok:"}
+  {key:"#bazaar_min_variety", text:"Min. malom-változatosság:"}
+  {key:"#bazaar_waiting_mill_variety", text:"Várakozás a malom ételváltozatosságára."}
   {key:"#TR_CONFIG_ENHANCED_NILOMETER", text:"Enhanced: nilométer HUD (áradás minősége, fázis, ártér info)"}
   {key:"#flood_phase_imminent", text:"Áradás közelít"}
   {key:"#flood_phase_flooding", text:"Áradás"}

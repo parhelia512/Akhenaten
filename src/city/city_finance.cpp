@@ -13,6 +13,9 @@
 #include "core/random.h"
 #include "figure/figure.h"
 #include "building/building_mansion.h"
+#include "city/city_resource.h"
+#include "empire/trade_prices.h"
+#include "game/resource.h"
 #include "js/js_game.h"
 #include "scenario/scenario.h"
 
@@ -44,6 +47,11 @@ void city_finance_t::init() {
         calculate_totals();
     });
 
+    // HE2 runtime-only counters (not in save): clear after load / new mission.
+    events::subscribe([this] (event_level_post_load) {
+        wages_grain_deben_so_far = 0;
+        wages_grain_deben_last_year = 0;
+    });
 }
 
 void city_finance_t::change_wages(int amount) {
@@ -302,10 +310,35 @@ void city_finance_t::collect_monthly_taxes() {
 }
 
 void city_finance_t::pay_monthly_wages() {
-    int montly_wages = wages * g_city.labor.workers_employed / 10 / 12;
-    treasury -= montly_wages;
-    wages_so_far += montly_wages;
-    wage_rate_paid_this_year += montly_wages;
+    int monthly_wages = wages * g_city.labor.workers_employed / 10 / 12;
+    int treasury_pay = monthly_wages;
+    int grain_deben_paid = 0;
+
+    if (!!game_features::gameplay_enhanced_historical_economy && monthly_wages > 0) {
+        const int grain_budget = monthly_wages / 2;
+        int price = trade_price_buy(RESOURCE_GRAIN);
+        if (price < 1) {
+            price = 1;
+        }
+        const int want_units = grain_budget / price;
+        if (want_units > 0) {
+            event_granaries_remove_resource ev{RESOURCE_GRAIN, want_units};
+            city_granaries_remove_resource(ev);
+            const int removed = want_units - ev.amount;
+            if (removed > 0) {
+                grain_deben_paid = removed * price;
+                if (grain_deben_paid > monthly_wages) {
+                    grain_deben_paid = monthly_wages;
+                }
+                treasury_pay = monthly_wages - grain_deben_paid;
+            }
+        }
+    }
+
+    treasury -= treasury_pay;
+    wages_so_far += monthly_wages;
+    wages_grain_deben_so_far += grain_deben_paid;
+    wage_rate_paid_this_year += monthly_wages;
 }
 
 void city_finance_t::pay_monthly_interest() {
@@ -380,6 +413,8 @@ void city_finance_t::copy_amounts_to_last_year() {
     // wages
     last_year.expenses.wages = wages_so_far;
     wages_so_far = 0;
+    wages_grain_deben_last_year = wages_grain_deben_so_far;
+    wages_grain_deben_so_far = 0;
     wage_rate_paid_last_year = wage_rate_paid_this_year;
     wage_rate_paid_this_year = 0;
 

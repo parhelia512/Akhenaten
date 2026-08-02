@@ -19,12 +19,14 @@
 #include "building/building_house.h"
 #include "building/building_bazaar.h"
 #include "building/building_granary.h"
+#include "building/building_food_mill.h"
 #include "building/building_static_params.h"
 #include "building/building_storage.h"
 #include "building/building_storage_yard.h"
 #include "building/building_temple_complex.h"
 #include "building/monument_mastaba.h"
 #include "building/monument_pyramid.h"
+#include "building/monument_royal_tomb.h"
 #include "building/monuments.h"
 #include "building/construction_blessing.h"
 #include "grid/grid.h"
@@ -39,6 +41,8 @@
 #include "figuretype/figure_market_buyer.h"
 #include "figuretype/figure_missile.h"
 #include "figuretype/figure_hunter.h"
+#include "figuretype/figure_stonemason.h"
+#include "figuretype/figure_tomb_artisan.h"
 #include "figuretype/animal_lion.h"
 #include "figuretype/animal_asp.h"
 #include "figuretype/animal_scorpion.h"
@@ -70,6 +74,7 @@
 #include "game/autosave_module.h"
 #include "core/bstring.h"
 #include "game/game.h"
+#include "game/resource.h"
 #include "io/gamestate/boilerplate.h"
 #include "game/game_events.h"
 #include "scenario/scenario.h"
@@ -1837,6 +1842,55 @@ static int __test_monument_resource_pct(int bid, int resource) {
 }
 ANK_FUNCTION_2(__test_monument_resource_pct);
 
+static int __test_royal_tomb_lamp_stock(int bid) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    auto *tomb = head ? head->dcast_royal_tomb() : nullptr;
+    return tomb ? tomb->lamp_stock() : -1;
+}
+ANK_FUNCTION_1(__test_royal_tomb_lamp_stock);
+
+static int __test_royal_tomb_lamp_stock_room(int bid) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    auto *tomb = head ? head->dcast_royal_tomb() : nullptr;
+    return tomb ? tomb->lamp_stock_room() : -1;
+}
+ANK_FUNCTION_1(__test_royal_tomb_lamp_stock_room);
+
+// Attach a living guild walker to a royal tomb worker slot (bypasses pathing).
+// Returns figure id, or 0 on failure.
+static int __test_royal_tomb_attach_worker(int bid, int figure_type) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    auto *tomb = head ? head->dcast_royal_tomb() : nullptr;
+    if (!tomb || figure_type <= 0) {
+        return 0;
+    }
+    if (!tomb->need_workers()) {
+        return 0;
+    }
+
+    const tile2i at = tomb->access_point();
+    figure *f = figure_create((e_figure_type)figure_type, at, DIR_0_TOP_RIGHT);
+    if (!f || !f->id || !f->is_alive()) {
+        return 0;
+    }
+    if (figure_type == FIGURE_STONEMASON) {
+        f->action_state = FIGURE_ACTION_14_MASON_WORK_GROUND;
+    } else if (figure_type == FIGURE_TOMB_ARTISAN) {
+        f->action_state = ACTION_14_TOMB_ARTISAN_WORK;
+        if (auto *impl = static_cast<figure_tomb_artisan *>(f->dcast())) {
+            impl->runtime_data().destination_bid = head->id;
+        }
+    }
+    f->set_destination(head);
+    f->destination_tile = at;
+    tomb->add_workers(f->id);
+    return f->id;
+}
+ANK_FUNCTION_2(__test_royal_tomb_attach_worker);
+
 // Call building_impl::update_day() (e.g. pyramid phase advance / congrats).
 static void __test_building_update_day(int bid) {
     building *b = building_get(bid);
@@ -2215,6 +2269,12 @@ static int __test_bazaar_max_buyers_param() {
 }
 ANK_FUNCTION(__test_bazaar_max_buyers_param);
 
+static int __test_bazaar_food_variety_target_param() {
+    const auto &p = (const building_bazaar::static_params &)building_static_params::get(BUILDING_BAZAAR);
+    return p.food_variety_target;
+}
+ANK_FUNCTION(__test_bazaar_food_variety_target_param);
+
 static int __test_bazaar_count_buyers(int bid) {
     auto *bazaar = building_get(bid)->dcast_bazaar();
     return bazaar ? bazaar->count_market_buyers() : -1;
@@ -2248,6 +2308,95 @@ static int __test_bazaar_pick_next_inventory(int bid) {
 }
 ANK_FUNCTION_1(__test_bazaar_pick_next_inventory);
 
+static int __test_bazaar_get_storage_inventory(int bid) {
+    auto *bazaar = building_get(bid)->dcast_bazaar();
+    if (!bazaar) {
+        return -1;
+    }
+    building *dest = bazaar->get_storage_destination();
+    if (!dest || !dest->id) {
+        return -1;
+    }
+    return bazaar->runtime_data().fetch_inventory_id;
+}
+ANK_FUNCTION_1(__test_bazaar_get_storage_inventory);
+
+static int __test_bazaar_get_storage_destination_type(int bid) {
+    auto *bazaar = building_get(bid)->dcast_bazaar();
+    if (!bazaar) {
+        return -1;
+    }
+    building *dest = bazaar->get_storage_destination();
+    if (!dest || !dest->id) {
+        return 0;
+    }
+    return dest->type;
+}
+ANK_FUNCTION_1(__test_bazaar_get_storage_destination_type);
+
+static int __test_bazaar_get_storage_destination_id(int bid) {
+    auto *bazaar = building_get(bid)->dcast_bazaar();
+    if (!bazaar) {
+        return -1;
+    }
+    building *dest = bazaar->get_storage_destination();
+    return (dest && dest->id) ? dest->id : 0;
+}
+ANK_FUNCTION_1(__test_bazaar_get_storage_destination_id);
+
+static int __test_bazaar_set_desired_variety(int bid, int value) {
+    auto *bazaar = building_get(bid)->dcast_bazaar();
+    if (!bazaar) {
+        return 0;
+    }
+    bazaar->set_desired_variety((uint8_t)value);
+    return bazaar->desired_variety();
+}
+ANK_FUNCTION_2(__test_bazaar_set_desired_variety);
+
+static int __test_bazaar_set_min_variety(int bid, int value) {
+    auto *bazaar = building_get(bid)->dcast_bazaar();
+    if (!bazaar) {
+        return 0;
+    }
+    bazaar->set_min_variety((uint8_t)value);
+    return bazaar->min_variety();
+}
+ANK_FUNCTION_2(__test_bazaar_set_min_variety);
+
+static int __test_bazaar_desired_variety(int bid) {
+    auto *bazaar = building_get(bid)->dcast_bazaar();
+    return bazaar ? bazaar->desired_variety() : -1;
+}
+ANK_FUNCTION_1(__test_bazaar_desired_variety);
+
+static int __test_bazaar_min_variety(int bid) {
+    auto *bazaar = building_get(bid)->dcast_bazaar();
+    return bazaar ? bazaar->min_variety() : -1;
+}
+ANK_FUNCTION_1(__test_bazaar_min_variety);
+
+static int __test_bazaar_waiting_for_mill(int bid) {
+    auto *bazaar = building_get(bid)->dcast_bazaar();
+    return bazaar ? (bazaar->waiting_for_mill_variety() ? 1 : 0) : -1;
+}
+ANK_FUNCTION_1(__test_bazaar_waiting_for_mill);
+
+static int __test_market_buyer_take_food(int fid, int market_id, int storage_id) {
+    figure *f = figure_get(fid);
+    if (!f || f->type != FIGURE_MARKET_BUYER) {
+        return -1;
+    }
+    auto *buyer = f->dcast_market_buyer();
+    building *market = building_get(market_id);
+    building *storage = building_get(storage_id);
+    if (!buyer || !market || !storage) {
+        return -1;
+    }
+    return buyer->take_food_from_storage(market, storage);
+}
+ANK_FUNCTION_3(__test_market_buyer_take_food);
+
 static int __test_bazaar_set_inventory(int bid, int inv, int amount) {
     auto *bazaar = building_get(bid)->dcast_bazaar();
     if (!bazaar || inv < 0 || inv >= INVENTORY_MAX) {
@@ -2266,6 +2415,12 @@ static int __test_bazaar_get_inventory(int bid, int inv) {
     return bazaar->runtime_data().inventory[inv].value;
 }
 ANK_FUNCTION_2(__test_bazaar_get_inventory);
+
+static int __test_bazaar_food_types(int bid) {
+    auto *bazaar = building_get(bid)->dcast_bazaar();
+    return bazaar ? bazaar->food_types_in_inventory() : -1;
+}
+ANK_FUNCTION_1(__test_bazaar_food_types);
 
 static void __test_bazaar_set_good_demands(int bid, int pottery, int luxury, int linen, int beer) {
     auto *bazaar = building_get(bid)->dcast_bazaar();
@@ -2371,6 +2526,179 @@ static int __test_granary_add_allowed_food(int bid, int food_index, int amount) 
     return granary->add_resource(res, amount, /*force*/true) >= 0 ? 1 : 0;
 }
 ANK_FUNCTION_3(__test_granary_add_allowed_food);
+
+static int __test_granary_add_resource(int bid, int resource, int amount) {
+    building *b = building_get(bid);
+    auto *granary = b ? b->dcast_granary() : nullptr;
+    if (!granary || !b->is_valid() || amount <= 0) {
+        return 0;
+    }
+    return granary->add_resource((e_resource)resource, amount, /*force*/true) >= 0 ? 1 : 0;
+}
+ANK_FUNCTION_3(__test_granary_add_resource);
+
+static int __test_granary_set_resource(int bid, int resource, int amount) {
+    building *b = building_get(bid);
+    auto *granary = b ? b->dcast_granary() : nullptr;
+    if (!granary || !b->is_valid() || amount < 0 || !resource_is_food((e_resource)resource)) {
+        return 0;
+    }
+    auto &stored = granary->runtime_data().resource_stored;
+    const e_resource res = (e_resource)resource;
+    const int old_amount = stored[res];
+    stored[res] = static_cast<short>(amount);
+    stored[RESOURCE_NONE] = static_cast<short>(stored[RESOURCE_NONE] + old_amount - amount);
+    if (stored[RESOURCE_NONE] < 0) {
+        stored[RESOURCE_NONE] = 0;
+    }
+    return 1;
+}
+ANK_FUNCTION_3(__test_granary_set_resource);
+
+static int __test_granary_clear_allowed_food(int bid, int food_index) {
+    building *b = building_get(bid);
+    auto *granary = b ? b->dcast_granary() : nullptr;
+    if (!granary || !b->is_valid() || food_index < 0 || food_index >= INVENTORY_MAX_FOOD) {
+        return 0;
+    }
+    e_resource res = g_city.allowed_foods(food_index);
+    if (res == RESOURCE_NONE) {
+        return 0;
+    }
+    granary->runtime_data().resource_stored[res] = 0;
+    return 1;
+}
+ANK_FUNCTION_2(__test_granary_clear_allowed_food);
+
+static int __test_city_allowed_food(int food_index) {
+    if (food_index < 0 || food_index >= INVENTORY_MAX_FOOD) {
+        return 0;
+    }
+    return (int)g_city.allowed_foods(food_index);
+}
+ANK_FUNCTION_1(__test_city_allowed_food);
+
+static int __test_set_allowed_food(int food_index, int resource) {
+    if (food_index < 0 || food_index >= INVENTORY_MAX_FOOD) {
+        return 0;
+    }
+    g_city.set_allowed_food(food_index, (e_resource)resource);
+    // Refresh bazaar slot types so accept toggles / display match the new foods.
+    buildings_valid_do([](building &b) {
+        if (auto *bazaar = b.dcast_bazaar()) {
+            bazaar->on_post_load();
+        }
+    }, BUILDING_BAZAAR);
+    return 1;
+}
+ANK_FUNCTION_2(__test_set_allowed_food);
+
+static int __test_city_recalc_granary_stored(int resource) {
+    g_city.resource.calculate_available_food();
+    return (int)g_city.resource.granary_stored((e_resource)resource);
+}
+ANK_FUNCTION_1(__test_city_recalc_granary_stored);
+
+static int __test_food_mill_add_resource(int bid, int resource, int amount) {
+    building *b = building_get(bid);
+    auto *mill = b ? b->dcast_food_mill() : nullptr;
+    if (!mill || !b->is_valid() || amount <= 0) {
+        return 0;
+    }
+    return mill->add_resource((e_resource)resource, amount, /*force*/true) >= 0 ? 1 : 0;
+}
+ANK_FUNCTION_3(__test_food_mill_add_resource);
+
+static int __test_food_mill_amount(int bid, int resource) {
+    building *b = building_get(bid);
+    auto *mill = b ? b->dcast_food_mill() : nullptr;
+    if (!mill || !b->is_valid()) {
+        return -1;
+    }
+    return mill->amount((e_resource)resource);
+}
+ANK_FUNCTION_2(__test_food_mill_amount);
+
+static int __test_food_mill_variety(int bid) {
+    building *b = building_get(bid);
+    auto *mill = b ? b->dcast_food_mill() : nullptr;
+    if (!mill || !b->is_valid()) {
+        return -1;
+    }
+    return mill->food_variety();
+}
+ANK_FUNCTION_1(__test_food_mill_variety);
+
+static int __test_food_mill_total_stored(int bid) {
+    building *b = building_get(bid);
+    auto *mill = b ? b->dcast_food_mill() : nullptr;
+    if (!mill || !b->is_valid()) {
+        return -1;
+    }
+    return mill->total_stored();
+}
+ANK_FUNCTION_1(__test_food_mill_total_stored);
+
+static int __test_food_mill_freespace(int bid) {
+    building *b = building_get(bid);
+    auto *mill = b ? b->dcast_food_mill() : nullptr;
+    if (!mill || !b->is_valid()) {
+        return -1;
+    }
+    return mill->freespace();
+}
+ANK_FUNCTION_1(__test_food_mill_freespace);
+
+static int __test_food_mill_set_getting(int bid, int resource) {
+    building *b = building_get(bid);
+    auto *mill = b ? b->dcast_food_mill() : nullptr;
+    if (!mill || !b->is_valid()) {
+        return 0;
+    }
+    for (int i = 0; i < 8; i++) {
+        if (mill->is_getting((e_resource)resource)) {
+            return 1;
+        }
+        building_storage_cycle_resource_state(mill->storage_id(), resource, false);
+    }
+    return mill->is_getting((e_resource)resource) ? 1 : 0;
+}
+ANK_FUNCTION_2(__test_food_mill_set_getting);
+
+static int __test_food_mill_find_getting_source(int bid) {
+    building *b = building_get(bid);
+    auto *mill = b ? b->dcast_food_mill() : nullptr;
+    if (!mill || !b->is_valid()) {
+        return 0;
+    }
+    g_city.resource.calculate_stocks();
+    return mill->find_storage_for_getting().building_id;
+}
+ANK_FUNCTION_1(__test_food_mill_find_getting_source);
+
+static int __test_food_mill_spawn_figure(int bid) {
+    building *b = building_get(bid);
+    auto *mill = b ? b->dcast_food_mill() : nullptr;
+    if (!mill || !b->is_valid()) {
+        return -1;
+    }
+    b->has_road_access = true;
+    if (b->road_network_id <= 0) {
+        b->road_network_id = 1;
+    }
+    if (b->distance_from_entry <= 0) {
+        b->distance_from_entry = 1;
+    }
+    g_city.resource.calculate_stocks();
+    const bool before = mill->has_figure_of_type(0, FIGURE_STORAGEYARD_CART);
+    mill->spawn_figure();
+    const bool after = mill->has_figure_of_type(0, FIGURE_STORAGEYARD_CART);
+    if (before) {
+        return 0;
+    }
+    return after ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_food_mill_spawn_figure);
 
 static int __test_resolve_building_road_access(int type, int x, int y, int size, int orientation) {
     if (type <= BUILDING_NONE || type >= BUILDING_MAX) {

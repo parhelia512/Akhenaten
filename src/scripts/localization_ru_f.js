@@ -74,6 +74,32 @@ localization_ru_f = [
     { key:"#TR_CONFIG_PTAH_SCORPION_RAID", text:"Гнев Птаха: набег скорпионов из храмов, если нет промышленности (TEMP Enhanced)"}
     { key:"#TR_CONFIG_AUTO_RESOLVE_INVASIONS", text:"Автобой вторжений: враги ждут на входе, быстрая битва через 8 дней (стены/башни не считаются; фараон включён; не восстания)"}
     { key:"#TR_CONFIG_FLOOD_BASINS", text:"Enhanced: дамбы / бассейны на пойме (замкните контур — лучше урожай после разлива)"}
+    { key:"#TR_CONFIG_FOOD_MILL", text:"Enhanced: разнообразие еды у базара + здание мельницы (арт-заглушка)"}
+    { key:"#TR_CONFIG_INDUSTRY_OFFICE", text:"Enhanced: офис индустрии — mothball цехов в радиусе (папирус + писцы)"}
+    { key:"#TR_CONFIG_LABOR_CATEGORY_SPLIT", text:"Enhanced: склады и доки отдельно от индустрии в советнике по труду"}
+    { key:"#labor_category_storage", text:"Склады и снабжение"}
+    { key:"#labor_category_industry", text:"Индустрия"}
+    { key:"#labor_category_industry_commerce", text:"Индустрия и торговля"}
+    { key:"#labor_category_culture", text:"Культура"}
+    { key:"#TR_CONFIG_HISTORICAL_ECONOMY", text:"Enhanced: историчная экономика — deben как мера ценности; часть зарплат зерном из амбаров"}
+    { key:"#finance_deben_unit_of_account", text:"мера deben"}
+    { key:"#finance_historical_economy_hint", text:"Deben — мера ценности (вес металла), не монеты. Часть труда оплачивается зерном из амбаров, если оно есть."}
+    { key:"#finance_wages_paid_in_grain", text:"Зарплата зерном (экв. deben)"}
+    { key:"#building_food_mill", text:"Мельница (врем.)"}
+    { key:"#building_food_mill_info", text:"Временная заглушка. Зелёные кубы — контур мельницы. Склад еды и разнообразие уже работают."}
+    { key:"#food_mill_no_road_access", text:"У мельницы нет доступа к дороге. Рабочие не могут подвозить еду."}
+    { key:"#food_mill_storing", text:"Хранится"}
+    { key:"#food_mill_space_for", text:"Места на"}
+    { key:"#food_mill_units", text:"ед."}
+    { key:"#food_mill_quality_now", text:"Качество еды:"}
+    { key:"#food_mill_variety_none", text:"нет (пусто)"}
+    { key:"#food_mill_variety_bland", text:"Пресная"}
+    { key:"#food_mill_variety_plain", text:"Простая"}
+    { key:"#food_mill_variety_appetizing", text:"Аппетитная"}
+    { key:"#food_mill_variety_tasty", text:"Вкусная"}
+    { key:"#bazaar_desired_variety", text:"Желаемые типы еды:"}
+    { key:"#bazaar_min_variety", text:"Мин. разнообразие мельницы:"}
+    { key:"#bazaar_waiting_mill_variety", text:"Ждём разнообразия еды на мельнице."}
     { key:"#building_dike", text:"Дамба"}
     { key:"#building_dike_info", text:"Земляной вал для ирригации бассейнов на пойме. Замкните контур вокруг ферм — урожай после разлива будет выше."}
     { key:"#terrain_dike_sealed", text:"Замкнутый бассейн"}
