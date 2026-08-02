@@ -8,7 +8,7 @@ mission5 { // Timna
 	start_message : "message_history_military"
 	selection_title : "Timna"
 	env {
-		has_animals : false
+		has_animals : true
 		marshland_grow : default_marshland_grow
 	    tree_grow : default_tree_grow
 		hide_nilometer : true

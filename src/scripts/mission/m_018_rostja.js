@@ -55,7 +55,7 @@ mission18 { // Rostja (Giza) — The Great Pyramid and Sphinx
 	}
 
 	env {
-		has_animals : false
+		has_animals : true
 		marshland_grow : default_marshland_grow
 		tree_grow : default_tree_grow
 	}

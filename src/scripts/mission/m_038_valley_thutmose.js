@@ -15,7 +15,7 @@ mission38 { // Thutmose in the Valley — The First Tomb
 	house_tax_multipliers [300, 200, 150, 100, 75]
 
 	env {
-		has_animals : false
+		has_animals : true
 		flotsam_enabled : false
 		marshland_grow : default_marshland_grow
 		tree_grow : default_tree_grow

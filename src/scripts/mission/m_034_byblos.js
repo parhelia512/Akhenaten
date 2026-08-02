@@ -25,7 +25,7 @@ mission34 { // Byblos — Expansion and Conquest
 	house_tax_multipliers [300, 200, 150, 100, 75]
 
 	env {
-		has_animals : false
+		has_animals : true
 		marshland_grow : default_marshland_grow
 		tree_grow : default_tree_grow
 	}

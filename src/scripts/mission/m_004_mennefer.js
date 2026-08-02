@@ -7,7 +7,7 @@ mission4 {
 	start_message : "message_trade_on_the_water"
 	selection_title : "Mennefer"
 	env {
-		has_animals : false
+		has_animals : true
 		marshland_grow : default_marshland_grow
 	    tree_grow : default_tree_grow
 	}

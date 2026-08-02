@@ -9,7 +9,7 @@ mission9 { // Abu — The Nubian Border
 	start_message : "message_history_abu"
 	selection_title : "Abu"
 	env {
-		has_animals : false
+		has_animals : true
 		marshland_grow : default_marshland_grow
 		tree_grow : default_tree_grow
 	}

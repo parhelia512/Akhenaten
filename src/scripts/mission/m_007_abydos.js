@@ -7,7 +7,7 @@ mission7 { // Abydos / Abedju — The Challenge of the Sea
 	start_message : "message_soldiers_and_forts"
 	selection_title : "Abydos"
 	env {
-		has_animals : false
+		has_animals : true
 		marshland_grow : default_marshland_grow
 		tree_grow : default_tree_grow
 	}
