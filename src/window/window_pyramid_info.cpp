@@ -8,6 +8,8 @@
 #include "window/building/common.h"
 #include "window/window_building_info.h"
 
+#include <algorithm>
+
 struct info_window_pyramid : building_info_window_t<info_window_pyramid> {
     virtual void init(object_info &c) override;
     virtual bool check(object_info &c) override {
@@ -153,8 +155,11 @@ void info_window_pyramid::init(object_info &c) {
             min_pct = 100;
         }
 
+        // Denominator = last schedule index (phases()-1), not vector size.
+        // Size is the finish threshold for set_phase (e.g. small 27 → FINISHED).
+        const int last_phase = std::max(0, pyramid->phases() - 1);
         bstring64 progress_str;
-        progress_str.printf("%d / %d    %d%%", (int)d.phase, pyramid->phases(), min_pct);
+        progress_str.printf("%d / %d    %d%%", (int)d.phase, last_phase, min_pct);
         ui["progress_text"] = progress_str;
 
         auto fill_resource_slot = [&] (e_resource r, pcstr icon_key, pcstr text_key) {

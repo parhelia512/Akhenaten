@@ -73,7 +73,8 @@ int __monument_material_pct_min(int bid) {
     auto &d = m->runtime_data();
     int min_pct = 100;
     bool any = false;
-    for (int ri = (int)RESOURCES_MIN; ri <= (int)RESOURCES_MAX; ++ri) {
+    // RESOURCES_MAX is exclusive (array is resources_pct[RESOURCES_MAX]).
+    for (int ri = (int)RESOURCES_MIN; ri < (int)RESOURCES_MAX; ++ri) {
         const auto r = (e_resource)ri;
         if (m->needs_resource(r) <= 0) {
             continue;
@@ -84,3 +85,9 @@ int __monument_material_pct_min(int bid) {
     return any ? min_pct : 100;
 }
 ANK_FUNCTION_1(__monument_material_pct_min)
+
+bool __monument_need_stonemason(int bid) {
+    building_monument *m = monument_from_building(bid);
+    return m && m->need_stonemason();
+}
+ANK_FUNCTION_1(__monument_need_stonemason)

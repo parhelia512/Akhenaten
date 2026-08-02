@@ -178,8 +178,8 @@ public:
 };
 
 // Large stepped pyramid (20×20, id 250). Same shared stepped machinery as small/medium,
-// only the footprint (init_tiles) and phase schedule differ. Marble polish is
-// true-pyramid only, not stepped.
+// only the footprint (init_tiles) and phase schedule differ. Limestone casing polish is
+// true/mudbrick only, not stepped.
 class building_large_stepped_pyramid : public building_stepped_pyramid {
 public:
     BUILDING_METAINFO(BUILDING_LARGE_STEPPED_PYRAMID, building_large_stepped_pyramid, building_stepped_pyramid)
@@ -208,7 +208,7 @@ public:
     BUILDING_METAINFO(BUILDING_LARGE_STEPPED_PYRAMID_WALL, building_large_stepped_pyramid_wall, building_large_stepped_pyramid)
 };
 
-// Complex = plain 20×20 (same footprint/pipeline as large). Causeway/temples not yet built.
+// Complex = plain 20×20 (same footprint/pipeline as large) + causeway; temples later.
 // Reuses LARGE_* part types (334–336) via JS corner/wall/cone/filler params.
 // Own wrappers required: BUILDING_STATIC_DATA current_params() is keyed on TYPE.
 class building_stepped_pyramid_complex : public building_stepped_pyramid {
@@ -440,6 +440,7 @@ public:
     virtual const base_params &pyramid_params() const override { return current_params(); }
     virtual bool need_stonemason() override;
     virtual bool use_polish_sprites_for_layer(int layer) const override;
+    virtual void on_phase_changed(int old, int current) override;
 
     virtual const monument &config() const override;
 };
@@ -565,6 +566,8 @@ public:
     virtual const base_params &pyramid_params() const override { return current_params(); }
     virtual bool need_stonemason() override;
     virtual bool use_polish_sprites_for_layer(int layer) const override;
+    // Phase 36 is polish begin and also 6*(L+1) for L=5 — must not raise a phantom ring.
+    virtual void on_phase_changed(int old, int current) override;
 
     virtual const monument &config() const override;
 };
@@ -586,7 +589,7 @@ public:
     BUILDING_METAINFO(BUILDING_LARGE_PYRAMID_CONE, building_large_pyramid_cone, building_large_pyramid)
 };
 
-// True pyramid complex = plain 20×20 (same as large). Causeway/temples not yet built.
+// True pyramid complex = plain 20×20 (same as large) + causeway; temples later.
 // Reuses LARGE_PYRAMID part types (344–346) via JS corner/wall/cone/filler params.
 class building_pyramid_complex : public building_large_pyramid {
 public:

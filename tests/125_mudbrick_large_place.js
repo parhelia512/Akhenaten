@@ -106,7 +106,9 @@ function run_test() {
     }
 
     // Polish mid-band @36: no limestone/bricks required → material_pct_min 100
+    // set_phase fills tiles to 200 → park mid-progress before any day tick / pump.
     __test_monument_set_phase(bid, 36)
+    __test_monument_set_all_progress(bid, 50)
     __test_pump_frames(2)
     var mon36 = city.get_monument(bid)
     if (mon36 && mon36.phase() == 36) {

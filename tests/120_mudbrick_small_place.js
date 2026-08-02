@@ -118,7 +118,9 @@ function run_test() {
     }
 
     // Polish mid-band: material_pct_min == 100 when no limestone/bricks required.
+    // set_phase fills tiles to 200 → park mid-progress before any day tick / pump.
     __test_monument_set_phase(bid, 24)
+    __test_monument_set_all_progress(bid, 50)
     __test_pump_frames(2)
     var mon24 = city.get_monument(bid)
     if (mon24 && mon24.phase() == 24) {
@@ -157,10 +159,10 @@ function run_test() {
         __log_marker('mudbrick_pyramid_small_art_ok:' + img)
         __test_monument_set_phase(bid, 23)
         __test_pump_frames(4)
-        graphics_save_screenshot(false)
+        __game_save_screenshot(SCREENSHOT_DISPLAY)
         __test_monument_set_phase(bid, 25)
         __test_pump_frames(4)
-        graphics_save_screenshot(false)
+        __game_save_screenshot(SCREENSHOT_DISPLAY)
     } else {
         __log_marker('mudbrick_pyramid_small_art_skipped:no_resource')
     }

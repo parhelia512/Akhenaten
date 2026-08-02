@@ -1987,6 +1987,22 @@ static int __test_monument_min_progress(int bid) {
 }
 ANK_FUNCTION_1(__test_monument_min_progress);
 
+// Override tile progress after set_phase (which fills 200). Mid-progress keeps
+// update_day from advancing the phase across save/load day ticks.
+static void __test_monument_set_all_progress(int bid, int progress) {
+    building *b = building_get(bid);
+    building *head = b ? b->main() : nullptr;
+    if (!head || !head->dcast_monument()) {
+        return;
+    }
+    const uint32_t v = (uint32_t)std::clamp(progress, 0, 200);
+    grid_tiles tiles = map_grid_get_tiles(head, 0);
+    for (auto &t : tiles) {
+        map_monuments_set_progress(t, v);
+    }
+}
+ANK_FUNCTION_2(__test_monument_set_all_progress);
+
 // Force-stock a storage yard (bypasses accepting/getting rules). Yard must already exist.
 // Force-remove from a storage yard. Returns true when the resource is fully gone.
 static bool __test_storage_yard_remove_resource(int bid, int resource, int amount) {

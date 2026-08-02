@@ -16,8 +16,12 @@ function monuments_advisor_status_line(bid) {
         return __loc(5, 32)
     }
     var pct = monument.material_pct_min()
-    var totalPh = monument.phases_total()
-    return String(phase) + " / " + String(totalPh) + "    " + String(pct) + "%"
+    // phases_total() is vector size / finish threshold; UI shows last schedule index.
+    var lastPh = monument.phases_total() - 1
+    if (lastPh < 0) {
+        lastPh = 0
+    }
+    return String(phase) + " / " + String(lastPh) + "    " + String(pct) + "%"
 }
 
 function monuments_advisor_on_render_item(p) {

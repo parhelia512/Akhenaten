@@ -409,7 +409,7 @@ struct monument_medium_stepped_pyramid : public monument {
 
 // Large stepped pyramid (20×20). Schedule: foundation 0–6, then brick courses → finish@36.
 // Also used by the stepped pyramid complex until causeway/temples change costs.
-// Top-down marble polish is NOT stepped — true pyramids only.
+// Top-down limestone casing polish is NOT stepped — true/mudbrick only.
 struct monument_large_stepped_pyramid : public monument {
     monument_large_stepped_pyramid() : monument{ BUILDING_LARGE_STEPPED_PYRAMID } {
         phases.push_back({ 0, monument_phase_resource{ARCHITECTS, 1}, {RESOURCE_NONE, 0} });
@@ -1530,7 +1530,7 @@ bool building_stepped_pyramid::draw_ornaments_and_animations_hight_impl(painter 
     const auto &d = runtime_data();
     const int ph = phase();
     const int nlayers = tiles_size.x / 4;
-    // Last schedule index is the RESOURCE_NONE terminal (small 24 / medium 32 / large 36).
+    // Last schedule index = RESOURCE_NONE terminal (stepped S24/M32/L36; true adds polish first).
     const int terminal_phase = phases() - 1;
 
     auto fill_tiles_height = [](painter &ctx, tile2i tile, int img) {
@@ -2622,6 +2622,27 @@ bool building_large_mudbrick_pyramid::need_stonemason() {
     return need_workers();
 }
 
+void building_large_mudbrick_pyramid::on_phase_changed(int old, int current) {
+    // Same as true large: polish begins at 36, which collides with stepped 6*(L+1).
+    if (current >= k_polish_phase_begin) {
+        if (current >= 2) {
+            int terrain = TERRAIN_BUILDING;
+            if (current >= 3) {
+                terrain |= TERRAIN_CANAL;
+            }
+            map_building_tiles_add(id(), tile(), size(), building_image_get(), terrain);
+        }
+        if (current != MONUMENT_FINISHED) {
+            auto &d = runtime_data();
+            for (e_resource resource = RESOURCE_NONE; resource < RESOURCES_MAX; ++resource) {
+                d.resources_pct[resource] = 0;
+            }
+        }
+        return;
+    }
+    building_stepped_pyramid::on_phase_changed(old, current);
+}
+
 bool building_large_mudbrick_pyramid::use_polish_sprites_for_layer(int layer) const {
     if (is_finished()) {
         return true;
@@ -2891,6 +2912,27 @@ bool building_large_pyramid::need_stonemason() {
         return false;
     }
     return need_workers();
+}
+
+void building_large_pyramid::on_phase_changed(int old, int current) {
+    // Polish/terminal start at 36 (= 6*6) — stepped ring-raise would target L5.
+    if (current >= k_polish_phase_begin) {
+        if (current >= 2) {
+            int terrain = TERRAIN_BUILDING;
+            if (current >= 3) {
+                terrain |= TERRAIN_CANAL;
+            }
+            map_building_tiles_add(id(), tile(), size(), building_image_get(), terrain);
+        }
+        if (current != MONUMENT_FINISHED) {
+            auto &d = runtime_data();
+            for (e_resource resource = RESOURCE_NONE; resource < RESOURCES_MAX; ++resource) {
+                d.resources_pct[resource] = 0;
+            }
+        }
+        return;
+    }
+    building_stepped_pyramid::on_phase_changed(old, current);
 }
 
 bool building_large_pyramid::use_polish_sprites_for_layer(int layer) const {

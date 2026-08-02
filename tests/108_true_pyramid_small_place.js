@@ -117,8 +117,10 @@ function run_test() {
         __log_marker('true_pyramid_small_phases_fail')
     }
 
-    // Polish mid-band: material_pct_min == 100 when no limestone/stone required.
+    // Polish mid-band: no limestone/stone; guild must still request stonemasons.
+    // set_phase fills tiles to 200 → park mid-progress before any day tick / pump.
     __test_monument_set_phase(bid, 24)
+    __test_monument_set_all_progress(bid, 50)
     __test_pump_frames(2)
     var mon24 = city.get_monument(bid)
     if (mon24 && mon24.phase() == 24) {
@@ -127,6 +129,11 @@ function run_test() {
             __log_marker('true_pyramid_small_polish_no_lime_ok')
         } else {
             __log_marker('true_pyramid_small_polish_pct_fail:' + pct)
+        }
+        if (mon24.need_stonemason()) {
+            __log_marker('true_pyramid_small_polish_mason_ok')
+        } else {
+            __log_marker('true_pyramid_small_polish_mason_fail')
         }
     } else {
         __log_marker('true_pyramid_small_polish_phase_fail')
@@ -157,10 +164,10 @@ function run_test() {
         __log_marker('true_pyramid_small_art_ok:' + img)
         __test_monument_set_phase(bid, 23)
         __test_pump_frames(4)
-        graphics_save_screenshot(false)
+        __game_save_screenshot(SCREENSHOT_DISPLAY)
         __test_monument_set_phase(bid, 25)
         __test_pump_frames(4)
-        graphics_save_screenshot(false)
+        __game_save_screenshot(SCREENSHOT_DISPLAY)
     } else {
         __log_marker('true_pyramid_small_art_skipped:no_resource')
     }
@@ -225,6 +232,7 @@ function check_valid() {
         'true_pyramid_small_schedule_ok',
         'true_pyramid_small_phases_ok',
         'true_pyramid_small_polish_no_lime_ok',
+        'true_pyramid_small_polish_mason_ok',
         'true_pyramid_small_polish_clear_ok',
         'true_pyramid_small_terminal_keep_ok',
         'true_pyramid_small_natural_finish_ok'
@@ -237,6 +245,7 @@ function check_valid() {
     }
     if (__test_find_inlog('true_pyramid_small_phases_fail')
         || __test_find_inlog('true_pyramid_small_polish_pct_fail')
+        || __test_find_inlog('true_pyramid_small_polish_mason_fail')
         || __test_find_inlog('true_pyramid_small_saveload_fail')
         || __test_find_inlog('true_pyramid_small_polish_clear_fail')
         || __test_find_inlog('true_pyramid_small_terminal_keep_fail')

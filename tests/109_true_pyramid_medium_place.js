@@ -105,8 +105,10 @@ function run_test() {
         __log_marker('true_pyramid_medium_phases_fail')
     }
 
-    // Polish mid-band @32: no limestone/stone required → material_pct_min 100
+    // Polish mid-band @32: no limestone/stone; guild must still request stonemasons.
+    // set_phase fills tiles to 200 → park mid-progress before any day tick / pump.
     __test_monument_set_phase(bid, 32)
+    __test_monument_set_all_progress(bid, 50)
     __test_pump_frames(2)
     var mon32 = city.get_monument(bid)
     if (mon32 && mon32.phase() == 32) {
@@ -115,6 +117,11 @@ function run_test() {
             __log_marker('true_pyramid_medium_polish_no_lime_ok')
         } else {
             __log_marker('true_pyramid_medium_polish_pct_fail:' + pct)
+        }
+        if (mon32.need_stonemason()) {
+            __log_marker('true_pyramid_medium_polish_mason_ok')
+        } else {
+            __log_marker('true_pyramid_medium_polish_mason_fail')
         }
     } else {
         __log_marker('true_pyramid_medium_polish_phase_fail')
@@ -198,6 +205,7 @@ function check_valid() {
         'true_pyramid_medium_schedule_ok',
         'true_pyramid_medium_phases_ok',
         'true_pyramid_medium_polish_no_lime_ok',
+        'true_pyramid_medium_polish_mason_ok',
         'true_pyramid_medium_polish_clear_ok',
         'true_pyramid_medium_terminal_keep_ok',
         'true_pyramid_medium_congrats_ok'
@@ -210,6 +218,7 @@ function check_valid() {
     }
     if (__test_find_inlog('true_pyramid_medium_phases_fail')
         || __test_find_inlog('true_pyramid_medium_polish_pct_fail')
+        || __test_find_inlog('true_pyramid_medium_polish_mason_fail')
         || __test_find_inlog('true_pyramid_medium_saveload_fail')
         || __test_find_inlog('true_pyramid_medium_polish_clear_fail')
         || __test_find_inlog('true_pyramid_medium_terminal_keep_fail')

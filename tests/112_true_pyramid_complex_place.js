@@ -92,12 +92,19 @@ function run_test() {
     }
 
     __test_monument_set_phase(bid, 36)
+    __test_monument_set_all_progress(bid, 50)
     __test_pump_frames(2)
     var mon36 = city.get_monument(bid)
     if (mon36 && mon36.phase() == 36 && mon36.material_pct_min() == 100) {
         __log_marker('true_pyramid_complex_polish_no_lime_ok')
     } else {
         __log_marker('true_pyramid_complex_polish_fail')
+        all_ok = false
+    }
+    if (mon36 && mon36.need_stonemason()) {
+        __log_marker('true_pyramid_complex_polish_mason_ok')
+    } else {
+        __log_marker('true_pyramid_complex_polish_mason_fail')
         all_ok = false
     }
 
@@ -118,7 +125,8 @@ function check_valid() {
         'true_pyramid_complex_parts_ok',
         'true_pyramid_complex_schedule_ok',
         'true_pyramid_complex_phases_ok',
-        'true_pyramid_complex_polish_no_lime_ok'
+        'true_pyramid_complex_polish_no_lime_ok',
+        'true_pyramid_complex_polish_mason_ok'
     ]
     for (var i = 0; i < required.length; i++) {
         if (!__test_find_inlog(required[i])) {
@@ -129,6 +137,7 @@ function check_valid() {
     if (__test_find_inlog('true_pyramid_complex_phases_fail')
         || __test_find_inlog('true_pyramid_complex_parts_fail')
         || __test_find_inlog('true_pyramid_complex_polish_fail')
+        || __test_find_inlog('true_pyramid_complex_polish_mason_fail')
         || __test_find_inlog('true_pyramid_complex_schedule_fail')
         || __test_find_inlog('true_pyramid_complex_causeway_claimed_fail')) {
         return false
