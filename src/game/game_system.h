@@ -19,4 +19,4 @@ struct game_system {
 
 };
 
-#define ANK_ESID(es) static pcstr esid() { return #es; }; static bstring64 esid(pcstr id) { return js_helpers::es_hash_str(#es, __func__); };
+#define ANK_ESID(es) static pcstr esid() { return #es; }; static bstring64 esid(pcstr id) { return js_helpers::es_hash_str(#es, id); };

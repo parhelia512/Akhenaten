@@ -11,6 +11,7 @@
 #include "core/vec2i.h"
 #include "core/xvalue.h"
 #include "game/game_config.h"
+#include "game/game_system.h"
 #include "js/js.h"
 #include "js/js_game.h"
 #include "mujs/mujs.h"
@@ -92,6 +93,16 @@ void run_es_hash_unit_tests() {
     const xstring section = "window_mission_won";
     expect_eq_str(js_helpers::es_hash_str(section, "init"), "init+window_mission_won",
                   "es_hash_str with xstring section");
+
+    // ANK_ESID(esid(pcstr)) must hash the passed id, not the helper's own __func__.
+    struct esid_probe {
+        ANK_ESID(city_animals)
+        static bstring64 create_herds() {
+            return esid(__func__);
+        }
+    };
+    expect_eq_str(esid_probe::create_herds(), "city_animals+create_herds",
+                  "ANK_ESID esid(__func__) uses caller name, not esid");
 }
 
 // Regression: bstring::cat() previously used snprintf(_data, _size, "%s%s", _data, s),
