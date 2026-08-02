@@ -1,5 +1,7 @@
 #include "build_planner.h"
 
+#include <algorithm>
+
 #include "editor/tool.h"
 #include "graphics/view/lookup.h"
 #include "graphics/view/view.h"
@@ -324,11 +326,13 @@ void build_planner::reset() {
 void build_planner::init_tiles(int size_x, int size_y) {
     size.x = size_x;
     size.y = size_y;
+    if (size.x > TILE_DIM || size.y > TILE_DIM) {
+        logs::error("build_planner::init_tiles footprint %dx%d exceeds TILE_DIM=%d", size.x, size.y, TILE_DIM);
+        size.x = std::min(size.x, TILE_DIM);
+        size.y = std::min(size.y, TILE_DIM);
+    }
     for (int row = 0; row < size.y; ++row) {
         for (int column = 0; column < size.x; ++column) {
-            if (column > 29 || row > 29)
-                return;
-
             tile_graphics_array[row][column] = 0;
             tile_sizes_array[row][column] = 1; // reset tile size to 1 by default
             tile_blocked_array[row][column] = false;
@@ -341,7 +345,7 @@ void build_planner::init_tiles(int size_x, int size_y) {
 }
 
 void build_planner::set_tile_size(int row, int column, int size) {
-    if (row > 29 || column > 29)
+    if (row < 0 || column < 0 || row >= TILE_DIM || column >= TILE_DIM)
         return;
     tile_sizes_array[row][column] = size;
 }
@@ -377,7 +381,7 @@ void build_planner::set_graphics_row(int row, xspan<int> image_ids, int def) {
     }
 
     for (int i = 0; i < image_ids.size(); ++i) {
-        if (row > 29 || i > 29) {
+        if (row >= TILE_DIM || i >= TILE_DIM) {
             return;
         }
 

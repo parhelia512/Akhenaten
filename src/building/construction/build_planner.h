@@ -62,13 +62,16 @@ struct event_building_menu_changed { bool temp; };
 struct event_use_building { int type = 0; bool en = false; };
 
 class build_planner {
-    int tile_graphics_array[30][30] = {};
-    int tile_sizes_array[30][30] = {};
-    bool tile_blocked_array[30][30] = {};
+    // Large royal tomb footprint is 17×34 (bulk+entrance); keep headroom for rotation.
+    static constexpr int TILE_DIM = 40;
+
+    int tile_graphics_array[TILE_DIM][TILE_DIM] = {};
+    int tile_sizes_array[TILE_DIM][TILE_DIM] = {};
+    bool tile_blocked_array[TILE_DIM][TILE_DIM] = {};
     int tiles_blocked_total = 0;
 
-    tile2i tile_coord_cache[30][30];
-    vec2i pixel_coords_cache[30][30];
+    tile2i tile_coord_cache[TILE_DIM][TILE_DIM];
+    vec2i pixel_coords_cache[TILE_DIM][TILE_DIM];
 
     int additional_req_param2 = -1;
     int additional_req_param3 = -1;
