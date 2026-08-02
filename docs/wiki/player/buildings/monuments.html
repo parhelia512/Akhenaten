@@ -175,6 +175,7 @@
         <li><strong>Staff the required guilds</strong> (bricklayers, stonemasons, carpenters, and in Cleopatra artisans). Guild members supervise on site.</li>
         <li>Work proceeds in <strong>phases</strong> (mastaba courses, pyramid courses, scaffolding, finishing). Progress shows in the monument info window.</li>
         <li>After a burial tomb is <strong>finished</strong> and burial provisions are dispatched (Overseer of Monuments; skip if the mission requires none), a one-shot <strong>funeral walker</strong> procession walks to the tomb and despawns. Tomb robbers stealing provisions later do not repeat the funeral.</li>
+        <li>Dispatched goods credit a <strong>per-tomb stock ledger</strong> (emptiest finished tomb first). City totals still drive the Overseer UI and win checks; robbers empty the target tomb’s stock, then the city counter. With several tombs, one site can be looted without wiping every grave.</li>
       </ol>
       <div class="note-box">
         Monuments do not need a road connection. Place them where materials and labour can reach them
@@ -283,10 +284,10 @@
               <td class="bld-note">Stonemasons + Carpenters + Work Camps</td>
             </tr>
             <tr>
-              <td>Royal tombs</td>
-              <td class="bld-note">Several sizes</td>
-              <td class="bld-note">Stone / granite (larger tiers)</td>
-              <td class="bld-note">Stonemasons (+ Artisans on grand)</td>
+              <td>Royal Burial Tombs <span class="tag-cleo">Cleo</span></td>
+              <td class="bld-note">Small 11×20 · Med … · Large · Grand 23×29 (cliff)</td>
+              <td class="bld-note">Stone / granite; lamps from phase 0; clay + paint with artisans</td>
+              <td class="bld-note">Stonemasons + Artisans (+ Lamp / Paint workshops)</td>
             </tr>
           </tbody>
         </table>
@@ -307,7 +308,7 @@
             <tr>
               <td>Royal Burial Tomb <span class="tag-cleo">Cleo</span></td>
               <td class="bld-note">11×20 … 23×29</td>
-              <td class="bld-note">Cut into cliff; lamps + paint; Artisans + Work Camps</td>
+              <td class="bld-note">Cliff tombs; lamps + paint; Artisans + Work Camps; burial ledger + robbers</td>
             </tr>
             <tr>
               <td><a href="abu-simbel.html">Abu Simbel</a> <span class="tag-cleo">Cleo</span></td>
