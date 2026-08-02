@@ -269,14 +269,14 @@
             <p>The entire mission — configuration block, variables, and all event handlers — lives in one file, imported by <span class="file-ref">src/scripts/missions.js</span>. Key parts of the <code>mission13 { … }</code> block (verified vs <code>mission1.pak</code> scenario 13, 2026-07-26 dump):</p>
             <pre><code><span class="kw">mission13</span> { <span class="cmt">// Buhen — Expansion to Nubia</span>
   <span class="kw">player_rank</span> : <span class="num">5</span>
-  <span class="kw">next_mission</span> : <span class="num">15</span>          <span class="cmt">// converges on North Dahshur (not scripted yet)</span>
+  <span class="kw">next_mission</span> : <span class="num">15</span>          <span class="cmt">// converges on North Dahshur</span>
 
   <span class="cmt">// pak Normal funds=10000 loan=5000 debt_interest=20 → int_dcy row (verified)</span>
   <span class="kw">initial_funds</span> [<span class="num">20000</span>, <span class="num">13300</span>, <span class="num">10000</span>, <span class="num">6700</span>, <span class="num">5300</span>]
   <span class="kw">debt_interest</span> [<span class="num">10</span>, <span class="num">15</span>, <span class="num">20</span>, <span class="num">25</span>, <span class="num">30</span>]
 
   <span class="cmt">// Gods fixed to Ptah + Seth per pak (GOD_PTAH:1, GOD_SETH:2) — Osiris/Ra removed</span>
-  <span class="cmt">// pop 3000, culture 25, prosperity 25, monuments TEMP 9 (pak raw 6), kingdom 75, housing 10</span>
+  <span class="cmt">// pop 3000, culture 25, prosperity 25, monuments 9 (pak raw 6 → formula), kingdom 75, housing 10</span>
   <span class="kw">win_criteria</span> {
     <span class="kw">population</span>    { enabled : <span class="num">true</span>, goal : <span class="num">3000</span> }
     <span class="kw">culture</span>       { enabled : <span class="num">true</span>, goal : <span class="num">25</span> }
@@ -293,7 +293,7 @@
         <details>
           <summary>Event handlers — all functions in <code>m_013_buhen.js</code></summary>
           <div class="details-body">
-            <p>Handlers fire only while <code>mission=mission13</code> is active. Raids use the JS API <code>city.start_foreign_army_invasion</code> with <code>ENEMY_6_KUSHITE</code>; native <code>EVENT_TYPE_INVASION</code> awaits B2 / B2-migrate. Every pak event index that isn't skipped junk gets its own <code>event_advance_month</code> handler, gated by a once-flag or a per-year "last fired" guard for recurring roots:</p>
+            <p>Handlers fire only while <code>mission=mission13</code> is active. Raids use the JS API <code>city.start_foreign_army_invasion</code> with <code>ENEMY_6_KUSHITE</code>; native <code>EVENT_TYPE_INVASION</code> binds exist (B2), but this mission still uses JS poll until <strong>B2-migrate</strong>. Every pak event index that isn't skipped junk gets its own <code>event_advance_month</code> handler, gated by a once-flag or a per-year "last fired" guard for recurring roots:</p>
             <ul class="event-list">
               <li>
                 <span class="ev-name">event_mission_start</span>
@@ -356,7 +356,7 @@
               <li><strong>Empire routes 8/9/10 skipped:</strong> the pak polylines exist but no map object references them — orphan data, the same pattern seen in earlier missions.</li>
               <li><strong>Oil×2000:</strong> the year-6 request amount is unusually large but matches the pak value exactly — not a transcription error.</li>
               <li><strong>Invasions and Pharaoh's favour</strong> are proxied in JS (<code>city.start_foreign_army_invasion</code>) rather than the native <code>EVENT_TYPE_INVASION</code> — same pattern as every mission before B2-migrate.</li>
-              <li><strong>Next mission 15</strong> (North Dahshur) is not scripted yet; the campaign currently ends after a win here.</li>
+              <li><strong>Next mission 15</strong> (North Dahshur) is scripted (<code>m_015_north_dahshur.js</code>); both Buhen and South Dahshur set <code>next_mission : 15</code>.</li>
             </ul>
           </div>
         </details>

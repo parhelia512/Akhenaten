@@ -257,7 +257,8 @@
             <ul class="event-list">
               <li><span class="ev-name">event_mission_start</span><span class="ev-desc"><code>empire.set_id(14)</code>; <code>ENEMY_5_HYKSOS</code>; wire grain/limestone/grain2 leaves.</span><span class="ev-fn">mission15_on_start</span></li>
               <li><span class="ev-name">Clay pit floods</span><span class="ev-desc">i=0/1 annual y1m0+; each wave floods ceil(N×8/100) clay pits (amount as %).</span><span class="ev-fn">mission15_clay_pit_flood_recurring</span></li>
-              <li><span class="ev-name">Henna</span><span class="ev-desc">i=11 biennial y2m1+ henna×12/24mo; KR +25 / −40 / −20.</span><span class="ev-fn">mission15_event_i11_henna_recurring</span></li>
+              <li><span class="ev-name">Henna</span><span class="ev-desc">i=11 biennial y2m1+ henna×12/24mo; KR +25 / −40 / −20; refuse/late→Hyksos×12.</span><span class="ev-fn">mission15_event_i11_henna_recurring</span></li>
+              <li><span class="ev-name">Request cleared</span><span class="ev-desc">henna refuse/late→Hyksos×12 (<code>event_request_cleared</code>; pak i=30).</span><span class="ev-fn">mission15_on_request_cleared</span></li>
               <li><span class="ev-name">Grain / gift / limestone</span><span class="ev-desc">i=2 grain×8 y4+; i=3 stone gift y13m3+ → limestone×24; i=5 grain×18 y17m4+.</span><span class="ev-fn">mission15_event_i2_* / i3_* / i5_*</span></li>
               <li><span class="ev-name">Hyksos + Beduin + favour</span><span class="ev-desc">i=7 size5→size6 chain; i=6 beduin×10 y6m8+; i=10 size11 y20m7; favour 75.</span><span class="ev-fn">mission15_event_i7_* / i6_* / i10_* / favour</span></li>
             </ul>
@@ -288,7 +289,7 @@
                 Stepped S/M still on the build list as extras.
                 </li>
               <li><strong>Clay floods i=0/1</strong> — pak year=24 reinterpreted as annual y1m0+; amount=8 = 8% of clay pits per wave (×2 waves).</li>
-              <li><strong>Henna i=11</strong> — pak year=24 amount=8 once → biennial y2m1+ amount=<strong>12</strong>; MESSAGE i=12/15 and invasion i=30 skipped (INVASION no-op / fluff).</li>
+              <li><strong>Henna i=11</strong> — pak year=24 amount=8 once → biennial y2m1+ amount=<strong>12</strong>; MESSAGE i=12/15 skipped. Invasion i=30 → JS Hyksos×12 via <code>event_request_cleared</code> (B12; smoke <code>tests/176_north_dahshur_henna_raid.js</code>).</li>
               <li><strong>Routes 7/8</strong> orphan polylines skipped; map_obj idx=10 empty stub skipped.</li>
               <li><strong>Invasion points</strong> omitted (pak 0/0) — raids use map exit fallback.</li>
               <li><strong>Hyksos size-6 chain</strong> after i=7 is infinite in pak (8↔9); mirrored with a month tick until B2-migrate bind tags.</li>

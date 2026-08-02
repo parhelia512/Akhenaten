@@ -542,7 +542,7 @@ function mission15_ensure_grain2_leaves() {
 }
 
 // pak i=11 henna tails (skip MESSAGE i=12/15): ok→KR+25 (i16); refuse→KR−40 (i13);
-// late→KR−20 (i14). Invasion i=30 size12 after refuse/late is EVENT_TYPE_INVASION no-op.
+// late→KR−20 (i14). i=30 INVASION no-op → Hyksos×12 via event_request_cleared.
 function mission15_ensure_henna_leaves() {
 	if (mission.henna_leaves_wired) {
 		return
@@ -551,6 +551,10 @@ function mission15_ensure_henna_leaves() {
 	mission15_make_leaf(1016, EVENT_TYPE_REPUTATION_INCREASE, undefined, 25, 2)
 	mission15_make_leaf(1013, EVENT_TYPE_REPUTATION_DECREASE, undefined, 40, 2)
 	mission15_make_leaf(1014, EVENT_TYPE_REPUTATION_DECREASE, undefined, 20, 2)
+}
+
+function mission15_is_henna_request_tag(tag) {
+	return Math.floor((tag - 3000) / 100) == 11
 }
 
 [es=event_mission_start, mission=mission15]
@@ -760,6 +764,21 @@ function mission15_event_i10_hyksos_invasion(ev) {
 	mission.event10_hyksos_done = true
 	log_info("akhenaten: mission 15 hyksos invasion size=11 year=20", {ev:ev})
 	mission15_hyksos_raid(3, 11, EVENT_ATTACK_TARGET_VAULTS)
+}
+
+// Factual request close — pak i=30 Hyksos×12 after henna refuse/late (INVASION no-op).
+// Leaf KR still via wired on_* tags. Tags = 3000+11*100+year (biennial).
+[es=event_request_cleared, mission=mission15]
+function mission15_on_request_cleared(ev) {
+	var outcome = mission_request_outcome(ev)
+	if (!mission15_is_henna_request_tag(ev.tag_id)) {
+		return
+	}
+	if (outcome != "refuse" && outcome != "late") {
+		return
+	}
+	log_info("akhenaten: mission 15 henna " + outcome + " → hyksos×12 tag=" + ev.tag_id, {ev:ev})
+	mission15_hyksos_raid(30, 12, EVENT_ATTACK_TARGET_FOOD)
 }
 
 // Favour: pak i=31 size=75 by_favour (no chain child).
