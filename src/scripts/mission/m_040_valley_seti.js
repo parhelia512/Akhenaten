@@ -3,13 +3,13 @@ log_info("akhenaten: mission 40 valley seti started")
 // Cleop mission1.pak scenario 40 (dump 2026-07-28). Empire id=21.
 // Enemy ENEMY_6_KUSHITE. Gods: Osiris(1), Ra(2), Ptah(1). Start year -1290.
 // MM subtitle: Tomb for a Pharaoh. Rank 6 (pak). Funds Normal 13720 / loan 3000 / debt 8.
-// Win: pop 3000 / culture 40 / prosperity 70 / monuments TEMP 32 (pak first=35 Large
-//   Royal Tomb; weight 1 undercounts — TODO(C10)) / kingdom 80 /
-//   housing_count 12 + housing_level 15.
+// Win: pop 3000 / culture 40 / prosperity 70 / monuments 33 (Large W=13 → trunc(33);
+//   pak goal often listed 32 — we use 33 so finished Large clears the gate) /
+//   kingdom 80 / housing_count 12 + housing_level 15.
 // Climate desert; map_background empire pack id 23. Our city: Deir el-Medina.
 // Burial: weapons×6 beer×12 luxury×10 papyrus×8 chariots×4. Fish points present.
-// Empire/events in JS (hide_pak_* + events[]); TODO(TR) tomb robbers.
-// next_mission -1 (campaign end — must not spill to Sumur 41).
+// Empire/events in JS (hide_pak_* + events[]). Robbers: crime_wave + TR engine.
+// next_mission -1 (campaign end — must not spill to Sumur 41; clears monument carry).
 
 mission40 { // Seti in the Valley — Tomb for a Pharaoh
 	map_file : "data/maps/m_040_valley_seti.map"
@@ -18,6 +18,7 @@ mission40 { // Seti in the Valley — Tomb for a Pharaoh
 	player_rank : 6
 
 	next_mission : -1
+	carry_monuments : true
 
 	// pak Normal funds=13720 loan=3000 debt_interest=8 → int_dcy around Normal.
 	initial_funds [27440, 18290, 13720, 9150, 7270]
@@ -63,6 +64,7 @@ mission40 { // Seti in the Valley — Tomb for a Pharaoh
 		BUILDING_FESTIVAL_SQUARE, BUILDING_BOOTH, BUILDING_JUGGLER_SCHOOL, BUILDING_BANDSTAND,
 		BUILDING_CONSERVATORY, BUILDING_PAVILLION, BUILDING_DANCE_SCHOOL,
 		BUILDING_SCRIBAL_SCHOOL, BUILDING_LIBRARY,
+		BUILDING_SMALL_ROYAL_TOMB, BUILDING_MEDIUM_ROYAL_TOMB, // carried from m38/m39
 		BUILDING_LARGE_ROYAL_TOMB,
 	]
 
@@ -70,7 +72,7 @@ mission40 { // Seti in the Valley — Tomb for a Pharaoh
 		population    {enabled : true, goal : 3000 }
 		culture       {enabled : true, goal : 40 }
 		prosperity    {enabled : true, goal : 70 }
-		monuments     {enabled : true, goal : 32 }
+		monuments     {enabled : true, goal : 33 }
 		kingdom       {enabled : true, goal : 80 }
 		housing_count {enabled : true, goal : 12 }
 		housing_level {enabled : true, goal : 15 }

@@ -33,11 +33,11 @@ mission38 { // Thutmose in the Valley — The First Tomb
 		BUILDING_WELL, BUILDING_WATER_LIFT, BUILDING_IRRIGATION_DITCH,
 		BUILDING_VILLAGE_PALACE, BUILDING_TOWN_PALACE, BUILDING_CITY_PALACE, BUILDING_WORK_CAMP,
 		BUILDING_WOOD_CUTTERS, BUILDING_STONEMASONS_GUILD, BUILDING_CARPENTERS_GUILD,
-		BUILDING_BRICKLAYERS_GUILD, BUILDING_ARTISANS_GUILD,
+		BUILDING_BRICKLAYERS_GUILD,
 		BUILDING_SMALL_STATUE, BUILDING_MEDIUM_STATUE, BUILDING_LARGE_STATUE, BUILDING_GARDENS, BUILDING_PLAZA,
 		BUILDING_POTTERY_WORKSHOP, BUILDING_BREWERY_WORKSHOP, BUILDING_JEWELS_WORKSHOP,
 		BUILDING_WEAVER_WORKSHOP, BUILDING_PAPYRUS_WORKSHOP, BUILDING_BRICKS_WORKSHOP,
-		BUILDING_CHARIOTS_WORKSHOP, BUILDING_LAMP_WORKSHOP, BUILDING_PAINT_WORKSHOP, BUILDING_WEAPONSMITH,
+		BUILDING_CHARIOTS_WORKSHOP, BUILDING_WEAPONSMITH,
 		BUILDING_TAX_COLLECTOR, BUILDING_COURTHOUSE, BUILDING_PERSONAL_MANSION, BUILDING_FAMILY_MANSION,
 		BUILDING_BAZAAR, BUILDING_GRANARY, BUILDING_STORAGE_YARD,
 		BUILDING_RECRUITER, BUILDING_MILITARY_ACADEMY,
@@ -52,7 +52,7 @@ mission38 { // Thutmose in the Valley — The First Tomb
 		BUILDING_FESTIVAL_SQUARE, BUILDING_BOOTH, BUILDING_JUGGLER_SCHOOL, BUILDING_BANDSTAND,
 		BUILDING_CONSERVATORY, BUILDING_PAVILLION, BUILDING_DANCE_SCHOOL,
 		BUILDING_SCRIBAL_SCHOOL, BUILDING_LIBRARY,
-		BUILDING_SMALL_ROYAL_TOMB,
+		// Lamp / paint / artisans / tomb unlock via mission38 tutorial stages (CL-VK / RT5).
 	]
 
 	win_criteria {
@@ -783,6 +783,8 @@ mission38 { // Thutmose in the Valley — The First Tomb
 
 	vars {
 		start_message_shown : false
+		tutorial_lamps_unlocked : false
+		tutorial_tomb_unlocked : false
 	}
 }
 
@@ -797,4 +799,21 @@ function mission38_on_start(ev) {
 	empire.set_id(21)
 	empire.set_expanded(false)
 	city.set_scenario_enemy_id(ENEMY_6_KUSHITE)
+}
+
+// CL-VK / RT5: gradual unlock — lamps+guilds first, then Small royal tomb.
+// Thresholds provisional until pak dump of OG tutorial beats.
+[event=event_population_changed, mission=mission38]
+function mission38_tutorial_unlocks(ev) {
+	var pop = ev.value | 0
+	if (!mission.tutorial_lamps_unlocked && pop >= 400) {
+		city.use_building(BUILDING_LAMP_WORKSHOP, true)
+		city.use_building(BUILDING_PAINT_WORKSHOP, true)
+		city.use_building(BUILDING_ARTISANS_GUILD, true)
+		mission.tutorial_lamps_unlocked = true
+	}
+	if (!mission.tutorial_tomb_unlocked && pop >= 800) {
+		city.use_building(BUILDING_SMALL_ROYAL_TOMB, true)
+		mission.tutorial_tomb_unlocked = true
+	}
 }

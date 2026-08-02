@@ -7,6 +7,7 @@ mission39 { // Tut in the Valley — Death of Tutankhamun
 	player_rank : 6
 
 	next_mission : 40
+	carry_monuments : true
 
 	// pak Normal funds=8500 loan=3000 debt_interest=12 → int_dcy around Normal.
 	initial_funds [17000, 11330, 8500, 5670, 4505]
@@ -51,6 +52,7 @@ mission39 { // Tut in the Valley — Death of Tutankhamun
 		BUILDING_FESTIVAL_SQUARE, BUILDING_BOOTH, BUILDING_JUGGLER_SCHOOL, BUILDING_BANDSTAND,
 		BUILDING_CONSERVATORY, BUILDING_PAVILLION, BUILDING_DANCE_SCHOOL,
 		BUILDING_SCRIBAL_SCHOOL, BUILDING_LIBRARY,
+		BUILDING_SMALL_ROYAL_TOMB, // carried preexisting from m38 (menu; not a second build goal)
 		BUILDING_MEDIUM_ROYAL_TOMB,
 	]
 
