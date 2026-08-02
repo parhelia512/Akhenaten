@@ -65,6 +65,7 @@
 #include "city/city_animals.h"
 #include "graphics/color.h"
 #include "city/city.h"
+#include "city/city_message.h"
 #include "city/city_industry.h"
 #include "city/city_buildings.h"
 #include "city/city_maintenance.h"
@@ -339,6 +340,62 @@ void __test_process_invasion_binds() {
     g_invasions.process_bind_resolutions();
 }
 ANK_FUNCTION(__test_process_invasion_binds);
+
+// B3: seed / inspect a single invasion_warning slot for saveload.
+void __test_invasion_warning_force(int idx, int months_to_go, int warning_years, int handled) {
+    if (idx < 0 || idx >= (int)g_invasions.warnings.size()) {
+        return;
+    }
+    auto &w = g_invasions.warnings[idx];
+    w = {};
+    w.in_use = true;
+    w.handled = handled != 0;
+    w.months_to_go = months_to_go;
+    w.warning_years = warning_years;
+    w.invasion_path_id = 3;
+    w.invasion_id = 5;
+    w.empire_object_id = 42;
+    w.image_id = 7;
+    w.pos = {11, 22};
+    w.year_notified = 1400;
+    w.month_notified = 4;
+}
+ANK_FUNCTION_4(__test_invasion_warning_force);
+
+int __test_invasion_warning_months_to_go(int idx) {
+    if (idx < 0 || idx >= (int)g_invasions.warnings.size()) {
+        return -1;
+    }
+    const auto &w = g_invasions.warnings[idx];
+    return w.in_use ? w.months_to_go : -1;
+}
+ANK_FUNCTION_1(__test_invasion_warning_months_to_go);
+
+int __test_invasion_warning_handled(int idx) {
+    if (idx < 0 || idx >= (int)g_invasions.warnings.size()) {
+        return -1;
+    }
+    const auto &w = g_invasions.warnings[idx];
+    return w.in_use ? (w.handled ? 1 : 0) : -1;
+}
+ANK_FUNCTION_1(__test_invasion_warning_handled);
+
+int __test_invasion_warning_pos_x(int idx) {
+    if (idx < 0 || idx >= (int)g_invasions.warnings.size()) {
+        return -999;
+    }
+    return g_invasions.warnings[idx].pos.x;
+}
+ANK_FUNCTION_1(__test_invasion_warning_pos_x);
+
+int __test_last_message_eventmsg_phrase_id() {
+    const int n = city_message_count();
+    if (n <= 0) {
+        return -1;
+    }
+    return city_message_get(n - 1).eventmsg_phrase_id;
+}
+ANK_FUNCTION(__test_last_message_eventmsg_phrase_id);
 
 void __test_clear_enemy_formations() {
     for (int fi = 1; fi < MAX_FORMATIONS; ++fi) {

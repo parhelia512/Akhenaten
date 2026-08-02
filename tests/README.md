@@ -182,6 +182,8 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `86_pharaoh_figure_smoke.js` | BF4 `FIGURE_PHARAOH`: spawn + type + CREATED→ROAMING + anim `walk` (SprMain 28); neighbor ids 108–110 |
 | `88_flat_buildings.js` | Flat buildings view: On → flatten palace; raise excludes; overlay blocks; Off clears raise |
 | `131_birds_herd_scare.js` | Birds companion gets `e_figure_flag_scared` after kill in range (BH0b) |
+| `132_nilometer_ui.js` | Enhanced nilometer helpers: flag OFF default, hide/floodplain gates, quality tiers, phase keys, water bar |
+| `169_invasion_warnings_saveload.js` | B3/B4: invasion_warnings saveload + MESSAGE phrase from reasons / fallback |
 
 Farm **placement** tests (34/35) cover `can_place` / terrain rules; **37** covers preview image helpers.
 When adding more preview draw coverage, follow JS draw conventions in

@@ -1104,8 +1104,23 @@ int scenario_invasion_start(invasion_opts_t opts) {
     return 0;
 }
 
+// Julius layout: 101 × 32 = 3232 (matches push_chunk size).
+// per warning: u8×4 + i16×6 + i32 + u8 + pad11.
 io_buffer* iob_invasion_warnings = new io_buffer([](io_buffer* iob, size_t version) {
-    // TODO (B3)
+    for (auto &w : g_invasions.warnings) {
+        iob->bind_bool(w.in_use);
+        iob->bind_bool(w.handled);
+        iob->bind(BIND_SIGNATURE_UINT8, &w.invasion_path_id);
+        iob->bind(BIND_SIGNATURE_UINT8, &w.warning_years);
+        iob->bind_vec2i_compat(w.pos);
+        iob->bind(BIND_SIGNATURE_INT16, &w.image_id);
+        iob->bind(BIND_SIGNATURE_INT16, &w.empire_object_id);
+        iob->bind(BIND_SIGNATURE_INT16, &w.month_notified);
+        iob->bind(BIND_SIGNATURE_INT16, &w.year_notified);
+        iob->bind(BIND_SIGNATURE_INT32, &w.months_to_go);
+        iob->bind(BIND_SIGNATURE_UINT8, &w.invasion_id);
+        iob->bind____skip(11);
+    }
 });
 
 // v172 stub: keep chunk in schema so old saves load; ignore contents.

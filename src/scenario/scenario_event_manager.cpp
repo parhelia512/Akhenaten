@@ -113,7 +113,7 @@ declare_console_command_p(run_scenario_event) {
     if (it == events.end()) {
         return;
     }
-    
+
     auto date = game.simtime.date();
     it->event_trigger_type = EVENT_TRIGGER_ONCE;
     it->time.year = date.year;
@@ -122,8 +122,11 @@ declare_console_command_p(run_scenario_event) {
 }
 
 uint16_t event_ph_t::rand_reason() const {
+    // Empty slot = 0xffff. Must compare as uint16_t: `p != -1` after int promotion
+    // never filters 0xffff (65535 != -1).
     svector<uint16_t, 4> active_reasons;
-    std::copy_if(reasons.begin(), reasons.end(), std::back_inserter(active_reasons), [] (auto &p) { return p != -1; });
+    std::copy_if(reasons.begin(), reasons.end(), std::back_inserter(active_reasons),
+                 [](uint16_t p) { return p != 0xffff; });
     return active_reasons.size() > 0 ? active_reasons[rand() % active_reasons.size()] : 0xffff;
 }
 
@@ -295,6 +298,7 @@ void event_manager_t::create_chain_event(int tag, e_event_type type, int amount,
     event.on_refusal_action = -1;
     event.on_too_late_action = -1;
     event.on_defeat_action = -1;
+    event.reasons = { 0xffff, 0xffff, 0xffff, 0xffff };
     g_scenario_events.event_list.front().num_total_header = g_scenario_events.event_list.size();
 }
 
@@ -937,7 +941,11 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
         break;
 
     case EVENT_TYPE_MESSAGE: {
-        int phrase_id = -1; // TODO
+        // Prefer event.reasons[] (pak / JS); fall back to the subtype's default phrase.
+        auto message_phrase = [&](uint16_t fallback) -> int {
+            const uint16_t r = event.rand_reason();
+            return (r != 0xffff) ? (int)r : (int)fallback;
+        };
         switch (event.subtype) {
         case EVENT_SUBTYPE_CITY_UNDER_SIEGE:
             process_event_city_under_siege(event, via_event_trigger, chain_action_parent, caller_event_id, caller_event_var);
@@ -945,26 +953,26 @@ void event_manager_t::process_event(int id, bool via_event_trigger, int chain_ac
 
         case EVENT_SUBTYPE_MSG_CITY_SAVED:
             city_message_post_full(true, "message_template_city_saved", &event, caller_event_id,
-                                   PHRASE_eg_city_saved_title, PHRASE_eg_city_saved_initial_announcement, PHRASE_eg_city_saved_reason_A,
-                                   id, 0);
+                                   PHRASE_eg_city_saved_title, PHRASE_eg_city_saved_initial_announcement,
+                                   message_phrase(PHRASE_eg_city_saved_reason_A), id, 0);
             break;
 
         case EVENT_SUBTYPE_FOREIGN_CITY_CONQUERED:
             city_message_post_full(true, "message_template_foreign_city_conquered", &event, caller_event_id,
                                    PHRASE_foreign_city_conquered_title, PHRASE_foreign_city_conquered_initial_announcement,
-                                   PHRASE_foreign_city_conquered_reason_A, id, 0);
+                                   message_phrase(PHRASE_foreign_city_conquered_reason_A), id, 0);
             break;
 
         case EVENT_SUBTYPE_MSG_DISTANT_BATTLE_LOST:
             city_message_post_full(true, "message_template_distant_battle_lost", &event, caller_event_id,
-                                   PHRASE_battle_lost_title, PHRASE_battle_lost_initial_announcement, PHRASE_battle_lost_reason_A,
-                                   id, 0);
+                                   PHRASE_battle_lost_title, PHRASE_battle_lost_initial_announcement,
+                                   message_phrase(PHRASE_battle_lost_reason_A), id, 0);
             break;
 
         case EVENT_SUBTYPE_MSG_ACKNOWLEDGEMENT:
             city_message_post_full(true, "message_template_general", &event, caller_event_id,
-                                   PHRASE_acknowledgement_title, PHRASE_acknowledgement_initial_announcement, PHRASE_acknowledgement_no_reason_A,
-                                   id, 0);
+                                   PHRASE_acknowledgement_title, PHRASE_acknowledgement_initial_announcement,
+                                   message_phrase(PHRASE_acknowledgement_no_reason_A), id, 0);
             break;
 
         default:
