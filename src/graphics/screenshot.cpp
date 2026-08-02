@@ -105,6 +105,7 @@ static int image_create(vec2i size, int has_alpha_channel, int rows_in_memory) {
 
 static bstring256 g_screenshot_dir;
 static bool g_screenshot_dir_inited = false;
+static bstring128 g_screenshot_basename_override;
 
 void graphics_set_screenshot_dir(const char *dir) {
     g_screenshot_dir = (dir && *dir) ? dir : "";
@@ -124,21 +125,30 @@ static const char *screenshot_dir() {
 static const char *generate_filename(screenshot_type type) {
     static bstring256 filename;
     bstring128 base;
-    time_t curtime = time(NULL);
-    struct tm *loctime = localtime(&curtime);
-    switch (type) {
-    case SCREENSHOT_FULL_CITY:
-        strftime(base, bstring128::capacity, "full_city_%Y_%m_%d_%H_%M_%S.png", loctime);
-        break;
+    if (!g_screenshot_basename_override.empty()) {
+        base = g_screenshot_basename_override.c_str();
+        if (!strstr(base.c_str(), ".png")) {
+            bstring128 with_ext;
+            with_ext.printf("%s.png", base.c_str());
+            base = with_ext.c_str();
+        }
+    } else {
+        time_t curtime = time(NULL);
+        struct tm *loctime = localtime(&curtime);
+        switch (type) {
+        case SCREENSHOT_FULL_CITY:
+            strftime(base, bstring128::capacity, "full_city_%Y_%m_%d_%H_%M_%S.png", loctime);
+            break;
 
-    case SCREENSHOT_MINIMAP:
-        strftime(base, bstring128::capacity, "minimap_%Y_%m_%d_%H_%M_%S.png", loctime);
-        break;
+        case SCREENSHOT_MINIMAP:
+            strftime(base, bstring128::capacity, "minimap_%Y_%m_%d_%H_%M_%S.png", loctime);
+            break;
 
-    case SCREENSHOT_DISPLAY:
-    default:
-        strftime(base, bstring128::capacity, "city_%Y_%m_%d_%H_%M_%S.png", loctime);
-        break;
+        case SCREENSHOT_DISPLAY:
+        default:
+            strftime(base, bstring128::capacity, "city_%Y_%m_%d_%H_%M_%S.png", loctime);
+            break;
+        }
     }
 
     const char *dir = screenshot_dir();
@@ -451,10 +461,21 @@ void graphics_save_screenshot(screenshot_type type) {
     }
 }
 
+void graphics_save_screenshot_as(screenshot_type type, const char *basename) {
+    g_screenshot_basename_override = (basename && *basename) ? basename : "";
+    graphics_save_screenshot(type);
+    g_screenshot_basename_override.clear();
+}
+
 void __game_save_screenshot(int type) {
     graphics_save_screenshot((screenshot_type)type);
 }
 ANK_FUNCTION_1(__game_save_screenshot)
+
+void __game_save_screenshot_as(int type, pcstr basename) {
+    graphics_save_screenshot_as((screenshot_type)type, basename);
+}
+ANK_FUNCTION_2(__game_save_screenshot_as)
 
 void __game_set_screenshot_dir(pcstr dir) {
     graphics_set_screenshot_dir(dir);

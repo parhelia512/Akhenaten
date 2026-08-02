@@ -20,6 +20,9 @@ function test_log_building_placed(bid) {
     __log_marker(marker)
 }
 
+// Between tests the C++ driver calls test_reset_session_between_tests(), so the
+// first ensure in a test always load_map()'s a clean map. Mid-test re-calls are
+// no-ops while the session stays active (use test_reload_city_session to force).
 function test_ensure_city_session(map_path) {
     if (game.session_active) {
         return true

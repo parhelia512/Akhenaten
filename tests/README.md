@@ -29,11 +29,15 @@ build\Debug\akhenaten.exe --integraltests --nointro --no-logo --window --size 80
 
 Screenshot-producing tests also want `--nomouse` (suppresses mouse-edge/drag camera
 scroll so a programmatically centered view doesn't drift) and optionally
-`--screenshot-dir PATH` (created if missing) to collect the PNGs:
+`--screenshot-dir PATH` (created if missing) to collect the PNGs.
+Use an **absolute** path (forward slashes) — relative `tmp\…` can fail to open on Windows:
 
 ```bash
-build\Debug\akhenaten.exe --integraltests --integraltest-only 43_sphinx --nointro --nomouse --no-logo --window --size 800x600 --screenshot-dir out\shots "d:/Work/Cleop"
+build\Debug\akhenaten.exe --integraltests --integraltest-only 43_sphinx --nointro --nomouse --no-logo --window --size 800x600 --screenshot-dir D:/Work/Akhenaten/tmp/shots "d:/Work/Cleop"
 ```
+
+After each test the driver also saves a display shot `end_<stem>.png` (skipped under
+`--no-resource`).
 
 Both modes pass equally (use the resource mode to verify pack
 loading / art resolution for data-dependent buildings).
@@ -52,7 +56,11 @@ C++ smoke checks run first (before JS files): `SDL_strlen`/`strcmp`, `vec2i`, `g
 
 ### Mutating city / features state
 
-Tests share one process. If you change census ages (`population_stats.set_at_age`),
+The driver calls `test_reset_session_between_tests()` before every JS file: city/editor
+session ends, scenario events clear, UI returns to the main menu. The next
+`test_ensure_city_session()` therefore `load_map`s a clean map.
+
+Tests still share one process. If you change census ages (`population_stats.set_at_age`),
 `game_features`, or other globals, restore them in `done()` (snapshot + restore) or call
 `test_reload_city_session` before signaling ready. Pattern: `67_fixed_workers.js`.
 See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.

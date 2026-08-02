@@ -15,6 +15,7 @@
 #include "js/js.h"
 #include "js/js_game.h"
 #include "mujs/mujs.h"
+#include "graphics/screenshot.h"
 #include "platform/arguments.h"
 #include "platform/version.hpp"
 
@@ -369,9 +370,9 @@ hvector<xstring, 16> list_test_files() {
         vfs::path strp = p.c_str();
         const bool found = strp.strstr(only.c_str()) != nullptr;
         if (found) {
-            const xstring stem = p;
+            const xstring stem = p; // copy before clear() invalidates `p`
             found_tests.clear();
-            found_tests.push_back(p);
+            found_tests.push_back(stem);
             break;
         }
     }
@@ -428,6 +429,9 @@ int run_js_tests() {
         logs::info("[integraltests] >> %s", name.c_str());
         logs::flush();
 
+        // Fresh map/UI for every test — leftover city/editor/events otherwise bleed.
+        test_reset_session_between_tests();
+
         g_app.quit = false;
         SDL_FlushEvent(SDL_USEREVENT);
 
@@ -472,6 +476,27 @@ int run_js_tests() {
             g_app.pump_one_frame();
             ++frames;
         }
+
+        // Fresh framebuffer, then end-of-test display shot (skipped under --no-resource).
+        g_app.pump_one_frame();
+        {
+            pcstr leaf = name.c_str();
+            if (const char *slash = std::strrchr(leaf, '/')) {
+                leaf = slash + 1;
+            }
+            if (const char *bslash = std::strrchr(leaf, '\\')) {
+                leaf = bslash + 1;
+            }
+            size_t stem_len = std::strlen(leaf);
+            if (stem_len > 3 && std::strcmp(leaf + stem_len - 3, ".js") == 0) {
+                stem_len -= 3;
+            }
+            bstring256 shot_name;
+            shot_name.printf("end_");
+            shot_name.ncat(leaf, stem_len);
+            graphics_save_screenshot_as(SCREENSHOT_DISPLAY, shot_name.c_str());
+        }
+
         if (!g_test_signal_ready) {
             logs::error("[test:%s] FAIL: timeout after %d frames (forgot __test_signal_ready?)",
                         name.c_str(), frames);

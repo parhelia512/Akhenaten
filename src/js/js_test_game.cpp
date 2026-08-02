@@ -79,7 +79,9 @@
 #include "game/file_editor.h"
 #include "game/resource.h"
 #include "content/vfs.h"
+#include "editor/editor.h"
 #include "io/gamestate/boilerplate.h"
+#include "input/hotkey.h"
 #include "scenario/editor.h"
 #include "scenario/editor_map_meta.h"
 #include "game/game_events.h"
@@ -247,6 +249,9 @@ bool __test_start_city_session(pcstr map_path) {
         return true;
     }
 
+    // load_map only clears scenario events when a *.meta.js sidecar exists.
+    g_scenario.events.clear_for_editor();
+
     if (!GamestateIO::load_map(map_path, false, true)) {
         logs::error("test_start_city_session: load_map(%s) failed", map_path);
         return false;
@@ -261,8 +266,18 @@ bool __test_start_city_session(pcstr map_path) {
 }
 ANK_FUNCTION_1(__test_start_city_session);
 
-void __test_end_city_session() {
+void test_reset_session_between_tests() {
+    if (editor_is_active()) {
+        editor_set_active(0);
+    }
     game.session.active = false;
+    g_scenario.events.clear_for_editor();
+    events::emit(event_show_main_menu{ false });
+    events::process();
+}
+
+void __test_end_city_session() {
+    test_reset_session_between_tests();
 }
 ANK_FUNCTION(__test_end_city_session);
 
