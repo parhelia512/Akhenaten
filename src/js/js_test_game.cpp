@@ -86,6 +86,7 @@
 #include "scenario/scenario.h"
 #include "scenario/scenario_event_manager.h"
 #include "scenario/scenario_invasion.h"
+#include "scenario/types.h"
 #include "window/window_info.h"
 #include "city/object_info.h"
 #include "scenario/request.h"
@@ -362,10 +363,12 @@ int __test_editor_request_roundtrip() {
 }
 ANK_FUNCTION(__test_editor_request_roundtrip);
 
-// ED4b: map write strips scenario_events; sidecar *.meta.js round-trips editor slots.
+// ED4b/ED5: map write strips scenario_events; sidecar *.meta.js round-trips
+// editor request slots + invasion schedule.
 // Returns 1 on success; on failure logs a step tag and returns 0.
 int __test_editor_map_meta_roundtrip() {
     g_scenario.events.clear_for_editor();
+    editor_invasions_clear();
 
     editor_request in{};
     in.year = 3;
@@ -382,6 +385,22 @@ int __test_editor_map_meta_roundtrip() {
     sparse.deadline_years = 1;
     sparse.kingdom = 1;
     g_scenario.events.editor_request_save(3, &sparse);
+
+    editor_invasion inv_in{};
+    inv_in.year = 2;
+    inv_in.type = INVASION_TYPE_ENEMY_ARMY;
+    inv_in.amount = 16;
+    inv_in.from = 3;
+    inv_in.attack_type = FORMATION_ATTACK_TROOPS;
+    scenario_editor_invasion_save(0, &inv_in);
+
+    editor_invasion inv_sparse{};
+    inv_sparse.year = 5;
+    inv_sparse.type = INVASION_TYPE_LOCAL_UPRISING;
+    inv_sparse.amount = 8;
+    inv_sparse.from = 1;
+    inv_sparse.attack_type = FORMATION_ATTACK_FOOD_CHAIN;
+    scenario_editor_invasion_save(2, &inv_sparse);
 
     const char *map_path = "Maps/_editor_meta_rt.map";
     if (!game_file_editor_write_scenario(map_path)) {
@@ -404,6 +423,7 @@ int __test_editor_map_meta_roundtrip() {
 
     editor_map_meta_remove(map_path);
     g_scenario.events.clear_for_editor();
+    editor_invasions_clear();
     if (!game_file_editor_load_scenario(map_path)) {
         logs::info("[test:172] step=load_map_only_failed");
         return 0;
@@ -414,14 +434,21 @@ int __test_editor_map_meta_roundtrip() {
         logs::info("[test:172] step=map_still_has_requests res=%d", (int)empty.resource);
         return 0;
     }
+    if (g_scenario.invasions[0].type != 0) {
+        logs::info("[test:172] step=map_still_has_invasions type=%d", g_scenario.invasions[0].type);
+        return 0;
+    }
 
     g_scenario.events.editor_request_save(0, &in);
     g_scenario.events.editor_request_save(3, &sparse);
+    scenario_editor_invasion_save(0, &inv_in);
+    scenario_editor_invasion_save(2, &inv_sparse);
     if (!game_file_editor_write_scenario(map_path)) {
         logs::info("[test:172] step=rewrite_failed");
         return 0;
     }
     g_scenario.events.clear_for_editor();
+    editor_invasions_clear();
     if (!game_file_editor_load_scenario(map_path)) {
         logs::info("[test:172] step=load_with_meta_failed");
         return 0;
@@ -431,20 +458,118 @@ int __test_editor_map_meta_roundtrip() {
     g_scenario.events.editor_request_get(0, &out0);
     editor_request out3{};
     g_scenario.events.editor_request_get(3, &out3);
+    // sort_invasions() packs filled slots by year — expect years 2 then 5 at 0/1.
+    const invasion_t &out_inv0 = g_scenario.invasions[0];
+    const invasion_t &out_inv1 = g_scenario.invasions[1];
     const bool ok = out0.year == 3 && out0.resource == RESOURCE_CLAY && out0.amount == 12
                     && out0.deadline_years == 2 && out0.kingdom == 5
                     && out3.year == 7 && out3.resource == RESOURCE_POTTERY && out3.amount == 4
-                    && out3.deadline_years == 1 && out3.kingdom == 1;
+                    && out3.deadline_years == 1 && out3.kingdom == 1
+                    && out_inv0.year == 2 && out_inv0.type == INVASION_TYPE_ENEMY_ARMY
+                    && out_inv0.amount == 16 && out_inv0.from == 3
+                    && out_inv0.attack_type == FORMATION_ATTACK_TROOPS
+                    && out_inv1.year == 5 && out_inv1.type == INVASION_TYPE_LOCAL_UPRISING
+                    && out_inv1.amount == 8 && out_inv1.from == 1
+                    && out_inv1.attack_type == FORMATION_ATTACK_FOOD_CHAIN;
     if (!ok) {
-        logs::info("[test:172] step=slot_mismatch s0=%d/%d/%d s3=%d/%d/%d",
+        logs::info("[test:172] step=slot_mismatch s0=%d/%d/%d s3=%d/%d/%d inv0=%d/%d/%d inv1=%d/%d/%d",
                    out0.year, (int)out0.resource, out0.amount,
-                   out3.year, (int)out3.resource, out3.amount);
+                   out3.year, (int)out3.resource, out3.amount,
+                   out_inv0.year, out_inv0.type, out_inv0.amount,
+                   out_inv1.year, out_inv1.type, out_inv1.amount);
     }
 
     GamestateIO::delete_map("_editor_meta_rt.map");
     return ok ? 1 : 0;
 }
 ANK_FUNCTION(__test_editor_map_meta_roundtrip);
+
+// ED5: custom-map play loads sidecar invasions before g_invasions.init().
+int __test_editor_invasion_meta_play() {
+    g_scenario.events.clear_for_editor();
+    editor_invasions_clear();
+
+    editor_invasion inv{};
+    inv.year = 1;
+    inv.type = INVASION_TYPE_ENEMY_ARMY;
+    inv.amount = 12;
+    inv.from = 2;
+    inv.attack_type = FORMATION_ATTACK_BEST_BUILDINGS;
+    scenario_editor_invasion_save(0, &inv);
+
+    const char *map_path = "Maps/_editor_inv_play.map";
+    if (!game_file_editor_write_scenario(map_path)) {
+        logs::info("[test:173] step=write_failed");
+        return 0;
+    }
+
+    editor_invasions_clear();
+    if (g_scenario.invasions[0].type != 0) {
+        logs::info("[test:173] step=clear_failed");
+        return 0;
+    }
+
+    // Play path: leave editor so load_map applies sidecar before g_invasions.init().
+    game_exit_editor();
+    if (!GamestateIO::load_map("_editor_inv_play.map", true, true)) {
+        logs::info("[test:173] step=load_play_failed");
+        GamestateIO::delete_map("_editor_inv_play.map");
+        return 0;
+    }
+
+    const invasion_t &got = g_scenario.invasions[0];
+    // Custom maps often have no empire invasion path — init may no-op month assign.
+    // Success = sidecar applied on play load (schedule present for scenario_invasion_process).
+    const bool ok = got.year == 1 && got.type == INVASION_TYPE_ENEMY_ARMY && got.amount == 12
+                    && got.from == 2 && got.attack_type == FORMATION_ATTACK_BEST_BUILDINGS;
+    if (!ok) {
+        logs::info("[test:173] step=mismatch year=%d type=%d amount=%d from=%d atk=%d",
+                   got.year, got.type, got.amount, got.from, (int)got.attack_type);
+    }
+
+    GamestateIO::delete_map("_editor_inv_play.map");
+    return ok ? 1 : 0;
+}
+ANK_FUNCTION(__test_editor_invasion_meta_play);
+
+// Procedural editor map: generate medium landscape and require water + road tiles + entry point.
+int __test_editor_map_generate() {
+    game_file_editor_generate_scenario(2); // medium 80x80
+
+    const int mw = g_scenario.map.width;
+    const int mh = g_scenario.map.height;
+    int water = 0;
+    int road = 0;
+    int meadow = 0;
+    int trees = 0;
+    int rocks = 0;
+    for (int y = 0; y < mh; y++) {
+        for (int x = 0; x < mw; x++) {
+            const int t = map_terrain_get(MAP_OFFSET(x, y));
+            if (t & (TERRAIN_WATER | TERRAIN_DEEPWATER))
+                water++;
+            if (t & TERRAIN_ROAD)
+                road++;
+            if (t & TERRAIN_MEADOW)
+                meadow++;
+            if (t & TERRAIN_TREE)
+                trees++;
+            if (t & TERRAIN_ROCK)
+                rocks++;
+        }
+    }
+
+    const bool entry_ok = g_scenario.entry_point.x() >= 0 && g_scenario.exit_point.x() >= 0;
+    const bool ok = water > 0 && road > 0 && entry_ok;
+    if (!ok) {
+        logs::info("[test:173] step=generate_sparse water=%d road=%d meadow=%d trees=%d rocks=%d entry=%d,%d exit=%d,%d",
+                   water, road, meadow, trees, rocks,
+                   g_scenario.entry_point.x(), g_scenario.entry_point.y(),
+                   g_scenario.exit_point.x(), g_scenario.exit_point.y());
+    }
+    return ok ? 1 : 0;
+}
+ANK_FUNCTION(__test_editor_map_generate);
 
 static event_ph_t *__test_find_request_by_tag(int tag) {
     for (int i = 0; i < g_scenario.events.events_count(); ++i) {

@@ -61,10 +61,12 @@
 #include "grid/clay.h"
 #include "grid/gems.h"
 #include "game/game.h"
+#include "editor/editor.h"
 #include "scenario/criteria.h"
 #include "scenario/demand_change.h"
 #include "scenario/distant_battle.h"
 #include "scenario/earthquake.h"
+#include "scenario/editor_map_meta.h"
 #include "scenario/farao_change.h"
 #include "scenario/scenario_revolt.h"
 #include "scenario/scenario_invasion.h"
@@ -893,6 +895,18 @@ bool GamestateIO::load_map(pcstr filename, bool relative, bool start_immediately
     cities[0].type = EMPIRE_CITY_OURS;
     cities[0].in_use = true;
     // temp hack
+
+    // ED5: custom-map play loads *.meta.js (requests + invasions) before
+    // g_invasions.init() in start_loaded_file. Editor load applies meta itself
+    // after stripping map-embedded events.
+    if (!editor_is_active()) {
+        editor_invasions_clear();
+        if (vfs::file_exists(editor_map_meta_path(fullpath.c_str()))) {
+            g_scenario.events.clear_for_editor();
+            editor_map_meta_load(fullpath.c_str());
+        }
+    }
+
     post_load();
 
     if (start_immediately) {
