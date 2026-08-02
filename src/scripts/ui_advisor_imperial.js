@@ -47,7 +47,10 @@ function scenario_request_handle(rq) {
     if (!rq.valid) {
         return
     }
-    __city_military_clear_kingdome_service()
+    // Keep empire-service marks for troop asks (B8 distant-battle needs them).
+    if (rq.resource_id !== RESOURCE_TROOPS) {
+        __city_military_clear_kingdome_service()
+    }
     var s = scenario_request_compute_status(rq)
     if (s === SCENARIO_REQ_NO_LEGIONS_AVAILABLE) {
         ui.show_ok("#popup_dialog_no_legions_available")
@@ -58,7 +61,11 @@ function scenario_request_handle(rq) {
         return
     }
     if (s === SCENARIO_REQ_CONFIRM_LEGIONS) {
-        ui.show_ok("#popup_dialog_send_troops")
+        ui.show_yesno("#popup_dialog_send_troops", function (yes) {
+            if (yes) {
+                __scenario_request_dispatch(index)
+            }
+        })
         return
     }
     if (s === SCENARIO_REQ_NOT_ENOUGH) {

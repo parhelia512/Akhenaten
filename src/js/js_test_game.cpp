@@ -92,6 +92,7 @@
 #include "window/window_info.h"
 #include "city/object_info.h"
 #include "scenario/request.h"
+#include "scenario/distant_battle.h"
 #include "figure/enemy_army.h"
 #include "figure/formation.h"
 #include "empire/empire.h"
@@ -837,6 +838,42 @@ void __test_request_force_fulfill(int tag, int as_late) {
     g_scenario.events.process_active_request(e->event_id);
 }
 ANK_FUNCTION_2(__test_request_force_fulfill);
+
+// Advisor-style dispatch (RESOURCE_TROOPS + defeat → distant battle; B8).
+void __test_request_dispatch_by_tag(int tag) {
+    event_ph_t *e = __test_find_request_by_tag(tag);
+    if (!e || !e->is_active) {
+        return;
+    }
+    scenario_request_dispatch_event(e->event_id);
+}
+ANK_FUNCTION_1(__test_request_dispatch_by_tag);
+
+void __test_distant_battle_set_egyptian_strength(int strength) {
+    if (strength <= 0) {
+        g_distant_battle.battle.egyptian_strength = 0;
+        g_distant_battle.battle.egyptian_months_to_travel_forth = 0;
+    } else {
+        g_distant_battle.battle.egyptian_strength = (uint8_t)std::min(255, strength);
+        g_distant_battle.battle.egyptian_months_to_travel_forth = 1;
+    }
+}
+ANK_FUNCTION_1(__test_distant_battle_set_egyptian_strength);
+
+void __test_process_distant_battle_month() {
+    g_distant_battle.process_distant_battle_impl();
+}
+ANK_FUNCTION(__test_process_distant_battle_month);
+
+int __test_distant_battle_egyptian_strength() {
+    return (int)g_distant_battle.battle.egyptian_strength;
+}
+ANK_FUNCTION(__test_distant_battle_egyptian_strength);
+
+int __test_distant_battle_enemy_strength() {
+    return (int)g_distant_battle.battle.enemy_strength;
+}
+ANK_FUNCTION(__test_distant_battle_enemy_strength);
 
 void __test_process_invasion_binds() {
     g_invasions.process_bind_resolutions();

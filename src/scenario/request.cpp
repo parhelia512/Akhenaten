@@ -15,6 +15,7 @@
 #include "game/resource.h"
 #include "scenario/scenario.h"
 #include "scenario/distant_battle.h"
+#include "figure/formation.h"
 #include "event_phrases.h"
 
 #include <algorithm>
@@ -206,18 +207,22 @@ void scenario_request_dispatch(int id) {
 
         ev->is_active = false; // hide from advisor; awaiting fight_distant_battle
 
-        const int strength = std::min(255, std::max(1, request.amount));
-        g_distant_battle.init_distant_battle(strength);
+        const int enemy_strength = std::min(255, std::max(1, request.amount));
+        g_distant_battle.init_distant_battle(enemy_strength);
         if (ev->city_id > 0) {
             g_distant_battle.battle.city = (uint8_t)ev->city_id;
         } else {
             g_distant_battle.determine_distant_battle_city();
         }
         g_distant_battle.source_request_event_id = (int16_t)ev->event_id;
-        // Abstract fulfill: full requested strength, arrive on time next month.
-        g_distant_battle.battle.egyptian_strength = (uint8_t)strength;
-        g_distant_battle.battle.egyptian_months_to_travel_forth = 1;
+        // B8: egyptian strength from empire-service bataillons (not equal-abstract cheat).
+        // No marked bataillons → travel_forth stays 0 → lose (no troops) next month.
+        g_distant_battle.battle.egyptian_strength = 0;
+        g_formations.dispatch_batalions_to_distant_battle();
         g_distant_battle.battle.months_until_battle = 1;
+        if (g_distant_battle.battle.egyptian_months_to_travel_forth > 0) {
+            g_distant_battle.battle.egyptian_months_to_travel_forth = 1;
+        }
         return;
     }
 

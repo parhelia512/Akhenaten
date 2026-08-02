@@ -427,6 +427,18 @@ static int16_t resolve_source_request_event_id(int16_t linked) {
     return found;
 }
 
+// ONLY_VIA masters clone to ACTIVATED_*; drain so request ok/defeat leaves fire same month.
+static void drain_activated_events(int from_index) {
+    while (from_index < g_scenario.events.events_count()) {
+        const int end = g_scenario.events.events_count();
+        for (int i = from_index; i < end; ++i) {
+            g_scenario.events.process_event(i, false, -1);
+            g_scenario.events.process_active_request(i);
+        }
+        from_index = end;
+    }
+}
+
 void distant_battles_t::fight_distant_battle() {
     const int16_t req_id = resolve_source_request_event_id(source_request_event_id);
     source_request_event_id = -1;
@@ -483,6 +495,7 @@ void distant_battles_t::fight_distant_battle() {
         event_ph_t *ev = g_scenario.events.at(req_id);
         if (ev) {
             ev->is_active = false;
+            const int before = g_scenario.events.events_count();
             if (won) {
                 ev->event_state = e_event_state_received;
                 if (ev->on_completed_action >= 0) {
@@ -494,6 +507,7 @@ void distant_battles_t::fight_distant_battle() {
                     g_scenario.events.process_event(ev->on_defeat_action, true, EVENT_ACTION_DEFEAT, ev->event_id);
                 }
             }
+            drain_activated_events(before);
             // Troop asks defer emit until battle resolves (see scenario_request_dispatch).
             scenario_request_emit_cleared(*ev, won);
         }
