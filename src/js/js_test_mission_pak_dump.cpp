@@ -31,6 +31,7 @@
 #include "scenario/scenario_event_manager.h"
 #include "scenario/types.h"
 
+#include <algorithm>
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
@@ -566,12 +567,70 @@ static pcstr invasion_semantics(int trigger, int invader, int amount) {
     return "timed_or_recurring";
 }
 
+static bool event_item_is_resource(int type, int subtype) {
+    switch (type) {
+    case EVENT_TYPE_REQUEST:
+        return subtype != EVENT_SUBTYPE_CITY_ASKS_FOR_TROOPS;
+    case EVENT_TYPE_DEMAND_INCREASE:
+    case EVENT_TYPE_DEMAND_DECREASE:
+    case EVENT_TYPE_PRICE_INCREASE:
+    case EVENT_TYPE_PRICE_DECREASE:
+    case EVENT_TYPE_GIFT_FROM_PHARAOH:
+        return true;
+    default:
+        return false;
+    }
+}
+
+static pcstr empire_city_name(int city_id) {
+    if (city_id < 0) {
+        return "-";
+    }
+    const empire_city *city = g_empire.city(city_id);
+    if (!city || !city->in_use) {
+        return "?";
+    }
+    pcstr name = (pcstr)lang_get_string(195, city->name_id);
+    return (name && name[0]) ? name : "?";
+}
+
+static void mark_chain_ref(bool *inbound, int n, int ref, bool *has_oob) {
+    if (ref < 0) {
+        return;
+    }
+    if (ref >= n) {
+        *has_oob = true;
+        return;
+    }
+    inbound[ref] = true;
+}
+
 static void dump_scenario_events() {
     const int n = g_scenario.events.events_count();
     int requests = 0;
     int invasions = 0;
     int distant = 0;
     int other = 0;
+    int orphan_inbound_count = 0;
+    int oob_count = 0;
+
+    // Pass 1: which event indices are referenced by any parent's ok/refuse/late/defeat.
+    constexpr int kMaxEvents = 150;
+    bool inbound[kMaxEvents];
+    memset(inbound, 0, sizeof inbound);
+    const int scan_n = std::min(n, kMaxEvents);
+    for (int i = 0; i < scan_n; i++) {
+        const event_ph_t *ev = g_scenario.events.at(i);
+        if (!ev || ev->type == EVENT_TYPE_NONE) {
+            continue;
+        }
+        bool unused_oob = false;
+        mark_chain_ref(inbound, scan_n, (int)ev->on_completed_action, &unused_oob);
+        mark_chain_ref(inbound, scan_n, (int)ev->on_refusal_action, &unused_oob);
+        mark_chain_ref(inbound, scan_n, (int)ev->on_too_late_action, &unused_oob);
+        mark_chain_ref(inbound, scan_n, (int)ev->on_defeat_action, &unused_oob);
+        (void)unused_oob;
+    }
 
     for (int i = 0; i < n; i++) {
         const event_ph_t* ev = g_scenario.events.at(i);
@@ -579,16 +638,54 @@ static void dump_scenario_events() {
             continue;
         }
 
+        bool oob = false;
+        const int chain_refs[4] = {
+            (int)ev->on_completed_action,
+            (int)ev->on_refusal_action,
+            (int)ev->on_too_late_action,
+            (int)ev->on_defeat_action
+        };
+        for (int r = 0; r < 4; r++) {
+            if (chain_refs[r] >= n) {
+                oob = true;
+                break;
+            }
+        }
+        if (oob) {
+            oob_count++;
+        }
+
+        const bool orphan_inbound = (ev->event_trigger_type == EVENT_TRIGGER_ONLY_VIA_EVENT)
+            && (i < scan_n) && !inbound[i];
+        if (orphan_inbound) {
+            orphan_inbound_count++;
+        }
+
+        const int item = (int)ev->item.value;
+        const int city_id = (int)ev->city_id;
+        char item_buf[64];
+        if (ev->type == EVENT_TYPE_REQUEST
+            && (int)ev->subtype == EVENT_SUBTYPE_CITY_ASKS_FOR_TROOPS) {
+            snprintf(item_buf, sizeof item_buf, "troops(%d)", item);
+        } else if (ev->type == EVENT_TYPE_INVASION) {
+            snprintf(item_buf, sizeof item_buf, "%s(%d)", invader_name(item), item);
+        } else if (event_item_is_resource((int)ev->type, (int)ev->subtype)) {
+            snprintf(item_buf, sizeof item_buf, "%s(%d)",
+                safe_token(resource_name((e_resource)item)), item);
+        } else {
+            snprintf(item_buf, sizeof item_buf, "%d", item);
+        }
+
         dump_marker(
-            "pak_event:i=%d|type=%d(%s)|year=%d|month=%d|item=%d|amount=%d|months=%d|"
-            "loc=%d,%d,%d,%d|sender=%d|subtype=%d|city=%d|trigger=%d(%s)|active=%d|"
-            "ok=%d|refuse=%d|late=%d|defeat=%d|attack=%d",
+            "pak_event:i=%d|type=%d(%s)|year=%d|month=%d|item=%s|amount=%d|months=%d|"
+            "loc=%d,%d,%d,%d|sender=%d|subtype=%d|city=%s(%d)|trigger=%d(%s)|active=%d|"
+            "ok=%d|refuse=%d|late=%d|defeat=%d|attack=%d|orphan_inbound=%d|oob=%d",
             i,
             (int)ev->type,
             safe_token(e_event_type_tokens.name((e_event_type)ev->type)),
             (int)ev->time.year,
             (int)ev->time.month,
-            (int)ev->item.value,
+            item_buf,
             (int)ev->amount.value,
             (int)ev->months_initial,
             (int)ev->location_fields[0],
@@ -597,7 +694,8 @@ static void dump_scenario_events() {
             (int)ev->location_fields[3],
             (int)ev->sender_faction,
             (int)ev->subtype,
-            (int)ev->city_id,
+            empire_city_name(city_id),
+            city_id,
             (int)ev->event_trigger_type,
             trigger_name((int)ev->event_trigger_type),
             ev->is_active ? 1 : 0,
@@ -605,7 +703,9 @@ static void dump_scenario_events() {
             (int)ev->on_refusal_action,
             (int)ev->on_too_late_action,
             (int)ev->on_defeat_action,
-            (int)ev->invasion_attack_target);
+            (int)ev->invasion_attack_target,
+            orphan_inbound ? 1 : 0,
+            oob ? 1 : 0);
 
         if (ev->type == EVENT_TYPE_REQUEST) {
             requests++;
@@ -650,10 +750,11 @@ static void dump_scenario_events() {
                 (int)ev->on_defeat_action);
         } else if (ev->type == EVENT_TYPE_DISTANT_BATTLE || ev->type == EVENT_TYPE_DISTANT_BATTLE_WON) {
             distant++;
-            dump_marker("pak_distant_battle:year=%d|month=%d|amount=%d|city=%d|trigger=%s(%d)|months=%d",
+            dump_marker("pak_distant_battle:year=%d|month=%d|amount=%d|city=%s(%d)|trigger=%s(%d)|months=%d",
                 (int)ev->time.year,
                 (int)ev->time.month,
                 (int)ev->amount.value,
+                empire_city_name((int)ev->city_id),
                 (int)ev->city_id,
                 trigger_name((int)ev->event_trigger_type),
                 (int)ev->event_trigger_type,
@@ -668,6 +769,8 @@ static void dump_scenario_events() {
     dump_marker("pak_invasion_event_count:%d", invasions);
     dump_marker("pak_distant_battle_count:%d", distant);
     dump_marker("pak_other_event_count:%d", other);
+    dump_marker("pak_orphan_inbound_count:%d", orphan_inbound_count);
+    dump_marker("pak_oob_count:%d", oob_count);
 }
 
 static void dump_legacy_tables() {
@@ -995,6 +1098,13 @@ static int __test_mission_pak_dump(int scenario_id) {
     return 1;
 }
 ANK_FUNCTION_1(__test_mission_pak_dump);
+
+// Dump in-memory scenario events only (B9 smoke under --no-resource).
+static int __test_dump_scenario_events() {
+    dump_scenario_events();
+    return 1;
+}
+ANK_FUNCTION(__test_dump_scenario_events);
 
 static void dump_bridge_allow_summary(int scenario_id, pcstr src) {
     const int16_t bridge = g_scenario.pak_editor_allow_flag(scenario_data_t::EDITOR_ALLOW_SLOT_BRIDGE);
