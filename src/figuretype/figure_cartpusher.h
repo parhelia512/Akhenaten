@@ -53,6 +53,7 @@ public:
 
     void do_deliver(bool storageyard_cart, int action_done, int action_fail);
     void calculate_destination(bool warehouseman);
+    static int destination_wait_threshold();
 
     void determine_deliveryman_destination();
     void determine_granaryman_destination();

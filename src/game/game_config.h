@@ -179,6 +179,8 @@ namespace game_features {
     extern game_feature gameplay_enhanced_historical_economy;
     extern game_feature gameplay_enhanced_food_mill;
     extern game_feature gameplay_enhanced_labor_category_split;
+    extern game_feature gameplay_enhanced_walker_spawn_boost;
+    extern game_feature gameplay_enhanced_walker_move_boost;
 
     xspan<game_feature*> all();
     game_feature* find(const xstring& name);

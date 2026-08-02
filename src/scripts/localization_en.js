@@ -94,6 +94,8 @@ localization_en = [
   {key:"#TR_CONFIG_FOOD_MILL", text:"Enhanced: bazaar food variety + Food Mill building (placeholder art)"}
   {key:"#TR_CONFIG_INDUSTRY_OFFICE", text:"Enhanced: Industry Office — radius mothball for workshops (papyrus + scribes)"}
   {key:"#TR_CONFIG_LABOR_CATEGORY_SPLIT", text:"Enhanced: split Storage yards/docks from Industry in the labor advisor"}
+  {key:"#TR_CONFIG_WALKER_SPAWN_BOOST", text:"Enhanced: faster service walker respawn (understaffed less harsh)"}
+  {key:"#TR_CONFIG_WALKER_MOVE_BOOST", text:"Enhanced: faster citizen walkers / shorter cart wait"}
   {key:"#labor_category_storage", text:"Storage & distribution"}
   {key:"#labor_category_industry", text:"Industry"}
   {key:"#labor_category_industry_commerce", text:"Industry & Commerce"}

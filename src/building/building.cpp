@@ -411,7 +411,7 @@ figure *building::create_cartpusher(e_resource resource_id, int quantity, e_figu
     if (!!game_features::gameplay_change_cart_speed_depends_quntity) {
         f->progress_inside_speed = std::clamp(quantity / 400, 0, 2);
     }
-    cart->base.wait_ticks = 30;
+    cart->base.wait_ticks = (short)figure_cartpusher::destination_wait_threshold();
 
     return f;
 }
@@ -759,19 +759,21 @@ int building::worker_percentage() const {
 
 int building::figure_spawn_timer() {
     int pct_workers = worker_percentage();
+    if (pct_workers <= 0) {
+        return -1;
+    }
+
+    const bool boost = game_features::gameplay_enhanced_walker_spawn_boost.to_bool();
     if (pct_workers >= 100) {
         return 0;
     } else if (pct_workers >= 75) {
-        return 1;
+        return boost ? 0 : 1;
     } else if (pct_workers >= 50) {
-        return 3;
+        return boost ? 1 : 3;
     } else if (pct_workers >= 25) {
-        return 7;
-    } else if (pct_workers >= 1) {
-        return 15;
-    } else {
-        return -1;
+        return boost ? 3 : 7;
     }
+    return boost ? 7 : 15;
 }
 
 bool building::has_figure(int i, figure *f) {

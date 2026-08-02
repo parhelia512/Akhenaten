@@ -9,6 +9,7 @@
 #include "city/city.h"
 #include "core/profiler.h"
 #include "figure/figure.h"
+#include "game/game_config.h"
 #include "graphics/animkeys.h"
 #include "graphics/image_desc.h"
 #include "grid/road_access.h"
@@ -104,6 +105,15 @@ bool figure::do_gotobuilding(building* dest, bool stop_at_road, e_terrain_usage 
     return false;
 }
 
+void figure::apply_params_speed_multiplier() {
+    const auto &params = figure_static_params::get(type);
+    speed_multiplier = params.speed_mult;
+    if (!!game_features::gameplay_enhanced_walker_move_boost
+        && params.category == figure_category_citizen) {
+        speed_multiplier = (uint8_t)(params.speed_mult + 1);
+    }
+}
+
 void figure::action_perform() {
     if (action_state < 0) {
         set_state(FIGURE_STATE_DEAD);
@@ -134,7 +144,7 @@ void figure::action_perform() {
             terrain_usage = params.terrain_usage;
         }
         max_roam_length = params.max_roam_length;
-        speed_multiplier = params.speed_mult;
+        apply_params_speed_multiplier();
         if (!this->animctx.key) {
             image_set_animation(animkeys().walk);
         }

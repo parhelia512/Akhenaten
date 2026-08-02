@@ -77,6 +77,8 @@ localization_de = [
   {key:"#TR_CONFIG_FOOD_MILL", text:"Enhanced: Basar-Nahrungsmittelvielfalt + Mühlengebäude (Platzhalter-Grafik)"}
   {key:"#TR_CONFIG_INDUSTRY_OFFICE", text:"Enhanced: Industrieamt — Werkstätten im Radius stilllegen (Papyrus + Schreiber)"}
   {key:"#TR_CONFIG_LABOR_CATEGORY_SPLIT", text:"Enhanced: Lagerhäuser/Docks getrennt von Industrie im Arbeitsberater"}
+  {key:"#TR_CONFIG_WALKER_SPAWN_BOOST", text:"Enhanced: Dienstwalker häufiger (unterbesetzt weniger streng)"}
+  {key:"#TR_CONFIG_WALKER_MOVE_BOOST", text:"Enhanced: schnellere Bürger / kürzeres Karrenwarten"}
   {key:"#labor_category_storage", text:"Lager & Verteilung"}
   {key:"#labor_category_industry", text:"Industrie"}
   {key:"#labor_category_industry_commerce", text:"Industrie & Handel"}

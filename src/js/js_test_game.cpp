@@ -39,6 +39,7 @@
 #include "figure/figure.h"
 #include "figure/figure_impl.h"
 #include "figuretype/figure_market_buyer.h"
+#include "figuretype/figure_cartpusher.h"
 #include "figuretype/figure_missile.h"
 #include "figuretype/figure_hunter.h"
 #include "figuretype/figure_stonemason.h"
@@ -520,6 +521,50 @@ static void __test_figure_set_speed(int fid, int speed) {
     f->speed_multiplier = (uint8_t)std::clamp(speed, 0, 255);
 }
 ANK_FUNCTION_2(__test_figure_set_speed);
+
+static int __test_figure_get_speed(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive()) {
+        return -1;
+    }
+    return f->speed_multiplier;
+}
+ANK_FUNCTION_1(__test_figure_get_speed);
+
+static int __test_figure_apply_params_speed(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive()) {
+        return -1;
+    }
+    f->apply_params_speed_multiplier();
+    return f->speed_multiplier;
+}
+ANK_FUNCTION_1(__test_figure_apply_params_speed);
+
+static int __test_figure_get_wait_ticks(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_alive()) {
+        return -1;
+    }
+    return f->wait_ticks;
+}
+ANK_FUNCTION_1(__test_figure_get_wait_ticks);
+
+static int __test_cartpusher_destination_wait_threshold() {
+    return figure_cartpusher::destination_wait_threshold();
+}
+ANK_FUNCTION(__test_cartpusher_destination_wait_threshold);
+
+static int __test_building_create_cartpusher_wait_ticks(int bid) {
+    building *b = building_get(bid);
+    if (!b) {
+        return -1;
+    }
+    figure *f = b->create_cartpusher(RESOURCE_GRAIN, 100, (e_figure_action)ACTION_20_CARTPUSHER_INITIAL,
+                                     BUILDING_SLOT_CARTPUSHER);
+    return f ? f->wait_ticks : -1;
+}
+ANK_FUNCTION_1(__test_building_create_cartpusher_wait_ticks);
 
 static void __test_figure_set_force_valid_animation(int fid, int enabled) {
     figure *f = figure_get(fid);
@@ -1183,6 +1228,12 @@ static int __test_building_figure_spawn_delay(int bid) {
     return b ? b->figure_spawn_delay : -1;
 }
 ANK_FUNCTION_1(__test_building_figure_spawn_delay);
+
+static int __test_building_figure_spawn_timer(int bid) {
+    building *b = building_get(bid);
+    return b ? b->figure_spawn_timer() : -2;
+}
+ANK_FUNCTION_1(__test_building_figure_spawn_timer);
 
 static void __test_building_set_figure_spawn_delay(int bid, int delay) {
     building *b = building_get(bid);

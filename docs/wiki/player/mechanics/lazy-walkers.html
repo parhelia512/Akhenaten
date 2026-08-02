@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Walker responsiveness — Akhenaten Wiki</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .cp-table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+    .cp-table th, .cp-table td { padding: 0.35rem 0.6rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .cp-table th { color: var(--text-muted); font-weight: normal; }
+    .file-ref { display: inline-block; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.78rem; background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.2); border-radius: 2px; padding: 0.05rem 0.45rem; color: var(--gold); margin: 0 0.1rem; }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.75rem; }
+    summary { padding: 0.7rem 1rem; cursor: pointer; font-size: 0.875rem; font-weight: 600; color: var(--text); list-style: none; display: flex; align-items: center; gap: 0.6rem; user-select: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: "▶"; font-size: 0.6rem; color: var(--gold); transition: transform 0.15s; flex-shrink: 0; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    details[open] > summary { border-bottom: 1px solid var(--border); }
+    .details-body { padding: 1rem 1.1rem; font-size: 0.85rem; line-height: 1.6; }
+    .bld-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; }
+    .bld-nav a { color: var(--gold); }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="../../../index.html" class="nav-logo">Akhenaten</a>
+      <ul>
+        <li><a href="../../../about.html">About</a></li>
+        <li><a href="../../../devblog.html">Devblog</a></li>
+        <li><a href="../../index.html" class="active">Wiki</a></li>
+        <li><a href="../../../screenshots.html">Screenshots</a></li>
+        <li><a href="../../../downloads.html">Downloads</a></li>
+        <li><a href="../../../contributors.html">Contributors</a></li>
+        <li><a href="../../../contact.html">Join us</a></li>
+        <li><a href="../../../reportbug.html">Report Bug</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="wiki-layout">
+    <aside class="wiki-sidebar">
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title"><a href="../index.html">← Player Guide</a></div>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">Mechanics</div>
+        <ul>
+          <li><a href="labor.html">Labor</a></li>
+          <li><a href="auto-resolve-invasions.html">Auto-resolve invasions</a></li>
+          <li><a href="flood-basins.html">Flood basins &amp; dikes</a></li>
+          <li><a href="food-mill.html">Food Mill &amp; variety</a></li>
+          <li><a href="lazy-walkers.html" class="active">Walker responsiveness</a></li>
+        </ul>
+      </div>
+      <div class="wiki-sidebar-section">
+        <div class="wiki-sidebar-title">On this page</div>
+        <ul>
+          <li><a href="#options">Options</a></li>
+          <li><a href="#not">What it is not</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <div class="wiki-content">
+      <div class="wiki-breadcrumb"><a href="../../index.html">Wiki</a> / <a href="../index.html">Player Guide</a> / Walker responsiveness</div>
+      <h1>Walker responsiveness</h1>
+      <p class="section-intro">Optional Enhanced QoL: service walkers and carts feel less idle without raising game speed. Both flags default <strong>OFF</strong> (original Pharaoh spawn delays and walk speed).</p>
+
+      <h2 id="options">Options</h2>
+      <table class="cp-table">
+        <thead>
+          <tr><th>Option</th><th>What it does</th><th>What it does <em>not</em> do</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Faster service walker respawn</td>
+            <td>Softens understaffed spawn delays (e.g. 50% staff waits less than in OG, but still slower than full staff).</td>
+            <td>Does not help fully staffed buildings (delay already 0). Does not change housing service decay.</td>
+          </tr>
+          <tr>
+            <td>Faster citizen walkers / shorter cart wait</td>
+            <td>Citizen figures walk with +1 speed multiplier; cartpushers pick a destination sooner after spawn / recalc.</td>
+            <td>Does not speed enemies, soldiers, animals, or ships. Does not replace game speed.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Enable under Features → Gameplay changes. Related but separate options: school walker range, cart speed by load, dock double haul.</p>
+
+      <h2 id="not">What it is not</h2>
+      <ul>
+        <li><strong>Game speed</strong> — that accelerates the whole simulation.</li>
+        <li><strong>Bazaar multi-buyer / Food Mill</strong> — different Enhanced flags.</li>
+        <li>Understaffed buildings still spawn less often than full staff when respawn boost is on.</li>
+      </ul>
+
+      <details>
+        <summary>Developer Reference</summary>
+        <div class="details-body">
+          <p>Flags: <span class="file-ref">gameplay_enhanced_walker_spawn_boost</span>, <span class="file-ref">gameplay_enhanced_walker_move_boost</span> (both OFF by default).</p>
+          <p>Spawn table: <span class="file-ref">src/building/building.cpp</span> (<code>figure_spawn_timer</code>).</p>
+          <p>Speed: <span class="file-ref">src/figure/action.cpp</span> (<code>apply_params_speed_multiplier</code>; <code>figure_category_citizen</code> only).</p>
+          <p>Cart wait: <span class="file-ref">src/figuretype/figure_cartpusher.cpp</span> (<code>destination_wait_threshold</code>).</p>
+          <p>Test: <span class="file-ref">tests/162_lazy_walkers.js</span>.</p>
+          <p>Open follow-up: optional roam-range boost (LW3).</p>
+        </div>
+      </details>
+
+      <div class="bld-nav">
+        <a href="../index.html">← Player Guide</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

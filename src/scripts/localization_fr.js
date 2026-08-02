@@ -78,6 +78,8 @@ localization_fr = [
   { key:"#TR_CONFIG_FOOD_MILL", text:"Enhanced : variété alimentaire au bazar + moulin (graphisme provisoire)"},
   { key:"#TR_CONFIG_INDUSTRY_OFFICE", text:"Enhanced : bureau d'industrie — arrêt des ateliers dans le rayon (papyrus + scribes)"},
   { key:"#TR_CONFIG_LABOR_CATEGORY_SPLIT", text:"Enhanced : séparer entrepôts/docks de l'industrie dans le conseiller au travail"},
+  { key:"#TR_CONFIG_WALKER_SPAWN_BOOST", text:"Enhanced : marcheurs de service plus fréquents (sous-effectif moins dur)"},
+  { key:"#TR_CONFIG_WALKER_MOVE_BOOST", text:"Enhanced : citoyens plus rapides / attente charrette plus courte"},
   { key:"#labor_category_storage", text:"Stockage et distribution"},
   { key:"#labor_category_industry", text:"Industrie"},
   { key:"#labor_category_industry_commerce", text:"Industrie et commerce"},

@@ -169,7 +169,7 @@ void figure_cartpusher::calculate_destination(bool warehouseman) {
     base.wait_ticks++;
 
     if (!warehouseman) {
-        if (base.wait_ticks > current_params().wait_on_calculate_destination) {
+        if (base.wait_ticks > destination_wait_threshold()) {
             base.wait_ticks = 0;
             determine_deliveryman_destination();
         }
@@ -184,6 +184,13 @@ void figure_cartpusher::calculate_destination(bool warehouseman) {
             }
         }
     }
+}
+
+int figure_cartpusher::destination_wait_threshold() {
+    if (game_features::gameplay_enhanced_walker_move_boost.to_bool()) {
+        return 10;
+    }
+    return current_params().wait_on_calculate_destination;
 }
 
 void figure_cartpusher::determine_deliveryman_destination() {

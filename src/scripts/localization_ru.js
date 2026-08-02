@@ -77,6 +77,8 @@ localization_ru = [
     { key:"#TR_CONFIG_FOOD_MILL", text:"Enhanced: разнообразие еды у базара + здание мельницы (арт-заглушка)"}
     { key:"#TR_CONFIG_INDUSTRY_OFFICE", text:"Enhanced: офис индустрии — mothball цехов в радиусе (папирус + писцы)"}
     { key:"#TR_CONFIG_LABOR_CATEGORY_SPLIT", text:"Enhanced: склады и доки отдельно от индустрии в советнике по труду"}
+    { key:"#TR_CONFIG_WALKER_SPAWN_BOOST", text:"Enhanced: чаще выпускать служебных walkers (недокомплект менее жёсткий)"}
+    { key:"#TR_CONFIG_WALKER_MOVE_BOOST", text:"Enhanced: быстрее граждане / короче ожидание телеги"}
     { key:"#labor_category_storage", text:"Склады и снабжение"}
     { key:"#labor_category_industry", text:"Индустрия"}
     { key:"#labor_category_industry_commerce", text:"Индустрия и торговля"}

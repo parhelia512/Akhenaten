@@ -366,6 +366,7 @@ public:
 
     // actions.c
     void action_perform();
+    void apply_params_speed_multiplier();
     void advance_action(short next_action);
     bool do_roam(int terrainchoice = TERRAIN_USAGE_ROADS, short NEXT_ACTION = ACTION_126_ROAMER_RETURNING);
     bool do_goto(tile2i dest, int terrainchoice = TERRAIN_USAGE_ROADS, short NEXT_ACTION = -1, short FAIL_ACTION = -1);
