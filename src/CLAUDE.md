@@ -63,9 +63,12 @@ Each subsystem hooks into the relevant frequency. City drives building and figur
 ### Event bus
 Cross-subsystem notifications use typed events:
 ```cpp
-g_city_events.post(event_finance_changed{amount});
+events::emit(event_finance_changed{amount});
 ```
 Subscribers register callbacks; no direct cross-module coupling.
+Dev ringbuffer (`game_events_history`) logs each emit with call site
+(`__builtin_FILE/LINE`), demangled type name, and optional ADL `describe_into`
+for hot types. Console: `events_history [substr]`.
 
 ### Config/content loading
 `ANK_CONFIG_PROPERTY(struct, field1, field2...)` exposes struct fields for JSON serialization

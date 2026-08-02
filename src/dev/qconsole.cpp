@@ -2,12 +2,26 @@
 
 #include "game/game_events_history.h"
 
-void dev::qconsole::eventsHistory(std::ostream &os) const {
+#include <cstring>
+#include <string>
+
+void dev::qconsole::eventsHistory(std::istream &is, std::ostream &os) const {
+    std::string filter;
+    is >> filter;
+
     os << "\nEvents history:";
+    if (!filter.empty()) {
+        os << " (filter: " << filter << ")";
+    }
+    os << std::endl;
 
     const auto &lines = events_history::get_event_history();
-    for (int i = 0; i < lines.events.size(); ++i) {
-        os << events_history::_event_to_string(lines.events[i]).c_str() << std::endl;
+    for (uint32_t i = 0; i < lines.events.size(); ++i) {
+        const bstring1024 &line = events_history::_event_to_string(lines.events[i]);
+        if (!filter.empty() && !::strstr(line.c_str(), filter.c_str())) {
+            continue;
+        }
+        os << line.c_str() << std::endl;
     }
 
     os << std::endl;
@@ -105,7 +119,8 @@ void dev::qconsole::bindBasicCommands() {
     bind_command("set", [this] (std::istream &is, std::ostream &os) { this->commandSet(is, os); }, "type set <identifier> <val> to change the value of a cvar");
     bind_command("echo", [this] (std::istream &is, std::ostream &os) { this->command_echo(is, os); }, "type echo <identifier> to print the value of a cvar");
     bind_command("cvars", [this] (std::istream &is, std::ostream &os) { listCVars(os); }, "lists the bound cvars");
-    bind_command("events_history", [this] (std::istream &is, std::ostream &os) { this->eventsHistory(os); }, "lists the events history");
+    bind_command("events_history", [this] (std::istream &is, std::ostream &os) { this->eventsHistory(is, os); },
+        "lists the events history; optional substr filter: events_history [substr]");
     bind_command("help", [this] (std::istream &is, std::ostream &os) { this->commandHelp(is, os); }, "you're a smarty");
 
     bind_command("run", [this] (std::istream &is, std::ostream &os) {

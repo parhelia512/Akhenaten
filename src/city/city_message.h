@@ -158,6 +158,10 @@ struct event_message { bool use_popup; xstring message_id; int param1; int param
 struct event_message_god { int god; xstring message_id; };
 struct event_message_population { bool use_popup; xstring message_id; };
 
+inline void describe_into(bstring256 &s, const event_message &ev) {
+    s.printf("message %s", ev.message_id.c_str());
+}
+
 struct message_manager_t {
     city_message messages[MAX_MESSAGES];
 

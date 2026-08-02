@@ -8,19 +8,29 @@ extern events::typed_queue g_permanent_events;
 
 namespace events {
     template<typename T>
-    inline void emit(T &&event) {
-        g_city_events.enqueue(std::forward<T>(event));
-        g_permanent_events.enqueue(std::forward<T>(event));
-        events_history::log_event(std::forward<T>(event));
+    inline void emit_at(pcstr source_file, int source_line, const T &event) {
+        g_city_events.enqueue(event);
+        g_permanent_events.enqueue(event);
+        events_history::log_event(source_file, source_line, event);
+    }
+
+    // __builtin_FILE/LINE as defaults capture the call site (MSVC 2019.8+ / GCC / Clang).
+    template<typename T>
+    inline void emit(const T &event,
+                     pcstr source_file = __builtin_FILE(),
+                     int source_line = __builtin_LINE()) {
+        emit_at(source_file, source_line, event);
     }
 
     template<typename T>
-    inline void emit_if(const bool expr, T &&event) {
+    inline void emit_if(const bool expr, const T &event,
+                        pcstr source_file = __builtin_FILE(),
+                        int source_line = __builtin_LINE()) {
         if (!expr) {
             return;
         }
 
-        emit(std::forward<T>(event));
+        emit_at(source_file, source_line, event);
     }
 
     template<typename T>

@@ -2,6 +2,7 @@
 
 #include "game/resource.h"
 #include "scenario/scenario_event_manager.h"
+#include "core/bstring.h"
 #include <functional>
 
 // Factual request close signal for JS. C++ stores/emits facts only —
@@ -12,6 +13,10 @@ struct event_request_cleared {
     int fulfilled = 0;   // 1 = player dispatched goods/troops/deben
     int was_overdue = 0; // 1 = past initial deadline (grace or refuse)
 };
+
+inline void describe_into(bstring256 &s, const event_request_cleared &ev) {
+    s.printf("tag=%d res=%d fulfilled=%d overdue=%d", ev.tag_id, ev.resource, ev.fulfilled, ev.was_overdue);
+}
 
 struct scenario_request {
     int event_id = -1;

@@ -218,8 +218,8 @@ namespace dev {
         ///dumps a list of bound cvars to the output stream
         void listCVars(std::ostream &os) const;
 
-        ///prints entire kept history of events
-        void eventsHistory(std::ostream &os) const;
+        ///prints kept history of events; optional substr filter from istream
+        void eventsHistory(std::istream &is, std::ostream &os) const;
 
         ///The function associated with the built in command "set" which parses the name of a cvar, and if it is bound, sets the value based on
         ///the value in the input stream

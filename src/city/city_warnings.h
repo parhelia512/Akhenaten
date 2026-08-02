@@ -5,6 +5,10 @@
 struct event_construction_warning { xstring id; };
 struct event_city_warning { xstring id; };
 
+inline void describe_into(bstring256 &s, const event_city_warning &ev) {
+    s.printf("city_warning %s", ev.id.c_str());
+}
+
 struct window_warnings : autoconfig_window_t<window_warnings> {
     struct warning {
         time_millis time;

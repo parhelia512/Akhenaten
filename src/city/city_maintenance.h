@@ -6,6 +6,16 @@ struct event_fire_damage { building_id bid; };
 struct event_collase_damage { building_id bid; };
 struct event_flooded_damage { building_id bid; };
 
+inline void describe_into(bstring256 &s, const event_fire_damage &ev) {
+    s.printf("building=%d", (int)ev.bid);
+}
+inline void describe_into(bstring256 &s, const event_collase_damage &ev) {
+    s.printf("building=%d", (int)ev.bid);
+}
+inline void describe_into(bstring256 &s, const event_flooded_damage &ev) {
+    s.printf("building=%d", (int)ev.bid);
+}
+
 struct city_maintenance_t {
     int fire_spread_direction = 0;
 
