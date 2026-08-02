@@ -41,6 +41,7 @@
 #include "scenario/distant_battle.h"
 #include "scenario/earthquake.h"
 #include "scenario/editor.h"
+#include "scenario/editor_map_meta.h"
 #include "scenario/empire.h"
 #include "scenario/scenario_invasion.h"
 #include "scenario/map.h"
@@ -159,6 +160,10 @@ int game_file_editor_load_scenario(const char* scenario_file) {
         return 0;
     }
 
+    // ED4b: .map is terrain-only SoT — drop embedded scenario_events, then apply sidecar.
+    g_scenario.events.clear_for_editor();
+    editor_map_meta_load(scenario_file);
+
     prepare_map_for_editing();
     g_scenario.is_saved = true;
     return 1;
@@ -179,6 +184,9 @@ int game_file_editor_write_scenario(const char* scenario_file) {
     int kenemy = g_empire.init_distant_battle_travel_months(EMPIRE_OBJECT_ENEMY_ARMY);
     g_scenario.distant_battle_set_enemy_travel_months(kenemy);
 
+    // ED4b: strip request events from the map blob; persist them in *.meta.js instead.
+    editor_requests_preserve_begin();
+
     bool ok = false;
     if (path_looks_absolute(scenario_file)
         || strncasecmp(scenario_file, "Maps/", 5) == 0
@@ -188,7 +196,10 @@ int game_file_editor_write_scenario(const char* scenario_file) {
         ok = GamestateIO::write_map(scenario_file);
     }
 
+    editor_requests_preserve_end();
+
     if (ok) {
+        editor_map_meta_write(scenario_file);
         g_scenario.is_saved = true;
     }
     return ok ? 1 : 0;

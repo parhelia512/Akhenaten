@@ -96,6 +96,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <cstring>
 #include <filesystem>
 #include <vector>
 #include <cstdio>
@@ -1045,6 +1046,15 @@ bool GamestateIO::delete_savegame(vfs::path filename_short) {
 
 bool GamestateIO::delete_map(const char* filename_short) {
     vfs::path full = fullpath_maps(filename_short);
+    // ED4b sidecar next to map (Maps/foo.map → Maps/foo.meta.js).
+    vfs::path meta = full;
+    char *dot = std::strrchr(meta.data(), '.');
+    if (dot) {
+        std::snprintf(dot, (size_t)(vfs::path::capacity - (dot - meta.data())), ".meta.js");
+        if (vfs::file_exists(meta)) {
+            vfs::file_remove(meta.c_str());
+        }
+    }
     return vfs::file_remove(full);
 }
 
@@ -1064,10 +1074,10 @@ declare_console_command_p(save_map) {
         os << "Error: No active game session. Please load a map or start a mission first.\n";
         return;
     }
-    
+
     bool success = GamestateIO::write_map(filename.c_str());
-    
-    os << (success 
+
+    os << (success
            ? "Map saved successfully!\n"
            : "Error: Failed to save map.\n");
 }

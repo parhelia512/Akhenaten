@@ -76,10 +76,12 @@
 #include "game/autosave_module.h"
 #include "core/bstring.h"
 #include "game/game.h"
+#include "game/file_editor.h"
 #include "game/resource.h"
 #include "content/vfs.h"
 #include "io/gamestate/boilerplate.h"
 #include "scenario/editor.h"
+#include "scenario/editor_map_meta.h"
 #include "game/game_events.h"
 #include "scenario/scenario.h"
 #include "scenario/scenario_event_manager.h"
@@ -359,6 +361,90 @@ int __test_editor_request_roundtrip() {
     return (slot3.resource == RESOURCE_POTTERY && slot3.amount == 20) ? 1 : 0;
 }
 ANK_FUNCTION(__test_editor_request_roundtrip);
+
+// ED4b: map write strips scenario_events; sidecar *.meta.js round-trips editor slots.
+// Returns 1 on success; on failure logs a step tag and returns 0.
+int __test_editor_map_meta_roundtrip() {
+    g_scenario.events.clear_for_editor();
+
+    editor_request in{};
+    in.year = 3;
+    in.resource = RESOURCE_CLAY;
+    in.amount = 12;
+    in.deadline_years = 2;
+    in.kingdom = 5;
+    g_scenario.events.editor_request_save(0, &in);
+
+    editor_request sparse{};
+    sparse.year = 7;
+    sparse.resource = RESOURCE_POTTERY;
+    sparse.amount = 4;
+    sparse.deadline_years = 1;
+    sparse.kingdom = 1;
+    g_scenario.events.editor_request_save(3, &sparse);
+
+    const char *map_path = "Maps/_editor_meta_rt.map";
+    if (!game_file_editor_write_scenario(map_path)) {
+        logs::info("[test:172] step=write_failed");
+        return 0;
+    }
+
+    editor_request live0{};
+    g_scenario.events.editor_request_get(0, &live0);
+    if (live0.resource != RESOURCE_CLAY || live0.amount != 12) {
+        logs::info("[test:172] step=live_buffer res=%d amount=%d", (int)live0.resource, live0.amount);
+        return 0;
+    }
+
+    vfs::path meta = editor_map_meta_path(map_path);
+    if (!vfs::file_exists(meta)) {
+        logs::info("[test:172] step=meta_missing path=%s", meta.c_str());
+        return 0;
+    }
+
+    editor_map_meta_remove(map_path);
+    g_scenario.events.clear_for_editor();
+    if (!game_file_editor_load_scenario(map_path)) {
+        logs::info("[test:172] step=load_map_only_failed");
+        return 0;
+    }
+    editor_request empty{};
+    g_scenario.events.editor_request_get(0, &empty);
+    if (empty.resource != RESOURCE_NONE) {
+        logs::info("[test:172] step=map_still_has_requests res=%d", (int)empty.resource);
+        return 0;
+    }
+
+    g_scenario.events.editor_request_save(0, &in);
+    g_scenario.events.editor_request_save(3, &sparse);
+    if (!game_file_editor_write_scenario(map_path)) {
+        logs::info("[test:172] step=rewrite_failed");
+        return 0;
+    }
+    g_scenario.events.clear_for_editor();
+    if (!game_file_editor_load_scenario(map_path)) {
+        logs::info("[test:172] step=load_with_meta_failed");
+        return 0;
+    }
+
+    editor_request out0{};
+    g_scenario.events.editor_request_get(0, &out0);
+    editor_request out3{};
+    g_scenario.events.editor_request_get(3, &out3);
+    const bool ok = out0.year == 3 && out0.resource == RESOURCE_CLAY && out0.amount == 12
+                    && out0.deadline_years == 2 && out0.kingdom == 5
+                    && out3.year == 7 && out3.resource == RESOURCE_POTTERY && out3.amount == 4
+                    && out3.deadline_years == 1 && out3.kingdom == 1;
+    if (!ok) {
+        logs::info("[test:172] step=slot_mismatch s0=%d/%d/%d s3=%d/%d/%d",
+                   out0.year, (int)out0.resource, out0.amount,
+                   out3.year, (int)out3.resource, out3.amount);
+    }
+
+    GamestateIO::delete_map("_editor_meta_rt.map");
+    return ok ? 1 : 0;
+}
+ANK_FUNCTION(__test_editor_map_meta_roundtrip);
 
 static event_ph_t *__test_find_request_by_tag(int tag) {
     for (int i = 0; i < g_scenario.events.events_count(); ++i) {
