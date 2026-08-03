@@ -10,19 +10,24 @@ function run_test() {
 
     __test_set_treasury(500000)
 
-    var cx = 40
-    var cy = 40
-    // Heaven bulk 9×21: cliff under X0..5; midcut_front at (6,9)..(8,11) stays clear.
+    var cx = 50
+    var cy = 50
+    // Heaven bulk 9×21: cliff under X0..5 except entrance column; midcut_front clear.
+    // Wide plateau so default elevation edges sit far from the niche (GIF-style).
     var w = 9
     var h = 21
+    var plateau_pad = 12
 
     function paint_cliff_site(ox, oy) {
-        for (var dy = 0; dy < h; dy++) {
-            for (var dx = 0; dx < 6; dx++) {
+        for (var dy = -plateau_pad; dy < h + plateau_pad; dy++) {
+            for (var dx = -plateau_pad; dx < 6 + plateau_pad; dx++) {
+                // Entrance column X6..8 stays clear inside the footprint.
+                if (dx >= 6 && dx <= 8 && dy >= 0 && dy < h) {
+                    continue
+                }
                 terrain.add({ x: ox + dx, y: oy + dy }, TERRAIN_ELEVATION)
             }
         }
-        // X6..8 approach column stays clear (midcut_front / entrance).
     }
 
     // Reject on clear land (no cliffs).

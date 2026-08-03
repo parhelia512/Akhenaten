@@ -6,22 +6,26 @@
 #include "core/vec2i.h"
 
 // Abu Simbel: linked square parts (mastaba/sphinx style).
-// Rot0 matches Heaven/OG bulk 9×21 — façade along +Y, entrance toward +X:
-//   Y0: cliffL 3 | Y3: statueL 6 | Y9: midcut_back 3 | Y12: statueR 6 | Y18: cliffR 3  @ X0
-//   midcut_front 3 at (6,9) — clear-land approach past the cliff bulk
+// Rot0 / Heaven 9×21 — façade along +Y, entrance toward +X:
+//   far  X0: cliffL | statueL | midcut_back | statueR | cliffR
+//   mid  X3: cliffL_near | … | midcut_depth | … | cliffR_near
+//   near X6: midcut_front (clear land)
 class building_abu_simbel : public building_monument {
 public:
     BUILDING_METAINFO(BUILDING_ABU_SIMBEL, building_abu_simbel, building_monument)
     virtual building_abu_simbel *dcast_abu_simbel() override { return this; }
 
     enum part_variant : uint8_t {
-        PART_CLIFF_L = 0,
-        PART_STATUE_L = 1,
-        PART_MIDCUT_BACK = 2,
-        PART_MIDCUT_FRONT = 3,
-        PART_STATUE_R = 4,
-        PART_CLIFF_R = 5,
-        PART_COUNT = 6,
+        PART_CLIFF_L_FAR = 0,
+        PART_CLIFF_L_NEAR = 1,
+        PART_STATUE_L = 2,
+        PART_MIDCUT_BACK = 3,
+        PART_MIDCUT_DEPTH = 4,
+        PART_MIDCUT_FRONT = 5,
+        PART_STATUE_R = 6,
+        PART_CLIFF_R_FAR = 7,
+        PART_CLIFF_R_NEAR = 8,
+        PART_COUNT = 9,
     };
 
     struct base_params {

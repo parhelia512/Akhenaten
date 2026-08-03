@@ -36,10 +36,12 @@ building_abu_simbel {
       midcut_front { pack:PACK_ABUSIMBEL, id:5 }
       stairs { pack:PACK_ABUSIMBEL, id:6 }
       // cliffs 00001..00008 → pack id7..14
-      cliff_l_near { pack:PACK_ABUSIMBEL, id:7 }   // abu-cliffs_00001
-      cliff_r_near { pack:PACK_ABUSIMBEL, id:10 }  // abu-cliffs_00004
-      cliff_r_far { pack:PACK_ABUSIMBEL, id:12 }   // abu-cliffs_00006
-      cliff_l_far { pack:PACK_ABUSIMBEL, id:13 }   // abu-cliffs_00007
+      // L_FAR uses jagged peak (iso-back = screen-outer). R uses 00006/00004 pair.
+      cliff_l_far { pack:PACK_ABUSIMBEL, id:7 }    // abu-cliffs_00001 jagged peak
+      cliff_l_near { pack:PACK_ABUSIMBEL, id:13 }  // abu-cliffs_00007 shelf→statue
+      cliff_r_far { pack:PACK_ABUSIMBEL, id:12 }   // abu-cliffs_00006 corner strata
+      cliff_r_near { pack:PACK_ABUSIMBEL, id:10 }  // abu-cliffs_00004 sloping edge
+      // unused: id8=00002, id9=00003, id11=00005, id14=00008
       scaffold_a { pack:PACK_ABUSIMBEL, id:15 }
       scaffold_b { pack:PACK_ABUSIMBEL, id:15, offset:1 }
       scaffold_c { pack:PACK_ABUSIMBEL, id:16 }

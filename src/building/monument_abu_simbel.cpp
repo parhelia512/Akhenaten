@@ -41,14 +41,18 @@ struct abu_part_def {
     bool needs_cliff;
 };
 
-// Rot0 / Heaven 9×21: façade runs along +Y; entrance protrudes on +X (clear land).
+// Rot0 / Heaven 9×21: façade along +Y; near-cliffs at X3 form the side-wall lips.
+// Center column Y9–11: midcut_back (X0) + midcut_depth (X3) + midcut_front (X6).
 static const abu_part_def k_parts[building_abu_simbel::PART_COUNT] = {
-    {building_abu_simbel::PART_CLIFF_L, 0, 0, 3, true},
+    {building_abu_simbel::PART_CLIFF_L_FAR, 0, 0, 3, true},
+    {building_abu_simbel::PART_CLIFF_L_NEAR, 3, 0, 3, true},
     {building_abu_simbel::PART_STATUE_L, 0, 3, 6, true},
     {building_abu_simbel::PART_MIDCUT_BACK, 0, 9, 3, true},
+    {building_abu_simbel::PART_MIDCUT_DEPTH, 3, 9, 3, true},
     {building_abu_simbel::PART_MIDCUT_FRONT, 6, 9, 3, false},
     {building_abu_simbel::PART_STATUE_R, 0, 12, 6, true},
-    {building_abu_simbel::PART_CLIFF_R, 0, 18, 3, true},
+    {building_abu_simbel::PART_CLIFF_R_FAR, 0, 18, 3, true},
+    {building_abu_simbel::PART_CLIFF_R_NEAR, 3, 18, 3, true},
 };
 
 void building_abu_simbel::static_params::rebuild_construction() {
@@ -343,11 +347,16 @@ int building_abu_simbel::building_image_get() const {
     auto first = [&](const char *key) { return params.first_img(key); };
 
     switch (part) {
-    case PART_CLIFF_L:
+    case PART_CLIFF_L_FAR:
         return first("cliff_l_far");
-    case PART_CLIFF_R:
+    case PART_CLIFF_L_NEAR:
+        return first("cliff_l_near");
+    case PART_CLIFF_R_FAR:
         return first("cliff_r_far");
-    case PART_MIDCUT_BACK: {
+    case PART_CLIFF_R_NEAR:
+        return first("cliff_r_near");
+    case PART_MIDCUT_BACK:
+    case PART_MIDCUT_DEPTH: {
         const int base_img = first("midcut_back");
         if (base_img <= 0) {
             return 0;
@@ -592,13 +601,20 @@ void building_abu_simbel::preview::ghost_preview(build_planner &planer, painter 
         tile2i t0 = abu_part_tile(end, def, rot);
         int img = 0;
         switch (def.variant) {
-        case PART_CLIFF_L:
+        case PART_CLIFF_L_FAR:
             img = params.first_img("cliff_l_far");
             break;
-        case PART_CLIFF_R:
+        case PART_CLIFF_L_NEAR:
+            img = params.first_img("cliff_l_near");
+            break;
+        case PART_CLIFF_R_FAR:
             img = params.first_img("cliff_r_far");
             break;
+        case PART_CLIFF_R_NEAR:
+            img = params.first_img("cliff_r_near");
+            break;
         case PART_MIDCUT_BACK:
+        case PART_MIDCUT_DEPTH:
             img = params.first_img("midcut_back");
             break;
         case PART_MIDCUT_FRONT:
@@ -627,7 +643,7 @@ void building_abu_simbel::on_place_update_tiles(int /*orientation*/, int /*varia
     }
 
     base.prev_part_building_id = 0;
-    runtime_data().variant = PART_CLIFF_L;
+    runtime_data().variant = PART_CLIFF_L_FAR;
     const int rotation = building_rotation_global_rotation() % 4;
     base.orientation = (uint8_t)rotation;
     base.size = (uint8_t)k_parts[0].size;
