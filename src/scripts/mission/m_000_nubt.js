@@ -25,7 +25,7 @@ mission0 { // Nubt
 
 	sounds {
 		briefing : "Voice/Mission/200_mission.mp3"
-		victory : "Voice/Mission/200_victory.mp3"  
+		victory : "Voice/Mission/200_victory.mp3"
 	}
 
 	win_criteria {
@@ -61,27 +61,14 @@ function mission0_on_start(ev) {
 		city.set_advisor_available(i, 0)
 	}
 
-	if (mission.tutorial_granary_opened) {
-		city.use_building(BUILDING_HUNTING_LODGE, true)
-		city.use_building(BUILDING_GRANARY, true)
-		city.use_building(BUILDING_BAZAAR, true)
-	}
+	city.use_building(BUILDING_HUNTING_LODGE, mission.tutorial_granary_opened)
+    city.use_building(BUILDING_GRANARY, mission.tutorial_granary_opened)
+	city.use_building(BUILDING_BAZAAR, mission.tutorial_granary_opened)
 
-	if (mission.granary_built) {
-		city.set_advisor_available(ADVISOR_POPULATION, 1)
-	}
-
-	if (mission.tutorial_fire_handled) {
-		city.use_building(BUILDING_FIREHOUSE, true)
-	}
-
-	if (mission.tutorial_collapsed_handled) {
-		city.use_building(BUILDING_ARCHITECT_POST, true)
-	}
-
-	if (mission.tutorial_gamemeat_stored) {
-		city.use_building(BUILDING_WATER_SUPPLY, true)
-	}
+	city.set_advisor_available(ADVISOR_POPULATION, mission.granary_built)
+	city.use_building(BUILDING_FIREHOUSE, mission.tutorial_fire_handled)
+	city.use_building(BUILDING_ARCHITECT_POST, mission.tutorial_collapsed_handled)
+	city.use_building(BUILDING_WATER_SUPPLY, mission.tutorial_gamemeat_stored)
 
 	migration.set_population_cap("first_mission_population_cap", mission.population_cap)
 	city.goal_tooltip = mission0_get_goal_tooltip
@@ -91,7 +78,7 @@ function mission0_on_start(ev) {
 function mission0_register_animals(ev) {
 	city.remove_animals()
 
-	city.add_animals_point(0, /*x*/40, /*y*/60, FIGURE_OSTRICH, 4)
+	city.add_animals_point(0, /*x*/40, /*y*/60, FIGURE_OSTRICH, 8)
 	city.set_animals_area(0, 16)
 }
 
