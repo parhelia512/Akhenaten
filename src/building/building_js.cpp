@@ -408,7 +408,7 @@ static void building_proto___property_getter(js_State *J) {
     if (value.value_type() == bvariant::etype_none) {
         logs::error("building: JS read of unregistered property '%s' on building type %d "
                     "(add the field to ANK_CONFIG_PROPERTY(building, ...) or provide a get binding)",
-                    prop, (int)b->type);
+                    prop.c_str(), (int)b->type);
         J->pushundefined();
     } else {
         js_helpers::js_push_bvariant(J, value);
