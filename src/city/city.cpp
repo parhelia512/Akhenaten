@@ -135,8 +135,7 @@ void city_t::update_month(simulation_time_t simtime) {
     update_allowed_foods();
 
     population.record_monthly();
-    // Local cults first: drain old counters, then festival execute can grant fresh ones
-    // without same-tick steal.
+
     local_cults.advance_month();
     festival.advance_month();
     buildings.update_month();
