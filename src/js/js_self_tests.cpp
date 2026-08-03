@@ -5,6 +5,7 @@
 #include "mujs/jsi.h"
 #include "mujs/jsvalue.h"
 #include "mujs/mujs.h"
+#include "js/js.h"
 #include "regexp.h"
 
 #include <cstring>
@@ -55,8 +56,8 @@ static bool mujs_self_test_regexp(pcstr id, pcstr pattern, pcstr subject, int ca
 static bool mujs_self_test_js(js_State *J, pcstr id, pcstr source)
 {
     if (js_try(J)) {
-        pcstr msg = js_strnode_cstr(js_tostring(J, -1));
-        verify_no_crash_var(false, "mujs_self_test_js %s: exception: %s", id, msg ? msg : "?");
+        xstring msg = js_toxstring(J, -1);
+        verify_no_crash_var(false, "mujs_self_test_js %s: exception: %s", id, msg.empty() ? "?" : msg.c_str());
         js_pop(J, 1);
         js_endtry(J);
         return false;

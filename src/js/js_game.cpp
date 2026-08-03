@@ -59,7 +59,7 @@ void js_log_info_native(js_State *J) {
     if (js_isundefined(J, 1)) {
         logs::info("log() Try to print undefined object", 0, 0);
     } else {
-        logs::info("%s", js_strnode_cstr(js_tostring(J, 1)));
+        logs::info("%s", js_toxstring(J, 1).c_str());
     }
     J->pushundefined();
 }
@@ -68,15 +68,14 @@ void js_log_warn_native(js_State *J) {
     if (js_isundefined(J, 1)) {
         logs::info("warning() Try to print undefined object", 0, 0);
     } else {
-        logs::info("WARN: %s", js_strnode_cstr(js_tostring(J, 1)));
+        logs::info("WARN: %s", js_toxstring(J, 1).c_str());
     }
     J->pushundefined();
 }
 
 void js_loc_native(js_State *J) {
     if (js_isstring(J, 1)) {
-        const js_StringNode key_node = js_tostring(J, 1);
-        const xstring key = js_strnode_cstr(key_node);
+        const xstring key = js_toxstring(J, 1);
         const xstring resolved = lang_xtext_from_key(key);
         J->pushstring(resolved.c_str());
         return;
@@ -85,8 +84,8 @@ void js_loc_native(js_State *J) {
     if (J->isobject(1) && !js_isarray(J, 1) && js_gettop(J) < 3) {
         J->getproperty(1, js_intern("key"));
         if (js_isstring(J, -1)) {
-            const js_StringNode key_node = js_tostring(J, -1); js_pop(J, 1);
-            const xstring resolved = lang_xtext_from_key(js_strnode_cstr(key_node));
+            const xstring key_node = js_toxstring(J, -1); js_pop(J, 1);
+            const xstring resolved = lang_xtext_from_key(key_node);
             J->pushstring((js_StringNode)resolved._get());
             return;
         }
@@ -107,9 +106,9 @@ void js_loc_native(js_State *J) {
 }
 
 void js_game_load_text(js_State *J) {
-    auto path = js_tostring(J, 1);
+    xstring path = js_toxstring(J, 1);
 
-    vfs::reader ftext = vfs::file_open(path->value.c_str(), "rt");
+    vfs::reader ftext = vfs::file_open(path.c_str(), "rt");
     if (!ftext) {
         return;
     }
@@ -141,9 +140,9 @@ void js_game_get_image(js_State *J) {
 
     int tid;
     if (js_isstring(J, 1)) {
-        auto path = js_tostring(J, 1);
+        xstring path = js_toxstring(J, 1);
         image_desc desc;
-        desc.path = path->value.c_str();
+        desc.path = path.c_str();
         tid = desc.tid();
     } else if (J->isobject(1) && !js_isarray(J, 1)) {
         J->getproperty(1, property_pack);
@@ -564,7 +563,7 @@ void js_call_function(xstring js_ref) {
         js_pushnull(J);  // 'this' context
         int result = J->pcall(0);
         if (result != 0) {
-            logs::error("JS onclick callback error: %s", js_strnode_cstr(js_tostring(J, -1)));
+            logs::error("JS onclick callback error: %s", js_toxstring(J, -1).c_str());
         }
         js_pop(J, 1); // result or error
     } else {
@@ -586,7 +585,7 @@ void js_call_function_bool(xstring js_ref, bool param) {
         js_pushboolean(J, param);
         int result = J->pcall(1);
         if (result != 0) {
-            logs::error("JS dialog callback error: %s", js_strnode_cstr(js_tostring(J, -1)));
+            logs::error("JS dialog callback error: %s", js_toxstring(J, -1).c_str());
         }
         js_pop(J, 1); // result or error
     } else {
@@ -610,7 +609,7 @@ bvariant js_call_function(xstring js_ref, int param1, int param2) {
         js_pushnumber(J, (double)param2);
         int result = J->pcall(2);
         if (result != 0) {
-            logs::error("JS textfn callback error: %s", js_strnode_cstr(js_tostring(J, -1)));
+            logs::error("JS textfn callback error: %s", js_toxstring(J, -1).c_str());
             js_pop(J, 1);
             return bvariant();
         }
@@ -642,7 +641,7 @@ bvariant js_call_function(xstring js_ref, const bvariant_map &params) {
         js_push_bvariant_map_object(J, params);
         int result = J->pcall(1);
         if (result != 0) {
-            logs::error("JS callback error (bvariant_map): %s", js_strnode_cstr(js_tostring(J, -1)));
+            logs::error("JS callback error (bvariant_map): %s", js_toxstring(J, -1).c_str());
             js_pop(J, 1);
             return bvariant();
         }

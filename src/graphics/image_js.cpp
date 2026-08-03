@@ -4,12 +4,12 @@
 #include "core/profiler.h"
 #include "core/xstring.h"
 #include "js/js_game.h"
+#include "js/js.h"
 #include "mujs/mujs.h"
 
 static bool __image_request_pak(js_State *J) {
     if (js_isstring(J, 1)) {
-        xstring name;
-        name._set(js_tostring(J, 1));
+        xstring name = js_toxstring(J, 1);
         return image_request_pak(name);
     }
 
@@ -24,8 +24,7 @@ ANK_FUNCTION_RAW(__image_request_pak)
 
 static bool __image_pak_is_loaded(js_State *J) {
     if (js_isstring(J, 1)) {
-        xstring name;
-        name._set(js_tostring(J, 1));
+        xstring name = js_toxstring(J, 1);
         return image_pak_is_loaded(name);
     }
 

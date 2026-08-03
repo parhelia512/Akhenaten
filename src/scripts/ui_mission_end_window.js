@@ -1,6 +1,5 @@
 log_info("akhenaten: ui mission end window started")
 
-var INTERMEZZO_MISSION_BRIEFING = 0
 var INTERMEZZO_FIRED = 1
 var INTERMEZZO_WON = 2
 

@@ -2,6 +2,7 @@
 
 #include "mujs/mujs.h"
 #include "mujs/jsvalue.h"
+#include "js/js.h"
 
 static void jsB_UIScrollableList_call(js_State *J) {
     js_typeerror(J, "UIScrollableList is not callable");

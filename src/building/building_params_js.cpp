@@ -4,6 +4,7 @@
 #include "core/profiler.h"
 #include "grid/building.h"
 #include "js/js_game.h"
+#include "js/js.h"
 #include "mujs/jsbuiltin.h"
 #include "mujs/jsvalue.h"
 
@@ -67,7 +68,7 @@ static void building_params_proto___property_getter(js_State *J) {
         return;
     }
 
-    pcstr prop = js_strnode_cstr(js_tostring(J, 1));
+    xstring prop = js_toxstring(J, 1);
     auto opt = archive_helper::get(*params, prop, true);
     js_helpers::js_push_value<std::optional<bvariant>>(J, opt);
 }

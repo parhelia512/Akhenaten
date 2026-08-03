@@ -1,4 +1,5 @@
 #include "core/profiler.h"
+#include "js/js.h"
 #include "js/js_defines.h"
 #include "js/js_game.h"
 #include "js/js_mujs_bound_offset.h"
@@ -103,7 +104,7 @@ static void js_sound_speech_stop(js_State *J) {
 }
 
 static void js_sound_speech_play(js_State *J) {
-    const xstring path = js_tostring(J, 1);
+    const xstring path = js_toxstring(J, 1);
     const int volume = js_gettop(J) > 2 ? js_tointeger(J, 2) : 255;
     js_pushboolean(J, g_sound.speech_play_file(path.c_str(), volume));
 }

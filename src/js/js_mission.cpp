@@ -31,7 +31,7 @@ void js_register_mission_objects(js_State *J) {
 static void js_mission_var_getter(js_State *J) {
     js_currentfunction(J);
     J->getproperty(-1, property_varname);
-    xstring name = js_tostring(J, -1)->value.c_str();
+    xstring name = js_toxstring(J, -1);
     js_pop(J, 2);
 
     if (!name || !g_scenario.vars.is_defined(name)) {
@@ -63,7 +63,7 @@ static void js_mission_var_getter(js_State *J) {
 static void js_mission_var_setter(js_State *J) {
     js_currentfunction(J);
     J->getproperty(-1, property_varname);
-    xstring name = js_tostring(J, -1)->value.c_str();
+    xstring name = js_toxstring(J, -1);
     js_pop(J, 2);
 
     if (!name || !g_scenario.vars.is_defined(name)) {
@@ -77,8 +77,8 @@ static void js_mission_var_setter(js_State *J) {
         float value = (float)js_tonumber(J, 1);
         g_scenario.vars.set_float(name, value);
     } else if (js_isstring(J, 1)) {
-        auto value = js_tostring(J, 1);
-        g_scenario.vars.set_string(name, value->value.c_str());
+        xstring value = js_toxstring(J, 1);
+        g_scenario.vars.set_string(name, value);
     } else if (J->isobject(1)) {
         J->getproperty(1, property_x);
         J->getproperty(1, property_y);

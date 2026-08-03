@@ -16,12 +16,27 @@ function mission_briefing_toggle_ironwill() {
     game_features.gameopt_ironwill = !game_features.gameopt_ironwill
 }
 
+function mission_briefing_splash_tid() {
+    var offset = 1
+    if (scenario.scmode != e_scenario_custom_map && scenario.campaign_scenario_id >= 20) {
+        offset = 2
+    }
+    var gi = get_image({pack: PACK_UNLOADED, id: 18, offset: offset})
+    return (gi && gi.tid !== undefined) ? gi.tid : 0
+}
+
+function mission_briefing_show(scenario_id, is_review) {
+    game.mission_briefing_scenario_id = scenario_id
+    game.mission_briefing_is_review = !!is_review
+    emit event_show_window{ id: "mission_briefing_window" }
+}
+
 [es=window]
 mission_briefing_window {
-    pos [(sw(0) - px(38))/2, (sh(0) - px(27))/2],
-    draw_underlying: true
+    pos [(sw(0) - px(38))/2, (sh(0) - px(27))/2]
 
     ui {
+        splash           : image({pos[(px(38) - 1024)/2, (px(27) - 768)/2], pack:PACK_UNLOADED, id:18, offset:1 })
         background       : outer_panel({pos[16, 32], size{w:38, h:27} })
         title            : text({pos[32, 48], font : FONT_LARGE_BLACK_ON_LIGHT })
         subtitle         : text({pos[32, 78], font : FONT_NORMAL_BLACK_ON_LIGHT })
@@ -65,14 +80,11 @@ mission_briefing_window {
 
 [event=event_mission_briefing_show_after_load]
 function mission_briefing_on_show_after_load(ev) {
-    game.mission_briefing_scenario_id = ev.scenario_id
-    game.mission_briefing_is_review = false
-    __game_mission_briefing_intermezzo(ev.scenario_id)
+    mission_briefing_show(ev.scenario_id, false)
 }
 
 [es=(mission_briefing_window, start_mission)]
 function mission_briefing_window_on_start_mission(window) {
-    // Lock difficulty + Ironwill for this playthrough (same as OG briefing → city).
     game_mission_options_locked = true
     __game_sound.speech_stop()
     __game_sound.music_update(1)
@@ -85,9 +97,13 @@ function mission_briefing_window_on_init(window) {
     var is_review = game.mission_briefing_is_review
     var text_id = 200 + scenario_id
 
+    window.splash.image = mission_briefing_splash_tid()
+
+    __game_sound.music_stop()
+    __game_sound.speech_stop()
     var cfg = get_mission_config(scenario_id)
     var briefing = cfg && cfg.sounds && cfg.sounds.briefing
-    if (briefing && !(new SoundChannel(0).playing)) {
+    if (briefing) {
         __game_sound.speech_play(briefing)
     }
 
@@ -139,7 +155,7 @@ function mission_briefing_window_on_init(window) {
     window.back.enabled = has_choice
     if (has_choice) {
         window.back.onclick = function() {
-            __game_speech_stop()
+            __game_sound.speech_stop()
             game_show_mission_choice(fork_scenario_id)
         }
     }

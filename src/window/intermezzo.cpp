@@ -11,7 +11,6 @@
 #include "sound/sound.h"
 #include "platform/renderer.h"
 #include "game/game.h"
-#include "window/autoconfig_window.h"
 #include "js/js.h"
 #include "js/js_game.h"
 
@@ -39,12 +38,8 @@ static void init(int mission_id, intermezzo_type type, std::function<void()> cal
     const bool is_custom_map = (g_scenario.mode() == e_scenario_custom_map);
     if (g_intermezzo_data.type == INTERMEZZO_FIRED) {
         g_sound.speech_play_file(SOUND_FILE_LOSE, 255);
-    } else if (!is_custom_map) {
-        const auto& conf = g_scenario.sounds;
-        xstring file2play = conf.briefing;
-        if (g_intermezzo_data.type == INTERMEZZO_WON) {
-            file2play = conf.victory;
-        }
+    } else if (g_intermezzo_data.type == INTERMEZZO_WON && !is_custom_map) {
+        const xstring file2play = g_scenario.sounds.victory;
         if (file2play.empty()) {
             return;
         }
@@ -58,14 +53,10 @@ static void draw_background(int) {
     vec2i offset = vec2i{screen_width() - 1024, screen_height() - 768} / 2;
 
     // draw background by mission
-    int campaign_scenario_id = g_scenario.campaign_scenario_id;
     int image_base = image_id_from_group(GROUP_INTERMEZZO_BACKGROUND);
     painter ctx = game.painter();
     const bool is_custom_map = (g_scenario.mode() == e_scenario_custom_map);
-    if (g_intermezzo_data.type == INTERMEZZO_MISSION_BRIEFING) {
-        ctx.img_generic(is_custom_map ? image_base + 1 : image_base + 1 + (campaign_scenario_id >= 20), offset);
-
-    } else if (g_intermezzo_data.type == INTERMEZZO_FIRED) {
+    if (g_intermezzo_data.type == INTERMEZZO_FIRED) {
         ctx.img_generic(image_base, offset);
 
     } else if (g_intermezzo_data.type == INTERMEZZO_WON) {
@@ -91,15 +82,6 @@ void window_intermezzo_show(int mission_id, intermezzo_type type, std::function<
     init(mission_id, type, callback);
     window_show(&window);
 }
-
-static void mission_briefing_after_intermezzo() {
-    autoconfig_window::show("mission_briefing_window");
-}
-
-void __game_mission_briefing_intermezzo(int scenario_id) {
-    window_intermezzo_show(scenario_id, INTERMEZZO_MISSION_BRIEFING, mission_briefing_after_intermezzo);
-}
-ANK_FUNCTION_1(__game_mission_briefing_intermezzo)
 
 void __game_intermezzo_show(int scenario_id, int type, pcstr on_done) {
     bstring64 cb = (on_done && *on_done) ? on_done : "";

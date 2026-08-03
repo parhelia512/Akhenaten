@@ -22,6 +22,7 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include "mujs/mujs.h"
 #include "mujs/jsi.h"
+#include "js/js.h"
 
 #include <algorithm>
 #include <cctype>
@@ -39,12 +40,12 @@ constexpr int BASE_CONFIG_WINDOW_H = 720;
 constexpr pcstr CONF_FILENAME = "akhenaten.conf";
 
 void js_conf_panic(js_State *J) {
-    logs::error("MuJS panic in settings conf: %s", js_strnode_cstr(js_tostring(J, -1)));
+    logs::error("MuJS panic in settings conf: %s", js_toxstring(J, -1).c_str());
 }
 
 void js_conf_log_info(js_State *J) {
     if (!js_isundefined(J, 1)) {
-        logs::info("%s", js_strnode_cstr(js_tostring(J, 1)));
+        logs::info("%s", js_toxstring(J, 1).c_str());
     }
     J->pushundefined();
 }

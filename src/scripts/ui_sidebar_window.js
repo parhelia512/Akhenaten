@@ -201,10 +201,7 @@ sidebar_window_expanded {
 }
 
 function sidebar_window_on_mission_briefing_review() {
-    var sid = scenario.campaign_scenario_id
-    game.mission_briefing_scenario_id = sid
-    game.mission_briefing_is_review = true
-    __game_mission_briefing_intermezzo(sid)
+    mission_briefing_show(scenario.campaign_scenario_id, true)
 }
 
 function sidebar_window_draw_background(window) {

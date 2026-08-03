@@ -1,6 +1,7 @@
 #include "debug_console.h"
 
 #include "js/js_game.h"
+#include "js/js.h"
 #include "js/js_struct.h"
 #include "mujs/mujs.h"
 #include "mujs/jsvalue.h"
@@ -61,8 +62,8 @@ static void __debug_props_show(js_State *J) {
         return;
     }
 
-    js_StringNode field_sn = js_tostring(J, 1);
-    pcstr field = js_strnode_cstr(field_sn);
+    xstring field_sn = js_toxstring(J, 1);
+    pcstr field = field_sn.c_str();
     if (!field || !*field) {
         return;
     }
@@ -107,7 +108,7 @@ static void __debug_props_show(js_State *J) {
     }
 
     if (js_isstring(J, val_idx)) {
-        game_debug_show_property(field, js_strnode_cstr(js_tostring(J, val_idx)));
+        game_debug_show_property(field, js_toxstring(J, val_idx).c_str());
     }
 }
 

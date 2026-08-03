@@ -6,6 +6,7 @@
 #include "grid/building.h"
 #include "grid/grid.h"
 #include "js/js_game.h"
+#include "js/js.h"
 #include "mujs/jsbuiltin.h"
 #include "mujs/jsvalue.h"
 #include "core/profiler.h"
@@ -25,7 +26,7 @@ static int house_this_id(js_State* J) {
     return id;
 }
 
-std::optional<bvariant> __house_get_property(int bid, pcstr property) {
+std::optional<bvariant> __house_get_property(int bid, const xstring property) {
     building_house* house = house_from_bid(bid);
     if (!house) {
         return {};
@@ -65,7 +66,7 @@ static js_Object *g_house_proto = nullptr;
 
 static void house_proto___property_getter(js_State *J) {
     const int bid = house_this_id(J);
-    pcstr prop = js_strnode_cstr(js_tostring(J, 1));
+    xstring prop = js_toxstring(J, 1);
     auto opt = __house_get_property(bid, prop);
     js_helpers::js_push_value<std::optional<bvariant>>(J, opt);
 }

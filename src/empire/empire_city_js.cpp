@@ -2,6 +2,7 @@
 #include "empire/empire_city.h"
 #include "empire/empire_object.h"
 #include "js/js_game.h"
+#include "js/js.h"
 #include "js/js_mujs_bound_offset.h"
 #include "mujs/jsbuiltin.h"
 #include "mujs/jsvalue.h"
@@ -30,7 +31,7 @@ static js_Object* g_empire_city_proto = nullptr;
 
 static void empire_city_map_proto___property_getter(js_State* J) {
     const int cid = empire_city_this_id(J);
-    pcstr prop = js_strnode_cstr(js_tostring(J, 1));
+    xstring prop = js_toxstring(J, 1);
     const empire_city* city = g_empire.city(cid);
     if (!city) {
         js_helpers::js_push_void(J);

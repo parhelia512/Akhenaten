@@ -23,6 +23,7 @@
 #include "figure/figure.h"
 #include "figure/action.h"
 #include "js/js_game.h"
+#include "js/js.h"
 #include "mujs/mujs.h"
 #include "mujs/jsvalue.h"
 #include "mujs/jsbuiltin.h"
@@ -298,7 +299,7 @@ static void building_proto___property_setter(js_State *J) {
         return;
     }
 
-    pcstr prop = js_strnode_cstr(js_tostring(J, 1));
+    xstring prop = js_toxstring(J, 1);
     const bool ok = b->dcast()->set_property(tags().building, prop, js_helpers::js_bvariant_from_js_value(J, 2));
     if (!ok) {
         logs::error("building: JS write to unregistered property '%s' on building type %d "
@@ -396,7 +397,7 @@ static js_Object *g_building_proto = nullptr;
 
 static void building_proto___property_getter(js_State *J) {
     const int bid = building_this_id(J);
-    pcstr prop = js_strnode_cstr(js_tostring(J, 1));
+    xstring prop = js_toxstring(J, 1);
     building *b = building_get(bid);
     if (!b || !b->is_valid()) {
         J->pushundefined();
