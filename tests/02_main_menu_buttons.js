@@ -1,6 +1,6 @@
 // Clicks the main menu buttons (except `continue_game` per request and
-// `quit_game` which would terminate the process), verifies that each opens
-// the expected sub-window, and right-clicks to go back to the main menu.
+// `quit_game` which would terminate the process) and verifies that each opens
+// the expected sub-window. Leaves the last window open for the end screenshot.
 
 var BUTTONS = [
     { name: "select_player", i: 1, window_id: "window_player_selection" },
@@ -15,24 +15,20 @@ function button_click_pos(i) {
     };
 }
 
-function go_back_pos() {
-    return { x: Math.floor(screen.width / 2), y: 50 };
-}
-
 function click_one_button(b) {
     var p = button_click_pos(b.i);
     __log_info_native('[test:02] click ' + b.name + ' at (' + p.x + ', ' + p.y + ')');
     __test_mouse_click(p.x, p.y);
-    __test_pump_frames(5);
-    var g = go_back_pos();
-    __log_info_native('[test:02] right-click at (' + g.x + ', ' + g.y + ') to go back');
-    __test_mouse_right_click(g.x, g.y);
     __test_pump_frames(5);
 }
 
 function run_test() {
     __log_info_native('[test:02] screen size = ' + screen.width + 'x' + screen.height);
     for (var i = 0; i < BUTTONS.length; i++) {
+        if (i > 0) {
+            window_show_by_id("window_main_menu");
+            __test_pump_frames(5);
+        }
         click_one_button(BUTTONS[i]);
     }
     __test_signal_ready();
