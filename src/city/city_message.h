@@ -208,6 +208,9 @@ struct message_manager_t {
     void init_problem_areas();
     int new_message_id();
 
+    // Slot + base fields + sequence. Returns message index, or -1 on failure.
+    int alloc_message(xstring template_id);
+
     city_message& post_common(bool use_popup, xstring message, int param1, int param2, int god, int bg_img);
 };
 

@@ -136,7 +136,8 @@ void message_manager_t::init() {
     }
     consecutive_message_delay = 0;
 
-    next_message_sequence = 0;
+    // Queue slots use 0 as empty sentinel — sequences must start at 1.
+    next_message_sequence = 1;
     total_messages = 0;
     current_message_id = 0;
 
@@ -187,6 +188,79 @@ int message_manager_t::new_message_id() {
             return i;
     }
     return -1;
+}
+
+int message_manager_t::alloc_message(xstring template_id) {
+    int id = new_message_id();
+    if (id < 0) {
+        return -1;
+    }
+
+    if (lang_get_message_uid(template_id) == 0) {
+        logs::info("messages::alloc: unknown message id '%s' - popup suppressed", template_id.c_str());
+        return -1;
+    }
+
+    total_messages++;
+    current_message_id = id;
+
+    city_message &msg = messages[id];
+    memset(&msg, 0, sizeof(city_message));
+    // Non-event list UI treats unset eventmsg ids as "no eventmsg".
+    msg.eventmsg_body_id = -1;
+    msg.eventmsg_title_id = -1;
+    msg.eventmsg_phrase_id = -1;
+
+    msg.MM_text_id = lang_get_message_uid(template_id);
+    msg.is_read = 0;
+    msg.year = game.simtime.year;
+    msg.month = game.simtime.month;
+    // Queue slots use 0 as empty sentinel — sequences must start at 1.
+    if (next_message_sequence <= 0) {
+        next_message_sequence = 1;
+    }
+    msg.sequence = next_message_sequence++;
+
+    return id;
+}
+
+static void fill_from_event(city_message &msg, const event_ph_t *event, int parent_event_id) {
+    if (!event) {
+        return;
+    }
+
+    msg.sender_faction = event->sender_faction;
+    msg.req_resource = event->item.value;
+    msg.req_amount = event->amount.value;
+    if (msg.req_amount < 100) {
+        msg.req_amount *= 100;
+    }
+    msg.req_city = event->city_id > 0 ? event->city_id : event->location_fields[0] - 1;
+
+    if (event->is_active) {
+        msg.req_months_left = event->quest_months_left;
+    } else {
+        msg.req_months_left = event->months_initial;
+    }
+
+    if (parent_event_id >= 0) {
+        const event_ph_t *parent_event = g_scenario.events.at(parent_event_id);
+        msg.req_resource_past = parent_event->item.value;
+        msg.req_amount_past = parent_event->amount.value;
+        msg.req_city_past = parent_event->location_fields[0] - 1;
+    } else {
+        msg.req_resource_past = -1;
+        msg.req_amount_past = -1;
+        msg.req_city_past = -1;
+    }
+
+    if (event->image.valid()) {
+        image_desc tmp_img = event->image;
+        int image_id = tmp_img.tid();
+        if (image_id >= 0) {
+            msg.background_img = image_id;
+        }
+    }
 }
 
 static bool has_video(const lang_message& template_id) {
@@ -298,67 +372,19 @@ void city_message_apply_sound_interval(int category) {
 
 void city_message_post_full(bool use_popup, xstring template_id, const event_ph_t *event, int parent_event_id, int title_id, int body_id, int phrase_id, int param1, int param2, e_popup_message_category popup_cat) {
     auto& data = g_message_manager;
-    int id = data.new_message_id();
-
+    int id = data.alloc_message(template_id);
     if (id < 0) {
         return;
     }
 
-    if (lang_get_message_uid(template_id) == 0) {
-        logs::info("city_message_post_full: unknown message id '%s' - popup suppressed", template_id.c_str());
-        return;
-    }
-
-    data.total_messages++;
-    data.current_message_id = id;
-
-    city_message* msg = &data.messages[id];
-    msg->MM_text_id = lang_get_message_uid(template_id);
-    msg->eventmsg_title_id = title_id;
-    msg->eventmsg_body_id = body_id;
-    msg->eventmsg_phrase_id = phrase_id;
-    msg->is_read = 0;
-    msg->god = GOD_UNKNOWN;
-    msg->year = game.simtime.year;
-    msg->month = game.simtime.month;
-    msg->param1 = param1;
-    msg->param2 = param2;
-    msg->sequence = data.next_message_sequence++;
-    msg->sender_faction = event->sender_faction;
-
-    msg->req_resource = event->item.value;
-    msg->req_amount = event->amount.value;
-    if (msg->req_amount < 100) {
-        msg->req_amount *= 100;
-    }
-    msg->req_city = event->city_id > 0 ? event->city_id : event->location_fields[0] - 1;
-
-    if (event->is_active) {
-        msg->req_months_left = event->quest_months_left;
-    } else {
-        //        msg->req_resource = event->item_1; // TODO
-        //        msg->req_amount = event->amount_FIXED; // TODO
-        msg->req_months_left = event->months_initial;
-    }
-
-    if (parent_event_id >= 0) {
-        const event_ph_t *parent_event = g_scenario.events.at(parent_event_id);
-        msg->req_resource_past = parent_event->item.value;
-        msg->req_amount_past = parent_event->amount.value;
-        msg->req_city_past = parent_event->location_fields[0] - 1;
-    } else {
-        msg->req_resource_past = -1;
-        msg->req_amount_past = -1;
-        msg->req_city_past = -1;
-    }
-
-    if (event->image.valid()) {
-        image_desc tmp_img = event->image;
-        int image_id = tmp_img.tid();
-        if (image_id >= 0) {
-            msg->background_img = image_id;
-        }
-    }
+    city_message &msg = data.messages[id];
+    msg.eventmsg_title_id = title_id;
+    msg.eventmsg_body_id = body_id;
+    msg.eventmsg_phrase_id = phrase_id;
+    msg.param1 = param1;
+    msg.param2 = param2;
+    msg.god = GOD_UNKNOWN;
+    fill_from_event(msg, event, parent_event_id);
 
     if (popup_cat == POPUP_MSG_NONE) {
         popup_cat = popup_message_category_for_key(template_id);
@@ -367,37 +393,15 @@ void city_message_post_full(bool use_popup, xstring template_id, const event_ph_
 }
 
 city_message &message_manager_t::post_common(bool use_popup, xstring mm_text, int param1, int param2, int god, int bg_img) {
-    int id = new_message_id();
+    int id = alloc_message(mm_text);
     if (id < 0) {
         static city_message dummy;
         return dummy;
     }
 
-    if (lang_get_message_uid(mm_text) == 0) {
-        logs::info("messages::popup: unknown message id '%s' - popup suppressed", mm_text.c_str());
-        static city_message dummy;
-        return dummy;
-    }
-
-    total_messages++;
-    current_message_id = id;
-
     city_message &msg = messages[id];
-    memset(&msg, 0, sizeof(city_message));
-    // For non-eventmsg messages these fields must be explicitly marked
-    // as "no eventmsg", otherwise message_list will treat them as
-    // event messages and always show the first eventmsg title.
-    msg.eventmsg_body_id = -1;
-    msg.eventmsg_title_id = -1;
-    msg.eventmsg_phrase_id = -1;
-
-    msg.MM_text_id = lang_get_message_uid(mm_text);
-    msg.is_read = 0;
-    msg.year = game.simtime.year;
-    msg.month = game.simtime.month;
     msg.param1 = param1;
     msg.param2 = param2;
-    msg.sequence = next_message_sequence++;
     msg.god = god;
     msg.hide_img = false;
     msg.background_img = bg_img;
