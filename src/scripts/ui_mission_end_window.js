@@ -1,8 +1,5 @@
 log_info("akhenaten: ui mission end window started")
 
-var INTERMEZZO_FIRED = 1
-var INTERMEZZO_WON = 2
-
 var MISSION_END_STATE_WON = 0
 var MISSION_END_STATE_LOST = 1
 
@@ -14,11 +11,16 @@ var MISSION_WON_DIFFICULTY_KEYS = [
     "#difficulty_very_hard"
 ]
 
+function mission_end_splash_tid(offset) {
+    var gi = get_image({pack: PACK_UNLOADED, id: 18, offset: offset})
+    return (gi && gi.tid !== undefined) ? gi.tid : 0
+}
+
 [es=window]
 window_mission_won {
     pos: [(sw(0) - px(38))/2, (sh(0) - px(28))/2]
-    draw_underlying: true
     ui {
+        splash              : image({pos[(px(38) - 1024)/2, (px(28) - 768)/2], pack:PACK_UNLOADED, id:18, offset:0 })
         background          : outer_panel({size:[38, 28]})
         title               : text({pos:[0, 16], size:[px(38), 20], text:{group:62, id:0}, align:"center", font: FONT_LARGE_BLACK_ON_LIGHT })
         description_panel   : inner_panel({pos:{x:32, y:48}, size:{w:34, h:7}})
@@ -44,8 +46,8 @@ window_mission_won {
 [es=window]
 window_mission_lost {
     pos: [(sw(0) - px(34))/2, (sh(0) - px(16))/2]
-    draw_underlying: true
     ui {
+        splash              : image({pos[(px(34) - 1024)/2, (px(16) - 768)/2], pack:PACK_UNLOADED, id:18, offset:0 })
         background          : outer_panel({size:[34, 16]})
         title               : text({pos:[0, 32], text:{group:62, id:1}, font: FONT_LARGE_BLACK_ON_LIGHT, align:"center", size:[px(32), 20] })
         warning_text        : text({pos:[32, 72], text:{group:62, id:16}, wrap:px(32), font: FONT_NORMAL_BLACK_ON_LIGHT, multiline:true })
@@ -123,6 +125,19 @@ function mission_won_compare_text(scenario_id, new_score) {
 function window_mission_won_on_init(window) {
     __log_marker("window_show:window_mission_won")
     var is_custom = scenario.scmode != e_scenario_normal
+
+    window.splash.image = mission_end_splash_tid(is_custom ? 2 : 0)
+
+    __game_sound.music_stop()
+    __game_sound.speech_stop()
+    if (!is_custom) {
+        var cfg = get_mission_config(scenario.campaign_scenario_id)
+        var victory = cfg && cfg.sounds && cfg.sounds.victory
+        if (victory) {
+            __game_sound.speech_play(victory)
+        }
+    }
+
     var subtitle_id = is_custom ? 53 : scenario.campaign_scenario_id
     window.victory_text.text = __loc(147, subtitle_id)
 
@@ -159,6 +174,12 @@ function window_mission_won_on_go_back(window) {
 
 [es=(window_mission_lost, init)]
 function window_mission_lost_on_init(window) {
+    window.splash.image = mission_end_splash_tid(0)
+
+    __game_sound.music_stop()
+    __game_sound.speech_stop()
+    __game_sound.speech_play("Wavs/lose_game.wav")
+
     window.replay_mission.onclick = mission_end_replay_mission
 }
 
@@ -226,12 +247,12 @@ function mission_end_show(state) {
     __mouse_reset_up_state()
 
     if (state == MISSION_END_STATE_LOST) {
-        __game_intermezzo_show(scenario.campaign_scenario_id, INTERMEZZO_FIRED, "mission_end_open_lost_dialog")
+        mission_end_open_lost_dialog()
         return
     }
 
     if (scenario.hide_won_screen) {
-        __game_intermezzo_show(scenario.campaign_scenario_id, INTERMEZZO_WON, "mission_end_open_won_dialog")
+        mission_end_open_won_dialog()
         return
     }
 
@@ -249,7 +270,7 @@ function mission_end_show(state) {
 }
 
 function mission_end_after_video() {
-    __game_intermezzo_show(scenario.campaign_scenario_id, INTERMEZZO_WON, "mission_end_open_won_dialog")
+    mission_end_open_won_dialog()
 }
 
 function mission_end_open_won_dialog() {
