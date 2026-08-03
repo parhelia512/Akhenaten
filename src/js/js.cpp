@@ -281,6 +281,17 @@ static void js_vm_dump_stack(js_State *J) {
 static js_StringNode property_name = js_intern("name");
 static js_StringNode property_message = js_intern("message");
 
+xstring js_toxstring(js_State* J, int idx) {
+    if (!js_isstring(J, idx)) {
+        return {};
+    }
+
+    js_StringNode id = js_tostring(J, idx);
+    xstring result;
+    result._set(id);
+    return result;
+}
+
 int js_vm_trypcall(js_State *J, int params) {
     int ok = js_vm_trypcall_keep_result(J, params);
     if (ok) {

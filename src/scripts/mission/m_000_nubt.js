@@ -24,7 +24,7 @@ mission0 { // Nubt
 	]
 
 	sounds {
-		briefing : "Voice/Mission/20o_mission.mp3"
+		briefing : "Voice/Mission/200_mission.mp3"
 		victory : "Voice/Mission/200_victory.mp3"  
 	}
 

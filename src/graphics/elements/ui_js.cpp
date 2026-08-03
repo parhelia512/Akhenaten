@@ -36,17 +36,6 @@
 
 #include <cstring>
 
-xstring js_toxstring(js_State* J, int idx) {
-    if (!js_isstring(J, idx)) {
-        return {};
-    }
-
-    js_StringNode id = js_tostring(J, idx);
-    xstring result;
-    result._set(id);
-    return result;
-}
-
 vec2i js_tovec2i(js_State *J, int idx) {
     return js_helpers::js_to_value<vec2i>(J, idx);
 }

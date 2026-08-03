@@ -102,6 +102,12 @@ static void js_sound_speech_stop(js_State *J) {
     J->pushundefined();
 }
 
+static void js_sound_speech_play(js_State *J) {
+    const xstring path = js_tostring(J, 1);
+    const int volume = js_gettop(J) > 2 ? js_tointeger(J, 2) : 255;
+    js_pushboolean(J, g_sound.speech_play_file(path.c_str(), volume));
+}
+
 static void js_sound_play_intro(js_State *J) {
     g_sound.play_intro();
     J->pushundefined();
@@ -122,6 +128,7 @@ void js_register_sound_object(js_State *J) {
     REGISTER_FUNCTION(J, js_sound_music_stop, "music_stop", 0);
     REGISTER_FUNCTION(J, js_sound_music_update, "music_update", 1);
     REGISTER_FUNCTION(J, js_sound_speech_stop, "speech_stop", 0);
+    REGISTER_FUNCTION(J, js_sound_speech_play, "speech_play", 1);
     REGISTER_FUNCTION(J, js_sound_play_intro, "play_intro", 0);
     js_setglobal(J, "__game_sound");
 }

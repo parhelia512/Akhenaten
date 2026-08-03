@@ -7,8 +7,6 @@
 #include "sound/channel.h"
 #include "content/mods.h"
 
-#include <filesystem>
-
 vfs::path sound_manager_t::speech_filename(xstring filename) {
     pcstr filename_str = filename.c_str();
     vfs::path fs_path = filename_str;
@@ -51,8 +49,7 @@ bool sound_manager_t::speech_play_file(xstring filename, int volume) {
     }
 
     stop_channel(SOUND_CHANNEL_SPEECH);
-    play_file_on_channel(fs_path, SOUND_CHANNEL_SPEECH, game_features::gameopt_sound_speech_volume.to_int());
-    return true;
+    return play_file_on_channel(fs_path, SOUND_CHANNEL_SPEECH, game_features::gameopt_sound_speech_volume.to_int());
 }
 
 void sound_manager_t::speech_stop() {

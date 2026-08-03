@@ -23,8 +23,6 @@ using UiElementProtoRegIterator = FuncLinkedList<void (*)(js_State *), UiElement
 void js_ui_register_element_proto(const xstring &kind, js_Object *proto);
 js_Object *js_ui_element_proto_for_kind(const xstring &kind);
 
-xstring js_toxstring(js_State* J, int idx);
-
 namespace ui {
     void proxy_get_value(js_State* J);
     void proxy_set_value(js_State* J);

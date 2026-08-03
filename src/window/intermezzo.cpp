@@ -1,7 +1,6 @@
 #include "intermezzo.h"
 
 #include "content/vfs.h"
-#include "core/log.h"
 #include "core/profiler.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -37,22 +36,18 @@ static void init(int mission_id, intermezzo_type type, std::function<void()> cal
     g_sound.music_stop();
     g_sound.speech_stop();
 
-    // play briefing sound by mission number
-    const bool is_custom_map = (g_scenario.mode() != e_scenario_normal);
+    const bool is_custom_map = (g_scenario.mode() == e_scenario_custom_map);
     if (g_intermezzo_data.type == INTERMEZZO_FIRED) {
         g_sound.speech_play_file(SOUND_FILE_LOSE, 255);
     } else if (!is_custom_map) {
         const auto& conf = g_scenario.sounds;
-        if (conf.briefing.empty()) {
-            logs::info("Intermezzo: can't found sound for mission %u", mission_id);
-            return;
-        }
-
         xstring file2play = conf.briefing;
         if (g_intermezzo_data.type == INTERMEZZO_WON) {
             file2play = conf.victory;
         }
-
+        if (file2play.empty()) {
+            return;
+        }
         g_sound.speech_play_file(file2play, 255);
     }
 }
@@ -66,7 +61,7 @@ static void draw_background(int) {
     int campaign_scenario_id = g_scenario.campaign_scenario_id;
     int image_base = image_id_from_group(GROUP_INTERMEZZO_BACKGROUND);
     painter ctx = game.painter();
-    const bool is_custom_map = (g_scenario.mode() != e_scenario_normal);
+    const bool is_custom_map = (g_scenario.mode() == e_scenario_custom_map);
     if (g_intermezzo_data.type == INTERMEZZO_MISSION_BRIEFING) {
         ctx.img_generic(is_custom_map ? image_base + 1 : image_base + 1 + (campaign_scenario_id >= 20), offset);
 

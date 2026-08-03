@@ -85,6 +85,12 @@ function mission_briefing_window_on_init(window) {
     var is_review = game.mission_briefing_is_review
     var text_id = 200 + scenario_id
 
+    var cfg = get_mission_config(scenario_id)
+    var briefing = cfg && cfg.sounds && cfg.sounds.briefing
+    if (briefing && !(new SoundChannel(0).playing)) {
+        __game_sound.speech_play(briefing)
+    }
+
     if (!is_review) {
         game_mission_options_locked = false
     }

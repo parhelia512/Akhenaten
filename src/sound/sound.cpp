@@ -393,9 +393,31 @@ void sound_manager_t::set_channel_panning(int channel, int left, int right) {
 }
 
 void sound_manager_t::set_channel_volume(int channel, int volume_pct) {
+    const int vol = percentage_to_volume(volume_pct);
+    Mix_Volume(channel, vol);
     if (_channels[channel].chunk) {
-        Mix_VolumeChunk((Mix_Chunk*)_channels[channel].chunk, percentage_to_volume(volume_pct));
+        Mix_VolumeChunk((Mix_Chunk*)_channels[channel].chunk, vol);
     }
+}
+
+bool sound_manager_t::play_file_on_channel(pcstr filename, int channel, int volume_pct) {
+    if (!initialized) {
+        return false;
+    }
+
+    stop_channel(channel);
+    _channels[channel].chunk = load_chunk(filename);
+    if (!_channels[channel].chunk) {
+        return false;
+    }
+
+    set_channel_volume(channel, volume_pct);
+    if (Mix_PlayChannelTimed(channel, (Mix_Chunk*)_channels[channel].chunk, 0, -1) < 0) {
+        logs::warn("Sound: Mix_PlayChannel failed for '%s': %s", filename ? filename : "<null>", Mix_GetError());
+        return false;
+    }
+    _channels[channel].playing = true;
+    return true;
 }
 
 #ifdef __vita__
@@ -461,21 +483,6 @@ bool sound_manager_t::play_music(pcstr filename, int volume_pct) {
         }
     }
     return !!_music_player->music;
-}
-
-void sound_manager_t::play_file_on_channel(pcstr filename, int channel, int volume_pct) {
-    if (!initialized) {
-        return;
-    }
-
-    stop_channel(channel);
-    _channels[channel].chunk = load_chunk(filename);
-    if (!_channels[channel].chunk) {
-        return;
-    }
-
-    set_channel_volume(channel, volume_pct);
-    Mix_PlayChannelTimed(channel, (Mix_Chunk*)_channels[channel].chunk, 0, -1);
 }
 
 void sound_manager_t::play_channel(int channel, int volume_pct) {

@@ -755,6 +755,8 @@ bool GamestateIO::load_mission_pak_raw(const int scenario_id) {
     game.session.last_loaded = e_session_mission;
     game.session.last_loaded_mission = MISSION_PACK_FILE;
     g_scenario.campaign_scenario_id = scenario_id;
+
+    g_scenario.scmode = e_scenario_normal;
     return true;
 }
 
@@ -783,6 +785,7 @@ bool GamestateIO::load_mission_map_raw(const int scenario_id, pcstr map_path) {
     game.session.last_loaded = e_session_mission;
     game.session.last_loaded_mission = map_path;
     g_scenario.campaign_scenario_id = scenario_id;
+    g_scenario.scmode = e_scenario_normal;
     return true;
 }
 
@@ -1022,9 +1025,7 @@ void GamestateIO::start_loaded_file() {
 
     autoconfig_window::before_mission_start();
     events::emit(event_mission_start{ g_scenario.campaign_scenario_id });
-    // Fresh mission start only: activate troop carry + notice.
-    // Do not run on selection preview loads (start_immediately=false) or save resume —
-    // preview would wipe a pending snapshot when browsing missions without carry_troops.
+
     if (game.session.last_loaded == e_session_mission) {
         g_campaign_carry.activate_for_mission(g_scenario.carry_troops_mask);
         g_campaign_carry.post_notice_if_needed();
@@ -1037,14 +1038,15 @@ void GamestateIO::start_loaded_file() {
     g_city.before_start_simulation();
     game.before_start_simulation();
     game.session.active = true;
-    g_sound.music_update(true);
 
     const bool show_briefing = (game.session.last_loaded == e_session_mission);
     if (show_briefing) {
         events::emit(event_mission_briefing_show_after_load{ g_scenario.campaign_scenario_id });
+        events::process();
     } else {
         game.paused = false;
         window_city_show();
+        g_sound.music_update(true);
     }
     game.session.last_loaded = e_session_none;
 }

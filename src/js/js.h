@@ -10,7 +10,7 @@ struct mission_id_t;
 
 void js_vm_setup();
 void js_vm_shutdown();
-
+xstring js_toxstring(js_State* J, int idx);
 
 /** False if no script reloads were queued (files2load empty). */
 bool js_vm_sync(const xstring& mission_id);
@@ -25,10 +25,7 @@ void js_call_event_handlers(const xstring &event_name, const bvariant_map &objec
 int js_vm_trypcall(js_State *J, int params);
 int js_vm_trypcall_keep_result(js_State *J, int params);
 bool js_vm_have_error();
-/** Clear the sticky `vm.have_error` flag. js_vm_trypcall short-circuits to 0
- * while the flag is set, so any code that wants to keep running after a
- * caught script exception (e.g. the integral-tests driver) must reset it
- * between independent calls. */
+
 void js_vm_reset_error();
 bool js_vm_global_is_callable(js_State *J, const char *name);
 int js_vm_stack_depth_if_idle();

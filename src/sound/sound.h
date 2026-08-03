@@ -68,7 +68,7 @@ private:
     void load_formats();
     void unload_formats();
     void set_channel_panning(int channel, int left, int right);
-    void play_file_on_channel(pcstr filename, int channel, int volume_pct);
+    bool play_file_on_channel(pcstr filename, int channel, int volume_pct);
     void stop_channel(int channel);
     void free_custom_audio_stream();
     bool create_custom_audio_stream(uint16_t src_format, uint8_t src_channels, int src_rate, uint16_t dst_format, uint8_t dst_channels, int dst_rate);
