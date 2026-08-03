@@ -35,7 +35,7 @@
 //  184 akhenaten: campaign_carry_monuments (Cleopatra monument carry CO1)
 //  185 akhenaten: (reserved / in-tree)
 //  186 akhenaten: labor STORAGE category priority (enhanced labor split LC4)
-constexpr uint32_t latest_save_version = 187;
+constexpr uint32_t latest_save_version = 188;
 
 vfs::path fullpath_saves(vfs::path filename);
 vfs::path fullpath_maps(char* full, vfs::path filename);

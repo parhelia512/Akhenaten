@@ -13,11 +13,12 @@
 #include "graphics/image_groups.h"
 #include "building/building_static_params.h"
 #include "building/building_bridge.h"
-#include "building/building_delivery_path.h"
 #include "building/building_temple_complex.h"
 #include "building/construction/build_planner.h"
 #include "city/city_finance.h"
+#include "city/city_recorded_paths.h"
 #include "city/city_warnings.h"
+#include "city/object_info.h"
 #include "core/calc.h"
 #include "core/string.h"
 #include "figure/formation_batalion.h"
@@ -29,9 +30,11 @@
 #include "grid/figure.h"
 #include "grid/image.h"
 #include "grid/terrain.h"
+#include "window/window_info.h"
 #include "grid/road_access.h"
 #include "grid/routing/routing.h"
 #include "input/scroll.h"
+#include "input/keyboard.h"
 #include "game/game_config.h"
 #include "io/gamefiles/lang.h"
 #include "platform/renderer.h"
@@ -68,8 +71,15 @@
 #include "city/city_figures.h"
 #include "input/mouse.h"
 #include "core/profiler.h"
+#include "js/js_game.h"
+#include "js/js_struct.h"
 
 #include <algorithm>
+
+struct city_view_postrender_ev {
+    int reserved = 0;
+};
+ANK_REGISTER_STRUCT_WRITER(city_view_postrender_ev, reserved)
 
 screen_city_t g_screen_city;
 
@@ -277,6 +287,84 @@ void screen_city_t::draw_building_road_access_marker(painter &ctx) {
     const color mask = map_routing_distance(ports.tile) > 0 ? COLOR_MASK_AMBER : COLOR_MASK_AMBER_40;
     vec2i pixel = g_camera.lookup_tile_to_pixel(ports.tile);
     build_planner::draw_building_ghost(ctx, image_id_from_group(GROUP_TERRAIN_OVERLAY_COLORED) + 23, pixel, mask);
+}
+
+void screen_city_t::draw_recorded_delivery_paths(painter &ctx) {
+    if (!game_features::gameui_show_delivery_paths.to_bool()) {
+        return;
+    }
+    if (!(keyboard_t::modifiers() & KEY_MOD_ALT)) {
+        return;
+    }
+    if (g_city_planner.build_type != BUILDING_NONE) {
+        return;
+    }
+
+    building *src = nullptr;
+    if (g_window_manager.window_is("window_building_info")) {
+        building_id bid = common_info_window::get_object_info().bid;
+        if (bid) {
+            building *b = building_get(bid);
+            if (b && b->is_valid()) {
+                src = b->main();
+            }
+        }
+    } else if (current_tile.valid()) {
+        building *b = building_at(current_tile);
+        if (b && b->is_valid()) {
+            src = b->main();
+        }
+    }
+    if (!src) {
+        return;
+    }
+
+    static const color path_colors[BUILDING_RECORDED_PATHS] = {
+        COLOR_MASK_AMBER,
+        COLOR_MASK_GREEN,
+        COLOR_MASK_BLUE,
+    };
+    const int base_img = image_id_from_group(PACK_CUSTOM, 1);
+    for (int i = 0; i < BUILDING_RECORDED_PATHS; i++) {
+        const int path_id = g_recorded_paths.building_path_at(src->id, i);
+        if (!path_id) {
+            continue;
+        }
+        const auto &tiles = g_recorded_paths.tiles(path_id);
+        if (tiles.empty()) {
+            continue;
+        }
+        const color mask = path_colors[i];
+
+        tile2i start((int)tiles[0]);
+        if (start.valid()) {
+            vec2i pixel = g_camera.lookup_tile_to_pixel(start);
+            build_planner::draw_building_ghost(ctx, base_img + 3, pixel, mask);
+        }
+
+        for (size_t t = 1; t < tiles.size(); t++) {
+            tile2i from((int)tiles[t - 1]);
+            tile2i to((int)tiles[t]);
+            if (!from.valid() || !to.valid()) {
+                continue;
+            }
+            int img_index = 10;
+            switch (calc_general_direction(from, to)) {
+            case DIR_0_TOP_RIGHT:
+            case DIR_4_BOTTOM_LEFT:
+                img_index = 0;
+                break;
+            case DIR_2_BOTTOM_RIGHT:
+            case DIR_6_TOP_LEFT:
+                img_index = 1;
+                break;
+            default:
+                break;
+            }
+            vec2i pixel = g_camera.lookup_tile_to_pixel(to);
+            build_planner::draw_building_ghost(ctx, base_img + img_index, pixel, mask);
+        }
+    }
 }
 
 void screen_city_t::draw_figures(vec2i pixel, tile2i tile, painter &ctx, [[maybe_unused]] bool force) {
@@ -546,7 +634,8 @@ void screen_city_t::draw_without_overlay(painter &ctx, int selected_figure_id) {
     }
 
     draw_building_road_access_marker(ctx);
-    delivery_paths_draw(ctx);
+    draw_recorded_delivery_paths(ctx);
+    js_event(city_view_postrender_ev{}, "city_view", "postrender");
 
     // PHASE 5: post-processing of tiles that require special handling after all main elements are drawn
     g_camera.foreach_valid_map_tile(ctx,
@@ -975,7 +1064,8 @@ void screen_city_t::draw_with_overlay(painter &ctx) {
     g_city_planner.draw(ctx);
 
     draw_building_road_access_marker(ctx);
-    delivery_paths_draw(ctx);
+    draw_recorded_delivery_paths(ctx);
+    js_event(city_view_postrender_ev{}, "city_view", "postrender");
 
     ImageDraw::apply_render_commands(ctx, "draw_city_planer_overlay");
 

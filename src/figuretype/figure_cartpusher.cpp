@@ -11,6 +11,7 @@
 #include "building/monuments.h"
 #include "city/buildings.h"
 #include "city/city_resource.h"
+#include "city/city_recorded_paths.h"
 #include "core/calc.h"
 #include "core/profiler.h"
 #include "figure/combat.h"
@@ -74,26 +75,39 @@ void figure_cartpusher::do_deliver(bool warehouseman, int action_done, int actio
         int carrying = base.get_carrying_amount();
         e_resource resource = base.get_resource();
 
-        // carrying nothing? done!
+        // carrying nothing? done — hand off outbound trail to granary/mill once.
         if (resource == RESOURCE_NONE || carrying <= 0) {
+            building *dest = destination();
+            if (dest && base.trail_path_id) {
+                const e_building_type dt = dest->type;
+                if (dt == BUILDING_GRANARY || dt == BUILDING_GRANARY_UP || dt == BUILDING_FOOD_MILL
+                    || dest->dcast_granary()) {
+                    building *main = dest->main();
+                    if (main) {
+                        g_recorded_paths.handoff_to_building(base, main->id);
+                        figure_recorded_path_acquire(base);
+                    }
+                }
+            }
             base.progress_inside_speed = 0;
             return advance_action(action_done);
 
         } else {
-            building* dest = destination();         
+            building* dest = destination();
 
             int amount_single_turn = std::min(carrying, UNITS_PER_LOAD);
             int times = carrying / amount_single_turn;
 
             switch (dest->type) {
             case BUILDING_GRANARY:
+            case BUILDING_GRANARY_UP:
             case BUILDING_FOOD_MILL:
             case BUILDING_STORAGE_YARD:
             case BUILDING_STORAGE_ROOM: {
                     building_storage *storage = dest->dcast_storage();
                     int accepting = storage ? storage->accepting_amount(resource) : 0;
                     int total_depositable = std::min<int>(carrying, accepting);
-                    
+
                     if (total_depositable <= 0) {
                         if (warehouseman) {
                             advance_action(ACTION_8_RECALCULATE);
@@ -453,6 +467,11 @@ void figure_cartpusher::figure_before_action() {
 }
 
 void figure_cartpusher::before_poof() {
+    building *home_b = home();
+    if (home_b && home_b->is_valid() && home_b->type == BUILDING_HUNTING_LODGE && base.trail_path_id) {
+        g_recorded_paths.handoff_to_building(base, home_b->main()->id);
+    }
+    figure_recorded_path_release(base);
 }
 
 void figure_cartpusher::figure_action() {
@@ -526,8 +545,12 @@ void figure_cartpusher::figure_action() {
         // so there is no need for `cartpusher_do_deliver` action.
         if (b->is_floodplain_farm()) { // do not return to floodplain farms
             poof();
-        } else {
-            do_returnhome(TERRAIN_USAGE_ROADS);
+        } else if (do_returnhome(TERRAIN_USAGE_ROADS)) {
+            // Arrived home (action_state becomes -1 → dead next tick). Handoff lodge trail now —
+            // action_perform kills via set_state(DEAD) without calling before_poof/poof().
+            if (b->type == BUILDING_HUNTING_LODGE) {
+                g_recorded_paths.handoff_to_building(base, b->main()->id);
+            }
         }
         break;
     }
@@ -541,7 +564,7 @@ sound_key figure_cartpusher::phrase_key() const {
     if (action_state(ACTION_8_RECALCULATE)) {
         return "cartpusher_no_found_destination";
     }
-         
+
     if (action_state(ACTION_20_CARTPUSHER_INITIAL, ACTION_24_CARTPUSHER_AT_WAREHOUSE)) {
         return "cartpusher_i_have_no_destination";
     }

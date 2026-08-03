@@ -128,6 +128,7 @@ public:
     short routing_path_id;
     short routing_path_current_tile;
     short routing_path_length;
+    uint16_t trail_path_id;
 
     uint8_t in_building_wait_ticks;
     uint8_t outside_road_ticks;

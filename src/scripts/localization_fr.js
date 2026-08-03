@@ -35,7 +35,7 @@ localization_fr = [
   { key:"#TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE", text:"Améliore le retour visuel durant le dégagement du terrain"},
   { key:"#TR_CONFIG_ALLOW_CYCLING_TEMPLES", text:"Permet de construire tous les temples successivement"},
   { key:"#TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE", text:"Voir la zone d'effet en plaçant des réservoirs, des fontaines et des puits"},
-  { key:"#TR_CONFIG_SHOW_DELIVERY_PATHS", text:"Afficher le chemin de livraison prévu en maintenant Alt sur un producteur"},
+  { key:"#TR_CONFIG_SHOW_DELIVERY_PATHS", text:"Afficher les chemins de livraison récents en maintenant Alt sur un grenier ou une loge de chasse"},
   { key:"#delivery_path_no_road", text:"Pas d'accès à la route — livraison impossible"},
   { key:"#delivery_path_understaffed", text:"Aucun entrepôt acceptant — sous-effectif"},
   { key:"#delivery_path_no_destination", text:"Aucune destination acceptant cette marchandise"},

@@ -29,6 +29,7 @@
 #include "building/monument_royal_tomb.h"
 #include "building/monuments.h"
 #include "building/construction_blessing.h"
+#include "city/city_recorded_paths.h"
 #include "grid/grid.h"
 #include "grid/terrain.h"
 #include "grid/water.h"
@@ -3662,6 +3663,49 @@ static int __test_building_shows_delivery_paths(int bid) {
     return building_shows_delivery_paths(*b) ? 1 : 0;
 }
 ANK_FUNCTION_1(__test_building_shows_delivery_paths);
+
+static int __test_recorded_path_acquire() {
+    return g_recorded_paths.acquire();
+}
+ANK_FUNCTION(__test_recorded_path_acquire);
+
+static void __test_recorded_path_append(int path_id, int x, int y) {
+    g_recorded_paths.append(path_id, MAP_OFFSET(x, y));
+}
+ANK_FUNCTION_3(__test_recorded_path_append);
+
+static void __test_building_push_recorded_path(int bid, int path_id) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return;
+    }
+    building *main = b->main();
+    g_recorded_paths.building_push(main ? main->id : bid, path_id);
+}
+ANK_FUNCTION_2(__test_building_push_recorded_path);
+
+static int __test_building_recorded_path_at(int bid, int index) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return 0;
+    }
+    building *main = b->main();
+    return g_recorded_paths.building_path_at(main ? main->id : bid, index);
+}
+ANK_FUNCTION_2(__test_building_recorded_path_at);
+
+static int __test_recorded_path_tile_count(int path_id) {
+    return (int)g_recorded_paths.tiles(path_id).size();
+}
+ANK_FUNCTION_1(__test_recorded_path_tile_count);
+
+static int __test_recorded_path_used(int path_id) {
+    if (path_id <= 0 || path_id >= RECORDED_PATH_POOL_SIZE) {
+        return 0;
+    }
+    return g_recorded_paths.slots[path_id].used ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_recorded_path_used);
 
 ANK_DECLARE_JSFUNCTION_ITERATOR(register_test_js_functions);
 inline void register_test_js_functions(js_State *J) {

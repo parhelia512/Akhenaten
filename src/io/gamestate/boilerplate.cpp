@@ -83,6 +83,7 @@
 #include "game/game_events.h"
 #include "empire/empire.h"
 #include "city/city_warnings.h"
+#include "city/city_recorded_paths.h"
 #include "empire/empire_traders.h"
 
 #include "chunks.h"
@@ -165,6 +166,7 @@ static void pre_load() { // do we NEED this...?
     figure_name_init();
     g_formations.clear_all();
     figure_route_clear_all();
+    g_recorded_paths.clear();
     map_clear_floodplain_growth();
     // Troop carry lives outside city_data; clear so old saves (no chunk) and map
     // loads cannot inherit a stale snapshot from the previous session.
@@ -669,6 +671,11 @@ static void file_schema(e_file_format file_format, const int file_version) {
         if (file_version > 186) {
             // local cults + festival calendar theme state (Enhanced PC2)
             FILEIO.push_chunk(64, false, "enhanced_religion", iob_enhanced_religion);
+        }
+        if (file_version > 187) {
+            // recorded cart trails pool + per-building last-3 rings
+            // 512*(1+2+256*2) + 4000*3*2 = 263680 + 24000 = 287680
+            FILEIO.push_chunk(287680, true, "recorded_paths", iob_recorded_paths);
         }
 
         break;

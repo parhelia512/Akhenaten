@@ -4,7 +4,6 @@
 #include "game/resource.h"
 #include "grid/point.h"
 
-struct painter;
 class building;
 
 enum class e_delivery_dest_kind : uint8_t {
@@ -51,5 +50,3 @@ struct delivery_path_query {
 bool building_shows_delivery_paths(const building &b);
 delivery_path_query building_predict_delivery(const building &b, e_resource r = RESOURCE_NONE);
 bool delivery_path_fill_road(delivery_path_query &q, uint8_t *dirs, int *out_len, int max_len);
-
-void delivery_paths_draw(painter &ctx);

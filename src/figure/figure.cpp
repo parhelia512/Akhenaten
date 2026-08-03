@@ -2,6 +2,7 @@
 
 #include "building/building.h"
 #include "city/city.h"
+#include "city/city_recorded_paths.h"
 #include "game/game_events.h"
 #include "city/city_warnings.h"
 #include "core/random.h"
@@ -322,6 +323,7 @@ void figure::figure_delete_UNSAFE() {
     }
 
     route_remove();
+    figure_recorded_path_release(*this);
     map_figure_remove();
 
     int figure_id = id;
@@ -1054,7 +1056,7 @@ void figure::bind(io_buffer* iob) {
     iob->bind(BIND_SIGNATURE_INT16, &f->opponent_id);
     //        iob->bind____skip(239);
     iob->bind____skip(4);
-    iob->bind(BIND_SIGNATURE_UINT16, &f->collecting_item_max);       
+    iob->bind(BIND_SIGNATURE_UINT16, &f->collecting_item_max);
     iob->bind(BIND_SIGNATURE_UINT8, &f->routing_try_reroute_counter);                       // 269
     iob->bind____skip(2); // iob->bind(BIND_SIGNATURE_UINT16, &f->phrase.group);                       // 269
     iob->bind(BIND_SIGNATURE_UINT16, &f->sender_building_id);                        // 0
@@ -1077,4 +1079,8 @@ void figure::bind(io_buffer* iob) {
     iob->bind____skip(2);
 
     draw_mode = 0;
+    // Runtime-only trail (persisted in recorded_paths building rings); clear stale ids on load.
+    if (iob->is_read_access()) {
+        f->trail_path_id = 0;
+    }
 }

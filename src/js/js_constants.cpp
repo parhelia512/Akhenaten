@@ -30,6 +30,8 @@
 #include "grid/terrain.h"
 #include "grid/water_supply.h"
 #include "city/labor_category.h"
+#include "graphics/color.h"
+#include "input/keys.h"
 
 e_advisor_tokens_t ANK_CONFIG_ENUM(e_advisor_tokens);
 e_trade_status_tokens_t ANK_CONFIG_ENUM(e_trade_status_tokens);
@@ -85,9 +87,17 @@ void js_register_game_constants(js_State* J) {
     _R(COLOR_MASK_RED)
     _R(COLOR_MASK_RED_30)
     _R(COLOR_MASK_GREEN_30)
+    _R(COLOR_MASK_AMBER)
+    _R(COLOR_MASK_LEGION_HIGHLIGHT)
     _R(COLOR_TOOLTIP_FILL)
     _R(COLOR_TOOLTIP_BORDER)
     _R(COLOR_TOOLTIP_TEXT)
+
+    _R(KEY_MOD_NONE)
+    _R(KEY_MOD_SHIFT)
+    _R(KEY_MOD_CTRL)
+    _R(KEY_MOD_ALT)
+    _R(KEY_MOD_GUI)
 
     _R(CAN_PLACE)
     _R(CAN_NOT_PLACE)

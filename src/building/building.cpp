@@ -6,6 +6,7 @@
 #include "building/destruction.h"
 #include "city/buildings.h"
 #include "city/city_population.h"
+#include "city/city_recorded_paths.h"
 #include "city/city_warnings.h"
 #include "game/game_events.h"
 #include "widget/city/ornaments.h"
@@ -355,6 +356,7 @@ void building::clear_related_data() {
     }
 
     dcast()->on_destroy();
+    g_recorded_paths.building_clear(id);
     clear_impl();
 }
 
@@ -406,7 +408,8 @@ figure *building::create_cartpusher(e_resource resource_id, int quantity, e_figu
 
     cart->load_resource(resource_id, quantity);
     cart->set_destination(nullptr);
-    
+    figure_recorded_path_acquire(cart->base);
+
     set_figure(slot, cart->id()); // warning: this overwrites any existing figure!
     if (!!game_features::gameplay_change_cart_speed_depends_quntity) {
         f->progress_inside_speed = std::clamp(quantity / 400, 0, 2);

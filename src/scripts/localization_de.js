@@ -38,7 +38,7 @@ localization_de = [
   {key:"#TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE", text:"Visuelle Rückmeldung beim Räumen von Land verbessern"}
   {key:"#TR_CONFIG_ALLOW_CYCLING_TEMPLES", text:"Bau jedes Tempels nacheinander erlauben"}
   {key:"#TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE", text:"Reichweite beim Bau von Reservoirs, Brunnen und Quellen anzeigen"}
-  {key:"#TR_CONFIG_SHOW_DELIVERY_PATHS", text:"Lieferweg anzeigen bei gedrückter Alt-Taste über Produzenten"}
+  {key:"#TR_CONFIG_SHOW_DELIVERY_PATHS", text:"Lieferwege anzeigen bei gedrückter Alt-Taste über Kornspeicher oder Jagdhütte"}
   {key:"#delivery_path_no_road", text:"Kein Straßenzugang — Lieferung unmöglich"}
   {key:"#delivery_path_understaffed", text:"Kein annehmendes Lager — unterbesetzt"}
   {key:"#delivery_path_no_destination", text:"Kein annehmendes Ziel für diese Ware"}

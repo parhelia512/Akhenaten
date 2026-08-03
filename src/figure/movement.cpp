@@ -5,6 +5,7 @@
 #include "building/destruction.h"
 #include "building/building_roadblock.h"
 #include "building/monuments.h"
+#include "city/city_recorded_paths.h"
 #include "core/calc.h"
 #include "figure/combat.h"
 #include "figure/route.h"
@@ -107,6 +108,10 @@ void figure::move_to_next_tile() {
 
     map_figure_add();
     figure_combat_attack_figure_at(tile.grid_offset());
+
+    if (type == FIGURE_CART_PUSHER) {
+        figure_recorded_path_append_tile(*this);
+    }
 
     const int old_terrain = map_terrain_get(old);
     const int current_terrain = map_terrain_get(tile);

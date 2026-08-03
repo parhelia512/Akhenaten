@@ -50,7 +50,7 @@ localization_en = [
   {key:"#TR_CONFIG_ALLOW_CYCLING_TEMPLES", text:"Allow building each temple in succession"}
   {key:"#TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE", text:"Show range when building reservoirs, fountains and wells"}
   {key:"#TR_CONFIG_SHOW_BUILDING_ROAD_ACCESS", text:"Show building road access tile when placing or hovering (classic: one tile)"}
-  {key:"#TR_CONFIG_SHOW_DELIVERY_PATHS", text:"Show predicted delivery path while holding Alt over a producer"}
+  {key:"#TR_CONFIG_SHOW_DELIVERY_PATHS", text:"Show recent delivery paths while holding Alt over a granary or hunting lodge"}
   {key:"#delivery_path_no_road", text:"No road access — cannot deliver"}
   {key:"#delivery_path_understaffed", text:"No accepting storage — yards understaffed"}
   {key:"#delivery_path_no_destination", text:"No accepting destination for this good"}
