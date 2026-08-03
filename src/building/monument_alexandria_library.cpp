@@ -2,6 +2,7 @@
 
 #include "building/monuments.h"
 #include "building/rotation.h"
+#include "city/city_buildings.h"
 #include "city/city_figures.h"
 #include "city/city_warnings.h"
 #include "construction/build_planner.h"

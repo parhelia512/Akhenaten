@@ -1,6 +1,7 @@
 #include "monument_pharos_lighthouse.h"
 
 #include "building/monuments.h"
+#include "city/city_buildings.h"
 #include "city/city_figures.h"
 #include "city/city_warnings.h"
 #include "construction/build_planner.h"
