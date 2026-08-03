@@ -47,7 +47,7 @@ localization_hu = [
   {key:"#TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE", text:"Területrendezés vizuális visszajelzésének javítása"}
   {key:"#TR_CONFIG_ALLOW_CYCLING_TEMPLES", text:"Templomok egymás utáni építésének engedélyezése"}
   {key:"#TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE", text:"Víztározók, szökőkutak és kutak hatótávolságának megjelenítése építéskor"}
-  {key:"#TR_CONFIG_SHOW_DELIVERY_PATHS", text:"Szállítási útvonal megjelenítése gyártó kijelölésekor vagy rámutatáskor"}
+  {key:"#TR_CONFIG_SHOW_DELIVERY_PATHS", text:"Szállítási útvonal megjelenítése Alt lenyomva tartásával gyártó felett"}
   {key:"#delivery_path_no_road", text:"Nincs útcsatlakozás — szállítás lehetetlen"}
   {key:"#delivery_path_understaffed", text:"Nincs fogadó raktár — nincs elég munkás"}
   {key:"#delivery_path_no_destination", text:"Nincs fogadó célhely ehhez az áruhoz"}

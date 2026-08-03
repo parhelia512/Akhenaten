@@ -75,6 +75,7 @@ struct keyboard_t {
     static e_key key_for_symbol(pcstr name);
     static int get_key_from_scancode(int scancode);
     static pcstr key_modifier_name(int modifier);
+    static e_key_mode modifiers();
     static uint32_t get_scancode_from_key(int key);
 
     int get_current_char_bytes();

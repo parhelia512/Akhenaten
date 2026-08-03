@@ -442,6 +442,20 @@ pcstr keyboard_t::key_modifier_name(int modifier) {
     }
 }
 
+e_key_mode keyboard_t::modifiers() {
+    const SDL_Keymod mod = SDL_GetModState();
+    int key_mod = KEY_MOD_NONE;
+    if (mod & KMOD_SHIFT)
+        key_mod |= KEY_MOD_SHIFT;
+    if (mod & KMOD_CTRL)
+        key_mod |= KEY_MOD_CTRL;
+    if (mod & KMOD_ALT)
+        key_mod |= KEY_MOD_ALT;
+    if (mod & KMOD_GUI)
+        key_mod |= KEY_MOD_GUI;
+    return (e_key_mode)key_mod;
+}
+
 void keyboard_t::include_cursor_in_viewport() {
     // first check if we can keep the viewport
     int new_start = viewport_start;

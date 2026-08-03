@@ -31,6 +31,7 @@
 #include "grid/road_network.h"
 #include "grid/routing/routing.h"
 #include "grid/terrain.h"
+#include "input/keyboard.h"
 #include "widget/widget_city.h"
 #include "window/window_info.h"
 
@@ -42,20 +43,12 @@ bool destination_is_storage_yard_goto(building &dest) {
         || dest.dcast_storage_room();
 }
 
-// Match figure::do_gotobuilding(..., stop_at_road=true) finish tile — *_for_storing dst is often
-// the building footprint tile, which is not on the road graph.
-//
-// Do NOT call map_closest_reachable_road_within_radius here: it requires a fresh
-// map_routing_distance flood from the cart/source. Without that it reads stale
-// distance grids and can pick an unreachable road tile. After a flood,
-// delivery_path_fill_road upgrades SY finishes via closest_reachable.
 tile2i delivery_finish_tile_for_destination(building &dest) {
     building *main = dest.main();
     if (!main || !main->is_valid()) {
         return tile2i::invalid;
     }
 
-    // Warehouse goto ignores road_access and uses radius-3 from main (OG / do_gotobuilding).
     if (destination_is_storage_yard_goto(dest)) {
         return map_closest_road_within_radius(main->tile, 3, 1);
     }
@@ -64,7 +57,6 @@ tile2i delivery_finish_tile_for_destination(building &dest) {
         return main->road_access;
     }
 
-    // Non-SY fallback uses dest footprint (same as do_gotobuilding else-branch).
     return map_closest_road_within_radius(dest.tile, dest.size, 1);
 }
 
@@ -101,7 +93,6 @@ e_delivery_dest_kind kind_from_building(building *b) {
     if (!b || !b->is_valid()) {
         return e_delivery_dest_kind::none;
     }
-    // Prefer type checks: upgraded variants may not share METAINFO/dcast with base.
     if (b->type == BUILDING_STORAGE_YARD || b->type == BUILDING_STORAGE_YARD_UP
         || b->type == BUILDING_STORAGE_ROOM || b->dcast_storage_yard() || b->dcast_storage_room()) {
         return e_delivery_dest_kind::storage_yard;
@@ -159,8 +150,6 @@ pcstr tooltip_no_route() {
     return ui::str_from_key("#delivery_path_no_route");
 }
 
-// En-route only. Unload / AT_* (12–14, 24–26) often leave destination_tile on the
-// building footprint (off the road graph) → false no_route; fall through to predict.
 bool is_enroute_delivering_cart_action(int action) {
     switch (action) {
     case ACTION_9_CARTPUSHER_DELIVERING_GOODS:
@@ -413,8 +402,6 @@ delivery_path_query building_predict_delivery(const building &b, e_resource r) {
 
     q.from_access = m->road_access.valid() ? m->road_access : m->tile;
 
-    // Prefer live outbound cart destination while en-route (not unloading / AT_*).
-    // Path origin stays on the building road_access (stable; avoids per-tile repath).
     if (m->has_figure(BUILDING_SLOT_CARTPUSHER)) {
         figure *f = m->get_figure(BUILDING_SLOT_CARTPUSHER);
         if (f && f->is_alive() && f->type == FIGURE_CART_PUSHER && is_enroute_delivering_cart_action(f->action_state)
@@ -486,11 +473,8 @@ bool delivery_path_fill_road(delivery_path_query &q, uint8_t *dirs, int *out_len
         return true;
     }
 
-    // Floods routing_distance from from_access (full component if dst unreachable).
     bool can = map_routing_citizen_can_travel_over_road(q.from_access, to_access);
 
-    // After flood, re-pick finish like do_gotobuilding (reachable). Keep q.to_access
-    // unchanged so the draw cache key stays stable.
     building *dest = building_get(q.to);
     if (dest && dest->is_valid()) {
         tile2i reach;
@@ -533,6 +517,9 @@ void delivery_paths_draw(painter &ctx) {
     if (!game_features::gameui_show_delivery_paths.to_bool()) {
         return;
     }
+    if ((keyboard_t::modifiers() & KEY_MOD_ALT) == 0) {
+        return;
+    }
     if (g_city_planner.build_type != BUILDING_NONE) {
         return;
     }
@@ -545,9 +532,6 @@ void delivery_paths_draw(painter &ctx) {
     delivery_path_query q = building_predict_delivery(*src);
     auto &cache = g_delivery_draw_cache;
     const bool need_route = q.to != 0 && q.from_access.valid() && q.to_access.valid();
-    // Live path uses stable building access — ignore cart tile motion in the key.
-    // Include reason so Empty All ↔ understaffed tooltips don't stay stale.
-    // Failed routes refresh sooner so newly built roads are picked up quickly.
     const int cache_ttl = (cache.has_route || !cache.to) ? 45 : 8;
     const bool cache_hit = cache.from == q.from && cache.resource == q.resource && cache.to == q.to
         && cache.from_access == q.from_access && cache.to_access == q.to_access
@@ -585,13 +569,11 @@ void delivery_paths_draw(painter &ctx) {
                 build_planner::draw_building_ghost(ctx, image_id_from_group(PACK_CUSTOM, 1) + 3, coords, mask);
             }
         }
-        // Skip orphan path/tooltip if the destination building was deleted mid-cache.
         if (dest_ok && cache.has_route && cache.path_len > 0) {
             draw_path_dirs(ctx, cache.from_access, cache.dirs, cache.path_len, mask);
         } else if (dest_ok && cache.has_route) {
             // Trivial same-tile route — footprint marker is enough.
         } else if (dest_ok && cache.from_access.valid() && cache.to_access.valid()) {
-            // Route was attempted and failed (blocked / off-road access).
             vec2i coords = g_camera.lookup_tile_to_pixel(cache.to_access);
             build_planner::draw_building_ghost(ctx, image_id_from_group(PACK_CUSTOM, 1) + 3, coords, mask);
             if (pcstr tip = tooltip_no_route()) {
