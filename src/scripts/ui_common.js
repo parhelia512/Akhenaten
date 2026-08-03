@@ -52,8 +52,18 @@ ui.draw_texture = __ui_draw_texture
 ui.window_is = __ui_window_is
 ui.resource_icon_flags = __ui_draw_resource_icon_flags
 ui.set_window_pos = __ui_set_window_pos
-ui.invalidate_minimap_preview = __ui_invalidate_minimap_preview
-ui.draw_minimap_preview = __ui_draw_minimap_preview
+ui.invalidate_minimap_preview = function(size) {
+	if (size)
+		__ui_invalidate_minimap_preview_size(size)
+	else
+		__ui_invalidate_minimap_preview()
+}
+ui.draw_minimap_preview = function(pos, size, generate_size) {
+	if (generate_size)
+		__ui_draw_minimap_preview_sized(pos, size, generate_size)
+	else
+		__ui_draw_minimap_preview(pos, size)
+}
 
 function show_window_by_id(window_id) {
 	return function() {

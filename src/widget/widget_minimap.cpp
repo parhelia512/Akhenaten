@@ -225,7 +225,12 @@ void minimap_window::draw_minimap_tile(vec2i screen, tile2i point) {
     painter ctx = game.painter();
     int grid_offset = point.grid_offset();
     if (grid_offset < 0) {
-        ctx.img_generic(image_id_from_group(GROUP_MINIMAP_BLACK), screen);
+        const int water_base = terrain_water.first_img();
+        if (water_base > 0) {
+            ctx.img_generic(water_base + ((screen.x / 2 + screen.y) & 3), screen);
+        } else {
+            ctx.img_generic(image_id_from_group(GROUP_MINIMAP_BLACK), screen);
+        }
         return;
     }
 
@@ -389,10 +394,44 @@ namespace {
 struct minimap_preview_cache {
     int texture_id = 0;
     vec2i native_size = {0, 0};
+    vec2i generate_size = {0, 0}; // {0,0} = full map pixels; otherwise aspect-fit into this box
     bool dirty = true;
 };
 
 minimap_preview_cache g_minimap_preview;
+
+vec2i fit_size_into(vec2i src, vec2i box) {
+    if (src.x <= 0 || src.y <= 0 || box.x <= 0 || box.y <= 0) {
+        return src;
+    }
+    const float sx = (float)box.x / (float)src.x;
+    const float sy = (float)box.y / (float)src.y;
+    const float scale = std::min(sx, sy);
+    return {
+        std::max(1, (int)(src.x * scale)),
+        std::max(1, (int)(src.y * scale)),
+    };
+}
+
+// Same 2x1 staggered pattern as city_view_foreach_minimap_tile.
+void fill_with_minimap_water(vec2i pos, vec2i size) {
+    painter ctx = game.painter();
+    const int water_base = g_minimap_window.terrain_water.first_img();
+    if (water_base <= 0) {
+        ctx.fill_rect(pos, size, COLOR_BLACK);
+        return;
+    }
+
+    int odd = 0;
+    for (int y = -2; y < size.y + 2; y++) {
+        int screen_x = odd ? pos.x - 1 : pos.x;
+        odd ^= 1;
+        const int screen_y = pos.y + y;
+        for (; screen_x < pos.x + size.x + 2; screen_x += 2) {
+            ctx.img_generic(water_base + ((screen_x / 2 + screen_y) & 3), {screen_x, screen_y});
+        }
+    }
+}
 
 void rebuild_minimap_preview() {
     const map_data_t *map = scenario_map_data();
@@ -435,10 +474,38 @@ void rebuild_minimap_preview() {
     g_minimap_window.cached_texture = g_minimap_preview.texture_id;
 
     graphics_set_clip_rectangle(capture_pos, native);
+    fill_with_minimap_water(capture_pos, native);
     g_minimap_window.draw(UiFlags_None);
     g_minimap_preview.texture_id = graphics_save_to_texture(g_minimap_preview.texture_id, capture_pos, native);
+
+    vec2i final_size = native;
+    const vec2i target = g_minimap_preview.generate_size;
+    if (target.x > 0 && target.y > 0) {
+        // Bake into exactly target size: water letterbox + aspect-fitted map.
+        const vec2i fitted = fit_size_into(native, target);
+        const vec2i centered = {
+            capture_pos.x + (target.x - fitted.x) / 2,
+            capture_pos.y + (target.y - fitted.y) / 2,
+        };
+        const int src_id = g_minimap_preview.texture_id;
+
+        graphics_reset_clip_rectangle();
+        graphics_set_clip_rectangle(capture_pos, target);
+        fill_with_minimap_water(capture_pos, target);
+        graphics_draw_from_texture(src_id, centered, fitted);
+        g_minimap_preview.texture_id = graphics_save_to_texture(-1, capture_pos, target);
+        graphics_delete_saved_texture(src_id);
+        final_size = target;
+    }
+
     // Wipe capture scratch so it cannot linger outside the centered dialog on large screens.
-    game.painter().fill_rect(capture_pos, native, COLOR_BLACK);
+    const vec2i wipe = {
+        std::max(native.x, final_size.x),
+        std::max(native.y, final_size.y),
+    };
+    graphics_reset_clip_rectangle();
+    graphics_set_clip_rectangle(capture_pos, wipe);
+    game.painter().fill_rect(capture_pos, wipe, COLOR_BLACK);
     graphics_reset_clip_rectangle();
 
     g_minimap_window.draw_size = saved_draw_size;
@@ -448,19 +515,30 @@ void rebuild_minimap_preview() {
     g_minimap_window.cached_texture = saved_texture;
     g_minimap_window.refresh_requested = saved_refresh;
 
-    g_minimap_preview.native_size = native;
+    g_minimap_preview.native_size = final_size;
     g_minimap_preview.dirty = false;
 }
 
 } // namespace
 
 void widget_minimap_invalidate_preview() {
+    g_minimap_preview.generate_size = {0, 0};
     g_minimap_preview.dirty = true;
 }
 
-void widget_minimap_queue_preview(vec2i box_pos, vec2i box_size) {
+void widget_minimap_invalidate_preview(vec2i generate_size) {
+    g_minimap_preview.generate_size = generate_size;
+    g_minimap_preview.dirty = true;
+}
+
+void widget_minimap_queue_preview(vec2i box_pos, vec2i box_size, vec2i generate_size) {
     if (box_size.x <= 0 || box_size.y <= 0) {
         return;
+    }
+
+    if (generate_size.x > 0 && generate_size.y > 0 && g_minimap_preview.generate_size != generate_size) {
+        g_minimap_preview.generate_size = generate_size;
+        g_minimap_preview.dirty = true;
     }
 
     if (g_minimap_preview.dirty || g_minimap_preview.texture_id <= 0) {
@@ -471,18 +549,17 @@ void widget_minimap_queue_preview(vec2i box_pos, vec2i box_size) {
         return;
     }
 
-    const float sx = (float)box_size.x / (float)g_minimap_preview.native_size.x;
-    const float sy = (float)box_size.y / (float)g_minimap_preview.native_size.y;
-    const float scale = std::min(sx, sy);
-    const vec2i disp = {
-        std::max(1, (int)(g_minimap_preview.native_size.x * scale)),
-        std::max(1, (int)(g_minimap_preview.native_size.y * scale)),
-    };
+    using namespace ui::opt;
+
+    if (g_minimap_preview.native_size == box_size) {
+        ui::push(ui::cmd_t::saved_texture, Pos{box_pos}, Size{box_size}, ImageId{g_minimap_preview.texture_id});
+        return;
+    }
+
+    const vec2i disp = fit_size_into(g_minimap_preview.native_size, box_size);
     const vec2i centered = {
         box_pos.x + (box_size.x - disp.x) / 2,
         box_pos.y + (box_size.y - disp.y) / 2,
     };
-
-    using namespace ui::opt;
     ui::push(ui::cmd_t::saved_texture, Pos{centered}, Size{disp}, ImageId{g_minimap_preview.texture_id});
 }

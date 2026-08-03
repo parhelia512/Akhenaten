@@ -278,10 +278,20 @@ void __ui_invalidate_minimap_preview() {
 }
 ANK_FUNCTION(__ui_invalidate_minimap_preview)
 
+void __ui_invalidate_minimap_preview_size(vec2i generate_size) {
+    widget_minimap_invalidate_preview(generate_size);
+}
+ANK_FUNCTION_1(__ui_invalidate_minimap_preview_size)
+
 void __ui_draw_minimap_preview(vec2i pos, vec2i size) {
     widget_minimap_queue_preview(pos, size);
 }
 ANK_FUNCTION_2(__ui_draw_minimap_preview)
+
+void __ui_draw_minimap_preview_sized(vec2i pos, vec2i size, vec2i generate_size) {
+    widget_minimap_queue_preview(pos, size, generate_size);
+}
+ANK_FUNCTION_3(__ui_draw_minimap_preview_sized)
 
 void __ui_widget_sidebar_set_type(int id) {
     widget_sidebar_set_type(id);
