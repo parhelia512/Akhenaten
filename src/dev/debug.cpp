@@ -43,7 +43,6 @@
 #include "grid/soldier_strength.h"
 #include "grid/enemy_strength.h"
 #include "grid/hyena_strength.h"
-#include "grid/malaria_risk.h"
 #include "grid/irrigation_value.h"
 #include "widget/city/building_ghost.h"
 #include "game/game.h"
@@ -226,6 +225,8 @@ static int north_tile_grid_offset(int x, int y) {
 
 void draw_debug_tile(vec2i pixel, tile2i point, painter &ctx) {
     OZZY_PROFILER_FUNCTION();
+    g_debug.draw_tile_render_handlers(pixel, point, ctx);
+
     int grid_offset = point.grid_offset();
     int x = pixel.x;
     int y = pixel.y;
@@ -519,7 +520,7 @@ void draw_debug_tile(vec2i pixel, tile2i point, painter &ctx) {
         break;
 
     case e_debug_render_image_alt: // IMAGE ALT FIELD
-        { 
+        {
             int image_alt_value = map_image_alt_at(grid_offset);
             int image_alt_id = (image_alt_value & 0x00ffffff);
             uint8_t image_alt_alpha = (image_alt_value & 0xff000000) >> 24;
@@ -623,22 +624,6 @@ void draw_debug_tile(vec2i pixel, tile2i point, painter &ctx) {
         }
         break;
 
-    case e_debug_render_malaria_risk:
-        {
-            int risk = g_malaria_risk.get(grid_offset);
-            if (risk > 0) {
-                color risk_color = (risk < 30) ? COLOR_LIGHT_GREEN : (risk < 60) ? COLOR_YELLOW : COLOR_LIGHT_RED;
-                debug_text(ctx, str, x, y + 10, 0, "", risk, risk_color);
-            }
-            if (b_id && b) {
-                if (b->malaria_risk > 0) {
-                    snprintf((char *)str, 30, "b:%d", b->malaria_risk);
-                    text_draw(ctx, (uint8_t*)str, x, y + 20, FONT_SMALL_PLAIN, COLOR_LIGHT_BLUE, 0.5f);
-                }
-            }
-        }
-        break;
-
     case e_debug_render_irrigation_value:
         {
             int irrigation = g_irrigation_value.get(grid_offset);
@@ -684,7 +669,7 @@ void draw_debug_tile(vec2i pixel, tile2i point, painter &ctx) {
         break;
 
     case e_debug_render_monuments:
-        if (auto monument = b->dcast_monument(); !!monument) {            
+        if (auto monument = b->dcast_monument(); !!monument) {
             d = map_monuments_get_progress(tile2i(grid_offset));
             b->is_valid()
                 ? snprintf((char *)str, 30, "%d[%d]", monument->runtime_data().phase, d)
@@ -864,12 +849,52 @@ int get_debug_building_id() {
     return debugbuildingid();
 }
 
+static xstring g_debug_render_mode_name;
+
+static xstring debug_render_token_leaf(pcstr name) {
+    if (!name) {
+        return xstring();
+    }
+    pcstr sep = strstr(name, "::");
+    return sep ? sep + 2 : name;
+}
+
 e_debug_render debug_render_mode() {
     return (e_debug_render)debugrender.value;
 }
 
 void set_debug_render_mode(e_debug_render mode) {
     debugrender.value = mode;
+    pcstr name = (mode != e_debug_render_none) ? e_debug_render_tokens.name(mode) : nullptr;
+    g_debug_render_mode_name = name ? debug_render_token_leaf(name) : xstring();
+}
+
+void set_debug_render_mode_name(const xstring &name) {
+    g_debug_render_mode_name = name;
+    int mode_id = (int)e_debug_render_none;
+    if (!name.empty()) {
+        for (int i = e_debug_render_none + 1; i < e_debug_render_size; ++i) {
+            pcstr token_name = e_debug_render_tokens.name((e_debug_render)i);
+            if (token_name && name == debug_render_token_leaf(token_name)) {
+                mode_id = i;
+                break;
+            }
+        }
+    }
+    debugrender.value = mode_id;
+}
+
+xstring debug_render_mode_name() {
+    if (!g_debug_render_mode_name.empty()) {
+        return g_debug_render_mode_name;
+    }
+
+    const e_debug_render mode = debug_render_mode();
+    if (mode == e_debug_render_none) {
+        return xstring();
+    }
+
+    return debug_render_token_leaf(e_debug_render_tokens.name(mode));
 }
 
 bstring256 get_terrain_type(pcstr def, tile2i tile) {
@@ -918,62 +943,60 @@ void config_show_debug_render_properties(bool header) {
         return;
     }
 
-    e_debug_render current_mode = debug_render_mode();
-
-    // Build array of mode names and their indices
-    static pcstr mode_names[e_debug_render_size];
-    static int mode_indices[e_debug_render_size];
-    static int mode_count = 0;
-    static bool initialized = false;
-
-    if (!initialized) {
-        mode_count = 0;
-        for (int i = e_debug_render_none + 1; i < e_debug_render_size; ++i) {
-            e_debug_render mode = (e_debug_render)i;
-            pcstr name = e_debug_render_tokens.name(mode);
-            if (name) {
-                mode_names[mode_count] = name;
-                mode_indices[mode_count] = i;
-                mode_count++;
+    xstring current_name = debug_render_mode_name();
+    svector<xstring, e_debug_render_size + 16> mode_names;
+    auto add_mode = [&](const xstring &name) {
+        if (name.empty()) {
+            return;
+        }
+        for (const auto &existing : mode_names) {
+            if (existing == name) {
+                return;
             }
         }
-        initialized = true;
+        mode_names.push_back(name);
+    };
+
+    g_debug.for_each_render_mode_name([&](const xstring &name) {
+        add_mode(name);
+    });
+
+    for (int i = e_debug_render_none + 1; i < e_debug_render_size; ++i) {
+        xstring name = debug_render_token_leaf(e_debug_render_tokens.name((e_debug_render)i));
+        if (!name.empty()) {
+            add_mode(name);
+        }
     }
 
     int current_index = -1;
-    for (int i = 0; i < mode_count; ++i) {
-        if (mode_indices[i] == (int)current_mode) {
+    for (int i = 0; i < (int)mode_names.size(); ++i) {
+        if (!!current_name && mode_names[i] == current_name) {
             current_index = i;
             break;
         }
     }
 
-    if (current_mode == e_debug_render_none) {
-        current_index = -1;
-    }
-    
-    const char* preview = (current_index >= 0) ? mode_names[current_index] : "None";
-    
+    const char *preview = (current_index >= 0) ? mode_names[current_index].c_str() : "None";
+
     if (ImGui::BeginCombo("Render Mode", preview)) {
-        bool is_none_selected = (current_mode == e_debug_render_none);
+        bool is_none_selected = (current_index < 0);
         if (ImGui::Selectable("None", is_none_selected)) {
             set_debug_render_mode(e_debug_render_none);
         }
         if (is_none_selected) {
             ImGui::SetItemDefaultFocus();
         }
-        
-        // Add all other modes
-        for (int i = 0; i < mode_count; ++i) {
+
+        for (int i = 0; i < (int)mode_names.size(); ++i) {
             bool is_selected = (current_index == i);
-            if (ImGui::Selectable(mode_names[i], is_selected)) {
-                set_debug_render_mode((e_debug_render)mode_indices[i]);
+            if (ImGui::Selectable(mode_names[i].c_str(), is_selected)) {
+                set_debug_render_mode_name(mode_names[i]);
             }
             if (is_selected) {
                 ImGui::SetItemDefaultFocus();
             }
         }
-        
+
         ImGui::EndCombo();
     }
 }
@@ -1131,38 +1154,86 @@ console_ref_bool::console_ref_bool(pcstr name, bool &v) : value(&v) {
     bind_debug_console_var_bool(name, v);
 }
 
-void game_debug_t::add_render_handler(const xstring &name, handler_cb func) {
+void game_debug_t::prepare_render_handlers() {
+    frame_screen_handler = nullptr;
+    frame_tile_handler = nullptr;
+
+    xstring mode_name = debug_render_mode_name();
+    if (!mode_name) {
+        return;
+    }
+
+    auto screen_it = std::find_if(screen_render_handlers.begin(), screen_render_handlers.end(), [mode_name](const screen_handler_t &h) { return h.name == mode_name && h.func; });
+    if (screen_it != screen_render_handlers.end()) {
+        frame_screen_handler = &screen_it->func;
+    }
+
+    auto tile_it = std::find_if(tile_render_handlers.begin(), tile_render_handlers.end(), [mode_name](const tile_handler_t &h) { return h.name == mode_name && h.func; });
+    if (tile_it != tile_render_handlers.end()) {
+        frame_tile_handler = &tile_it->func;
+    }
+}
+
+void game_debug_t::add_render_handler(const xstring &name, screen_draw_cb func) {
     if (!func || name.empty()) {
         return;
     }
-    for (auto &handler : render_handlers) {
+    for (auto &handler : screen_render_handlers) {
         if (handler.name == name) {
             handler.func = std::move(func);
             return;
         }
     }
-    render_handlers.push_back({name, std::move(func)});
+    screen_render_handlers.push_back({name, std::move(func)});
 }
 
 void game_debug_t::draw_render_handlers(painter &ctx) {
     OZZY_PROFILER_FUNCTION();
-    const e_debug_render mode = debug_render_mode();
-    if (mode == e_debug_render_none) {
+    if (frame_screen_handler) {
+        (*frame_screen_handler)(ctx);
+    }
+}
+
+void game_debug_t::add_tile_render_handler(const xstring &name, tile_draw_cb func) {
+    if (!func || name.empty()) {
         return;
     }
-    pcstr mode_name = e_debug_render_tokens.name(mode);
-    if (!mode_name) {
-        return;
+    for (auto &handler : tile_render_handlers) {
+        if (handler.name == name) {
+            handler.func = std::move(func);
+            return;
+        }
     }
-    for (auto &handler : render_handlers) {
-        if (handler.name == mode_name && handler.func) {
-            handler.func(ctx);
+    tile_render_handlers.push_back({name, std::move(func)});
+}
+
+void game_debug_t::draw_tile_render_handlers(vec2i pixel, tile2i tile, painter &ctx) {
+    if (frame_tile_handler) {
+        (*frame_tile_handler)(pixel, tile, ctx);
+    }
+}
+
+void game_debug_t::for_each_render_mode_name(const xfunction<void(const xstring &)> &fn) const {
+    for (const auto &handler : screen_render_handlers) {
+        if (!handler.name.empty()) {
+            fn(handler.name);
+        }
+    }
+    for (const auto &handler : tile_render_handlers) {
+        if (!handler.name.empty()) {
+            fn(handler.name);
         }
     }
 }
 
 void game_debug_t::init() {
     events::subscribe([] (event_debug_render_change ev) {
-        debugrender.value += ev.value;
+        int mode = debugrender.value + ev.value;
+        if (mode < e_debug_render_none) {
+            mode = e_debug_render_size - 1;
+        } else if (mode >= e_debug_render_size) {
+            mode = e_debug_render_none;
+        }
+        set_debug_render_mode((e_debug_render)mode);
     });
 }

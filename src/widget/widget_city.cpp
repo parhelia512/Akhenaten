@@ -578,6 +578,7 @@ void screen_city_t::draw_without_overlay(painter &ctx, int selected_figure_id) {
 
     // PHASE 6: Draw debug overlays on top of everything else
     // These debug elements should be visible above all game elements for debugging purposes
+    g_debug.prepare_render_handlers();
     g_camera.foreach_valid_map_tile(ctx, draw_debug_tile);
     debug_draw_figures(ctx);
 
@@ -1018,6 +1019,7 @@ void screen_city_t::draw_with_overlay(painter &ctx) {
     ImageDraw::apply_render_commands(ctx, "draw_city_planer_overlay");
 
     // finally, draw these on top of everything else
+    g_debug.prepare_render_handlers();
     g_camera.foreach_valid_map_tile(ctx, draw_debug_tile);
     debug_draw_figures(ctx);
 

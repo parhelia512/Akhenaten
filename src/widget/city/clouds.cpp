@@ -350,7 +350,5 @@ void clouds_t::draw_city(painter &ctx) {
 
 void ANK_REGISTER_APPLICATION_MODULE(register_city_clouds_module) {
     g_screen_city.add_screen_space_effect([](painter &ctx) { g_clouds.draw_city(ctx); });
-
-    struct e_debug_render_clouds {};
-    g_debug.add_render_handler<e_debug_render_clouds>([](painter &ctx) { g_clouds.draw_debug(ctx); });
+    g_debug.add_render_handler("clouds", [](painter &ctx) { g_clouds.draw_debug(ctx); });
 }

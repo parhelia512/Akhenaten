@@ -68,20 +68,18 @@ enum e_debug_render {
     e_debug_render_soldier_strength = 39,
     e_debug_render_enemy_strength = 40,
     e_debug_render_hyena_strength = 41,
-    e_debug_render_malaria_risk = 42,
-    e_debug_render_animal_spawn = 43,
-    e_debug_render_animal_spawn_area = 44,
-    e_debug_render_sandstone = 45,
-    e_debug_render_stone = 46,
-    e_debug_render_limestone = 47,
-    e_debug_render_granite = 48,
-    e_debug_render_golden = 49,
-    e_debug_render_clay = 50,
-    e_debug_render_copper = 51,
-    e_debug_render_gems = 52,
-    e_debug_render_irrigation_value = 53,
-    e_debug_render_damage_grid = 54,
-    e_debug_render_clouds = 55,
+    e_debug_render_animal_spawn = 42,
+    e_debug_render_animal_spawn_area = 43,
+    e_debug_render_sandstone = 44,
+    e_debug_render_stone = 45,
+    e_debug_render_limestone = 46,
+    e_debug_render_granite = 47,
+    e_debug_render_golden = 48,
+    e_debug_render_clay = 49,
+    e_debug_render_copper = 50,
+    e_debug_render_gems = 51,
+    e_debug_render_irrigation_value = 52,
+    e_debug_render_damage_grid = 53,
 
     e_debug_render_size
 };
@@ -91,6 +89,8 @@ void set_debug_building_id(int bid);
 int get_debug_building_id();
 e_debug_render debug_render_mode();
 void set_debug_render_mode(e_debug_render mode);
+void set_debug_render_mode_name(const xstring &name);
+xstring debug_render_mode_name();
 
 bstring256 get_terrain_type(pcstr def, tile2i tile);
 bstring256 get_terrain_type(pcstr def, int type);
@@ -189,24 +189,43 @@ using PropertiesIterator = FuncLinkedList<debug_iterator_function_cb*, DebugMode
 } // end namespace debug
 
 struct game_debug_t {
-    using handler_cb = xfunction<void(painter &)>;
+    using screen_draw_cb = xfunction<void(painter &)>;
+    using tile_draw_cb = xfunction<void(vec2i, tile2i, painter &)>;
 
     void init();
-    void add_render_handler(const xstring &name, handler_cb func);
+    void add_render_handler(const xstring &name, screen_draw_cb func);
     void draw_render_handlers(painter &ctx);
+    void add_tile_render_handler(const xstring &name, tile_draw_cb func);
+    void draw_tile_render_handlers(vec2i pixel, tile2i tile, painter &ctx);
+    void for_each_render_mode_name(const xfunction<void(const xstring &)> &fn) const;
+    void prepare_render_handlers();
 
     template<typename T>
-    void add_render_handler(handler_cb func) {
+    void add_render_handler(screen_draw_cb func) {
         type_name_holder<T> holder;
         add_render_handler(xstring(type_simplified_name(holder.value.data())), std::move(func));
     }
 
+    template<typename T>
+    void add_tile_render_handler(tile_draw_cb func) {
+        type_name_holder<T> holder;
+        add_tile_render_handler(xstring(type_simplified_name(holder.value.data())), std::move(func));
+    }
+
 private:
-    struct handler_t {
+    struct screen_handler_t {
         xstring name;
-        handler_cb func;
+        screen_draw_cb func;
     };
-    hvector<handler_t, 16> render_handlers;
+    struct tile_handler_t {
+        xstring name;
+        tile_draw_cb func;
+    };
+    hvector<screen_handler_t, 16> screen_render_handlers;
+    hvector<tile_handler_t, 32> tile_render_handlers;
+
+    screen_draw_cb *frame_screen_handler = nullptr;
+    tile_draw_cb *frame_tile_handler = nullptr;
 };
 
 extern game_debug_t g_debug;
