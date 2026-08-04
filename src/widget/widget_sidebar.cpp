@@ -1,5 +1,4 @@
 ﻿#include "widget_sidebar.h"
-#include "dev/debug.h"
 
 #include "core/profiler.h"
 #include "graphics/image.h"
@@ -129,8 +128,6 @@ void ui::sidebar_window_expanded_t::ui_draw_foreground(UiFlags flags) {
 
     ui_draw_extra(flags);
     ui_draw_relief(flags);
-
-    draw_debug_ui(10, 30);
 }
 
 void ui::sidebar_window_collapsed_t::collapse() {

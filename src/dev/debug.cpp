@@ -52,7 +52,6 @@
 #include "building/building_farm.h"
 #include "building/building_temple_complex.h"
 #include "city/coverage.h"
-#include "city/city_floods.h"
 #include "game/game_events.h"
 #include "sound/sound_city.h"
 #include "sound/sound.h"
@@ -366,12 +365,6 @@ void draw_debug_tile(vec2i pixel, tile2i point, painter &ctx) {
                 debug_text(ctx, str, x, y + 15, 0, "", d, COLOR_LIGHT_RED);
             }
         }
-        break;
-
-    case e_debug_render_grass_flood_order: // FLOODPLAIN SHORE ORDER
-        d = map_get_floodplain_row(grid_offset);
-        if (d > -1)
-            debug_text(ctx, str, x, y + 10, 0, "", d, COLOR_LIGHT_RED);
         break;
 
     case e_debug_render_grass_flood_flags: // FLOODPLAIN TERRAIN FLAGS
@@ -998,127 +991,6 @@ void config_show_debug_render_properties(bool header) {
         }
 
         ImGui::EndCombo();
-    }
-}
-
-void draw_debug_ui(int x, int y) {
-    OZZY_PROFILER_FUNCTION();
-
-    char str[300];
-
-    painter ctx = game.painter();
-    /////// RANDOM
-    if (false) {
-        auto randm = random_data_struct();
-
-        int cl = 60;
-        debug_text(ctx, str, x, y + 15, cl, "iv1:", randm->iv1);
-        debug_text(ctx, str, x, y + 25, cl, "iv2:", randm->iv2);
-        debug_text(ctx, str, x, y + 35, cl, "1_3b:", randm->random1_3bit);
-        debug_text(ctx, str, x, y + 45, cl, "1_7b:", randm->random1_7bit);
-        debug_text(ctx, str, x, y + 55, cl, "1_15b:", randm->random1_15bit);
-        debug_text(ctx, str, x, y + 65, cl, "2_3b:", randm->random2_3bit);
-        debug_text(ctx, str, x, y + 75, cl, "2_7b:", randm->random2_7bit);
-        debug_text(ctx, str, x, y + 85, cl, "2_15b:", randm->random2_15bit);
-
-        debug_text(ctx, str, x, y + 105, cl, "scum:", anti_scum_random_15bit(false));
-        y += 100;
-    }
-
-    /////// FLOODS
-    if (debug_render_mode() == e_debug_render_grass_flood_order) {
-        float _c_curr = g_floods.current_cycle();
-        float _c_start = g_floods.start_cycle();
-        float _c_end = g_floods.end_cycle();
-
-        int _c_period_last = g_floods.period_length(false);
-        int _c_period_next = g_floods.period_length(true);
-
-        float rc_curr = fmod(_c_curr, CYCLES_IN_A_YEAR);
-        float rc_start = fmod(_c_start, CYCLES_IN_A_YEAR);
-        float rc_end = fmod(_c_end, CYCLES_IN_A_YEAR);
-
-        // floodplains timeline (yearly)
-        auto dot = string_from_ascii(",");
-        for (int i = 0; i < 392; ++i) {
-            text_draw(dot, x + i - 1, y + 15, FONT_SMALL_PLAIN, 0);
-        }
-
-        for (int i = 0; i < 392; ++i) {
-            int abs_i = i;
-            text_draw(dot, x + i, y + 15, FONT_SMALL_PLAIN, COLOR_WHITE);
-
-            if ((i > rc_start - 28 && i < rc_end + 28)
-                || (i > rc_start - 28 - CYCLES_IN_A_YEAR && i < rc_end + 28 - CYCLES_IN_A_YEAR)
-                || (i > rc_start - 28 + CYCLES_IN_A_YEAR && i < rc_end + 28 + CYCLES_IN_A_YEAR)) {
-                text_draw(dot, x + i, y + 15, FONT_SMALL_PLAIN, COLOR_FONT_ORANGE_LIGHT);
-            }
-
-            if ((i > rc_start && i < rc_end) || (i > rc_start - CYCLES_IN_A_YEAR && i < rc_end - CYCLES_IN_A_YEAR)
-                || (i > rc_start + CYCLES_IN_A_YEAR && i < rc_end + CYCLES_IN_A_YEAR))
-                text_draw(dot, x + i, y + 15, FONT_SMALL_PLAIN, COLOR_RED);
-
-            if (g_floods.debug_period() > 0) {
-                if (abs_i > _c_start + _c_period_next && abs_i < _c_end - _c_period_next)
-                    text_draw(dot, x + i, y + 15, FONT_SMALL_PLAIN, COLOR_GREEN);
-            } else {
-                if (abs_i > _c_start + _c_period_last && abs_i < _c_end - _c_period_last)
-                    text_draw(dot, x + i, y + 15, FONT_SMALL_PLAIN, COLOR_GREEN);
-            }
-        }
-
-        // cursor
-        text_draw(dot, x + rc_curr, y + 15, FONT_SMALL_OUTLINED, COLOR_FONT_YELLOW);
-        text_draw(string_from_ascii("\'"), x + rc_curr, y + 25, FONT_SMALL_OUTLINED, COLOR_FONT_YELLOW);
-        debug_text_float(x + rc_curr + 5, y + 25, 0, "", _c_curr);  // current cycle
-        debug_text(ctx, str, x + rc_curr + 54, y + 25, 5, ":", g_floods.state); // current cycle
-
-        debug_text(ctx, str, x, y + 35, 60, "debug:", g_floods.debug_period());
-        debug_text(ctx, str, x, y + 45, 60, "ftick:", g_floods.fticks);
-
-        y += 50;
-
-        int cl = 60;
-        debug_text(ctx, str, x, y + 15, cl + 15, "CURRENT:", _c_curr);             // current cycle
-        debug_text(ctx, str, x + 105, y + 15, 10, "/", g_floods.current_subcycle()); // current cycle
-        debug_text(ctx, str, x, y + 25, cl, "t-49:", _c_start - 49);               // 49 cycles prior
-        debug_text(ctx, str, x, y + 35, cl, "t-28:", _c_start - 28);               // 28 cycles prior
-        debug_text(ctx, str, x, y + 45, cl, "  START", _c_start);                  // flood start
-
-        if (g_floods.debug_period() > 0) {
-            debug_text(ctx, str, x, y + 55, cl, "rest:", _c_start + _c_period_next);  // first rest period
-            debug_text(ctx, str, x, y + 65, cl, "retract:", _c_end - _c_period_next); // first rest period
-        } else {
-            debug_text(ctx, str, x, y + 55, cl, "rest:", _c_start + _c_period_last);  // first rest period
-            debug_text(ctx, str, x, y + 65, cl, "retract:", _c_end - _c_period_last); // first rest period
-        }
-
-        debug_text(ctx, str, x, y + 75, cl, "    END", _c_end);    // flood end
-        debug_text(ctx, str, x, y + 85, cl, "t+23:", _c_end + 23); // lands farmable again
-        debug_text(ctx, str, x, y + 95, cl, "t+28:", _c_end + 28); // lands farmable again
-
-        cl = 100;
-        y += 10;
-        debug_text(ctx, str, x, y + 105, cl, "season_initial:", g_floods.season_initial);
-        debug_text(ctx, str, x, y + 115, cl, "duration_initial:", g_floods.duration_initial);
-        debug_text(ctx, str, x, y + 125, cl, "quality_initial:", g_floods.quality_initial);
-        debug_text(ctx, str, x, y + 135, cl, "season:", g_floods.season);
-        debug_text(ctx, str, x, y + 145, cl, "duration:", g_floods.duration);
-        debug_text(ctx, str, x, y + 155, cl, "quality:", g_floods.quality_current);
-        debug_text(ctx, str, x, y + 165, cl, "(unk00):", g_floods.unk00);
-        debug_text(ctx, str, x, y + 175, cl, "quality_next:", g_floods.quality_next);
-        debug_text(ctx, str, x, y + 185, cl, "quality_last:", g_floods.quality_last);
-
-        cl = 150;
-        debug_text(ctx, str, x, y + 205, cl, "progress:", g_floods.flood_progress);   // status 30 (???)
-        debug_text(ctx, str, x, y + 215, cl, "(unk01):", g_floods.unk01);             // ???
-        debug_text(ctx, str, x, y + 225, cl, "state:", g_floods.state);               // floodplains state
-        debug_text(ctx, str, x, y + 235, cl, "width:", g_floods.floodplain_width);    
-        debug_text(ctx, str, x, y + 245, cl, "hasplains:", g_floods.has_floodplains); 
-        debug_text(ctx, str, x, y + 255, cl, "force_inundation:", g_floods.force_inundation);
-        debug_text(ctx, str, x, y + 265, cl, "flood_progress_tick:", g_floods.flood_progress_tick);
-        debug_text(ctx, str, x, y + 275, cl, "target_progress:", g_floods.flood_progress_target);
-        y += 350;
     }
 }
 
