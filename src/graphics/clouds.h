@@ -116,10 +116,10 @@ struct clouds_t {
 
     void init_cloud_images();
     bool cloud_intersects(const cloud_t &cloud);
-    void position_cloud(cloud_t &cloud, const vec2i min_pos, const vec2i limit);
+    void position_cloud(cloud_t &cloud, const vec2i offset, const vec2i view_size);
     void pause();
     void draw_cloud(painter &ctx, const image_t *img, const vec2i pos, const color color, const float scale_x, const float scale_y, const double angle);
-    void draw(painter &ctx, const vec2i min_pos, const vec2i offset, const vec2i limit);
+    void draw(painter &ctx, const vec2i offset, const vec2i view_size);
     void generate_cloud(cloud_t &cloud);
     int ellipse_is_inside_bounds(const ellipse &e);
     void generate_cloud_ellipse(color *pixels, const int width, const  int height);

@@ -287,13 +287,10 @@ void painter::draw_impl(SDL_Texture *texture, vec2i pos, vec2i offset, vec2i siz
                          size.y * y_scale_factor};
     }
 
-    // Manually clip src+dst against the active clip rect. SDL's clip alone can
-    // leave a 1px vertical smear on the left when tall atlas sprites (pyramid
-    // tiers, stairs) cross the city viewport with dest.x < clip.x.
     {
         SDL_Rect clip{};
         SDL_RenderGetClipRect(this->renderer, &clip);
-        if (clip.w > 0 && clip.h > 0) {
+        if (clip.w > 0 && clip.h > 0 && angle == 0.0) {
             const float clip_l = (float)clip.x;
             const float clip_t = (float)clip.y;
             const float clip_r = (float)(clip.x + clip.w);

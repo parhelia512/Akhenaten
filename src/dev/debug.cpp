@@ -155,8 +155,8 @@ void debug_draw_rect_with_contour(int x, int y, int w, int h, color col) {
 }
 
 void debug_draw_crosshair(int x, int y) {
-    g_render.draw_line(vec2i{x, x + 10}, vec2i{y, y}, COLOR_GREEN);
-    g_render.draw_line(vec2i{x, x}, vec2i{y, y + 10}, COLOR_RED);
+    g_render.draw_line(vec2i{x, y}, vec2i{x + 10, y}, COLOR_GREEN);
+    g_render.draw_line(vec2i{x, y}, vec2i{x, y + 10}, COLOR_RED);
 }
 
 void debug_draw_sprite_box(int x, int y, const image_t* img, float scale, color color_mask) {
@@ -855,6 +855,57 @@ void draw_debug_animal_spawn_areas(painter &ctx) {
             }
         }
     });
+}
+
+void draw_debug_clouds(painter &ctx) {
+    OZZY_PROFILER_FUNCTION();
+    if (debug_render_mode() != e_debug_render_clouds) {
+        return;
+    }
+
+    const float scale = g_zoom.get_scale();
+    const int view_w = (int)(g_camera.size_pixels.x / scale) + 64;
+    const int view_h = (int)(g_camera.size_pixels.y / scale) + 64;
+    char str[64];
+    for (int i = 0; i < (int)g_clouds.clouds.size(); i++) {
+        const cloud_t &cloud = g_clouds.clouds[i];
+        if (cloud.status != e_cloud_status_moving) {
+            continue;
+        }
+
+        if (cloud.render_pos.x + cloud.side < -64 || cloud.render_pos.x > view_w
+            || cloud.render_pos.y + cloud.side < -64 || cloud.render_pos.y > view_h) {
+            continue;
+        }
+
+        const int sx = (int)(cloud.render_pos.x * scale);
+        const int sy = (int)(cloud.render_pos.y * scale);
+        const int sw = std::max(1, (int)(cloud.img.width * cloud.scale_x * scale));
+        const int sh = std::max(1, (int)(cloud.img.height * cloud.scale_y * scale));
+
+        color col = COLOR_GREEN;
+        debug_draw_rect_with_contour(sx, sy, sw, sh, col);
+        debug_draw_crosshair(sx, sy);
+
+        pcstr status_name = e_cloud_status_tokens.name(cloud.status);
+        int tx = cloud.render_pos.x;
+        int ty = cloud.render_pos.y;
+        debug_text(ctx, str, tx, ty, 40, "C", i, col);
+        ty += 10;
+        debug_text_a(ctx, str, tx, ty, 0, status_name ? status_name : "?", col);
+        ty += 10;
+        debug_text(ctx, str, tx, ty, 40, "px", cloud.pos.x, col);
+        ty += 10;
+        debug_text(ctx, str, tx, ty, 40, "py", cloud.pos.y, col);
+        ty += 10;
+        debug_text(ctx, str, tx, ty, 40, "rx", cloud.render_pos.x, col);
+        ty += 10;
+        debug_text(ctx, str, tx, ty, 40, "ry", cloud.render_pos.y, col);
+        ty += 10;
+        debug_text(ctx, str, tx, ty, 40, "ang", cloud.angle, col);
+        ty += 10;
+        debug_text(ctx, str, tx, ty, 40, "side", cloud.side, col);
+    }
 }
 
 void set_debug_building_id(int bid) {

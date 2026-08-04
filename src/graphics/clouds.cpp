@@ -126,6 +126,9 @@ void clouds_t::init_cloud_images() {
         img->height = config.cloud_height;
         speed_clear(cloud.speed.x);
         speed_clear(cloud.speed.y);
+        cloud.status = e_cloud_status_inactive;
+        cloud.pos = {0, 0};
+        cloud.render_pos = {0, 0};
 
         atlas_data.width = img->width;
         atlas_data.height = img->height;
@@ -181,11 +184,12 @@ bool clouds_t::cloud_intersects(const cloud_t &cloud) {
     return false;
 }
 
-void clouds_t::position_cloud(cloud_t &cloud, const vec2i min_pos, const vec2i limit) {
-    const int offset_x = random_int_between(0, limit.x / 2);
-
-    cloud.pos = { limit.x - offset_x + cloud.side - min_pos.x,
-                    (limit.y - offset_x) / 2 - cloud.side - min_pos.y };
+void clouds_t::position_cloud(cloud_t &cloud, const vec2i offset, const vec2i view_size) {
+    const int margin = std::max(cloud.side, 1);
+    cloud.pos = {
+        offset.x + view_size.x + random_int_between(0, margin),
+        offset.y + random_int_between(-margin / 2, view_size.y),
+    };
 
     if (!cloud_intersects(cloud)) {
         cloud.status = e_cloud_status_moving;
@@ -218,7 +222,7 @@ void clouds_t::draw_cloud(painter &ctx, const image_t *img, const vec2i pos, con
     ctx.draw(texture, pos, img->atlas.offset, size, color, scale_x, scale_y, angle, ImgFlag_Alpha, true);
 }
 
-void clouds_t::draw(painter &ctx, const vec2i min_pos, const vec2i offset, const vec2i limit) {
+void clouds_t::draw(painter &ctx, const vec2i offset, const vec2i view_size) {
    if (!game_features::gameplay_draw_cloud_shadows) {
        return;
    }
@@ -241,24 +245,28 @@ void clouds_t::draw(painter &ctx, const vec2i min_pos, const vec2i offset, const
             generate_cloud(cloud);
             continue;
         }
+        if (!cloud.img.atlas.p_atlas || !cloud.img.atlas.p_atlas->texture) {
+            cloud.status = e_cloud_status_inactive;
+            continue;
+        }
         if (cloud.status == e_cloud_status_created) {
             if (movement_timeout > 0) {
                 movement_timeout--;
             } else if (pause_frames <= 0) {
-                position_cloud(cloud, min_pos, limit);
+                position_cloud(cloud, offset, view_size);
             }
-            continue;
-        }
-        if (cloud.pos.x < -cloud.side || cloud.pos.y >= limit.y) {
-            cloud.status = e_cloud_status_inactive;
             continue;
         }
 
         cloud.render_pos = cloud.pos - offset;
+        if (cloud.render_pos.x < -cloud.side || cloud.render_pos.x > view_size.x + cloud.side * 3
+            || cloud.render_pos.y < -cloud.side * 2 || cloud.render_pos.y >= view_size.y + cloud.side) {
+            cloud.status = e_cloud_status_inactive;
+            continue;
+        }
 
         speed_set_target(cloud.speed.x, -cloud_speed, SPEED_CHANGE_IMMEDIATE, 1);
         speed_set_target(cloud.speed.y, cloud_speed / 2, SPEED_CHANGE_IMMEDIATE, 1);
-        // FIXME: smoothen clouds somehow, right now they are blocky
         draw_cloud(ctx, &cloud.img, cloud.render_pos, COLOR_MASK_NONE, cloud.scale_x, cloud.scale_y, cloud.angle);
 
         cloud.pos.x += speed_get_delta(cloud.speed.x);

@@ -75,6 +75,7 @@ enum e_debug_render {
     e_debug_render_gems = 52,
     e_debug_render_irrigation_value = 53,
     e_debug_render_damage_grid = 54,
+    e_debug_render_clouds = 55,
 
     e_debug_render_size
 };
@@ -103,6 +104,7 @@ void debug_draw_tile_top_bb(int x, int y, int height, color color, int size = 1)
 
 void draw_debug_tile(vec2i pixel, tile2i point, painter &ctx);
 void draw_debug_animal_spawn_areas(painter &ctx);
+void draw_debug_clouds(painter &ctx);
 
 void draw_debug_ui(int x, int y);
 

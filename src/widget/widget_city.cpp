@@ -186,12 +186,13 @@ void screen_city_t::update_clouds(painter &ctx) {
         g_camera.camera_position.y - mm_view.min.y,
     };
 
-    const vec2i limit = {
-        GRID_LENGTH * TILE_WIDTH_PIXELS,
-        GRID_LENGTH * TILE_HEIGHT_PIXELS,
+    const float zoom = g_zoom.get_scale();
+    const vec2i view_size = {
+        std::max(1, (int)(g_camera.size_pixels.x / zoom)),
+        std::max(1, (int)(g_camera.size_pixels.y / zoom)),
     };
 
-    g_clouds.draw(ctx, mm_view.min, offset, limit);
+    g_clouds.draw(ctx, offset, view_size);
 }
 
 void screen_city_t::clear_current_tile() {
@@ -660,6 +661,7 @@ void screen_city_t::draw_without_overlay(painter &ctx, int selected_figure_id) {
     // Update and draw cloud effects over the entire scene
     // Clouds are drawn last so they appear above everything else (or are blended appropriately)
     update_clouds(ctx);
+    draw_debug_clouds(ctx);
 }
 
 void screen_city_t::draw_current_select_tile(painter &ctx) {
@@ -1080,6 +1082,7 @@ void screen_city_t::draw_with_overlay(painter &ctx) {
     ImageDraw::finalize_render(ctx);
 
     update_clouds(ctx);
+    draw_debug_clouds(ctx);
 }
 
 void screen_city_t::draw(painter &ctx) {

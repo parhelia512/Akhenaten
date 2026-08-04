@@ -367,7 +367,7 @@ void graphics_renderer_interface::update_custom_texture_from(int type, const col
     int x_offset, int y_offset, int width, int height)
 {
     auto &data = g_renderer_data;
-    if (game.paused || !data.custom_textures[type].texture) {
+    if (!data.custom_textures[type].texture) {
         return;
     }
     int texture_width, texture_height;
