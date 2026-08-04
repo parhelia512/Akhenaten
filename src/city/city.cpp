@@ -48,7 +48,7 @@
 #include "graphics/elements/lang_text.h"
 #include "empire/empire_traders.h"
 #include "scenario/criteria.h"
-#include "graphics/clouds.h"
+#include "widget/city/clouds.h"
 #include "city/city_religion_osiris.h"
 #include "scenario/distant_battle.h"
 

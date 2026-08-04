@@ -17,7 +17,6 @@
 #include "building/building_house.h"
 #include "city/city.h"
 #include "core/profiler.h"
-#include "graphics/clouds.h"
 #include "graphics/view/lookup.h"
 #include "graphics/view/zoom.h"
 #include "grid/canals.h"
@@ -855,57 +854,6 @@ void draw_debug_animal_spawn_areas(painter &ctx) {
             }
         }
     });
-}
-
-void draw_debug_clouds(painter &ctx) {
-    OZZY_PROFILER_FUNCTION();
-    if (debug_render_mode() != e_debug_render_clouds) {
-        return;
-    }
-
-    const float scale = g_zoom.get_scale();
-    const int view_w = (int)(g_camera.size_pixels.x / scale) + 64;
-    const int view_h = (int)(g_camera.size_pixels.y / scale) + 64;
-    char str[64];
-    for (int i = 0; i < (int)g_clouds.clouds.size(); i++) {
-        const cloud_t &cloud = g_clouds.clouds[i];
-        if (cloud.status != e_cloud_status_moving) {
-            continue;
-        }
-
-        if (cloud.render_pos.x + cloud.side < -64 || cloud.render_pos.x > view_w
-            || cloud.render_pos.y + cloud.side < -64 || cloud.render_pos.y > view_h) {
-            continue;
-        }
-
-        const int sx = (int)(cloud.render_pos.x * scale);
-        const int sy = (int)(cloud.render_pos.y * scale);
-        const int sw = std::max(1, (int)(cloud.img.width * cloud.scale_x * scale));
-        const int sh = std::max(1, (int)(cloud.img.height * cloud.scale_y * scale));
-
-        color col = COLOR_GREEN;
-        debug_draw_rect_with_contour(sx, sy, sw, sh, col);
-        debug_draw_crosshair(sx, sy);
-
-        pcstr status_name = e_cloud_status_tokens.name(cloud.status);
-        int tx = cloud.render_pos.x;
-        int ty = cloud.render_pos.y;
-        debug_text(ctx, str, tx, ty, 40, "C", i, col);
-        ty += 10;
-        debug_text_a(ctx, str, tx, ty, 0, status_name ? status_name : "?", col);
-        ty += 10;
-        debug_text(ctx, str, tx, ty, 40, "px", cloud.pos.x, col);
-        ty += 10;
-        debug_text(ctx, str, tx, ty, 40, "py", cloud.pos.y, col);
-        ty += 10;
-        debug_text(ctx, str, tx, ty, 40, "rx", cloud.render_pos.x, col);
-        ty += 10;
-        debug_text(ctx, str, tx, ty, 40, "ry", cloud.render_pos.y, col);
-        ty += 10;
-        debug_text(ctx, str, tx, ty, 40, "ang", cloud.angle, col);
-        ty += 10;
-        debug_text(ctx, str, tx, ty, 40, "side", cloud.side, col);
-    }
 }
 
 void set_debug_building_id(int bid) {
