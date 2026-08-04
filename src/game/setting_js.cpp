@@ -59,6 +59,15 @@ ANK_FUNCTION(__game_debug_render_mode)
 void __game_set_debug_render_mode(int mode) { set_debug_render_mode((e_debug_render)mode); }
 ANK_FUNCTION_1(__game_set_debug_render_mode)
 
+pcstr __game_debug_render_mode_name() {
+    xstring name = debug_render_mode_name();
+    return name.empty() ? "" : name.c_str();
+}
+ANK_FUNCTION(__game_debug_render_mode_name)
+
+void __game_set_debug_render_mode_name(pcstr name) { set_debug_render_mode_name(name ? name : ""); }
+ANK_FUNCTION_1(__game_set_debug_render_mode_name)
+
 int display_options_video_modes_count() { return (int)get_video_modes().size(); }
 ANK_FUNCTION(display_options_video_modes_count)
 

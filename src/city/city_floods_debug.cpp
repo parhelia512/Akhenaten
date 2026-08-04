@@ -3,8 +3,11 @@
 
 #include "city/city_floods.h"
 #include "core/string.h"
+#include "graphics/image.h"
+#include "graphics/image_groups.h"
 #include "graphics/text.h"
 #include "grid/floodplain.h"
+#include "grid/terrain.h"
 
 #include <cmath>
 
@@ -112,7 +115,27 @@ static void draw_flood_order_ui(painter &ctx) {
     debug_text(ctx, str, x, y + 275, cl, "target_progress:", g_floods.flood_progress_target);
 }
 
+static void draw_floodplain_shore_tile(vec2i pixel, tile2i point, painter &ctx) {
+    const int d = map_get_floodplain_edge(point);
+    if (!d)
+        return;
+
+    text_draw(bstring32(d).c_str(), pixel.x + 15, pixel.y + 15, FONT_SMALL_OUTLINED, COLOR_WHITE);
+    ctx.img_generic(image_id_from_group(GROUP_DEBUG_WIREFRAME_TILE) + 3, pixel, 0x80000000);
+}
+
+static void draw_river_shore_tile(vec2i pixel, tile2i point, painter &ctx) {
+    const int d = map_terrain_is(point.grid_offset(), TERRAIN_SHORE);
+    if (!d)
+        return;
+
+    text_draw(bstring32(d).c_str(), pixel.x + 15, pixel.y + 15, FONT_SMALL_PLAIN, COLOR_WHITE);
+    ctx.img_generic(image_id_from_group(GROUP_DEBUG_WIREFRAME_TILE) + 3, pixel, 0x80000000);
+}
+
 void ANK_REGISTER_APPLICATION_MODULE(register_flood_order_debug) {
     g_debug.add_tile_render_handler("flood_order", draw_flood_order_tile);
+    g_debug.add_tile_render_handler("floodplain_shore", draw_floodplain_shore_tile);
+    g_debug.add_tile_render_handler("river_shore", draw_river_shore_tile);
     g_debug.add_render_handler("flood_order", draw_flood_order_ui);
 }

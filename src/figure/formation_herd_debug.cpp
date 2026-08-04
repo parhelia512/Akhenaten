@@ -5,7 +5,9 @@
 #include "figure/formation.h"
 #include "graphics/image.h"
 #include "graphics/image_groups.h"
+#include "graphics/text.h"
 #include "graphics/view/view.h"
+#include "grid/hyena_strength.h"
 #include "scenario/scenario.h"
 
 #include <vector>
@@ -79,7 +81,19 @@ static void draw_animal_spawn_area(painter &ctx) {
     });
 }
 
+static void draw_hyena_strength_tile(vec2i pixel, tile2i point, painter &ctx) {
+    const int d = map_hyena_strength_get(point.grid_offset());
+    if (!d)
+        return;
+
+    char str[64];
+    ctx.img_generic(image_id_from_group(GROUP_TERRAIN_OVERLAY_COLORED) + 23, pixel, 0x80000000);
+    snprintf(str, 30, "%d", d);
+    text_draw(str, pixel.x + 15, pixel.y + 15, FONT_SMALL_PLAIN, COLOR_WHITE);
+}
+
 void ANK_REGISTER_APPLICATION_MODULE(register_animal_spawn_debug) {
     g_debug.add_tile_render_handler("animal_spawn", draw_animal_spawn_tile);
+    g_debug.add_tile_render_handler("hyena_strength", draw_hyena_strength_tile);
     g_debug.add_render_handler("animal_spawn_area", draw_animal_spawn_area);
 }

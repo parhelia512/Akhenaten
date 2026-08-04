@@ -94,11 +94,9 @@ function top_menu_debug_terrain_paint_toggle(p1, p2) {
 }
 function top_menu_debug_write_video_text(p1, p2) { return video_capture.active ? "Write Video ON" : "Write Video OFF" }
 
-function top_menu_debug_buildings_text(p1, p2) { return game.debug_render_mode == e_debug_render_building ? "Buildings ON" : "Buildings OFF" }
+function top_menu_debug_buildings_text(p1, p2) { return game.debug_render_mode_name == "building" ? "Buildings ON" : "Buildings OFF" }
 function top_menu_debug_buildings_toggle(p1, p2) {
-	var mode = game.debug_render_mode;
-	mode = (mode == e_debug_render_building) ? e_debug_render_none : e_debug_render_building;
-	game.debug_render_mode = mode;
+	game.debug_render_mode_name = (game.debug_render_mode_name == "building") ? "" : "building"
 }
 
 function top_menu_date_explanation(p1, p2) { ui.window_message_dialog_show("message_game_control_date_display", -1) }

@@ -18,64 +18,11 @@
 
 struct painter;
 
-extern int debug_range_1;
-extern int debug_range_2;
-extern int debug_range_3;
-extern int debug_range_4;
-
 struct event_draw_debug_properties{ int reserved; };
 
 enum e_debug_render {
     e_debug_render_none = 0,
-    e_debug_render_building = 1,
-    e_debug_render_tilesize = 2,
-    e_debug_render_roads = 3,
-    e_debug_render_routing_dist = 4,
-    e_debug_render_routing_grid = 5,
-    e_debug_render_moisture = 6,
-    e_debug_render_grass_level = 7,
-    e_debug_render_grass_soil_depletion = 8,
-    e_debug_render_grass_flood_flags = 9,
-    e_debug_render_labor = 10,
-    e_debug_render_terrain_bits = 11,
-    e_debug_render_image = 12,
-    e_debug_render_image_alt = 13,
-    e_debug_render_marshland = 14,
-    e_debug_render_terrain_type = 15,
-    e_debug_render_soil = 16,
-    e_debug_render_unk_19 = 17,
-    e_debug_render_tile_pos = 18,
-    e_debug_render_floodplain_shore = 19,
-    e_debug_render_tile_toph = 20,
-    e_debug_render_monuments = 21,
-    e_debug_render_figures = 22,
-    e_debug_render_height = 23,
-    e_debug_render_vegetation_growth = 24,
-    e_debug_render_damage = 25,
-    e_debug_render_desirability = 26,
-    e_debug_render_river_shore = 27,
-    e_debug_render_overall_entertainment = 28,
-    e_debug_render_canals = 29,
-    e_debug_render_overlay_add = 30,
-    e_debug_render_gardens = 31,
-    e_debug_render_routing_noncitizen = 32,
-    e_debug_render_routing_amphibia = 33,
-    e_debug_render_routing_water = 34,
-    e_debug_render_invasion_point = 35,
-    e_debug_render_tile_random = 36,
-    e_debug_render_soldier_strength = 37,
-    e_debug_render_enemy_strength = 38,
-    e_debug_render_hyena_strength = 39,
-    e_debug_render_sandstone = 40,
-    e_debug_render_stone = 41,
-    e_debug_render_limestone = 42,
-    e_debug_render_granite = 43,
-    e_debug_render_golden = 44,
-    e_debug_render_clay = 45,
-    e_debug_render_copper = 46,
-    e_debug_render_gems = 47,
-    e_debug_render_irrigation_value = 48,
-    e_debug_render_damage_grid = 49,
+    e_debug_render_overlay_add = 1,
 
     e_debug_render_size
 };

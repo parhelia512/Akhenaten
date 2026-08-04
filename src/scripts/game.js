@@ -18,6 +18,7 @@ game = extend(__game, {
     @version { get: __game_version }
     @difficulty { get: __game_difficulty }
     @debug_render_mode { get: __game_debug_render_mode, set: __game_set_debug_render_mode }
+    @debug_render_mode_name { get: __game_debug_render_mode_name, set: __game_set_debug_render_mode_name }
     @last_autosave { get: __game_get_last_autosave }
     @session_active { get: __game_session_active }
     @session_last_loaded_kind { get: __game_session_last_loaded_kind }
