@@ -67,18 +67,16 @@ enum e_debug_render {
     e_debug_render_soldier_strength = 38,
     e_debug_render_enemy_strength = 39,
     e_debug_render_hyena_strength = 40,
-    e_debug_render_animal_spawn = 41,
-    e_debug_render_animal_spawn_area = 42,
-    e_debug_render_sandstone = 43,
-    e_debug_render_stone = 44,
-    e_debug_render_limestone = 45,
-    e_debug_render_granite = 46,
-    e_debug_render_golden = 47,
-    e_debug_render_clay = 48,
-    e_debug_render_copper = 49,
-    e_debug_render_gems = 50,
-    e_debug_render_irrigation_value = 51,
-    e_debug_render_damage_grid = 52,
+    e_debug_render_sandstone = 41,
+    e_debug_render_stone = 42,
+    e_debug_render_limestone = 43,
+    e_debug_render_granite = 44,
+    e_debug_render_golden = 45,
+    e_debug_render_clay = 46,
+    e_debug_render_copper = 47,
+    e_debug_render_gems = 48,
+    e_debug_render_irrigation_value = 49,
+    e_debug_render_damage_grid = 50,
 
     e_debug_render_size
 };
@@ -108,7 +106,6 @@ void debug_draw_tile_box(int x, int y, color rect, color bb, int tile_size_x = 1
 void debug_draw_tile_top_bb(int x, int y, int height, color color, int size = 1);
 
 void draw_debug_tile(vec2i pixel, tile2i point, painter &ctx);
-void draw_debug_animal_spawn_areas(painter &ctx);
 
 bool get_debug_draw_option(int opt);
 void set_debug_draw_option(int opt, bool e);

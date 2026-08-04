@@ -508,11 +508,6 @@ void screen_city_t::draw_without_overlay(painter &ctx, int selected_figure_id) {
 
     ImageDraw::apply_render_commands(ctx, "draw_flat");
 
-    // PHASE 3: Experimental debug layer - draw animal spawn area indicators
-    // This is a debugging feature to visualize where animals can spawn in the game
-    draw_debug_animal_spawn_areas(ctx);
-    ImageDraw::apply_render_commands(ctx, "draw_debug_animal_areas");
-
     // PHASE 4: Draw height-based elements (buildings, decorations, and figures)
     // This includes buildings with height, animated decorations, and all figures (people, animals, etc.)
     // These are drawn after flat terrain so they appear on top
