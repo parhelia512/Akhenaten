@@ -242,13 +242,8 @@ void figure_cartpusher::determine_deliveryman_destination() {
         }
     }
 
-    // no one will accept
+    // Wait — returning home would despawn and lose cargo already taken from home.
     base.min_max_seen = pred.understaffed ? 2 : 1;
-    if (++base.routing_try_reroute_counter > 5) {
-        // Give up after repeated failures — return home so the workshop can dispatch a fresh cart.
-        base.routing_try_reroute_counter = 0;
-        return advance_action(ACTION_27_CARTPUSHER_RETURNING);
-    }
     advance_action(ACTION_8_RECALCULATE);
 }
 
@@ -451,10 +446,6 @@ void figure_cartpusher::determine_storageyard_cart_destination() {
 }
 
 void figure_cartpusher::figure_before_action() {
-    if (action_state() != ACTION_8_RECALCULATE && action_state() != ACTION_20_CARTPUSHER_INITIAL) {
-        base.routing_try_reroute_counter = 0;
-    }
-
     if (has_destination()) {
         return;
     }
