@@ -1131,7 +1131,37 @@ console_ref_bool::console_ref_bool(pcstr name, bool &v) : value(&v) {
     bind_debug_console_var_bool(name, v);
 }
 
-void game_debug_t::init() {    
+void game_debug_t::add_render_handler(const xstring &name, handler_cb func) {
+    if (!func || name.empty()) {
+        return;
+    }
+    for (auto &handler : render_handlers) {
+        if (handler.name == name) {
+            handler.func = std::move(func);
+            return;
+        }
+    }
+    render_handlers.push_back({name, std::move(func)});
+}
+
+void game_debug_t::draw_render_handlers(painter &ctx) {
+    OZZY_PROFILER_FUNCTION();
+    const e_debug_render mode = debug_render_mode();
+    if (mode == e_debug_render_none) {
+        return;
+    }
+    pcstr mode_name = e_debug_render_tokens.name(mode);
+    if (!mode_name) {
+        return;
+    }
+    for (auto &handler : render_handlers) {
+        if (handler.name == mode_name && handler.func) {
+            handler.func(ctx);
+        }
+    }
+}
+
+void game_debug_t::init() {
     events::subscribe([] (event_debug_render_change ev) {
         debugrender.value += ev.value;
     });

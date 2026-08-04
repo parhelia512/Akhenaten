@@ -590,6 +590,7 @@ void screen_city_t::draw_without_overlay(painter &ctx, int selected_figure_id) {
     ImageDraw::finalize_render(ctx);
 
     draw_screen_space_effects(ctx);
+    g_debug.draw_render_handlers(ctx);
 }
 
 void screen_city_t::draw_current_select_tile(painter &ctx) {
@@ -1027,6 +1028,7 @@ void screen_city_t::draw_with_overlay(painter &ctx) {
     ImageDraw::finalize_render(ctx);
 
     draw_screen_space_effects(ctx);
+    g_debug.draw_render_handlers(ctx);
 }
 
 void screen_city_t::draw(painter &ctx) {

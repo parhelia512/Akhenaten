@@ -276,9 +276,6 @@ void clouds_t::draw(painter &ctx, const vec2i offset, const vec2i view_size) {
 
 void clouds_t::draw_debug(painter &ctx) {
     OZZY_PROFILER_FUNCTION();
-    if (debug_render_mode() != e_debug_render_clouds) {
-        return;
-    }
 
     const float scale = g_zoom.get_scale();
     const int view_w = (int)(g_camera.size_pixels.x / scale) + 64;
@@ -349,9 +346,11 @@ void clouds_t::draw_city(painter &ctx) {
     };
 
     draw(ctx, offset, view_size);
-    draw_debug(ctx);
 }
 
 void ANK_REGISTER_APPLICATION_MODULE(register_city_clouds_module) {
     g_screen_city.add_screen_space_effect([](painter &ctx) { g_clouds.draw_city(ctx); });
+
+    struct e_debug_render_clouds {};
+    g_debug.add_render_handler<e_debug_render_clouds>([](painter &ctx) { g_clouds.draw_debug(ctx); });
 }

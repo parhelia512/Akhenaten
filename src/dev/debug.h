@@ -2,6 +2,10 @@
 
 #include "graphics/color.h"
 #include "core/string.h"
+#include "core/hvector.h"
+#include "core/typename.h"
+#include "core/xfunction.h"
+#include "core/xstring.h"
 #include "graphics/image.h"
 #include "graphics/view/view.h"
 #include "graphics/font.h"
@@ -11,6 +15,8 @@
 #include <functional>
 #include <iosfwd>
 #include <iomanip>
+
+struct painter;
 
 extern int debug_range_1;
 extern int debug_range_2;
@@ -183,7 +189,24 @@ using PropertiesIterator = FuncLinkedList<debug_iterator_function_cb*, DebugMode
 } // end namespace debug
 
 struct game_debug_t {
+    using handler_cb = xfunction<void(painter &)>;
+
     void init();
+    void add_render_handler(const xstring &name, handler_cb func);
+    void draw_render_handlers(painter &ctx);
+
+    template<typename T>
+    void add_render_handler(handler_cb func) {
+        type_name_holder<T> holder;
+        add_render_handler(xstring(type_simplified_name(holder.value.data())), std::move(func));
+    }
+
+private:
+    struct handler_t {
+        xstring name;
+        handler_cb func;
+    };
+    hvector<handler_t, 16> render_handlers;
 };
 
 extern game_debug_t g_debug;
