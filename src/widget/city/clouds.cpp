@@ -274,7 +274,7 @@ void clouds_t::draw(painter &ctx, const vec2i offset, const vec2i view_size) {
     }
 }
 
-static void draw_debug_clouds(painter &ctx) {
+void clouds_t::draw_debug(painter &ctx) {
     OZZY_PROFILER_FUNCTION();
     if (debug_render_mode() != e_debug_render_clouds) {
         return;
@@ -284,8 +284,8 @@ static void draw_debug_clouds(painter &ctx) {
     const int view_w = (int)(g_camera.size_pixels.x / scale) + 64;
     const int view_h = (int)(g_camera.size_pixels.y / scale) + 64;
     char str[64];
-    for (int i = 0; i < (int)g_clouds.clouds.size(); i++) {
-        const cloud_t &cloud = g_clouds.clouds[i];
+    for (int i = 0; i < (int)clouds.size(); i++) {
+        const cloud_t &cloud = clouds[i];
         if (cloud.status != e_cloud_status_moving) {
             continue;
         }
@@ -325,7 +325,7 @@ static void draw_debug_clouds(painter &ctx) {
     }
 }
 
-static void city_clouds_draw(painter &ctx) {
+void clouds_t::draw_city(painter &ctx) {
     OZZY_PROFILER_FUNCTION();
 
     if (game.paused
@@ -333,7 +333,7 @@ static void city_clouds_draw(painter &ctx) {
             && !g_window_manager.window_is("window_city_military")
             && !g_window_manager.window_is("window_city_warship")
             && !g_window_manager.window_is("window_city_transport"))) {
-        g_clouds.pause();
+        pause();
     }
 
     auto mm_view = g_camera.get_scrollable_pixel_limits();
@@ -348,10 +348,10 @@ static void city_clouds_draw(painter &ctx) {
         std::max(1, (int)(g_camera.size_pixels.y / zoom)),
     };
 
-    g_clouds.draw(ctx, offset, view_size);
-    draw_debug_clouds(ctx);
+    draw(ctx, offset, view_size);
+    draw_debug(ctx);
 }
 
 void ANK_REGISTER_APPLICATION_MODULE(register_city_clouds_module) {
-    g_screen_city.add_screen_space_effect(city_clouds_draw);
+    g_screen_city.add_screen_space_effect([](painter &ctx) { g_clouds.draw_city(ctx); });
 }

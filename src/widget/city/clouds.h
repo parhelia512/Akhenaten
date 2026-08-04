@@ -78,6 +78,8 @@ struct clouds_t {
     void pause();
     void draw_cloud(painter &ctx, const image_t *img, const vec2i pos, const color color, const float scale_x, const float scale_y, const double angle);
     void draw(painter &ctx, const vec2i offset, const vec2i view_size);
+    void draw_debug(painter &ctx);
+    void draw_city(painter &ctx);
     void generate_cloud(cloud_t &cloud);
     int ellipse_is_inside_bounds(const ellipse &e);
     void generate_cloud_ellipse(color *pixels, const int width, const int height);
