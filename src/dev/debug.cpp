@@ -27,7 +27,6 @@
 #include "grid/property.h"
 #include "grid/road_network.h"
 #include "grid/routing/routing.h"
-#include "grid/sprite.h"
 #include "grid/terrain.h"
 #include "grid/vegetation.h"
 #include "grid/sandstone.h"
@@ -48,9 +47,7 @@
 #include "game/game.h"
 
 #include "building/construction/build_planner.h"
-#include "building/building_statue.h"
 #include "building/building_farm.h"
-#include "building/building_temple_complex.h"
 #include "city/coverage.h"
 #include "game/game_events.h"
 #include "sound/sound_city.h"
@@ -206,20 +203,6 @@ void debug_draw_tile_top_bb(int x, int y, int height, color color, int size) {
 
     g_render.draw_line(vec2i(left_x * scale, left_x * scale), vec2i(left_bottom * scale, left_top * scale), color);
     g_render.draw_line(vec2i(right_x * scale, right_x * scale), vec2i(right_bottom * scale, right_top * scale), color);
-}
-
-static int north_tile_grid_offset(int x, int y) {
-    int grid_offset = MAP_OFFSET(x, y);
-    int size = map_property_multi_tile_size(grid_offset);
-    for (int i = 0; i < size && map_property_multi_tile_x(grid_offset); i++) {
-        grid_offset += GRID_OFFSET(-1, 0);
-    }
-
-    for (int i = 0; i < size && map_property_multi_tile_y(grid_offset); i++) {
-        grid_offset += GRID_OFFSET(0, -1);
-    }
-
-    return grid_offset;
 }
 
 void draw_debug_tile(vec2i pixel, tile2i point, painter &ctx) {
@@ -429,49 +412,6 @@ void draw_debug_tile(vec2i pixel, tile2i point, painter &ctx) {
                 debug_text(ctx, str, x0, y + 30, 0, "", d.juggler_visited, COLOR_GREEN);
                 debug_text(ctx, str, x1, y + 30, 0, "", d.musician_visited, COLOR_GREEN);
                 debug_text(ctx, str, x0, y + 40, 0, "", d.dancer_visited, COLOR_GREEN);
-            }
-        }
-        break;
-
-    case e_debug_render_sprite_frames: // SPRITE FRAMES
-        if (grid_offset == b->tile.grid_offset()) {
-            build_planner::draw_building_ghost(ctx, image_id_from_group(GROUP_SUNKEN_TILE) + 3, {x - 15, y}, COLOR_MASK_GREEN);
-        }
-        if (grid_offset == north_tile_grid_offset(b->tile.x(), b->tile.y())) {
-            ctx.img_generic(image_id_from_group(GROUP_DEBUG_WIREFRAME_TILE) + 3, { x - 15, y }, COLOR_MASK_RED);
-        }
-        d = map_sprite_animation_at(grid_offset);
-        if (d) {
-            text_draw(bstring32(d).c_str(), x, y + 10, FONT_SMALL_OUTLINED, COLOR_WHITE);
-        }
-
-        // STATUES & MONUMENTS
-
-        if (b_id && map_property_is_draw_tile(grid_offset) && (b->labor_category != LABOR_CATEGORY_NONE)) {
-            switch (b->type) {
-            default:
-                break;
-            case BUILDING_SMALL_STATUE:
-            case BUILDING_MEDIUM_STATUE:
-            case BUILDING_LARGE_STATUE:
-                {
-                    auto statue = b->dcast_statue();
-                    debug_text(ctx, str, x1, y + 10, 0, "", statue->runtime_data().variant, COLOR_WHITE);
-                }
-                break;
-                //
-            case BUILDING_TEMPLE_COMPLEX_OSIRIS:
-            case BUILDING_TEMPLE_COMPLEX_RA:
-            case BUILDING_TEMPLE_COMPLEX_PTAH:
-            case BUILDING_TEMPLE_COMPLEX_SETH:
-            case BUILDING_TEMPLE_COMPLEX_BAST:
-                {
-                    auto complex = b->dcast_temple_complex();
-                    auto &d = complex->runtime_data();
-                    debug_text(ctx, str, x1, y + 10, 0, "", d.variant, COLOR_WHITE);
-                    debug_text(ctx, str, x1, y + 20, 0, "", d.temple_complex_upgrades, COLOR_LIGHT_BLUE);
-                }
-                break;
             }
         }
         break;
