@@ -80,6 +80,16 @@ function mission1_on_start(ev) {
 	city.goal_tooltip = mission1_get_goal_tooltip
 }
 
+[es=(city_animals, create_herds), mission=mission1]
+function mission1_register_animals(ev) {
+	city.remove_animals()
+	city.add_animals_point(0, /*x*/58, /*y*/77, FIGURE_OSTRICH, 8)
+	city.set_animals_area(0, 16)
+
+	city.add_animals_point(1, /*x*/55, /*y*/95, FIGURE_OSTRICH, 8)
+	city.set_animals_area(1, 16)
+}
+
 [event=event_advance_day, mission=mission1]
 function mission1_check_gold_mined(ev) {
     if (mission.gold_mined_handled) {
