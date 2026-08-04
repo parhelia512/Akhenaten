@@ -67,18 +67,14 @@ function mission1_on_start(ev) {
 		city.set_advisor_available(i, 0)
 	}
 
-	if (mission.gold_mined_handled) {
-		city.use_building(BUILDING_TEMPLE_BAST, true)
-		city.use_building(BUILDING_SHRINE_BAST, true)
-		city.use_building(BUILDING_FESTIVAL_SQUARE, true)
-		city.set_advisor_available(ADVISOR_RELIGION, 1)
-	}
+	city.use_building(BUILDING_TEMPLE_BAST, mission.gold_mined_handled)
+	city.use_building(BUILDING_SHRINE_BAST, mission.gold_mined_handled)
+	city.use_building(BUILDING_FESTIVAL_SQUARE, mission.gold_mined_handled)
+	city.set_advisor_available(ADVISOR_RELIGION, mission.gold_mined_handled)
 
-	if (mission.temples_built) {
-		city.use_building(BUILDING_BOOTH, true)
-		city.use_building(BUILDING_JUGGLER_SCHOOL, true)
-		city.set_advisor_available(ADVISOR_ENTERTAINMENT, 1)
-	}
+	city.use_building(BUILDING_BOOTH, mission.temples_built)
+	city.use_building(BUILDING_JUGGLER_SCHOOL, mission.temples_built)
+	city.set_advisor_available(ADVISOR_ENTERTAINMENT, mission.temples_built)
 
     city.set_advisor_available(ADVISOR_POPULATION, 1)
 	city.goal_tooltip = mission1_get_goal_tooltip
