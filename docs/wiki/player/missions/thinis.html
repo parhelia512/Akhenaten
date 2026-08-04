@@ -453,55 +453,62 @@
             <ul class="event-list">
               <li>
                 <span class="ev-name">event_mission_start</span>
-                <span class="ev-line">line 54</span>
+                <span class="ev-line">line 61</span>
                 <span class="ev-desc">Hides all advisors except Population on fresh start. On load/restart, re-unlocks any buildings whose event was already fired (religion if <code>gold_mined_handled</code>, entertainment if <code>temples_built</code>), restoring mid-mission state correctly.</span>
                 <span class="ev-fn">mission1_on_start</span>
                 <span></span>
               </li>
               <li>
+                <span class="ev-name">city_animals / create_herds</span>
+                <span class="ev-line">line 83</span>
+                <span class="ev-desc">Clears animals then places two ostrich herds (8 each) at (58,77) and (55,95) with roam area 16.</span>
+                <span class="ev-fn">mission1_register_animals</span>
+                <span></span>
+              </li>
+              <li>
                 <span class="ev-name">event_advance_day · gold check</span>
-                <span class="ev-line">line 77</span>
+                <span class="ev-line">line 93</span>
                 <span class="ev-desc">Checks daily whether <code>city.finance.this_year.income.gold_delivered ≥ 500</code>. When reached, sets <code>gold_mined_handled = true</code>, unlocks Temple of Bast / Shrine of Bast / Festival Square, enables Religion Advisor, and shows <code>message_tutorial_the_gods_of_egypt</code>. Runs only once (guard on <code>gold_mined_handled</code>).</span>
                 <span class="ev-fn">mission1_check_gold_mined</span>
                 <span></span>
               </li>
               <li>
                 <span class="ev-name">event_migration_update</span>
-                <span class="ev-line">line 99</span>
+                <span class="ev-line">line 115</span>
                 <span class="ev-desc">Caps immigration when no Granary exists: calls <code>migration.set_population_cap("no_granary_population_cap", 150)</code>. Lifted to 0 (no cap) as soon as any active Granary is present.</span>
                 <span class="ev-fn">mission1_handle_population_cap</span>
                 <span></span>
               </li>
               <li>
                 <span class="ev-name">event_update_victory_state</span>
-                <span class="ev-line">line 107</span>
+                <span class="ev-line">line 123</span>
                 <span class="ev-desc">Evaluates all four milestone flags plus a 4-day cooldown since the last event. All must be true before victory can be granted. Also sets named reasons for the UI tooltip that describes what remains to be done.</span>
                 <span class="ev-fn">mission1_handle_victory_state</span>
                 <span></span>
               </li>
               <li>
                 <span class="ev-name">event_advance_day · temple check</span>
-                <span class="ev-line">line 118</span>
+                <span class="ev-line">line 134</span>
                 <span class="ev-desc">Polls daily for an active Temple of Bast. When found, sets <code>temples_built = true</code>, unlocks Booth and Juggler's School, enables Entertainment Advisor, shows <code>message_tutorial_entertainment</code>. Runs only once.</span>
                 <span class="ev-fn">mission1_on_build_temple</span>
                 <span></span>
               </li>
               <li>
                 <span class="ev-name">event_advance_day · booth check</span>
-                <span class="ev-line">line 140</span>
+                <span class="ev-line">line 156</span>
                 <span class="ev-desc">Polls daily for an active Booth. Sets <code>booth_built = true</code> on first detection. Runs only once.</span>
                 <span class="ev-fn">mission1_on_build_booth</span>
                 <span></span>
               </li>
               <li>
                 <span class="ev-name">event_advance_day · juggler school check</span>
-                <span class="ev-line">line 155</span>
+                <span class="ev-line">line 171</span>
                 <span class="ev-desc">Polls daily for an active Juggler's School. Sets <code>juggler_school_built = true</code> on first detection. Runs only once.</span>
                 <span class="ev-fn">mission1_on_build_juggler_school</span>
                 <span></span>
               </li>
             </ul>
-            <p style="margin-top:0.75rem">The goal tooltip function <code>mission1_get_goal_tooltip()</code> (line 41) returns a different hint string depending on which milestone is still pending — it is called by <code>city.goal_tooltip</code> to drive the in-game objective display.</p>
+            <p style="margin-top:0.75rem">The goal tooltip function <code>mission1_get_goal_tooltip()</code> (line 49) returns a different hint string depending on which milestone is still pending — it is called by <code>city.goal_tooltip</code> to drive the in-game objective display.</p>
           </div>
         </details>
 
@@ -534,7 +541,7 @@
           <div class="details-body">
             <p>The original Pharaoh save file that provides the map layout, terrain, gold ore deposits, and starting positions for Thinis is:</p>
             <p><span class="file-ref">bin_x64/Missions/mission_01.sav</span></p>
-            <p>This binary file is loaded by the engine before the JS script runs. It encodes the tile map, Nile course, gold deposit positions, predefined animal spawn zones, and the kingdom road entry point. To replace the map entirely, swap the <code>.sav</code> file; the JS script will still apply on top of it.</p>
+            <p>This binary file is loaded by the engine before the JS script runs. It encodes the tile map, Nile course, gold deposit positions, and the kingdom road entry point. Ostrich herds are placed from JS via <code>mission1_register_animals</code> (<code>city_animals</code> / <code>create_herds</code>). To replace the map entirely, swap the <code>.sav</code> file; the JS script will still apply on top of it.</p>
             <p>The scripting system is loaded from <span class="file-ref">src/scripts/missions.js</span>, which imports <code>mission_1_thinis.js</code> by path. If you rename or move the file, update the import there.</p>
           </div>
         </details>
