@@ -1,6 +1,5 @@
 ﻿#include "widget/widget_city.h"
 
-#include "graphics/clouds.h"
 #include "graphics/image.h"
 #include "graphics/graphics.h"
 #include "graphics/view/lookup.h"
@@ -170,28 +169,6 @@ void draw_tile_boxes(vec2i pixel, tile2i point) {
 
 void update_tile_coords(vec2i pixel, tile2i tile, painter &ctx) {
     g_camera.record_mappoint_pixelcoord(tile, pixel);
-}
-
-void screen_city_t::update_clouds(painter &ctx) {
-    OZZY_PROFILER_FUNCTION();
-
-    if (game.paused || (!g_window_manager.window_is("window_city") && !g_window_manager.window_is("window_city_military") && !g_window_manager.window_is("window_city_warship") && !g_window_manager.window_is("window_city_transport"))) {
-        g_clouds.pause();
-    }
-
-    auto mm_view = g_camera.get_scrollable_pixel_limits();
-    const vec2i offset = {
-        g_camera.camera_position.x - mm_view.min.x,
-        g_camera.camera_position.y - mm_view.min.y,
-    };
-
-    const float zoom = g_zoom.get_scale();
-    const vec2i view_size = {
-        std::max(1, (int)(g_camera.size_pixels.x / zoom)),
-        std::max(1, (int)(g_camera.size_pixels.y / zoom)),
-    };
-
-    g_clouds.draw(ctx, offset, view_size);
 }
 
 void screen_city_t::clear_current_tile() {
@@ -612,10 +589,7 @@ void screen_city_t::draw_without_overlay(painter &ctx, int selected_figure_id) {
     // This ensures all graphics commands are flushed and the frame is ready
     ImageDraw::finalize_render(ctx);
 
-    // Update and draw cloud effects over the entire scene
-    // Clouds are drawn last so they appear above everything else (or are blended appropriately)
-    update_clouds(ctx);
-    draw_debug_clouds(ctx);
+    draw_screen_space_effects(ctx);
 }
 
 void screen_city_t::draw_current_select_tile(painter &ctx) {
@@ -630,6 +604,23 @@ void screen_city_t::draw_current_select_tile(painter &ctx) {
 
     vec2i pixel = g_camera.lookup_tile_to_pixel(current_tile);
     debug_draw_tile_box(pixel.x, pixel.y, COLOR_NULL, COLOR_BLACK);
+}
+
+void screen_city_t::add_screen_space_effect(screen_space_effect_cb *effect) {
+    if (!effect) {
+        return;
+    }
+    if (std::find(screen_space_effects.begin(), screen_space_effects.end(), effect) != screen_space_effects.end()) {
+        return;
+    }
+    screen_space_effects.push_back(effect);
+}
+
+void screen_city_t::draw_screen_space_effects(painter &ctx) {
+    OZZY_PROFILER_FUNCTION();
+    for (auto *effect : screen_space_effects) {
+        effect(ctx);
+    }
 }
 
 void screen_city_t::debug_draw_figures(painter &ctx) {
@@ -1035,8 +1026,7 @@ void screen_city_t::draw_with_overlay(painter &ctx) {
 
     ImageDraw::finalize_render(ctx);
 
-    update_clouds(ctx);
-    draw_debug_clouds(ctx);
+    draw_screen_space_effects(ctx);
 }
 
 void screen_city_t::draw(painter &ctx) {

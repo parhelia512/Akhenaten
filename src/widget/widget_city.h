@@ -4,11 +4,14 @@
 #include "input/mouse.h"
 #include "grid/point.h"
 #include "graphics/color.h"
+#include "core/svector.h"
 
 #include "city/tile_draw.h"
 
 struct tooltip_context;
 struct painter;
+
+using screen_space_effect_cb = void(painter &ctx);
 
 struct screen_city_t {
     tile2i current_tile;
@@ -19,12 +22,12 @@ struct screen_city_t {
     bool buildings_flat_view = false;
 
     local_render_context_t render_ctx;
+    svector<screen_space_effect_cb *, 8> screen_space_effects;
 
     int selected_figure_id;
     int highlighted_formation;
 
     void handle_touch_scroll(const touch_t *t, bool force_capture_input);
-    void update_clouds(painter &ctx);
     void clear_current_tile();
     void handle_first_touch(tile2i tile);
     void handle_touch();
@@ -67,6 +70,8 @@ struct screen_city_t {
     void draw_tooltip(tooltip_context* c);
     void debug_draw_figures(painter &ctx);
     void draw_current_select_tile(painter &ctx);
+    void add_screen_space_effect(screen_space_effect_cb *effect);
+    void draw_screen_space_effects(painter &ctx);
     bool allow_building_info(tile2i tile);
 };
 
