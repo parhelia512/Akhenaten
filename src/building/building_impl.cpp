@@ -1,8 +1,8 @@
 #include "building_impl.h"
 
 #include "building/building.h"
-#include "grid/building_tiles.h"
 #include "city/object_info.h"
+#include "grid/building_tiles.h"
 #include "grid/terrain.h"
 #include "city/city_warnings.h"
 #include "grid/road_access.h"
@@ -185,6 +185,11 @@ bool building_impl::draw_ornaments_and_animations_height(painter &ctx, vec2i poi
     }
 
     return false;
+}
+
+void building_impl::draw_usable_paths(painter &ctx) {
+    (void)ctx;
+    es(__func__);
 }
 
 bool building_impl::is_enemies_nearby() const {

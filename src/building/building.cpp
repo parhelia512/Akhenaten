@@ -419,6 +419,10 @@ figure *building::create_cartpusher(e_resource resource_id, int quantity, e_figu
     return f;
 }
 
+void building::draw_usable_paths(painter &ctx) {
+    dcast()->draw_usable_paths(ctx);
+}
+
 figure *building::create_figure_with_destination(e_figure_type _type, building *destination, e_figure_action created_action, e_building_slot slot) {
     figure *f = create_figure_generic(_type, created_action, slot, DIR_4_BOTTOM_LEFT);
     f->set_destination(destination->id);

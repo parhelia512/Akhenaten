@@ -1,6 +1,7 @@
 #pragma once
 
 #include "building/building.h"
+#include "core/circullar_buffer.h"
 #include "core/hvector.h"
 #include "grid/point.h"
 
@@ -8,9 +9,12 @@
 
 constexpr int RECORDED_PATH_POOL_SIZE = 512;
 constexpr int RECORDED_PATH_MAX_TILES = 256;
-constexpr int BUILDING_RECORDED_PATHS = 3;
+// circular_buffer 2nd param is pow2 exponent: 1<<2 = 4 slots
+constexpr int BUILDING_RECORDED_PATHS_POW2 = 2;
+constexpr int BUILDING_RECORDED_PATHS = 1 << BUILDING_RECORDED_PATHS_POW2;
 
 using recorded_path_tiles_t = hvector<uint16_t, RECORDED_PATH_MAX_TILES>;
+using building_path_ring_t = circular_buffer<uint16_t, BUILDING_RECORDED_PATHS_POW2>;
 
 struct recorded_paths_t {
     struct slot_t {
@@ -19,8 +23,7 @@ struct recorded_paths_t {
     };
 
     slot_t slots[RECORDED_PATH_POOL_SIZE];
-    // rings[bid][0] = newest; 0 = empty id
-    uint16_t building_rings[MAX_BUILDINGS][BUILDING_RECORDED_PATHS] = {};
+    building_path_ring_t building_rings[MAX_BUILDINGS];
 
     void clear();
     int acquire();
@@ -42,3 +45,5 @@ extern recorded_paths_t g_recorded_paths;
 void figure_recorded_path_acquire(figure &f);
 void figure_recorded_path_append_tile(figure &f);
 void figure_recorded_path_release(figure &f);
+
+void building_draw_usable_paths(int bid);

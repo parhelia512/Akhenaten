@@ -8,6 +8,7 @@
 #include "core/log.h"
 #include "building/building_storage_yard.h"
 #include "building/building_bazaar.h"
+#include "city/city_recorded_paths.h"
 #include "figure/combat.h"
 #include "figure/movement.h"
 #include "figure/route.h"
@@ -28,6 +29,14 @@
 #include <algorithm>
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_market_buyer);
+
+void figure_market_buyer::on_create() {
+    figure_recorded_path_acquire(base);
+}
+
+void figure_market_buyer::before_poof() {
+    figure_recorded_path_release(base);
+}
 
 void figure_market_buyer::figure_before_action() {
     building *b = home();
@@ -77,15 +86,23 @@ void figure_market_buyer::figure_action() {
     case ACTION_145_MARKET_BUYER_GOING_TO_STORAGE:
         ok = do_gotobuilding(destination(), true, TERRAIN_USAGE_ROADS, ACTION_146_MARKET_BUYER_RETURNING);
         if (ok) {
+            building *dest = destination();
+            bool took = false;
             if (base.collecting_item_id > 3) {
-                if (!take_resource_from_storageyard(destination())) {
-                    advance_action(ACTION_146_MARKET_BUYER_RETURNING);
-                }
-
+                took = take_resource_from_storageyard(destination());
             } else {
-                if (!take_food_from_storage(home(), destination())) {
-                    advance_action(ACTION_146_MARKET_BUYER_RETURNING);
+                took = take_food_from_storage(home(), destination());
+            }
+            if (took && dest && base.trail_path_id
+                && (dest->type == BUILDING_GRANARY || dest->type == BUILDING_GRANARY_UP
+                    || dest->type == BUILDING_FOOD_MILL || dest->dcast_granary())) {
+                building *main = dest->main();
+                if (main) {
+                    g_recorded_paths.handoff_to_building(base, main->id);
                 }
+            }
+            if (!took) {
+                advance_action(ACTION_146_MARKET_BUYER_RETURNING);
             }
         }
         break;

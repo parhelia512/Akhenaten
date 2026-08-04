@@ -5,8 +5,6 @@
 #include "grid/grid.h"
 #include "io/io_buffer.h"
 
-#include <cstring>
-
 recorded_paths_t g_recorded_paths;
 
 void recorded_paths_t::clear() {
@@ -14,7 +12,9 @@ void recorded_paths_t::clear() {
         slots[i].used = false;
         slots[i].tiles.clear();
     }
-    memset(building_rings, 0, sizeof(building_rings));
+    for (int b = 0; b < MAX_BUILDINGS; b++) {
+        building_rings[b].clear();
+    }
 }
 
 int recorded_paths_t::acquire() {
@@ -73,21 +73,22 @@ void recorded_paths_t::building_push(building_id bid, int path_id) {
         return;
     }
     auto &ring = building_rings[bid];
-    const int dropped = ring[BUILDING_RECORDED_PATHS - 1];
-    for (int i = BUILDING_RECORDED_PATHS - 1; i > 0; i--) {
-        ring[i] = ring[i - 1];
+    if (ring.full()) {
+        release(ring.head());
     }
-    ring[0] = (uint16_t)path_id;
-    if (dropped) {
-        release(dropped);
-    }
+    ring.push_tail((uint16_t)path_id);
 }
 
 int recorded_paths_t::building_path_at(building_id bid, int index) const {
     if (bid <= 0 || bid >= MAX_BUILDINGS || index < 0 || index >= BUILDING_RECORDED_PATHS) {
         return 0;
     }
-    return building_rings[bid][index];
+    const auto &ring = building_rings[bid];
+    if ((uint32_t)index >= ring.size()) {
+        return 0;
+    }
+    // ring[0] = oldest; expose newest-first for UI/tests
+    return ring[ring.size() - 1 - (uint32_t)index];
 }
 
 void recorded_paths_t::building_clear(building_id bid) {
@@ -95,12 +96,12 @@ void recorded_paths_t::building_clear(building_id bid) {
         return;
     }
     auto &ring = building_rings[bid];
-    for (int i = 0; i < BUILDING_RECORDED_PATHS; i++) {
-        if (ring[i]) {
-            release(ring[i]);
-            ring[i] = 0;
+    ring.for_each([this](uint16_t path_id) {
+        if (path_id) {
+            release(path_id);
         }
-    }
+    });
+    ring.clear();
 }
 
 void recorded_paths_t::handoff_to_building(figure &f, building_id bid) {
@@ -165,9 +166,25 @@ io_buffer *iob_recorded_paths = new io_buffer([](io_buffer *iob, size_t version)
             }
         }
     }
+    // File layout: newest-first fixed slots (BUILDING_RECORDED_PATHS).
     for (int b = 0; b < MAX_BUILDINGS; b++) {
+        uint16_t ordered[BUILDING_RECORDED_PATHS] = {};
+        if (!iob->is_read_access()) {
+            for (int i = 0; i < BUILDING_RECORDED_PATHS; i++) {
+                ordered[i] = (uint16_t)p.building_path_at(b, i);
+            }
+        }
         for (int i = 0; i < BUILDING_RECORDED_PATHS; i++) {
-            iob->bind(BIND_SIGNATURE_UINT16, &p.building_rings[b][i]);
+            iob->bind(BIND_SIGNATURE_UINT16, &ordered[i]);
+        }
+        if (iob->is_read_access()) {
+            auto &ring = p.building_rings[b];
+            ring.clear();
+            for (int i = BUILDING_RECORDED_PATHS - 1; i >= 0; i--) {
+                if (ordered[i]) {
+                    ring.write_tail(ordered[i]);
+                }
+            }
         }
     }
 });

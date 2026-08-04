@@ -326,6 +326,8 @@ public:
     figure* create_figure_with_destination(e_figure_type _type, building* destination, e_figure_action created_action, e_building_slot slot = BUILDING_SLOT_SERVICE);
     figure* create_cartpusher(e_resource resource_id, int quantity, e_figure_action created_action, e_building_slot slot);
 
+    void draw_usable_paths(painter &ctx);
+
     int worker_percentage() const;
     int figure_spawn_timer();
     void check_labor_problem();

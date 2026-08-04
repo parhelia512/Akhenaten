@@ -1,4 +1,23 @@
 log_info("akhenaten: city delivery_paths.js started")
 
-// Drawing is done in C++ (screen_city_t::draw_recorded_delivery_paths).
-// Hold Alt + hover granary / hunting lodge.
+function building_draw_usable_paths(ev) {
+    if (!ev || !ev.bid) {
+        return
+    }
+    __building_draw_usable_paths(ev.bid)
+}
+
+[es=(building_granary, draw_usable_paths)]
+function building_granary_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
+
+[es=(building_hunting_lodge, draw_usable_paths)]
+function building_hunting_lodge_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
+
+[es=(building_food_mill, draw_usable_paths)]
+function building_food_mill_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}

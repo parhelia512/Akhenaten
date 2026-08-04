@@ -1,8 +1,8 @@
-// Recorded cart paths: granary/lodge keep last 3 handoff trails for hover UI.
+// Recorded visitor paths: granary/lodge keep last 4 handoff trails for hover UI.
 //
 // Markers:
 //   [test-marker] delivery_paths_granary_push_ok
-//   [test-marker] delivery_paths_ring3_ok
+//   [test-marker] delivery_paths_ring4_ok
 //   [test-marker] delivery_paths_evict_ok
 //   [test-marker] delivery_paths_lodge_ok
 //   [test-marker] delivery_paths_feature_ok
@@ -53,23 +53,27 @@ function run_test() {
 
     var p2 = test95_push_path(granary, cx + 1, cy)
     var p3 = test95_push_path(granary, cx + 2, cy)
-    if (__test_building_recorded_path_at(granary, 0) != p3
-        || __test_building_recorded_path_at(granary, 1) != p2
-        || __test_building_recorded_path_at(granary, 2) != p1) {
-        __log_info_native('[test:95] ring order want newest-first ' + p3 + ',' + p2 + ',' + p1
-            + ' got ' + __test_building_recorded_path_at(granary, 0)
-            + ',' + __test_building_recorded_path_at(granary, 1)
-            + ',' + __test_building_recorded_path_at(granary, 2))
-        __test_signal_ready()
-        return
-    }
-    __log_marker('delivery_paths_ring3_ok')
-
     var p4 = test95_push_path(granary, cx + 3, cy)
     if (__test_building_recorded_path_at(granary, 0) != p4
         || __test_building_recorded_path_at(granary, 1) != p3
-        || __test_building_recorded_path_at(granary, 2) != p2) {
-        __log_info_native('[test:95] after 4th push ring want ' + p4 + ',' + p3 + ',' + p2)
+        || __test_building_recorded_path_at(granary, 2) != p2
+        || __test_building_recorded_path_at(granary, 3) != p1) {
+        __log_info_native('[test:95] ring order want newest-first ' + p4 + ',' + p3 + ',' + p2 + ',' + p1
+            + ' got ' + __test_building_recorded_path_at(granary, 0)
+            + ',' + __test_building_recorded_path_at(granary, 1)
+            + ',' + __test_building_recorded_path_at(granary, 2)
+            + ',' + __test_building_recorded_path_at(granary, 3))
+        __test_signal_ready()
+        return
+    }
+    __log_marker('delivery_paths_ring4_ok')
+
+    var p5 = test95_push_path(granary, cx + 4, cy)
+    if (__test_building_recorded_path_at(granary, 0) != p5
+        || __test_building_recorded_path_at(granary, 1) != p4
+        || __test_building_recorded_path_at(granary, 2) != p3
+        || __test_building_recorded_path_at(granary, 3) != p2) {
+        __log_info_native('[test:95] after 5th push ring want ' + p5 + ',' + p4 + ',' + p3 + ',' + p2)
         __test_signal_ready()
         return
     }
@@ -92,7 +96,7 @@ function run_test() {
         __test_signal_ready()
         return
     }
-    if (__test_building_recorded_path_at(granary, 0) != p4) {
+    if (__test_building_recorded_path_at(granary, 0) != p5) {
         __log_info_native('[test:95] lodge push must not clear granary ring')
         __test_signal_ready()
         return
@@ -118,7 +122,7 @@ function run_test() {
 
 function check_valid() {
     return __test_find_inlog('delivery_paths_granary_push_ok')
-        && __test_find_inlog('delivery_paths_ring3_ok')
+        && __test_find_inlog('delivery_paths_ring4_ok')
         && __test_find_inlog('delivery_paths_evict_ok')
         && __test_find_inlog('delivery_paths_lodge_ok')
         && __test_find_inlog('delivery_paths_feature_ok')

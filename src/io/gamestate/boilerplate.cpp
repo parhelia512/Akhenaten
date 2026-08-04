@@ -673,9 +673,9 @@ static void file_schema(e_file_format file_format, const int file_version) {
             FILEIO.push_chunk(64, false, "enhanced_religion", iob_enhanced_religion);
         }
         if (file_version > 187) {
-            // recorded cart trails pool + per-building last-3 rings
-            // 512*(1+2+256*2) + 4000*3*2 = 263680 + 24000 = 287680
-            FILEIO.push_chunk(287680, true, "recorded_paths", iob_recorded_paths);
+            // recorded trails pool + per-building last-4 rings
+            // 512*(1+2+256*2) + 4000*4*2 = 263680 + 32000 = 295680
+            FILEIO.push_chunk(295680, true, "recorded_paths", iob_recorded_paths);
         }
 
         break;

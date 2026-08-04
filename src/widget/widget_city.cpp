@@ -16,7 +16,6 @@
 #include "building/building_temple_complex.h"
 #include "building/construction/build_planner.h"
 #include "city/city_finance.h"
-#include "city/city_recorded_paths.h"
 #include "city/city_warnings.h"
 #include "city/object_info.h"
 #include "core/calc.h"
@@ -320,52 +319,7 @@ void screen_city_t::draw_recorded_delivery_paths(painter &ctx) {
         return;
     }
 
-    static const color path_colors[BUILDING_RECORDED_PATHS] = {
-        COLOR_MASK_AMBER,
-        COLOR_MASK_GREEN,
-        COLOR_MASK_BLUE,
-    };
-    const int base_img = image_id_from_group(PACK_CUSTOM, 1);
-    for (int i = 0; i < BUILDING_RECORDED_PATHS; i++) {
-        const int path_id = g_recorded_paths.building_path_at(src->id, i);
-        if (!path_id) {
-            continue;
-        }
-        const auto &tiles = g_recorded_paths.tiles(path_id);
-        if (tiles.empty()) {
-            continue;
-        }
-        const color mask = path_colors[i];
-
-        tile2i start((int)tiles[0]);
-        if (start.valid()) {
-            vec2i pixel = g_camera.lookup_tile_to_pixel(start);
-            build_planner::draw_building_ghost(ctx, base_img + 3, pixel, mask);
-        }
-
-        for (size_t t = 1; t < tiles.size(); t++) {
-            tile2i from((int)tiles[t - 1]);
-            tile2i to((int)tiles[t]);
-            if (!from.valid() || !to.valid()) {
-                continue;
-            }
-            int img_index = 10;
-            switch (calc_general_direction(from, to)) {
-            case DIR_0_TOP_RIGHT:
-            case DIR_4_BOTTOM_LEFT:
-                img_index = 0;
-                break;
-            case DIR_2_BOTTOM_RIGHT:
-            case DIR_6_TOP_LEFT:
-                img_index = 1;
-                break;
-            default:
-                break;
-            }
-            vec2i pixel = g_camera.lookup_tile_to_pixel(to);
-            build_planner::draw_building_ghost(ctx, base_img + img_index, pixel, mask);
-        }
-    }
+    src->draw_usable_paths(ctx);
 }
 
 void screen_city_t::draw_figures(vec2i pixel, tile2i tile, painter &ctx, [[maybe_unused]] bool force) {

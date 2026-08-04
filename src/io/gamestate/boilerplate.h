@@ -35,6 +35,7 @@
 //  184 akhenaten: campaign_carry_monuments (Cleopatra monument carry CO1)
 //  185 akhenaten: (reserved / in-tree)
 //  186 akhenaten: labor STORAGE category priority (enhanced labor split LC4)
+//  188 akhenaten: recorded cart trails (pool + last-4 building rings)
 constexpr uint32_t latest_save_version = 188;
 
 vfs::path fullpath_saves(vfs::path filename);

@@ -109,7 +109,7 @@ void figure::move_to_next_tile() {
     map_figure_add();
     figure_combat_attack_figure_at(tile.grid_offset());
 
-    if (type == FIGURE_CART_PUSHER) {
+    if (params().record_path) {
         figure_recorded_path_append_tile(*this);
     }
 

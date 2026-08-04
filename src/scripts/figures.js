@@ -1018,6 +1018,7 @@ figure_market_buyer {
 	category: figure_category_citizen
 	max_damage : 10
 	terrain_usage : TERRAIN_USAGE_ROADS,
+	record_path : true
 }
 
 figure_delivery_boy {
@@ -1115,6 +1116,7 @@ figure_cartpusher {
 	category: figure_category_citizen
 	max_damage : 20
 	terrain_usage : TERRAIN_USAGE_ROADS,
+	record_path : true
 }
 
 figure_zookeeper {
