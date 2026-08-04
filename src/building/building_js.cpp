@@ -304,7 +304,7 @@ static void building_proto___property_setter(js_State *J) {
     if (!ok) {
         logs::error("building: JS write to unregistered property '%s' on building type %d "
                     "(add the field to ANK_CONFIG_PROPERTY(building, ...) or provide a get/set binding)",
-                    prop, (int)b->type);
+          prop.c_str(), (int)b->type);
     }
 }
 
