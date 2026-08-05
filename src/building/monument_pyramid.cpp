@@ -1533,8 +1533,11 @@ bool building_stepped_pyramid::draw_ornaments_and_animations_hight_impl(painter 
     // Last schedule index = RESOURCE_NONE terminal (stepped S24/M32/L36; true adds polish first).
     const int terminal_phase = phases() - 1;
 
-    auto fill_tiles_height = [](painter &ctx, tile2i tile, int img) {
-        auto image = image_get(img);
+    auto fill_tiles_height = [](painter & /*ctx*/, tile2i tile, int img) {
+        const image_t *image = image_get(img);
+        if (!image) {
+            return;
+        }
         int iso_size = image->isometric_size() - 1;
         grid_tiles tiles = map_grid_get_tiles(tile, tile.shifted(iso_size, iso_size));
         for (auto &t : tiles) {
@@ -1608,8 +1611,11 @@ bool building_stepped_pyramid::draw_completed_height_ornaments(painter &ctx, vec
     const int L = d.layer;
     const int nlayers = tiles_size.x / 4;
 
-    auto fill_tiles_height = [](painter &ctx, tile2i tile, int img) {
-        auto image = image_get(img);
+    auto fill_tiles_height = [](painter & /*ctx*/, tile2i tile, int img) {
+        const image_t *image = image_get(img);
+        if (!image) {
+            return;
+        }
         int iso_size = image->isometric_size() - 1;
         grid_tiles tiles = map_grid_get_tiles(tile, tile.shifted(iso_size, iso_size));
         for (auto &t : tiles) {

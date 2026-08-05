@@ -97,6 +97,9 @@ const image_t *painter::img_generic(int image_id, vec2i p, color color_mask, flo
     OZZY_PROFILER_FUNCTION();
 
     const image_t *img = image_get(image_id);
+    if (!img) {
+        return nullptr;
+    }
     vec2i offset{ 0, 0 };
     if (!!(flags & ImgFlag_InternalOffset)) {
         offset = img->animation.sprite_offset;
@@ -136,10 +139,12 @@ const image_t *painter::img_ornament(int image_id, int base_id, int x, int y, co
 
     const image_t *img = image_get(image_id);
     const image_t *base = image_get(base_id);
+    if (!img || !base) {
+        return nullptr;
+    }
     int ydiff = HALF_TILE_HEIGHT_PIXELS * (base->isometric_size() + 1);
     x += base->animation.sprite_offset.x;
     y += base->animation.sprite_offset.y - base->height + ydiff;
-    //    y += base->animation.sprite_y_offset - img->isometric_ydiff();
     draw_image(img, vec2i{ x, y }, color_mask, scale);
     return img;
 }
@@ -148,6 +153,9 @@ const image_t *painter::img_from_below(int image_id, int x, int y, color color_m
     OZZY_PROFILER_FUNCTION();
 
     const image_t *img = image_get(image_id);
+    if (!img) {
+        return nullptr;
+    }
     draw_image(img, vec2i{ x, y - img->height }, color_mask, scale);
     return img;
 }
@@ -218,6 +226,9 @@ const image_t *painter::isometric_from_drawtile_top(int image_id, vec2i pos, col
 
 const image_t* painter::img_isometric(int image_id, vec2i p, color color_mask, float scale, ImgFlags flags) {
     const image_t* img = image_get(image_id);
+    if (!img) {
+        return nullptr;
+    }
     const int ydiff = img->isometric_size() * HALF_TILE_HEIGHT_PIXELS;
     isometric_from_drawtile(image_id, p + vec2i{0, ydiff}, color_mask, flags);
     return isometric_from_drawtile_top(image_id, p, color_mask, flags);

@@ -666,8 +666,11 @@ bool building_mastaba::draw_ornaments_and_animations_hight_impl(painter &ctx, ve
         return lhs_offset.y < rhs_offset.y;
     });
 
-    auto fill_tiles_height = [] (painter &ctx, tile2i tile, int img) {
-        auto image = image_get(img);
+    auto fill_tiles_height = [](painter & /*ctx*/, tile2i tile, int img) {
+        const image_t *image = image_get(img);
+        if (!image) {
+            return;
+        }
         int iso_size = image->isometric_size() - 1;
         grid_tiles tiles = map_grid_get_tiles(tile, tile.shifted(iso_size, iso_size));
         for (auto &t : tiles) {

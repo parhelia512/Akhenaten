@@ -6,6 +6,7 @@
 #include "graphics/view/view.h"
 #include "building/monuments.h"
 #include "graphics/graphics.h"
+#include "graphics/image.h"
 #include "grid/building.h"
 #include "grid/figure.h"
 #include "grid/image.h"
@@ -199,7 +200,7 @@ void draw_isometrics_overlay_flat(vec2i pixel, tile2i tile, painter &ctx) {
             command.location = SOURCE_LOCATION;
 
             const image_t* img = image_get(command.image_id);
-            map_render_set(tile, img->isometric_top_height > 0 ? RENDER_TALL_TILE : 0);
+            map_render_set(tile, (img && img->isometric_top_height > 0) ? RENDER_TALL_TILE : 0);
 
         } else if (map_is_highlighted(tile)) {
             e_highligth_mode mode = map_is_highlighted(tile);
@@ -221,7 +222,7 @@ void draw_isometrics_overlay_flat(vec2i pixel, tile2i tile, painter &ctx) {
             command.location = SOURCE_LOCATION;
 
             const image_t* img = image_get(command.image_id);
-            map_render_set(tile, img->isometric_top_height > 0 ? RENDER_TALL_TILE : 0);
+            map_render_set(tile, (img && img->isometric_top_height > 0) ? RENDER_TALL_TILE : 0);
         }
     }
 
@@ -244,7 +245,7 @@ void draw_isometrics_overlay_height(vec2i pixel, tile2i point, painter &ctx) {
 
             int image_id = map_image_at(grid_offset);
             const image_t *img = image_get(image_id);
-            int offset_y = 15 * (img->width / 58) - 1;
+            int offset_y = image_iso_top_offset_y(img) - 1;
             command.image_id = image_id;
             command.pixel = pixel - vec2i(0, offset_y);
             command.use_sort_pixel = true;

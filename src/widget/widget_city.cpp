@@ -776,7 +776,7 @@ void screen_city_t::draw_isometric_nonterrain_height(vec2i pixel, tile2i tile, p
 
     int building_id = map_building_at(grid_offset);
 
-    color color_mask = force_mask;    
+    color color_mask = force_mask;
     bool deletion_tool = (g_city_planner.build_type == BUILDING_CLEAR_LAND && g_city_planner.end == tile);
     if (deletion_tool || map_property_is_deleted(tile) || drawing_building_as_deleted(building_id)) {
         color_mask = COLOR_MASK_RED;
@@ -820,7 +820,7 @@ void screen_city_t::draw_isometric_nonterrain_height(vec2i pixel, tile2i tile, p
             auto& command = ImageDraw::create_command(ctx, render_command_t::ert_drawtile_top);
             command.image_id = image_id;
             const image_t* img = image_get(image_id);
-            int offset_y = 15 * (img->width / 58);
+            int offset_y = image_iso_top_offset_y(img);
             command.pixel = pixel - vec2i{ 0, offset_y };
             command.mask = color_mask;
             command.use_sort_pixel = true;
@@ -834,7 +834,7 @@ void screen_city_t::draw_isometric_nonterrain_height(vec2i pixel, tile2i tile, p
         if (image_alt_id > 0 && image_alt_alpha > 0) {
             auto& command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_top);
             const image_t *img = image_get(image_alt_id);
-            int offset_y = 15 * (img->width / 58);
+            int offset_y = image_iso_top_offset_y(img);
             command.image_id = image_alt_id;
             command.pixel = pixel;
             command.mask = (0x00ffffff | (image_alt_alpha << 24));
@@ -883,14 +883,14 @@ void screen_city_t::draw_isometric_terrain_height(vec2i pixel, tile2i tile, pain
         int image_id = map_image_at(tile);
         auto& command = ImageDraw::create_command(ctx, render_command_t::ert_drawtile_top);
         const image_t *img = image_get(image_id);
-        int offset_y = 15 * (img->width / 58) - 1;
+        int offset_y = image_iso_top_offset_y(img) - 1;
         command.image_id = image_id;
         command.pixel = pixel - vec2i(0, offset_y );
         command.mask = color_mask;
         command.use_sort_pixel = true;
         command.sort_pixel = pixel;
         command.location = SOURCE_LOCATION;
-    } 
+    }
 
     {
         int image_alt_value = map_image_alt_at(tile);
@@ -900,7 +900,7 @@ void screen_city_t::draw_isometric_terrain_height(vec2i pixel, tile2i tile, pain
             auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_drawtile_top);
             command.image_id = image_alt_id;
             const image_t *img = image_get(image_alt_id);
-            int offset_y = 15 * (img->width / 58) - 1;
+            int offset_y = image_iso_top_offset_y(img) - 1;
             command.pixel = pixel - vec2i(0, offset_y);
             command.mask = (0x00ffffff | (image_alt_alpha << 24));
             command.flags = ImgFlag_Alpha;

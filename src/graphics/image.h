@@ -160,6 +160,14 @@ const image_t *image_letter(int letter_id);
 const image_t *image_get_enemy(int type, int id);
 const image_t *image_next_close_get(image_desc desc, bool &last, int &last_index);
 
+inline int image_safe_width(const image_t *img) { return img ? img->width : 0; }
+
+// Lift for isometric top sprites: SGX footprints are 58px wide (not TILE_WIDTH_PIXELS).
+inline int image_iso_top_offset_y(const image_t *img) {
+    constexpr int footprint_width = 58;
+    return HALF_TILE_HEIGHT_PIXELS * (image_safe_width(img) / footprint_width);
+}
+
 int image_copy_to_atlas(const image_t &img);
 
 inline color image_to_32_bit(uint16_t c) {

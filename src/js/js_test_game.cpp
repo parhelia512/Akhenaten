@@ -37,6 +37,7 @@
 #include "grid/building_tiles.h"
 #include "graphics/view/view.h"
 #include "graphics/view/zoom.h"
+#include "graphics/image.h"
 #include "figure/figure.h"
 #include "figure/figure_impl.h"
 #include "figuretype/figure_market_buyer.h"
@@ -2705,17 +2706,17 @@ static int __test_monument_add_burial_stock(int bid, int resource, int amount) {
 }
 ANK_FUNCTION_3(__test_monument_add_burial_stock);
 
-// Return the current resolved image id for a monument building (per phase + variant + camera).
 static int __test_building_current_image(int bid) {
     building *b = building_get(bid);
     auto m = b ? b->dcast_monument() : nullptr;
-    return m ? m->building_image_get() : 0;
+    if (!m) {
+        return 0;
+    }
+    const int id = m->building_image_get();
+    return (id > 0 && image_get(id)) ? id : 0;
 }
 ANK_FUNCTION_1(__test_building_current_image);
 
-// Center the camera on a building. For tall pyramids the on-screen mass sits well
-// above the footprint, so we aim the footprint below mid-viewport. Caller must
-// pump ≥1 frame after this before SCREENSHOT_DISPLAY (framebuffer is otherwise stale).
 static void __test_camera_center_building(int bid) {
     building *b = building_get(bid);
     if (!b || !b->is_valid()) {

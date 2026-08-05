@@ -81,13 +81,7 @@ void ImageDraw::execute_render_command(painter& ctx, const render_command_t& com
 
     case render_command_t::ert_drawtile_full: {
             img = ctx.isometric_from_drawtile(command.image_id, command.pixel, command.mask, command.flags);
-
-            if (!img) {
-                // Invalid/unloaded image id: skip rather than dereference a null
-                // image (unlike the other tile commands, this path reads img->width).
-                break;
-            }
-            int offset_y = 15 * (img->width / 58);
+            int offset_y = image_iso_top_offset_y(img);
             const vec2i pixel = command.pixel - vec2i{ 0, offset_y };
             ctx.isometric_from_drawtile_top(command.image_id, pixel, command.mask, command.flags);
         }
