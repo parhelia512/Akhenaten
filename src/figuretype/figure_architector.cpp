@@ -3,6 +3,7 @@
 #include "building/building.h"
 #include "city/city.h"
 #include "city/city_buildings.h"
+#include "city/city_recorded_paths.h"
 #include "core/calc.h"
 #include "core/log.h"
 #include "core/profiler.h"
@@ -129,7 +130,15 @@ void figure_architector::figure_action() {
         break;
 
     case ACTION_4_ENGINEER_RETURNING:
-        do_returnhome(TERRAIN_USAGE_ROADS, ACTION_2_ENGINEER_ENTERING_EXITING);
+        if (do_returnhome(TERRAIN_USAGE_ROADS, ACTION_2_ENGINEER_ENTERING_EXITING)) {
+            building *h = home();
+            if (h && h->params().flags.keeps_visitor_paths) {
+                building *main = h->main();
+                if (main) {
+                    g_recorded_paths.handoff_to_building(base, main->id);
+                }
+            }
+        }
         break;
 
     case ACTION_5_ENGINEER_GOING_TO_DAMAGE: {

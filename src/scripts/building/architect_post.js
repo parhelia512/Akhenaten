@@ -19,6 +19,7 @@ building_architect_post {
     laborers[5], fire_risk[0], damage_risk[0]
     flags {
         is_infrastructure: true
+        keeps_visitor_paths: true
     }
 }
 

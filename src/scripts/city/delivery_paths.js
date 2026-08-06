@@ -56,3 +56,8 @@ function building_mine_copper_draw_usable_paths(ev) {
 function building_mine_gems_draw_usable_paths(ev) {
     building_draw_usable_paths(ev)
 }
+
+[es=(building_architect_post, draw_usable_paths)]
+function building_architect_post_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
