@@ -65,19 +65,32 @@ int figure::get_carrying_amount() {
     return resource_amount_full;
 }
 
-static bool cartpusher_dest_keeps_visitor_paths(building *dest) {
-    return dest && dest->params().flags.keeps_visitor_paths;
+static bool building_keeps_visitor_paths(building *b) {
+    return b && b->params().flags.keeps_visitor_paths;
 }
 
 static void cartpusher_handoff_visitor_path(figure &f, building *dest) {
-    if (!f.trail_path_id || !cartpusher_dest_keeps_visitor_paths(dest)) {
+    if (!f.trail_path_id) {
         return;
     }
-    building *main = dest->main();
-    if (!main) {
-        return;
+
+    building *home = f.home();
+    building *home_main = home ? home->main() : nullptr;
+    building *dest_main = dest ? dest->main() : nullptr;
+    const bool home_keeps = building_keeps_visitor_paths(home_main);
+    const bool dest_keeps = building_keeps_visitor_paths(dest_main);
+
+    if (home_keeps && dest_keeps) {
+        const int copy = g_recorded_paths.duplicate(f.trail_path_id);
+        if (copy) {
+            g_recorded_paths.building_push(home_main->id, copy);
+        }
+        g_recorded_paths.handoff_to_building(f, dest_main->id);
+    } else if (dest_keeps) {
+        g_recorded_paths.handoff_to_building(f, dest_main->id);
+    } else if (home_keeps) {
+        g_recorded_paths.handoff_to_building(f, home_main->id);
     }
-    g_recorded_paths.handoff_to_building(f, main->id);
 }
 
 void figure_cartpusher::do_deliver(bool warehouseman, int action_done, int action_fail) {

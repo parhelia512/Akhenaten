@@ -68,6 +68,18 @@ const recorded_path_tiles_t &recorded_paths_t::tiles(int id) const {
     return slots[id].tiles;
 }
 
+int recorded_paths_t::duplicate(int id) {
+    if (id <= 0 || id >= RECORDED_PATH_POOL_SIZE || !slots[id].used) {
+        return 0;
+    }
+    const int copy = acquire();
+    if (!copy) {
+        return 0;
+    }
+    slots[copy].tiles = slots[id].tiles;
+    return copy;
+}
+
 void recorded_paths_t::building_push(building_id bid, int path_id) {
     if (bid <= 0 || bid >= MAX_BUILDINGS || path_id <= 0) {
         return;

@@ -31,6 +31,7 @@ struct recorded_paths_t {
     void clear_tiles(int id);
     void append(int id, int grid_offset);
     const recorded_path_tiles_t &tiles(int id) const;
+    int duplicate(int id);
 
     void building_push(building_id bid, int path_id);
     int building_path_at(building_id bid, int index) const; // 0 = newest

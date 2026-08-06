@@ -704,6 +704,7 @@ building_mine_copper {
   flags {
     is_extractor: true
     is_industry: true
+    keeps_visitor_paths: true
   }
   cost [ 50, 75, 100, 150, 300 ]
   desirability { value[-12], step[2], step_size[2], range[6] }
@@ -735,6 +736,7 @@ building_mine_gems {
   flags {
     is_extractor: true
     is_industry: true
+    keeps_visitor_paths: true
   }
   cost [ 50, 75, 100, 150, 300 ]
   desirability { value[-12], step[2], step_size[2], range[6] }
@@ -904,6 +906,7 @@ building_mine_gold {
   flags {
     is_extractor: true
     is_industry: true
+    keeps_visitor_paths: true
   }
   cost [ 50, 100, 150, 250, 400 ]
   desirability { value[-16], step[2], step_size[3], range[6] }
