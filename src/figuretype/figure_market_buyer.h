@@ -16,8 +16,6 @@ public:
     figure_market_buyer(figure *f) : figure_impl(f) {}
     virtual figure_market_buyer* dcast_market_buyer() override { return this; }
 
-    virtual void on_create() override;
-    virtual void before_poof() override;
     virtual void figure_before_action() override;
     virtual void figure_action() override;
     virtual e_overlay get_overlay() const override { return OVERLAY_BAZAAR_ACCESS; }

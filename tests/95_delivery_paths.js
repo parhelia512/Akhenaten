@@ -1,4 +1,4 @@
-// Recorded visitor paths: granary/lodge/palace keep last 4 handoff trails for hover UI.
+// Recorded visitor paths: granary/lodge/palace/bazaar keep last 4 handoff trails for hover UI.
 //
 // Markers:
 //   [test-marker] delivery_paths_granary_push_ok
@@ -6,6 +6,7 @@
 //   [test-marker] delivery_paths_evict_ok
 //   [test-marker] delivery_paths_lodge_ok
 //   [test-marker] delivery_paths_palace_ok
+//   [test-marker] delivery_paths_bazaar_ok
 //   [test-marker] delivery_paths_feature_ok
 
 function test95_push_path(bid, tile_x, tile_y) {
@@ -123,6 +124,20 @@ function run_test() {
     }
     __log_marker('delivery_paths_palace_ok')
 
+    var bazaar = __test_building_create(BUILDING_BAZAAR, cx + 18, cy)
+    if (!bazaar) {
+        __log_info_native('[test:95] bazaar create failed')
+        __test_signal_ready()
+        return
+    }
+    var bp = test95_push_path(bazaar, cx + 18, cy)
+    if (__test_building_recorded_path_at(bazaar, 0) != bp) {
+        __log_info_native('[test:95] bazaar should keep recorded path')
+        __test_signal_ready()
+        return
+    }
+    __log_marker('delivery_paths_bazaar_ok')
+
     if (!game_features.gameui_show_delivery_paths) {
         __log_info_native('[test:95] gameui_show_delivery_paths should default ON')
         __test_signal_ready()
@@ -146,5 +161,6 @@ function check_valid() {
         && __test_find_inlog('delivery_paths_evict_ok')
         && __test_find_inlog('delivery_paths_lodge_ok')
         && __test_find_inlog('delivery_paths_palace_ok')
+        && __test_find_inlog('delivery_paths_bazaar_ok')
         && __test_find_inlog('delivery_paths_feature_ok')
 }

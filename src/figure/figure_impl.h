@@ -33,7 +33,7 @@ public:
     virtual void figure_roaming_action();
     virtual bool window_info_background(object_info &ctx) { return false; }
     virtual void draw_main_sprite(painter &ctx, vec2i pixel, int highlight);
-    virtual void before_poof() {}
+    virtual void before_poof();
     virtual void poof();
     virtual e_overlay get_overlay() const { return OVERLAY_NONE; }
     virtual figure_sound_t get_sound_reaction(xstring key) const;

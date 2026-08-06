@@ -408,7 +408,6 @@ figure *building::create_cartpusher(e_resource resource_id, int quantity, e_figu
 
     cart->load_resource(resource_id, quantity);
     cart->set_destination(nullptr);
-    figure_recorded_path_acquire(cart->base);
 
     set_figure(slot, cart->id()); // warning: this overwrites any existing figure!
     if (!!game_features::gameplay_change_cart_speed_depends_quntity) {

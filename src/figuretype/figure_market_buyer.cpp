@@ -30,14 +30,6 @@
 
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(figure_market_buyer);
 
-void figure_market_buyer::on_create() {
-    figure_recorded_path_acquire(base);
-}
-
-void figure_market_buyer::before_poof() {
-    figure_recorded_path_release(base);
-}
-
 void figure_market_buyer::figure_before_action() {
     building *b = home();
     const bool in_buyer_slot = b->has_figure(BUILDING_SLOT_MARKET_BUYER, id())
@@ -99,6 +91,9 @@ void figure_market_buyer::figure_action() {
                     g_recorded_paths.handoff_to_building(base, main->id);
                 }
             }
+            if (!base.trail_path_id) {
+                figure_recorded_path_acquire(base);
+            }
             if (!took) {
                 advance_action(ACTION_146_MARKET_BUYER_RETURNING);
             }
@@ -107,6 +102,13 @@ void figure_market_buyer::figure_action() {
 
     case ACTION_146_MARKET_BUYER_RETURNING:
         if (base.do_returnhome()) {
+            building *h = home();
+            if (h && h->params().flags.keeps_visitor_paths) {
+                building *main = h->main();
+                if (main) {
+                    g_recorded_paths.handoff_to_building(base, main->id);
+                }
+            }
             apply_return_home_spawn_cooldown();
         }
         break;

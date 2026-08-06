@@ -45,7 +45,6 @@ public:
     } FIGURE_STATIC_DATA_T;
 
     virtual void figure_before_action() override;
-    virtual void before_poof() override;
     virtual void figure_action() override;
     virtual e_overlay get_overlay() const override { return OVERLAY_NONE; }
     virtual sound_key phrase_key() const override;

@@ -79,12 +79,20 @@ void building_draw_usable_paths(int bid) {
         if (!f || f->is_dead() || f->trail_path_id <= 0) {
             continue;
         }
+        bool linked = false;
         building *dest = f->destination();
-        if (!dest || !dest->is_valid()) {
-            continue;
+        if (dest && dest->is_valid()) {
+            building *dest_main = dest->main();
+            linked = dest_main && dest_main->id == mid;
         }
-        building *dest_main = dest->main();
-        if (!dest_main || dest_main->id != mid) {
+        if (!linked) {
+            building *home = f->home();
+            if (home && home->is_valid()) {
+                building *home_main = home->main();
+                linked = home_main && home_main->id == mid;
+            }
+        }
+        if (!linked) {
             continue;
         }
         draw_recorded_path_tiles(ctx, g_recorded_paths.tiles(f->trail_path_id), COLOR_MASK_NONE, base_img);

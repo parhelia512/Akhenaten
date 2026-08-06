@@ -477,10 +477,6 @@ void figure_cartpusher::figure_before_action() {
     }
 }
 
-void figure_cartpusher::before_poof() {
-    figure_recorded_path_release(base);
-}
-
 void figure_cartpusher::figure_action() {
     OZZY_PROFILER_FUNCTION();
 

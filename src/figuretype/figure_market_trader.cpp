@@ -2,6 +2,7 @@
 
 #include "building/building_bazaar.h"
 #include "building/building_house.h"
+#include "city/city_recorded_paths.h"
 #include "figuretype/figure_market_buyer.h"
 #include "figure/service.h"
 #include "js/js_game.h"
@@ -19,7 +20,15 @@ void figure_market_trader::figure_roaming_action() {
         break;
 
     case ACTION_126_MARKET_TRADER_RETURNING:
-        base.do_returnhome();
+        if (base.do_returnhome()) {
+            building *h = home();
+            if (h && h->params().flags.keeps_visitor_paths) {
+                building *main = h->main();
+                if (main) {
+                    g_recorded_paths.handoff_to_building(base, main->id);
+                }
+            }
+        }
         break;
 
     default:

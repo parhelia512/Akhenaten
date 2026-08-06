@@ -2,6 +2,7 @@
 
 #include "figure/figure.h"
 #include "city/city.h"
+#include "city/city_recorded_paths.h"
 #include "city/city_resource.h"
 #include "figure/figure_names.h"
 #include "figure/cart_images.h"
@@ -39,6 +40,13 @@ void figure_impl::acquire(e_figure_type e, figure &f) {
 
 void figure_impl::on_create() {
     assert(base.tile.x() < GRID_LENGTH && base.tile.y() < GRID_LENGTH);
+    if (current_params().record_path) {
+        figure_recorded_path_acquire(base);
+    }
+}
+
+void figure_impl::before_poof() {
+    figure_recorded_path_release(base);
 }
 
 void figure_impl::on_post_load() {

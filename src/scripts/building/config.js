@@ -225,6 +225,7 @@ building_bazaar {
 
   flags {
     is_food: true
+    keeps_visitor_paths: true
   }
 }
 

@@ -36,3 +36,8 @@ function building_town_palace_draw_usable_paths(ev) {
 function building_city_palace_draw_usable_paths(ev) {
     building_draw_usable_paths(ev)
 }
+
+[es=(building_bazaar, draw_usable_paths)]
+function building_bazaar_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}

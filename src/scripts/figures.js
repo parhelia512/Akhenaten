@@ -1912,6 +1912,7 @@ figure_market_trader = {
 	terrain_usage : TERRAIN_USAGE_ROADS
 	max_roam_length : 384
 	permission : epermission_market
+	record_path : true
 }
 
 figure_labor_seeker {
