@@ -29,6 +29,7 @@ void js_register_ui_element_checkbox(js_State *J) {
     def_accessor(J, ui::proxy_get_size, ui::proxy_set_size, "size");
     def_accessor(J, ui::proxy_get_enabled, ui::proxy_set_enabled, "enabled");
     def_accessor(J, ui::proxy_get_readonly, ui::proxy_set_readonly, "readonly");
+    def_accessor(J, ui::proxy_get_darkened, ui::proxy_set_darkened, "darkened");
     def_accessor(J, ui::proxy_get_font, ui::proxy_set_font, "font");
     def_accessor(J, ui::proxy_get_text_color, ui::proxy_set_text_color, "text_color");
     def_accessor(J, ui::proxy_get_selected, ui::proxy_set_selected, "selected");

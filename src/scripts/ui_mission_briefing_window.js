@@ -114,8 +114,9 @@ function mission_briefing_window_on_init(window) {
     var can_edit_options = !is_review && !game_mission_options_locked
     window.dec_difficulty.enabled = can_edit_options
     window.inc_difficulty.enabled = can_edit_options
-    window.ironwill_check.enabled = can_edit_options
+    window.ironwill_check.enabled = true
     window.ironwill_check.readonly = !can_edit_options
+    window.ironwill_check.darkened = can_edit_options ? 0 : 1
 
     var goal_tooltip_text = city.goal_tooltip()
     window.goal_immediate.enabled = !!goal_tooltip_text
