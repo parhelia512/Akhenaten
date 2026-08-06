@@ -55,6 +55,7 @@ building_food_mill {
   max_per_type : 800
   flags {
     is_food: true
+    keeps_visitor_paths: true
   }
 }
 

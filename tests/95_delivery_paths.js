@@ -1,10 +1,11 @@
-// Recorded visitor paths: granary/lodge keep last 4 handoff trails for hover UI.
+// Recorded visitor paths: granary/lodge/palace keep last 4 handoff trails for hover UI.
 //
 // Markers:
 //   [test-marker] delivery_paths_granary_push_ok
 //   [test-marker] delivery_paths_ring4_ok
 //   [test-marker] delivery_paths_evict_ok
 //   [test-marker] delivery_paths_lodge_ok
+//   [test-marker] delivery_paths_palace_ok
 //   [test-marker] delivery_paths_feature_ok
 
 function test95_push_path(bid, tile_x, tile_y) {
@@ -103,6 +104,25 @@ function run_test() {
     }
     __log_marker('delivery_paths_lodge_ok')
 
+    var palace = __test_building_create(BUILDING_VILLAGE_PALACE, cx + 14, cy)
+    if (!palace) {
+        __log_info_native('[test:95] village palace create failed')
+        __test_signal_ready()
+        return
+    }
+    var pp = test95_push_path(palace, cx + 14, cy)
+    if (__test_building_recorded_path_at(palace, 0) != pp) {
+        __log_info_native('[test:95] palace should keep recorded path')
+        __test_signal_ready()
+        return
+    }
+    if (__test_building_recorded_path_at(granary, 0) != p5) {
+        __log_info_native('[test:95] palace push must not clear granary ring')
+        __test_signal_ready()
+        return
+    }
+    __log_marker('delivery_paths_palace_ok')
+
     if (!game_features.gameui_show_delivery_paths) {
         __log_info_native('[test:95] gameui_show_delivery_paths should default ON')
         __test_signal_ready()
@@ -125,5 +145,6 @@ function check_valid() {
         && __test_find_inlog('delivery_paths_ring4_ok')
         && __test_find_inlog('delivery_paths_evict_ok')
         && __test_find_inlog('delivery_paths_lodge_ok')
+        && __test_find_inlog('delivery_paths_palace_ok')
         && __test_find_inlog('delivery_paths_feature_ok')
 }

@@ -93,9 +93,7 @@ void figure_market_buyer::figure_action() {
             } else {
                 took = take_food_from_storage(home(), destination());
             }
-            if (took && dest && base.trail_path_id
-                && (dest->type == BUILDING_GRANARY || dest->type == BUILDING_GRANARY_UP
-                    || dest->type == BUILDING_FOOD_MILL || dest->dcast_granary())) {
+            if (took && dest && base.trail_path_id && dest->params().flags.keeps_visitor_paths) {
                 building *main = dest->main();
                 if (main) {
                     g_recorded_paths.handoff_to_building(base, main->id);

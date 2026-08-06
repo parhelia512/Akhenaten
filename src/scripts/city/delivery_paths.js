@@ -21,3 +21,18 @@ function building_hunting_lodge_draw_usable_paths(ev) {
 function building_food_mill_draw_usable_paths(ev) {
     building_draw_usable_paths(ev)
 }
+
+[es=(building_village_palace, draw_usable_paths)]
+function building_village_palace_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
+
+[es=(building_town_palace, draw_usable_paths)]
+function building_town_palace_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
+
+[es=(building_city_palace, draw_usable_paths)]
+function building_city_palace_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}

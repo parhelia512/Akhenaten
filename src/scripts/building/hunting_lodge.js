@@ -34,6 +34,7 @@ building_hunting_lodge {
     hunter_type : FIGURE_NONE
     flags {
         is_food: true
+        keeps_visitor_paths: true
     }
 }
 

@@ -66,12 +66,7 @@ int figure::get_carrying_amount() {
 }
 
 static bool cartpusher_dest_keeps_visitor_paths(building *dest) {
-    if (!dest) {
-        return false;
-    }
-    const e_building_type dt = dest->type;
-    return dt == BUILDING_GRANARY || dt == BUILDING_GRANARY_UP || dt == BUILDING_FOOD_MILL
-        || dest->dcast_granary();
+    return dest && dest->params().flags.keeps_visitor_paths;
 }
 
 static void cartpusher_handoff_visitor_path(figure &f, building *dest) {
@@ -560,7 +555,7 @@ void figure_cartpusher::figure_action() {
         } else if (do_returnhome(TERRAIN_USAGE_ROADS)) {
             // Arrived home (action_state becomes -1 ? dead next tick). Handoff lodge trail now ?
             // action_perform kills via set_state(DEAD) without calling before_poof/poof().
-            if (b->type == BUILDING_HUNTING_LODGE) {
+            if (b->params().flags.keeps_visitor_paths) {
                 g_recorded_paths.handoff_to_building(base, b->main()->id);
             }
         }
