@@ -74,7 +74,7 @@ struct skyline_node {
     int x, y, width;
 };
 
-bool g_preview = true;
+bool g_preview = false;
 bool g_handler_registered = false;
 bool g_page_linear = false;
 bool g_page_alloc_failed = false;
@@ -760,10 +760,12 @@ declare_console_command_p(residency_atlas) {
         int size = 0;
         is >> size;
         res_atlas::enable(size);
-        os << "residency_atlas: recording on" << std::endl;
+        res_atlas::set_preview(true);
+        os << "residency_atlas: recording on, preview on" << std::endl;
     } else if (sub == "off") {
         res_atlas::disable();
-        os << "residency_atlas: recording off, redirect off" << std::endl;
+        res_atlas::set_preview(false);
+        os << "residency_atlas: recording off, redirect off, preview off" << std::endl;
     } else if (sub == "reset") {
         res_atlas::reset();
         os << "residency_atlas: reset" << std::endl;
