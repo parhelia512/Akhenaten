@@ -74,7 +74,7 @@ max_hyena_strength_tile map_hyena_strength_get_max(tile2i tile, int radius) {
 
 void map_hyena_strength_update() {
     map_hyena_strength_clear();
-    
+
     for (int i = 1; i < MAX_FORMATIONS; i++) {
         formation *m = formation_get(i);
         if (m->in_use && m->is_herd && m->max_figures > 0 && m->figure_type == FIGURE_HYENA) {
