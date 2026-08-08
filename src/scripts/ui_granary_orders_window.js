@@ -63,7 +63,7 @@ granary_orders_window {
         title        : text({pos[0, 12], size[px(28), 0], text:{group:98, id:5}, font : FONT_LARGE_BLACK_ON_LIGHT, align:"center"})
         goods_list   : scrollable_list({
             pos[16, 42]
-            size[27, 11]
+            size[27, 10]
             view_items: 8
             buttons_size_y: 20
             buttons_margin_x: 0
