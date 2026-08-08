@@ -159,8 +159,6 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `114_bridge_editor_allow_dump.js` | UB1/BR1 canary: Bridges/Alexandria Bridge ON; Nubt/Perwadjyt OFF; Nekhen ON (skip `--no-resource`). Table: [`docs/bridge_editor_allow_triage.md`](../docs/bridge_editor_allow_triage.md) |
 | `115_bridge_menu_smoke.js` | BR2: Perwadjyt Low Bridge locked→`use_building` unlock; Bridges.map day-0 ON (else Nekhen hermetic fallback) |
 | `116_canal_shore_refresh.js` | IR3a: adding WATER next to existing canal restamps neighbor canal image |
-| `110_sun_temple_place.js` | Sun Temple (C8): place with 220 sandstone, reject without stock / second unfinished |
-| `117_sun_temple_pipeline.js` | Sun Temple (C8.6): timber→carve→+160→congrats, stockpile block, rating 13, saveload |
 | `77_brick_wall_placement.js` | Brick wall L-drag; material; clear+undo; mud↔brick overwrite no-op |
 | `76_invasion_auto_resolve.js` | Enhanced auto-resolve invasions (AC*): freeze/pending, lose/win KR, queue timer, flag OFF, natives out, Pharaoh, queue full, save/load, chain spawn |
 | `77_bazaar_multi_buyer.js` | Multi-buyer bazaar (BB*): complementary/fallback/demand freeze/OFF slot1; slots; -3 |
