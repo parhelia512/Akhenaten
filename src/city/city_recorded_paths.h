@@ -19,6 +19,7 @@ using building_path_ring_t = circular_buffer<uint16_t, BUILDING_RECORDED_PATHS_P
 struct recorded_paths_t {
     struct slot_t {
         bool used = false;
+        uint16_t figure_type = 0;
         recorded_path_tiles_t tiles;
     };
 
@@ -31,6 +32,7 @@ struct recorded_paths_t {
     void clear_tiles(int id);
     void append(int id, int grid_offset);
     const recorded_path_tiles_t &tiles(int id) const;
+    uint16_t figure_type(int id) const;
     int duplicate(int id);
 
     void building_push(building_id bid, int path_id);

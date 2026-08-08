@@ -1,6 +1,7 @@
 #include "city/city_recorded_paths.h"
 
 #include "building/building.h"
+#include "building/building_bazaar.h"
 #include "building/construction/build_planner.h"
 #include "city/city_figures.h"
 #include "core/bstring.h"
@@ -8,6 +9,7 @@
 #include "core/profiler.h"
 #include "core/variant.h"
 #include "figure/figure.h"
+#include "figure/figure_type.h"
 #include "game/game.h"
 #include "graphics/color.h"
 #include "graphics/image.h"
@@ -15,15 +17,21 @@
 #include "graphics/view/view.h"
 #include "js/js_game.h"
 
-static void draw_recorded_path_tiles(painter &ctx, const recorded_path_tiles_t &tiles, color mask, int base_img) {
+namespace {
+
+constexpr int k_path_dot_img_offset = 3;
+constexpr int k_buyer_path_x_offset = 5;
+
+static void draw_recorded_path_tiles(painter &ctx, const recorded_path_tiles_t &tiles, color mask, int base_img,
+                                     vec2i pixel_offset = {0, 0}) {
     if (tiles.empty()) {
         return;
     }
 
     tile2i start((int)tiles[0]);
     if (start.valid()) {
-        vec2i pixel = g_camera.lookup_tile_to_pixel(start);
-        build_planner::draw_building_ghost(ctx, base_img + 3, pixel, mask);
+        vec2i pixel = g_camera.lookup_tile_to_pixel(start) + pixel_offset;
+        build_planner::draw_building_ghost(ctx, base_img + k_path_dot_img_offset, pixel, mask);
     }
 
     for (size_t t = 1; t < tiles.size(); t++) {
@@ -45,10 +53,39 @@ static void draw_recorded_path_tiles(painter &ctx, const recorded_path_tiles_t &
         default:
             break;
         }
-        vec2i pixel = g_camera.lookup_tile_to_pixel(to);
+        vec2i pixel = g_camera.lookup_tile_to_pixel(to) + pixel_offset;
         build_planner::draw_building_ghost(ctx, base_img + img_index, pixel, mask);
     }
 }
+
+static void draw_recorded_path_dots(painter &ctx, const recorded_path_tiles_t &tiles, color mask, int base_img,
+                                    vec2i pixel_offset = {0, 0}) {
+    const int dot_img = base_img + k_path_dot_img_offset;
+    for (size_t t = 0; t < tiles.size(); t++) {
+        tile2i tile((int)tiles[t]);
+        if (!tile.valid()) {
+            continue;
+        }
+        vec2i pixel = g_camera.lookup_tile_to_pixel(tile) + pixel_offset;
+        build_planner::draw_building_ghost(ctx, dot_img, pixel, mask);
+    }
+}
+
+static void draw_bazaar_path(painter &ctx, int path_id, int base_img, e_figure_type ftype) {
+    if (!path_id) {
+        return;
+    }
+    const auto &tiles = g_recorded_paths.tiles(path_id);
+    if (ftype == FIGURE_MARKET_BUYER) {
+        draw_recorded_path_dots(ctx, tiles, COLOR_MASK_RED, base_img, {k_buyer_path_x_offset, 0});
+    } else if (ftype == FIGURE_MARKET_TRADER) {
+        draw_recorded_path_dots(ctx, tiles, COLOR_MASK_GREEN, base_img);
+    } else {
+        draw_recorded_path_tiles(ctx, tiles, COLOR_MASK_AMBER, base_img);
+    }
+}
+
+} // namespace
 
 void building_draw_usable_paths(int bid) {
     building *b = building_get(bid);
@@ -57,6 +94,7 @@ void building_draw_usable_paths(int bid) {
     }
     building *main = b->main();
     const int mid = main ? main->id : bid;
+    const bool is_bazaar = main && main->dcast_bazaar();
 
     static const color path_colors[BUILDING_RECORDED_PATHS] = {
         COLOR_MASK_AMBER,
@@ -72,7 +110,11 @@ void building_draw_usable_paths(int bid) {
         if (!path_id) {
             continue;
         }
-        draw_recorded_path_tiles(ctx, g_recorded_paths.tiles(path_id), path_colors[i], base_img);
+        if (is_bazaar) {
+            draw_bazaar_path(ctx, path_id, base_img, (e_figure_type)g_recorded_paths.figure_type(path_id));
+        } else {
+            draw_recorded_path_tiles(ctx, g_recorded_paths.tiles(path_id), path_colors[i], base_img);
+        }
     }
 
     for (figure *f : map_figures()) {
@@ -95,7 +137,11 @@ void building_draw_usable_paths(int bid) {
         if (!linked) {
             continue;
         }
-        draw_recorded_path_tiles(ctx, g_recorded_paths.tiles(f->trail_path_id), COLOR_MASK_NONE, base_img);
+        if (is_bazaar) {
+            draw_bazaar_path(ctx, f->trail_path_id, base_img, f->type);
+        } else {
+            draw_recorded_path_tiles(ctx, g_recorded_paths.tiles(f->trail_path_id), COLOR_MASK_NONE, base_img);
+        }
     }
 }
 
