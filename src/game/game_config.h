@@ -185,6 +185,8 @@ namespace game_features {
     extern game_feature gameplay_enhanced_walker_move_boost;
     extern game_feature gameplay_enhanced_festival_calendar;
     extern game_feature gameplay_enhanced_local_cults;
+    extern game_feature graphics_atlas_max_sprite_width;
+    extern game_feature graphics_atlas_page_size;
 
     xspan<game_feature*> all();
     game_feature* find(const xstring& name);

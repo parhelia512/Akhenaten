@@ -26,6 +26,7 @@
 #include "widget/debug_console.h"
 #include "graphics/imagepak_holder.h"
 #include "graphics/image.h"
+#include "graphics/residency_atlas.h"
 #include "sound/sound.h"
 #include "scenario/scenario.h"
 #include "core/cstring.h"
@@ -561,6 +562,11 @@ static void handle_event(CoreEvent* event, bool& active, bool& quit) {
     case SDL_FINGERMOTION:
     case SDL_FINGERUP:
         g_app.handle_touch_event(sdl_event);
+        break;
+
+    case SDL_RENDER_TARGETS_RESET:
+    case SDL_RENDER_DEVICE_RESET:
+        res_atlas::invalidate();
         break;
 
     case SDL_QUIT:

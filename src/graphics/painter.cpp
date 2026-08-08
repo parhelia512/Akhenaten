@@ -241,10 +241,6 @@ void painter::draw_impl(SDL_Texture *texture, vec2i pos, vec2i offset, vec2i siz
         return;
     }
 
-    // Record the full (unclipped) source region for the add-only residency-atlas
-    // debug tool (no-op unless enabled via the `residency_atlas` console command).
-    res_atlas::on_draw(texture, offset, size);
-
     if (!color) {
         color = COLOR_MASK_NONE;
     }
@@ -257,16 +253,26 @@ void painter::draw_impl(SDL_Texture *texture, vec2i pos, vec2i offset, vec2i siz
         DOWNSCALED_CITY = true;
     }
 
-    g_render.set_texture_scale_mode(texture, overall_scale_factor, force_linear);
+    const bool want_linear = force_linear || overall_scale_factor < 1.0f;
+    SDL_Texture *draw_tex = nullptr;
+    SDL_Rect texture_coords;
+    const bool found = res_atlas::enabled()
+                       && res_atlas::resolve(texture, offset, size, want_linear, draw_tex, texture_coords);
+    const bool resident = found && res_atlas::render_enabled();
+    if (!resident) {
+        draw_tex = texture;
+        texture_coords = SDL_Rect{offset.x, offset.y, size.x, size.y};
+        g_render.set_texture_scale_mode(texture, overall_scale_factor, force_linear);
+    }
 
-    SDL_SetTextureColorMod(texture,
+    SDL_SetTextureColorMod(draw_tex,
                            (color & COLOR_CHANNEL_RED) >> COLOR_BITSHIFT_RED,
                            (color & COLOR_CHANNEL_GREEN) >> COLOR_BITSHIFT_GREEN,
                            (color & COLOR_CHANNEL_BLUE) >> COLOR_BITSHIFT_BLUE);
-    SDL_SetTextureAlphaMod(texture, (color & COLOR_CHANNEL_ALPHA) >> COLOR_BITSHIFT_ALPHA);
+    SDL_SetTextureAlphaMod(draw_tex, (color & COLOR_CHANNEL_ALPHA) >> COLOR_BITSHIFT_ALPHA);
 
     const bool alpha = !!(flags & ImgFlag_Alpha);
-    SDL_SetTextureBlendMode(texture, alpha ? SDL_BLENDMODE_BLEND : (SDL_BlendMode)g_render.premult_alpha());
+    SDL_SetTextureBlendMode(draw_tex, alpha ? SDL_BLENDMODE_BLEND : (SDL_BlendMode)g_render.premult_alpha());
 
     // uncomment here if you want save something from atlases
     int k = 0;
@@ -274,14 +280,8 @@ void painter::draw_impl(SDL_Texture *texture, vec2i pos, vec2i offset, vec2i siz
         char filename[32] = {0};
         static int index = 0;
         sprintf(filename, "%u_img.bmp", index);
-        g_render.save_texture_to_file(filename, texture);
+        g_render.save_texture_to_file(filename, draw_tex);
     }
-
-    float texture_coord_correction = 0;
-    SDL_Rect texture_coords = {static_cast<int>(offset.x + texture_coord_correction),
-                               static_cast<int>(offset.y + texture_coord_correction),
-                               static_cast<int>(size.x - texture_coord_correction),
-                               static_cast<int>(size.y - texture_coord_correction)};
 
     SDL_FRect screen_coords;
     if (DOWNSCALED_CITY) {
@@ -367,9 +367,9 @@ void painter::draw_impl(SDL_Texture *texture, vec2i pos, vec2i offset, vec2i siz
     }
 
     if (!!(flags & ImgFlag_Mirrored)) {
-        SDL_RenderCopyExF(this->renderer, texture, &texture_coords, &screen_coords, angle, nullptr, SDL_FLIP_HORIZONTAL);
+        SDL_RenderCopyExF(this->renderer, draw_tex, &texture_coords, &screen_coords, angle, nullptr, SDL_FLIP_HORIZONTAL);
     } else {
-        SDL_RenderCopyExF(this->renderer, texture, &texture_coords, &screen_coords, angle, nullptr, SDL_FLIP_NONE);
+        SDL_RenderCopyExF(this->renderer, draw_tex, &texture_coords, &screen_coords, angle, nullptr, SDL_FLIP_NONE);
     }
 }
 

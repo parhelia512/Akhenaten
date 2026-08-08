@@ -7,6 +7,7 @@
 #include "platform/platform.h"
 #include "platform/screen.h"
 #include "graphics/image_groups.h"
+#include "graphics/residency_atlas.h"
 #include "graphics/view/view.h"
 #include "game/game.h"
 #include "input/cursor.h"
@@ -770,6 +771,8 @@ SDL_Texture* graphics_renderer_interface::create_texture_from_buffer(color* p_da
     SDL_FreeSurface(surface);
 #endif
 
+    res_atlas::register_source(texture);
+
     return texture;
 }
 
@@ -1047,6 +1050,8 @@ static void destroy_render_texture(void) {
 int platform_renderer_create_render_texture(int width, int height) {
     auto &data = g_renderer_data;
     destroy_render_texture();
+
+    res_atlas::invalidate();
 
     if (data.filter_texture) {
         SDL_DestroyTexture(data.filter_texture);

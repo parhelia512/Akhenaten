@@ -14,6 +14,7 @@
 #include "graphics/text.h"
 #include "graphics/screen.h"
 #include "graphics/image.h"
+#include "graphics/residency_atlas.h"
 #include "content/zipreader.hpp"
 
 #include "game/game.h"
@@ -409,12 +410,13 @@ span_const<uint16_t> imagepak::image_ids() {
 
 void imagepak::cleanup_and_destroy() {
     for (int i = 0; i < atlas_pages.size(); ++i) {
-        auto atlas_data = atlas_pages.at(i);
+        auto &atlas_data = atlas_pages.at(i);
         if (atlas_data.temp.pixel_buffer != nullptr)
             delete atlas_data.temp.pixel_buffer;
 
         atlas_data.temp.pixel_buffer = nullptr;
         if (atlas_data.texture != nullptr) {
+            res_atlas::forget_source(atlas_data.texture);
             SDL_DestroyTexture(atlas_data.texture);
         }
         atlas_data.texture = nullptr;
