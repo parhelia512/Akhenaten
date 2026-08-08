@@ -269,7 +269,7 @@ void config_show_debug_render_properties(bool header) {
     }
 
     xstring current_name = debug_render_mode_name();
-    svector<xstring, e_debug_render_size + 16> mode_names;
+    hvector<xstring, 16> mode_names;
     auto add_mode = [&](const xstring &name) {
         if (name.empty()) {
             return;
