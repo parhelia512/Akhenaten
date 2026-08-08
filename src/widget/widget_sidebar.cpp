@@ -117,7 +117,7 @@ void ui::sidebar_window_expanded_t::ui_draw_foreground(UiFlags flags) {
     ui.pos.x = x_offset;
 
     const bool is_disabled = !(g_window_manager.window_is("window_city") || g_window_manager.window_is("build_menu_widget"));
-    const UiFlags wflags = is_disabled ? UiFlags_Darkened : UiFlags_None;
+    const UiFlags wflags = is_disabled ? UiFlags_Readonly : UiFlags_None;
 
     ui.begin_widget(pos);
     widget_minimap_draw({ x_offset + 12, MINIMAP_Y_OFFSET }, 0);
@@ -191,7 +191,7 @@ void ui::sidebar_window_collapsed_t::ui_draw_foreground(UiFlags flags) {
     }
 
     const bool is_disabled = !(g_window_manager.window_is("window_city") || g_window_manager.window_is("build_menu_widget"));
-    const UiFlags wflags = is_disabled ? UiFlags_Darkened : UiFlags_None;
+    const UiFlags wflags = is_disabled ? UiFlags_Readonly : UiFlags_None;
 
     ui.begin_widget(pos);
     ui.draw(wflags);

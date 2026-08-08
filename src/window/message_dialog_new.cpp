@@ -30,7 +30,9 @@
 #include "graphics/screen.h"
 #include "content/vfs.h"
 #include "input/input.h"
+#include "input/mouse.h"
 #include "input/scroll.h"
+#include "graphics/elements/ui.h"
 #include "io/gamefiles/lang.h"
 #include "scenario/scenario.h"
 #include "scenario/scenario_event_manager.h"
@@ -385,7 +387,7 @@ void ui::message_dialog_base::draw_content(const lang_message& msg) {
     } else {
         ui["content_text"] = text;
     }
-    
+
     graphics_reset_clip_rectangle();
 }
 
@@ -407,6 +409,8 @@ int ui::message_dialog_base::draw_background(UiFlags flags) {
 
     if (background_callback) {
         background_callback();
+        // City/sidebar draw registers HUD buttons; drop them so only the dialog is interactive.
+        ui::clear_active_elements();
     } else {
         window_draw_underlying_window(0);
     }
@@ -460,7 +464,9 @@ int ui::message_dialog_base::ui_handle_mouse(const mouse *m) {
         return 1;
     }
 
-    return handled ? 1 : 0;
+    mouse::ref().reset_up_state();
+    mouse::ref().reset_scroll();
+    return 1;
 }
 
 int ui::message_dialog_base::handle_mouse(const mouse *m) {

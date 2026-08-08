@@ -32,17 +32,18 @@ namespace ui {
     struct message_dialog_god;
     struct message_dialog_image;
     struct message_dialog_troop_request;
-    
+
     // Base class with common functionality
     struct message_dialog_base : public autoconfig_window {
         message_dialog_base(pcstr config_name);
-        
+
         virtual int handle_mouse(const mouse *m) override;
         virtual int get_tooltip_text() override { return 0; }
         virtual void draw_foreground(UiFlags flags) override;
         virtual int draw_background(UiFlags flags) override;
         virtual void ui_draw_foreground(UiFlags flags) override {}
         virtual int ui_handle_mouse(const mouse *m) override;
+        virtual bool is_modal() const override { return true; }
         virtual void init() override;
 
         void show(xstring text_id, int message_id, void (*background_callback)(void));

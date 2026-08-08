@@ -1724,6 +1724,9 @@ void ui::eimage_button::draw(UiFlags gflags) {
     flags |= (readonly ? UiFlags_Readonly : UiFlags_None);
     flags |= (!!(darkened & UiFlags_Grayscale) ? UiFlags_Grayscale : UiFlags_None);
     flags |= (composite ? UiFlags_Composite : UiFlags_None);
+    if (darkened == 1 || !!(darkened & UiFlags_Darkened)) {
+        flags |= UiFlags_Darkened;
+    }
 
     image_button* btn = nullptr;
     if (resolved_image_id >= 0) {
@@ -1734,7 +1737,7 @@ void ui::eimage_button::draw(UiFlags gflags) {
         tsize = size;
     } else if (icon_texture) {
         int icon_draw_flags = ImgFlag_Alpha;
-        if (!!(darkened & UiFlags_Grayscale)) {
+        if (!!(flags & UiFlags_Grayscale)) {
             icon_draw_flags |= ImgFlag_Grayscale;
         }
         btn = &ui::img_button({0, 0}, pos, size, offsets, flags);
@@ -1775,13 +1778,13 @@ void ui::eimage_button::draw(UiFlags gflags) {
              ImgFlagsTag{(hov && !bd && !readonly) ? ImgFlag_Alpha : ImgFlag_None});
     }
 
-    if (!!(darkened & UiFlags_Darkened)) {
+    if (!!(flags & UiFlags_Darkened)) {
         push(cmd_t::shade_rect, Pos{scr_pos}, Size{tsize}, ImageId{0x80});
         fire_ui_hover_edge(*this, false, _hover_prev);
         return;
     }
 
-    if (!!(darkened & UiFlags_Grayscale)) {
+    if (!!(flags & UiFlags_Grayscale)) {
         fire_ui_hover_edge(*this, false, _hover_prev);
         return;
     }
