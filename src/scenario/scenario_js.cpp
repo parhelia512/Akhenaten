@@ -13,6 +13,7 @@
 #include "scenario/criteria.h"
 
 #include "js/js_game.h"
+#include "core/variant.h"
 
 #include "core/profiler.h"
 #include <algorithm>
@@ -184,5 +185,29 @@ void __scenario_building_allow(int type, bool enabled) {
     scenario_building_allow((e_building_type)type, enabled);
 }
 ANK_FUNCTION_2(__scenario_building_allow)
+
+bvariant_map __scenario_vars() {
+    bvariant_map result;
+    g_scenario.vars.foreach_vars([&](xstring name, const setting_variant &var) {
+        switch (var.index()) {
+        case setting_bool:
+            result[name] = bvariant(std::get<bool>(var));
+            break;
+        case setting_float:
+            result[name] = bvariant(std::get<float>(var));
+            break;
+        case setting_vec2i:
+            result[name] = bvariant(std::get<vec2i>(var));
+            break;
+        case setting_string:
+            result[name] = bvariant(std::get<xstring>(var));
+            break;
+        default:
+            break;
+        }
+    });
+    return result;
+}
+ANK_FUNCTION(__scenario_vars)
 
 

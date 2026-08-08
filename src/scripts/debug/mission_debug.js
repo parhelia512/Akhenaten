@@ -122,3 +122,25 @@ function mission_debug_draw_properties_migration_caps(ev) {
     imgui.end_table()
     imgui.tree_pop()
 }
+
+[es=event_draw_debug_properties]
+function mission_debug_draw_properties_vars(ev) {
+    if (!imgui.tree_node_ex("Mission Variables")) {
+        return
+    }
+
+    var vars = __scenario_vars()
+    var names = Object.keys(vars)
+    if (names.length <= 0) {
+        imgui.tree_pop()
+        return
+    }
+
+    names.sort()
+    imgui.begin_table("MissionVars", 2, imgui.table_flags_debug_props())
+    for (var i = 0; i < names.length; i++) {
+        imgui.property_input(names[i], vars[names[i]])
+    }
+    imgui.end_table()
+    imgui.tree_pop()
+}
