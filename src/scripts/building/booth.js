@@ -24,6 +24,7 @@ building_booth {
     damage_risk[2]
     flags {
         is_entertainment: true
+        keeps_visitor_paths: true
     }
 }
 

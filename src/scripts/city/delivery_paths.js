@@ -66,3 +66,8 @@ function building_architect_post_draw_usable_paths(ev) {
 function building_water_supply_draw_usable_paths(ev) {
     building_draw_usable_paths(ev)
 }
+
+[es=(building_booth, draw_usable_paths)]
+function building_booth_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}

@@ -1868,6 +1868,7 @@ figure_juggler {
 	max_damage : 20
 	max_roam_length: 640
 	permission : epermission_entertainer  // roadblock option
+	record_path : true
 }
 
 figure_senet_player {

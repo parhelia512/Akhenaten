@@ -3,6 +3,7 @@
 #include "core/calc.h"
 #include "city/city_buildings.h"
 #include "city/city_figures.h"
+#include "city/city_recorded_paths.h"
 #include "building/building_entertainment.h"
 #include "grid/road_network.h"
 #include "grid/road_access.h"
@@ -224,7 +225,15 @@ void figure_entertainer::figure_action() {
         break;
 
     case ACTION_13_ENTERTAINER_RETURNING_EMPTY:
-        do_returnhome(TERRAIN_USAGE_ROADS);
+        if (do_returnhome(TERRAIN_USAGE_ROADS)) {
+            building *h = home();
+            if (h && h->params().flags.keeps_visitor_paths) {
+                building *main = h->main();
+                if (main) {
+                    g_recorded_paths.handoff_to_building(base, main->id);
+                }
+            }
+        }
         break;
     }
 }

@@ -390,10 +390,6 @@ void building_house::change_to(building &b, e_building_type new_type, bool force
         return;
     }
 
-    // Repair corrupted state: a 1x1 hut/cottage/apartment-tier type sitting on
-    // a 2x2 footprint without is_merged is invalid (older saves can carry this
-    // from a prior change_to that downgraded type without splitting). Split
-    // back into 4 individual tiles instead of repainting the bad state.
     const bool target_is_1x1_tier = (new_type >= BUILDING_HOUSE_CRUDE_HUT && new_type <= BUILDING_HOUSE_SPACIOUS_APARTMENT);
     if (target_is_1x1_tier && b.size == 2 && !d.is_merged) {
         split_size2(&b, new_type);
@@ -407,11 +403,7 @@ void building_house::change_to(building &b, e_building_type new_type, bool force
     int image_id = house_image_group<false>(house->house_level());
 
     const auto &house_params = get_house_params(new_type);
-    // Pick a random variant whose image actually exists. Some house tiers
-    // reference custom image packs (e.g. PACK_CUSTOM_HOUSE) that aren't
-    // always installed; missing packs make first_img() return garbage
-    // (0/1/65535), which then renders as a black/missing-texture tile.
-    // Probe up to N tries so the picker degrades gracefully.
+
     const auto &variants_data = house->is_merged() ? house_params.variants_merged.data : house_params.variants.data;
     if (!variants_data.empty()) {
         const size_t n = variants_data.size();
@@ -585,19 +577,19 @@ void building_house::merge() {
 e_house_progress building_house::check_requirements(house_demands* demands) {
     auto &d = runtime_data();
     const model_house& model = this->model();
-    
+
     // If house is unreachable beyond threshold, it should devolve
     if (d.unreachable_ticks >= model.unreachable_ticks_devolve_threshold) {
         return e_house_decay;
     }
-    
+
     // If house requires food and has been without food for too long, it should devolve
     if (model.food_types > 0 && model.days_without_food_devolve_threshold > 0) {
         if (d.days_without_food >= model.days_without_food_devolve_threshold) {
             return e_house_decay;
         }
     }
-    
+
     e_house_progress status = check_evolve_desirability();
     if (!has_required_goods_and_services(0, demands)) { // check if it will devolve to previous step
         status = e_house_decay;
@@ -617,7 +609,7 @@ e_house_progress building_house::check_requirements(house_demands* demands) {
                 status = has_required_goods_and_services(1, demands);
             }
         }
-        
+
         // House cannot evolve if it's been without food (only for houses that require food)
         if (model.food_types > 0 && d.days_without_food > 0) {
             status = e_house_none;
