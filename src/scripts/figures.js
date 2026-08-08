@@ -31,6 +31,7 @@ figure_fireman {
 	max_roam_length : 640
 	permission : epermission_maintenance
 	fire_detection_distance : 10
+	record_path : true
 }
 
 figure_water_carrier {

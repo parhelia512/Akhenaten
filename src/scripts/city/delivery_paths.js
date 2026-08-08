@@ -71,3 +71,8 @@ function building_water_supply_draw_usable_paths(ev) {
 function building_booth_draw_usable_paths(ev) {
     building_draw_usable_paths(ev)
 }
+
+[es=(building_firehouse, draw_usable_paths)]
+function building_firehouse_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}

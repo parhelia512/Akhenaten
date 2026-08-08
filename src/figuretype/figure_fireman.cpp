@@ -12,6 +12,7 @@
 #include "graphics/animation.h"
 #include "city/city_health.h"
 #include "city/city.h"
+#include "city/city_recorded_paths.h"
 #include "figure/service.h"
 #include "grid/building.h"
 #include "js/js_game.h"
@@ -101,7 +102,15 @@ void figure_fireman::figure_action() { // doubles as fireman! not as policeman!!
         break;
 
     case ACTION_73_FIREMAN_RETURNING:
-        do_returnhome(TERRAIN_USAGE_PREFER_ROADS);
+        if (do_returnhome(TERRAIN_USAGE_PREFER_ROADS)) {
+            building *h = home();
+            if (h && h->params().flags.keeps_visitor_paths) {
+                building *main = h->main();
+                if (main) {
+                    g_recorded_paths.handoff_to_building(base, main->id);
+                }
+            }
+        }
         break;
 
     case ACTION_71_FIREMAN_ENTERING_EXITING:
@@ -129,7 +138,7 @@ void figure_fireman::figure_action() { // doubles as fireman! not as policeman!!
                 base.set_destination(next_tile_b);
                 advance_action(ACTION_75_FIREMAN_AT_FIRE);
             }
-            
+
             if (!next_b || next_b->state == BUILDING_STATE_UNUSED || next_b->type != BUILDING_BURNING_RUIN) {
                 clear_ruin_destination();
                 bool has_fire_around = fight_fire();
@@ -244,7 +253,7 @@ bool figure_fireman::fight_fire() {
 int figure_fireman::provide_service() {
     building *firehouse_building = home();
     auto firehouse = firehouse_building ? firehouse_building->dcast_firehouse() : nullptr;
-    
+
     int min_happiness = 0;
     int result = figure_provide_service(tile(), &base, [&] (building *b, figure *f) {
         b = b->main();
@@ -254,7 +263,7 @@ int figure_fireman::provide_service() {
         if (house) {
             min_happiness = std::max<short>(house->runtime_data().house_happiness, min_happiness);
         }
-        
+
         // Update statistics in firehouse
         if (firehouse) {
             firehouse->runtime_data().buildings_served_this_month++;
@@ -271,7 +280,7 @@ figure_sound_t figure_fireman::get_sound_reaction(xstring key) const {
 void figure_fireman::update_animation() {
     figure_impl::update_animation();
 
-    switch (action_state()) {  
+    switch (action_state()) {
     case ACTION_75_FIREMAN_AT_FIRE:
         base.direction = base.attack_direction;
         image_set_animation(animkeys().fight_fire);

@@ -44,6 +44,7 @@ building_firehouse {
     damage_risk [0]
     flags {
         is_infrastructure: true
+        keeps_visitor_paths: true
     }
 }
 
