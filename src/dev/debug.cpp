@@ -65,22 +65,6 @@ static void debug_font_line(int* y, e_font font) {
     //    text_draw(font_test_str_extended, 5, *y, font, COLOR_MASK_NONE); *y += line_height;
 }
 
-void debug_font_test() {
-    ui::fill_rect(vec2i{0, 0}, vec2i{1600, 300}, COLOR_FONT_LIGHT_GRAY);
-    //    auto str = string_from_ascii(font_test_str, true);
-    int y = 10;
-    debug_font_line(&y, FONT_SMALL_PLAIN);
-    debug_font_line(&y, FONT_NORMAL_BLACK_ON_LIGHT);
-    debug_font_line(&y, FONT_NORMAL_WHITE_ON_DARK);
-    debug_font_line(&y, FONT_NORMAL_YELLOW);
-    debug_font_line(&y, FONT_NORMAL_BLUE);
-    debug_font_line(&y, FONT_LARGE_BLACK_ON_LIGHT);
-    debug_font_line(&y, FONT_LARGE_BLACK_ON_DARK);
-    debug_font_line(&y, FONT_SMALL_OUTLINED);
-    debug_font_line(&y, FONT_NORMAL_BLACK_ON_DARK);
-    debug_font_line(&y, FONT_SMALL_SHADED);
-}
-
 void debug_text(painter &ctx, pstr str, int x, int y, int indent, pcstr text, int value, color color, e_font font) {
     text_draw(ctx, (const uint8_t *)string_from_ascii(text), x, y, font, color);
     text_draw(ctx, (uint8_t*)bstring32(value).c_str(), x + indent, y, font, color);
