@@ -16,6 +16,7 @@ import gods
 import city
 import city_modules
 import terrain
+import image_context
 import routed_building
 import images
 import game_messages_en
