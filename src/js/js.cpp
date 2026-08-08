@@ -998,6 +998,7 @@ void js_reset_vm_state() {
     js_register_building_params(vm.J);
     js_register_imperial_visible_request(vm.J);
     js_register_house(vm.J);
+    js_register_enemy_army(vm.J);
     js_register_temple_complex_building(vm.J);
     js_register_storage_yard(vm.J);
     js_register_ui_objects(vm.J);
