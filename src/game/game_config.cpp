@@ -166,6 +166,7 @@ namespace game_features {
     game_feature gameplay_enhanced_walker_move_boost{ "gameplay_enhanced_walker_move_boost", "#TR_CONFIG_WALKER_MOVE_BOOST", false };
     game_feature gameplay_enhanced_festival_calendar{ "gameplay_enhanced_festival_calendar", "#TR_CONFIG_FESTIVAL_CALENDAR", false };
     game_feature gameplay_enhanced_local_cults{ "gameplay_enhanced_local_cults", "#TR_CONFIG_LOCAL_CULTS", false };
+    game_feature graphics_atlas_render{ "graphics_atlas_render", "", true };
     game_feature graphics_atlas_max_sprite_width{ "graphics_atlas_max_sprite_width", "", 512.0f };
     game_feature graphics_atlas_page_size{ "graphics_atlas_page_size", "", 8192.0f };
 

@@ -439,6 +439,10 @@ static void setup() {
     platform.append_startup_log("Startup: config refresh");
     config::refresh(js_vm_state());
 
+    if (!!game_features::graphics_atlas_render) {
+        res_atlas::set_render(true);
+    }
+
     if (platform.is_emscripten()) {
         game_features::gameopt_language = "en";
     } else if (!g_args.get_language().empty()) {
