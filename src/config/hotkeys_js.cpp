@@ -4,7 +4,6 @@
 #include "game/game_events.h"
 #include "js/js_events.h"
 #include "js/js_game.h"
-#include "window/hotkey_editor.h"
 #include "core/profiler.h"
 
 struct event_hotkey_editor_result {
@@ -15,8 +14,19 @@ struct event_hotkey_editor_result {
 };
 ANK_SCRIPT_EVENT(event_hotkey_editor_result, action, is_alt, key, modifiers)
 
-static void hotkey_editor_js_callback(int action, int index, e_key key, e_key_mode modifiers) {
-    events::emit(event_hotkey_editor_result{action, index, (int)key, (int)modifiers});
+struct event_hotkey_editor_key {
+    int key;
+    int modifiers;
+    int pressed;
+};
+ANK_SCRIPT_EVENT(event_hotkey_editor_key, key, modifiers, pressed)
+
+void hotkey_editor_notify_key_pressed(int key, int modifiers) {
+    events::emit(event_hotkey_editor_key{key, modifiers, 1});
+}
+
+void hotkey_editor_notify_key_released(int key, int modifiers) {
+    events::emit(event_hotkey_editor_key{key, modifiers, 0});
 }
 
 static bvariant_map hotkey_mapping_to_js(const hotkey_mapping *mapping) {
@@ -64,10 +74,5 @@ xstring __hotkey_key_display_name(int key, int modifiers) {
     return name ? xstring((pcstr)name) : xstring();
 }
 ANK_FUNCTION_2(__hotkey_key_display_name)
-
-void __hotkey_editor_show(int action, int is_alt) {
-    window_hotkey_editor_show(action, is_alt, hotkey_editor_js_callback);
-}
-ANK_FUNCTION_2(__hotkey_editor_show)
 
 e_hotkey_action_tokens_t ANK_CONFIG_ENUM(e_hotkey_action_tokens);

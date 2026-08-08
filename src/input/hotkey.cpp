@@ -10,7 +10,7 @@
 #include "game/game_events.h"
 #include "input/scroll.h"
 #include "widget/widget_top_menu_game.h"
-#include "window/hotkey_editor.h"
+#include "config/hotkeys.h"
 #include "window/popup_dialog.h"
 #include "game/game.h"
 #include "sound/sound.h"
@@ -370,7 +370,7 @@ void hotkey_reset_state(void) {
 void hotkey_key_pressed(int key, int modifiers, int repeat) {
     auto& data = g_hotkey_data;
     if (g_window_manager.window_is("window_hotkey_editor")) {
-        window_hotkey_editor_key_pressed(key, modifiers);
+        hotkey_editor_notify_key_pressed(key, modifiers);
         return;
     }
 
@@ -399,7 +399,7 @@ void hotkey_key_pressed(int key, int modifiers, int repeat) {
 void hotkey_key_released(int key, int modifiers) {
     auto& data = g_hotkey_data;
     if (g_window_manager.window_is("window_hotkey_editor")) {
-        window_hotkey_editor_key_released(key, modifiers);
+        hotkey_editor_notify_key_released(key, modifiers);
         return;
     }
 
