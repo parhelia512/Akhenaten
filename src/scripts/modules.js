@@ -7,6 +7,7 @@ import common
 import camera
 import game
 import game_speed
+import hotkey_actions
 import scenario
 import discord_presence
 import math

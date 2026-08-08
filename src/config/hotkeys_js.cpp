@@ -1,6 +1,8 @@
 #include "hotkeys.h"
 
 #include "input/keys.h"
+#include "input/hotkey.h"
+#include "core/app.h"
 #include "game/game_events.h"
 #include "js/js_events.h"
 #include "js/js_game.h"
@@ -20,6 +22,18 @@ struct event_hotkey_editor_key {
     int pressed;
 };
 ANK_SCRIPT_EVENT(event_hotkey_editor_key, key, modifiers, pressed)
+
+ANK_SCRIPT_EVENT(event_hotkey_fired, action)
+ANK_SCRIPT_EVENT(event_hotkey_overlay, value)
+ANK_SCRIPT_EVENT(event_toggle_overlay, value)
+ANK_SCRIPT_EVENT(event_toggle_flat_buildings, value)
+ANK_SCRIPT_EVENT(event_toggle_legion, value)
+ANK_SCRIPT_EVENT(event_editor_toggle_battle_info, value)
+ANK_SCRIPT_EVENT(event_debug_tile_change, value)
+ANK_SCRIPT_EVENT(event_debug_render_change, value)
+ANK_SCRIPT_EVENT(event_app_center_screen, value)
+ANK_SCRIPT_EVENT(event_app_screenshot, value)
+ANK_SCRIPT_EVENT(event_app_city_screenshot, value)
 
 void hotkey_editor_notify_key_pressed(int key, int modifiers) {
     events::emit(event_hotkey_editor_key{key, modifiers, 1});
