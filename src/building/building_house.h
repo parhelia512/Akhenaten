@@ -40,7 +40,7 @@ public:
         uint16_t inventory[8];
         uint16_t highest_population;
         uint16_t unreachable_ticks;
-        uint16_t last_update_day;
+        uint32_t last_update_day;
         building_id tax_collector_id;
         uint16_t population;
         int16_t tax_income_or_storage;
@@ -152,7 +152,7 @@ ANK_CONFIG_PROPERTY(building_house::runtime_data_t,
     magistrate, num_gods, dentist, apothecary, health, mortuary, physician,
     booth_juggler, bandstand_juggler, senet_player, zookeeper, criminal_active,
     no_space_to_expand, fancy_bazaar_access, worst_desirability_building_id,
-    frog_infest_days, evolve_text)
+    frog_infest_days, evolve_text, unreachable_ticks, days_without_food)
 
 // --- Individual housing tiers -------------------------------------------------
 // some info shared with vacant lot, so this is unique twice-config class

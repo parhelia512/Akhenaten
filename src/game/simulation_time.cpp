@@ -7,12 +7,12 @@
 
 e_month_tokens_t ANK_CONFIG_ENUM(e_month_tokens);
 
-void simulation_time_t::init(int year) {
+void simulation_time_t::init(int y) {
     tick = 0;
     day = 0;
     month = 0;
     total_days = 0;
-    year = year;
+    year = y;
 }
 
 int16_t simulation_time_t::years_since_start() const {

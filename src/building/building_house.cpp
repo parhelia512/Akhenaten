@@ -195,23 +195,15 @@ void building_house::bind_dynamic(io_buffer *iob, size_t version) {
     iob->bind_u8(d.days_without_food);
     iob->bind_u8(d.hsize);
     iob->bind_u16(d.unreachable_ticks);
-    iob->bind_u16(d.last_update_day);
+    iob->bind_u16(tmp);
     iob->bind_u8(d.drunkard_active);
     iob->bind_u8(d.nobles_with_bad_teeth);
     iob->bind_u8(d.toothache_probability);
     iob->bind_u8(d.fade_alpha);
     iob->bind_xstr<8>(d.image_key);
-    // Cleopatra Zoo house coverage — appended in the 186-byte house pad (save v174+).
-    if (version >= 174) {
-        iob->bind_u8(d.zookeeper);
-    } else {
-        d.zookeeper = 0;
-    }
-    if (version >= 181) {
-        iob->bind_u8(d.frog_infest_days);
-    } else {
-        d.frog_infest_days = 0;
-    }
+    iob->bind_u8(d.zookeeper);
+    iob->bind_u8(d.frog_infest_days);
+    iob->bind_u32(d.last_update_day);
 }
 
 int building_house::get_fire_risk(int value) const {
@@ -891,8 +883,8 @@ bool building_house::can_expand(int num_tiles) {
             if (!map_terrain_is(tile_offset, TERRAIN_NOT_CLEAR)) {
                 ok_tiles++;
                 continue;
-            } 
-            
+            }
+
             if (!map_terrain_is(tile_offset, TERRAIN_BUILDING)) {
                 continue;
             }
@@ -905,8 +897,8 @@ bool building_house::can_expand(int num_tiles) {
             if (other_house->id() == id()) {
                 ok_tiles++;
                 continue;
-            } 
-            
+            }
+
             if (absorbable(other_house)) {
                 ok_tiles++;
             }

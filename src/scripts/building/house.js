@@ -41,6 +41,8 @@ House.property.worst_desirability_building_id = { }
 House.property.fancy_bazaar_access = { }
 House.property.no_space_to_expand = { }
 House.property.evolve_text = { }
+House.property.unreachable_ticks = { }
+House.property.days_without_food = { }
 
 House.property.population_room = { get: function() { return this.__population_room() } }
 House.property.level = { get: function() { return this.__house_level() } }
