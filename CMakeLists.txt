@@ -758,6 +758,7 @@ file(GLOB WINDOW_FILES ${PROJECT_SOURCE_DIR}/src/window/*.cpp)
 file(GLOB WINDOW_EDITOR_FILES ${PROJECT_SOURCE_DIR}/src/window/editor/*.cpp)
 file(GLOB WINDOW_BUILDING_FILES ${PROJECT_SOURCE_DIR}/src/window/building/*.cpp)
 file(GLOB DEV_FILES ${PROJECT_SOURCE_DIR}/src/dev/*.cpp)
+file(GLOB DEBUG_FILES ${PROJECT_SOURCE_DIR}/src/debug/*.cpp)
 file(GLOB EDITOR_FILES ${PROJECT_SOURCE_DIR}/src/editor/*.cpp)
 file(GLOB TRANSLATION_FILES ${PROJECT_SOURCE_DIR}/src/translation/*.cpp)
 # imgui files from FetchContent (directly in project, not as separate library)
@@ -888,6 +889,7 @@ if(MSVC)
     source_group("window/building" FILES ${WINDOW_BUILDING_FILES})
     source_group("advisor" FILES ${ADVISOR_FILES})
     source_group("dev" FILES ${DEV_FILES})
+    source_group("debug" FILES ${DEBUG_FILES})
     source_group("editor" FILES ${EDITOR_FILES})
     source_group("translation" FILES ${TRANSLATION_FILES})
     source_group("io" FILES ${IO_FILES} {IO_HEADERS})
@@ -936,6 +938,7 @@ set(SOURCE_FILES
     ${WIDGET_FILES}
     ${WINDOW_FILES}
     ${DEV_FILES}
+    ${DEBUG_FILES}
     ${EDITOR_FILES}
     ${TRANSLATION_FILES}
     ${ADVISOR_FILES}

@@ -17,6 +17,7 @@
 | `game/` | Main game loop, resource type enums, config, simulation tick |
 | `empire/` | Empire cities, trade routes, caravans, ships |
 | `overlays/` | Map overlay rendering (desirability, crime, water, labor, etc.) |
+| `debug/` | Tile overlay / ImGui debug registration modules |
 | `js/` | MuJS VM integration, script loading, DAP debugger server |
 | `platform/` | Platform-specific init code (Android, PS Vita, Nintendo Switch) |
 | `events/` | Typed event bus infrastructure (`g_city_events`) |

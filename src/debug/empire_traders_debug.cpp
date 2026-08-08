@@ -1,4 +1,4 @@
-#include "empire_traders.h"
+#include "empire/empire_traders.h"
 
 #include "widget/debug_console.h"
 #include "imgui.h"

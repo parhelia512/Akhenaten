@@ -56,6 +56,7 @@ file(GLOB WINDOW_FILES ${SRC_ROOT}/window/*.cpp)
 file(GLOB WINDOW_EDITOR_FILES ${SRC_ROOT}/window/editor/*.cpp)
 file(GLOB WINDOW_BUILDING_FILES ${SRC_ROOT}/window/building/*.cpp)
 file(GLOB DEV_FILES ${SRC_ROOT}/dev/*.cpp)
+file(GLOB DEBUG_FILES ${SRC_ROOT}/debug/*.cpp)
 file(GLOB EDITOR_FILES ${SRC_ROOT}/editor/*.cpp)
 file(GLOB TRANSLATION_FILES ${SRC_ROOT}/translation/*.cpp)
 file(GLOB GRAPHICS_FILES ${SRC_ROOT}/graphics/*.cpp)
@@ -130,6 +131,7 @@ set(SOURCE_FILES
     ${WINDOW_EDITOR_FILES}
     ${WINDOW_BUILDING_FILES}
     ${DEV_FILES}
+    ${DEBUG_FILES}
     ${EDITOR_FILES}
     ${TRANSLATION_FILES}
     ${IO_FILES}
