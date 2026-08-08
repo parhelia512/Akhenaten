@@ -468,6 +468,7 @@ figure_birds_hunter {
 	attack_distance: 5
 	terrain_usage : TERRAIN_USAGE_ANIMAL
 	max_hunting_distance : 15
+	record_path : true
 }
 
 figure_hippo = {
@@ -566,6 +567,7 @@ figure_ostrich_hunter {
 	attack_distance: 5
 	terrain_usage : TERRAIN_USAGE_ANIMAL,
   	max_hunting_distance : 15
+	record_path : true
 }
 
 figure_hunter_arrow {
@@ -608,6 +610,7 @@ figure_antelope_hunter {
 	attack_distance: 5
 	terrain_usage : TERRAIN_USAGE_ANIMAL,
 	max_hunting_distance : 30,
+	record_path : true
 }
 
 figure_antelope_hunter_javelin = {

@@ -674,8 +674,9 @@ static void file_schema(e_file_format file_format, const int file_version) {
         }
         if (file_version > 187) {
             // recorded trails pool + per-building last-4 rings
-            // 512*(1+2+2+256*2) + 4000*4*2 = 264704 + 32000 = 296704
-            FILEIO.push_chunk(296704, true, "recorded_paths", iob_recorded_paths);
+            // slot: used+len+tiles[254]+figure_type+reserved = 515 (same as old used+len+tiles[256])
+            // 512*515 + 4000*4*2 = 263680 + 32000 = 295680
+            FILEIO.push_chunk(295680, true, "recorded_paths", iob_recorded_paths);
         }
 
         break;

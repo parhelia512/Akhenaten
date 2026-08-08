@@ -8,7 +8,7 @@
 #include <cstdint>
 
 constexpr int RECORDED_PATH_POOL_SIZE = 512;
-constexpr int RECORDED_PATH_MAX_TILES = 256;
+constexpr int RECORDED_PATH_MAX_TILES = 254;
 // circular_buffer 2nd param is pow2 exponent: 1<<2 = 4 slots
 constexpr int BUILDING_RECORDED_PATHS_POW2 = 2;
 constexpr int BUILDING_RECORDED_PATHS = 1 << BUILDING_RECORDED_PATHS_POW2;

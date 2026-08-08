@@ -7,6 +7,7 @@
 #include "figuretype/figure_animal.h"
 #include "figuretype/figure_missile.h"
 #include "city/city_figures.h"
+#include "city/city_recorded_paths.h"
 #include "core/random.h"
 #include "game/resource.h"
 #include "js/js_game.h"
@@ -256,7 +257,16 @@ void figure_hunter::figure_action() {
 
     case ACTION_14_OSTRICH_HUNTER_UNLOADING:
         if (animation().finished()) {
-            home()->store_resource(RESOURCE_GAMEMEAT, 100);
+            building *h = home();
+            if (h) {
+                h->store_resource(RESOURCE_GAMEMEAT, 100);
+                if (h->params().flags.keeps_visitor_paths) {
+                    building *main = h->main();
+                    if (main) {
+                        g_recorded_paths.handoff_to_building(base, main->id);
+                    }
+                }
+            }
             poof();
         }
         break;

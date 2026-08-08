@@ -71,6 +71,10 @@ static void draw_recorded_path_dots(painter &ctx, const recorded_path_tiles_t &t
     }
 }
 
+static bool is_hunter_figure_type(e_figure_type ftype) {
+    return ftype == FIGURE_OSTRICH_HUNTER || ftype == FIGURE_ANTELOPE_HUNTER || ftype == FIGURE_BIRDS_HUNTER;
+}
+
 static void draw_bazaar_path(painter &ctx, int path_id, int base_img, e_figure_type ftype) {
     if (!path_id) {
         return;
@@ -80,6 +84,20 @@ static void draw_bazaar_path(painter &ctx, int path_id, int base_img, e_figure_t
         draw_recorded_path_dots(ctx, tiles, COLOR_MASK_RED, base_img, {k_buyer_path_x_offset, 0});
     } else if (ftype == FIGURE_MARKET_TRADER) {
         draw_recorded_path_dots(ctx, tiles, COLOR_MASK_GREEN, base_img);
+    } else {
+        draw_recorded_path_tiles(ctx, tiles, COLOR_MASK_AMBER, base_img);
+    }
+}
+
+static void draw_hunting_lodge_path(painter &ctx, int path_id, int base_img, e_figure_type ftype) {
+    if (!path_id) {
+        return;
+    }
+    const auto &tiles = g_recorded_paths.tiles(path_id);
+    if (is_hunter_figure_type(ftype)) {
+        draw_recorded_path_tiles(ctx, tiles, COLOR_MASK_RED, base_img);
+    } else if (ftype == FIGURE_CART_PUSHER) {
+        draw_recorded_path_tiles(ctx, tiles, COLOR_MASK_GREEN, base_img);
     } else {
         draw_recorded_path_tiles(ctx, tiles, COLOR_MASK_AMBER, base_img);
     }
@@ -95,6 +113,7 @@ void building_draw_usable_paths(int bid) {
     building *main = b->main();
     const int mid = main ? main->id : bid;
     const bool is_bazaar = main && main->dcast_bazaar();
+    const bool is_hunting_lodge = main && main->type == BUILDING_HUNTING_LODGE;
 
     static const color path_colors[BUILDING_RECORDED_PATHS] = {
         COLOR_MASK_AMBER,
@@ -110,8 +129,11 @@ void building_draw_usable_paths(int bid) {
         if (!path_id) {
             continue;
         }
+        const e_figure_type ftype = (e_figure_type)g_recorded_paths.figure_type(path_id);
         if (is_bazaar) {
-            draw_bazaar_path(ctx, path_id, base_img, (e_figure_type)g_recorded_paths.figure_type(path_id));
+            draw_bazaar_path(ctx, path_id, base_img, ftype);
+        } else if (is_hunting_lodge) {
+            draw_hunting_lodge_path(ctx, path_id, base_img, ftype);
         } else {
             draw_recorded_path_tiles(ctx, g_recorded_paths.tiles(path_id), path_colors[i], base_img);
         }
@@ -139,6 +161,8 @@ void building_draw_usable_paths(int bid) {
         }
         if (is_bazaar) {
             draw_bazaar_path(ctx, f->trail_path_id, base_img, f->type);
+        } else if (is_hunting_lodge) {
+            draw_hunting_lodge_path(ctx, f->trail_path_id, base_img, f->type);
         } else {
             draw_recorded_path_tiles(ctx, g_recorded_paths.tiles(f->trail_path_id), COLOR_MASK_NONE, base_img);
         }

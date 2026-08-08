@@ -171,13 +171,12 @@ io_buffer *iob_recorded_paths = new io_buffer([](io_buffer *iob, size_t version)
     for (int i = 0; i < RECORDED_PATH_POOL_SIZE; i++) {
         uint8_t used = p.slots[i].used ? 1 : 0;
         iob->bind(BIND_SIGNATURE_UINT8, &used);
-        uint16_t figure_type = p.slots[i].figure_type;
-        iob->bind(BIND_SIGNATURE_UINT16, &figure_type);
         uint16_t len = 0;
+        uint16_t figure_type = p.slots[i].figure_type;
+        uint16_t reserved = 0;
         if (iob->is_read_access()) {
             iob->bind(BIND_SIGNATURE_UINT16, &len);
             p.slots[i].used = used != 0;
-            p.slots[i].figure_type = p.slots[i].used ? figure_type : 0;
             p.slots[i].tiles.clear();
             for (uint16_t t = 0; t < RECORDED_PATH_MAX_TILES; t++) {
                 uint16_t off = 0;
@@ -186,6 +185,9 @@ io_buffer *iob_recorded_paths = new io_buffer([](io_buffer *iob, size_t version)
                     p.slots[i].tiles.push_back(off);
                 }
             }
+            iob->bind(BIND_SIGNATURE_UINT16, &figure_type);
+            iob->bind(BIND_SIGNATURE_UINT16, &reserved);
+            p.slots[i].figure_type = p.slots[i].used ? figure_type : 0;
         } else {
             len = p.slots[i].used ? (uint16_t)p.slots[i].tiles.size() : 0;
             iob->bind(BIND_SIGNATURE_UINT16, &len);
@@ -193,6 +195,11 @@ io_buffer *iob_recorded_paths = new io_buffer([](io_buffer *iob, size_t version)
                 uint16_t off = (p.slots[i].used && t < len) ? p.slots[i].tiles[t] : 0;
                 iob->bind(BIND_SIGNATURE_UINT16, &off);
             }
+            if (!p.slots[i].used) {
+                figure_type = 0;
+            }
+            iob->bind(BIND_SIGNATURE_UINT16, &figure_type);
+            iob->bind(BIND_SIGNATURE_UINT16, &reserved);
         }
     }
     // File layout: newest-first fixed slots (BUILDING_RECORDED_PATHS).
