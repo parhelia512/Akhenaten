@@ -38,6 +38,24 @@ building_hunting_lodge {
     }
 }
 
+[es=(building_hunting_lodge, update_animation)]
+function building_hunting_lodge_on_update_animation(ev) {
+    var b = city.get_building(ev.bid)
+    if (!b.play_animation) {
+        return
+    }
+
+    if (b.worker_percentage <= 50) {
+        b.play_animation = false
+        return
+    }
+
+    var hunters = b.get_figures_number(FIGURE_OSTRICH_HUNTER)
+        + b.get_figures_number(FIGURE_ANTELOPE_HUNTER)
+        + b.get_figures_number(FIGURE_BIRDS_HUNTER)
+    b.play_animation = b.stored_resource(RESOURCE_GAMEMEAT) > 0 || hunters > 0
+}
+
 [es=(building_hunting_lodge, update_graphic)]
 function building_hunting_lodge_on_update_graphic(ev) {
     var building = city.get_building(ev.bid)

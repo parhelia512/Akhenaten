@@ -196,6 +196,12 @@ void __building_has_figure(js_State *J) {
     js_helpers::js_push_value(J, building_get(bid)->has_figure(index));
 }
 
+void __building_get_figures_number(js_State *J) {
+    const int bid = building_this_id(J);
+    const e_figure_type ftype = (e_figure_type)js_helpers::js_to_value<int>(J, 1);
+    js_helpers::js_push_value(J, building_get(bid)->get_figures_number(ftype));
+}
+
 int __building_get_figure_id(int bid, int index) {
     return building_get(bid)->get_figure(index)->id;
 }
@@ -454,6 +460,7 @@ void js_register_building(js_State *J) {
     jsB_propf(J, js_intern("Building.prototype.__property_getter"), building_proto___property_getter, 1);
     jsB_propf(J, js_intern("Building.prototype.__property_setter"), building_proto___property_setter, 2);
     jsB_propf(J, js_intern("Building.prototype.has_figure"), __building_has_figure, 1);
+    jsB_propf(J, js_intern("Building.prototype.get_figures_number"), __building_get_figures_number, 1);
     jsB_propf(J, js_intern("Building.prototype.mothball_toggle"), __building_mothball_toggle, 0);
     jsB_propf(J, js_intern("Building.prototype.add_structure_damage"), __building_add_structure_damage, 1);
     jsB_propf(J, js_intern("Building.prototype.add_fire_damage"), __building_add_fire_damage, 1);

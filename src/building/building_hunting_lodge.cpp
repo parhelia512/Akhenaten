@@ -128,18 +128,3 @@ bool building_hunting_lodge::draw_ornaments_and_animations_height(painter &ctx, 
 
     return true;
 }
-
-void building_hunting_lodge::update_animation() {
-    building_impl::update_animation();
-    if (!base.play_animation) {
-        return;
-    }
-
-    if (worker_percentage() <= 50) {
-        base.play_animation = false;
-        return;
-    }
-
-    base.play_animation = (stored_amount(RESOURCE_GAMEMEAT) > 0
-        || active_hunters_count() > 0);
-}
