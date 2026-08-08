@@ -4,7 +4,7 @@
 #include "js_game.h"
 #include "input/hotkey.h"
 #include "mujs/mujs.h"
-#include "window/file_dialog.h"
+#include "window/file_dialog_common.h"
 #include "game/game.h"
 #include "game/resource.h"
 #include "game/mission.h"

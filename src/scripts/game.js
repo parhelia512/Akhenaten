@@ -322,7 +322,7 @@ function app_clear_pending_exit_after_save() {
 function app_open_save_dialog_for_exit() {
     app_pending_exit_after_save = true
     ui.window_city_show()
-    window_file_dialog_save_show()
+    window_show_by_id("file_dialog_save")
 }
 
 function app_finish_exit_after_save() {

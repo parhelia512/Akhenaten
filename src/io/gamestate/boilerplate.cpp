@@ -79,7 +79,7 @@
 #include "widget/widget_top_menu_game.h"
 #include "widget/widget_figure_follow.h"
 #include "window/window_city.h"
-#include "window/file_dialog.h"
+#include "window/file_dialog_common.h"
 #include "game/game_events.h"
 #include "empire/empire.h"
 #include "city/city_warnings.h"

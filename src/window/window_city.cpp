@@ -25,7 +25,6 @@
 #include "widget/widget_city.h"
 #include "widget/widget_figure_follow.h"
 #include "window/window_advisors.h"
-#include "window/file_dialog.h"
 #include "graphics/elements/ui.h"
 #include "input/scroll.h"
 
