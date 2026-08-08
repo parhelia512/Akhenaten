@@ -36,6 +36,9 @@ bool page_linear();
 
 void frame_pre_present();
 
+double fill_percent();
+double frame_time_ms();
+
 void log_stats();
 void dump(const char *filename);
 

@@ -107,6 +107,7 @@ uint32_t g_last_filter = 0;
 uint32_t g_last_unregistered = 0;
 uint32_t g_last_too_wide = 0;
 uint32_t g_last_requests = 0;
+double g_last_frame_ms = 0.0;
 
 std::mutex &buffers_mutex() {
     static std::mutex *m = new std::mutex();
@@ -676,18 +677,38 @@ bool page_linear() {
 }
 
 void frame_pre_present() {
+    const Uint64 t0 = SDL_GetPerformanceCounter();
+
     apply_registry_changes();
-    if (!g_enabled && !g_atlas) {
-        return;
+    if (g_enabled || g_atlas) {
+        if (g_enabled) {
+            process_requests();
+        }
+        flush_pending();
     }
-    if (g_enabled) {
-        process_requests();
-    }
-    flush_pending();
+
+    const Uint64 t1 = SDL_GetPerformanceCounter();
+    const Uint64 freq = SDL_GetPerformanceFrequency();
+    g_last_frame_ms = freq ? (double)(t1 - t0) * 1000.0 / (double)freq : 0.0;
+
     if (g_enabled && g_preview && g_atlas) {
         draw_preview();
     }
-    snapshot_counters();
+    if (g_enabled || g_atlas) {
+        snapshot_counters();
+    }
+}
+
+double fill_percent() {
+    if (!g_atlas) {
+        return 0.0;
+    }
+    const int64_t total = (int64_t)g_atlas_w * g_atlas_h;
+    return total > 0 ? 100.0 * (double)g_used_area / (double)total : 0.0;
+}
+
+double frame_time_ms() {
+    return g_last_frame_ms;
 }
 
 void log_stats() {

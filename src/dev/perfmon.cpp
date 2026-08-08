@@ -5,6 +5,7 @@
 #include "dev/perfmon_nanoprofiler.h"
 #include "dev/perfmon_widget.h"
 #include "game/game.h"
+#include "graphics/residency_atlas.h"
 #include "js/js.h"
 #include "widget/debug_console.h"
 
@@ -66,6 +67,26 @@ namespace
             },
             memSettings,
             { 1.0, 4.0, 8.0, 16.0, 32.0, 64.0 }));
+
+        Perfmon::PerfMetricSettings atlasFillSettings;
+        atlasFillSettings.goodValue = 25.0;
+        atlasFillSettings.badValue = 90.0;
+
+        g_perfmon.RegisterMetric(Perfmon::Metric(
+            "residency atlas fill (%)",
+            []() { return res_atlas::fill_percent(); },
+            atlasFillSettings,
+            { 10.0, 25.0, 50.0, 75.0, 100.0 }));
+
+        Perfmon::PerfMetricSettings atlasTimeSettings;
+        atlasTimeSettings.goodValue = 0.5;
+        atlasTimeSettings.badValue = 4.0;
+
+        g_perfmon.RegisterMetric(Perfmon::Metric(
+            "residency atlas pack+blit (ms)",
+            []() { return res_atlas::frame_time_ms(); },
+            atlasTimeSettings,
+            { 0.25, 0.5, 1.0, 2.0, 4.0, 8.0 }));
     }
 } // namespace
 
