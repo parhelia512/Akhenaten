@@ -61,3 +61,8 @@ function building_mine_gems_draw_usable_paths(ev) {
 function building_architect_post_draw_usable_paths(ev) {
     building_draw_usable_paths(ev)
 }
+
+[es=(building_water_supply, draw_usable_paths)]
+function building_water_supply_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}

@@ -23,6 +23,9 @@ building_water_supply {
   laborers[5]
   fire_risk[0]
   damage_risk[0]
+  flags {
+    keeps_visitor_paths: true
+  }
 }
 
 [es=(building_water_supply, on_place_checks)]

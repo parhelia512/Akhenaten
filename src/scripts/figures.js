@@ -55,6 +55,7 @@ figure_water_carrier {
 
   terrain_usage : TERRAIN_USAGE_ROADS
   max_roam_length : 640
+  record_path : true
 }
 
 figure_protestor = {

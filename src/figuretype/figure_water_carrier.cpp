@@ -3,6 +3,7 @@
 #include "city/city_health.h"
 #include "city/ratings.h"
 #include "city/city.h"
+#include "city/city_recorded_paths.h"
 #include "figure/service.h"
 #include "grid/building.h"
 #include "graphics/animation.h"
@@ -28,7 +29,15 @@ void figure_water_carrier::figure_action() {
         break;
 
     case ACTION_73_WATER_CARRIER_RETURNING:
-        do_returnhome(TERRAIN_USAGE_PREFER_ROADS);
+        if (do_returnhome(TERRAIN_USAGE_PREFER_ROADS)) {
+            building *h = home();
+            if (h && h->params().flags.keeps_visitor_paths) {
+                building *main = h->main();
+                if (main) {
+                    g_recorded_paths.handoff_to_building(base, main->id);
+                }
+            }
+        }
         break;
 
     case ACTION_150_WATER_CARRIER_ATTACKED:
