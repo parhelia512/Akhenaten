@@ -259,6 +259,7 @@ function empire_window_confirm_open_trade() {
     }
 
     city.is_open = true
+    city.empire_object.trade_route_open = 1
     emit event_finance_request{ type: efinance_request_construction, deben: city.cost_to_open }
     emit event_show_window{ id: "trade_opened_window" }
 }
