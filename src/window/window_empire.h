@@ -46,7 +46,6 @@ struct empire_window : public autoconfig_window_t<empire_window> {
     bool is_outside_map(int x, int y);
     void determine_selected_object(const mouse *m);
     void draw_trade_route(const empire_city *city, int object_index, bool force);
-    void draw_tooltip(tooltip_context *c);
     vec2i map_clip_origin() const;
     vec2i map_area_size_pixels() const;
     vec2i map_viewport_size() const;

@@ -174,6 +174,9 @@ int ANK_FUNCTION_UNIFIED(__ui_draw_button)(const bvariant_map &args) {
     auto& btn = ui::button(text.c_str(), pos, size, fonts_vec{font, fonth}, (UiFlags)flags);
     if (!tooltip.empty()) {
         btn.tooltip(tooltip);
+        if (btn.hovered) {
+            ui::set_tooltip(tooltip);
+        }
     }
 
     if (is_underlying) {

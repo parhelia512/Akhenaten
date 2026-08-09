@@ -562,29 +562,12 @@ void empire_window::ui_draw_foreground(UiFlags flags) {
     ui.end_widget();
 }
 
-void empire_window::draw_tooltip(tooltip_context* c) {
-    // First check for button tooltips (goods icons)
-    int button_id = ui::button_hover(&mouse::get());
-    if (button_id > 0) {
-        pcstr tooltip = ui::button_tooltip(button_id - 1);
-        if (tooltip && *tooltip) {
-            c->text = tooltip;
-            return;
-        }
-    }
-
-    // Fall back to UI tooltip (set from scripts during draw_map, e.g. city hover).
-    const tooltip_context& uitooltip = ui::get_tooltip();
-    if (!!uitooltip.text) {
-        c->text = uitooltip.text;
-    }
-}
-
 void window_empire_show() {
-    static window_type window = {"window_empire", [](int flags) { g_empire_window.draw_background(flags); },
+    static window_type window = {"window_empire",
+      [](int flags) { g_empire_window.draw_background(flags); },
       [](int flags) { g_empire_window.ui_draw_foreground(flags); },
-      [](const mouse* m, const hotkeys* h) { g_empire_window.ui_handle_mouse(m); },
-      [](tooltip_context* c) { g_empire_window.draw_tooltip(c); }};
+      [](const mouse* m, const hotkeys* h) { g_empire_window.ui_handle_mouse(m); }
+    };
 
     g_empire_window.init();
     window_show(&window);
