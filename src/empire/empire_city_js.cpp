@@ -1,12 +1,15 @@
 #include "empire/empire.h"
 #include "empire/empire_city.h"
 #include "empire/empire_object.h"
+#include "graphics/elements/lang_text.h"
+#include "graphics/elements/ui.h"
 #include "js/js_game.h"
 #include "js/js.h"
 #include "js/js_mujs_bound_offset.h"
 #include "mujs/jsbuiltin.h"
 #include "mujs/jsvalue.h"
 #include "mujs/mujs.h"
+#include "scenario/scenario.h"
 
 #include <cstdio>
 
@@ -43,11 +46,37 @@ static empire_object* empire_object_this_ptr(js_State* J) {
 
 static void empire_object_proto___property_getter(js_State* J) {
     xstring prop = js_toxstring(J, 1);
+    const int slot = empire_object_this_slot(J);
     const empire_object* obj = empire_object_this_ptr(J);
     if (!obj) {
         js_helpers::js_push_void(J);
         return;
     }
+
+    if (prop == "expanded_pos") {
+        js_helpers::js_push_value(J, obj->expanded.pos);
+        return;
+    }
+    if (prop == "expanded_image_id") {
+        js_helpers::js_push_value(J, obj->expanded.image_id);
+        return;
+    }
+    if (prop == "city_id") {
+        js_helpers::js_push_value(J, g_empire.get_city_for_object(slot));
+        return;
+    }
+    if (prop == "label") {
+        const full_empire_object* full = g_empire.get_full_object(slot);
+        if (full && !!full->text_key) {
+            J->pushstring(lang_xtext_from_key(full->text_key).c_str());
+        } else if (full) {
+            J->pushstring(ui::str(196, full->city_name_id));
+        } else {
+            J->pushstring("");
+        }
+        return;
+    }
+
     auto opt = archive_helper::get(*obj, prop, true);
     js_helpers::js_push_value<std::optional<bvariant>>(J, opt);
 }
@@ -165,6 +194,7 @@ void js_register_empire_object_proto(js_State* J) {
     g_empire_object_proto = jsV_newobject(J, JS_COBJECT, J->Object_prototype);
     js_pushobject(J, g_empire_object_proto);
     JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, empire_object, type);
+    JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, empire_object, image_id);
     JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, empire_object, distant_battle_travel_months);
     jsB_propf(J, js_intern("EmpireObject.prototype.__property_getter"), empire_object_proto___property_getter, 1);
     jsB_propf(J, js_intern("EmpireObject.prototype.toString"), empire_object_proto_toString, 0);
@@ -185,6 +215,7 @@ void js_register_empire_city_map_proto(js_State* J) {
 void js_register_empire_city_proto(js_State* J) {
     g_empire_city_proto = jsV_newobject(J, JS_COBJECT, J->Object_prototype);
     js_pushobject(J, g_empire_city_proto);
+    JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, empire_city, in_use);
     JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, empire_city, is_open);
     JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, empire_city, is_sea_trade);
     JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, empire_city, months_under_siege);

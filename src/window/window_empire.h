@@ -40,7 +40,6 @@ struct empire_window : public autoconfig_window_t<empire_window> {
     virtual void archive_load(archive arch) override;
 
     void draw_map();
-    void draw_empire_object(int object_index, const empire_object &obj);
     void draw_paneling();
     bool is_outside_map(int x, int y);
     void determine_selected_object(const mouse *m);

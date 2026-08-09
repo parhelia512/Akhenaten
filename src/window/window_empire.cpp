@@ -1,6 +1,5 @@
 #include "window_empire.h"
 
-#include "city/military.h"
 #include "city/city.h"
 #include "game/game_events.h"
 #include "city/city_warnings.h"
@@ -12,12 +11,10 @@
 #include "empire/empire_traders.h"
 #include "empire/trade_route.h"
 #include "empire/type.h"
-#include "scenario/distant_battle.h"
 #include "graphics/image.h"
 #include "graphics/graphics.h"
 #include "graphics/elements/generic_button.h"
 #include "graphics/elements/image_button.h"
-#include "graphics/elements/lang_text.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
@@ -74,40 +71,11 @@ struct empire_window_draw_trader {
 };
 ANK_REGISTER_STRUCT_WRITER(empire_window_draw_trader, draw_offset, index);
 
-struct empire_window_draw_battle_icon {
+struct empire_window_draw_map_object {
     vec2i draw_offset;
-    vec2i pos;
-    int image_id = 0;
-    int path = 0;
-    int years = 0;
     int object_index = 0;
 };
-ANK_REGISTER_STRUCT_WRITER(empire_window_draw_battle_icon, draw_offset, pos, image_id, path, years, object_index);
-
-struct empire_window_draw_city {
-    vec2i draw_offset;
-    vec2i pos;
-    int object_index = 0;
-    int city_id = 0;
-    int text_align = 0;
-    int width = 0;
-};
-ANK_REGISTER_STRUCT_WRITER(empire_window_draw_city, draw_offset, pos, object_index, city_id, text_align, width);
-
-struct empire_window_draw_text {
-    vec2i draw_offset;
-    vec2i pos;
-    xstring label;
-};
-ANK_REGISTER_STRUCT_WRITER(empire_window_draw_text, draw_offset, pos, label);
-
-struct empire_window_draw_sprite {
-    vec2i draw_offset;
-    vec2i pos;
-    int image_id = 0;
-    int object_index = 0;
-};
-ANK_REGISTER_STRUCT_WRITER(empire_window_draw_sprite, draw_offset, pos, image_id, object_index);
+ANK_REGISTER_STRUCT_WRITER(empire_window_draw_map_object, draw_offset, object_index);
 
 struct empire_window_init_event {
     vec2i pos;
@@ -307,73 +275,6 @@ int empire_window::ui_handle_mouse(const mouse* m) {
     return 0;
 }
 
-void empire_window::draw_empire_object(int object_index, const empire_object& obj) {
-    // Routes are drawn via draw_trade_route(); pak Cleopatra IDs here are unmapped and cover cities.
-    if (obj.type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj.type == EMPIRE_OBJECT_SEA_TRADE_ROUTE
-        || obj.type == EMPIRE_OBJECT_TRADER) {
-        return;
-    }
-
-    vec2i pos;
-    int image_id;
-    if (scenario_empire_is_expanded()) {
-        pos = obj.expanded.pos;
-        image_id = obj.expanded.image_id;
-    } else {
-        pos = obj.pos;
-        image_id = obj.image_id;
-    }
-
-    const e_empire_object ot = (e_empire_object)obj.type;
-    if (ot == EMPIRE_OBJECT_CITY) {
-        const int city_id = g_empire.get_city_for_object(object_index);
-        const empire_city* city = g_empire.city(city_id);
-        if (!city || !city->shows_as_trade_city_on_map()) {
-            return;
-        }
-        ui.event(empire_window_draw_city{draw_offset, pos, object_index, city_id, obj.text_align, obj.width},
-          get_section(), "draw_map", empire_object_tokens.name(ot));
-        return;
-    }
-
-    if (ot == EMPIRE_OBJECT_TEXT) {
-        const full_empire_object* full = g_empire.get_full_object(object_index);
-        xstring label;
-        if (full && !!full->text_key) {
-            label = lang_xtext_from_key(full->text_key);
-        } else if (full) {
-            label = ui::str(196, full->city_name_id);
-        }
-        ui.event(empire_window_draw_text{draw_offset, pos, label}, get_section(), "draw_map",
-          empire_object_tokens.name(ot));
-        return;
-    }
-
-    if (ot == EMPIRE_OBJECT_BATTLE_ICON) {
-        ui.event(empire_window_draw_battle_icon{draw_offset, pos, image_id, obj.invasion_path_id, obj.invasion_years,
-                   object_index},
-          get_section(), "draw_map", empire_object_tokens.name(ot));
-        return;
-    }
-
-    if (ot == EMPIRE_OBJECT_ENEMY_ARMY) {
-        if (g_distant_battle.battle.months_until_battle <= 0
-            || g_distant_battle.enemy_months_traveled() != obj.distant_battle_travel_months) {
-            return;
-        }
-    }
-
-    if (ot == EMPIRE_OBJECT_KINGDOME_ARMY) {
-        if (!g_distant_battle.kingdome_army_is_traveling()
-            || city_military_distant_battle_kingdome_months_traveled() != obj.distant_battle_travel_months) {
-            return;
-        }
-    }
-
-    ui.event(empire_window_draw_sprite{draw_offset, pos, image_id, object_index}, get_section(), "draw_map",
-      empire_object_tokens.name(ot));
-}
-
 void empire_window::draw_map() {
     const vec2i clip_origin = map_clip_origin();
     const vec2i pixel_view = map_area_size_pixels();
@@ -396,8 +297,17 @@ void empire_window::draw_map() {
         ctx.draw(spr, draw_offset, COLOR_MASK_NONE, scale, scale);
     }
 
-    g_empire.foreach_object(
-      [this](int object_index, const empire_object& obj) { draw_empire_object(object_index, obj); });
+    // LAND/SEA route pak objects and TRADER slots are skipped: routes come from draw_trade_route(),
+    // traders from g_empire_traders (typed EMPIRE_OBJECT_TRADER handler is for those figures).
+    g_empire.foreach_object([this](int object_index, const empire_object& obj) {
+        const e_empire_object ot = (e_empire_object)obj.type;
+        if (ot == EMPIRE_OBJECT_LAND_TRADE_ROUTE || ot == EMPIRE_OBJECT_SEA_TRADE_ROUTE
+            || ot == EMPIRE_OBJECT_TRADER) {
+            return;
+        }
+        ui.event(empire_window_draw_map_object{draw_offset, object_index}, get_section(), "draw_map",
+          empire_object_tokens.name(ot));
+    });
 
     scenario_invasion_foreach_warning([&](vec2i pos, int image_id) {
         if (const image_t* warning_img = image_get(image_id)) {

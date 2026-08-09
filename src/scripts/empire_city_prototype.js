@@ -11,3 +11,13 @@ EmpireCity.property.name = {
 EmpireCityObject.property.pos = { }
 
 EmpireObject.property.pos = { }
+EmpireObject.property.expanded_pos = { }
+EmpireObject.property.expanded_image_id = { }
+EmpireObject.property.city_id = { }
+EmpireObject.property.label = { }
+EmpireObject.property.map_pos = {
+    get: function() { return empire.is_expanded ? this.expanded_pos : this.pos }
+}
+EmpireObject.property.map_image_id = {
+    get: function() { return empire.is_expanded ? this.expanded_image_id : this.image_id }
+}

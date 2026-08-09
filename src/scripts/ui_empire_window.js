@@ -474,8 +474,9 @@ function empire_window_draw_map_animation(object_index, img, draw_pos, scale) {
 
 [es=(empire_window, draw_map, EMPIRE_OBJECT_CITY)]
 function empire_window_draw_city(ev) {
-    var city = empire.get_city(ev.city_id)
-    if (!city) {
+    var obj = empire.get_object(ev.object_index)
+    var city = empire.get_city(obj.city_id)
+    if (!city || !city.in_use) {
         return
     }
 
@@ -485,7 +486,7 @@ function empire_window_draw_city(ev) {
     }
 
     var scale = empire_window_map_scale()
-    var draw_pos = empire_window_map_point(ev.draw_offset, ev.pos)
+    var draw_pos = empire_window_map_point(ev.draw_offset, obj.map_pos)
     ui.image_scaled(img, draw_pos, scale)
 
     var scaled_w = Math.max(1, Math.round(img.width * scale))
@@ -502,7 +503,7 @@ function empire_window_draw_city(ev) {
         }
     }
 
-    __empire_window_draw_city_trade_route(ev.city_id, ev.object_index, 0)
+    __empire_window_draw_city_trade_route(obj.city_id, ev.object_index, 0)
 
     var letter_h = 11
     var text_pos = {
@@ -526,32 +527,57 @@ function empire_window_draw_city(ev) {
 
 [es=(empire_window, draw_map, EMPIRE_OBJECT_TEXT)]
 function empire_window_draw_text(ev) {
-    var sp = empire_window_map_point(ev.draw_offset, ev.pos)
-    ui.label_colored(ev.label, { x: sp.x - 5, y: sp.y }, FONT_SMALL_PLAIN, COLOR_FONT_SHITTY_BROWN)
+    var obj = empire.get_object(ev.object_index)
+    var sp = empire_window_map_point(ev.draw_offset, obj.map_pos)
+    ui.label_colored(obj.label, { x: sp.x - 5, y: sp.y }, FONT_SMALL_PLAIN, COLOR_FONT_SHITTY_BROWN)
 }
 
-function empire_window_draw_sprite_object(ev) {
-    if (!ev.image_id) {
+function empire_window_draw_sprite_object(ev, obj) {
+    var image_id = obj.map_image_id
+    if (!image_id) {
         return
     }
-    var img = get_image({ tid: ev.image_id })
+    var img = get_image({ tid: image_id })
     if (!img) {
         return
     }
     var scale = empire_window_map_scale()
-    var draw_pos = empire_window_map_point(ev.draw_offset, ev.pos)
+    var draw_pos = empire_window_map_point(ev.draw_offset, obj.map_pos)
     ui.image_scaled(img, draw_pos, scale)
     empire_window_draw_map_animation(ev.object_index, img, draw_pos, scale)
 }
 
 [es=(empire_window, draw_map, EMPIRE_OBJECT_ORNAMENT)]
-function empire_window_draw_ornament(ev) { empire_window_draw_sprite_object(ev) }
+function empire_window_draw_ornament(ev) {
+    empire_window_draw_sprite_object(ev, empire.get_object(ev.object_index))
+}
 
 [es=(empire_window, draw_map, EMPIRE_OBJECT_KINGDOME_ARMY)]
-function empire_window_draw_kingdome_army(ev) { empire_window_draw_sprite_object(ev) }
+function empire_window_draw_kingdome_army(ev) {
+    var obj = empire.get_object(ev.object_index)
+    var battle = empire.active_battle
+    if (!(battle.egyptian_months_to_travel_forth > 0 || battle.egyptian_months_to_travel_back > 0)) {
+        return
+    }
+    if (battle.egyptian_months_traveled !== obj.distant_battle_travel_months) {
+        return
+    }
+    empire_window_draw_sprite_object(ev, obj)
+}
 
 [es=(empire_window, draw_map, EMPIRE_OBJECT_ENEMY_ARMY)]
-function empire_window_draw_enemy_army(ev) { empire_window_draw_sprite_object(ev) }
+function empire_window_draw_enemy_army(ev) {
+    var obj = empire.get_object(ev.object_index)
+    var battle = empire.active_battle
+    if (battle.months_until_battle <= 0) {
+        return
+    }
+    // Matches distant_battles_t::enemy_months_traveled() (returns egyptian_months_traveled).
+    if (battle.egyptian_months_traveled !== obj.distant_battle_travel_months) {
+        return
+    }
+    empire_window_draw_sprite_object(ev, obj)
+}
 
 /** Sprites along one segment (spacing matches former C++ trade route / distant battle path). */
 function empire_window_route_segment_sprites(img, p1, p2) {
@@ -630,12 +656,13 @@ function empire_window_draw_trader(ev) {
 
 [es=(empire_window, draw_map, EMPIRE_OBJECT_BATTLE_ICON)]
 function empire_window_draw_battle_icon(ev) {
+    var obj = empire.get_object(ev.object_index)
     var img = get_image("pharaoh_general/empire_bits_00001")
     if (!img) {
         return
     }
 
-    ui.image(img, empire_window_map_point(ev.draw_offset, ev.pos))
+    ui.image(img, empire_window_map_point(ev.draw_offset, obj.map_pos))
 }
 
 [es=(empire_window, draw_map, EMPIRE_OBJECT_DISTANT_BATTLE_ROUTE)]
