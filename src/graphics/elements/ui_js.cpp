@@ -29,6 +29,7 @@
 #include "core/flat_map.h"
 #include "game/game.h"
 #include "graphics/image.h"
+#include "graphics/painter.h"
 #include "graphics/elements/ui_scope_property.h"
 #include "graphics/elements/arrow_button.h"
 #include "input/mouse.h"
@@ -51,6 +52,18 @@ void __ui_draw_image(int imgid, vec2i pos) {
     ui::eimage(imgid, pos);
 }
 ANK_FUNCTION_2(__ui_draw_image);
+
+void __ui_draw_image_scaled(int imgid, vec2i pos, float scale) {
+    const image_t* img = image_get(imgid);
+    if (!img) {
+        return;
+    }
+    painter ctx = game.painter();
+    sprite spr;
+    spr.img = img;
+    ctx.draw(spr, pos, COLOR_MASK_NONE, scale, scale);
+}
+ANK_FUNCTION_3(__ui_draw_image_scaled);
 
 void __ui_panel(vec2i pos, vec2i size, int flags) {
     ui::panel(pos, size, (UiFlags)flags);

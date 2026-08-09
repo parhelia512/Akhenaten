@@ -146,20 +146,28 @@ void js_game_get_image(js_State *J) {
         desc.path = path.c_str();
         tid = desc.tid();
     } else if (J->isobject(1) && !js_isarray(J, 1)) {
-        J->getproperty(1, property_pack);
-        int16_t pack = !js_isundefined(J, -1) ? (int16_t)js_tointeger(J, -1) : 0;
-        js_pop(J, 1);
+        J->getproperty(1, property_tid);
+        if (!js_isundefined(J, -1)) {
+            tid = (int)js_tointeger(J, -1);
+            js_pop(J, 1);
+        } else {
+            js_pop(J, 1);
 
-        J->getproperty(1, property_id);
-        int16_t id = !js_isundefined(J, -1) ? (int16_t)js_tointeger(J, -1) : 0;
-        js_pop(J, 1);
+            J->getproperty(1, property_pack);
+            int16_t pack = !js_isundefined(J, -1) ? (int16_t)js_tointeger(J, -1) : 0;
+            js_pop(J, 1);
 
-        J->getproperty(1, property_offset);
-        int16_t offset = !js_isundefined(J, -1) ? (int16_t)js_tointeger(J, -1) : 0;
-        js_pop(J, 1);
+            J->getproperty(1, property_id);
+            int16_t id = !js_isundefined(J, -1) ? (int16_t)js_tointeger(J, -1) : 0;
+            js_pop(J, 1);
 
-        image_desc desc{ pack, id, offset };
-        tid = desc.tid();
+            J->getproperty(1, property_offset);
+            int16_t offset = !js_isundefined(J, -1) ? (int16_t)js_tointeger(J, -1) : 0;
+            js_pop(J, 1);
+
+            image_desc desc{ pack, id, offset };
+            tid = desc.tid();
+        }
     } else if (js_isnumber(J, 1) || js_iscnumber(J, 1)) {
         int16_t pack = js_touint32(J, 1);
         int16_t id = (js_isnumber(J, 2) || js_iscnumber(J, 2)) ? js_touint32(J, 2) : 0;
@@ -189,6 +197,15 @@ void js_game_get_image(js_State *J) {
 
     js_pushnumber(J, img->height);
     js_setproperty(J, -2, property_height);
+
+    js_pushnumber(J, img->animation.speed_id);
+    js_setproperty(J, -2, js_intern("animation_speed_id"));
+
+    js_pushnumber(J, img->animation.sprite_offset.x);
+    js_setproperty(J, -2, js_intern("animation_offset_x"));
+
+    js_pushnumber(J, img->animation.sprite_offset.y);
+    js_setproperty(J, -2, js_intern("animation_offset_y"));
 }
 
 bool js_has_event_handlers(const xstring &event_name) {
