@@ -5,6 +5,7 @@
 //   [test-marker] farm_info_month_june
 //   [test-marker] farm_info_month_august
 //   [test-marker] farm_info_meadow_irrigated
+//   [test-marker] farm_info_meadow_harvest
 //   [test-marker] farm_info_meadow_ok
 //   [test-marker] farm_info_floodplain_open_ok
 //   [test-marker] farm_info_inundation_hides_next
@@ -85,7 +86,7 @@ function run_test() {
     }
     __log_marker('farm_info_month_august')
 
-    // Meadow path: irrigation flag + no Work Camp laborers string; flood_info clears.
+    // Meadow path: irrigation flag + no Work Camp laborers string; next-harvest line.
     test_prepare_terrain_patch(cx + 10, cy, 5, TERRAIN_MEADOW)
     var meadow = __test_building_create(BUILDING_GRAIN_MEADOW_FARM, cx + 10, cy)
     if (!meadow) {
@@ -117,6 +118,23 @@ function run_test() {
         return
     }
     __log_marker('farm_info_meadow_irrigated')
+
+    var harvest_prefix = __loc(meadow_b.meta_text_id, 14)
+    if (!harvest_prefix || harvest_prefix === __loc(177, 2)) {
+        test147_fail('meadow_harvest_loc_missing_or_flood')
+        return
+    }
+    var next_harvest = building_farm_next_harvest_month(meadow)
+    if (next_harvest !== MONTH_JANUARY && next_harvest !== MONTH_MAY) {
+        test147_fail('meadow_next_harvest_month_' + next_harvest)
+        return
+    }
+    var harvest_line = harvest_prefix + " " + __loc(160, next_harvest)
+    if (!harvest_line || harvest_line.indexOf(harvest_prefix) !== 0) {
+        test147_fail('meadow_harvest_line')
+        return
+    }
+    __log_marker('farm_info_meadow_harvest')
 
     __test_show_tile_info(meadow)
     __test_pump_frames(6)
@@ -165,6 +183,7 @@ function check_valid() {
         'farm_info_month_june',
         'farm_info_month_august',
         'farm_info_meadow_irrigated',
+        'farm_info_meadow_harvest',
         'farm_info_meadow_ok',
         'farm_info_floodplain_open_ok',
         'farm_info_inundation_hides_next',

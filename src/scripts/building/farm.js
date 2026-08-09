@@ -21,6 +21,31 @@ Farm.prototype.requested_workers = function() {
   return __farm_requested_workers(this.id)
 }
 
+function building_farm_next_harvest_month(bid) {
+  var b = city.get_building(bid)
+  if (!b) {
+    return MONTH_JANUARY
+  }
+  var cfg = get_building_config_by_id(b.type)
+  var months = cfg && cfg.month_harvest
+  if (!months || !months.length) {
+    return MONTH_JANUARY
+  }
+  var current = game.simtime.month
+  var day = game.simtime.day
+  for (var i = 0; i < months.length; i++) {
+    var month = months[i]
+    if (month > current || (month === current && day < 2)) {
+      return month
+    }
+  }
+  return months[0]
+}
+
+Farm.prototype.next_harvest_month = function() {
+  return building_farm_next_harvest_month(this.id)
+}
+
 // end prototype for farm buildings
 
 building_meadow_farm_tile_offsets = [
