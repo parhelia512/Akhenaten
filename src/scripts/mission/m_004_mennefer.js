@@ -204,12 +204,12 @@ mission4 {
 	}
 
 	goal_tooltip: function() {
-		if (!mission.spacious_apartment_built) {
-			return "#tutorial_goal_education"
-		}
-
 		if (!mission.papyrus_made_handled) {
 			return "#tutorial_goal_scribal_school"
+		}
+
+		if (!mission.spacious_apartment_built) {
+			return "#tutorial_goal_education"
 		}
 
 		if (!mission.bricks_bought_handled) {
