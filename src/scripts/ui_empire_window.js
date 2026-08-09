@@ -730,6 +730,53 @@ function empire_window_draw_map_begin(ev) {
     }
 }
 
+[es=(empire_window, draw_map_objects)]
+function empire_window_draw_map_objects(ev) {
+    var payload = { draw_offset: ev.draw_offset, object_index: 0 }
+    for (var i = 0; i < empire.object_slots; i++) {
+        var obj = empire.get_object(i)
+        if (!obj.in_use) {
+            continue
+        }
+        // LAND/SEA pak route markers skipped: city routes drawn via request_city_trade_route.
+        // TRADER slots skipped: live traders drawn from g_empire_traders.
+        switch (obj.type) {
+        case EMPIRE_OBJECT_LAND_TRADE_ROUTE:
+        case EMPIRE_OBJECT_SEA_TRADE_ROUTE:
+        case EMPIRE_OBJECT_TRADER:
+            break
+        case EMPIRE_OBJECT_CITY:
+            payload.object_index = i
+            empire_window_draw_city(payload)
+            break
+        case EMPIRE_OBJECT_TEXT:
+            payload.object_index = i
+            empire_window_draw_text(payload)
+            break
+        case EMPIRE_OBJECT_ORNAMENT:
+            payload.object_index = i
+            empire_window_draw_ornament(payload)
+            break
+        case EMPIRE_OBJECT_KINGDOME_ARMY:
+            payload.object_index = i
+            empire_window_draw_kingdome_army(payload)
+            break
+        case EMPIRE_OBJECT_ENEMY_ARMY:
+            payload.object_index = i
+            empire_window_draw_enemy_army(payload)
+            break
+        case EMPIRE_OBJECT_BATTLE_ICON:
+            payload.object_index = i
+            empire_window_draw_battle_icon(payload)
+            break
+        case EMPIRE_OBJECT_DISTANT_BATTLE_ROUTE:
+            payload.object_index = i
+            empire_window_draw_distant_battle_path(payload)
+            break
+        }
+    }
+}
+
 [es=(empire_window, draw_deferred_trade_route)]
 function empire_window_draw_deferred_trade_route(ev) {
     var cid = empire_window.deferred_route_city_id

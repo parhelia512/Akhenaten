@@ -349,6 +349,10 @@ void js_register_bound_int16_offset_property(js_State *J, const js_StringNode na
     js_register_bound_offset_property_impl(J, name, byte_offset, JS_PTR_INT16);
 }
 
+void js_register_bound_xstring_offset_property(js_State *J, const js_StringNode name, size_t byte_offset) {
+    js_register_bound_offset_property_impl(J, name, byte_offset, JS_PTR_XSTRING);
+}
+
 void js_set_framealloc(js_State* J, js_Alloc frame_alloc, void* frame_actx) {
     J->frame_alloc = frame_alloc;
     J->frame_actx = frame_actx;

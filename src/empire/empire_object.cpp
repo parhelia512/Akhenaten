@@ -140,9 +140,9 @@ static void sync_city_object_size(full_empire_object *full, e_empire_city city_t
         return;
     }
     full->obj.image_id = image_id;
-    if (full->obj.expanded.image_id <= 0) {
+    if (full->obj.expanded_image_id <= 0) {
         const int expanded_id = empire_city_images.image_id(city_type, true);
-        full->obj.expanded.image_id = expanded_id > 0 ? expanded_id : image_id;
+        full->obj.expanded_image_id = expanded_id > 0 ? expanded_id : image_id;
     }
     const image_t *img = image_get(image_id);
     if (img) {
@@ -249,10 +249,10 @@ void empire_t::load_empire_cities(archive arch) {
             full->obj.type = EMPIRE_OBJECT_CITY;
             full->city_name_id = name_id;
             full->obj.pos = entry.r_vec2i("pos", full->obj.pos);
-            const vec2i expanded_fallback = (full->obj.expanded.pos.x || full->obj.expanded.pos.y)
-                ? full->obj.expanded.pos
+            const vec2i expanded_fallback = (full->obj.expanded_pos.x || full->obj.expanded_pos.y)
+                ? full->obj.expanded_pos
                 : full->obj.pos;
-            full->obj.expanded.pos = entry.r_vec2i("expanded_pos", expanded_fallback);
+            full->obj.expanded_pos = entry.r_vec2i("expanded_pos", expanded_fallback);
             full->obj.text_align = entry.r_int("text_align", full->obj.text_align);
             full->obj.trade_route_id = (uint8_t)entry.r_int("route", full->obj.trade_route_id);
             full->trade_route_open = entry.r_bool("is_open", full->trade_route_open != 0) ? 1 : 0;
@@ -303,8 +303,8 @@ void empire_t::load_empire_cities(archive arch) {
         full->trade_route_open = city->is_open ? 1 : 0;
         full->trade_route_cost = city->cost_to_open;
 
-        if (has_pos && full->obj.expanded.pos.x == 0 && full->obj.expanded.pos.y == 0) {
-            full->obj.expanded.pos = full->obj.pos;
+        if (has_pos && full->obj.expanded_pos.x == 0 && full->obj.expanded_pos.y == 0) {
+            full->obj.expanded_pos = full->obj.pos;
         }
 
         sync_city_object_size(full, city->type);
@@ -397,19 +397,19 @@ static full_empire_object *begin_script_map_object(archive arch, e_empire_object
         full->obj.image_id = arch.r_int("image", full->obj.image_id);
     }
 
-    full->obj.expanded.pos = arch.r_vec2i("expanded_pos", full->obj.expanded.pos);
-    if (full->obj.expanded.pos.x == 0 && full->obj.expanded.pos.y == 0) {
-        full->obj.expanded.pos = full->obj.pos;
+    full->obj.expanded_pos = arch.r_vec2i("expanded_pos", full->obj.expanded_pos);
+    if (full->obj.expanded_pos.x == 0 && full->obj.expanded_pos.y == 0) {
+        full->obj.expanded_pos = full->obj.pos;
     }
 
     image_desc expanded_img;
     if (arch.r_desc("expanded_image", expanded_img) && expanded_img.valid()) {
-        full->obj.expanded.image_id = expanded_img.tid();
+        full->obj.expanded_image_id = expanded_img.tid();
     } else {
-        full->obj.expanded.image_id = arch.r_int("expanded_image", full->obj.expanded.image_id);
+        full->obj.expanded_image_id = arch.r_int("expanded_image", full->obj.expanded_image_id);
     }
-    if (full->obj.expanded.image_id <= 0) {
-        full->obj.expanded.image_id = full->obj.image_id;
+    if (full->obj.expanded_image_id <= 0) {
+        full->obj.expanded_image_id = full->obj.image_id;
     }
 
     full->obj.text_align = arch.r_int("text_align", full->obj.text_align);
@@ -691,7 +691,7 @@ int empire_t::get_closest_object(vec2i pos) const {
         const empire_object* obj = &objects[i].obj;
         vec2i obj_pos;
         if (scenario_empire_is_expanded()) {
-            obj_pos = obj->expanded.pos;
+            obj_pos = obj->expanded_pos;
         } else {
             obj_pos = obj->pos;
         }
@@ -726,7 +726,7 @@ void empire_t::object_set_expanded(int object_id, e_empire_city new_city_type) {
     objects[object_id].city_type = new_city_type;
     const int image_id = empire_city_images.image_id(new_city_type, true);
     if (image_id > 0) {
-        objects[object_id].obj.expanded.image_id = image_id;
+        objects[object_id].obj.expanded_image_id = image_id;
     }
 }
 
@@ -848,13 +848,13 @@ io_buffer* iob_empire_map_objects = new io_buffer([](io_buffer* iob, size_t vers
         iob->bind(BIND_SIGNATURE_INT16, &obj->width);
         iob->bind(BIND_SIGNATURE_INT16, &obj->height);
         iob->bind(BIND_SIGNATURE_INT16, &obj->image_id);
-        iob->bind(BIND_SIGNATURE_INT16, &obj->expanded.image_id);
+        iob->bind(BIND_SIGNATURE_INT16, &obj->expanded_image_id);
         iob->bind____skip(1);
         iob->bind(BIND_SIGNATURE_UINT8, &obj->distant_battle_travel_months);
         iob->bind____skip(1);
         iob->bind(BIND_SIGNATURE_UINT8, &obj->text_align);
-        iob->bind(BIND_SIGNATURE_INT16, &obj->expanded.pos.x);
-        iob->bind(BIND_SIGNATURE_INT16, &obj->expanded.pos.y);
+        iob->bind(BIND_SIGNATURE_INT16, &obj->expanded_pos.x);
+        iob->bind(BIND_SIGNATURE_INT16, &obj->expanded_pos.y);
         iob->bind(BIND_SIGNATURE_UINT8, &full->city_type);
         iob->bind(BIND_SIGNATURE_UINT8, &full->city_name_id);
         iob->bind_u8(obj->trade_route_id);

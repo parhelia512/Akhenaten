@@ -9,6 +9,7 @@
 #include "jsrun.h"
 #include "utf.h"
 
+#include "core/core.h"
 #include "core/profiler.h"
 #include "core/xstring.h"
 
@@ -841,6 +842,15 @@ static void jsR_defproperty(js_State* J, js_Object* obj, const js_StringNode nam
 
     ref = jsV_setproperty(J, obj, name);
     if (ref) {
+        // X.property.name = {} compiles to defineProperty(get/set) and would
+        // shadow a CPTROFF/CPTR cell left on the prototype by JS_REGISTER_BOUND_*.
+        if ((getter || setter) && ref->value.type == JS_TOBJECT && ref->value.u.object
+          && (ref->value.u.object->type == JS_CPTR || ref->value.u.object->type == JS_CPTROFF)) {
+            verify_no_crash_var(false,
+              "accessor shadows bound C property '%s' — remove X.property.%s = {} "
+              "(CPTROFF/CPTR fields are read directly; empty {} installs __property_getter over them)",
+              js_strnode_cstr(name), js_strnode_cstr(name));
+        }
         if (value) {
             if (!(ref->atts & JS_READONLY))
                 ref->value = *value;

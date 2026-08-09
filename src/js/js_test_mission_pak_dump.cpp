@@ -462,7 +462,7 @@ static void dump_empire_objects() {
             dump_marker("pak_ornament_meta:idx=%d|img=%d|exp_img=%d|w=%d|h=%d",
                 object_index,
                 obj.image_id,
-                full ? full->obj.expanded.image_id : -1,
+                full ? full->obj.expanded_image_id : -1,
                 full ? full->obj.width : -1,
                 full ? full->obj.height : -1);
         }

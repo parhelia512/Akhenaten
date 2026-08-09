@@ -94,6 +94,8 @@ empire {
     }
 
     route_debug_points : false
+    /** Keep in sync with MAX_OBJECTS in empire_object.cpp */
+    object_slots : 200
 
     trade_route_num_points : __empire_trade_route_num_points
     trade_route_point : __empire_trade_route_point

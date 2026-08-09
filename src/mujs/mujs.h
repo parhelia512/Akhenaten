@@ -79,6 +79,7 @@ void js_register_bound_int8_offset_property(js_State *J, const js_StringNode nam
 void js_register_bound_uint8_offset_property(js_State *J, const js_StringNode name, size_t byte_offset);
 void js_register_bound_uint16_offset_property(js_State *J, const js_StringNode name, size_t byte_offset);
 void js_register_bound_int16_offset_property(js_State *J, const js_StringNode name, size_t byte_offset);
+void js_register_bound_xstring_offset_property(js_State *J, const js_StringNode name, size_t byte_offset);
 
 /* Basic functions */
 js_State *js_newstate(js_Alloc alloc, void *actx, int flags);

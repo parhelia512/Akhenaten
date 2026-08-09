@@ -16,16 +16,14 @@ struct empire_object {
     int height;
     int image_id;
     int text_align;
-    struct {
-        vec2i pos;
-        int image_id;
-    } expanded;
+    vec2i expanded_pos;
+    int expanded_image_id;
     int distant_battle_travel_months;
     uint8_t trade_route_id;
     int invasion_path_id;
     int invasion_years;
 };
-ANK_CONFIG_PROPERTY(empire_object, id, type, pos, image_id, distant_battle_travel_months)
+ANK_CONFIG_PROPERTY(empire_object, id, type, pos, image_id, expanded_pos, expanded_image_id, distant_battle_travel_months)
 
 #define EMPIRE_OBJ_MAX_SOLD_RESOURCES 14
 #define EMPIRE_OBJ_MAX_BOUGHT_RESOURCES 8

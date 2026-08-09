@@ -59,12 +59,6 @@ struct empire_window_draw_trader {
 };
 ANK_REGISTER_STRUCT_WRITER(empire_window_draw_trader, draw_offset, index);
 
-struct empire_window_draw_map_object {
-    vec2i draw_offset;
-    int object_index = 0;
-};
-ANK_REGISTER_STRUCT_WRITER(empire_window_draw_map_object, draw_offset, object_index);
-
 struct empire_window_init_event {
     vec2i pos;
 };
@@ -226,17 +220,7 @@ void empire_window::draw_map() {
 
     painter ctx = game.painter();
 
-    // LAND/SEA route pak objects and TRADER slots are skipped: city routes are drawn from JS,
-    // traders from g_empire_traders (typed EMPIRE_OBJECT_TRADER handler is for those figures).
-    g_empire.foreach_object([this](int object_index, const empire_object& obj) {
-        const e_empire_object ot = (e_empire_object)obj.type;
-        if (ot == EMPIRE_OBJECT_LAND_TRADE_ROUTE || ot == EMPIRE_OBJECT_SEA_TRADE_ROUTE
-            || ot == EMPIRE_OBJECT_TRADER) {
-            return;
-        }
-        ui.event(empire_window_draw_map_object{draw_offset, object_index}, get_section(), "draw_map",
-          empire_object_tokens.name(ot));
-    });
+    ui.event(empire_window_draw{draw_offset}, get_section(), "draw_map_objects");
 
     scenario_invasion_foreach_warning([&](vec2i pos, int image_id) {
         if (const image_t* warning_img = image_get(image_id)) {
