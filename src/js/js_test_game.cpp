@@ -3525,6 +3525,38 @@ static int __test_building_road_access_tile(int bid) {
 }
 ANK_FUNCTION_1(__test_building_road_access_tile);
 
+static void __test_building_road_access_set_stale(int bid) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return;
+    }
+    building *m = b->main();
+    if (!m) {
+        return;
+    }
+    m->has_road_access = true;
+    m->road_network_id = 1;
+    m->distance_from_entry = 1;
+    m->road_access = m->tile;
+}
+ANK_FUNCTION_1(__test_building_road_access_set_stale);
+
+static int __test_building_road_access_fields_cleared(int bid) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return 0;
+    }
+    building *m = b->main();
+    if (!m) {
+        return 0;
+    }
+    return (!m->has_road_access && m->road_network_id == 0 && m->distance_from_entry == 0
+            && !m->road_access.valid())
+        ? 1
+        : 0;
+}
+ANK_FUNCTION_1(__test_building_road_access_fields_cleared);
+
 static int __test_building_road_access_match_preview(int bid) {
     building *b = building_get(bid);
     if (!b || !b->is_valid()) {
