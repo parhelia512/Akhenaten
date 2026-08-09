@@ -41,93 +41,61 @@ inline void reader<building_decorative_gatehouse::static_params>(archive arch, b
 } // namespace archive_helper
 
 building_gatehouse::back_tile_orientation building_gatehouse::second_part_tile(build_planner &planer, tile2i end, int city_orientation) {
-    int local_rotation = -1;
-    blocked_tile_vec tmp_tiles;
-    tile2i possible_next, possible_next_w, tile_second_part;
+    struct candidate_t {
+        tile2i tile;
+        int orientation = -1;
+        bool ok = false;
+        bool road = false;
+    };
 
-    uint32_t restricted_terrain = TERRAIN_ALL;
-    restricted_terrain -= TERRAIN_ROAD;
-    bool tmp_blocked;
+    const uint32_t restricted_terrain = TERRAIN_ALL - TERRAIN_ROAD;
+    auto make_candidate = [&] (tile2i tile, int orientation) {
+        candidate_t c;
+        c.tile = tile;
+        c.orientation = orientation;
+        blocked_tile_vec tmp_tiles;
+        c.ok = !planer.is_blocked_for_building(tile, 1, tmp_tiles, restricted_terrain);
+        c.road = c.ok && map_terrain_is(tile, TERRAIN_ROAD);
+        return c;
+    };
 
+    candidate_t first, second;
     switch (city_orientation) {
     case 0:
-        possible_next = end.shifted(0, -1);
-        tmp_tiles.clear();
-        tmp_blocked = !!planer.is_blocked_for_building(possible_next, 1, tmp_tiles, restricted_terrain);
-        if (!tmp_blocked) {
-            local_rotation = 0;
-            tile_second_part = possible_next;
-        }
-
-        possible_next_w = end.shifted(1, 0);
-        tmp_tiles.clear();
-        tmp_blocked = !!planer.is_blocked_for_building(possible_next_w, 1, tmp_tiles, restricted_terrain);
-        if (!tmp_blocked) {
-            local_rotation = 1;
-            tile_second_part = possible_next_w;
-            break;
-        }
+        first = make_candidate(end.shifted(0, -1), 0);
+        second = make_candidate(end.shifted(1, 0), 1);
         break;
-
     case 1:
-        possible_next = end.shifted(0, -1);
-        tmp_tiles.clear();
-        tmp_blocked = !!planer.is_blocked_for_building(possible_next, 1, tmp_tiles, restricted_terrain);
-        if (!tmp_blocked) {
-            local_rotation = 1;
-            tile_second_part = possible_next;
-        }
-
-        possible_next_w = end.shifted(1, 0);
-        tmp_tiles.clear();
-        tmp_blocked = !!planer.is_blocked_for_building(possible_next_w, 1, tmp_tiles, restricted_terrain);
-        if (!tmp_blocked) {
-            local_rotation = 2;
-            tile_second_part = possible_next_w;
-            break;
-        }
+        first = make_candidate(end.shifted(0, -1), 1);
+        second = make_candidate(end.shifted(1, 0), 2);
         break;
-
     case 2:
-        possible_next = end.shifted(0, 1);
-        tmp_tiles.clear();
-        tmp_blocked = !!planer.is_blocked_for_building(possible_next, 1, tmp_tiles, restricted_terrain);
-        if (!tmp_blocked) {
-            local_rotation = 2;
-            tile_second_part = possible_next;
-        }
-
-        possible_next_w = end.shifted(1, 0);
-        tmp_tiles.clear();
-        tmp_blocked = !!planer.is_blocked_for_building(possible_next_w, 1, tmp_tiles, restricted_terrain);
-        if (!tmp_blocked) {
-            local_rotation = 3;
-            tile_second_part = possible_next_w;
-            break;
-        }
+        first = make_candidate(end.shifted(0, 1), 2);
+        second = make_candidate(end.shifted(1, 0), 3);
         break;
-
     case 3:
-        possible_next = end.shifted(0, 1);
-        tmp_tiles.clear();
-        tmp_blocked = !!planer.is_blocked_for_building(possible_next, 1, tmp_tiles, restricted_terrain);
-        if (!tmp_blocked) {
-            local_rotation = 3;
-            tile_second_part = possible_next;
-        }
-
-        possible_next_w = end.shifted(-1, 0);
-        tmp_tiles.clear();
-        tmp_blocked = !!planer.is_blocked_for_building(possible_next_w, 1, tmp_tiles, restricted_terrain);
-        if (!tmp_blocked) {
-            local_rotation = 0;
-            tile_second_part = possible_next_w;
-            break;
-        }
+        first = make_candidate(end.shifted(0, 1), 3);
+        second = make_candidate(end.shifted(-1, 0), 0);
         break;
+    default:
+        return { tile2i(), -1 };
     }
 
-    return { tile_second_part, local_rotation };
+    const candidate_t *picked = nullptr;
+    if (first.road != second.road) {
+        picked = first.road ? &first : &second;
+    } else if (first.road && second.road) {
+        picked = (building_rotation_get_road_orientation() == 2) ? &second : &first;
+    } else if (second.ok) {
+        picked = &second;
+    } else if (first.ok) {
+        picked = &first;
+    }
+
+    if (!picked) {
+        return { tile2i(), -1 };
+    }
+    return { picked->tile, picked->orientation };
 }
 
 void building_gatehouse::on_create(int orientation) {

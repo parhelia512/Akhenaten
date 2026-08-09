@@ -10,59 +10,53 @@ function building_gatehouse_tile_blocked(tile) {
     return __city_planner_is_blocked_for_building(tile, 1, building_gatehouse_restricted_terrain)
 }
 
-function building_gatehouse_second_part_tile(end, city_orientation) {
-    var local_rotation = -1
-    var tile_second_part = { x: 0, y: 0 }
-    var possible_next
-    var possible_next_w
+function building_gatehouse_make_candidate(tile, orientation) {
+    var ok = !building_gatehouse_tile_blocked(tile)
+    return {
+        tile: tile,
+        orientation: orientation,
+        ok: ok,
+        road: ok && terrain.is(tile, TERRAIN_ROAD)
+    }
+}
 
+function building_gatehouse_pick_second_part(first, second) {
+    if (first.road != second.road) {
+        return first.road ? first : second
+    }
+    if (first.road && second.road) {
+        return city_planner.road_orientation == 2 ? second : first
+    }
+    if (second.ok) {
+        return second
+    }
+    if (first.ok) {
+        return first
+    }
+    return { tile: { x: 0, y: 0 }, orientation: -1 }
+}
+
+function building_gatehouse_second_part_tile(end, city_orientation) {
+    var first
+    var second
     if (city_orientation == 0) {
-        possible_next = building_gatehouse_shift(end, 0, -1)
-        if (!building_gatehouse_tile_blocked(possible_next)) {
-            local_rotation = 0
-            tile_second_part = possible_next
-        }
-        possible_next_w = building_gatehouse_shift(end, 1, 0)
-        if (!building_gatehouse_tile_blocked(possible_next_w)) {
-            local_rotation = 1
-            tile_second_part = possible_next_w
-        }
+        first = building_gatehouse_make_candidate(building_gatehouse_shift(end, 0, -1), 0)
+        second = building_gatehouse_make_candidate(building_gatehouse_shift(end, 1, 0), 1)
     } else if (city_orientation == 1) {
-        possible_next = building_gatehouse_shift(end, 0, -1)
-        if (!building_gatehouse_tile_blocked(possible_next)) {
-            local_rotation = 1
-            tile_second_part = possible_next
-        }
-        possible_next_w = building_gatehouse_shift(end, 1, 0)
-        if (!building_gatehouse_tile_blocked(possible_next_w)) {
-            local_rotation = 2
-            tile_second_part = possible_next_w
-        }
+        first = building_gatehouse_make_candidate(building_gatehouse_shift(end, 0, -1), 1)
+        second = building_gatehouse_make_candidate(building_gatehouse_shift(end, 1, 0), 2)
     } else if (city_orientation == 2) {
-        possible_next = building_gatehouse_shift(end, 0, 1)
-        if (!building_gatehouse_tile_blocked(possible_next)) {
-            local_rotation = 2
-            tile_second_part = possible_next
-        }
-        possible_next_w = building_gatehouse_shift(end, 1, 0)
-        if (!building_gatehouse_tile_blocked(possible_next_w)) {
-            local_rotation = 3
-            tile_second_part = possible_next_w
-        }
+        first = building_gatehouse_make_candidate(building_gatehouse_shift(end, 0, 1), 2)
+        second = building_gatehouse_make_candidate(building_gatehouse_shift(end, 1, 0), 3)
     } else if (city_orientation == 3) {
-        possible_next = building_gatehouse_shift(end, 0, 1)
-        if (!building_gatehouse_tile_blocked(possible_next)) {
-            local_rotation = 3
-            tile_second_part = possible_next
-        }
-        possible_next_w = building_gatehouse_shift(end, -1, 0)
-        if (!building_gatehouse_tile_blocked(possible_next_w)) {
-            local_rotation = 0
-            tile_second_part = possible_next_w
-        }
+        first = building_gatehouse_make_candidate(building_gatehouse_shift(end, 0, 1), 3)
+        second = building_gatehouse_make_candidate(building_gatehouse_shift(end, -1, 0), 0)
+    } else {
+        return { tile: { x: 0, y: 0 }, orientation: -1 }
     }
 
-    return { tile: tile_second_part, orientation: local_rotation }
+    var picked = building_gatehouse_pick_second_part(first, second)
+    return { tile: picked.tile, orientation: picked.orientation }
 }
 
 function building_gatehouse_placement_check(ev) {
