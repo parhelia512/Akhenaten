@@ -94,7 +94,6 @@ void empire_window::archive_load(archive arch) {
 
     start_pos = arch.r_vec2i("start_pos");
     finish_pos = arch.r_vec2i("finish_pos");
-    arch.r_desc("image", image);
 
     init();
 }
@@ -226,12 +225,6 @@ void empire_window::draw_map() {
     ui.event(empire_window_draw{draw_offset}, get_section(), "draw_map_begin");
 
     painter ctx = game.painter();
-    image_desc map_bg = g_empire.map_background.valid() ? g_empire.map_background : image;
-    if (const image_t* map_img = image_get(map_bg.tid())) {
-        sprite spr;
-        spr.img = map_img;
-        ctx.draw(spr, draw_offset, COLOR_MASK_NONE, scale, scale);
-    }
 
     // LAND/SEA route pak objects and TRADER slots are skipped: city routes are drawn from JS,
     // traders from g_empire_traders (typed EMPIRE_OBJECT_TRADER handler is for those figures).

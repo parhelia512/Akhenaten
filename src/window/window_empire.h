@@ -14,7 +14,6 @@ struct empire_window : public autoconfig_window_t<empire_window> {
     int left_pan_travel = 0;
     vec2i left_pan_last_pos;
     vec2i start_pos, finish_pos;
-    image_desc image;
 
     virtual int handle_mouse(const mouse *m) override { return 0; }
     virtual int get_tooltip_text() override { return 0; }

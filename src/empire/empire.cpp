@@ -89,13 +89,6 @@ declare_console_command_p(save_empire_routes) {
 
 void empire_t::load_mission_metadata(const mission_id_t &missionid) {
     g_config_arch.r_section(missionid, [] (archive arch) {
-        // Optional map background: {pack,id} / {path:"..."} / "path/to/image"
-        g_empire.map_background = {};
-        image_desc map_bg;
-        if (arch.r_desc("map_background", map_bg) && map_bg.valid()) {
-            g_empire.map_background = map_bg;
-        }
-
         // When true: ignore all pak cities and show only cities listed in JS (including ours).
         const bool hide_pak_cities = arch.r_bool("hide_pak_cities", false);
         if (hide_pak_cities) {

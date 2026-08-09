@@ -712,9 +712,22 @@ function empire_window_request_city_trade_route(city, draw_offset, force) {
     })
 }
 
+function empire_window_map_background_image() {
+    var cfg = get_mission_config(scenario.campaign_scenario_id)
+    if (cfg && cfg.map_background) {
+        return get_image(cfg.map_background)
+    }
+    return get_image(empire_window.image)
+}
+
 [es=(empire_window, draw_map_begin)]
 function empire_window_draw_map_begin(ev) {
     empire_window.deferred_route_city_id = -1
+
+    var img = empire_window_map_background_image()
+    if (img) {
+        ui.image_scaled(img, ev.draw_offset, empire_window_map_scale())
+    }
 }
 
 [es=(empire_window, draw_deferred_trade_route)]
