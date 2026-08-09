@@ -4,6 +4,7 @@
 #include "core/direction.h"
 #include "core/speed.h"
 #include "graphics/screen.h"
+#include "graphics/view/view.h" // g_camera
 #include "input/touch.h"
 #include "game/game_config.h"
 #include "game/game.h"

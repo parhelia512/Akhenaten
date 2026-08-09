@@ -6,6 +6,7 @@
 #include "editor/tool_restriction.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
+#include "graphics/view/view.h" // screen_tile / map_tile_to_view, no longer via scroll.h
 #include "grid/terrain.h"
 #include "input/scroll.h"
 #include "scenario/scenario.h"
