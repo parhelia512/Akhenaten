@@ -74,6 +74,13 @@ void building_planer_renderer::register_model(e_building_type e, const building_
 }
 
 void building_planer_renderer::ghost_blocked(build_planner &planer, painter &ctx, tile2i start, tile2i end, vec2i pixel, bool fully_blocked) const {
+    const auto &params = building_static_params::get(planer.build_type);
+    const xstring event_name = js_helpers::es_hash_str<64>(params.name, __func__).c_str();
+    if (js_has_event_handlers(event_name)) {
+        es_t(ghost_preview_ev{ start, end, pixel, planer.in_progress }, params.name, __func__);
+        return;
+    }
+
     for (int row = 0; row < planer.size.y; row++) {
         for (int column = 0; column < planer.size.x; column++) {
             vec2i current_coord = planer.pixel_coord_offset(row, column);

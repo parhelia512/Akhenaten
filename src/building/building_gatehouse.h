@@ -13,11 +13,6 @@ public:
     building_gatehouse(building &b) : building_impl(b) {}
     virtual building_gatehouse *dcast_gatehouse() override { return this; }
 
-    struct preview : building_planer_renderer {
-        virtual void ghost_preview(build_planner &planer, painter &ctx, tile2i tile, tile2i end, vec2i pixel) const override;
-        virtual void ghost_blocked(build_planner &planer, painter &ctx, tile2i tile, tile2i end, vec2i pixel, bool fully_blocked) const override;
-    };
-
     struct gatehouse_params_t {
         building_gatehouse_ghost ghost;
     };

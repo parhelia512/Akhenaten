@@ -179,6 +179,12 @@ void __city_planner_set_warning(xstring warning) {
 }
 ANK_FUNCTION_1(__city_planner_set_warning);
 
+bool __city_planner_is_blocked_for_building(tile2i tile, int size, unsigned int restricted_terrain) {
+    blocked_tile_vec blocked_tiles;
+    return !!build_planner::is_blocked_for_building(tile, size, blocked_tiles, restricted_terrain);
+}
+ANK_FUNCTION_3(__city_planner_is_blocked_for_building);
+
 tile2i __map_tile_shift_offset(tile2i tile, int offset) {
     return tile.shifted(offset);
 }

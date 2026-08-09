@@ -67,3 +67,4 @@ import building.industry_office
 import building.well
 import building.water_lift
 import building.water_supply
+import building.gatehouse
