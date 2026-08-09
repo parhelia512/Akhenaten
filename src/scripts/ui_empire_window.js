@@ -27,7 +27,7 @@ empire_window {
         button_help          : help_button({pos[0, 0]})
         button_close         : close_button({pos[0, 0]})
         button_advisor       : advisor_button({pos[0, 0]})
-        button_pause         : button({pos[0, 0], size:[32, 32]})
+        button_pause         : button({pos[0, 0], size:[32, 32], ondraw_event: "draw_pause_button"})
 
         button_open_trade    : button({pos[0, 0], size:[440, 20]})
         info_tooltip         : text({pos[0, 0], size:[400, 20], font:FONT_NORMAL_BLACK_ON_LIGHT, align:"center"})
@@ -272,6 +272,35 @@ function empire_window_on_init(window) {
     window.button_pause.onclick = function() { emit event_toggle_pause{ value: 0 } }
     window.button_open_trade.onclick = function() {
         ui.show_yesno("#popup_dialog_open_trade", empire_window_confirm_open_trade )
+    }
+}
+
+[es=(empire_window, draw_pause_button)]
+function empire_window_draw_pause_button(window) {
+    var btn = window.button_pause
+    btn.tooltip = game.paused ? __loc("#TR_BUTTON_RESUME") : __loc("#TR_BUTTON_PAUSE")
+
+    var p = btn.screen_pos
+    var sz = btn.size
+    if (game.paused) {
+        var tri_h = 17
+        var tri_w = ((tri_h + 1) / 2) | 0
+        var x0 = p.x + (((sz.x - tri_w) / 2) | 0)
+        var y0 = p.y + (((sz.y - tri_h) / 2) | 0)
+        var half = ((tri_h - 1) / 2) | 0
+        for (var r = 0; r < tri_h; r++) {
+            var w = (r <= half) ? (r + 1) : (tri_h - r)
+            ui.fill_rect({ x: x0, y: y0 + r }, { x: w, y: 1 }, COLOR_BLACK)
+        }
+    } else {
+        var bar_w = 4
+        var bar_h = 18
+        var gap = 6
+        var total_w = 2 * bar_w + gap
+        var x0 = p.x + (((sz.x - total_w) / 2) | 0)
+        var y0 = p.y + (((sz.y - bar_h) / 2) | 0)
+        ui.fill_rect({ x: x0, y: y0 }, { x: bar_w, y: bar_h }, COLOR_BLACK)
+        ui.fill_rect({ x: x0 + bar_w + gap, y: y0 }, { x: bar_w, y: bar_h }, COLOR_BLACK)
     }
 }
 
