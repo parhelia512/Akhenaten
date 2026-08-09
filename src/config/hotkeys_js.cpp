@@ -35,14 +35,6 @@ ANK_SCRIPT_EVENT(event_app_center_screen, value)
 ANK_SCRIPT_EVENT(event_app_screenshot, value)
 ANK_SCRIPT_EVENT(event_app_city_screenshot, value)
 
-void hotkey_editor_notify_key_pressed(int key, int modifiers) {
-    events::emit(event_hotkey_editor_key{key, modifiers, 1});
-}
-
-void hotkey_editor_notify_key_released(int key, int modifiers) {
-    events::emit(event_hotkey_editor_key{key, modifiers, 0});
-}
-
 static bvariant_map hotkey_mapping_to_js(const hotkey_mapping *mapping) {
     bvariant_map result;
     if (!mapping) {

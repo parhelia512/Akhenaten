@@ -7,6 +7,7 @@
 #include "input/touch.h"
 #include "game/game_config.h"
 #include "game/game.h"
+#include "js/js_game.h"
 #include "platform/arguments.h"
 
 #include <cmath>
@@ -505,19 +506,17 @@ void scroll_stop(void) {
     data.drag.apply_middle_mouse_pan_speed = 0;
     data.limits.active = 0;
 }
-void scroll_arrow_left(int value) {
+void scroll_arrow(int which, int value) {
     auto &data = g_input_scroll_data;
-    set_arrow_key(&data.arrow_key.left, value);
+    scroll_key_t *arrow = nullptr;
+    switch (which) {
+    case 0: arrow = &data.arrow_key.up; break;
+    case 1: arrow = &data.arrow_key.down; break;
+    case 2: arrow = &data.arrow_key.left; break;
+    case 3: arrow = &data.arrow_key.right; break;
+    default: return;
+    }
+    set_arrow_key(arrow, value);
 }
-void scroll_arrow_right(int value) {
-    auto &data = g_input_scroll_data;
-    set_arrow_key(&data.arrow_key.right, value);
-}
-void scroll_arrow_up(int value) {
-    auto &data = g_input_scroll_data;
-    set_arrow_key(&data.arrow_key.up, value);
-}
-void scroll_arrow_down(int value) {
-    auto &data = g_input_scroll_data;
-    set_arrow_key(&data.arrow_key.down, value);
-}
+void __scroll_arrow(int which, int value) { scroll_arrow(which, value); }
+ANK_FUNCTION_2(__scroll_arrow)

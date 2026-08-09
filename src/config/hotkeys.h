@@ -127,6 +127,3 @@ namespace game_hotkeys {
     void set_hotkey(const hotkey_mapping &mapping);
     void install();
 }
-
-void hotkey_editor_notify_key_pressed(int key, int modifiers);
-void hotkey_editor_notify_key_released(int key, int modifiers);

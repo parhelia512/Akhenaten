@@ -16,6 +16,7 @@
 #include "core/variant.h"
 #include "core/svector.h"
 #include "core/hvector.h"
+#include "core/profiler.h" // ANK_FUNCTION_* expand to OZZY_PROFILER_FUNCTION()
 #include "grid/grid.h"
 #include "grid/point.h"
 

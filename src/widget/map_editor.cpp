@@ -14,6 +14,7 @@
 #include "grid/property.h"
 #include "input/scroll.h"
 #include "game/game_config.h"
+#include "game/game_events.h"
 #include "sound/sound_city.h"
 #include "sound/sound.h"
 #include "widget/city/tile_draw.h"
@@ -299,7 +300,7 @@ void widget_map_editor_handle_input(const mouse* m, const hotkeys* h) {
         if (editor_tool_is_active())
             editor_tool_deactivate();
         else {
-            hotkey_handle_escape();
+            events::emit(event_exit_to_menu_requested{ 0 });
         }
         return;
     }

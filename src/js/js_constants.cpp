@@ -96,6 +96,7 @@ void js_register_game_constants(js_State* J) {
     _R(KEY_NONE)
     _R(KEY_ENTER)
     _R(KEY_ESCAPE)
+    _R(HOTKEY_MAX_ITEMS)
     _R(KEY_MOD_NONE)
     _R(KEY_MOD_SHIFT)
     _R(KEY_MOD_CTRL)

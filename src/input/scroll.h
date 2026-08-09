@@ -29,7 +29,5 @@ int scroll_drag_end(void);
 
 void scroll_stop(void);
 
-void scroll_arrow_left(int value);
-void scroll_arrow_right(int value);
-void scroll_arrow_up(int value);
-void scroll_arrow_down(int value);
+// which: 0=up, 1=down, 2=left, 3=right
+void scroll_arrow(int which, int value);

@@ -21,6 +21,7 @@
 #include "core/string.h"
 #include "figure/formation_batalion.h"
 #include "game/cheats.h"
+#include "game/game_events.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "grid/bridge.h"
@@ -1790,7 +1791,7 @@ void screen_city_t::handle_escape(const hotkeys *h) {
         return;
     }
 
-    hotkey_handle_escape();
+    events::emit(event_exit_to_menu_requested{ 0 });
 }
 
 void screen_city_t::handle_input(const mouse* m, const hotkeys* h) {

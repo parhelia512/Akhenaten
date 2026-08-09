@@ -8,6 +8,123 @@ function hotkey_map_from_pairs(pairs) {
     return m
 }
 
+function hotkey_action_is_arrow(action) {
+    return action === HOTKEY_ARROW_UP
+        || action === HOTKEY_ARROW_DOWN
+        || action === HOTKEY_ARROW_LEFT
+        || action === HOTKEY_ARROW_RIGHT
+}
+
+function hotkey_scroll_arrow(action, is_down) {
+    switch (action) {
+    case HOTKEY_ARROW_UP: __scroll_arrow(0, is_down); break
+    case HOTKEY_ARROW_DOWN: __scroll_arrow(1, is_down); break
+    case HOTKEY_ARROW_LEFT: __scroll_arrow(2, is_down); break
+    case HOTKEY_ARROW_RIGHT: __scroll_arrow(3, is_down); break
+    }
+}
+
+function hotkey_action_is_repeatable(action) {
+    return action === HOTKEY_INCREASE_GAME_SPEED
+        || action === HOTKEY_DECREASE_GAME_SPEED
+        || action === HOTKEY_DEBUG_1_UP
+        || action === HOTKEY_DEBUG_1_DOWN
+        || action === HOTKEY_DEBUG_RENDER_UP
+        || action === HOTKEY_DEBUG_RENDER_DOWN
+}
+
+var hotkey_bindings = {
+    defs: [],
+    arrows: []
+}
+
+function hotkey_bindings_add_def(defs, key, modifiers, action, repeatable) {
+    if (!key) {
+        return
+    }
+    defs.push({
+        key: key,
+        modifiers: modifiers | 0,
+        action: action,
+        repeatable: repeatable ? 1 : 0
+    })
+}
+
+function hotkey_bindings_rebuild() {
+    var defs = []
+    var arrows = []
+    for (var action = HOTKEY_NONE + 1; action < HOTKEY_MAX_ITEMS; action++) {
+        var m = __hotkey_read_mapping(action, 0)
+        if (!m) {
+            continue
+        }
+        if (hotkey_action_is_arrow(action)) {
+            if (m.key) {
+                arrows.push({ key: m.key, action: action })
+            }
+            if (m.alt_key) {
+                arrows.push({ key: m.alt_key, action: action })
+            }
+        } else {
+            var repeatable = hotkey_action_is_repeatable(action)
+            hotkey_bindings_add_def(defs, m.key, m.modifiers, action, repeatable)
+            hotkey_bindings_add_def(defs, m.alt_key, m.alt_modifiers, action, repeatable)
+        }
+    }
+    hotkey_bindings.defs = defs
+    hotkey_bindings.arrows = arrows
+}
+
+[es=event_hotkey_bindings_changed]
+function hotkey_on_bindings_changed(ev) {
+    hotkey_bindings_rebuild()
+}
+
+[es=event_level_post_load]
+function hotkey_on_level_post_load(ev) {
+    hotkey_bindings_rebuild()
+}
+
+[es=event_hotkey_key]
+function hotkey_on_key(ev) {
+    if (ui.window_is("window_hotkey_editor")) {
+        emit event_hotkey_editor_key{ key: ev.key, modifiers: ev.modifiers, pressed: ev.pressed }
+        return
+    }
+
+    if (ev.key === KEY_NONE) {
+        return
+    }
+
+    var i
+    if (ev.pressed) {
+        for (i = 0; i < hotkey_bindings.arrows.length; i++) {
+            if (hotkey_bindings.arrows[i].key === ev.key) {
+                hotkey_scroll_arrow(hotkey_bindings.arrows[i].action, 1)
+            }
+        }
+        if (ev.key === KEY_ENTER && ev.modifiers === KEY_MOD_NONE) {
+            __hotkeys.enter_pressed = 1
+        }
+        if (ev.key === KEY_ESCAPE && ev.modifiers === KEY_MOD_NONE) {
+            __hotkeys.escape_pressed = 1
+        }
+        for (i = 0; i < hotkey_bindings.defs.length; i++) {
+            var d = hotkey_bindings.defs[i]
+            if (d.key === ev.key && d.modifiers === ev.modifiers && (!ev.repeat || d.repeatable)) {
+                emit event_hotkey_fired{ action: d.action }
+            }
+        }
+        return
+    }
+
+    for (i = 0; i < hotkey_bindings.arrows.length; i++) {
+        if (hotkey_bindings.arrows[i].key === ev.key) {
+            hotkey_scroll_arrow(hotkey_bindings.arrows[i].action, 0)
+        }
+    }
+}
+
 var hotkey_actions = {
     advisors: hotkey_map_from_pairs([
         [HOTKEY_SHOW_ADVISOR_LABOR, ADVISOR_LABOR],
