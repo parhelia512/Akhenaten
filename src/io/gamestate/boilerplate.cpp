@@ -135,7 +135,7 @@ vfs::path fullpath_maps(vfs::path filename) {
     if (strncasecmp(filename, "Maps/", 5) == 0 || strncasecmp(filename, "Maps\\", 5) == 0) {
         return filename;
     }
-    return vfs::path( "Maps/", filename.c_str() );
+    return vfs::path(vfs::MAPS_FOLDER, "/", filename.c_str());
 }
 
 static buffer* small_buffer = new buffer(4);
