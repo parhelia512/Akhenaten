@@ -204,19 +204,33 @@ mission4 {
 	}
 
 	goal_tooltip: function() {
-		if (!mission.papyrus_made_handled) {
-			return "#tutorial_goal_scribal_school"
+		if (!mission.spacious_apartment_built) {
+			return "#mission4_goal_spacious_apartment"
 		}
 
-		if (!mission.spacious_apartment_built) {
-			return "#tutorial_goal_education"
+		if (!mission.papyrus_made_handled) {
+			if (city.count_total_buildings(BUILDING_REED_GATHERER) < 1) {
+				return "#mission4_goal_reed_gatherer"
+			}
+			if (city.count_total_buildings(BUILDING_PAPYRUS_WORKSHOP) < 1) {
+				return "#mission4_goal_papyrus_maker"
+			}
+			if (city.count_total_buildings(BUILDING_SCRIBAL_SCHOOL) < 1) {
+				return "#mission4_goal_scribal_school"
+			}
+			return "#mission4_goal_store_papyrus"
 		}
 
 		if (!mission.bricks_bought_handled) {
-			return "#tutorial_goal_import_bricks"
+			return "#mission4_goal_import_bricks"
 		}
 
-		return ""
+		if (city.count_total_buildings(BUILDING_BRICKLAYERS_GUILD) < 1
+			|| city.count_total_buildings(BUILDING_SMALL_MASTABA) < 1) {
+			return "#mission4_goal_build_mastaba"
+		}
+
+		return "#mission4_goal_export_papyrus"
 	}
 }
 
@@ -244,6 +258,7 @@ function mission4_on_start(ev) {
 	if (mission.papyrus_made_handled) {
 		city.set_advisor_available(ADVISOR_TRADE, 1)
 		city.use_building(BUILDING_DOCK, true)
+		city.set_empire_available(1)
 	}
 
 	if (mission.spacious_apartment_built) {

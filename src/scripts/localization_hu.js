@@ -1285,6 +1285,15 @@ localization_hu = [
   { key: "#tutorial_goal_scribal_school", text: "Készíts papiruszt és építs írnokiskolát" }
   { key: "#tutorial_goal_import_bricks", text: "Importálj téglát, hogy masztabát építhess" }
 
+  { key: "#mission4_goal_spacious_apartment", text: "1/4 Fejlessz egy házat tágas lakássá (élelem, víz, fazekaság, szórakozás)" }
+  { key: "#mission4_goal_reed_gatherer", text: "2/4 Építs nádgyűjtőt a mocsár mellé" }
+  { key: "#mission4_goal_papyrus_maker", text: "2/4 Építs papiruszkészítőt, és lássd el náddal" }
+  { key: "#mission4_goal_scribal_school", text: "2/4 Építs írnokiskolát, majd tárolj 100 papiruszt" }
+  { key: "#mission4_goal_store_papyrus", text: "2/4 Tárolj 100 papiruszt a raktárban a kereskedelemhez" }
+  { key: "#mission4_goal_import_bricks", text: "3/4 Perwadjyt (300 db) csak téglát ad — importálj 100-at. Nekhen (550) papiruszt vesz" }
+  { key: "#mission4_goal_build_mastaba", text: "4/4 Építs kőművescéhet és helyezz el egy kis masztabát" }
+  { key: "#mission4_goal_export_papyrus", text: "Nyisd meg Nekhent (550 db), exportálj papiruszt, majd a célok (1500 / 15 / 20 / 9 / 40)" }
+
   { key: "#none", text: "Semmi" }
   { key: "#grain", text: "Gabona" }
   { key: "#meat", text: "Hús" }
