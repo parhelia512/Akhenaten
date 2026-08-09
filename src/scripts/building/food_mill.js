@@ -69,7 +69,7 @@ function building_food_mill_ghost_preview(ev) {
     [-60, 30], [60, 30], [-30, 45], [30, 45], [0, 60]
   ]
   for (var i = 0; i < offsets.length; i++) {
-    city.planner.draw_flat_tile(
+    city_planner.draw_flat_tile(
       { x: pixel.x + offsets[i][0], y: pixel.y + offsets[i][1] },
       COLOR_MASK_GREEN)
   }

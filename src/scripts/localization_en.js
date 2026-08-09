@@ -1306,6 +1306,8 @@ localization_en = [
   { key: "#mission2_pottery_step2", text: "Beautify your city, then review the Mission Briefing" }
 
   { key: "#mission3_brew_beer", text: "Brew some beer for Bazaars to distribute" }
+  { key: "#reach_modest_houses_number", text: "Evolve 10 houses to Modest Homestead" }
+  { key: "#build_tax_collector", text: "Build a Tax Collector" }
 
   { key: "#market_buyer_returning_to", text: "Returning to" }
   { key: "#market_buyer_collecting", text: "Collecting" }

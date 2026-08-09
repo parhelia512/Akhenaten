@@ -270,6 +270,7 @@ figure_priest = {
 	terrain_usage : TERRAIN_USAGE_ROADS
 	max_roam_length : 384
 	permission : epermission_priest
+	record_path : true
 }
 
 figure_ostrich {

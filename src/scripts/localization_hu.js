@@ -1275,6 +1275,8 @@ localization_hu = [
   { key: "#mission2_pottery_step2", text: "Szépítsd a várost, majd tekintsd át a küldetés ismertetőjét" }
 
   { key: "#mission3_brew_beer", text: "Főzz sört, hogy a bazárok kioszthassák" }
+  { key: "#reach_modest_houses_number", text: "Fejlessz 10 házat szerény tanyává" }
+  { key: "#build_tax_collector", text: "Építs adószedőt" }
 
   { key: "#market_buyer_returning_to", text: "Visszatérés ide:" }
   { key: "#market_buyer_collecting", text: "Begyűjtés" }

@@ -1234,25 +1234,27 @@ localization_de = [
   { key: "#seth_low_sentiment_2", text: "Die Menschen in der Stadt sind zutiefst unglücklich. Sie könnten sich bald dem Verbrechen zuwenden." }
   { key: "#seth_low_entertainment_2", text: "Was soll eine Priesterin tun? Es gibt hier so wenig Ablenkung." }
   { key: "#seth_city_low_mood_2", text: "Bastet gewährt mir die Kraft, die Kranken zu heilen, bevor sie ihre Krankheit verbreiten." }
-  
+
   { key: "#antelope_hunter_hunting", text: "Antilopen sind uns nicht gewachsen!" }
   { key: "#antelope_hunter_back", text: "Heute Abend wird es für alle Steaks geben." }
   { key: "#antelope_hunter_city_is_good", text: "Diese Stadt ist gut!" }
   { key: "#hunt_bird_birds_are_wily", text: "Diese Vögel sind gerissen!" }
   { key: "#hunt_bird_birds_ready_for_roasting", text: "Diese Vögel sind bereit zum Braten!" }
-  
+
   { key: "#mission2_pottery_step1", text: "Füllt einen Lagerhof mit Töpferwaren" }
   { key: "#mission2_pottery_step2", text: "Verschönert Eure Stadt, dann überprüft das Missionsbriefing" }
-  
+
   { key: "#mission3_brew_beer", text: "Braut etwas Bier, damit Basare es verteilen können" }
-  
+  { key: "#reach_modest_houses_number", text: "Entwickelt 10 Häuser zu bescheidenen Gehöften" }
+  { key: "#build_tax_collector", text: "Baut ein Steueramt" }
+
   { key: "#market_buyer_returning_to", text: "Kehrt zurück zu" }
   { key: "#market_buyer_collecting", text: "Sammelt ein" }
-  
+
   { key: "#tutorial_goal_education", text: "Lasst ein Haus zu einer 'geräumigen Wohnung' entwickeln" }
   { key: "#tutorial_goal_scribal_school", text: "Stellt etwas Papyrus her und baut eine Schreiberschule" }
   { key: "#tutorial_goal_import_bricks", text: "Importiert einige Ziegel, damit Ihr eine Mastaba bauen könnt" }
-  
+
   { key: "#none", text: "Nichts" }
   { key: "#grain", text: "Getreide" }
   { key: "#meat", text: "Fleisch" }

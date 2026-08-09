@@ -76,3 +76,53 @@ function building_booth_draw_usable_paths(ev) {
 function building_firehouse_draw_usable_paths(ev) {
     building_draw_usable_paths(ev)
 }
+
+[es=(building_temple_osiris, draw_usable_paths)]
+function building_temple_osiris_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
+
+[es=(building_temple_ra, draw_usable_paths)]
+function building_temple_ra_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
+
+[es=(building_temple_ptah, draw_usable_paths)]
+function building_temple_ptah_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
+
+[es=(building_temple_seth, draw_usable_paths)]
+function building_temple_seth_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
+
+[es=(building_temple_bast, draw_usable_paths)]
+function building_temple_bast_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
+
+[es=(building_temple_complex_osiris, draw_usable_paths)]
+function building_temple_complex_osiris_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
+
+[es=(building_temple_complex_ra, draw_usable_paths)]
+function building_temple_complex_ra_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
+
+[es=(building_temple_complex_ptah, draw_usable_paths)]
+function building_temple_complex_ptah_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
+
+[es=(building_temple_complex_seth, draw_usable_paths)]
+function building_temple_complex_seth_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
+
+[es=(building_temple_complex_bast, draw_usable_paths)]
+function building_temple_complex_bast_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}

@@ -65,8 +65,9 @@ function run_test() {
         test147_fail('half_month_0_got_' + floods_expected_half_month())
         return
     }
-    if (floods_ui_format_farm_flood_month() !== __loc(44, 180)) {
-        test147_fail('early_june_text')
+    // Half 0 → June (160:5), matching OG farm info (#572).
+    if (floods_ui_format_farm_flood_month() !== __loc(160, MONTH_JUNE)) {
+        test147_fail('june_text')
         return
     }
     __log_marker('farm_info_month_june')
@@ -80,8 +81,9 @@ function run_test() {
         test147_fail('half_month_5_got_' + floods_expected_half_month())
         return
     }
-    if (floods_ui_format_farm_flood_month() !== __loc(44, 185)) {
-        test147_fail('late_august_text')
+    // Half 5 → August (160:7).
+    if (floods_ui_format_farm_flood_month() !== __loc(160, MONTH_AUGUST)) {
+        test147_fail('august_text')
         return
     }
     __log_marker('farm_info_month_august')

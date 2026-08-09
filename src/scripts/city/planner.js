@@ -59,5 +59,3 @@ function city_planner_on_rotate_building(ev) {
 function city_planner_on_change_building_variant(ev) {
     __city_planner_next_building_variant()
 }
-
-city.planner = city_planner
