@@ -109,6 +109,11 @@ void __ui_label_colored(pcstr text, vec2i pos, int font, unsigned int c) {
 }
 ANK_FUNCTION_4(__ui_label_colored);
 
+void __ui_set_tooltip(pcstr text) {
+    ui::set_tooltip(text ? text : "");
+}
+ANK_FUNCTION_1(__ui_set_tooltip);
+
 void __ui_window_city_draw_panels() {
     window_city_draw_panels();
 }

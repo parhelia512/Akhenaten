@@ -26,7 +26,6 @@ struct empire_window : public autoconfig_window_t<empire_window> {
     const int sell_res_group = 47;
     vec2i start_pos, finish_pos;
     image_desc image;
-    xstring hovered_object_tooltip;
 
     /** Empire city index (lookup_id); deferred route drawn at end of draw_map. */
     int deffer_city_route_id = -1;
@@ -47,7 +46,6 @@ struct empire_window : public autoconfig_window_t<empire_window> {
     bool is_outside_map(int x, int y);
     void determine_selected_object(const mouse *m);
     void draw_trade_route(const empire_city *city, int object_index, bool force);
-    void draw_object_tooltip();
     void draw_tooltip(tooltip_context *c);
     vec2i map_clip_origin() const;
     vec2i map_area_size_pixels() const;

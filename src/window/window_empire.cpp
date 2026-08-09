@@ -448,7 +448,7 @@ void empire_window::draw_map() {
     g_empire_map.set_viewport(map_view);
 
     draw_offset = map_draw_origin();
-    hovered_object_tooltip = "";
+    ui::set_tooltip({});
     deffer_city_route_id = -1;
 
     painter ctx = game.painter();
@@ -558,15 +558,8 @@ void empire_window::ui_draw_foreground(UiFlags flags) {
     }
 
     draw_object_info();
-    draw_object_tooltip();
 
     ui.end_widget();
-}
-
-void empire_window::draw_object_tooltip() {
-    if (!!hovered_object_tooltip) {
-        ui::set_tooltip(hovered_object_tooltip);
-    }
 }
 
 void empire_window::draw_tooltip(tooltip_context* c) {
@@ -580,7 +573,7 @@ void empire_window::draw_tooltip(tooltip_context* c) {
         }
     }
 
-    // Fall back to UI tooltip (set by draw_object_tooltip for city names, etc.)
+    // Fall back to UI tooltip (set from scripts during draw_map, e.g. city hover).
     const tooltip_context& uitooltip = ui::get_tooltip();
     if (!!uitooltip.text) {
         c->text = uitooltip.text;
@@ -616,11 +609,6 @@ void __empire_window_set_map_bounds(int min_x, int min_y, int max_x, int max_y) 
 }
 ANK_FUNCTION_4(__empire_window_set_map_bounds)
 
-void __empire_window_set_hovered_tooltip(pcstr text) {
-    g_empire_window.hovered_object_tooltip = text ? text : "";
-}
-ANK_FUNCTION_1(__empire_window_set_hovered_tooltip)
-
 void __empire_window_draw_city_trade_route(int city_id, int object_index, int force) {
     g_empire_window.draw_trade_route(g_empire.city(city_id), object_index, force != 0);
 }
@@ -634,12 +622,6 @@ int __empire_update_map_animation(int object_index, int image_id) {
     return g_empire.update_animation(object_index, *obj, image_id);
 }
 ANK_FUNCTION_2(__empire_update_map_animation)
-
-pcstr __empire_city_display_name(int city_id) {
-    const empire_city* city = g_empire.city(city_id);
-    return (city && city->in_use) ? city->name_str.c_str() : "";
-}
-ANK_FUNCTION_1(__empire_city_display_name)
 
 int __empire_city_image_id(int city_type) {
     return empire_city_images.image_id((e_empire_city)city_type, scenario_empire_is_expanded());

@@ -135,6 +135,7 @@ void js_register_empire_city_proto(js_State* J) {
     JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, empire_city, months_under_siege);
     JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, empire_city, type);
     JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, empire_city, cost_to_open);
+    JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, empire_city, name_id);
 
     jsB_propf(J, js_intern("EmpireCity.prototype.city_buys_resource"), empire_city_proto_city_buys_resource, 1);
     jsB_propf(J, js_intern("EmpireCity.prototype.city_sells_resource"), empire_city_proto_city_sells_resource, 1);

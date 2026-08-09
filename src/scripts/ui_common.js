@@ -58,6 +58,7 @@ ui.border = __ui_border
 ui.button_border = __ui_button_border
 ui.panel = __ui_panel
 ui.label_colored = __ui_label_colored
+ui.set_tooltip = __ui_set_tooltip
 ui.text_abs_colored = __ui_text_abs_colored
 ui.draw_texture = __ui_draw_texture
 ui.window_is = __ui_window_is

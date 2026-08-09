@@ -430,7 +430,7 @@ function empire_window_draw_city(ev) {
 
     var scaled_w = Math.max(1, Math.round(img.width * scale))
     var scaled_h = Math.max(1, Math.round(img.height * scale))
-    var name = __empire_city_display_name(ev.city_id)
+    var name = city.name
 
     if (city.is_sieged) {
         var siege = get_image("pharaoh_general/empire_bits_00001")
@@ -458,7 +458,7 @@ function empire_window_draw_city(ev) {
     if (city.type != EMPIRE_CITY_OURS
         && __mouse.x > draw_pos.x && __mouse.y > draw_pos.y
         && __mouse.x < draw_pos.x + scaled_w && __mouse.y < draw_pos.y + scaled_h) {
-        __empire_window_set_hovered_tooltip(name)
+        ui.set_tooltip(name)
     }
 
     empire_window_draw_map_animation(ev.object_index, img, draw_pos, scale)
