@@ -101,8 +101,8 @@ void screen_city_t::update_zoom_level(painter &ctx) {
 }
 
 void screen_city_t::scroll_map(const mouse* m) {
-    vec2i delta;
-    if (g_scroll.get_delta(m, &delta, scroll_t::CITY)) {
+    vec2i delta = g_scroll.get_delta(m, scroll_t::CITY);
+    if (delta.x || delta.y) {
         g_camera.scroll(delta.x, delta.y);
         sound_city_decay_views();
     }
@@ -941,9 +941,9 @@ void screen_city_t::draw_ornaments_and_animations_height(vec2i point, tile2i til
         color_mask = COLOR_MASK_RED;
     }
 
-    // Anchor for create_subcommand (pyramid bricks/stairs, plague skull, …).
+    // Anchor for create_subcommand (pyramid bricks/stairs, plague skull, Â…).
     // draw_isometric_nonterrain_height often creates no parent (non-tall map
-    // image) — then subcommands attach to the *previous* tile and sort with its
+    // image) Â— then subcommands attach to the *previous* tile and sort with its
     // pixel. That shows up as crushed/mis-layered sprites on the left viewport
     // edge when a tall monument is partially off-screen. ert_none draws nothing.
     {
@@ -1168,7 +1168,7 @@ void screen_city_t::handle_touch_scroll(const touch_t * t, bool fore_capture_inp
         if (t->has_started) {
             vec2i view_pos = g_camera.offset;
             vec2i view_size = g_camera.size_pixels;
-            g_scroll.set_custom_margins(view_pos.x, view_pos.y, view_size.x, view_size.y);
+            g_scroll.set_custom_margins(view_pos, view_size);
         }
         if (t->has_ended) {
             g_scroll.restore_margins();
@@ -1337,7 +1337,7 @@ void screen_city_t::military_map_click(int legion_formation_id, tile2i tile) {
     if (other_formation_id && other_formation_id == legion_formation_id) {
         formation_batalion_return_home(m);
     } else if (invasion_auto_resolve_target_blocked(tile)) {
-        // March onto a frozen pending wave — blocked; reposition elsewhere OK.
+        // March onto a frozen pending wave Â— blocked; reposition elsewhere OK.
         events::emit(event_city_warning{ "#warning_auto_resolve_orders_blocked" });
     } else {
         formation_batalion_move_to(m, tile);
@@ -1822,7 +1822,7 @@ xstring screen_city_t::get_overlay_tooltip(tooltip_context *c, tile2i tile) {
     }
 
     // Tile-map overlays (irrigation, hide cliffs, bridges, desirability) use
-    // get_tooltip on bare land — do not require a building id.
+    // get_tooltip on bare land Â— do not require a building id.
     if (!tooltip) {
         city_overlay_ptr->get_tooltip(c, tile, tooltip);
     }

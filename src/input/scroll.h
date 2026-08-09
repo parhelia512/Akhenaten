@@ -19,6 +19,13 @@ struct scroll_t {
         middle_mouse_pan = 2,
     };
 
+    enum class arrow_dir {
+        up = 0,
+        down = 1,
+        left = 2,
+        right = 3,
+    };
+
     struct config_t {
         int mouse_border = 5;
         int touch_border = 100;
@@ -39,8 +46,28 @@ struct scroll_t {
         const std::array<int, 11> &steps_for(type t) const {
             return t == CITY ? step_city : step_empire;
         }
+
+        vec2i direction(int dir) const {
+            return {direction_x[dir], direction_y[dir]};
+        }
     } config;
 
+    int in_progress() const;
+    int is_smooth() const;
+
+    vec2i get_delta(const mouse *m, type t);
+
+    void drag_start(drag_source source);
+    int drag_end();
+
+    void stop();
+
+    void set_custom_margins(vec2i pos, vec2i size);
+    void restore_margins();
+
+    void arrow(arrow_dir which, int value);
+
+private:
     struct arrow_key_t {
         int state = 0;
         int value = 0;
@@ -53,45 +80,50 @@ struct scroll_t {
         void restart_unless(const arrow_key_t *exception);
     };
 
-    int is_scrolling = 0;
-    int constant_input = 0;
-    struct {
+    struct arrows_t {
         arrow_key_t up;
         arrow_key_t down;
         arrow_key_t left;
         arrow_key_t right;
-    } arrow_key;
-    struct {
+
+        void restart_all_except(const arrow_key_t *arrow);
+    };
+
+    struct drag_t {
         int active = 0;
         int is_touch = 0;
         int apply_middle_mouse_pan_speed = 0;
-        int has_started = 0;
+        int moved = 0;
         vec2i delta;
-    } drag;
-    struct {
+        vec2i travel;
+    };
+
+    struct camera_speed_t {
         speed_type x{};
         speed_type y{};
         int decaying = 0;
         float modifier_x = 0.f;
         float modifier_y = 0.f;
-    } speed;
-    vec2i align_direction;
-    time_millis last_time = 0;
-    struct {
+    };
+
+    struct margins_t {
         int active = 0;
         vec2i pos;
-        int width = 0;
-        int height = 0;
-    } limits;
+        vec2i size;
+    };
 
-    int in_progress() const;
-    int is_smooth() const;
+    int is_scrolling = 0;
+    int constant_input = 0;
+    arrows_t arrows;
+    drag_t drag;
+    camera_speed_t speed;
+    time_millis last_time = 0;
+    margins_t limits;
+
     int should_scroll();
     int speed_factor() const;
-
     void clear_speed();
     float dampen_mouse_relative_pan_delta(float d) const;
-    void restart_all_active_arrows_except(const arrow_key_t *arrow);
     int get_key_state_for_value(int value) const;
     int set_arrow_input(arrow_key_t *arrow, const arrow_key_t *opposite_arrow, float *modifier);
     int get_direction(const mouse *m);
@@ -99,18 +131,6 @@ struct scroll_t {
     static int get_alignment_delta(int direction, int camera_max_offset, int camera_offset);
     int set_speed_from_drag(bool keep_delta);
     bool set_speed_from_input(const mouse *m, type t);
-    void set_custom_margins(int x, int y, int width, int height);
-    void restore_margins();
-
-    int get_delta(const mouse *m, vec2i *delta, type t);
-
-    void drag_start(drag_source source);
-    int drag_end();
-
-    void stop();
-
-    // which: 0=up, 1=down, 2=left, 3=right
-    void arrow(int which, int value);
 };
 
 extern scroll_t g_scroll;
@@ -131,4 +151,3 @@ ANK_CONFIG_STRUCT(scroll_t::config_t,
     direction_y,
     step_city,
     step_empire)
-

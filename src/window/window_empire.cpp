@@ -240,9 +240,9 @@ bool empire_window::is_outside_map(int x, int y) {
 int empire_window::ui_handle_mouse(const mouse* m) {
     const hotkeys* h = hotkey_state();
 
-    vec2i position;
     last_mouse_pos = {m->x, m->y};
-    if (g_scroll.get_delta(m, &position, scroll_t::EMPIRE)) {
+    vec2i position = g_scroll.get_delta(m, scroll_t::EMPIRE);
+    if (position.x || position.y) {
         const float scale = map_scale();
         scroll_remainder_x += position.x / std::max(0.001f, scale);
         scroll_remainder_y += position.y / std::max(0.001f, scale);

@@ -12,7 +12,7 @@
 #include "platform/arguments.h"
 
 #include <cmath>
-#include <stdlib.h>
+#include <cstdlib>
 
 enum key_state { KEY_STATE_UNPRESSED = 0, KEY_STATE_PRESSED = 1, KEY_STATE_HELD = 2, KEY_STATE_AXIS = 3 };
 
@@ -48,7 +48,6 @@ void scroll_t::clear_speed() {
     speed_clear(speed.x);
     speed_clear(speed.y);
     speed.decaying = 0;
-    align_direction = {SPEED_DIRECTION_STOPPED, SPEED_DIRECTION_STOPPED};
 }
 
 int scroll_t::arrow_key_t::get_value() {
@@ -86,12 +85,12 @@ void scroll_t::arrow_key_t::restart_unless(const arrow_key_t *exception) {
     }
 }
 
-void scroll_t::restart_all_active_arrows_except(const arrow_key_t *arrow) {
-    clear_speed();
-    arrow_key.up.restart_unless(arrow);
-    arrow_key.down.restart_unless(arrow);
-    arrow_key.left.restart_unless(arrow);
-    arrow_key.right.restart_unless(arrow);
+void scroll_t::arrows_t::restart_all_except(const arrow_key_t *arrow) {
+    g_scroll.clear_speed();
+    up.restart_unless(arrow);
+    down.restart_unless(arrow);
+    left.restart_unless(arrow);
+    right.restart_unless(arrow);
 }
 
 int scroll_t::get_key_state_for_value(int value) const {
@@ -115,7 +114,7 @@ void scroll_t::arrow_key_t::set(int new_value) {
     value = new_value;
     last_change = time_get_millis();
     if (new_state != KEY_STATE_AXIS && !game_features::gameui_smooth_scrolling)
-        g_scroll.restart_all_active_arrows_except(this);
+        g_scroll.arrows.restart_all_except(this);
 }
 
 int scroll_t::in_progress() const {
@@ -175,12 +174,12 @@ int scroll_t::direction_from_sides(int top, int left, int bottom, int right) {
     return DIR_8_NONE;
 }
 
-void scroll_t::set_custom_margins(int x, int y, int width, int height) {
+void scroll_t::set_custom_margins(vec2i pos, vec2i size) {
     limits.active = 1;
-    limits.pos = {x, y};
-    limits.width = width;
-    limits.height = height;
+    limits.pos = pos;
+    limits.size = size;
 }
+
 void scroll_t::restore_margins() {
     limits.active = 0;
 }
@@ -191,13 +190,15 @@ void scroll_t::drag_start(drag_source source) {
     drag.active = 1;
     drag.is_touch = (source == drag_source::touch) ? 1 : 0;
     drag.apply_middle_mouse_pan_speed = (source == drag_source::middle_mouse_pan) ? 1 : 0;
-    drag.delta.x = 0;
-    drag.delta.y = 0;
+    drag.moved = 0;
+    drag.delta = {0, 0};
+    drag.travel = {0, 0};
     if (!drag.is_touch)
         g_mouse.get_relative_state(nullptr, nullptr);
 
     clear_speed();
 }
+
 int scroll_t::set_speed_from_drag(bool keep_delta) {
     if (!drag.active)
         return 0;
@@ -226,33 +227,27 @@ int scroll_t::set_speed_from_drag(bool keep_delta) {
     }
     drag.delta.x += delta_x;
     drag.delta.y += delta_y;
-    if ((delta_x != 0 || delta_y != 0)) {
-        //        if (!drag.is_touch)
-        //            g_mouse.set_relative_mode(1);
-        // Store tiny movements until we decide that it's enough to move into scroll mode
-        //        if (!drag.has_started)
-        //            drag.has_started =
-        //                    abs(drag.delta.x) > config.drag_min_delta || abs(drag.delta.y) >
-        //                    config.drag_min_delta;
+    drag.travel.x += std::abs(delta_x);
+    drag.travel.y += std::abs(delta_y);
+    if (!drag.moved
+        && (drag.travel.x > config.drag_min_delta || drag.travel.y > config.drag_min_delta)) {
+        drag.moved = 1;
     }
-    //    if (drag.has_started) {
     speed_set_target(speed.x, drag.delta.x, SPEED_CHANGE_IMMEDIATE, 0);
     speed_set_target(speed.y, drag.delta.y, SPEED_CHANGE_IMMEDIATE, 0);
     if (!keep_delta) {
-        drag.delta.x = 0;
-        drag.delta.y = 0;
+        drag.delta = {0, 0};
     }
-    //    }
     return 1;
 }
 
 int scroll_t::drag_end() {
     if (!drag.active)
         return 0;
-    int has_scrolled = drag.has_started;
+    int has_scrolled = drag.moved;
 
     drag.active = 0;
-    drag.has_started = 0;
+    drag.moved = 0;
     drag.apply_middle_mouse_pan_speed = 0;
 
     if (!drag.is_touch)
@@ -262,10 +257,6 @@ int scroll_t::drag_end() {
         speed_set_target(speed.x, -t->frame_movement.x, SPEED_CHANGE_IMMEDIATE, 1);
         speed_set_target(speed.y, -t->frame_movement.y, SPEED_CHANGE_IMMEDIATE, 1);
     }
-    align_direction = {
-        speed_get_current_direction(speed.x),
-        speed_get_current_direction(speed.y)
-    };
     speed_set_target(speed.x, 0, config.drag_decay_time, 1);
     speed_set_target(speed.y, 0, config.drag_decay_time, 1);
 
@@ -307,8 +298,8 @@ int scroll_t::get_direction(const mouse *m) {
     speed.modifier_y = 0.0f;
     if (limits.active) {
         border = config.touch_border;
-        width = limits.width;
-        height = limits.height;
+        width = limits.size.x;
+        height = limits.size.y;
         x -= limits.pos.x;
         y -= limits.pos.y;
         constant_input = 1;
@@ -334,10 +325,10 @@ int scroll_t::get_direction(const mouse *m) {
         }
     }
     // keyboard/joystick arrow keys
-    left |= set_arrow_input(&arrow_key.left, nullptr, &speed.modifier_x);
-    right |= set_arrow_input(&arrow_key.right, &arrow_key.left, &speed.modifier_x);
-    top |= set_arrow_input(&arrow_key.up, nullptr, &speed.modifier_y);
-    bottom |= set_arrow_input(&arrow_key.down, &arrow_key.up, &speed.modifier_y);
+    left |= set_arrow_input(&arrows.left, nullptr, &speed.modifier_x);
+    right |= set_arrow_input(&arrows.right, &arrows.left, &speed.modifier_x);
+    top |= set_arrow_input(&arrows.up, nullptr, &speed.modifier_y);
+    bottom |= set_arrow_input(&arrows.down, &arrows.up, &speed.modifier_y);
 
     if (constant_input) {
         if (!speed.modifier_x)
@@ -393,8 +384,7 @@ bool scroll_t::set_speed_from_input(const mouse *m, type t) {
     if (speed.decaying)
         clear_speed();
 
-    int dir_x = config.direction_x[direction];
-    int dir_y = config.direction_y[direction];
+    vec2i dir = config.direction(direction);
     int y_fraction = t == CITY ? 2 : 1;
     const auto &steps = config.steps_for(t);
 
@@ -405,26 +395,26 @@ bool scroll_t::set_speed_from_input(const mouse *m, type t) {
         int align_y = 0;
         if (t == CITY) {
             vec2i camera_pixels = g_camera.camera_pixel_offset_internal;
-            align_x = get_alignment_delta(dir_x, config.tile_x_pixels, camera_pixels.x);
-            align_y = get_alignment_delta(dir_y, config.tile_y_pixels, camera_pixels.y);
+            align_x = get_alignment_delta(dir.x, config.tile_x_pixels, camera_pixels.x);
+            align_y = get_alignment_delta(dir.y, config.tile_y_pixels, camera_pixels.y);
         }
-        speed_set_target(speed.x, (step + align_x) * dir_x * do_scroll, SPEED_CHANGE_IMMEDIATE, 0);
-        speed_set_target(speed.y, ((step / y_fraction) + align_y) * dir_y * do_scroll, SPEED_CHANGE_IMMEDIATE, 0);
+        speed_set_target(speed.x, (step + align_x) * dir.x * do_scroll, SPEED_CHANGE_IMMEDIATE, 0);
+        speed_set_target(speed.y, ((step / y_fraction) + align_y) * dir.y * do_scroll, SPEED_CHANGE_IMMEDIATE, 0);
         return true;
     }
 
     int max_speed = steps[speed_factor()];
-    int max_speed_x = max_speed * dir_x;
-    int max_speed_y = (max_speed / y_fraction) * dir_y;
+    int max_speed_x = max_speed * dir.x;
+    int max_speed_y = (max_speed / y_fraction) * dir.y;
 
     if (!constant_input) {
-        if (speed_get_current_direction(speed.x) * dir_x < 0)
+        if (speed_get_current_direction(speed.x) * dir.x < 0)
             speed_invert(speed.x);
 
         else if (speed.x.desired_speed != max_speed_x)
             speed_set_target(speed.x, max_speed_x, config.regular_decay_time, 1);
 
-        if (speed_get_current_direction(speed.y) * dir_y < 0)
+        if (speed_get_current_direction(speed.y) * dir.y < 0)
             speed_invert(speed.y);
 
         else if (speed.y.desired_speed != max_speed_y)
@@ -437,15 +427,14 @@ bool scroll_t::set_speed_from_input(const mouse *m, type t) {
     return true;
 }
 
-int scroll_t::get_delta(const mouse* m, vec2i* delta, type t) {
+vec2i scroll_t::get_delta(const mouse* m, type t) {
     is_scrolling = set_speed_from_input(m, t);
-    delta->x = speed_get_delta(speed.x);
-    delta->y = speed_get_delta(speed.y);
+    vec2i delta{speed_get_delta(speed.x), speed_get_delta(speed.y)};
     if (!is_scrolling) {
         speed.decaying = speed_is_changing(speed.x) || speed_is_changing(speed.y);
         is_scrolling = speed.decaying;
     }
-    return delta->x != 0 || delta->y != 0;
+    return delta;
 }
 
 void scroll_t::stop() {
@@ -458,17 +447,19 @@ void scroll_t::stop() {
     limits.active = 0;
 }
 
-void scroll_t::arrow(int which, int value) {
+void scroll_t::arrow(arrow_dir which, int value) {
     arrow_key_t *key = nullptr;
     switch (which) {
-    case 0: key = &arrow_key.up; break;
-    case 1: key = &arrow_key.down; break;
-    case 2: key = &arrow_key.left; break;
-    case 3: key = &arrow_key.right; break;
-    default: return;
+    case arrow_dir::up: key = &arrows.up; break;
+    case arrow_dir::down: key = &arrows.down; break;
+    case arrow_dir::left: key = &arrows.left; break;
+    case arrow_dir::right: key = &arrows.right; break;
     }
-    key->set(value);
+    if (key)
+        key->set(value);
 }
 
-void __scroll_arrow(int which, int value) { g_scroll.arrow(which, value); }
+void __scroll_arrow(int which, int value) {
+    g_scroll.arrow(static_cast<scroll_t::arrow_dir>(which), value);
+}
 ANK_FUNCTION_2(__scroll_arrow)

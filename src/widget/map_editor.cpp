@@ -92,8 +92,8 @@ static void update_city_view_coords(int x, int y, tile2i* tile) {
 }
 
 static void scroll_map(const mouse* m) {
-    vec2i delta;
-    if (g_scroll.get_delta(m, &delta, scroll_t::CITY)) {
+    vec2i delta = g_scroll.get_delta(m, scroll_t::CITY);
+    if (delta.x || delta.y) {
         g_camera.scroll(delta.x, delta.y);
         sound_city_decay_views();
     }
@@ -116,8 +116,8 @@ static void handle_touch_scroll(const touch_t * t) {
         if (t->has_started) {
             vec2i view_pos, view_size;
             view_pos = g_camera.offset;
-    view_size = g_camera.size_pixels;
-            g_scroll.set_custom_margins(view_pos.x, view_pos.y, view_size.x, view_size.y);
+            view_size = g_camera.size_pixels;
+            g_scroll.set_custom_margins(view_pos, view_size);
         }
         if (t->has_ended)
             g_scroll.restore_margins();
