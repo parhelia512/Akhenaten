@@ -7,6 +7,20 @@ EmpireCity.property.name = {
         return __loc(game_features.gameui_empire_city_old_names ? 195 : 21, this.name_id)
     }
 }
+EmpireCity.property.can_trade = {
+    get: function() {
+        if (this.is_sieged) {
+            return false
+        }
+        switch (this.type) {
+        case EMPIRE_CITY_PHARAOH_TRADING:
+        case EMPIRE_CITY_EGYPTIAN_TRADING:
+        case EMPIRE_CITY_FOREIGN_TRADING:
+            return true
+        }
+        return false
+    }
+}
 
 EmpireCityObject.property.pos = { }
 

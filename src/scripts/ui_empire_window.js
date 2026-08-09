@@ -866,6 +866,28 @@ function empire_window_draw_background(window) {
     empire_window_layout_ui(window)
 }
 
+[es=(empire_window, update_selection_ui)]
+function empire_window_update_selection_ui(window) {
+    var city = null
+    var obj = empire_window.selected_object
+    if (obj && obj.type == EMPIRE_OBJECT_CITY) {
+        __empire_map_set_selected_city(obj.city_id)
+        city = empire.get_city(obj.city_id)
+    }
+
+    window.city_name.text = city ? city.name : ""
+    window.button_help.enabled = !!city
+    window.button_close.enabled = true
+    window.button_advisor.enabled = !!city
+
+    var may_open_trade = city && !city.is_open && city.can_trade
+    window.button_open_trade.enabled = may_open_trade
+    if (may_open_trade) {
+        window.button_open_trade.text = __loc("#debens") + " " + city.cost_to_open + " "
+            + __loc(47, 6 + (city.is_sea_trade ? 1 : 0))
+    }
+}
+
 [es=(empire_window, draw_paneling)]
 function empire_window_draw_paneling(window) {
     var min_pos = empire_window.screen_bounds.min_pos

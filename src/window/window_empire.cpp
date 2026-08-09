@@ -283,30 +283,7 @@ void empire_window::draw_paneling() {
 
 void empire_window::ui_draw_foreground(UiFlags flags) {
     draw_map();
-
-    const empire_city* city = nullptr;
-    int selected_object = g_empire_map.selected_object();
-    if (selected_object) {
-        const empire_object* object = g_empire.get_object(selected_object - 1);
-        if (object->type == EMPIRE_OBJECT_CITY) {
-            g_empire_map.selected_city = g_empire.get_city_for_object(selected_object - 1);
-            city = g_empire.city(g_empire_map.selected_city);
-        }
-    }
-
-    ui["city_name"] = "";
-    ui["button_help"].enabled = !!city;
-    ui["button_close"].enabled = true;
-    ui["button_advisor"].enabled = !!city;
-    ui["city_name"] = city ? city->name_str : "";
-
-    const bool may_open_trade = city && !city->is_open && city->can_trade();
-    ui["button_open_trade"].enabled = may_open_trade;
-    if (may_open_trade) {
-        ui["button_open_trade"].text_var("%s %d %s", ui::str_from_key("#debens"), city->cost_to_open,
-          ui::str(sell_res_group, 6 + city->is_sea_trade));
-    }
-
+    ui.event(empire_window_draw{pos}, get_section(), "update_selection_ui");
     draw_paneling();
 
     ui.begin_widget({0, 0});

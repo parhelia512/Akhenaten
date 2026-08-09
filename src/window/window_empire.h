@@ -2,9 +2,6 @@
 
 #include "window/autoconfig_window.h"
 
-struct empire_object;
-struct empire_city;
-
 struct empire_window : public autoconfig_window_t<empire_window> {
     vec2i min_pos, max_pos;
     vec2i draw_offset;
@@ -16,7 +13,6 @@ struct empire_window : public autoconfig_window_t<empire_window> {
     bool left_panning = false;
     int left_pan_travel = 0;
     vec2i left_pan_last_pos;
-    const int sell_res_group = 47;
     vec2i start_pos, finish_pos;
     image_desc image;
 
