@@ -46,6 +46,29 @@ int __empire_map_selected_empire_object_id() {
 }
 ANK_FUNCTION(__empire_map_selected_empire_object_id)
 
+int __empire_map_selected_object_type() {
+    const int selected_object = g_empire_map.selected_object();
+    if (selected_object <= 0) {
+        return -1;
+    }
+    const empire_object* object = g_empire.get_object(selected_object - 1);
+    return object ? object->type : -1;
+}
+ANK_FUNCTION(__empire_map_selected_object_type)
+
+std::optional<bvariant> __empire_map_selected_object_property(pcstr property) {
+    const int selected_object = g_empire_map.selected_object();
+    if (selected_object <= 0) {
+        return {};
+    }
+    const empire_object* object = g_empire.get_object(selected_object - 1);
+    if (!object) {
+        return {};
+    }
+    return archive_helper::get(*object, property, true);
+}
+ANK_FUNCTION_1(__empire_map_selected_object_property)
+
 int __empire_luxury_goods_traded_sum() {
     int sum = 0;
     for (const auto &route : g_empire.get_routes()) {

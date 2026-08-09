@@ -57,6 +57,8 @@ empire_window {
 
     @selected_empire_object_id { get: function() { return __empire_map_selected_empire_object_id() } }
     @selected_city { get: function() { return __empire_map_selected_city() } }
+    @selected_object_type { get: function() { return __empire_map_selected_object_type() } }
+    selected_object_property : __empire_map_selected_object_property
 
     /** Filled each frame in draw_paneling; used by draw_object_info*/
     screen_bounds : null
@@ -168,18 +170,15 @@ function empire_window_clear_city_trade_ui(w) {
     w.city_want_buy_items.enabled = false
 }
 
-[es=(empire_window, draw_object_info, none)]
 function empire_window_draw_object_info_none(ev) {
     empire_window_clear_city_trade_ui(ev)
     ev.info_tooltip.text = __loc(47, 9)
 }
 
-[es=(empire_window, draw_object_info, EMPIRE_OBJECT_ORNAMENT)]
 function empire_window_draw_object_info_ornament(ev) {
     ev.info_tooltip.text = ""
 }
 
-[es=(empire_window, draw_object_info, EMPIRE_OBJECT_CITY)]
 function empire_window_draw_object_info_city(ev) {
     ev.info_tooltip.text = ""
     empire_window_clear_city_trade_ui(ev)
@@ -220,25 +219,28 @@ function empire_window_draw_object_info_city(ev) {
     }
 }
 
-[es=(empire_window, draw_object_info, EMPIRE_OBJECT_KINGDOME_ARMY)]
 function empire_window_draw_object_info_kingdome_army(ev) {
     ev.info_tooltip.text = ""
-    if (ev.egyptian_months_to_travel_back > 0) {
-        if (ev.kingdome_months_traveled === ev.distant_battle_travel_months) {
+    var battle = empire.active_battle
+    var travel_months = empire_window.selected_object_property("distant_battle_travel_months")
+    if (battle.egyptian_months_to_travel_back > 0) {
+        if (battle.egyptian_months_traveled === travel_months) {
             var sb = empire_window.screen_bounds
             var ox = ((sb.min_pos.x + sb.max_pos.x - 240) / 2) | 0
             var oy = sb.max_pos.y - 68
-            var text_id = ev.egyptian_months_to_travel_forth ? 15 : 16
+            var text_id = battle.egyptian_months_to_travel_forth ? 15 : 16
             __lang_text_draw_multiline(47, text_id, ox, oy, 240, FONT_NORMAL_BLACK_ON_LIGHT)
         }
     }
 }
 
-[es=(empire_window, draw_object_info, EMPIRE_OBJECT_ENEMY_ARMY)]
 function empire_window_draw_object_info_enemy_army(ev) {
     ev.info_tooltip.text = ""
-    if (ev.months_until_battle > 0) {
-        if (ev.enemy_months_traveled === ev.distant_battle_travel_months) {
+    var battle = empire.active_battle
+    var travel_months = empire_window.selected_object_property("distant_battle_travel_months")
+    if (battle.months_until_battle > 0) {
+        // enemy_months_traveled() historically returned egyptian_months_traveled.
+        if (battle.egyptian_months_traveled === travel_months) {
             var sb = empire_window.screen_bounds
             var ox = ((sb.min_pos.x + sb.max_pos.x - 240) / 2) | 0
             var oy = sb.max_pos.y - 68
@@ -247,9 +249,34 @@ function empire_window_draw_object_info_enemy_army(ev) {
     }
 }
 
-[es=(empire_window, draw_object_info, other)]
 function empire_window_draw_object_info_other(ev) {
     ev.info_tooltip.text = ""
+}
+
+[es=(empire_window, draw_object_info)]
+function empire_window_draw_object_info(ev) {
+    var type = empire_window.selected_object_type
+    if (type < 0) {
+        empire_window_draw_object_info_none(ev)
+        return
+    }
+    switch (type) {
+    case EMPIRE_OBJECT_ORNAMENT:
+        empire_window_draw_object_info_ornament(ev)
+        break
+    case EMPIRE_OBJECT_CITY:
+        empire_window_draw_object_info_city(ev)
+        break
+    case EMPIRE_OBJECT_KINGDOME_ARMY:
+        empire_window_draw_object_info_kingdome_army(ev)
+        break
+    case EMPIRE_OBJECT_ENEMY_ARMY:
+        empire_window_draw_object_info_enemy_army(ev)
+        break
+    default:
+        empire_window_draw_object_info_other(ev)
+        break
+    }
 }
 
 function empire_window_confirm_open_trade() {

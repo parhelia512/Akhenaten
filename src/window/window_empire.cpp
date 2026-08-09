@@ -119,27 +119,10 @@ struct empire_window_draw_background_evt {
 };
 ANK_REGISTER_STRUCT_WRITER(empire_window_draw_background_evt, pad);
 
-struct empire_window_object_info_empty {
+struct empire_window_object_info_evt {
     int unused = 0;
 };
-ANK_REGISTER_STRUCT_WRITER(empire_window_object_info_empty, unused);
-
-struct empire_window_object_info_kingdome_army {
-    int distant_battle_travel_months;
-    int egyptian_months_to_travel_back;
-    int egyptian_months_to_travel_forth;
-    int kingdome_months_traveled;
-};
-ANK_REGISTER_STRUCT_WRITER(empire_window_object_info_kingdome_army, distant_battle_travel_months,
-  egyptian_months_to_travel_back, egyptian_months_to_travel_forth, kingdome_months_traveled);
-
-struct empire_window_object_info_enemy_army {
-    int distant_battle_travel_months;
-    int months_until_battle;
-    int enemy_months_traveled;
-};
-ANK_REGISTER_STRUCT_WRITER(empire_window_object_info_enemy_army, distant_battle_travel_months, months_until_battle,
-  enemy_months_traveled);
+ANK_REGISTER_STRUCT_WRITER(empire_window_object_info_evt, unused);
 
 void empire_window::init() {
     int selected_object = g_empire_map.selected_object();
@@ -203,44 +186,7 @@ void empire_window::draw_trade_route(const empire_city* city, int object_index, 
 }
 
 void empire_window::draw_object_info() {
-    const int selected_object = g_empire_map.selected_object();
-    if (selected_object <= 0) {
-        ui.event(empire_window_object_info_empty{}, get_section(), "draw_object_info", "none");
-        return;
-    }
-
-    const empire_object* object = g_empire.get_object(selected_object - 1);
-    if (!object) {
-        ui.event(empire_window_object_info_empty{}, get_section(), "draw_object_info", "none");
-        return;
-    }
-
-    const e_empire_object ot = (e_empire_object)object->type;
-
-    switch (ot) {
-    case EMPIRE_OBJECT_KINGDOME_ARMY: {
-        const auto& battle = g_distant_battle.battle;
-        empire_window_object_info_kingdome_army info;
-        info.distant_battle_travel_months = object->distant_battle_travel_months;
-        info.egyptian_months_to_travel_back = battle.egyptian_months_to_travel_back;
-        info.egyptian_months_to_travel_forth = battle.egyptian_months_to_travel_forth;
-        info.kingdome_months_traveled = city_military_distant_battle_kingdome_months_traveled();
-        ui.event(info, get_section(), "draw_object_info", empire_object_tokens.name(ot));
-        break;
-    }
-    case EMPIRE_OBJECT_ENEMY_ARMY: {
-        const auto& battle = g_distant_battle.battle;
-        empire_window_object_info_enemy_army info;
-        info.distant_battle_travel_months = object->distant_battle_travel_months;
-        info.months_until_battle = battle.months_until_battle;
-        info.enemy_months_traveled = g_distant_battle.enemy_months_traveled();
-        ui.event(info, get_section(), "draw_object_info", empire_object_tokens.name(ot));
-        break;
-    }
-    default:
-        ui.event(empire_window_object_info_empty{}, get_section(), "draw_object_info", empire_object_tokens.name(ot));
-        break;
-    }
+    ui.event(empire_window_object_info_evt{}, get_section(), "draw_object_info");
 }
 
 void empire_window::determine_selected_object(const mouse* m) {

@@ -70,6 +70,8 @@ empire {
         __property_getter: function(property) { return __game_get_active_battle_property(property) }
         @egyptian_months_to_travel_back { }
         @egyptian_months_to_travel_forth { }
+        @egyptian_months_traveled { }
+        @enemy_months_traveled { }
         @kingdome_army_is_traveling_forth { }
         @months_until_battle { }
         @city { }

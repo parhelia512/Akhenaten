@@ -91,9 +91,11 @@ struct distant_battles_t {
     void process_distant_battle_impl();
 };
 ANK_CONFIG_PROPERTY(distant_battles_t::battle_state_t,
-    egyptian_months_to_travel_forth, 
+    egyptian_months_to_travel_forth,
     egyptian_months_to_travel_back,
     months_until_battle,
-    city)
+    city,
+    enemy_months_traveled,
+    egyptian_months_traveled)
 
 extern distant_battles_t g_distant_battle;
