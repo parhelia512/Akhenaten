@@ -146,6 +146,9 @@ void empire_window::init() {
     g_empire_map.selected_city = selected_object ? g_empire.get_city_for_object(selected_object - 1) : 0;
     scroll_remainder_x = 0.f;
     scroll_remainder_y = 0.f;
+    left_panning = false;
+    left_pan_travel = 0;
+    left_pan_last_pos = {0, 0};
 
     ui.begin_widget(pos);
     ui.event(empire_window_init_event{pos}, get_section(), "init");
@@ -266,22 +269,54 @@ int empire_window::ui_handle_mouse(const mouse* m) {
     const hotkeys* h = hotkey_state();
 
     last_mouse_pos = {m->x, m->y};
-    vec2i position = g_scroll.get_delta(m, scroll_t::EMPIRE);
-    if (position.x || position.y) {
-        const float scale = map_scale();
-        scroll_remainder_x += position.x / std::max(0.001f, scale);
-        scroll_remainder_y += position.y / std::max(0.001f, scale);
-        const vec2i map_delta{
-            consume_scroll_remainder(scroll_remainder_x),
-            consume_scroll_remainder(scroll_remainder_y)
-        };
-        if (map_delta.x || map_delta.y) {
-            g_empire_map.scroll_map(map_delta);
+
+    // Left-drag: 1:1 grab pan (map follows the cursor). Skip camera-scroll stack.
+    if (!m->is_touch && m->left.went_down && !is_outside_map(m->x, m->y)) {
+        left_panning = true;
+        left_pan_travel = 0;
+        left_pan_last_pos = {m->x, m->y};
+    }
+
+    if (!m->is_touch && left_panning && m->left.is_down) {
+        const int dx = m->x - left_pan_last_pos.x;
+        const int dy = m->y - left_pan_last_pos.y;
+        if (dx || dy) {
+            const float scale = std::max(0.001f, map_scale());
+            // Negative: drag right → content follows right (scroll decreases).
+            scroll_remainder_x += -dx / scale;
+            scroll_remainder_y += -dy / scale;
+            const vec2i map_delta{
+                consume_scroll_remainder(scroll_remainder_x),
+                consume_scroll_remainder(scroll_remainder_y)
+            };
+            if (map_delta.x || map_delta.y) {
+                g_empire_map.scroll_map(map_delta);
+            }
+            left_pan_travel += std::abs(dx) + std::abs(dy);
+            left_pan_last_pos = {m->x, m->y};
         }
     }
 
-    if (!m->is_touch && m->left.went_down && !is_outside_map(m->x, m->y)) {
-        g_scroll.drag_start(scroll_t::drag_source::mouse);
+    if (!m->is_touch && m->left.went_up) {
+        finished_scroll = left_pan_travel > g_scroll.config.drag_min_delta ? 1 : 0;
+        left_panning = false;
+        left_pan_travel = 0;
+    }
+
+    if (!left_panning) {
+        vec2i position = g_scroll.get_delta(m, scroll_t::EMPIRE);
+        if (position.x || position.y) {
+            const float scale = map_scale();
+            scroll_remainder_x += position.x / std::max(0.001f, scale);
+            scroll_remainder_y += position.y / std::max(0.001f, scale);
+            const vec2i map_delta{
+                consume_scroll_remainder(scroll_remainder_x),
+                consume_scroll_remainder(scroll_remainder_y)
+            };
+            if (map_delta.x || map_delta.y) {
+                g_empire_map.scroll_map(map_delta);
+            }
+        }
     }
 
     if (!!game_features::gameopt_middle_mouse_camera_pan
@@ -305,9 +340,6 @@ int empire_window::ui_handle_mouse(const mouse* m) {
         }
     }
 
-    if (!m->is_touch && m->left.went_up) {
-        finished_scroll = g_scroll.drag_end();
-    }
     if (m->middle.went_up) {
         g_scroll.drag_end();
     }
