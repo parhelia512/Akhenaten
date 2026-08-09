@@ -124,3 +124,28 @@ building_temple_osiris {
       keeps_visitor_paths: true
     }
   }
+
+[es=(building_temple_osiris, draw_usable_paths)]
+function building_temple_osiris_draw_usable_paths(ev) {
+    city.get_building(ev.bid).draw_usable_paths()
+}
+
+[es=(building_temple_ra, draw_usable_paths)]
+function building_temple_ra_draw_usable_paths(ev) {
+    city.get_building(ev.bid).draw_usable_paths()
+}
+
+[es=(building_temple_ptah, draw_usable_paths)]
+function building_temple_ptah_draw_usable_paths(ev) {
+    city.get_building(ev.bid).draw_usable_paths()
+}
+
+[es=(building_temple_seth, draw_usable_paths)]
+function building_temple_seth_draw_usable_paths(ev) {
+    city.get_building(ev.bid).draw_usable_paths()
+}
+
+[es=(building_temple_bast, draw_usable_paths)]
+function building_temple_bast_draw_usable_paths(ev) {
+    city.get_building(ev.bid).draw_usable_paths()
+}

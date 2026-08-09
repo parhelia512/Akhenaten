@@ -496,3 +496,28 @@ building_temple_complex_osiris {
     fire_proof : true
     cost [ 180, 250, 300, 500, 800 ]
   }
+
+[es=(building_temple_complex_osiris, draw_usable_paths)]
+function building_temple_complex_osiris_draw_usable_paths(ev) {
+    city.get_building(ev.bid).draw_usable_paths()
+}
+
+[es=(building_temple_complex_ra, draw_usable_paths)]
+function building_temple_complex_ra_draw_usable_paths(ev) {
+    city.get_building(ev.bid).draw_usable_paths()
+}
+
+[es=(building_temple_complex_ptah, draw_usable_paths)]
+function building_temple_complex_ptah_draw_usable_paths(ev) {
+    city.get_building(ev.bid).draw_usable_paths()
+}
+
+[es=(building_temple_complex_seth, draw_usable_paths)]
+function building_temple_complex_seth_draw_usable_paths(ev) {
+    city.get_building(ev.bid).draw_usable_paths()
+}
+
+[es=(building_temple_complex_bast, draw_usable_paths)]
+function building_temple_complex_bast_draw_usable_paths(ev) {
+    city.get_building(ev.bid).draw_usable_paths()
+}

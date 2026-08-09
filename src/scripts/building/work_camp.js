@@ -124,3 +124,8 @@ function building_work_camp_update_graphic(ev) {
     var animkey = building.play_animation ? "work" : "none"
     building.set_animation(animkey)
 }
+
+[es=(building_work_camp, draw_usable_paths)]
+function building_work_camp_draw_usable_paths(ev) {
+    city.get_building(ev.bid).draw_usable_paths()
+}

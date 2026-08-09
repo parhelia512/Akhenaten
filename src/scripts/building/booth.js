@@ -34,6 +34,11 @@ function building_booth_on_place_checks(ev) {
     city.warnings.show_if_not(has_juggler_school, "#build_juggling_school")
 }
 
+[es=(building_booth, draw_usable_paths)]
+function building_booth_draw_usable_paths(ev) {
+    city.get_building(ev.bid).draw_usable_paths()
+}
+
 [es=(building_booth, ghost_preview)]
 function building_booth_ghost_preview(ev) {
     var pixel = ev.pixel

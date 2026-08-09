@@ -59,6 +59,11 @@ building_food_mill {
   }
 }
 
+[es=(building_food_mill, draw_usable_paths)]
+function building_food_mill_draw_usable_paths(ev) {
+    city.get_building(ev.bid).draw_usable_paths()
+}
+
 [es=(building_food_mill, ghost_preview)]
 function building_food_mill_ghost_preview(ev) {
   var pixel = ev.pixel
