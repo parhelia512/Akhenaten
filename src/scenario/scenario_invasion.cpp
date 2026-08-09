@@ -429,12 +429,13 @@ bool scenario_invasion_exists_upcoming() {
     return false;
 }
 
-void scenario_invasion_foreach_warning(std::function<void(vec2i, int)> callback) {
-    for (const auto& warning : g_invasions.warnings) {
-        if (warning.in_use && warning.handled)
-            callback(warning.pos, warning.image_id);
+std::optional<bvariant> __invasion_warning_get_property(int index, pcstr property) {
+    if (index < 0 || index >= (int)g_invasions.warnings.size()) {
+        return {};
     }
+    return archive_helper::get(g_invasions.warnings[index], property, true);
 }
+ANK_FUNCTION_2(__invasion_warning_get_property)
 
 int scenario_invasion_count() {
     int num_invasions = 0;

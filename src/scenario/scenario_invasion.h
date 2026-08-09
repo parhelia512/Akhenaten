@@ -8,7 +8,6 @@
 #include "core/tokenum.h"
 
 #include <array>
-#include <functional>
 
 enum e_attack_faction {
     ATTACK_TYPE_ENEMIES = 0,
@@ -44,6 +43,7 @@ struct invasion_warning_t {
     int months_to_go;
     int invasion_id;
 };
+ANK_CONFIG_PROPERTY(invasion_warning_t, in_use, handled, pos, image_id)
 
 struct invasion_opts_t {
     e_attack_faction mode = ATTACK_TYPE_ENEMIES;
@@ -146,8 +146,6 @@ extern const int LOCAL_UPRISING_NUM_ENEMIES[20];
 
 
 bool scenario_invasion_exists_upcoming();
-
-void scenario_invasion_foreach_warning(std::function<void(vec2i, int)> callback);
 
 int scenario_invasion_count();
 

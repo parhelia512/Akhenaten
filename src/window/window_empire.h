@@ -33,7 +33,6 @@ struct empire_window : public autoconfig_window_t<empire_window> {
     vec2i map_base_origin() const;
     vec2i map_draw_origin() const;
     float map_scale() const;
-    vec2i map_to_screen(vec2i map_pos) const;
 };
 
 

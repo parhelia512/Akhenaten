@@ -6,7 +6,6 @@
 #include "empire/empire_object.h"
 #include "empire/empire_traders.h"
 #include "empire/type.h"
-#include "graphics/image.h"
 #include "graphics/graphics.h"
 #include "graphics/elements/generic_button.h"
 #include "graphics/elements/image_button.h"
@@ -16,7 +15,6 @@
 #include "input/mouse.h"
 #include "input/scroll.h"
 #include "scenario/empire.h"
-#include "scenario/scenario_invasion.h"
 #include "scenario/scenario.h"
 #include "window/window_city.h"
 #include "game/game_config.h"
@@ -208,7 +206,6 @@ void empire_window::draw_map() {
     const vec2i clip_origin = map_clip_origin();
     const vec2i pixel_view = map_area_size_pixels();
     const vec2i map_view = map_viewport_size();
-    const float scale = map_scale();
 
     graphics_set_clip_rectangle(clip_origin, pixel_view);
 
@@ -218,17 +215,9 @@ void empire_window::draw_map() {
     ui::set_tooltip({});
     ui.event(empire_window_draw{draw_offset}, get_section(), "draw_map_begin");
 
-    painter ctx = game.painter();
-
     ui.event(empire_window_draw{draw_offset}, get_section(), "draw_map_objects");
 
-    scenario_invasion_foreach_warning([&](vec2i pos, int image_id) {
-        if (const image_t* warning_img = image_get(image_id)) {
-            sprite spr;
-            spr.img = warning_img;
-            ctx.draw(spr, map_to_screen(pos), COLOR_MASK_NONE, scale, scale);
-        }
-    });
+    ui.event(empire_window_draw{draw_offset}, get_section(), "draw_invasion_warnings");
 
     for (auto& trader : g_empire_traders.traders) {
         if (!trader.is_active) {
@@ -342,13 +331,5 @@ vec2i empire_window::map_base_origin() const {
     return clip_origin + vec2i{
         std::max(0, (clip_size.x - scaled_map_size.x) / 2),
         std::max(0, (clip_size.y - scaled_map_size.y) / 2)
-    };
-}
-
-vec2i empire_window::map_to_screen(vec2i map_pos) const {
-    const float scale = map_scale();
-    return map_draw_origin() + vec2i{
-        (int)std::lround(map_pos.x * scale),
-        (int)std::lround(map_pos.y * scale)
     };
 }

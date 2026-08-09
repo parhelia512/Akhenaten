@@ -777,6 +777,22 @@ function empire_window_draw_map_objects(ev) {
     }
 }
 
+[es=(empire_window, draw_invasion_warnings)]
+function empire_window_draw_invasion_warnings(ev) {
+    var scale = empire_window_map_scale()
+    for (var i = 0; i < invasions.warning_slots; i++) {
+        var w = invasions.get_warning(i)
+        if (!w.in_use || !w.handled) {
+            continue
+        }
+        var img = get_image({ tid: w.image_id })
+        if (!img) {
+            continue
+        }
+        ui.image_scaled(img, empire_window_map_point(ev.draw_offset, w.pos), scale)
+    }
+}
+
 [es=(empire_window, draw_deferred_trade_route)]
 function empire_window_draw_deferred_trade_route(ev) {
     var cid = empire_window.deferred_route_city_id
