@@ -313,7 +313,7 @@ static int get_elapsed_ticks() {
         return 0;
     }
 
-    if (scroll_in_progress() && !scroll_is_smooth()) {
+    if (g_scroll.in_progress() && !g_scroll.is_smooth()) {
         return 0;
     }
 

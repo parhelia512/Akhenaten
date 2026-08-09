@@ -242,7 +242,7 @@ int empire_window::ui_handle_mouse(const mouse* m) {
 
     vec2i position;
     last_mouse_pos = {m->x, m->y};
-    if (scroll_get_delta(m, &position, SCROLL_TYPE_EMPIRE)) {
+    if (g_scroll.get_delta(m, &position, scroll_t::EMPIRE)) {
         const float scale = map_scale();
         scroll_remainder_x += position.x / std::max(0.001f, scale);
         scroll_remainder_y += position.y / std::max(0.001f, scale);
@@ -257,7 +257,7 @@ int empire_window::ui_handle_mouse(const mouse* m) {
 
     if (!!game_features::gameopt_middle_mouse_camera_pan
         && m->middle.went_down && !is_outside_map(m->x, m->y)) {
-        scroll_drag_start(scroll_drag_source::middle_mouse_pan);
+        g_scroll.drag_start(scroll_t::drag_source::middle_mouse_pan);
     }
 
     if (m->is_touch) {
@@ -265,14 +265,14 @@ int empire_window::ui_handle_mouse(const mouse* m) {
         if (!is_outside_map(t->current_point.x, t->current_point.y)) {
             if (t->has_started) {
                 is_scrolling = 1;
-                scroll_drag_start(scroll_drag_source::touch);
+                g_scroll.drag_start(scroll_t::drag_source::touch);
             }
         }
 
         if (t->has_ended) {
             is_scrolling = 0;
             finished_scroll = !touch_was_click(t);
-            scroll_drag_end();
+            g_scroll.drag_end();
         }
     }
 
@@ -290,13 +290,13 @@ int empire_window::ui_handle_mouse(const mouse* m) {
             return 0;
         }
     } else if (input_go_back_requested(m, h)) {
-        scroll_drag_end();
+        g_scroll.drag_end();
         window_city_show();
         return 0;
     }
 
     if (m->middle.went_up) {
-        scroll_drag_end();
+        g_scroll.drag_end();
     }
 
     ui.begin_widget({0, 0});

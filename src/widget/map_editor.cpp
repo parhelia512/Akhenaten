@@ -1,4 +1,4 @@
-﻿#include "map_editor.h"
+#include "map_editor.h"
 
 #include "editor/tool.h"
 #include "widget/widget_city.h"
@@ -93,7 +93,7 @@ static void update_city_view_coords(int x, int y, tile2i* tile) {
 
 static void scroll_map(const mouse* m) {
     vec2i delta;
-    if (scroll_get_delta(m, &delta, SCROLL_TYPE_CITY)) {
+    if (g_scroll.get_delta(m, &delta, scroll_t::CITY)) {
         g_camera.scroll(delta.x, delta.y);
         sound_city_decay_views();
     }
@@ -117,21 +117,21 @@ static void handle_touch_scroll(const touch_t * t) {
             vec2i view_pos, view_size;
             view_pos = g_camera.offset;
     view_size = g_camera.size_pixels;
-            scroll_set_custom_margins(view_pos.x, view_pos.y, view_size.x, view_size.y);
+            g_scroll.set_custom_margins(view_pos.x, view_pos.y, view_size.x, view_size.y);
         }
         if (t->has_ended)
-            scroll_restore_margins();
+            g_scroll.restore_margins();
 
         return;
     }
-    scroll_restore_margins();
+    g_scroll.restore_margins();
 
     if (!data.capture_input)
         return;
 
     int was_click = touch_was_click(get_latest_touch());
     if (t->has_started || was_click) {
-        scroll_drag_start(scroll_drag_source::touch);
+        g_scroll.drag_start(scroll_t::drag_source::touch);
         return;
     }
 
@@ -139,7 +139,7 @@ static void handle_touch_scroll(const touch_t * t) {
         return;
 
     if (t->has_ended)
-        scroll_drag_end();
+        g_scroll.drag_end();
 }
 
 static void handle_touch_zoom(const touch_t * first, const touch_t * last) {
@@ -254,7 +254,7 @@ static void handle_touch(void) {
     auto &data = g_map_editor_data;
     const touch_t * first = get_earliest_touch();
     if (!first->in_use) {
-        scroll_restore_margins();
+        g_scroll.restore_margins();
         return;
     }
 
@@ -263,7 +263,7 @@ static void handle_touch(void) {
 
     if (first->has_started && input_coords_in_map(first->current_point.x, first->current_point.y)) {
         data.capture_input = true;
-        scroll_restore_margins();
+        g_scroll.restore_margins();
     }
 
     handle_last_touch();
@@ -282,11 +282,11 @@ void widget_map_editor_handle_input(const mouse* m, const hotkeys* h) {
         handle_touch();
     } else {
         if (m->right.went_down && input_coords_in_map(m->x, m->y) && !editor_tool_is_active())
-            scroll_drag_start(scroll_drag_source::mouse);
+            g_scroll.drag_start(scroll_t::drag_source::mouse);
 
         if (m->right.went_up) {
             if (!editor_tool_is_active()) {
-                int has_scrolled = scroll_drag_end();
+                int has_scrolled = g_scroll.drag_end();
                 if (!has_scrolled)
                     editor_tool_deactivate();
 
