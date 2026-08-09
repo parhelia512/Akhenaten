@@ -42,6 +42,16 @@ int __empire_map_selected_object() {
 }
 ANK_FUNCTION(__empire_map_selected_object)
 
+void __empire_map_select_object(vec2i pos) {
+    g_empire_map.select_object(pos);
+}
+ANK_FUNCTION_1(__empire_map_select_object)
+
+void __empire_map_set_selected_city(int city_id) {
+    g_empire_map.selected_city = city_id;
+}
+ANK_FUNCTION_1(__empire_map_set_selected_city)
+
 int __empire_luxury_goods_traded_sum() {
     int sum = 0;
     for (const auto &route : g_empire.get_routes()) {

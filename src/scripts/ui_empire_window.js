@@ -123,11 +123,67 @@ function empire_window_map_scale() {
     return Math.max(viewport_w / 1200, viewport_h / 1600)
 }
 
+function empire_window_map_clip_origin() {
+    var sb = empire_window.screen_bounds
+    return {
+        x: sb.min_pos.x + empire_window.start_pos.x,
+        y: sb.min_pos.y + empire_window.start_pos.y
+    }
+}
+
+function empire_window_map_area_size() {
+    var sb = empire_window.screen_bounds
+    return {
+        x: Math.max(1, (sb.max_pos.x - sb.min_pos.x) - empire_window.finish_pos.x),
+        y: Math.max(1, (sb.max_pos.y - sb.min_pos.y) - empire_window.finish_pos.y)
+    }
+}
+
+function empire_window_map_base_origin() {
+    var clip = empire_window_map_clip_origin()
+    var size = empire_window_map_area_size()
+    var s = empire_window_map_scale()
+    var scaled_w = Math.max(1, Math.round(1200 * s))
+    var scaled_h = Math.max(1, Math.round(1600 * s))
+    return {
+        x: clip.x + Math.max(0, ((size.x - scaled_w) / 2) | 0),
+        y: clip.y + Math.max(0, ((size.y - scaled_h) / 2) | 0)
+    }
+}
+
+function empire_window_is_outside_map(x, y) {
+    var o = empire_window_map_clip_origin()
+    var size = empire_window_map_area_size()
+    return x < o.x || x >= o.x + size.x || y < o.y || y >= o.y + size.y
+}
+
 function empire_window_map_point(draw_offset, pos) {
     var s = empire_window_map_scale()
     return {
         x: draw_offset.x + Math.round(pos.x * s),
         y: draw_offset.y + Math.round(pos.y * s)
+    }
+}
+
+[es=(empire_window, determine_selected_object)]
+function empire_window_determine_selected_object(ev) {
+    if (!empire_window.screen_bounds) {
+        return
+    }
+    if (!__mouse.left.went_up || ev.finished_scroll || empire_window_is_outside_map(__mouse.x, __mouse.y)) {
+        return
+    }
+
+    var origin = empire_window_map_base_origin()
+    var scale = Math.max(0.001, empire_window_map_scale())
+    __empire_map_select_object({
+        x: Math.max(0, Math.round((__mouse.x - origin.x) / scale)),
+        y: Math.max(0, Math.round((__mouse.y - origin.y) / scale))
+    })
+
+    var obj = empire_window.selected_object
+    if (obj && obj.type == EMPIRE_OBJECT_CITY) {
+        __empire_map_set_selected_city(obj.city_id)
     }
 }
 

@@ -148,21 +148,10 @@ void empire_window::draw_trade_route(const empire_city* city, int object_index, 
       empire_object_tokens.name(EMPIRE_OBJECT_TRADE_ROUTE));
 }
 
-void empire_window::determine_selected_object(const mouse* m) {
-    if (!m->left.went_up || finished_scroll || is_outside_map(m->x, m->y)) {
-        finished_scroll = 0;
-        return;
-    }
-
-    const vec2i origin = map_base_origin();
-    const float scale = map_scale();
-    const vec2i map_pos{
-        std::max(0, (int)std::lround((m->x - origin.x) / std::max(0.001f, scale))),
-        std::max(0, (int)std::lround((m->y - origin.y) / std::max(0.001f, scale)))
-    };
-
-    g_empire_map.select_object(map_pos);
-}
+struct empire_window_determine_selected_object {
+    int finished_scroll;
+};
+ANK_REGISTER_STRUCT_WRITER(empire_window_determine_selected_object, finished_scroll);
 
 bool empire_window::is_outside_map(int x, int y) {
     const vec2i origin = map_clip_origin();
@@ -249,15 +238,11 @@ int empire_window::ui_handle_mouse(const mouse* m) {
         g_scroll.drag_end();
     }
 
-    determine_selected_object(m);
+    ui.event(empire_window_determine_selected_object{finished_scroll}, get_section(), "determine_selected_object");
+    finished_scroll = 0;
 
     int selected_object = g_empire_map.selected_object();
     if (selected_object) {
-        const empire_object* obj = g_empire.get_object(selected_object - 1);
-        if (obj->type == EMPIRE_OBJECT_CITY) {
-            g_empire_map.selected_city = g_empire.get_city_for_object(selected_object - 1);
-        }
-
         if (input_go_back_requested(m, h)) {
             g_empire_map.clear_selected_object();
             return 0;
