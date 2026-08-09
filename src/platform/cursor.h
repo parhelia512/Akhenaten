@@ -16,7 +16,7 @@ struct platform_cursor_t {
 private:
     struct mouse_color_t {
         char type;
-        color color;
+        color value;
     };
 
     void* cursors[CURSOR_MAX] = {};

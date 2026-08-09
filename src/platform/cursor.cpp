@@ -9,7 +9,7 @@
 color platform_cursor_t::color_for(char type) {
     for (const auto& entry : mouse_colors) {
         if (entry.type == type) {
-            return entry.color;
+            return entry.value;
         }
     }
     return ALPHA_TRANSPARENT;
