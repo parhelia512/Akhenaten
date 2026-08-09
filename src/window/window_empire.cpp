@@ -9,7 +9,6 @@
 #include "empire/empire_map.h"
 #include "empire/empire_object.h"
 #include "empire/empire_traders.h"
-#include "empire/trade_route.h"
 #include "empire/type.h"
 #include "graphics/image.h"
 #include "graphics/graphics.h"
@@ -58,13 +57,6 @@ struct empire_window_draw {
 };
 ANK_REGISTER_STRUCT_WRITER(empire_window_draw, draw_offset);
 
-struct empire_window_draw_trade_route {
-    vec2i draw_offset;
-    int route_id = 0;
-    int effect = 0;
-};
-ANK_REGISTER_STRUCT_WRITER(empire_window_draw_trade_route, draw_offset, route_id, effect);
-
 struct empire_window_draw_trader {
     vec2i draw_offset;
     int index;
@@ -109,43 +101,6 @@ void empire_window::archive_load(archive arch) {
     arch.r_desc("image", image);
 
     init();
-}
-
-void empire_window::draw_trade_route(const empire_city* city, int object_index, bool force) {
-    if (!city) {
-        return;
-    }
-
-    if (city->type != EMPIRE_CITY_EGYPTIAN_TRADING && city->type != EMPIRE_CITY_FOREIGN_TRADING
-        && city->type != EMPIRE_CITY_PHARAOH_TRADING) {
-        return;
-    }
-
-    e_empire_route_state state = ROUTE_CLOSED;
-    if (city->is_open) {
-        state = (g_empire_map.selected_object()
-                  && g_empire_map.selected_city == g_empire.get_city_for_object(object_index))
-                  ? ROUTE_OPEN_SELECTED
-                  : ROUTE_OPEN;
-    } else {
-        state = (g_empire_map.selected_object()
-                  && g_empire_map.selected_city == g_empire.get_city_for_object(object_index))
-                  ? ROUTE_CLOSED_SELECTED
-                  : ROUTE_CLOSED;
-    }
-
-    if ((state == ROUTE_OPEN_SELECTED || state == ROUTE_CLOSED_SELECTED) && !force) {
-        deffer_city_route_id = city->lookup_id;
-        return;
-    }
-
-    const map_route_object& obj = g_empire.get_route_object(city->route_id);
-    if (!obj.in_use || state == ROUTE_CLOSED) {
-        return;
-    }
-
-    ui::event(empire_window_draw_trade_route{draw_offset, city->route_id, (int)state}, get_section(), "draw_map",
-      empire_object_tokens.name(EMPIRE_OBJECT_TRADE_ROUTE));
 }
 
 struct empire_window_determine_selected_object {
@@ -272,7 +227,7 @@ void empire_window::draw_map() {
 
     draw_offset = map_draw_origin();
     ui::set_tooltip({});
-    deffer_city_route_id = -1;
+    ui.event(empire_window_draw{draw_offset}, get_section(), "draw_map_begin");
 
     painter ctx = game.painter();
     image_desc map_bg = g_empire.map_background.valid() ? g_empire.map_background : image;
@@ -282,7 +237,7 @@ void empire_window::draw_map() {
         ctx.draw(spr, draw_offset, COLOR_MASK_NONE, scale, scale);
     }
 
-    // LAND/SEA route pak objects and TRADER slots are skipped: routes come from draw_trade_route(),
+    // LAND/SEA route pak objects and TRADER slots are skipped: city routes are drawn from JS,
     // traders from g_empire_traders (typed EMPIRE_OBJECT_TRADER handler is for those figures).
     g_empire.foreach_object([this](int object_index, const empire_object& obj) {
         const e_empire_object ot = (e_empire_object)obj.type;
@@ -313,12 +268,7 @@ void empire_window::draw_map() {
     ui.event(empire_window_draw{draw_offset}, get_section(), __func__,
       empire_object_tokens.name(EMPIRE_OBJECT_DISTANT_BATTLE_ROUTE));
 
-    if (deffer_city_route_id >= 0) {
-        const empire_city* deferred_city = g_empire.city(deffer_city_route_id);
-        if (deferred_city) {
-            draw_trade_route(deferred_city, deferred_city->empire_object_id, true);
-        }
-    }
+    ui.event(empire_window_draw{draw_offset}, get_section(), "draw_deferred_trade_route");
 
     ui.begin_widget(pos);
     ui.event(empire_window_draw{draw_offset}, get_section(), __func__);
@@ -393,11 +343,6 @@ void __empire_window_set_map_bounds(int min_x, int min_y, int max_x, int max_y) 
     g_empire_window.max_pos = {max_x, max_y};
 }
 ANK_FUNCTION_4(__empire_window_set_map_bounds)
-
-void __empire_window_draw_city_trade_route(int city_id, int object_index, int force) {
-    g_empire_window.draw_trade_route(g_empire.city(city_id), object_index, force != 0);
-}
-ANK_FUNCTION_3(__empire_window_draw_city_trade_route)
 
 int __empire_update_map_animation(int object_index, int image_id) {
     const empire_object* obj = g_empire.get_object(object_index);

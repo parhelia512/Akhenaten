@@ -68,6 +68,16 @@ empire_window {
 
     /** Filled each frame in draw_paneling; used by draw_object_info*/
     screen_bounds : null
+
+    /** Selected city's trade route is deferred and drawn last (on top). */
+    deferred_route_city_id : -1
+
+    route_state : {
+        closed : 0
+        closed_selected : 1
+        open : 2
+        open_selected : 3
+    }
 }
 
 function empire_window_draw_trade_resource_row(offset, flags, resource, tradeNow, tradeMax, font) {
@@ -559,7 +569,7 @@ function empire_window_draw_city(ev) {
         }
     }
 
-    __empire_window_draw_city_trade_route(obj.city_id, ev.object_index, 0)
+    empire_window_request_city_trade_route(city, ev.draw_offset, false)
 
     var letter_h = 11
     var text_pos = {
@@ -655,9 +665,66 @@ function empire_window_route_segment_sprites(img, p1, p2) {
     }
 }
 
+function empire_window_trade_route_state(city) {
+    var rs = empire_window.route_state
+    var is_selected = !!empire_window.selected_object && empire_window.selected_city == city.id
+    if (city.is_open) {
+        return is_selected ? rs.open_selected : rs.open
+    }
+    return is_selected ? rs.closed_selected : rs.closed
+}
+
+function empire_window_request_city_trade_route(city, draw_offset, force) {
+    if (!city) {
+        return
+    }
+    if (city.type != EMPIRE_CITY_EGYPTIAN_TRADING
+        && city.type != EMPIRE_CITY_FOREIGN_TRADING
+        && city.type != EMPIRE_CITY_PHARAOH_TRADING) {
+        return
+    }
+
+    var rs = empire_window.route_state
+    var state = empire_window_trade_route_state(city)
+    if ((state == rs.open_selected || state == rs.closed_selected) && !force) {
+        empire_window.deferred_route_city_id = city.id
+        return
+    }
+
+    if (state == rs.closed || empire.trade_route_num_points(city.route_id) <= 0) {
+        return
+    }
+
+    empire_window_draw_trade_route({
+        draw_offset: draw_offset,
+        route_id: city.route_id,
+        effect: state
+    })
+}
+
+[es=(empire_window, draw_map_begin)]
+function empire_window_draw_map_begin(ev) {
+    empire_window.deferred_route_city_id = -1
+}
+
+[es=(empire_window, draw_deferred_trade_route)]
+function empire_window_draw_deferred_trade_route(ev) {
+    var cid = empire_window.deferred_route_city_id
+    empire_window.deferred_route_city_id = -1
+    if (cid < 0) {
+        return
+    }
+    var city = empire.get_city(cid)
+    if (!city || !city.in_use) {
+        return
+    }
+    empire_window_request_city_trade_route(city, ev.draw_offset, true)
+}
+
 [es=(empire_window, draw_map, EMPIRE_OBJECT_TRADE_ROUTE)]
 function empire_window_draw_trade_route(ev) {
-    if (ev.effect == 0) {
+    var rs = empire_window.route_state
+    if (ev.effect == rs.closed) {
         return
     }
     var route_id = ev.route_id
@@ -667,13 +734,13 @@ function empire_window_draw_trade_route(ev) {
     }
     var imgDesc = null
     switch (ev.effect) {
-    case 1:
+    case rs.closed_selected:
         imgDesc = empire_window.closed_trade_route_hl
         break
-    case 2:
+    case rs.open:
         imgDesc = empire_window.open_trade_route
         break
-    case 3:
+    case rs.open_selected:
         imgDesc = empire_window.open_trade_route_hl
         break
     default:

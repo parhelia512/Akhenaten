@@ -2,13 +2,6 @@
 
 #include "window/autoconfig_window.h"
 
-enum e_empire_route_state {
-    ROUTE_CLOSED = 0,
-    ROUTE_CLOSED_SELECTED = 1,
-    ROUTE_OPEN = 2,
-    ROUTE_OPEN_SELECTED = 3,
-};
-
 struct empire_object;
 struct empire_city;
 
@@ -27,9 +20,6 @@ struct empire_window : public autoconfig_window_t<empire_window> {
     vec2i start_pos, finish_pos;
     image_desc image;
 
-    /** Empire city index (lookup_id); deferred route drawn at end of draw_map. */
-    int deffer_city_route_id = -1;
-
     virtual int handle_mouse(const mouse *m) override { return 0; }
     virtual int get_tooltip_text() override { return 0; }
     virtual void draw_foreground(UiFlags flags) override {}
@@ -42,7 +32,6 @@ struct empire_window : public autoconfig_window_t<empire_window> {
     void draw_map();
     void draw_paneling();
     bool is_outside_map(int x, int y);
-    void draw_trade_route(const empire_city *city, int object_index, bool force);
     vec2i map_clip_origin() const;
     vec2i map_area_size_pixels() const;
     vec2i map_viewport_size() const;
