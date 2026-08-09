@@ -1065,7 +1065,7 @@ int platform_renderer_create_render_texture(int width, int height) {
 #ifndef __APPLE__
         // Scale using nearest neighbour when we scale a multiple of 100%: makes it look sharper.
         // But not on MacOS: users are used to the linear interpolation since that's what Apple also does.
-        if (platform_screen_get_scale() % 100 == 0) {
+        if (g_platform_screen.get_scale() % 100 == 0) {
             scale_quality = "nearest";
         }
 #endif
@@ -1115,7 +1115,7 @@ int platform_renderer_create_render_texture(int width, int height) {
         if (HAS_TEXTURE_SCALE_MODE) {
             SDL_ScaleMode scale_quality = SDL_ScaleModeLinear;
 #ifndef __APPLE__
-            if (platform_screen_get_scale() % 100 == 0) {
+            if (g_platform_screen.get_scale() % 100 == 0) {
                 scale_quality = SDL_ScaleModeNearest;
             }
 #endif
@@ -1159,7 +1159,7 @@ static void draw_software_mouse_cursor(void) {
     if (!mouse->is_touch) {
         cursor_shape current = platform_cursor_get_current_shape();
         int size
-          = calc_adjust_with_percentage(data.cursors[current].size, calc_percentage(100, platform_screen_get_scale()));
+          = calc_adjust_with_percentage(data.cursors[current].size, calc_percentage(100, g_platform_screen.get_scale()));
         SDL_Rect dst;
         dst.x = mouse->x - data.cursors[current].hotspot.x;
         dst.y = mouse->y - data.cursors[current].hotspot.y;
