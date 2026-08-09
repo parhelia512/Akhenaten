@@ -255,6 +255,10 @@ int empire_window::ui_handle_mouse(const mouse* m) {
         }
     }
 
+    if (!m->is_touch && m->left.went_down && !is_outside_map(m->x, m->y)) {
+        g_scroll.drag_start(scroll_t::drag_source::mouse);
+    }
+
     if (!!game_features::gameopt_middle_mouse_camera_pan
         && m->middle.went_down && !is_outside_map(m->x, m->y)) {
         g_scroll.drag_start(scroll_t::drag_source::middle_mouse_pan);
@@ -276,6 +280,13 @@ int empire_window::ui_handle_mouse(const mouse* m) {
         }
     }
 
+    if (!m->is_touch && m->left.went_up) {
+        finished_scroll = g_scroll.drag_end();
+    }
+    if (m->middle.went_up) {
+        g_scroll.drag_end();
+    }
+
     determine_selected_object(m);
 
     int selected_object = g_empire_map.selected_object();
@@ -293,10 +304,6 @@ int empire_window::ui_handle_mouse(const mouse* m) {
         g_scroll.drag_end();
         window_city_show();
         return 0;
-    }
-
-    if (m->middle.went_up) {
-        g_scroll.drag_end();
     }
 
     ui.begin_widget({0, 0});
