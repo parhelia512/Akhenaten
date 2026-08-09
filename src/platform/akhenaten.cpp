@@ -14,7 +14,6 @@
 #include "game/game_config.h"
 #include "platform/arguments.h"
 #include "platform/integral_tests.h"
-#include "platform/cursor.h"
 #include "content/content.h"
 #include "platform/platform.h"
 #include "platform/prefs.h"
@@ -401,8 +400,10 @@ static void setup() {
         const auto& pos = g_args.get_window_pos();
         g_platform_screen.move(pos.x, pos.y);
     }
-    platform_init_cursors(g_args.get_cursor_scale_percentage()); // this has to come after g_platform_screen.create,
-                                                                 // otherwise it fails on Nintendo Switch
+
+    // After the window exists (required for cursor init on Nintendo Switch).
+    g_app.register_modules();
+
     image_data_init();                                           // image paks structures init
 
     vfs::path scripts_base_path(vfs::SCRIPTS_FOLDER);
@@ -635,8 +636,6 @@ int main(int argc, char** argv) {
     crashhandler_install();
 
     logs::initialize();
-
-    g_app.register_modules();
 
     setup();
 

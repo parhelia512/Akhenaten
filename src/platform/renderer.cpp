@@ -6,6 +6,7 @@
 #include "platform/arguments.h"
 #include "platform/platform.h"
 #include "platform/screen.h"
+#include "platform/cursor.h"
 #include "graphics/image_groups.h"
 #include "graphics/residency_atlas.h"
 #include "graphics/view/view.h"
@@ -1157,7 +1158,7 @@ void platform_renderer_invalidate_target_textures() {
 static void draw_software_mouse_cursor(void) {
     const mouse* mouse = mouse_get();
     if (!mouse->is_touch) {
-        cursor_shape current = platform_cursor_get_current_shape();
+        cursor_shape current = xvalue<platform_cursor_t>::ref().current();
         int size
           = calc_adjust_with_percentage(data.cursors[current].size, calc_percentage(100, g_platform_screen.get_scale()));
         SDL_Rect dst;
