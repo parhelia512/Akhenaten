@@ -39,4 +39,3 @@ struct empire_window : public autoconfig_window_t<empire_window> {
 
 
 void window_empire_show();
-void window_empire_show_checked();

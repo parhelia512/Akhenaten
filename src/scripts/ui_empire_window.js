@@ -1,5 +1,15 @@
 log_info("akhenaten: ui empire window common started")
 
+function window_empire_show_checked() {
+    var avail = city.is_empire_available()
+    if (avail == 1 || scenario.scmode != e_scenario_normal) {
+        __window_empire_show()
+        return
+    }
+    var text = (avail == 0) ? "#not_available_in_this_assignment" : "#not_available_yet"
+    city.warnings.show(text)
+}
+
 empire_window {
     trade_column_spacing : 146
     trade_row_spacing : 20

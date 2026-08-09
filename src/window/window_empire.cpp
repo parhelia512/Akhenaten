@@ -1,9 +1,5 @@
 #include "window_empire.h"
 
-#include "city/city.h"
-#include "game/game_events.h"
-#include "city/city_warnings.h"
-#include "city/constants.h"
 #include "empire/empire.h"
 #include "empire/empire_city.h"
 #include "empire/empire_map.h"
@@ -301,19 +297,6 @@ void window_empire_show() {
     g_empire_window.init();
     window_show(&window);
 }
-
-void window_empire_show_checked() {
-    const e_availability avail = g_city.is_empire_available();
-
-    const bool is_custom_map = (g_scenario.mode() != e_scenario_normal);
-    if (avail == AVAILABLE || is_custom_map) {
-        window_empire_show();
-    } else {
-        pcstr text = (avail == NOT_AVAILABLE ? "#not_available_in_this_assignment" : "#not_available_yet");
-        events::emit(event_city_warning{text});
-    }
-}
-ANK_FUNCTION(window_empire_show_checked)
 
 void __empire_window_set_map_bounds(int min_x, int min_y, int max_x, int max_y) {
     g_empire_window.min_pos = {min_x, min_y};
