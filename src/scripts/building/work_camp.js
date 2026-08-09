@@ -19,6 +19,7 @@ building_work_camp = {
     damage_risk [2]
 
     flags {
+        keeps_visitor_paths: true
     }
 
     search_radius : 100

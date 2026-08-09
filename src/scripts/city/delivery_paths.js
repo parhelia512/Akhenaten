@@ -77,6 +77,11 @@ function building_firehouse_draw_usable_paths(ev) {
     building_draw_usable_paths(ev)
 }
 
+[es=(building_work_camp, draw_usable_paths)]
+function building_work_camp_draw_usable_paths(ev) {
+    building_draw_usable_paths(ev)
+}
+
 [es=(building_temple_osiris, draw_usable_paths)]
 function building_temple_osiris_draw_usable_paths(ev) {
     building_draw_usable_paths(ev)

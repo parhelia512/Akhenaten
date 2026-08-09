@@ -933,6 +933,7 @@ figure_worker {
 
 	category: figure_category_citizen
 	max_damage : 10
+	record_path : true
 }
 
 figure_physician {
