@@ -307,10 +307,9 @@ int empire_window::ui_handle_mouse(const mouse* m) {
 }
 
 void empire_window::draw_empire_object(int object_index, const empire_object& obj) {
+    // Routes are drawn via draw_trade_route(); pak Cleopatra IDs here are unmapped and cover cities.
     if (obj.type == EMPIRE_OBJECT_LAND_TRADE_ROUTE || obj.type == EMPIRE_OBJECT_SEA_TRADE_ROUTE) {
-        if (!g_empire.is_trade_route_open(obj.trade_route_id)) {
-            return;
-        }
+        return;
     }
 
     vec2i pos;
