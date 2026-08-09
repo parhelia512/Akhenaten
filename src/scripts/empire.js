@@ -103,6 +103,10 @@ empire.get_city_object = function(city_id) {
     return new EmpireCityObject(city_id)
 }
 
+empire.get_object = function(object_id) {
+    return new EmpireObject(object_id)
+}
+
 empire.get_trader = function(index) {
     return {
         trader_index: index

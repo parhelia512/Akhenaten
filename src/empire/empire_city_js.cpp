@@ -27,6 +27,50 @@ static empire_city* empire_city_this_active(js_State* J) {
 
 static js_Object* g_empire_city_map_proto = nullptr;
 static js_Object* g_empire_city_proto = nullptr;
+static js_Object* g_empire_object_proto = nullptr;
+
+static int empire_object_this_slot(js_State* J) {
+    J->getproperty(J->toobject(0), js_intern("id"));
+    const int id = (int)js_tointeger(J, -1);
+    js_pop(J, 1);
+    return id;
+}
+
+static empire_object* empire_object_this_ptr(js_State* J) {
+    full_empire_object* full = g_empire.ref_full_object(empire_object_this_slot(J));
+    return full ? &full->obj : nullptr;
+}
+
+static void empire_object_proto___property_getter(js_State* J) {
+    xstring prop = js_toxstring(J, 1);
+    const empire_object* obj = empire_object_this_ptr(J);
+    if (!obj) {
+        js_helpers::js_push_void(J);
+        return;
+    }
+    auto opt = archive_helper::get(*obj, prop, true);
+    js_helpers::js_push_value<std::optional<bvariant>>(J, opt);
+}
+
+static void empire_object_proto_toString(js_State* J) {
+    char buf[64];
+    snprintf(buf, sizeof buf, "EmpireObject(%d)", empire_object_this_slot(J));
+    J->pushstring(buf);
+}
+
+static void js_push_empire_object(js_State* J, int slot) {
+    full_empire_object* full = g_empire.ref_full_object(slot);
+    empire_object* obj = full ? &full->obj : nullptr;
+    js_pushobject(J, jsV_newobject(J, JS_COBJECT, g_empire_object_proto));
+    js_pushnumber(J, (double)slot);
+    js_setproperty(J, -2, js_intern("id"));
+    js_register_cobj_ptr_property(J, obj);
+}
+
+static void jsB_new_EmpireObject(js_State* J) {
+    const int slot = js_gettop(J) > 1 ? (int)js_tointeger(J, 1) : 0;
+    js_push_empire_object(J, slot);
+}
 
 static void empire_city_map_proto___property_getter(js_State* J) {
     const int cid = empire_city_this_id(J);
@@ -115,6 +159,17 @@ static void empire_city_proto_toString(js_State* J) {
 static void jsB_new_EmpireCity(js_State* J) {
     const int id = js_gettop(J) > 1 ? (int)js_tointeger(J, 1) : 0;
     js_push_empire_city(J, id, g_empire_city_proto);
+}
+
+void js_register_empire_object_proto(js_State* J) {
+    g_empire_object_proto = jsV_newobject(J, JS_COBJECT, J->Object_prototype);
+    js_pushobject(J, g_empire_object_proto);
+    JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, empire_object, type);
+    JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, empire_object, distant_battle_travel_months);
+    jsB_propf(J, js_intern("EmpireObject.prototype.__property_getter"), empire_object_proto___property_getter, 1);
+    jsB_propf(J, js_intern("EmpireObject.prototype.toString"), empire_object_proto_toString, 0);
+    js_newcconstructor(J, jsB_new_EmpireObject, jsB_new_EmpireObject, js_intern("EmpireObject"), 1);
+    js_defglobal(J, js_intern("EmpireObject"), JS_DONTENUM);
 }
 
 void js_register_empire_city_map_proto(js_State* J) {

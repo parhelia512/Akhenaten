@@ -9,3 +9,5 @@ EmpireCity.property.name = {
 }
 
 EmpireCityObject.property.pos = { }
+
+EmpireObject.property.pos = { }

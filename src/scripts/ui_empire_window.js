@@ -47,6 +47,9 @@ empire_window {
         city_want_buy_title  : text({text[47, 4], pos[0, 0], font: FONT_NORMAL_BLACK_ON_LIGHT })
         city_want_buy_items  : dummy({pos[0, 0], ondraw_event: "draw_city_want_buy_items"})
         city_want_buy_item   : dummy({size[110, 0], font:FONT_SMALL_PLAIN})
+
+        // After other UI so army travel text paints on top (same as former C++ post-draw call).
+        object_info          : dummy({pos[0, 0], size[0, 0], ondraw_event: "draw_object_info"})
     }
 
     trade_amount_image : function(extraOffset) {
@@ -55,10 +58,13 @@ empire_window {
 
     adjust_scroll : __empire_map_adjust_scroll
 
-    @selected_empire_object_id { get: function() { return __empire_map_selected_empire_object_id() } }
     @selected_city { get: function() { return __empire_map_selected_city() } }
-    @selected_object_type { get: function() { return __empire_map_selected_object_type() } }
-    selected_object_property : __empire_map_selected_object_property
+    @selected_object {
+        get: function() {
+            var pick = __empire_map_selected_object()
+            return pick > 0 ? new EmpireObject(pick - 1) : null
+        }
+    }
 
     /** Filled each frame in draw_paneling; used by draw_object_info*/
     screen_bounds : null
@@ -219,12 +225,11 @@ function empire_window_draw_object_info_city(ev) {
     }
 }
 
-function empire_window_draw_object_info_kingdome_army(ev) {
+function empire_window_draw_object_info_kingdome_army(ev, obj) {
     ev.info_tooltip.text = ""
     var battle = empire.active_battle
-    var travel_months = empire_window.selected_object_property("distant_battle_travel_months")
     if (battle.egyptian_months_to_travel_back > 0) {
-        if (battle.egyptian_months_traveled === travel_months) {
+        if (battle.egyptian_months_traveled === obj.distant_battle_travel_months) {
             var sb = empire_window.screen_bounds
             var ox = ((sb.min_pos.x + sb.max_pos.x - 240) / 2) | 0
             var oy = sb.max_pos.y - 68
@@ -234,13 +239,12 @@ function empire_window_draw_object_info_kingdome_army(ev) {
     }
 }
 
-function empire_window_draw_object_info_enemy_army(ev) {
+function empire_window_draw_object_info_enemy_army(ev, obj) {
     ev.info_tooltip.text = ""
     var battle = empire.active_battle
-    var travel_months = empire_window.selected_object_property("distant_battle_travel_months")
     if (battle.months_until_battle > 0) {
         // enemy_months_traveled() historically returned egyptian_months_traveled.
-        if (battle.egyptian_months_traveled === travel_months) {
+        if (battle.egyptian_months_traveled === obj.distant_battle_travel_months) {
             var sb = empire_window.screen_bounds
             var ox = ((sb.min_pos.x + sb.max_pos.x - 240) / 2) | 0
             var oy = sb.max_pos.y - 68
@@ -255,12 +259,12 @@ function empire_window_draw_object_info_other(ev) {
 
 [es=(empire_window, draw_object_info)]
 function empire_window_draw_object_info(ev) {
-    var type = empire_window.selected_object_type
-    if (type < 0) {
+    var obj = empire_window.selected_object
+    if (!obj) {
         empire_window_draw_object_info_none(ev)
         return
     }
-    switch (type) {
+    switch (obj.type) {
     case EMPIRE_OBJECT_ORNAMENT:
         empire_window_draw_object_info_ornament(ev)
         break
@@ -268,10 +272,10 @@ function empire_window_draw_object_info(ev) {
         empire_window_draw_object_info_city(ev)
         break
     case EMPIRE_OBJECT_KINGDOME_ARMY:
-        empire_window_draw_object_info_kingdome_army(ev)
+        empire_window_draw_object_info_kingdome_army(ev, obj)
         break
     case EMPIRE_OBJECT_ENEMY_ARMY:
-        empire_window_draw_object_info_enemy_army(ev)
+        empire_window_draw_object_info_enemy_army(ev, obj)
         break
     default:
         empire_window_draw_object_info_other(ev)

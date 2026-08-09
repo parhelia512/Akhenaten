@@ -119,11 +119,6 @@ struct empire_window_draw_background_evt {
 };
 ANK_REGISTER_STRUCT_WRITER(empire_window_draw_background_evt, pad);
 
-struct empire_window_object_info_evt {
-    int unused = 0;
-};
-ANK_REGISTER_STRUCT_WRITER(empire_window_object_info_evt, unused);
-
 void empire_window::init() {
     int selected_object = g_empire_map.selected_object();
     g_empire_map.selected_city = selected_object ? g_empire.get_city_for_object(selected_object - 1) : 0;
@@ -183,10 +178,6 @@ void empire_window::draw_trade_route(const empire_city* city, int object_index, 
 
     ui::event(empire_window_draw_trade_route{draw_offset, city->route_id, (int)state}, get_section(), "draw_map",
       empire_object_tokens.name(EMPIRE_OBJECT_TRADE_ROUTE));
-}
-
-void empire_window::draw_object_info() {
-    ui.event(empire_window_object_info_evt{}, get_section(), "draw_object_info");
 }
 
 void empire_window::determine_selected_object(const mouse* m) {
@@ -475,7 +466,6 @@ void empire_window::ui_draw_foreground(UiFlags flags) {
 
     ui.begin_widget({0, 0});
     ui.draw(flags);
-    draw_object_info();
     ui.end_widget();
 }
 
