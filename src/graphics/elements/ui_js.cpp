@@ -140,13 +140,16 @@ int ANK_FUNCTION_UNIFIED(__ui_draw_button)(const bvariant_map &args) {
     const xstring tooltip = args.s("tooltip");
 
     int flags = args.int32_or_def("flags", 0);
-    // Only disable the border/body when the flag is explicitly the bool false.
-    // Several button configs pass these keys as non-bool (e.g. body:"" or border:3),
-    // and as_bool() throws bad_variant_access on a non-bool variant -> hard crash.
+    // Disable border/body only when explicitly false (bool or 0). Other types
+    // (e.g. body:"" or border:3) keep the default chrome.
     const auto border = args["border"];
-    flags |= (border.is_bool() && !border.as_bool() ? UiFlags_NoBorder : 0);
+    if ((border.is_bool() && !border.as_bool()) || (border.is_int32() && border.as_int32() == 0)) {
+        flags |= UiFlags_NoBorder;
+    }
     const auto body = args["body"];
-    flags |= (body.is_bool() && !body.as_bool() ? UiFlags_NoBody : 0);
+    if ((body.is_bool() && !body.as_bool()) || (body.is_int32() && body.as_int32() == 0)) {
+        flags |= UiFlags_NoBody;
+    }
 
     const bool is_underlying = g_window_manager.underlying_windows_redrawing > 0;
     flags |= is_underlying ? UiFlags_Readonly : UiFlags_None;

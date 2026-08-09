@@ -66,10 +66,6 @@ function empire_window_draw_trade_resource_row(offset, flags, resource, tradeNow
     var ox = offset.x
     var oy = offset.y
     ui.resource_icon_flags({ x: ox + 1, y: oy + 1 }, resource, UiFlags_Outline)
-    var clicked = ui.button({text:"", pos[ox - 2, oy - 2], size[105, 24], font:FONT_SMALL_PLAIN, body:false, tooltip:__loc(23, resource)})
-    if (clicked == ui.button_clicked) {
-        show_trade_resource_settings_window(resource)
-    }
 
     var text = "0"
     if (tradeNow < 0) {
@@ -78,7 +74,10 @@ function empire_window_draw_trade_resource_row(offset, flags, resource, tradeNow
         text = String(tradeNow) + " " + __loc(47, 12) + " " + String(tradeMax)
     }
 
-    ui.label(text, { x: ox + 40, y: oy }, font)
+    var clicked = ui.button({text:text, pos[ox - 2, oy - 2], size[105, 24], font:font, flags: UiFlags_NoBody, tooltip:__loc(23, resource)})
+    if (clicked == ui.button_clicked) {
+        show_trade_resource_settings_window(resource)
+    }
     var img = null
     switch (tradeMax) {
     case 1500:
