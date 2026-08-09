@@ -196,6 +196,25 @@ public:
         }
     }
 
+    // Same SoA layout for points that expose a tile2i `tile` member (e.g. herd_point_t).
+    template<size_t Cap, typename PointT>
+    void bind_hvector_point_tiles_xy(hvector<PointT, Cap> &pts, bind_signature_e coord_sig, size_t slots = Cap) {
+        assert(slots <= Cap);
+        const PointT empty{};
+        if (is_read_access()) {
+            pts.assign(slots, empty);
+        } else {
+            pts.resize(slots, empty);
+        }
+        for (size_t i = 0; i < slots; ++i) {
+            pts[i].tile.invalidate_offset();
+            bind(coord_sig, pts[i].tile.private_access(_X));
+        }
+        for (size_t i = 0; i < slots; ++i) {
+            bind(coord_sig, pts[i].tile.private_access(_Y));
+        }
+    }
+
     template<size_t Cap>
     void bind_hvector_tiles_xy_i32(hvector<tile2i, Cap> &pts, size_t slots = Cap) {
         bind_hvector_tiles_xy(pts, BIND_SIGNATURE_INT32, slots);
@@ -204,6 +223,16 @@ public:
     template<size_t Cap>
     void bind_hvector_tiles_xy_u16(hvector<tile2i, Cap> &pts, size_t slots = Cap) {
         bind_hvector_tiles_xy(pts, BIND_SIGNATURE_UINT16, slots);
+    }
+
+    template<size_t Cap, typename PointT>
+    void bind_hvector_point_tiles_xy_i32(hvector<PointT, Cap> &pts, size_t slots = Cap) {
+        bind_hvector_point_tiles_xy(pts, BIND_SIGNATURE_INT32, slots);
+    }
+
+    template<size_t Cap, typename PointT>
+    void bind_hvector_point_tiles_xy_u16(hvector<PointT, Cap> &pts, size_t slots = Cap) {
+        bind_hvector_point_tiles_xy(pts, BIND_SIGNATURE_UINT16, slots);
     }
 
     void bind(bind_signature_e signature, grid_xx *ext) {

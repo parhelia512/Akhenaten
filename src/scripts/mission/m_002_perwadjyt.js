@@ -2,6 +2,10 @@ log_info("akhenaten: mission 2 started")
 
 mission2 {
 	map_file : "data/maps/m_002_perwadjyt.map"
+
+	// Map points from data/maps/m_002_perwadjyt.map.
+	herd_points_predator [ [71, 36], [17, 65] ]
+
 	start_message : "message_farming_along_the_nile"
 	selection_title : "Perwadjyt"
 	env {
