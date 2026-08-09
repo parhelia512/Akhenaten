@@ -1,9 +1,13 @@
-log_info("akhenaten: building_gatehouse started")
+log_info("akhenaten: building_gatehouse_common started")
 
 var building_gatehouse_restricted_terrain = TERRAIN_NOT_CLEAR - TERRAIN_ROAD
 
 function building_gatehouse_shift(tile, dx, dy) {
     return { x: tile.x + dx, y: tile.y + dy }
+}
+
+function building_gatehouse_tile_to_view(tile) {
+    return { x: (tile.x - tile.y) * 30, y: (tile.x + tile.y) * 15 }
 }
 
 function building_gatehouse_tile_blocked(tile) {
@@ -135,22 +139,13 @@ function building_gatehouse_ghost_preview(ev) {
     }
 }
 
-[es=(building_brick_gatehouse, ghost_preview)]
-function building_brick_gatehouse_ghost_preview(ev) {
-    building_gatehouse_ghost_preview(ev)
-}
-
-[es=(building_brick_gatehouse, ghost_blocked)]
-function building_brick_gatehouse_ghost_blocked(ev) {
-    building_gatehouse_ghost_blocked(ev)
-}
-
-[es=(building_mud_gatehouse, ghost_preview)]
-function building_mud_gatehouse_ghost_preview(ev) {
-    building_gatehouse_ghost_preview(ev)
-}
-
-[es=(building_mud_gatehouse, ghost_blocked)]
-function building_mud_gatehouse_ghost_blocked(ev) {
-    building_gatehouse_ghost_blocked(ev)
+function building_gatehouse_on_place_checks(ev, size) {
+    var main_id = __building_main_id(ev.bid)
+    var b = city.get_building(main_id)
+    if (!b) {
+        return
+    }
+    var check_size = size || b.params.building_size
+    var near_walls = !__map_terrain_is_adjacent_to_wall(b.tile, check_size)
+    city.warnings.show_if_not(near_walls, "#warning_shipwright_needed")
 }
