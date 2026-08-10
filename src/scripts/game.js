@@ -5,6 +5,7 @@ game = extend(__game, {
     // -> debug_properties
     // -> debug_terrain_paint
     // -> paused
+    // -> pause_allow
 
     mission_briefing_scenario_id : 0
     mission_briefing_is_review : false
@@ -124,6 +125,8 @@ game_features {
     @gameopt_display_size {}
     @gameplay_change_multiple_temple_complexes {}
     @gameplay_change_work_camp_one_worker_per_month {}
+    @gameplay_change_empire_map_runs_simulation {}
+    @gameplay_pause_sim_while_building {}
     @gameplay_fix_editor_events {}
     @gameopt_disable_victory {}
     @gameui_show_water_structure_range {}

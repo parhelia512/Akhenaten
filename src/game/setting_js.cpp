@@ -27,6 +27,7 @@ ANK_GLOBAL_OBJECT(game, __game,
     debug_properties,
     debug_terrain_paint,
     paused,
+    pause_allow,
     tick_timer_ms);
 
 ANK_GLOBAL_OBJECT(g_screen, __screen,
