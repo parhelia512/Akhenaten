@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core/tokenum.h"
+
 enum e_empire_object {
     EMPIRE_OBJECT_ORNAMENT = 0,
     EMPIRE_OBJECT_CITY = 1,
@@ -15,13 +17,15 @@ enum e_empire_object {
 
     EMPIRE_OBJECT_COUNT
 };
+using e_empire_object_tokens_t = token_holder<e_empire_object, EMPIRE_OBJECT_ORNAMENT, EMPIRE_OBJECT_COUNT>;
+extern const e_empire_object_tokens_t e_empire_object_tokens;
 
 enum e_empire_city {
-    EMPIRE_CITY_OURS = 0,  
+    EMPIRE_CITY_OURS = 0,
     EMPIRE_CITY_PHARAOH_TRADING = 1,
-    EMPIRE_CITY_PHARAOH = 2, 
+    EMPIRE_CITY_PHARAOH = 2,
     EMPIRE_CITY_EGYPTIAN_TRADING = 3,
-    EMPIRE_CITY_EGYPTIAN = 4,  
+    EMPIRE_CITY_EGYPTIAN = 4,
     EMPIRE_CITY_FOREIGN_TRADING = 5,
     EMPIRE_CITY_FOREIGN = 6,
 

@@ -17,6 +17,7 @@
 #include "scenario/empire.h"
 #include "game/game.h"
 #include "dev/debug.h"
+#include "js/js_game.h"
 
 #include <vector>
 #include <algorithm>
@@ -27,6 +28,8 @@
 #define MAX_OBJECTS 200
 #define MAX_ROUTES 20
 #define EMPIRE_REGION_NAME_SCAN 128
+
+const e_empire_object_tokens_t ANK_CONFIG_ENUM(e_empire_object_tokens);
 
 full_empire_object g_empire_objects[MAX_OBJECTS];
 std::array<map_route_object, 50> g_empire_route_objects;
