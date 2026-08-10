@@ -74,6 +74,14 @@ function run_test() {
     __log_marker('zoo_stocked_ok')
     __test65_stock_ok = true
 
+    // Roads south of 6×6 so spawn uses a valid road_access tile (flag alone is not enough).
+    var zt = __building_tile(bid)
+    for (var dx = 0; dx < 6; dx++) {
+        terrain.add({ x: zt.x + dx, y: zt.y + 6 }, TERRAIN_ROAD)
+    }
+    __test_update_road_network()
+    __test_check_kingdome_access()
+
     city.figures.remove_figures(FIGURE_ZOOKEEPER)
     test65_keep_staffed(bid)
 
@@ -103,10 +111,10 @@ function run_test() {
     __test65_spawn_ok = true
 
     // Feed consume sets animals-present timer (juggler_visited reused).
-    b = city.get_building(bid)
-    if (!b || !(b.juggler_visited > 0)) {
+    var zoo = city.get_entertainment_building(bid)
+    if (!zoo || !(zoo.juggler_visited > 0)) {
         __log_info_native('[test:65] expected animals-present timer after spawn'
-            + ' juggler_visited=' + (b ? b.juggler_visited : -1))
+            + ' juggler_visited=' + (zoo ? zoo.juggler_visited : -1))
         __test_signal_ready()
         return
     }

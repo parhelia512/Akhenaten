@@ -9,6 +9,7 @@
 #include "game/resource.h"
 #include "graphics/graphics.h"
 #include "grid/building_tiles.h"
+#include "grid/road_access.h"
 #include "js/js_game.h"
 #include "window/popup_dialog.h"
 
@@ -43,6 +44,13 @@ void building_zoo::spawn_figure() {
     if (stored_amount(RESOURCE_STRAW) < need || stored_amount(RESOURCE_GAMEMEAT) < need) {
         return;
     }
+
+    tile2i road = map_get_road_access_tile(tile(), size());
+    if (!road.valid()) {
+        return;
+    }
+    base.road_access = road;
+    base.has_road_access = true;
 
     if (!common_spawn_figure_trigger(100, BUILDING_SLOT_SERVICE)) {
         return;
