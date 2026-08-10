@@ -255,7 +255,6 @@ void figure_scorpion::figure_action() {
             do_goto(prey->tile, TERRAIN_USAGE_ANIMAL, ACTION_25_SCORPION_LOOKING_FOR_ATTACK, ACTION_8_SCORPION_RECALCULATE);
             if (direction() == DIR_FIGURE_CAN_NOT_REACH || direction() == DIR_FIGURE_REROUTE) {
                 base.direction = DIR_0_TOP_RIGHT;
-                release_target();
                 advance_action(ACTION_8_SCORPION_RECALCULATE);
             }
         }

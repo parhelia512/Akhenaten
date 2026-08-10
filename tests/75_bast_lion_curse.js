@@ -192,11 +192,11 @@ function run_test() {
     __test_figure_set_action(lion, ACTION_25_LION_LOOKING_FOR_ATTACK)
 
     var prey_ok = false
-    for (var i = 0; i < 40; i++) {
+    for (var i = 0; i < 120; i++) {
         test_figure_set_speed(ostrich, 0)
         test_figure_set_speed(enemy, 0)
         test_figure_set_speed(lion, 0)
-        __test_pump_frames(15)
+        __test_pump_frames(1)
 
         if (!__figure_is_valid(lion) || !__figure_is_valid(ostrich) || !__figure_is_valid(enemy)) {
             break
