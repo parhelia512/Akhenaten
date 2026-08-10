@@ -166,17 +166,18 @@ void city_resources_t::calculate_stocks() {
             return;
         }
 
+        // ACCEPT stocks are get-from sources; GET-state buildings are sinks (see better_getting_source).
         building_storage_yard *warehouse = b.dcast_storage_yard();
         if (warehouse) {
             for (const auto &r : resource_list::foods) {
-                storages[r.type] += warehouse->is_gettable(r.type) ? warehouse->amount(r.type) : 0;
+                storages[r.type] += !warehouse->is_gettable(r.type) ? warehouse->amount(r.type) : 0;
             }
         }
 
         building_granary *granary = b.dcast_granary();
         if (granary) {
             for (const auto &r : resource_list::foods) {
-                storages[r.type] += granary->is_gettable(r.type) ? granary->amount(r.type) : 0;
+                storages[r.type] += !granary->is_gettable(r.type) ? granary->amount(r.type) : 0;
             }
         }
     }, { BUILDING_GRANARY, BUILDING_STORAGE_YARD });
