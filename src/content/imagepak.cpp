@@ -4,6 +4,7 @@
 #include "core/string.h"
 #include "core/vec2i.h"
 #include "core/log.h"
+#include "core/memory_manager.h"
 #include "core/custom_span.hpp"
 #include "core/profiler.h"
 #include "graphics/font.h"
@@ -417,6 +418,7 @@ void imagepak::cleanup_and_destroy() {
 
         atlas_data.temp.pixel_buffer = nullptr;
         if (atlas_data.texture != nullptr) {
+            g_memory.track_pack_texture(name.c_str(), atlas_data.width, atlas_data.height, false);
             res_atlas::forget_source(atlas_data.texture);
             SDL_DestroyTexture(atlas_data.texture);
         }
@@ -671,6 +673,7 @@ bool imagepak::load_zip_pak(pcstr pak, int starting_index) {
             }
             return false;
         }
+        g_memory.track_pack_texture(name.c_str(), atlas_data.width, atlas_data.height, true);
 
         // delete temp data buffer in the atlas
         delete atlas_data.temp.pixel_buffer;
@@ -1065,6 +1068,7 @@ bool imagepak::load_pak(pcstr pak_name, int starting_index) {
             }
             return false;
         }
+        g_memory.track_pack_texture(name.c_str(), atlas_data.width, atlas_data.height, true);
 
         // delete temp data buffer in the atlas
         delete atlas_data.temp.pixel_buffer;

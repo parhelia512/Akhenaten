@@ -2,6 +2,7 @@
 
 #include "core/encoding/trad_chinese.h"
 #include "core/log.h"
+#include "core/memory_manager.h"
 #include "image.h"
 #include "js/js_game.h"
 #include "graphics/imagepak_holder.h"
@@ -401,6 +402,7 @@ void font_atlas_regenerate() {
         atlas_data_t &atlas_data = font_pack.handle->atlas_pages.at(i);
         atlas_data.texture = g_render.create_texture_from_buffer(atlas_data.temp.pixel_buffer, atlas_data.width, atlas_data.height);
         assert(atlas_data.texture != nullptr);
+        g_memory.track_pack_texture(font_pack.handle->name.c_str(), atlas_data.width, atlas_data.height, true);
 
         // Delete temp data buffer in the atlas
         delete atlas_data.temp.pixel_buffer;

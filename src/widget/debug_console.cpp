@@ -20,6 +20,7 @@
 #include "backends/imgui_impl_sdl2.h"
 #include "dev/debug.h"
 #include "dev/perfmon.h"
+#include "dev/memorymon.h"
 #include "editor/tool.h"
 #include "building/construction/build_planner.h"
 #include "graphics/view/view.h"
@@ -393,7 +394,7 @@ void game_imgui_overlay_init() {
     ImGui_ImplSDLRenderer2_Init(g_render.renderer());
 
     debug_console().con.bind_command("close", [] (auto &, auto &) { game.debug_console = false; });
-    game_perfmon_overlay_init();
+    game_memorymon_overlay_init();
 }
 
 void game_imgui_overlay_destroy() {
@@ -426,7 +427,8 @@ bool game_imgui_overlay_handle_event(void *e) {
         if (key == SDL_SCANCODE_GRAVE) {
             game_toggle_debug_console();
         } else if (key == SDL_SCANCODE_F4) {
-            game.debug_perfmon = !game.debug_perfmon;
+            game.debug_perfmon = true;
+            game.debug_memorymon = true;
             return true;
         }
     }
@@ -435,7 +437,8 @@ bool game_imgui_overlay_handle_event(void *e) {
         debug_console().skip_event = true;
     }
 
-    if (!(game.debug_console || game.debug_properties || game.debug_perfmon || game.debug_terrain_paint)) {
+    if (!(game.debug_console || game.debug_properties || game.debug_perfmon || game.debug_memorymon
+          || game.debug_terrain_paint)) {
         return false;
     }
 

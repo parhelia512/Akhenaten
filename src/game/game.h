@@ -63,6 +63,7 @@ struct game_t {
     };
 
     bool paused = false;
+    bool pause_allow = false;
     bool cli_fullscreen = false;
     bool save_debug_texture = false;
 
@@ -73,6 +74,7 @@ struct game_t {
     bool debug_console = false;
     bool debug_properties = false;
     bool debug_perfmon = false;
+    bool debug_memorymon = false;
     bool debug_terrain_paint = false;
     uint32_t frame = 0;
     uint16_t last_frame_tick = 0;

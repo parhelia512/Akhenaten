@@ -49,6 +49,7 @@
 
 #include "dev/perfmon.h"
 #include "dev/perfmon_nanoprofiler.h"
+#include "dev/memorymon.h"
 
 #include "graphics/graphics.h"
 
@@ -522,6 +523,7 @@ static void run_and_draw() {
             game_debug_properties_draw();
             game_debug_terrain_paint_draw();
             game_perfmon_draw();
+            game_memorymon_draw();
         }
 
         {
