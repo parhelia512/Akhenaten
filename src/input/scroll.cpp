@@ -463,3 +463,18 @@ void __scroll_arrow(int which, int value) {
     g_scroll.arrow(static_cast<scroll_t::arrow_dir>(which), value);
 }
 ANK_FUNCTION_2(__scroll_arrow)
+
+vec2i __scroll_get_delta_empire() {
+    return g_scroll.get_delta(&mouse::get(), scroll_t::EMPIRE);
+}
+ANK_FUNCTION(__scroll_get_delta_empire)
+
+void __scroll_drag_start(int source) {
+    g_scroll.drag_start(static_cast<scroll_t::drag_source>(source));
+}
+ANK_FUNCTION_1(__scroll_drag_start)
+
+void __scroll_drag_end() {
+    g_scroll.drag_end();
+}
+ANK_FUNCTION(__scroll_drag_end)
