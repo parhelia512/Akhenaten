@@ -101,6 +101,14 @@ void autoconfig_window::go_back() {
 
 int autoconfig_window::ui_handle_mouse(const mouse *m) {
     ui.begin_widget(pos);
+
+    const xstring window_id_before = window_get_id();
+    ui.event(window_info{pos}, get_section(), __func__);
+    if (window_get_id() != window_id_before) {
+        ui.end_widget();
+        return 0;
+    }
+
     bool handled = ui::handle_mouse(m);
 
     if (allow_rmb_goback && (is_modal() || !handled)) {
