@@ -139,3 +139,4 @@ int get_first_mission_in_campaign(int campaign_id);
 bool game_scenario_beaten(int scenario_id);
 
 bool game_load_campaign_file();
+bool game_has_campaign_data();

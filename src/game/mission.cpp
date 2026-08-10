@@ -23,6 +23,10 @@ struct mission_data_t {
 
 mission_data_t g_mission_data;
 
+bool game_has_campaign_data() {
+    return g_mission_data.num_campaigns > 0;
+}
+
 struct campaign_mission_id {
     int campaign_id = -1;
     int step_index = -1;

@@ -62,7 +62,14 @@ function get_mission_config(scenario_id) {
 }
 
 function mission_is_playable(scenario_id) {
-    return __game_mission_is_valid(scenario_id) && get_mission_config(scenario_id) !== undefined
+    if (get_mission_config(scenario_id) === undefined) {
+        return false
+    }
+    // --no-resource skips campaign.txt; JS mission configs are enough in hermetic runs.
+    if (!__game_has_campaign_data()) {
+        return true
+    }
+    return __game_mission_is_valid(scenario_id)
 }
 
 function mission_get_visible_choices(mission_config, completed_id) {
