@@ -33,6 +33,13 @@ function test90_setup_sick_house() {
     if (b) {
         b.common_health = 5
     }
+    // Plague walker spawn requires a road tile near the house (never house.tile).
+    var ht = __building_tile(bid)
+    for (var dx = 0; dx < 2; dx++) {
+        terrain.add({ x: ht.x + dx, y: ht.y + 1 }, TERRAIN_ROAD)
+    }
+    __test_update_road_network()
+    __test_check_kingdome_access()
     return bid
 }
 

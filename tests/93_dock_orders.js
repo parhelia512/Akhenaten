@@ -124,9 +124,10 @@ function run_test() {
     }
 
     // Two docks: pottery specialist scores higher on pottery import than beer specialist.
-    var bid2 = __test_building_create(BUILDING_DOCK, -1, -1)
-    if (!bid2) {
-        __log_info_native('[test:93] second dock create failed')
+    var dock_tile = __building_tile(bid)
+    var bid2 = __test_building_create(BUILDING_DOCK, dock_tile.x + 10, dock_tile.y)
+    if (!bid2 || bid2 === bid) {
+        __log_info_native('[test:93] second dock create failed bid2=' + bid2 + ' bid=' + bid)
         __test_signal_ready()
         return
     }

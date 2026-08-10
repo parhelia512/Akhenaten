@@ -1034,11 +1034,11 @@ static int __test_building_create(int type, int x, int y) {
     }
 
     tile2i place = (x < 0 || y < 0) ? tile2i::invalid : tile2i(x, y);
-    if (building *existing = building_first((e_building_type)type)) {
-        return existing->id;
-    }
-
+    // Reuse only for unspecified tile; explicit coords create a second instance when needed.
     if (!place.valid()) {
+        if (building *existing = building_first((e_building_type)type)) {
+            return existing->id;
+        }
         place.set(g_scenario.map.width / 2, g_scenario.map.height / 2);
     }
 
@@ -3487,6 +3487,18 @@ static int __test_food_mill_spawn_figure(int bid) {
     if (b->distance_from_entry <= 0) {
         b->distance_from_entry = 1;
     }
+    // gettable stocks skip buildings with distance_from_entry <= 0 — ensure sources count.
+    buildings_valid_do([](building &src) {
+        if (!src.has_road_access) {
+            src.has_road_access = true;
+        }
+        if (src.road_network_id <= 0) {
+            src.road_network_id = 1;
+        }
+        if (src.distance_from_entry <= 0) {
+            src.distance_from_entry = 1;
+        }
+    }, {BUILDING_GRANARY, BUILDING_STORAGE_YARD});
     g_city.resource.calculate_stocks();
     const bool before = mill->has_figure_of_type(0, FIGURE_STORAGEYARD_CART);
     mill->spawn_figure();

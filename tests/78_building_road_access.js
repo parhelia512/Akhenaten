@@ -101,7 +101,9 @@ function run_test() {
     // EE1b booth: place on venue roads; assume-preview must match stored after commit.
     var bx = cx + 10
     var by = cy - 14
+    // Booth orientation 0: footprint .R/RR plus exterior stem (1,0) — see BOOTH_ROAD_POSITIONS / test 144.
     terrain.add({ x: bx + 0, y: by + 1 }, TERRAIN_ROAD)
+    terrain.add({ x: bx + 1, y: by + 0 }, TERRAIN_ROAD)
     terrain.add({ x: bx + 1, y: by + 1 }, TERRAIN_ROAD)
     terrain.add({ x: bx + 1, y: by + 2 }, TERRAIN_ROAD)
     terrain.add({ x: bx + 2, y: by + 1 }, TERRAIN_ROAD)
@@ -142,4 +144,21 @@ function run_test() {
 
     __log_info_native('[test:78] ok')
     __test_signal_ready()
+}
+
+function check_valid() {
+    var markers = [
+        'road_access_allowlist_ok',
+        'road_access_apply_clear_ok',
+        'road_access_road_parity_ok',
+        'road_access_booth_assume_ok',
+        'road_access_feature_ok'
+    ]
+    for (var i = 0; i < markers.length; i++) {
+        if (!__test_find_inlog('[test-marker] ' + markers[i])) {
+            __log_info_native('[test:78] missing marker: ' + markers[i])
+            return false
+        }
+    }
+    return true
 }

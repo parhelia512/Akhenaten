@@ -43,7 +43,7 @@ function run_test() {
     }
     __log_marker('burial_empty_reject_ok')
 
-    var sy = test_staffed_yard_with_resource(RESOURCE_LINEN, 8, 10, 10)
+    var sy = test_staffed_yard_with_resource(RESOURCE_LINEN, 8, -1, -1)
     if (!sy) {
         __log_info_native('[test:54] yard linen failed')
         __test_signal_ready()
@@ -51,7 +51,7 @@ function run_test() {
     }
     // Limestone in same or another yard
     if (!__test_storage_yard_add_resource(sy, RESOURCE_LIMESTONE, 32)) {
-        var sy2 = test_staffed_yard_with_resource(RESOURCE_LIMESTONE, 32, 15, 15)
+        var sy2 = test_staffed_yard_with_resource(RESOURCE_LIMESTONE, 32, -1, -1)
         if (!sy2) {
             __log_info_native('[test:54] yard limestone failed')
             __test_signal_ready()
