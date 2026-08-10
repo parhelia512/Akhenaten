@@ -10,7 +10,6 @@ public:
     int initial_scroll_y;
     int scroll_x;
     int scroll_y;
-    int selected_city = 1;
     int selected_obj;
     int viewport_width;
     int viewport_height;

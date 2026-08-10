@@ -9,6 +9,7 @@
 #include "game/resource.h"
 #include "scenario/distant_battle.h"
 #include "scenario/scenario.h"
+#include "scenario/empire.h"
 #include "core/profiler.h"
 #include "js/js_game.h"
 
@@ -47,10 +48,15 @@ void __empire_map_select_object(vec2i pos) {
 }
 ANK_FUNCTION_1(__empire_map_select_object)
 
-void __empire_map_set_selected_city(int city_id) {
-    g_empire_map.selected_city = city_id;
+void __empire_map_scroll_map(vec2i delta) {
+    g_empire_map.scroll_map(delta);
 }
-ANK_FUNCTION_1(__empire_map_set_selected_city)
+ANK_FUNCTION_1(__empire_map_scroll_map)
+
+void __empire_map_clear_selected_object() {
+    g_empire_map.clear_selected_object();
+}
+ANK_FUNCTION(__empire_map_clear_selected_object)
 
 int __empire_luxury_goods_traded_sum() {
     int sum = 0;
@@ -60,11 +66,6 @@ int __empire_luxury_goods_traded_sum() {
     return sum;
 }
 ANK_FUNCTION(__empire_luxury_goods_traded_sum)
-
-int __empire_map_selected_city() {
-    return g_empire_map.selected_city;
-}
-ANK_FUNCTION(__empire_map_selected_city)
 
 std::optional<bvariant> __empire_trader_get_property(int index, pcstr property) {
     if (index < 0 || index >= g_empire_traders.traders.size()) {
@@ -78,6 +79,16 @@ vec2i __empire_map_adjust_scroll(vec2i pos) {
     return g_empire_map.adjust_scroll(pos);
 }
 ANK_FUNCTION_1(__empire_map_adjust_scroll)
+
+vec2i __empire_map_get_scroll() {
+    return g_empire_map.get_scroll();
+}
+ANK_FUNCTION(__empire_map_get_scroll)
+
+void __empire_map_set_viewport(vec2i size) {
+    g_empire_map.set_viewport(size);
+}
+ANK_FUNCTION_1(__empire_map_set_viewport)
 
 static constexpr int EMPIRE_TRADE_ROUTE_COUNT = 50;
 
@@ -148,6 +159,20 @@ void __empire_expand() {
     messages::popup("message_empire_has_expanded", 0, 0);
 }
 ANK_FUNCTION(__empire_expand)
+
+int __empire_update_map_animation(int object_index, int image_id) {
+    const empire_object* obj = g_empire.get_object(object_index);
+    if (!obj || image_id <= 0) {
+        return 0;
+    }
+    return g_empire.update_animation(object_index, *obj, image_id);
+}
+ANK_FUNCTION_2(__empire_update_map_animation)
+
+int __empire_city_image_id(int city_type) {
+    return empire_city_images.image_id((e_empire_city)city_type, scenario_empire_is_expanded());
+}
+ANK_FUNCTION_1(__empire_city_image_id)
 
 void js_register_empire_objects(js_State *J) {
     js_register_empire_object_proto(J);
