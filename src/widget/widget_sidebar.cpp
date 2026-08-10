@@ -13,7 +13,6 @@
 #include "widget/sidebar/common.h"
 #include "building/construction/build_planner.h"
 #include "window/window_city.h"
-#include "window/window_empire.h"
 #include "window/message_dialog.h"
 #include "window/autoconfig_window.h"
 #include "widget/widget_top_menu_game.h"

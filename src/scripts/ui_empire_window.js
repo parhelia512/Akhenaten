@@ -3,13 +3,14 @@ log_info("akhenaten: ui empire window common started")
 function window_empire_show_checked() {
     var avail = city.is_empire_available()
     if (avail == 1 || scenario.scmode != e_scenario_normal) {
-        __window_empire_show()
+        emit event_show_window{ id: "empire_window" }
         return
     }
     var text = (avail == 0) ? "#not_available_in_this_assignment" : "#not_available_yet"
     city.warnings.show(text)
 }
 
+[es=window]
 empire_window {
     trade_column_spacing : 146
     trade_row_spacing : 20
@@ -68,7 +69,12 @@ empire_window {
 
     adjust_scroll : __empire_map_adjust_scroll
 
-    @selected_city { get: function() { return __empire_map_selected_city() } }
+    @selected_city {
+        get: function() {
+            var obj = this.selected_object
+            return (obj && obj.type == EMPIRE_OBJECT_CITY) ? obj.city_id : 0
+        }
+    }
     @selected_object {
         get: function() {
             var pick = __empire_map_selected_object()
@@ -82,6 +88,13 @@ empire_window {
     /** Selected city's trade route is deferred and drawn last (on top). */
     deferred_route_city_id : -1
 
+    scroll_remainder_x : 0
+    scroll_remainder_y : 0
+    left_panning : false
+    left_pan_travel : 0
+    left_pan_last_pos : { x: 0, y: 0 }
+    finished_scroll : 0
+
     route_state : {
         closed : 0
         closed_selected : 1
@@ -89,6 +102,9 @@ empire_window {
         open_selected : 3
     }
 }
+
+var SCROLL_DRAG_TOUCH = 0
+var SCROLL_DRAG_MIDDLE_MOUSE_PAN = 2
 
 function empire_window_draw_trade_resource_row(offset, flags, resource, tradeNow, tradeMax, font) {
     var ox = offset.x
@@ -171,6 +187,25 @@ function empire_window_map_base_origin() {
     }
 }
 
+function empire_window_map_viewport_size() {
+    var size = empire_window_map_area_size()
+    var s = Math.max(0.001, empire_window_map_scale())
+    return {
+        x: Math.min(1200, Math.max(1, Math.round(size.x / s))),
+        y: Math.min(1600, Math.max(1, Math.round(size.y / s)))
+    }
+}
+
+function empire_window_map_draw_origin() {
+    var scroll = __empire_map_get_scroll()
+    var s = empire_window_map_scale()
+    var base = empire_window_map_base_origin()
+    return {
+        x: base.x - Math.round(scroll.x * s),
+        y: base.y - Math.round(scroll.y * s)
+    }
+}
+
 function empire_window_is_outside_map(x, y) {
     var o = empire_window_map_clip_origin()
     var size = empire_window_map_area_size()
@@ -185,12 +220,35 @@ function empire_window_map_point(draw_offset, pos) {
     }
 }
 
-[es=(empire_window, determine_selected_object)]
-function empire_window_determine_selected_object(ev) {
+function empire_window_consume_scroll_remainder(axis) {
+    var rem = (axis == "x") ? empire_window.scroll_remainder_x : empire_window.scroll_remainder_y
+    var step = (rem >= 0) ? Math.floor(rem) : Math.ceil(rem)
+    if (axis == "x") {
+        empire_window.scroll_remainder_x = rem - step
+    } else {
+        empire_window.scroll_remainder_y = rem - step
+    }
+    return step
+}
+
+function empire_window_apply_map_scroll_delta(dx, dy, scale) {
+    var s = Math.max(0.001, scale)
+    empire_window.scroll_remainder_x += dx / s
+    empire_window.scroll_remainder_y += dy / s
+    var map_delta = {
+        x: empire_window_consume_scroll_remainder("x"),
+        y: empire_window_consume_scroll_remainder("y")
+    }
+    if (map_delta.x || map_delta.y) {
+        __empire_map_scroll_map(map_delta)
+    }
+}
+
+function empire_window_determine_selected_object() {
     if (!empire_window.screen_bounds) {
         return
     }
-    if (!__mouse.left.went_up || ev.finished_scroll || empire_window_is_outside_map(__mouse.x, __mouse.y)) {
+    if (!__mouse.left.went_up || empire_window.finished_scroll || empire_window_is_outside_map(__mouse.x, __mouse.y)) {
         return
     }
 
@@ -200,11 +258,77 @@ function empire_window_determine_selected_object(ev) {
         x: Math.max(0, Math.round((__mouse.x - origin.x) / scale)),
         y: Math.max(0, Math.round((__mouse.y - origin.y) / scale))
     })
+}
 
-    var obj = empire_window.selected_object
-    if (obj && obj.type == EMPIRE_OBJECT_CITY) {
-        __empire_map_set_selected_city(obj.city_id)
+[es=(empire_window, ui_handle_mouse)]
+function empire_window_ui_handle_mouse(window) {
+    var m = __mouse
+    var scale = empire_window_map_scale()
+
+    if (!m.is_touch && m.left.went_down && !empire_window_is_outside_map(m.x, m.y)) {
+        empire_window.left_panning = true
+        empire_window.left_pan_travel = 0
+        empire_window.left_pan_last_pos = { x: m.x, y: m.y }
     }
+
+    if (!m.is_touch && empire_window.left_panning && m.left.is_down) {
+        var dx = m.x - empire_window.left_pan_last_pos.x
+        var dy = m.y - empire_window.left_pan_last_pos.y
+        if (dx || dy) {
+            empire_window_apply_map_scroll_delta(-dx, -dy, scale)
+            empire_window.left_pan_travel += Math.abs(dx) + Math.abs(dy)
+            empire_window.left_pan_last_pos = { x: m.x, y: m.y }
+        }
+    }
+
+    if (!m.is_touch && m.left.went_up) {
+        empire_window.finished_scroll = empire_window.left_pan_travel > __scroll_config.drag_min_delta ? 1 : 0
+        empire_window.left_panning = false
+        empire_window.left_pan_travel = 0
+    }
+
+    if (!empire_window.left_panning) {
+        var position = __scroll_get_delta_empire()
+        if (position.x || position.y) {
+            empire_window_apply_map_scroll_delta(position.x, position.y, scale)
+        }
+    }
+
+    if (game_features.gameopt_middle_mouse_camera_pan
+        && m.middle.went_down && !empire_window_is_outside_map(m.x, m.y)) {
+        __scroll_drag_start(SCROLL_DRAG_MIDDLE_MOUSE_PAN)
+    }
+
+    if (m.is_touch) {
+        var tp = __touch_earliest_current()
+        if (!empire_window_is_outside_map(tp.x, tp.y)) {
+            if (__touch_earliest_has_started()) {
+                __scroll_drag_start(SCROLL_DRAG_TOUCH)
+            }
+        }
+        if (__touch_earliest_has_ended()) {
+            empire_window.finished_scroll = __touch_earliest_was_click() ? 0 : 1
+            __scroll_drag_end()
+        }
+    }
+
+    if (m.middle.went_up) {
+        __scroll_drag_end()
+    }
+
+    empire_window_determine_selected_object()
+    empire_window.finished_scroll = 0
+}
+
+[es=(empire_window, go_back)]
+function empire_window_on_go_back(window) {
+    if (empire_window.selected_object) {
+        __empire_map_clear_selected_object()
+        return
+    }
+    __scroll_drag_end()
+    game.pause_allow = false
+    ui.window_city_show()
 }
 
 function empire_window_layout_ui(window) {
@@ -373,9 +497,24 @@ function empire_window_confirm_open_trade() {
 
 [es=(empire_window, init)]
 function empire_window_on_init(window) {
+    empire_window.scroll_remainder_x = 0
+    empire_window.scroll_remainder_y = 0
+    empire_window.left_panning = false
+    empire_window.left_pan_travel = 0
+    empire_window.left_pan_last_pos = { x: 0, y: 0 }
+    empire_window.finished_scroll = 0
+
+    game.pause_allow = !!game_features.gameplay_change_empire_map_runs_simulation
+
     window.button_help.onclick = function() { ui.window_message_dialog_show("message_world_map") }
-    window.button_close.onclick = function() { ui.window_city_show() }
-    window.button_advisor.onclick = function() { window_advisors_show_advisor(ADVISOR_TRADE) }
+    window.button_close.onclick = function() {
+        game.pause_allow = false
+        ui.window_city_show()
+    }
+    window.button_advisor.onclick = function() {
+        game.pause_allow = false
+        window_advisors_show_advisor(ADVISOR_TRADE)
+    }
     window.button_pause.onclick = function() { emit event_toggle_pause{ value: 0 } }
     window.button_open_trade.onclick = function() {
         ui.show_yesno("#popup_dialog_open_trade", empire_window_confirm_open_trade )
@@ -548,7 +687,6 @@ function empire_window_draw_map_animation(object_index, img, draw_pos, scale) {
     }, scale)
 }
 
-[es=(empire_window, draw_map, EMPIRE_OBJECT_CITY)]
 function empire_window_draw_city(ev) {
     var obj = empire.get_object(ev.object_index)
     var city = empire.get_city(obj.city_id)
@@ -601,7 +739,6 @@ function empire_window_draw_city(ev) {
     empire_window_draw_map_animation(ev.object_index, img, draw_pos, scale)
 }
 
-[es=(empire_window, draw_map, EMPIRE_OBJECT_TEXT)]
 function empire_window_draw_text(ev) {
     var obj = empire.get_object(ev.object_index)
     var sp = empire_window_map_point(ev.draw_offset, obj.map_pos)
@@ -623,12 +760,10 @@ function empire_window_draw_sprite_object(ev, obj) {
     empire_window_draw_map_animation(ev.object_index, img, draw_pos, scale)
 }
 
-[es=(empire_window, draw_map, EMPIRE_OBJECT_ORNAMENT)]
 function empire_window_draw_ornament(ev) {
     empire_window_draw_sprite_object(ev, empire.get_object(ev.object_index))
 }
 
-[es=(empire_window, draw_map, EMPIRE_OBJECT_KINGDOME_ARMY)]
 function empire_window_draw_kingdome_army(ev) {
     var obj = empire.get_object(ev.object_index)
     var battle = empire.active_battle
@@ -641,7 +776,6 @@ function empire_window_draw_kingdome_army(ev) {
     empire_window_draw_sprite_object(ev, obj)
 }
 
-[es=(empire_window, draw_map, EMPIRE_OBJECT_ENEMY_ARMY)]
 function empire_window_draw_enemy_army(ev) {
     var obj = empire.get_object(ev.object_index)
     var battle = empire.active_battle
@@ -677,7 +811,7 @@ function empire_window_route_segment_sprites(img, p1, p2) {
 
 function empire_window_trade_route_state(city) {
     var rs = empire_window.route_state
-    var is_selected = !!empire_window.selected_object && empire_window.selected_city == city.id
+    var is_selected = empire_window.selected_city == city.id
     if (city.is_open) {
         return is_selected ? rs.open_selected : rs.open
     }
@@ -720,7 +854,6 @@ function empire_window_map_background_image() {
     return get_image(empire_window.image)
 }
 
-[es=(empire_window, draw_map_begin)]
 function empire_window_draw_map_begin(ev) {
     empire_window.deferred_route_city_id = -1
 
@@ -730,7 +863,6 @@ function empire_window_draw_map_begin(ev) {
     }
 }
 
-[es=(empire_window, draw_map_objects)]
 function empire_window_draw_map_objects(ev) {
     var payload = { draw_offset: ev.draw_offset, object_index: 0 }
     for (var i = 0; i < empire.object_slots; i++) {
@@ -777,7 +909,6 @@ function empire_window_draw_map_objects(ev) {
     }
 }
 
-[es=(empire_window, draw_invasion_warnings)]
 function empire_window_draw_invasion_warnings(ev) {
     var scale = empire_window_map_scale()
     for (var i = 0; i < invasions.warning_slots; i++) {
@@ -793,7 +924,6 @@ function empire_window_draw_invasion_warnings(ev) {
     }
 }
 
-[es=(empire_window, draw_deferred_trade_route)]
 function empire_window_draw_deferred_trade_route(ev) {
     var cid = empire_window.deferred_route_city_id
     empire_window.deferred_route_city_id = -1
@@ -807,7 +937,6 @@ function empire_window_draw_deferred_trade_route(ev) {
     empire_window_request_city_trade_route(city, ev.draw_offset, true)
 }
 
-[es=(empire_window, draw_map, EMPIRE_OBJECT_TRADE_ROUTE)]
 function empire_window_draw_trade_route(ev) {
     var rs = empire_window.route_state
     if (ev.effect == rs.closed) {
@@ -851,9 +980,11 @@ function empire_window_draw_trade_route(ev) {
     }
 }
 
-[es=(empire_window, draw_map, EMPIRE_OBJECT_TRADER)]
 function empire_window_draw_trader(ev) {
     var t = empire.get_trader(ev.index)
+    if (!t || !t.is_active) {
+        return
+    }
 
     var img = get_image({ pack: PACK_GENERAL, id: 179, offset: t.is_ship ? 0 : 1 })
     if (!img) {
@@ -863,7 +994,14 @@ function empire_window_draw_trader(ev) {
     ui.image(img, empire_window_map_point(ev.draw_offset, t.current_position))
 }
 
-[es=(empire_window, draw_map, EMPIRE_OBJECT_BATTLE_ICON)]
+function empire_window_draw_traders(ev) {
+    var payload = { draw_offset: ev.draw_offset, index: 0 }
+    for (var i = 0; i < empire.trader_slots; i++) {
+        payload.index = i
+        empire_window_draw_trader(payload)
+    }
+}
+
 function empire_window_draw_battle_icon(ev) {
     var obj = empire.get_object(ev.object_index)
     var img = get_image("pharaoh_general/empire_bits_00001")
@@ -874,7 +1012,6 @@ function empire_window_draw_battle_icon(ev) {
     ui.image(img, empire_window_map_point(ev.draw_offset, obj.map_pos))
 }
 
-[es=(empire_window, draw_map, EMPIRE_OBJECT_DISTANT_BATTLE_ROUTE)]
 function empire_window_draw_distant_battle_path(ev) {
     if (!empire.has_distant_battle) {
         return
@@ -905,8 +1042,7 @@ function empire_window_draw_distant_battle_path(ev) {
     }
 }
 
-[es=(empire_window, draw_map)]
-function empire_window_draw_distant_battle_icon(window) {
+function empire_window_draw_distant_battle_icon(ev) {
     if (!empire.has_distant_battle) {
         return
     }
@@ -921,14 +1057,13 @@ function empire_window_draw_distant_battle_icon(window) {
         return
     }
 
-    var battle_icon_pos = vec2i(empire_window_map_point(window.draw_offset, ecity.empire_object.pos))
+    var battle_icon_pos = vec2i(empire_window_map_point(ev.draw_offset, ecity.empire_object.pos))
                             .add({x:-battle_icon.width / 2, y:-battle_icon.height / 2})
 
     ui.image(battle_icon, battle_icon_pos)
 }
 
-[es=(empire_window, draw_map)]
-function empire_window_draw_dispatched_army_icon(window) {
+function empire_window_draw_dispatched_army_icon(ev) {
     if (empire.dispatched_army.state <= 0) {
         return
     }
@@ -938,27 +1073,44 @@ function empire_window_draw_dispatched_army_icon(window) {
         return
     }
 
-    var army_icon_pos = vec2i(empire_window_map_point(window.draw_offset, empire.dispatched_army.pos))
+    var army_icon_pos = vec2i(empire_window_map_point(ev.draw_offset, empire.dispatched_army.pos))
                             .add({x:-army_icon.width / 2, y:-army_icon.height / 2})
 
     ui.image(army_icon, army_icon_pos)
 }
 
-[es=(empire_window, draw_background)]
-function empire_window_draw_background(window) {
-    var bounds = empire_window_screen_bounds()
-    empire_window.screen_bounds = bounds
-    __empire_window_set_map_bounds(bounds.min_pos.x, bounds.min_pos.y, bounds.max_pos.x, bounds.max_pos.y)
-    empire_window_layout_ui(window)
+function empire_window_draw_map(window) {
+    var clip = empire_window_map_clip_origin()
+    var area = empire_window_map_area_size()
+    ui.set_clip_rectangle(clip, area)
+    __empire_map_set_viewport(empire_window_map_viewport_size())
+    ui.set_tooltip("")
+
+    var draw_offset = empire_window_map_draw_origin()
+    empire_window.draw_offset = draw_offset
+    var payload = { draw_offset: draw_offset }
+
+    empire_window_draw_map_begin(payload)
+    empire_window_draw_map_objects(payload)
+    empire_window_draw_invasion_warnings(payload)
+    empire_window_draw_traders(payload)
+    empire_window_draw_distant_battle_path(payload)
+    empire_window_draw_deferred_trade_route(payload)
+
+    var wpos = window.pos || { x: 0, y: 0 }
+    ui.begin_widget(wpos)
+    empire_window_draw_distant_battle_icon(payload)
+    empire_window_draw_dispatched_army_icon(payload)
+    ui.end_widget()
+
+    ui.reset_clip_rectangle()
 }
 
-[es=(empire_window, update_selection_ui)]
 function empire_window_update_selection_ui(window) {
     var city = null
-    var obj = empire_window.selected_object
-    if (obj && obj.type == EMPIRE_OBJECT_CITY) {
-        __empire_map_set_selected_city(obj.city_id)
-        city = empire.get_city(obj.city_id)
+    var cityId = empire_window.selected_city
+    if (cityId) {
+        city = empire.get_city(cityId)
     }
 
     window.city_name.text = city ? city.name : ""
@@ -974,7 +1126,6 @@ function empire_window_update_selection_ui(window) {
     }
 }
 
-[es=(empire_window, draw_paneling)]
 function empire_window_draw_paneling(window) {
     var min_pos = empire_window.screen_bounds.min_pos
     var max_pos = empire_window.screen_bounds.max_pos
@@ -1012,4 +1163,16 @@ function empire_window_draw_paneling(window) {
     ui.image(cross, {x: max_pos.x - 16, y: max_pos.y - 16})
 
     ui.reset_clip_rectangle()
+}
+
+[es=(empire_window, draw_background)]
+function empire_window_draw_background(window) {
+    game.pause_allow = !!game_features.gameplay_change_empire_map_runs_simulation
+    var bounds = empire_window_screen_bounds()
+    empire_window.screen_bounds = bounds
+    empire_window_layout_ui(window)
+
+    empire_window_draw_map(window)
+    empire_window_update_selection_ui(window)
+    empire_window_draw_paneling(window)
 }

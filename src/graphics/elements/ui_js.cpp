@@ -17,7 +17,6 @@
 #include "window/message_dialog_new.h"
 #include "window/window_advisors.h"
 #include "window/autoconfig_window.h"
-#include "window/window_empire.h"
 #include "empire/trade_prices.h"
 #include "game/resource.h"
 #include "window/popup_dialog.h"
@@ -262,11 +261,6 @@ int __trade_price_sell(int resource) {
     return trade_price_sell((e_resource)resource);
 }
 ANK_FUNCTION_1(__trade_price_sell)
-
-void __window_empire_show() {
-    window_empire_show();
-}
-ANK_FUNCTION(__window_empire_show)
 
 void __ui_draw_line(bool hline, vec2i pos, int size) {
     ui::line(hline, pos, size, 0xff000000);
