@@ -1,12 +1,15 @@
-#include "dev/perfmon.h"
+#include "platform/platform.h"
 
 #ifndef GAME_PLATFORM_ANDROID
 
 #include "core/app.h"
+#include "core/xvalue.h"
 #include "dev/perfmon_nanoprofiler.h"
 #include "dev/perfmon_widget.h"
 #include "game/game.h"
+#include "game/game_events.h"
 #include "graphics/residency_atlas.h"
+#include "input/keys.h"
 #include "js/js.h"
 #include "widget/debug_console.h"
 
@@ -17,6 +20,7 @@
 struct game_perfmon_t {
     Perfmon::PerfmonWidget widget;
     bool metrics_registered = false;
+    bool visible = false;
     double game_update_ms = 0.0;
     double draw_ms = 0.0;
 
@@ -24,8 +28,6 @@ struct game_perfmon_t {
     void set_phase_ms(double update_ms, double draw_phase_ms);
     void draw();
 };
-
-static game_perfmon_t *g_perfmon = nullptr;
 
 void game_perfmon_t::ensure_metrics() {
     if (metrics_registered) {
@@ -52,13 +54,13 @@ void game_perfmon_t::ensure_metrics() {
 
     widget.RegisterMetric(Perfmon::Metric(
         "game.update (ms)",
-        []() { return g_perfmon ? g_perfmon->game_update_ms : 0.0; },
+        []() { return xvalue<game_perfmon_t>::ref().game_update_ms; },
         phaseSettings,
         { 4.0, 8.0, 16.0, 33.0, 66.0 }));
 
     widget.RegisterMetric(Perfmon::Metric(
         "draw phase (ms)",
-        []() { return g_perfmon ? g_perfmon->draw_ms : 0.0; },
+        []() { return xvalue<game_perfmon_t>::ref().draw_ms; },
         phaseSettings,
         { 4.0, 8.0, 16.0, 33.0, 66.0 }));
 
@@ -102,7 +104,7 @@ void game_perfmon_t::set_phase_ms(double update_ms, double draw_phase_ms) {
 }
 
 void game_perfmon_t::draw() {
-    if (!game.debug_perfmon) {
+    if (!visible) {
         return;
     }
 
@@ -112,36 +114,30 @@ void game_perfmon_t::draw() {
     widget.Update(io.DeltaTime);
 
     ImGui::SetNextWindowSize(ImVec2(520, 400), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Performance##perfmon", &game.debug_perfmon)) {
+    if (ImGui::Begin("Performance##perfmon", &visible)) {
         widget.DrawGUI();
     }
     ImGui::End();
 }
 
 void ANK_REGISTER_APPLICATION_MODULE(register_perfmon_module) {
-    static game_perfmon_t module;
-    g_perfmon = &module;
-
-    bind_debug_command("perfmon", [](std::istream &, std::ostream &os) {
-        game.debug_perfmon = !game.debug_perfmon;
-        os << (game.debug_perfmon ? "perfmon on\n" : "perfmon off\n");
+    auto &module = xvalue<game_perfmon_t>::ref();
+    game.add_frame_phase_ms_handler([&module](double game_update_ms, double draw_ms) {
+        module.set_phase_ms(game_update_ms, draw_ms);
     });
-}
+    game.add_debug_ui_draw_handler([&module]() { module.draw(); });
+    game.add_frame_serial_part_handler([]() { Perfmon::NanoProfiler::Clear(); });
 
-void game_perfmon_set_phase_ms(double game_update_ms, double draw_ms) {
-    if (g_perfmon) {
-        g_perfmon->set_phase_ms(game_update_ms, draw_ms);
-    }
-}
+    events::subscribe_permanent([&module](event_debug_hotkey ev) {
+        if (ev.key == KEY_F4) {
+            module.visible = true;
+        }
+    });
 
-void game_perfmon_draw() {
-    if (g_perfmon) {
-        g_perfmon->draw();
-    }
-}
-
-void game_perfmon_frame_mark_end() {
-    Perfmon::NanoProfiler::Clear();
+    bind_debug_command("perfmon", [&module](std::istream &, std::ostream &os) {
+        module.visible = !module.visible;
+        os << (module.visible ? "perfmon on\n" : "perfmon off\n");
+    });
 }
 
 #endif // !GAME_PLATFORM_ANDROID

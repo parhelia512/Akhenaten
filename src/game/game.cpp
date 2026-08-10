@@ -277,6 +277,30 @@ void game_t::frame_serial_part() {
     }
 }
 
+void game_t::add_frame_phase_ms_handler(frame_phase_ms_handler_t handler) {
+    std::lock_guard<std::mutex> lock(frame_phase_ms_handlers_mutex);
+    frame_phase_ms_handlers.push_back(std::move(handler));
+}
+
+void game_t::frame_phase_ms(double game_update_ms, double draw_ms) {
+    std::lock_guard<std::mutex> lock(frame_phase_ms_handlers_mutex);
+    for (auto &handler : frame_phase_ms_handlers) {
+        handler(game_update_ms, draw_ms);
+    }
+}
+
+void game_t::add_debug_ui_draw_handler(serial_event_t handler) {
+    std::lock_guard<std::mutex> lock(debug_ui_draw_handlers_mutex);
+    debug_ui_draw_handlers.push_back(std::move(handler));
+}
+
+void game_t::debug_ui_draw() {
+    std::lock_guard<std::mutex> lock(debug_ui_draw_handlers_mutex);
+    for (auto &handler : debug_ui_draw_handlers) {
+        handler();
+    }
+}
+
 static int get_elapsed_ticks() {
     if (game.paused || !city_has_loaded) {
         return 0;
@@ -296,9 +320,7 @@ static int get_elapsed_ticks() {
     auto it = std::find_if(std::begin(meaning_windows), std::end(meaning_windows), [] (pcstr id) {
         return window_get_id() == id;
     });
-    const bool empire_map_runs_sim = game_features::gameplay_change_empire_map_runs_simulation.to_bool()
-        && window_get_id() == "window_empire";
-    if (it != std::end(meaning_windows) || empire_map_runs_sim) {
+    if (it != std::end(meaning_windows) || game.pause_allow) {
         game_speed_index = (100 - game_features::gameopt_game_speed.to_int()) / 10;
         if (game_speed_index >= 10) {
             return 0;
@@ -348,6 +370,7 @@ bool game_t::check_valid() {
     random_init();
 
     paused = false;
+    pause_allow = false;
     unsigned int n = g_args.get_thread_count();
     if (n == 0) {
         n = std::thread::hardware_concurrency();

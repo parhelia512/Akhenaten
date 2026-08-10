@@ -53,10 +53,12 @@ struct event_game_scripts_was_reloaded {};
 struct event_game_exit_requested { int reserved = 0; };
 struct event_update_game_tick_timer { uint8_t reserved = 0; };
 struct event_debug_properties_draw_mission_info { uint8_t reserved = 0; };
+struct event_debug_hotkey { int key; };
 struct event_report_bug_result { int ok; xstring url; xstring error; };
 
 struct game_t {
     using serial_event_t = xfunction<void()>;
+    using frame_phase_ms_handler_t = xfunction<void(double game_update_ms, double draw_ms)>;
 
     enum {
         MAX_ANIM_TIMERS = 51
@@ -73,8 +75,6 @@ struct game_t {
     bool animation = false;
     bool debug_console = false;
     bool debug_properties = false;
-    bool debug_perfmon = false;
-    bool debug_memorymon = false;
     bool debug_terrain_paint = false;
     uint32_t frame = 0;
     uint16_t last_frame_tick = 0;
@@ -138,6 +138,10 @@ struct game_t {
     void frame_pre_present();
     void add_frame_serial_part_handler(serial_event_t handler);
     void frame_serial_part();
+    void add_frame_phase_ms_handler(frame_phase_ms_handler_t handler);
+    void frame_phase_ms(double game_update_ms, double draw_ms);
+    void add_debug_ui_draw_handler(serial_event_t handler);
+    void debug_ui_draw();
 
     threading::thread_pool mtrpc;
     threading::thread_pool mt;
@@ -150,6 +154,12 @@ struct game_t {
 
     std::mutex frame_serial_part_handlers_mutex;
     hvector<serial_event_t, 8> frame_serial_part_handlers;
+
+    std::mutex frame_phase_ms_handlers_mutex;
+    hvector<frame_phase_ms_handler_t, 8> frame_phase_ms_handlers;
+
+    std::mutex debug_ui_draw_handlers_mutex;
+    hvector<serial_event_t, 8> debug_ui_draw_handlers;
 
     ::painter painter();
 };

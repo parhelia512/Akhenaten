@@ -1,9 +1,13 @@
-#include "dev/memorymon.h"
+#include "platform/platform.h"
 
 #ifndef GAME_PLATFORM_ANDROID
 
+#include "core/app.h"
 #include "core/memory_manager.h"
+#include "core/xvalue.h"
 #include "game/game.h"
+#include "game/game_events.h"
+#include "input/keys.h"
 #include "widget/debug_console.h"
 
 #include "imgui.h"
@@ -13,20 +17,18 @@
 #include <unordered_map>
 #include <vector>
 
-void game_memorymon_overlay_init() {
-    bind_debug_command("memorymon", [](std::istream &, std::ostream &os) {
-        game.debug_memorymon = !game.debug_memorymon;
-        os << (game.debug_memorymon ? "memorymon on\n" : "memorymon off\n");
-    });
-}
+struct game_memorymon_t {
+    bool visible = false;
+    void draw();
+};
 
-void game_memorymon_draw() {
-    if (!game.debug_memorymon) {
+void game_memorymon_t::draw() {
+    if (!visible) {
         return;
     }
 
     ImGui::SetNextWindowSize(ImVec2(460, 420), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Memory##memorymon", &game.debug_memorymon)) {
+    if (ImGui::Begin("Memory##memorymon", &visible)) {
         const double inv_mib = 1.0 / (1024.0 * 1024.0);
         const int64_t total_bytes = g_memory.total();
         const auto &allocs = g_memory.pack_texture_allocs();
@@ -120,6 +122,22 @@ void game_memorymon_draw() {
         }
     }
     ImGui::End();
+}
+
+void ANK_REGISTER_APPLICATION_MODULE(register_memorymon_module) {
+    auto &module = xvalue<game_memorymon_t>::ref();
+    game.add_debug_ui_draw_handler([&module]() { module.draw(); });
+
+    events::subscribe_permanent([&module](event_debug_hotkey ev) {
+        if (ev.key == KEY_F4) {
+            module.visible = true;
+        }
+    });
+
+    bind_debug_command("memorymon", [&module](std::istream &, std::ostream &os) {
+        module.visible = !module.visible;
+        os << (module.visible ? "memorymon on\n" : "memorymon off\n");
+    });
 }
 
 #endif // !GAME_PLATFORM_ANDROID

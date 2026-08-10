@@ -47,10 +47,7 @@
 #include "dev/imguifiledialog.h"
 #include "misc/cpp/imgui_stdlib.h"
 
-#include "dev/perfmon.h"
 #include "dev/perfmon_nanoprofiler.h"
-#include "dev/memorymon.h"
-
 #include "graphics/graphics.h"
 
 static_assert(SDL_VERSION_ATLEAST(2, 0, 17));
@@ -497,7 +494,7 @@ static void run_and_draw() {
         }
         Uint32 time_after_draw = SDL_GetTicks();
 
-        game_perfmon_set_phase_ms((double)(time_between_run_and_draw - time_before_run),
+        game.frame_phase_ms((double)(time_between_run_and_draw - time_before_run),
           (double)(time_after_draw - time_between_run_and_draw));
 
         {
@@ -520,10 +517,8 @@ static void run_and_draw() {
         {
             NANO_PROFILE_SCOPE("_DebugUI");
             game_debug_cli_draw();
-            game_debug_properties_draw();
+            game.debug_ui_draw();
             game_debug_terrain_paint_draw();
-            game_perfmon_draw();
-            game_memorymon_draw();
         }
 
         {
@@ -540,7 +535,6 @@ static void run_and_draw() {
         game.frame_end();
     }
 
-    game_perfmon_frame_mark_end();
     js_vm_frame_end();
     game.frame_serial_part();
 }

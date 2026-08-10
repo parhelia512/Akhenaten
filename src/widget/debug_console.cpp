@@ -19,11 +19,12 @@
 #include "backends/imgui_impl_sdlrenderer2.h"
 #include "backends/imgui_impl_sdl2.h"
 #include "dev/debug.h"
-#include "dev/perfmon.h"
-#include "dev/memorymon.h"
 #include "editor/tool.h"
 #include "building/construction/build_planner.h"
 #include "graphics/view/view.h"
+#include "game/game_events.h"
+#include "input/keyboard.h"
+#include "input/keys.h"
 
 #include <iostream>
 
@@ -394,7 +395,7 @@ void game_imgui_overlay_init() {
     ImGui_ImplSDLRenderer2_Init(g_render.renderer());
 
     debug_console().con.bind_command("close", [] (auto &, auto &) { game.debug_console = false; });
-    game_memorymon_overlay_init();
+    game.add_debug_ui_draw_handler([]() { game_debug_properties_draw(); });
 }
 
 void game_imgui_overlay_destroy() {
@@ -427,19 +428,13 @@ bool game_imgui_overlay_handle_event(void *e) {
         if (key == SDL_SCANCODE_GRAVE) {
             game_toggle_debug_console();
         } else if (key == SDL_SCANCODE_F4) {
-            game.debug_perfmon = true;
-            game.debug_memorymon = true;
+            events::emit(event_debug_hotkey{ keyboard_t::get_key_from_scancode(key) });
             return true;
         }
     }
 
     if (event->type == SDL_TEXTINPUT && *event->text.text == '`') {
         debug_console().skip_event = true;
-    }
-
-    if (!(game.debug_console || game.debug_properties || game.debug_perfmon || game.debug_memorymon
-          || game.debug_terrain_paint)) {
-        return false;
     }
 
     if (debug_console().skip_event) {
