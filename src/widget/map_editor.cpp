@@ -15,6 +15,7 @@
 #include "input/scroll.h"
 #include "game/game_config.h"
 #include "game/game_events.h"
+#include "platform/renderer.h"
 #include "sound/sound_city.h"
 #include "sound/sound.h"
 #include "widget/city/tile_draw.h"
@@ -30,7 +31,6 @@ struct map_editor_data_t {
 };
 
 map_editor_data_t g_map_editor_data;
-local_render_context_t draw_context;
 
 static void draw_flags(vec2i pixel, tile2i point) {
     painter ctx = game.painter();
@@ -66,19 +66,30 @@ void widget_map_editor_draw() {
     painter ctx = game.painter();
     auto &data = g_map_editor_data;
     update_zoom_level();
+    set_render_scale(ctx, g_zoom.get_scale());
     set_city_clip_rectangle(ctx);
 
-    draw_context.init();
-    //    city_view_foreach_map_tile(draw_buildings);
+    g_screen_city.render_ctx.init();
+    map_render_clear();
+    ImageDraw::clear_render_commands();
+
     g_camera.foreach_valid_map_tile(ctx,
         [] (vec2i pixel, tile2i tile, painter &ctx) { g_screen_city.draw_isometric_flat(pixel, tile, ctx); }
     );
-
     g_camera.foreach_valid_map_tile(ctx,
         [] (vec2i pixel, tile2i tile, painter &ctx) { g_screen_city.draw_isometric_terrain_height(pixel, tile, ctx); }
     );
-    //    city_view_foreach_valid_map_tile(draw_flags, draw_top, 0);
+    ImageDraw::apply_render_commands(ctx, "editor_draw_flat");
+
+    g_camera.foreach_valid_map_tile(ctx,
+        [] (vec2i pixel, tile2i tile, painter &ctx) { g_screen_city.draw_isometric_nonterrain_height(pixel, tile, ctx); }
+    );
+    ImageDraw::apply_render_commands(ctx, "editor_draw_height");
+
     map_editor_tool_draw(ctx, data.current_tile);
+
+    graphics_reset_clip_rectangle();
+    set_render_scale(ctx, 1.0f);
 }
 
 static void update_city_view_coords(int x, int y, tile2i* tile) {
