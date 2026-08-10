@@ -38,8 +38,6 @@ static generic_button generic_button_ok[] = {
 };
 
 struct window_empire_t {
-    int selected_button;
-    int selected_city;
     vec2i p_min;
     vec2i p_max;
     vec2i draw_offset;
@@ -53,9 +51,6 @@ window_empire_t g_window_empire;
 
 static void init() {
     auto &data = g_window_empire;
-    data.selected_button = 0;
-    int selected_object = g_empire_map.selected_object();
-    data.selected_city = selected_object ? g_empire.get_city_for_object(selected_object - 1) : 0;
     data.focus_button_id = 0;
 
     events::subscribe([] (event_editor_toggle_battle_info ev) {
@@ -281,16 +276,14 @@ static void draw_panel_buttons(const empire_city* city) {
 }
 
 static void draw_foreground(int) {
-    auto &data = g_window_empire;
     window_editor_draw_map();
 
-    const empire_city* city = 0;
+    const empire_city* city = nullptr;
     int selected_object = g_empire_map.selected_object();
     if (selected_object) {
         const empire_object* object = g_empire.get_object(selected_object - 1);
-        if (object->type == EMPIRE_OBJECT_CITY) {
-            data.selected_city = g_empire.get_city_for_object(selected_object - 1);
-            city = g_empire.city(data.selected_city);
+        if (object && object->type == EMPIRE_OBJECT_CITY) {
+            city = g_empire.city(g_empire.get_city_for_object(selected_object - 1));
         }
     }
     draw_panel_buttons(city);
@@ -335,13 +328,9 @@ static void handle_input(const mouse* m, const hotkeys* h) {
     if (!arrow_buttons_handle_mouse(m, /*{data.p_min.x + 20, data.p_max.y - 100},*/ arrow_buttons_empire, 2, 0)) {
         if (!generic_buttons_handle_mouse(m, {data.p_min.x + 20, data.p_max.y - 100}, generic_button_ok, 1, &data.focus_button_id, nullptr)) {
             determine_selected_object(m);
-            int selected_object = g_empire_map.selected_object();
-            if (selected_object) {
-                if (g_empire.get_object(selected_object - 1)->type == EMPIRE_OBJECT_CITY)
-                    data.selected_city = g_empire.get_city_for_object(selected_object - 1);
-
-            } else if (input_go_back_requested(m, h))
+            if (!g_empire_map.selected_object() && input_go_back_requested(m, h)) {
                 window_editor_map_show();
+            }
         }
     }
 }
