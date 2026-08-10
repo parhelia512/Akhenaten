@@ -25,6 +25,8 @@ Building.property.stored_straw = { get: function() { return this.stored_resource
 Building.property.first_material_stored = { get: function() { return __building_first_material_stored(this.id) } }
 
 Building.property.has_road_access = { }
+Building.property.road_network_id = { }
+Building.property.distance_from_entry = { }
 Building.property.has_water_access = { }
 Building.property.spawned_worker_this_month = { }
 Building.property.play_animation = { }
