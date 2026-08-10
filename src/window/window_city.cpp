@@ -21,7 +21,6 @@
 #include "scenario/scenario.h"
 #include "scenario/criteria.h"
 #include "widget/widget_sidebar.h"
-#include "widget/widget_top_menu_game.h"
 #include "widget/widget_city.h"
 #include "widget/widget_figure_follow.h"
 #include "window/window_advisors.h"
@@ -33,12 +32,7 @@ window_city g_window_city;
 int window_city::draw_background(UiFlags flags) {
     OZZY_PROFILER_FUNCTION();
     autoconfig_window::draw_background(flags);
-    widget_top_menu_draw();
     return 0;
-}
-
-void window_city_draw_background(int) {
-    g_window_city.draw_background(UiFlags_None);
 }
 
 void window_city::draw_paused_panel() {
@@ -131,15 +125,15 @@ bool window_city_draw_construction_cost_and_size() {
     return true;
 }
 
-void window_city_draw_foreground(int) {
+void window_city::draw_foreground(UiFlags flags) {
     OZZY_PROFILER_FUNCTION();
 
     window_city_draw();
     widget_sidebar_city_draw_foreground();
-    widget_top_menu_draw();
+    ui::dispatch_autoconfig_es_event(this, __func__, {});
 
     if (g_window_manager.window_is("window_city") || g_window_manager.window_is("window_city_military") || g_window_manager.window_is("window_city_warship")) {
-        g_window_city.draw_paused_panel();
+        draw_paused_panel();
         window_city_draw_time_left_panel();
         draw_cancel_construction();
         figure_follow_draw_panel();
@@ -201,10 +195,7 @@ void window_city::handle_input(const mouse* m, const hotkeys* h) {
     }
 
     if (!g_city_planner.in_progress) {
-        int top_menu_handled = widget_top_menu_handle_input(m, h);
-        if (!top_menu_handled) {
-            widget_sidebar_city_handle_mouse(m);
-        }
+        ui::dispatch_autoconfig_es_event(this, "handle_top_menu", {});
     }
 
     if (figure_follow_handle_mouse(m)) {
@@ -216,13 +207,17 @@ void window_city::handle_input(const mouse* m, const hotkeys* h) {
     city_has_loaded = true;
 }
 
+void window_city::draw_all() {
+    draw_background(UiFlags_None);
+    draw_foreground(UiFlags_None);
+}
+
 void window_city_draw_all() {
-    window_city_draw_background(0);
-    window_city_draw_foreground(0);
+    g_window_city.draw_all();
 }
 
 void window_city_draw_panels() {
-    window_city_draw_background(0);
+    g_window_city.draw_background(UiFlags_None);
 }
 
 void window_city_draw() {
@@ -250,7 +245,7 @@ void window_city::show() {
     static window_type window = {
         "window_city",
         [](int flags) { instance().draw_background(flags); },
-        window_city_draw_foreground,
+        [](int flags) { instance().draw_foreground(flags); },
         [](const mouse *m, const hotkeys *h) { instance().handle_input(m, h); },
         [](tooltip_context *c) { g_screen_city.draw_tooltip(c); }
     };

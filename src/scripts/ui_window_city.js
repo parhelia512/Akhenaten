@@ -6,6 +6,11 @@ window_city {
     }
 }
 
+[es=(window_city, draw_foreground)]
+function window_city_draw_foreground(ev) {
+    top_menu_draw()
+}
+
 [es=(window_city, draw_paused_panel)]
 function window_city_draw_paused_panel(ev) {
     if (!game.paused) {
@@ -27,6 +32,13 @@ function window_city_draw_paused_panel(ev) {
 
     ui.panel({ x: x, y: y }, { x: 28, y: 3 }, UiFlags_PanelOuter)
     ui.label_ex(_format(__loc("#TR_GAME_PAUSED"), key_name), { x: x, y: 58 }, FONT_NORMAL_BLACK_ON_LIGHT, UiFlags_AlignCentered, panel_w)
+}
+
+[es=(window_city, handle_top_menu)]
+function window_city_handle_top_menu(ev) {
+    if (!top_menu_handle_input()) {
+        __ui_widget_sidebar_city_handle_mouse()
+    }
 }
 
 [es=event_save_city]

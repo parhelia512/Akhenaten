@@ -62,7 +62,7 @@ void window_show(const window_type* window) {
     // push window into queue of screens to render
     reset_input();
     ui::stop_active_input();
-    ui::begin_frame();
+    ui::clear_active_elements();
     increase_queue_index();
     data.window_queue[data.queue_index] = *window;
     data.current_window = &data.window_queue[data.queue_index];
@@ -80,7 +80,7 @@ void window_show(const window_type* window) {
 void window_go_back() {
     auto& data = g_window_manager;
     // cant exit from city with rmb
-    if (data.current_window->id == windows_manager_t::window_city 
+    if (data.current_window->id == windows_manager_t::window_city
         || data.current_window->id == windows_manager_t::window_main_menu) {
         return;
     }

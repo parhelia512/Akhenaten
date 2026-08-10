@@ -18,7 +18,7 @@
 |------|---------|
 | `widget_city.h` | Main gameplay screen: isometric rendering, tile input, overlay tooltips |
 | `widget_sidebar.h` | Collapsible sidebar with expanded/collapsed states |
-| `widget_top_menu_game.h` | Top menu bar with submenu support |
+| *(JS)* | Top menu bar: `top_menu_draw` / `top_menu_handle_input` events in `ui_top_menu_widget.js` |
 | `widget_minimap.h` | Small map overlay |
 | `city/` | City rendering helpers (tile drawing, building ghosts, ornaments) |
 
@@ -46,7 +46,7 @@ Windows are modal (one active), but underlying windows draw for dialogs over gam
 ## Adding a New Widget
 
 1. Create in `widget/` inheriting from `autoconfig_window`
-2. Call from main game loop (see `widget_top_menu_draw()`, `widget_sidebar_city_*()`)
+2. Call from main game loop (see `js_call_event_handlers("top_menu_draw")`, `widget_sidebar_city_*()`)
 3. Manages state across frames; handles its own input and drawing
 
 ## Adding a New UI Element Type

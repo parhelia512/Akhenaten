@@ -76,7 +76,7 @@
 #include "scenario/scenario.h"
 #include "sound/sound_city.h"
 #include "sound/sound.h"
-#include "widget/widget_top_menu_game.h"
+#include "js/js_game.h"
 #include "widget/widget_figure_follow.h"
 #include "window/window_city.h"
 #include "window/file_dialog_common.h"
@@ -847,8 +847,6 @@ bool GamestateIO::load_mission(const int scenario_id, bool start_immediately) {
     post_load();
 
     g_empire.fix_trade_routes();
-
-    widget_top_menu_clear_state();
 
     // finish loading and start
     if (start_immediately) {

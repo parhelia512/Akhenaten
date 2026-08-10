@@ -186,6 +186,7 @@ function overlay_menu_widget_go_back(window) {
 [es=(overlay_menu_widget, ui_draw_foreground)]
 function overlay_menu_widget_ui_draw_foreground(window) {
 	__ui_window_city_draw_panels()
+	top_menu_draw()
 	__ui_widget_sidebar_city_draw_foreground()
 	__ui_window_city_draw()
 

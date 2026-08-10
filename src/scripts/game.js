@@ -133,6 +133,7 @@ game_features {
     @gameui_show_building_road_access {}
     @gameui_show_delivery_paths {}
     @gameui_flat_buildings {}
+    @gameui_highlight_top_menu_hover {}
     @count { get: __game_features_count }
 }
 

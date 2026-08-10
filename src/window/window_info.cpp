@@ -193,6 +193,7 @@ static void window_info_draw_background(int) {
 
     game.animation = false;
     window_city_draw_panels();
+    js_call_event_handlers("top_menu_draw", {});
     window_city_draw();
     widget_sidebar_city_draw_foreground();
     context.ui->window_info_background(context);

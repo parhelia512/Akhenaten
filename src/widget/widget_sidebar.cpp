@@ -15,7 +15,6 @@
 #include "window/window_city.h"
 #include "window/message_dialog.h"
 #include "window/autoconfig_window.h"
-#include "widget/widget_top_menu_game.h"
 #include "sound/sound.h"
 #include "game/game.h"
 
@@ -313,7 +312,6 @@ void ui::slide_driver::update(int &x_offset, int expanded_offset_x, std::functio
             }
             x_offset += rel_offset;
         }
-        widget_top_menu_draw();
     } else {
         x_offset -= expanded_offset_x;
     }

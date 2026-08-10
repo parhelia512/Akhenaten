@@ -33,6 +33,9 @@
 #include "graphics/elements/arrow_button.h"
 #include "input/mouse.h"
 #include "graphics/font.h"
+#include "graphics/elements/panel.h"
+#include "graphics/text.h"
+#include "graphics/elements/lang_text.h"
 
 #include <cstring>
 
@@ -128,10 +131,28 @@ bool __ui_widget_sidebar_city_handle_mouse_build_menu() {
 }
 ANK_FUNCTION(__ui_widget_sidebar_city_handle_mouse_build_menu)
 
+bool __ui_widget_sidebar_city_handle_mouse() {
+    return widget_sidebar_city_handle_mouse(&mouse::ref()) != 0;
+}
+ANK_FUNCTION(__ui_widget_sidebar_city_handle_mouse)
+
 void __ui_window_city_draw() {
     window_city_draw();
 }
 ANK_FUNCTION(__ui_window_city_draw)
+
+int __ui_text_width(pcstr text, int font) {
+    if (!text) {
+        return 0;
+    }
+    return lang_text_get_width(text, (e_font)font);
+}
+ANK_FUNCTION_2(__ui_text_width)
+
+void __ui_unbordered_panel(int x, int y, int width_blocks, int height_blocks) {
+    unbordered_panel_draw(x, y, width_blocks, height_blocks);
+}
+ANK_FUNCTION_4(__ui_unbordered_panel)
 
 void __ui_text_abs(pcstr text, vec2i pos, int font) {
     ui::text_abs(text, pos, (e_font)font, 0);

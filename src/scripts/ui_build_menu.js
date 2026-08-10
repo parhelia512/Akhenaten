@@ -127,6 +127,7 @@ function build_menu_widget_click_item(window, ev) {
 [es=(build_menu_widget, draw_background)]
 function build_menu_widget_draw_background(window) {
     __ui_window_city_draw_panels()
+    top_menu_draw()
 }
 
 [es=(build_menu_widget, ui_draw_foreground)]

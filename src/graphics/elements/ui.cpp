@@ -277,7 +277,7 @@ void reset_ui_command_queue();
     }
 
     void pop_widget(bool pushed) {
-        if (pushed) {
+        if (pushed && !g_state.current_widget_stack.empty()) {
             g_state.current_widget_stack.pop();
         }
     }
