@@ -19,6 +19,8 @@
 #include "graphics/view/view.h"
 #include "city/constants.h"
 
+#include <cstring>
+
 static const time_millis TOOLTIP_DELAY_MILLIS = 150;
 
 static time_millis last_update = 0;
@@ -177,7 +179,8 @@ void tooltip_context::draw_tooltip() {
 }
 
 bool tooltip_context::should_draw_tooltip() {
-    if (!text) {
+    pcstr t = text.c_str();
+    if (!t || !*t || !strcmp(t, "{0.0}") || !strcmp(t, "#0.0")) {
         reset_timer();
         return false;
     }
@@ -187,7 +190,7 @@ bool tooltip_context::should_draw_tooltip() {
         return false;
     }
 
-    if (time_get_millis() - last_update < TOOLTIP_DELAY_MILLIS) { // delay drawing tooltip
+    if (time_get_millis() - last_update < TOOLTIP_DELAY_MILLIS) {
         return false;
     }
 
@@ -203,13 +206,14 @@ void tooltip_handle(const mouse* m, xfunction<void(tooltip_context*)> func) {
 
     context.mpos = *m;
     context.text = "";
+    context.high_priority = 0;
+    context._drawtooltip = nullptr;
     if (game_features::gameopt_tooltips_mode.to_int() && func) {
         func(&context);
     }
 
     if (!context.text) {
-        const tooltip_context &uitooltip = ui::get_tooltip();
-        context.text = uitooltip.text;
+        context.text = ui::get_tooltip().text;
     }
 
     if (context.should_draw_tooltip()) {
@@ -218,8 +222,8 @@ void tooltip_handle(const mouse* m, xfunction<void(tooltip_context*)> func) {
     }
 }
 
-void tooltip_context::set(int t, textid tx) { 
-    text = lang_get_string(tx);
+void tooltip_context::set(int t, textid tx) {
+    text = tx.valid() ? lang_get_string(tx) : "";
 }
 
 void tooltip_context::set(int t, pcstr tx) {

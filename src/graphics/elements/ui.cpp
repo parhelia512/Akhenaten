@@ -69,6 +69,12 @@ void reset_ui_command_queue();
     }
 
     void set_tooltip(const xstring& text) {
+        // Unresolved empty textid placeholders are not real tips.
+        pcstr t = text.c_str();
+        if (!t || !*t || !strcmp(t, "{0.0}") || !strcmp(t, "#0.0")) {
+            tooltipctx.text = "";
+            return;
+        }
         tooltipctx.text = text;
     }
 
@@ -425,6 +431,7 @@ void ui::begin_frame() {
     g_state.reset();
     reset_ui_command_queue();
     tooltipctx.set(0, "");
+    tooltipctx.high_priority = 0;
 }
 
 void ui::end_frame() {
@@ -1626,13 +1633,8 @@ void ui::elabel::draw(UiFlags flags) {
     if (!tip.empty()) {
         const vec2i hit_size = has_body ? vec2i{_body.x * DEFAULT_BLOCK_SIZE, DEFAULT_BLOCK_SIZE}
                                         : (size.x > 0 && size.y > 0 ? size : vec2i{text_get_width(caption, _font), DEFAULT_BLOCK_SIZE});
-        struct probe_t {
-            vec2i p;
-            vec2i s;
-            vec2i pos() const { return p; }
-            vec2i size() const { return s; }
-        };
-        _hover = is_mouse_over(probe_t{scr_pos, hit_size}, {0, 0});
+        const mouse& m = mouse::get();
+        _hover = (scr_pos.x <= m.x && scr_pos.x + hit_size.x > m.x && scr_pos.y <= m.y && scr_pos.y + hit_size.y > m.y);
         if (_hover) {
             ui::set_tooltip(tip);
         }
@@ -2447,7 +2449,7 @@ void ui::egeneric_button::draw(UiFlags gflags) {
     }
 
     _hover = is_mouse_over(*btn, vec2i{0, 0});
-    if (clickable && _hover) {
+    if (clickable && _hover && !_tooltip.empty()) {
         ui::set_tooltip(_tooltip);
     }
 

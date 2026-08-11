@@ -390,7 +390,7 @@ void common_info_window::init(object_info &c) {
 
 void common_info_window::draw_tooltip(tooltip_context *c) {
     textid tx = get_tooltip(def_object_info);
-    pcstr tooltip = (pcstr)lang_get_string(tx);
+    pcstr tooltip = tx.valid() ? (pcstr)lang_get_string(tx) : nullptr;
     int button_id = ui::button_hover(&mouse::get());
     if (button_id > 0 && !(tooltip && *tooltip)) {
         tooltip = ui::button_tooltip(button_id - 1);

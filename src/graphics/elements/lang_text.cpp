@@ -377,6 +377,11 @@ pcstr lang_get_string(int group, int index) {
         return nullptr;
     }
 
+    // textid {0,0} means "no string" — not a missing localization entry.
+    if (group == 0 && index == 0) {
+        return "";
+    }
+
     loc_base_textid key(group, index);
     auto it = g_localization_base.find(key);
 
