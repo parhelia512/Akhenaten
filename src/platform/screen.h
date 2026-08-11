@@ -11,7 +11,13 @@ struct platform_screen_t {
     int scale_percentage = 100;
 
     int scale_logical_to_pixels(int logical_value) const { return logical_value * scale_percentage / 100; }
-    int scale_pixels_to_logical(int pixel_value) const { return pixel_value * 100 / scale_percentage; }
+    // Ceil so the logical→pixel round-trip never undershoots the window (avoids a 1px letterbox gap).
+    int scale_pixels_to_logical(int pixel_value) const {
+        if (scale_percentage <= 0) {
+            return pixel_value;
+        }
+        return (pixel_value * 100 + scale_percentage - 1) / scale_percentage;
+    }
     int get_scale() const { return scale_percentage; }
 
     int create(const xstring& title, const xstring& renderer, bool fullscreen, int display_scale_percentage,

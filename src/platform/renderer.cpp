@@ -1233,6 +1233,10 @@ void platform_renderer_render() {
     g_render.apply_filter();
 
     SDL_SetRenderTarget(data.renderer, NULL);
+    // Clear letterbox/pillarbox regions left by SDL_RenderSetLogicalSize (otherwise a 1px
+    // strip can show as uninitialized garbage, especially at the bottom edge).
+    SDL_SetRenderDrawColor(data.renderer, 0, 0, 0, 0xff);
+    SDL_RenderClear(data.renderer);
 
     if (platform_render_any_filter_active()) {
         SDL_RenderCopy(data.renderer, data.filter_texture, NULL, NULL);

@@ -55,8 +55,12 @@ void ui::textured::graphics_draw_background(painter& ctx, int image_id, float sc
     if (scale == -1) {
         //        graphics_renderer()->draw_image(img, 0, 0, COLOR_MASK_NONE, scale, false); // todo?
     } else {
-        ctx.draw_image(img, vec2i{(screen_width() - img->width) / 2, (screen_height() - img->height) / 2} + offset,
-            COLOR_MASK_NONE, scale);
+        // Prefer any odd leftover pixel on top so the bottom edge of the art meets the screen.
+        const int pad_x = screen_width() - img->width;
+        const int pad_y = screen_height() - img->height;
+        const int x = (pad_x >= 0) ? (pad_x + 1) / 2 : pad_x / 2;
+        const int y = (pad_y >= 0) ? (pad_y + 1) / 2 : pad_y / 2;
+        ctx.draw_image(img, vec2i{x, y} + offset, COLOR_MASK_NONE, scale);
     }
 }
 
