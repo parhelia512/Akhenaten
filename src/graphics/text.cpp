@@ -4,7 +4,6 @@
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/view/view.h"
-#include "io/gamefiles/lang.h"
 #include "game/game.h"
 #include "graphics/elements/ui.h"
 #include "core/log.h"
@@ -459,13 +458,6 @@ void text_draw_number_centered_colored(int value, int x_offset, int y_offset, in
     uint8_t str[NUMBER_BUFFER_LENGTH];
     number_to_string(str, value, '@', " ");
     text_draw_centered(str, x_offset, y_offset, box_width, font, color);
-}
-
-int text_draw_money(int value, int x_offset, int y_offset, e_font font) {
-    bstring128 str;
-    str.printf("%d %s", value, lang_get_string(6, 0));
-
-    return text_draw(str.c_str(), x_offset, y_offset, font, 0);
 }
 
 int text_draw_percentage(int value, int x_offset, int y_offset, e_font font) {

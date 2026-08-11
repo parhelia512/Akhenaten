@@ -1,31 +1,10 @@
 log_info("akhenaten: localization_hu config started")
 
 localization_base_hu = [
-    { group:1, id:1, text: "Új játék" }
-    { group:1, id:3, text: "Játék betöltése" }
-    { group:1, id:4, text: "Játék mentése" }
-    { group:1, id:5, text: "Kilépés" }
-    { group:1, id:6, text: "Mentés törlése" }
     { group:2, id:0, text: "Beállítások" }
-    { group:2, id:1, text: "Képernyőbeállítások" }
-    { group:2, id:2, text: "Hangbeállítások" }
-    { group:2, id:3, text: "Játéksebesség" }
-    { group:2, id:4, text: "Piramisépítés gyorsítása – Kikapcsolva" }
-    { group:2, id:5, text: "Piramisépítés gyorsítása – Bekapcsolva" }
-    { group:2, id:6, text: "Nehézségi szint" }
-    { group:2, id:7, text: "Városnevek – egyiptomi" }
-    { group:2, id:8, text: "Városnevek – klasszikus" }
     { group:2, id:9, text: "Automatikus mentés – Bekapcsolva" }
     { group:2, id:10, text: "Automatikus mentés – Kikapcsolva" }
-    { group:2, id:11, text: "Felugró üzenetek" }
     { group:3, id:0, text: "Súgó" }
-    { group:3, id:1, text: "Súgó" }
-    { group:3, id:2, text: "Egérsúgó – Kikapcsolva" }
-    { group:3, id:3, text: "Egérsúgó – Részleges" }
-    { group:3, id:4, text: "Egérsúgó – Teljes" }
-    { group:3, id:5, text: "Figyelmeztetések – Kikapcsolva" }
-    { group:3, id:6, text: "Figyelmeztetések – Bekapcsolva" }
-    { group:3, id:7, text: "Névjegy" }
     { group:3, id:8, text: "Küldetésszerkesztő útmutató" }
     { group:4, id:0, text: "Felügyelők" }
     { group:4, id:1, text: "Munkaügyi felügyelő" }
@@ -170,8 +149,6 @@ localization_base_hu = [
     { group:5, id:140, text: "A város nem tud sem vadhúst, sem szalmát termelni vagy importálni. Az állatkert eltávolításra került." }
     { group:5, id:141, text: "A család még nem nyert küldetést" }
     { group:5, id:142, text: "Ha új vagy a Fáraóban, válaszd a „Családtörténet kezdése” lehetőséget. Folytatod a küldetés kiválasztását?" }
-    { group:6, id:0, text: "Db" }
-    { group:6, id:1, text: "Lakosság" }
     { group:6, id:2, text: "A küldetésből hátralévő hónapok" }
     { group:6, id:3, text: "Hónapok a győzelemig" }
     { group:6, id:4, text: "Nézetek" }
@@ -434,8 +411,6 @@ localization_base_hu = [
     { group:19, id:48, text: "Túl közel vannak az ellenséges csapatok!" }
     { group:19, id:49, text: "Az egység morálja túl alacsony az engedelmeskedéshez!" }
     { group:19, id:50, text: "A hadsereg már elérte az erődök maximális számát." }
-    { group:19, id:51, text: "Havi automatikus mentés: BE" }
-    { group:19, id:52, text: "Havi automatikus mentés: KI" }
     { group:19, id:53, text: "Nem bontható le a híd, amíg emberek vannak rajta." }
     { group:19, id:54, text: "Ez a belső tó nem kapcsolódik a tengerhez." }
     { group:19, id:55, text: "Nem lehet ablakos módra váltani." }
@@ -3050,9 +3025,6 @@ localization_base_hu = [
     { group:68, id:58, text: "szabad egérsúgó" }
     { group:68, id:59, text: "szabad egérsúgó" }
     { group:68, id:60, text: "szabad egérsúgó" }
-    { group:68, id:61, text: "A város jelenlegi pénzkészlete" }
-    { group:68, id:62, text: "A város jelenlegi lakossága" }
-    { group:68, id:63, text: "Az aktuális dátum!" }
     { group:68, id:64, text: "szabad egérsúgó" }
     { group:68, id:65, text: "szabad egérsúgó" }
     { group:68, id:66, text: "szabad egérsúgó" }
@@ -5271,7 +5243,6 @@ localization_base_hu = [
     { group:235, id:8, text: "Ez a város teljesen átlagos." }
     { group:235, id:9, text: "Ez a város kitűnő értékelést érdemel!" }
     { group:235, id:10, text: "Egy fesztiválon sokat lehet tanulni az emberi természetről." }
-
 
     { group:240, id:0, text: "A városban lévő betegek száma alapján hamarosan rengeteg dolgom akadhat!" }
     { group:240, id:1, text: "Éhezem. Hamarosan soványabb leszek, mint egy múmia!" }

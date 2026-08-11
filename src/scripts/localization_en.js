@@ -566,8 +566,6 @@ localization_en = [
   {key: "#too_close_to_enemy_troops", group:19, id:48}
   {key: "#company_morale_too_low", group:19, id:49}
   {key: "#army_has_full_complement_of_forts", group:19, id:50}
-  {key: "#monthly_autosave_on", group:19, id:51}
-  {key: "#monthly_autosave_off", group:19, id:52}
   {key: "#autosave_slots", text: "Autosave slots"}
   {key: "#cannot_demolish_bridge_with_people", group:19, id:53}
   {key: "#inland_lake_has_no_sea_access", group:19, id:54}
@@ -1629,6 +1627,59 @@ localization_en = [
   { key: "#top_menu_help_tooltip", text: "Get help, hints and information about the game" }
   { key: "#top_menu_overseers", text: "Advisors" }
   { key: "#top_menu_overseers_tooltip", text: "Consult your advisors about the state of the city" }
+  { key: "#top_menu_funds", text: "Db" }
+  { key: "#top_menu_population", text: "Pop" }
+  { key: "#top_menu_new_game", text: "New game" }
+  { key: "#top_menu_load_game", text: "Load game" }
+  { key: "#top_menu_save_game", text: "Save game" }
+  { key: "#top_menu_exit_game", text: "Exit game" }
+  { key: "#top_menu_delete_game", text: "Delete game" }
+  { key: "#top_menu_display_settings", text: "Display settings" }
+  { key: "#top_menu_sound_settings", text: "Sound settings" }
+  { key: "#top_menu_speed_settings", text: "Speed settings" }
+  { key: "#top_menu_pyramid_speedup_off", text: "Pyramid Speedup - OFF" }
+  { key: "#top_menu_pyramid_speedup_on", text: "Pyramid Speedup - ON" }
+  { key: "#top_menu_difficulty", text: "Difficulty" }
+  { key: "#top_menu_cities_egyptian", text: "Cities - Egyptian" }
+  { key: "#top_menu_cities_classical", text: "Cities - Classical" }
+  { key: "#top_menu_popup_messages", text: "Popup Messages" }
+  { key: "#top_menu_help_item", text: "Help" }
+  { key: "#top_menu_mouse_help_off", text: "Mouse help - OFF" }
+  { key: "#top_menu_mouse_help_some", text: "Mouse help - SOME" }
+  { key: "#top_menu_mouse_help_full", text: "Mouse help - FULL" }
+  { key: "#top_menu_warnings_off", text: "Warnings - OFF" }
+  { key: "#top_menu_warnings_on", text: "Warnings - ON" }
+  { key: "#top_menu_about", text: "About" }
+  { key: "#top_menu_advisor_labor", text: "Overseer of the Workers" }
+  { key: "#top_menu_advisor_military", text: "Overseer of the Military" }
+  { key: "#top_menu_advisor_imperial", text: "Political Overseer" }
+  { key: "#top_menu_advisor_ratings", text: "Ratings Overseer" }
+  { key: "#top_menu_advisor_trade", text: "Overseer of Commerce" }
+  { key: "#top_menu_advisor_population", text: "Overseer of the Granaries" }
+  { key: "#top_menu_advisor_health", text: "Overseer of Public Health" }
+  { key: "#top_menu_advisor_education", text: "Overseer of Learning" }
+  { key: "#top_menu_advisor_entertainment", text: "Overseer of Diversions" }
+  { key: "#top_menu_advisor_religion", text: "Overseer of the Temples" }
+  { key: "#top_menu_advisor_financial", text: "Overseer of the Treasury" }
+  { key: "#top_menu_advisor_chief", text: "Chief Overseer" }
+  { key: "#monthly_autosave_on", text: "Monthly autosave ON" }
+  { key: "#monthly_autosave_off", text: "Monthly autosave OFF" }
+  { key: "#top_menu_funds_tooltip", text: "Current city funds" }
+  { key: "#top_menu_population_tooltip", text: "Current city population" }
+  { key: "#top_menu_date_tooltip", text: "The current date!" }
+  { key: "#top_menu_debug", text: "Debug" }
+  { key: "#top_menu_debug_render", text: "Render" }
+  { key: "#top_menu_cheat_console", text: "Cheat console" }
+  { key: "#top_menu_properties_on", text: "Properties ON" }
+  { key: "#top_menu_properties_off", text: "Properties OFF" }
+  { key: "#top_menu_terrain_paint_on", text: "Terrain paint ON" }
+  { key: "#top_menu_terrain_paint_off", text: "Terrain paint OFF" }
+  { key: "#top_menu_write_video_on", text: "Write Video ON" }
+  { key: "#top_menu_write_video_off", text: "Write Video OFF" }
+  { key: "#top_menu_buildings_on", text: "Buildings ON" }
+  { key: "#top_menu_buildings_off", text: "Buildings OFF" }
+  { key: "#top_menu_js_debugger_on", text: "JS debugger ON" }
+  { key: "#top_menu_js_debugger_off", text: "JS debugger OFF" }
 
   { key: "#sidebar_speed_header", text: "Speed" }
   { key: "#sidebar_flat_buildings", text: "Flat view" }

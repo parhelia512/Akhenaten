@@ -509,8 +509,6 @@ localization_de = [
   {key: "#too_close_to_enemy_troops", group:19, id:48}
   {key: "#company_morale_too_low", group:19, id:49}
   {key: "#army_has_full_complement_of_forts", group:19, id:50}
-  {key: "#monthly_autosave_on", group:19, id:51}
-  {key: "#monthly_autosave_off", group:19, id:52}
   {key: "#autosave_slots", text: "Autosave-Slots"}
   {key: "#cannot_demolish_bridge_with_people", group:19, id:53}
   {key: "#inland_lake_has_no_sea_access", group:19, id:54}
@@ -1535,6 +1533,59 @@ localization_de = [
   { key: "#top_menu_help_tooltip", text: "Hilfe, Hinweise und Informationen zum Spiel" }
   { key: "#top_menu_overseers", text: "Berater" }
   { key: "#top_menu_overseers_tooltip", text: "Berater zum Zustand der Stadt befragen" }
+  { key: "#top_menu_funds", text: "Db" }
+  { key: "#top_menu_population", text: "Bev" }
+  { key: "#top_menu_new_game", text: "Neues Spiel" }
+  { key: "#top_menu_load_game", text: "Spiel laden" }
+  { key: "#top_menu_save_game", text: "Spiel speichern" }
+  { key: "#top_menu_exit_game", text: "Spiel beenden" }
+  { key: "#top_menu_delete_game", text: "Spiel löschen" }
+  { key: "#top_menu_display_settings", text: "Anzeigeeinstellungen" }
+  { key: "#top_menu_sound_settings", text: "Toneinstellungen" }
+  { key: "#top_menu_speed_settings", text: "Geschwindigkeitseinstellungen" }
+  { key: "#top_menu_pyramid_speedup_off", text: "Pyramiden-Beschleunigung - AUS" }
+  { key: "#top_menu_pyramid_speedup_on", text: "Pyramiden-Beschleunigung - AN" }
+  { key: "#top_menu_difficulty", text: "Schwierigkeitsgrad" }
+  { key: "#top_menu_cities_egyptian", text: "Städte - Ägyptisch" }
+  { key: "#top_menu_cities_classical", text: "Städte - Klassisch" }
+  { key: "#top_menu_popup_messages", text: "Popup-Nachrichten" }
+  { key: "#top_menu_help_item", text: "Hilfe" }
+  { key: "#top_menu_mouse_help_off", text: "Maushilfe - AUS" }
+  { key: "#top_menu_mouse_help_some", text: "Maushilfe - ETWAS" }
+  { key: "#top_menu_mouse_help_full", text: "Maushilfe - VOLL" }
+  { key: "#top_menu_warnings_off", text: "Warnungen - AUS" }
+  { key: "#top_menu_warnings_on", text: "Warnungen - AN" }
+  { key: "#top_menu_about", text: "Über" }
+  { key: "#top_menu_advisor_labor", text: "Aufseher der Arbeiter" }
+  { key: "#top_menu_advisor_military", text: "Aufseher des Militärs" }
+  { key: "#top_menu_advisor_imperial", text: "Politischer Aufseher" }
+  { key: "#top_menu_advisor_ratings", text: "Bewertungsaufseher" }
+  { key: "#top_menu_advisor_trade", text: "Aufseher des Handels" }
+  { key: "#top_menu_advisor_population", text: "Aufseher der Getreidespeicher" }
+  { key: "#top_menu_advisor_health", text: "Aufseher der öffentlichen Gesundheit" }
+  { key: "#top_menu_advisor_education", text: "Aufseher der Bildung" }
+  { key: "#top_menu_advisor_entertainment", text: "Aufseher der Unterhaltung" }
+  { key: "#top_menu_advisor_religion", text: "Aufseher der Tempel" }
+  { key: "#top_menu_advisor_financial", text: "Aufseher der Schatzkammer" }
+  { key: "#top_menu_advisor_chief", text: "Oberaufseher" }
+  { key: "#monthly_autosave_on", text: "Monatliche Autospeicherung AN" }
+  { key: "#monthly_autosave_off", text: "Monatliche Autospeicherung AUS" }
+  { key: "#top_menu_funds_tooltip", text: "Aktuelle Stadtfinanzen" }
+  { key: "#top_menu_population_tooltip", text: "Aktuelle Stadtbevölkerung" }
+  { key: "#top_menu_date_tooltip", text: "Das aktuelle Datum!" }
+  { key: "#top_menu_debug", text: "Debug" }
+  { key: "#top_menu_debug_render", text: "Render" }
+  { key: "#top_menu_cheat_console", text: "Cheat-Konsole" }
+  { key: "#top_menu_properties_on", text: "Eigenschaften AN" }
+  { key: "#top_menu_properties_off", text: "Eigenschaften AUS" }
+  { key: "#top_menu_terrain_paint_on", text: "Gelände malen AN" }
+  { key: "#top_menu_terrain_paint_off", text: "Gelände malen AUS" }
+  { key: "#top_menu_write_video_on", text: "Video schreiben AN" }
+  { key: "#top_menu_write_video_off", text: "Video schreiben AUS" }
+  { key: "#top_menu_buildings_on", text: "Gebäude AN" }
+  { key: "#top_menu_buildings_off", text: "Gebäude AUS" }
+  { key: "#top_menu_js_debugger_on", text: "JS-Debugger AN" }
+  { key: "#top_menu_js_debugger_off", text: "JS-Debugger AUS" }
 
   { key: "#sidebar_speed_header", text: "Geschwindigkeit" }
 

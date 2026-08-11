@@ -185,7 +185,7 @@ function build_menu_widget_ui_draw_foreground(window) {
         if (cost > 0) {
             var cost_x = x_offset + build_menu_widget.btn_w_cost_offset - build_menu_widget.btn_w_tot_offset
             var cost_y = y_offset + build_menu_widget.btn_w_start_pos.y + build_menu_widget.btn_text_w_offset.y + item.size.y * i
-            __ui_text_abs("" + cost + " " + __loc(6, 0), {x: cost_x, y: cost_y}, font)
+            __ui_text_abs("" + cost + " " + __loc("#top_menu_funds"), {x: cost_x, y: cost_y}, font)
         }
     }
 }

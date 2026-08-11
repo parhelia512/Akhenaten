@@ -1,31 +1,10 @@
 log_info("akhenaten: localization_en config started")
 
 localization_base_en = [
-    { group:1, id:1, text: "New game" }
-    { group:1, id:3, text: "Load game" }
-    { group:1, id:4, text: "Save game" }
-    { group:1, id:5, text: "Exit game" }
-    { group:1, id:6, text: "Delete game" }
     { group:2, id:0, text: "Options" }
-    { group:2, id:1, text: "Display settings" }
-    { group:2, id:2, text: "Sound settings" }
-    { group:2, id:3, text: "Speed settings" }
-    { group:2, id:4, text: "Pyramid Speedup - OFF" }
-    { group:2, id:5, text: "Pyramid Speedup - ON" }
-    { group:2, id:6, text: "Difficulty" }
-    { group:2, id:7, text: "Cities - Egyptian" }
-    { group:2, id:8, text: "Cities - Classical" }
     { group:2, id:9, text: "Autosave - ON" }
     { group:2, id:10, text: "Autosave - OFF" }
-    { group:2, id:11, text: "Popup Messages" }
     { group:3, id:0, text: "Help" }
-    { group:3, id:1, text: "Help" }
-    { group:3, id:2, text: "Mouse help - OFF" }
-    { group:3, id:3, text: "Mouse help - SOME" }
-    { group:3, id:4, text: "Mouse help - FULL" }
-    { group:3, id:5, text: "Warnings - OFF" }
-    { group:3, id:6, text: "Warnings - ON" }
-    { group:3, id:7, text: "About" }
     { group:3, id:8, text: "Mission Editor Guide" }
     { group:4, id:0, text: "Overseers" }
     { group:4, id:1, text: "Overseer of the Workers" }
@@ -170,8 +149,6 @@ localization_base_en = [
     { group:5, id:140, text: "The city cannot produce or import either game meat or straw. Zoo has been removed." }
     { group:5, id:141, text: "No Missions Won By Family" }
     { group:5, id:142, text: "Please 'Begin Family History' if you are new to Pharaoh.  Continue to choose mission?" }
-    { group:6, id:0, text: "Db" }
-    { group:6, id:1, text: "Pop" }
     { group:6, id:2, text: "Months to complete mission" }
     { group:6, id:3, text: "Months until victory" }
     { group:6, id:4, text: "Overlays" }
@@ -434,8 +411,6 @@ localization_base_en = [
     { group:19, id:48, text: "Too close to enemy troops!" }
     { group:19, id:49, text: "Company's morale is too low to respond!" }
     { group:19, id:50, text: "Your army has its full complement of Forts" }
-    { group:19, id:51, text: "Monthly autosave ON" }
-    { group:19, id:52, text: "Monthly autosave OFF" }
     { group:19, id:53, text: "Can't demolish Bridge with people on it" }
     { group:19, id:54, text: "This inland lake has no access to the sea." }
     { group:19, id:55, text: "Cannot set Windows mode." }
@@ -3005,9 +2980,6 @@ localization_base_en = [
     { group:68, id:58, text: "mouse help free" }
     { group:68, id:59, text: "mouse help free" }
     { group:68, id:60, text: "mouse help free" }
-    { group:68, id:61, text: "Current city funds" }
-    { group:68, id:62, text: "Current city population" }
-    { group:68, id:63, text: "The current date!" }
     { group:68, id:64, text: "mouse help free" }
     { group:68, id:65, text: "mouse help free" }
     { group:68, id:66, text: "mouse help free" }

@@ -211,7 +211,7 @@ function window_scenario_selection_update_monuments(ev) {
 function window_scenario_selection_update_goals(ev) {
     var invasion_id = 112 + ((__game_scenario_invasion_count() / 2) | 0)
     ev.info_line_invasion.text = __loc(44, invasion_id)
-    ev.info_line_start_region.text = __loc(2, 6)
+    ev.info_line_start_region.text = __loc("#top_menu_difficulty")
 
     var goal_lines = []
     if (scenario.is_open_play) {

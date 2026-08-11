@@ -875,6 +875,59 @@ localization_ru = [
     { key: "#top_menu_help_tooltip", text: "Справка, подсказки и сведения об игре" }
     { key: "#top_menu_overseers", text: "Советники" }
     { key: "#top_menu_overseers_tooltip", text: "Обратиться к советникам о состоянии города" }
+    { key: "#top_menu_funds", text: "Дб" }
+    { key: "#top_menu_population", text: "Нас" }
+    { key: "#top_menu_new_game", text: "Новая игра" }
+    { key: "#top_menu_load_game", text: "Загрузить игру" }
+    { key: "#top_menu_save_game", text: "Сохранить игру" }
+    { key: "#top_menu_exit_game", text: "Выйти из игры" }
+    { key: "#top_menu_delete_game", text: "Удалить игру" }
+    { key: "#top_menu_display_settings", text: "Настройки дисплея" }
+    { key: "#top_menu_sound_settings", text: "Настройки звука" }
+    { key: "#top_menu_speed_settings", text: "Настройки скорости" }
+    { key: "#top_menu_pyramid_speedup_off", text: "Ускорение пирамид - ВЫКЛ" }
+    { key: "#top_menu_pyramid_speedup_on", text: "Ускорение пирамид - ВКЛ" }
+    { key: "#top_menu_difficulty", text: "Сложность" }
+    { key: "#top_menu_cities_egyptian", text: "Города - Египетские" }
+    { key: "#top_menu_cities_classical", text: "Города - Классические" }
+    { key: "#top_menu_popup_messages", text: "Всплывающие сообщения" }
+    { key: "#top_menu_help_item", text: "Справка" }
+    { key: "#top_menu_mouse_help_off", text: "Помощь мыши - ВЫКЛ" }
+    { key: "#top_menu_mouse_help_some", text: "Помощь мыши - ЧАСТИЧНО" }
+    { key: "#top_menu_mouse_help_full", text: "Помощь мыши - ПОЛНАЯ" }
+    { key: "#top_menu_warnings_off", text: "Предупреждения - ВЫКЛ" }
+    { key: "#top_menu_warnings_on", text: "Предупреждения - ВКЛ" }
+    { key: "#top_menu_about", text: "О программе" }
+    { key: "#top_menu_advisor_labor", text: "Надзиратель работников" }
+    { key: "#top_menu_advisor_military", text: "Надзиратель армии" }
+    { key: "#top_menu_advisor_imperial", text: "Политический надзиратель" }
+    { key: "#top_menu_advisor_ratings", text: "Надзиратель рейтингов" }
+    { key: "#top_menu_advisor_trade", text: "Надзиратель торговли" }
+    { key: "#top_menu_advisor_population", text: "Надзиратель зернохранилищ" }
+    { key: "#top_menu_advisor_health", text: "Надзиратель общественного здравоохранения" }
+    { key: "#top_menu_advisor_education", text: "Надзиратель образования" }
+    { key: "#top_menu_advisor_entertainment", text: "Надзиратель развлечений" }
+    { key: "#top_menu_advisor_religion", text: "Надзиратель храмов" }
+    { key: "#top_menu_advisor_financial", text: "Надзиратель казначейства" }
+    { key: "#top_menu_advisor_chief", text: "Главный надзиратель" }
+    { key: "#monthly_autosave_on", text: "Ежемесячное автосохранение ВКЛ" }
+    { key: "#monthly_autosave_off", text: "Ежемесячное автосохранение ВЫКЛ" }
+    { key: "#top_menu_funds_tooltip", text: "Текущие средства города" }
+    { key: "#top_menu_population_tooltip", text: "Текущее население города" }
+    { key: "#top_menu_date_tooltip", text: "Текущая дата!" }
+    { key: "#top_menu_debug", text: "Отладка" }
+    { key: "#top_menu_debug_render", text: "Рендер" }
+    { key: "#top_menu_cheat_console", text: "Консоль читов" }
+    { key: "#top_menu_properties_on", text: "Свойства ВКЛ" }
+    { key: "#top_menu_properties_off", text: "Свойства ВЫКЛ" }
+    { key: "#top_menu_terrain_paint_on", text: "Рисование местности ВКЛ" }
+    { key: "#top_menu_terrain_paint_off", text: "Рисование местности ВЫКЛ" }
+    { key: "#top_menu_write_video_on", text: "Запись видео ВКЛ" }
+    { key: "#top_menu_write_video_off", text: "Запись видео ВЫКЛ" }
+    { key: "#top_menu_buildings_on", text: "Здания ВКЛ" }
+    { key: "#top_menu_buildings_off", text: "Здания ВЫКЛ" }
+    { key: "#top_menu_js_debugger_on", text: "JS-отладчик ВКЛ" }
+    { key: "#top_menu_js_debugger_off", text: "JS-отладчик ВЫКЛ" }
 
     { key: "#sidebar_speed_header", text: "Скорость" }
 

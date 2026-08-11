@@ -1,7 +1,7 @@
 log_info("akhenaten: ui set salary window started")
 
 function salary_rank_text(rank, _) {
-    return city.rank_title(rank) + ": " + city.rank_salary(rank) + " " + __loc(6, 0)
+    return city.rank_title(rank) + ": " + city.rank_salary(rank) + " " + __loc("#top_menu_funds")
 }
 
 function set_salary_window_list_on_click_item(p) {

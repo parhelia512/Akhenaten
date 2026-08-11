@@ -20,7 +20,9 @@ import ui_send_gift_window
 import ui_advisor_trade
 import ui_figure_trader_window
 import ui_figure_enemy_window
+import ui_top_menu_actions
 import ui_top_menu_widget
+import ui_top_menu_bar
 import ui_advisor_religion
 import ui_advisor_finance
 import ui_advisor_health

@@ -1,31 +1,10 @@
 log_info("akhenaten: localization_de config started")
 
 localization_base_de = [
-    { group:1, id:1, text: "Neues Spiel" }
-    { group:1, id:3, text: "Spiel laden" }
-    { group:1, id:4, text: "Spiel speichern" }
-    { group:1, id:5, text: "Spiel beenden" }
-    { group:1, id:6, text: "Spiel löschen" }
     { group:2, id:0, text: "Optionen" }
-    { group:2, id:1, text: "Anzeigeeinstellungen" }
-    { group:2, id:2, text: "Toneinstellungen" }
-    { group:2, id:3, text: "Geschwindigkeitseinstellungen" }
-    { group:2, id:4, text: "Pyramiden-Beschleunigung - AUS" }
-    { group:2, id:5, text: "Pyramiden-Beschleunigung - AN" }
-    { group:2, id:6, text: "Schwierigkeitsgrad" }
-    { group:2, id:7, text: "Städte - Ägyptisch" }
-    { group:2, id:8, text: "Städte - Klassisch" }
     { group:2, id:9, text: "Autospeichern - AN" }
     { group:2, id:10, text: "Autospeichern - AUS" }
-    { group:2, id:11, text: "Popup-Nachrichten" }
     { group:3, id:0, text: "Hilfe" }
-    { group:3, id:1, text: "Hilfe" }
-    { group:3, id:2, text: "Maushilfe - AUS" }
-    { group:3, id:3, text: "Maushilfe - ETWAS" }
-    { group:3, id:4, text: "Maushilfe - VOLL" }
-    { group:3, id:5, text: "Warnungen - AUS" }
-    { group:3, id:6, text: "Warnungen - AN" }
-    { group:3, id:7, text: "Über" }
     { group:3, id:8, text: "Missions-Editor Anleitung" }
     { group:4, id:0, text: "Aufseher" }
     { group:4, id:1, text: "Aufseher der Arbeiter" }
@@ -170,8 +149,6 @@ localization_base_de = [
     { group:5, id:140, text: "Die Stadt kann weder Wildfleisch noch Stroh produzieren oder importieren. Zoo wurde entfernt." }
     { group:5, id:141, text: "Keine von der Familie gewonnenen Missionen" }
     { group:5, id:142, text: "Bitte 'Familiengeschichte beginnen', wenn Ihr neu bei Pharao seid. Fortfahren und Mission wählen?" }
-    { group:6, id:0, text: "Db" }
-    { group:6, id:1, text: "Bev" }
     { group:6, id:2, text: "Monate bis Missionsende" }
     { group:6, id:3, text: "Monate bis zum Sieg" }
     { group:6, id:4, text: "Überlagerungen" }
@@ -435,8 +412,6 @@ localization_base_de = [
     { group:19, id:48, text: "Zu nah an feindlichen Truppen!" }
     { group:19, id:49, text: "Die Moral der Kompanie ist zu niedrig zum Reagieren!" }
     { group:19, id:50, text: "Eure Armee hat ihre vollständige Anzahl an Forts" }
-    { group:19, id:51, text: "Monatliche Autospeicherung AN" }
-    { group:19, id:52, text: "Monatliche Autospeicherung AUS" }
     { group:19, id:53, text: "Kann Brücke mit Leuten darauf nicht abreißen" }
     { group:19, id:54, text: "Dieser Binnensee hat keinen Zugang zum Meer." }
     { group:19, id:55, text: "Fenster-Modus kann nicht gesetzt werden." }
@@ -3010,9 +2985,6 @@ localization_base_de = [
     { group:68, id:58, text: "Maushilfe frei" }
     { group:68, id:59, text: "Maushilfe frei" }
     { group:68, id:60, text: "Maushilfe frei" }
-    { group:68, id:61, text: "Aktuelle Stadtfinanzen" }
-    { group:68, id:62, text: "Aktuelle Stadtbevölkerung" }
-    { group:68, id:63, text: "Das aktuelle Datum!" }
     { group:68, id:64, text: "Maushilfe frei" }
     { group:68, id:65, text: "Maushilfe frei" }
     { group:68, id:66, text: "Maushilfe frei" }

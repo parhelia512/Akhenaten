@@ -35,7 +35,6 @@ int text_draw_left(pcstr str, int x, int y, e_font font, color color);
 
 int text_draw_number(int value, char prefix, const char* postfix, int x_offset, int y_offset, e_font font);
 int text_draw_number_colored(int value, char prefix, const char* postfix, int x_offset, int y_offset, e_font font, color color);
-int text_draw_money(int value, int x_offset, int y_offset, e_font font);
 int text_draw_percentage(int value, int x_offset, int y_offset, e_font font);
 
 int text_draw_label_and_number(const char* label, int value, const char* postfix, int x_offset, int y_offset, e_font font, color color);

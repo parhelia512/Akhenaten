@@ -536,8 +536,6 @@ localization_hu = [
   {key: "#too_close_to_enemy_troops", group:19, id:48}
   {key: "#company_morale_too_low", group:19, id:49}
   {key: "#army_has_full_complement_of_forts", group:19, id:50}
-  {key: "#monthly_autosave_on", group:19, id:51}
-  {key: "#monthly_autosave_off", group:19, id:52}
   {key: "#autosave_slots", text: "Autosave slotok"}
   {key: "#cannot_demolish_bridge_with_people", group:19, id:53}
   {key: "#inland_lake_has_no_sea_access", group:19, id:54}
@@ -1596,6 +1594,59 @@ localization_hu = [
   { key: "#top_menu_help_tooltip", text: "Segítség, tippek és információk a játékról" }
   { key: "#top_menu_overseers", text: "Tanácsadók" }
   { key: "#top_menu_overseers_tooltip", text: "Kérdezd tanácsadóidat a város állapotáról" }
+  { key: "#top_menu_funds", text: "Db" }
+  { key: "#top_menu_population", text: "Lakosság" }
+  { key: "#top_menu_new_game", text: "Új játék" }
+  { key: "#top_menu_load_game", text: "Játék betöltése" }
+  { key: "#top_menu_save_game", text: "Játék mentése" }
+  { key: "#top_menu_exit_game", text: "Kilépés" }
+  { key: "#top_menu_delete_game", text: "Mentés törlése" }
+  { key: "#top_menu_display_settings", text: "Képernyőbeállítások" }
+  { key: "#top_menu_sound_settings", text: "Hangbeállítások" }
+  { key: "#top_menu_speed_settings", text: "Játéksebesség" }
+  { key: "#top_menu_pyramid_speedup_off", text: "Piramisépítés gyorsítása – Kikapcsolva" }
+  { key: "#top_menu_pyramid_speedup_on", text: "Piramisépítés gyorsítása – Bekapcsolva" }
+  { key: "#top_menu_difficulty", text: "Nehézségi szint" }
+  { key: "#top_menu_cities_egyptian", text: "Városnevek – egyiptomi" }
+  { key: "#top_menu_cities_classical", text: "Városnevek – klasszikus" }
+  { key: "#top_menu_popup_messages", text: "Felugró üzenetek" }
+  { key: "#top_menu_help_item", text: "Súgó" }
+  { key: "#top_menu_mouse_help_off", text: "Egérsúgó – Kikapcsolva" }
+  { key: "#top_menu_mouse_help_some", text: "Egérsúgó – Részleges" }
+  { key: "#top_menu_mouse_help_full", text: "Egérsúgó – Teljes" }
+  { key: "#top_menu_warnings_off", text: "Figyelmeztetések – Kikapcsolva" }
+  { key: "#top_menu_warnings_on", text: "Figyelmeztetések – Bekapcsolva" }
+  { key: "#top_menu_about", text: "Névjegy" }
+  { key: "#top_menu_advisor_labor", text: "Munkaügyi felügyelő" }
+  { key: "#top_menu_advisor_military", text: "Katonai felügyelő" }
+  { key: "#top_menu_advisor_imperial", text: "Politikai felügyelő" }
+  { key: "#top_menu_advisor_ratings", text: "Értékelési felügyelő" }
+  { key: "#top_menu_advisor_trade", text: "Kereskedelmi felügyelő" }
+  { key: "#top_menu_advisor_population", text: "Magtárak felügyelője" }
+  { key: "#top_menu_advisor_health", text: "Közegészségügyi felügyelő" }
+  { key: "#top_menu_advisor_education", text: "Oktatási felügyelő" }
+  { key: "#top_menu_advisor_entertainment", text: "Szórakoztatási felügyelő" }
+  { key: "#top_menu_advisor_religion", text: "Templomok felügyelője" }
+  { key: "#top_menu_advisor_financial", text: "Kincstári felügyelő" }
+  { key: "#top_menu_advisor_chief", text: "Főfelügyelő" }
+  { key: "#monthly_autosave_on", text: "Havi automatikus mentés: BE" }
+  { key: "#monthly_autosave_off", text: "Havi automatikus mentés: KI" }
+  { key: "#top_menu_funds_tooltip", text: "A város jelenlegi pénzkészlete" }
+  { key: "#top_menu_population_tooltip", text: "A város jelenlegi lakossága" }
+  { key: "#top_menu_date_tooltip", text: "Az aktuális dátum!" }
+  { key: "#top_menu_debug", text: "Debug" }
+  { key: "#top_menu_debug_render", text: "Render" }
+  { key: "#top_menu_cheat_console", text: "Csalókonszol" }
+  { key: "#top_menu_properties_on", text: "Tulajdonságok BE" }
+  { key: "#top_menu_properties_off", text: "Tulajdonságok KI" }
+  { key: "#top_menu_terrain_paint_on", text: "Terepfestés BE" }
+  { key: "#top_menu_terrain_paint_off", text: "Terepfestés KI" }
+  { key: "#top_menu_write_video_on", text: "Videóírás BE" }
+  { key: "#top_menu_write_video_off", text: "Videóírás KI" }
+  { key: "#top_menu_buildings_on", text: "Épületek BE" }
+  { key: "#top_menu_buildings_off", text: "Épületek KI" }
+  { key: "#top_menu_js_debugger_on", text: "JS debugger BE" }
+  { key: "#top_menu_js_debugger_off", text: "JS debugger KI" }
 
   { key: "#sidebar_speed_header", text: "Sebesség" }
   { key: "#no_requests", text: "Jelenleg nincs teljesítendő kérés." }

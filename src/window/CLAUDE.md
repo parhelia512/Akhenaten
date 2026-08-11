@@ -18,7 +18,7 @@
 |------|---------|
 | `widget_city.h` | Main gameplay screen: isometric rendering, tile input, overlay tooltips |
 | `widget_sidebar.h` | Collapsible sidebar with expanded/collapsed states |
-| *(JS)* | Top menu bar: `top_menu_draw` / `top_menu_handle_input` events in `ui_top_menu_widget.js` |
+| *(JS)* | Top menu: `ui_top_menu_actions.js` / `ui_top_menu_widget.js` / `ui_top_menu_bar.js` (`top_menu_draw` / `top_menu_handle_input`) |
 | `widget_minimap.h` | Small map overlay |
 | `city/` | City rendering helpers (tile drawing, building ghosts, ornaments) |
 
