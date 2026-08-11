@@ -23,6 +23,7 @@ empire_window {
     trade_button_offset_y : 10
     start_pos : {x: 16, y: 16}
     finish_pos : {x: 32, y: 136}
+    map_size : {x: 1200, y: 1600}
     image : {pack:PACK_EMPIRE, id:1}
     bottom_image : {pack:PACK_GENERAL, id:172, offset:3}
     horizontal_bar : {pack:PACK_GENERAL, id:172, offset:1}
@@ -82,8 +83,11 @@ empire_window {
         }
     }
 
-    /** Filled each frame in draw_paneling; used by draw_object_info*/
+    /** Filled each frame in draw_background. */
     screen_bounds : null
+
+    /** Map transform for the current frame (scale, clip, origins, viewport). */
+    camera : null
 
     /** Selected city's trade route is deferred and drawn last (on top). */
     deferred_route_city_id : -1
@@ -152,63 +156,73 @@ function empire_window_screen_bounds() {
     return { min_pos: {x: 0, y: 0}, max_pos: {x: screen.width, y: screen.height} }
 }
 
-function empire_window_map_scale() {
+function empire_window_rebuild_camera() {
     var sb = empire_window.screen_bounds
-    var viewport_w = Math.max(1, (sb.max_pos.x - sb.min_pos.x) - empire_window.finish_pos.x)
-    var viewport_h = Math.max(1, (sb.max_pos.y - sb.min_pos.y) - empire_window.finish_pos.y)
-    return Math.max(viewport_w / 1200, viewport_h / 1600)
-}
+    var map = empire_window.map_size
+    if (!sb || !map) {
+        empire_window.camera = null
+        return null
+    }
 
-function empire_window_map_clip_origin() {
-    var sb = empire_window.screen_bounds
-    return {
+    var clip = {
         x: sb.min_pos.x + empire_window.start_pos.x,
         y: sb.min_pos.y + empire_window.start_pos.y
     }
-}
-
-function empire_window_map_area_size() {
-    var sb = empire_window.screen_bounds
-    return {
+    var area = {
         x: Math.max(1, (sb.max_pos.x - sb.min_pos.x) - empire_window.finish_pos.x),
         y: Math.max(1, (sb.max_pos.y - sb.min_pos.y) - empire_window.finish_pos.y)
     }
-}
-
-function empire_window_map_base_origin() {
-    var clip = empire_window_map_clip_origin()
-    var size = empire_window_map_area_size()
-    var s = empire_window_map_scale()
-    var scaled_w = Math.max(1, Math.round(1200 * s))
-    var scaled_h = Math.max(1, Math.round(1600 * s))
-    return {
-        x: clip.x + Math.max(0, ((size.x - scaled_w) / 2) | 0),
-        y: clip.y + Math.max(0, ((size.y - scaled_h) / 2) | 0)
+    var scale = Math.max(area.x / map.x, area.y / map.y)
+    var scale_safe = Math.max(0.001, scale)
+    var scaled = {
+        x: Math.max(1, Math.round(map.x * scale)),
+        y: Math.max(1, Math.round(map.y * scale))
     }
-}
-
-function empire_window_map_viewport_size() {
-    var size = empire_window_map_area_size()
-    var s = Math.max(0.001, empire_window_map_scale())
-    return {
-        x: Math.min(1200, Math.max(1, Math.round(size.x / s))),
-        y: Math.min(1600, Math.max(1, Math.round(size.y / s)))
+    var base = {
+        x: clip.x + Math.max(0, ((area.x - scaled.x) / 2) | 0),
+        y: clip.y + Math.max(0, ((area.y - scaled.y) / 2) | 0)
     }
-}
-
-function empire_window_map_draw_origin() {
     var scroll = __empire_map_get_scroll()
-    var s = empire_window_map_scale()
-    var base = empire_window_map_base_origin()
-    return {
-        x: base.x - Math.round(scroll.x * s),
-        y: base.y - Math.round(scroll.y * s)
+    var draw_origin = {
+        x: base.x - Math.round(scroll.x * scale),
+        y: base.y - Math.round(scroll.y * scale)
     }
+    var viewport = {
+        x: Math.min(map.x, Math.max(1, Math.round(area.x / scale_safe))),
+        y: Math.min(map.y, Math.max(1, Math.round(area.y / scale_safe)))
+    }
+
+    var cam = {
+        scale: scale,
+        scale_safe: scale_safe,
+        clip: clip,
+        area: area,
+        base: base,
+        draw_origin: draw_origin,
+        viewport: viewport,
+        map: map
+    }
+    empire_window.camera = cam
+    empire_window.draw_offset = draw_origin
+    return cam
+}
+
+function empire_window_camera() {
+    return empire_window.camera || empire_window_rebuild_camera()
+}
+
+function empire_window_map_scale() {
+    var cam = empire_window_camera()
+    return cam ? cam.scale : 1
 }
 
 function empire_window_is_outside_map(x, y) {
-    var o = empire_window_map_clip_origin()
-    var size = empire_window_map_area_size()
+    var cam = empire_window_camera()
+    if (!cam) {
+        return true
+    }
+    var o = cam.clip
+    var size = cam.area
     return x < o.x || x >= o.x + size.x || y < o.y || y >= o.y + size.y
 }
 
@@ -241,27 +255,34 @@ function empire_window_apply_map_scroll_delta(dx, dy, scale) {
     }
     if (map_delta.x || map_delta.y) {
         __empire_map_scroll_map(map_delta)
+        // Scroll changed: keep camera.draw_origin in sync for the rest of the frame.
+        if (empire_window.camera) {
+            empire_window_rebuild_camera()
+        }
     }
 }
 
 function empire_window_determine_selected_object() {
-    if (!empire_window.screen_bounds) {
+    var cam = empire_window_camera()
+    if (!cam) {
         return
     }
     if (!__mouse.left.went_up || empire_window.finished_scroll || empire_window_is_outside_map(__mouse.x, __mouse.y)) {
         return
     }
 
-    var origin = empire_window_map_base_origin()
-    var scale = Math.max(0.001, empire_window_map_scale())
     __empire_map_select_object({
-        x: Math.max(0, Math.round((__mouse.x - origin.x) / scale)),
-        y: Math.max(0, Math.round((__mouse.y - origin.y) / scale))
+        x: Math.max(0, Math.round((__mouse.x - cam.base.x) / cam.scale_safe)),
+        y: Math.max(0, Math.round((__mouse.y - cam.base.y) / cam.scale_safe))
     })
 }
 
 [es=(empire_window, ui_handle_mouse)]
 function empire_window_ui_handle_mouse(window) {
+    if (!empire_window.screen_bounds) {
+        return
+    }
+    empire_window_rebuild_camera()
     var m = __mouse
     var scale = empire_window_map_scale()
 
@@ -544,11 +565,12 @@ function empire_window_draw_pause_button(window) {
 [es=(empire_window, draw_city_want_sell_items)]
 function empire_window_es_draw_city_want_sell_items(window) {
     var elm = window[window.active_id]
-    var cityId = empire_window.selected_city
-    var itemStepX = 110
-    var itemStepY = 0
+    var item = window.city_want_sell_item
+    var itemStepX = item.size.x
+    var itemStepY = item.size.y
     var rowFont = FONT_SMALL_PLAIN
     var sellIndex = 0
+    var cityId = empire_window.selected_city
 
     var city = empire.get_city(cityId)
     for (var r = RESOURCE_GRAIN; r <= RESOURCE_MARBLE; r++) {
@@ -566,11 +588,12 @@ function empire_window_es_draw_city_want_sell_items(window) {
 [es=(empire_window, draw_city_want_buy_items)]
 function empire_window_es_draw_city_want_buy_items(window) {
     var elm = window[window.active_id]
-    var cityId = empire_window.selected_city
-    var itemStepX = 110
-    var itemStepY = 0
+    var item = window.city_want_buy_item
+    var itemStepX = item.size.x
+    var itemStepY = item.size.y
     var rowFont = FONT_SMALL_PLAIN
     var buyIndex = 0
+    var cityId = empire_window.selected_city
 
     var city = empire.get_city(cityId)
     for (var r = RESOURCE_GRAIN; r <= RESOURCE_MARBLE; r++) {
@@ -588,8 +611,9 @@ function empire_window_es_draw_city_want_buy_items(window) {
 [es=(empire_window, draw_city_sell_items)]
 function empire_window_es_draw_city_sell_items(window) {
     var cityId = empire_window.selected_city
-    var itemW = 120
-    var itemH = 20
+    var item = window.city_sell_item
+    var itemW = item.size.x
+    var itemH = item.size.y
     var rowFont = FONT_SMALL_PLAIN
     var index = 0
     var elm = window[window.active_id]
@@ -622,8 +646,9 @@ function empire_window_es_draw_city_sell_items(window) {
 [es=(empire_window, draw_city_buy_items)]
 function empire_window_es_draw_city_buy_items(window) {
     var cityId = empire_window.selected_city
-    var itemW = 120
-    var itemH = 20
+    var item = window.city_buy_item
+    var itemW = item.size.x
+    var itemH = item.size.y
     var rowFont = FONT_SMALL_PLAIN
     var index = 0
     var elm = window[window.active_id]
@@ -1102,7 +1127,7 @@ function empire_window_city_at_screen_pos(draw_offset, mx, my) {
 
 function empire_window_update_map_hover_tooltip(draw_offset) {
     ui.set_tooltip("")
-    if (!empire_window.screen_bounds || empire_window_is_outside_map(__mouse.x, __mouse.y)) {
+    if (!empire_window.camera || empire_window_is_outside_map(__mouse.x, __mouse.y)) {
         return
     }
     var city = empire_window_city_at_screen_pos(draw_offset, __mouse.x, __mouse.y)
@@ -1112,13 +1137,15 @@ function empire_window_update_map_hover_tooltip(draw_offset) {
 }
 
 function empire_window_draw_map(window) {
-    var clip = empire_window_map_clip_origin()
-    var area = empire_window_map_area_size()
-    ui.set_clip_rectangle(clip, area)
-    __empire_map_set_viewport(empire_window_map_viewport_size())
+    var cam = empire_window_camera()
+    if (!cam) {
+        return
+    }
 
-    var draw_offset = empire_window_map_draw_origin()
-    empire_window.draw_offset = draw_offset
+    ui.set_clip_rectangle(cam.clip, cam.area)
+    __empire_map_set_viewport(cam.viewport)
+
+    var draw_offset = cam.draw_origin
     var payload = { draw_offset: draw_offset }
 
     empire_window_prepare_deferred_trade_route()
@@ -1204,8 +1231,8 @@ function empire_window_draw_paneling(window) {
 [es=(empire_window, draw_background)]
 function empire_window_draw_background(window) {
     game.pause_allow = !!game_features.gameplay_change_empire_map_runs_simulation
-    var bounds = empire_window_screen_bounds()
-    empire_window.screen_bounds = bounds
+    empire_window.screen_bounds = empire_window_screen_bounds()
+    empire_window_rebuild_camera()
     empire_window_layout_ui(window)
     empire_window_update_selection_ui(window)
 
