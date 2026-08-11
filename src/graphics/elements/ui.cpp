@@ -1588,17 +1588,17 @@ void ui::elabel::draw(UiFlags flags) {
     auto box_width = size.x;
     const vec2i text_pos = offset + dpos;
 
-    const bool single_line = !(_flags & (UiFlags_AlignCentered | UiFlags_LabelMultiline | UiFlags_Rich));
+    const bool may_ellipsize = !(_flags & (UiFlags_LabelMultiline | UiFlags_Rich));
     int max_text_width = 0;
     if (has_body) {
         max_text_width = _body.x * DEFAULT_BLOCK_SIZE - 16;
-    } else if (size.x > 0 && single_line) {
+    } else if (size.x > 0 && may_ellipsize) {
         max_text_width = size.x;
     }
 
     pcstr caption = _text.c_str() ? _text.c_str() : "";
     bool truncated = false;
-    if (single_line && max_text_width > 0 && caption[0]
+    if (may_ellipsize && max_text_width > 0 && caption[0]
         && text_get_width(caption, _font) > max_text_width) {
         _draw_caption = caption;
         text_ellipsize((uint8_t*)_draw_caption.data(), _font, max_text_width);
