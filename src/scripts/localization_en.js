@@ -454,6 +454,7 @@ localization_en = [
   {key: "#popup_dialog_no_festival_square", text:"Festival: No Festival Square." }
   {key: "#popup_dialog_delete_dynasty", text:"Delete Dynasty?" }
   {key: "#popup_dialog_no_dynasty", text:"No Dynasty" }
+  {key: "#popup_dialog_no_player_name", text:"Please enter a family name." }
   {key: "#replay_mission", text:"Replay mission" }
   {key: "#mission_won_culture_rating", text:"Final Culture rating" }
   {key: "#mission_won_prosperity_rating", text:"Final Prosperity rating" }

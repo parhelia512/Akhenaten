@@ -397,6 +397,7 @@ localization_de = [
   {key: "#popup_dialog_no_festival_square", text:"Fest: Kein Festplatz." }
   {key: "#popup_dialog_delete_dynasty", text:"Dynastie löschen?" }
   {key: "#popup_dialog_no_dynasty", text:"Keine Dynastie" }
+  {key: "#popup_dialog_no_player_name", text:"Bitte geben Sie einen Familiennamen ein." }
   {key: "#replay_mission", text:"Mission wiederholen" }
   {key: "#mission_won_culture_rating", text:"Endgültige Kulturbewertung" }
   {key: "#mission_won_prosperity_rating", text:"Endgültige Wohlstandsbewertung" }

@@ -429,6 +429,7 @@ localization_hu = [
   {key: "#popup_dialog_no_festival_square", text:"Ünnepség: nincs ünnepi tér"}
   {key: "#popup_dialog_delete_dynasty", text:"Dinasztia törlése?"}
   {key: "#popup_dialog_no_dynasty", text:"Nincs dinasztia"}
+  {key: "#popup_dialog_no_player_name", text:"Adjon meg egy családnevet."}
   {key: "#replay_mission", text:"Küldetés újrajátszása"}
   {key: "#ui_gift_to_kingdome_window_title", text:"Ajándék Egyiptom népének"}
   {key: "#ui_unable_to_fulfill_request", text:"A kérés nem teljesíthető"}

@@ -14,11 +14,11 @@ window_new_career {
             view_items:11
             draw_scrollbar_always:true
             draw_paneling:true
-            onclick_item: new_career_on_pick_name
-            ondoubleclick_item: new_career_on_double_click_name
+            onclick_event: "pick_name"
+            ondoubleclick_event: "pick_name_ok"
         })
         btn_back   : button({margin{left:31, top:312}, size[px(9), 26], text[12, 0], font:FONT_NORMAL_BLACK_ON_LIGHT, onclick: window_go_back})
-        btn_ok     : button({margin{centerx:16, top:312}, size[px(9), 26], text[13, 5], font:FONT_NORMAL_BLACK_ON_LIGHT, onclick: new_career_btn_ok})
+        btn_ok     : button({margin{centerx:16, top:312}, size[px(9), 26], text[13, 5], font:FONT_NORMAL_BLACK_ON_LIGHT, onclick_event: "ok"})
     }
 }
 
@@ -31,42 +31,6 @@ function new_career_trim_name(name) {
         name = name.substring(0, name.length - 1)
     }
     return name
-}
-
-function new_career_current_name() {
-    if (!window_new_career.player_name) {
-        return ""
-    }
-    return new_career_trim_name(window_new_career.player_name.value || "")
-}
-
-function new_career_apply_name(name) {
-    name = new_career_trim_name(name)
-    if (!name || !window_new_career.player_name) {
-        return
-    }
-    window_new_career.player_name.value = name
-}
-
-function new_career_on_pick_name(entry) {
-    new_career_apply_name(entry.text)
-}
-
-function new_career_on_double_click_name(entry) {
-    new_career_apply_name(entry.text)
-    new_career_btn_ok()
-}
-
-function new_career_btn_ok() {
-    var name = new_career_current_name()
-    if (!name) {
-        ui.show_ok("#popup_dialog_no_player_name")
-        return
-    }
-    game.dynasty_name = name
-    __game_player_data_new(name)
-    // Opened from player selection — go_back restores it and refreshes the list.
-    window_go_back()
 }
 
 function new_career_is_missing_loc(text) {
@@ -105,6 +69,41 @@ function new_career_fill_egyptian_names(window) {
         }
         window.name_list.add_item(name, i)
     }
+}
+
+[es=(window_new_career, pick_name)]
+function new_career_on_pick_name(window) {
+    var name = new_career_trim_name(window.text)
+    if (!name) {
+        return
+    }
+    window.player_name.value = name
+}
+
+function new_career_commit(window) {
+    var name = new_career_trim_name(window.player_name.value || "")
+    if (!name) {
+        ui.show_ok(__loc("#popup_dialog_no_player_name"), __loc(5, 96))
+        return
+    }
+    game.dynasty_name = name
+    __game_player_data_new(name)
+    // Opened from player selection — go_back restores it and refreshes the list.
+    window_go_back()
+}
+
+[es=(window_new_career, pick_name_ok)]
+function new_career_on_pick_name_ok(window) {
+    var name = new_career_trim_name(window.text)
+    if (name) {
+        window.player_name.value = name
+    }
+    new_career_commit(window)
+}
+
+[es=(window_new_career, ok)]
+function new_career_btn_ok(window) {
+    new_career_commit(window)
 }
 
 [es=(window_new_career, init)]

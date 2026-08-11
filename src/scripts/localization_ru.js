@@ -322,6 +322,7 @@ localization_ru = [
     { key:"#popup_dialog_no_festival_square", text:"Фестиваль: Нет площади для фестивалей." }
     { key:"#popup_dialog_delete_dynasty", text:"Удалить династию?" }
     { key:"#popup_dialog_no_dynasty", text:"Нет династии" }
+    { key:"#popup_dialog_no_player_name", text:"Введите имя семьи." }
     { key:"#replay_mission", text:"Повторить миссию" }
     { key:"#mission_won_culture_rating", text:"Финальный рейтинг культуры" }
     { key:"#mission_won_prosperity_rating", text:"Финальный рейтинг процветания" }
