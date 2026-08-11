@@ -51,22 +51,48 @@ function top_menu_clear_state() {
 	top_menu_widget.item_clicked = 0
 }
 
+function top_menu_dismiss() {
+	var open = ui.window_is("top_menu_submenu")
+	top_menu_clear_state()
+	if (open) {
+		window_go_back()
+	}
+}
+
 function widget_top_menu_clear_state() {
 	top_menu_clear_state()
+}
+
+function top_menu_format_date(year, month) {
+	var month_str = __loc(25, month)
+	if (year >= 0) {
+		return game.locale_year_before_ad
+			? _format("{0} {1} AD", month_str, year)
+			: _format("{0} AD {1}", month_str, year)
+	}
+	return _format("{0} {1} BC", month_str, -year)
+}
+
+function top_menu_refresh_status_text() {
+	top_menu_widget.population_str = __loc(6, 1) + " " + city.population
+	top_menu_widget.date_str = top_menu_format_date(game.simtime.year, game.simtime.month)
 }
 
 [es=event_level_post_load]
 function top_menu_on_level_post_load(ev) {
 	top_menu_clear_state()
+	top_menu_refresh_status_text()
 }
 
 function top_menu_open_advisor(advisor, p2) {
-	top_menu_clear_state()
-	window_go_back()
+	top_menu_dismiss()
 	window_advisors_show_advisor(advisor)
 }
 
-function top_menu_show_console(p1, p2) { window_show_cheat_console(true) }
+function top_menu_show_console(p1, p2) {
+	top_menu_dismiss()
+	window_show_cheat_console(true)
+}
 
 function top_menu_js_debugger_text(p1, p2) {
 	return __js_debugger_is_running()
@@ -75,29 +101,25 @@ function top_menu_js_debugger_text(p1, p2) {
 }
 
 function top_menu_js_debugger_toggle(p1, p2) {
-	top_menu_clear_state()
-	window_go_back()
+	top_menu_dismiss()
 	if (__js_debugger_is_running())
 		__js_debugger_stop()
 	else
 		__js_debugger_start(4711)
 }
 function top_menu_make_fullscreenshot(p1, p2) {
-	top_menu_clear_state()
-	window_go_back()
+	top_menu_dismiss()
 	__game_save_screenshot(SCREENSHOT_FULL_CITY)
 }
 
 function top_menu_make_screenshot(p1, p2) {
-	top_menu_clear_state()
-	window_go_back()
+	top_menu_dismiss()
 	__game_save_screenshot(SCREENSHOT_DISPLAY)
 }
 function top_menu_debug_properties_text(p1, p2) { return game.debug_properties ? "Properties ON" : "Properties OFF" }
 function top_menu_debug_properties_toggle(p1, p2) {
 	game.debug_properties = !game.debug_properties
-	top_menu_clear_state()
-	window_go_back()
+	top_menu_dismiss()
 }
 function top_menu_debug_terrain_paint_text(p1, p2) { return game.debug_terrain_paint ? "Terrain paint ON" : "Terrain paint OFF" }
 function top_menu_debug_terrain_paint_toggle(p1, p2) {
@@ -105,8 +127,7 @@ function top_menu_debug_terrain_paint_toggle(p1, p2) {
 	if (!game.debug_terrain_paint) {
 		__editor_tool_deactivate()
 	}
-	top_menu_clear_state()
-	window_go_back()
+	top_menu_dismiss()
 }
 function top_menu_debug_write_video_text(p1, p2) { return video_capture.active ? "Write Video ON" : "Write Video OFF" }
 
@@ -121,14 +142,13 @@ function top_menu_funds_explanation(p1, p2) { ui.window_message_dialog_show("mes
 
 function top_menu_show_window_by_id(window_id) {
 	return function() {
-		top_menu_clear_state()
-		window_go_back()
+		top_menu_dismiss()
 		emit event_show_window{ id:window_id }
 	}
 }
 
 function top_menu_new_game() {
-	top_menu_clear_state()
+	top_menu_dismiss()
 	ui.show_yesno("#popup_dialog_quit",
 		function() {
 			__ui_city_planner_reset()
@@ -144,7 +164,7 @@ function top_menu_new_game() {
 }
 
 function top_menu_replay_map() {
-	top_menu_clear_state()
+	top_menu_dismiss()
 	ui.show_yesno("#replay_mission",
 		function() {
 			__ui_city_planner_reset()
@@ -168,11 +188,11 @@ function top_menu_replay_map() {
 
 function top_menu_load_map() {
 	if (!game_allows_midgame_load()) {
-		top_menu_clear_state()
+		top_menu_dismiss()
 		game_toast_ironwill_load_blocked()
 		return
 	}
-	top_menu_clear_state()
+	top_menu_dismiss()
 	__ui_city_planner_reset()
 	ui.window_city_show()
 	window_show_by_id("file_dialog_load")
@@ -180,39 +200,38 @@ function top_menu_load_map() {
 
 function top_menu_save_map() {
 	if (!game_allows_player_save()) {
-		top_menu_clear_state()
+		top_menu_dismiss()
 		game_toast_ironwill_save_blocked()
 		return
 	}
-	top_menu_clear_state()
+	top_menu_dismiss()
 	ui.window_city_show()
 	window_show_by_id("file_dialog_save")
 }
 
 function top_menu_delete_map() {
-	top_menu_clear_state()
+	top_menu_dismiss()
 	ui.window_city_show()
 	window_show_by_id("file_dialog_delete")
 }
 
 function top_menu_exit_game() {
-	top_menu_clear_state()
+	top_menu_dismiss()
 	game_confirm_exit_to_main_menu()
 }
 
 function top_menu_features(p1, p2) {
+	top_menu_dismiss()
 	window_show_by_id("window_features")
 }
 
 function top_menu_show_help(p1, p2) {
-	top_menu_clear_state()
-	window_go_back()
+	top_menu_dismiss()
 	ui.window_message_dialog("message_dialog_help")
 }
 
 function top_menu_show_about(p1, p2) {
-	top_menu_clear_state()
-	window_go_back()
+	top_menu_dismiss()
 	ui.window_message_dialog("message_dialog_about")
 }
 
@@ -528,7 +547,6 @@ top_menu_widget {
 	date_str : ""
 	population_str : ""
 	item_clicked : 0
-	input_handled : 0
 	rotate_hover : 0
 
 	menus [
@@ -600,8 +618,8 @@ top_menu_widget {
 			items [
 				{ id: "properties", textfn: top_menu_debug_properties_text, onclick: top_menu_debug_properties_toggle }
 				{ id: "terrain_paint", textfn: top_menu_debug_terrain_paint_text, onclick: top_menu_debug_terrain_paint_toggle }
-				{ id: "make_screenshot", text: "Make full screenshot", onclick: top_menu_make_fullscreenshot }
-				{ id: "make_full_screenshot", text: "Make screenshot", onclick: top_menu_make_screenshot }
+				{ id: "make_screenshot", text: "Make screenshot", onclick: top_menu_make_screenshot }
+				{ id: "make_full_screenshot", text: "Make full screenshot", onclick: top_menu_make_fullscreenshot }
 				{ id: "write_video", textfn: top_menu_debug_write_video_text, onclick: video_capture.toggle }
 				{ id: "show_console", text: "Cheat console", onclick: top_menu_show_console }
 				{ id: "js_debugger", textfn: top_menu_js_debugger_text, onclick: top_menu_js_debugger_toggle }
@@ -636,13 +654,11 @@ function top_menu_draw(ev) {
 }
 
 function top_menu_handle_input() {
-	top_menu_widget.input_handled = 0
 	if (__ui_screen_city_capture_input()) {
 		return 0
 	}
 
 	if (top_menu_handle_status()) {
-		top_menu_widget.input_handled = 1
 		return 1
 	}
 
@@ -650,7 +666,6 @@ function top_menu_handle_input() {
 	top_menu_widget.focus_menu_id = menu_id
 	if (menu_id && __mouse.left.went_up) {
 		top_menu_open_submenu(menu_id)
-		top_menu_widget.input_handled = 1
 		return 1
 	}
 	return 0
@@ -669,8 +684,7 @@ function top_menu_submenu_init(window) {
 
 [es=(top_menu_submenu, go_back)]
 function top_menu_submenu_go_back(window) {
-	top_menu_clear_state()
-	window_go_back()
+	top_menu_dismiss()
 }
 
 [es=(top_menu_submenu, draw_background)]
@@ -695,7 +709,6 @@ function top_menu_submenu_ui_draw_foreground(window) {
 	var y_offset = top_menu_widget.height + top_menu_widget.offset.y * 2 + sub.y
 	var items = menu.items || []
 	var focus_id = ""
-	top_menu_widget.item_clicked = 0
 
 	for (var i = 0; i < items.length; i++) {
 		var item = items[i]
@@ -750,26 +763,24 @@ function top_menu_submenu_ui_handle_mouse(window) {
 		}
 	}
 
-	if (__mouse.left.went_up && !top_menu_widget.item_clicked) {
-		top_menu_clear_state()
-		window_go_back()
+	if (!__mouse.left.went_up) {
+		return
 	}
+
+	if (top_menu_widget.item_clicked) {
+		top_menu_widget.item_clicked = 0
+		return
+	}
+
+	top_menu_dismiss()
 }
 
 [es=event_population_changed]
 function top_menu_update_population_text(ev) {
-	top_menu_widget.population_str = __loc(6, 1) + " " + ev.value;
+	top_menu_widget.population_str = __loc(6, 1) + " " + ev.value
 }
 
 [es=event_advance_day]
 function top_menu_update_date_text(ev) {
-	var month_str = __loc(25, ev.month);
-    if (ev.year >= 0) {
-    	top_menu_widget.date_str = game.locale_year_before_ad
-			 							? _format("{0} {1} AD", month_str, ev.year)
-			                            : _format("{0} AD {1}", month_str, ev.year);
-
-    }  else {
-		top_menu_widget.date_str = _format("{0} {1} BC", month_str, -ev.year);
-	}
+	top_menu_widget.date_str = top_menu_format_date(ev.year, ev.month)
 }
