@@ -1017,7 +1017,7 @@ void building_storage_yard::spawn_figure() {
             cart->load_resource(RESOURCE_NONE, 0);
             cart->base.collecting_item_id = task.resource;
             cart->base.collecting_item_max = std::min(task.amount,
-                game_features::gameplay_change_granaries_get_double ? 400 : 200);
+                !!game_features::gameplay_change_granaries_get_double ? 400 : 200);
             break;
 
         case STORAGEYARD_TASK_DELIVERING:
@@ -1057,7 +1057,7 @@ void building_storage_yard::spawn_figure() {
         cart->load_resource(RESOURCE_NONE, 0);
         cart->base.collecting_item_id = task.resource;
         cart->base.collecting_item_max = std::min(task.amount,
-            game_features::gameplay_change_granaries_get_double ? 400 : 200);
+            !!game_features::gameplay_change_granaries_get_double ? 400 : 200);
 
         base.set_figure(1, cart->id());
         cart->set_home(base.id);

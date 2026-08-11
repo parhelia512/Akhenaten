@@ -85,7 +85,7 @@ void figure_storageyard_cart::do_retrieve(int action_done) {
     } else if (base.collecting_item_max == 0) {
         const e_resource res = (e_resource)base.collecting_item_id;
         int max_amount = dest_storage->amount(res);
-        const int load_cap = game_features::gameplay_change_granaries_get_double ? 400 : 200;
+        const int load_cap = !!game_features::gameplay_change_granaries_get_double ? 400 : 200;
         max_amount = std::min(max_amount, load_cap);
         max_amount = std::min<int>(max_amount, home_storage->freespace());
         base.collecting_item_max = max_amount;
