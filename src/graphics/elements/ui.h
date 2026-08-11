@@ -712,6 +712,7 @@ namespace ui {
 
         xstring _tooltip;
         xstring _format;
+        xstring _draw_caption;
 
         rich_text_t::margin_t _text_margin;
 
@@ -730,6 +731,8 @@ namespace ui {
         virtual void text(pcstr) override;
         virtual void text_color(color) override;
         virtual void font(int) override;
+        virtual void tooltip(textid t) override { _tooltip = ui::str(t); }
+        virtual void tooltip(const xstring& t) override { _tooltip = t; }
         virtual e_font font_hover() const override { return _font_hover; }
         virtual e_font font() const override { return _font; }
         virtual const xstring& tooltip() const override { return _tooltip; }

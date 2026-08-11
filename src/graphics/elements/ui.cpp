@@ -1579,25 +1579,63 @@ void ui::elabel::draw(UiFlags flags) {
         _text = ui::sformat<1024>(&holder, dyn.to_str().c_str());
     }
 
-    if (_body.x > 0) {
+    const bool has_body = _body.x > 0;
+    if (has_body) {
         push(cmd_t::small_panel, Pos{scr_pos}, BoxWidth{_body.x}, ImageId{_body.y}, Mask{0xffffffffu});
     }
 
-    auto dpos = pos + ((_body.x > 0) ? vec2i{8, 4} : vec2i{0, 0});
+    auto dpos = pos + (has_body ? vec2i{8, 4} : vec2i{0, 0});
     auto box_width = size.x;
     const vec2i text_pos = offset + dpos;
 
+    const bool single_line = !(_flags & (UiFlags_AlignCentered | UiFlags_LabelMultiline | UiFlags_Rich));
+    int max_text_width = 0;
+    if (has_body) {
+        max_text_width = _body.x * DEFAULT_BLOCK_SIZE - 16;
+    } else if (size.x > 0 && single_line) {
+        max_text_width = size.x;
+    }
+
+    pcstr caption = _text.c_str() ? _text.c_str() : "";
+    bool truncated = false;
+    if (single_line && max_text_width > 0 && caption[0]
+        && text_get_width(caption, _font) > max_text_width) {
+        _draw_caption = caption;
+        text_ellipsize((uint8_t*)_draw_caption.data(), _font, max_text_width);
+        caption = _draw_caption.c_str();
+        truncated = true;
+    }
+
     if (!!(_flags & UiFlags_AlignCentered)) {
-        push(cmd_t::text_centered, Pos{text_pos}, BoxWidth{box_width}, Font{_font}, Caption{_text.c_str()});
+        push(cmd_t::text_centered, Pos{text_pos}, BoxWidth{box_width}, Font{_font}, Caption{caption});
     } else if (!!(_flags & UiFlags_LabelMultiline)) {
-        push(cmd_t::text_multiline, Pos{text_pos}, BoxWidth{box_width}, Font{_font}, Caption{_text.c_str()});
+        push(cmd_t::text_multiline, Pos{text_pos}, BoxWidth{box_width}, Font{_font}, Caption{caption});
     } else if (!!(_flags & UiFlags_Rich)) {
         rich_text_t rich_text;
         rich_text.set_fonts(_font, FONT_NORMAL_YELLOW);
         rich_text.set_margin(_text_margin);
         rich_text.draw(_text.c_str(), offset, box_width, 10, false);
     } else {
-        push(cmd_t::text, Pos{text_pos}, BoxWidth{box_width}, Font{_font}, Caption{_text.c_str()});
+        push(cmd_t::text, Pos{text_pos}, BoxWidth{box_width}, Font{_font}, Caption{caption});
+    }
+
+    xstring tip = _tooltip;
+    if (tip.empty() && truncated) {
+        tip = _text;
+    }
+    if (!tip.empty()) {
+        const vec2i hit_size = has_body ? vec2i{_body.x * DEFAULT_BLOCK_SIZE, DEFAULT_BLOCK_SIZE}
+                                        : (size.x > 0 && size.y > 0 ? size : vec2i{text_get_width(caption, _font), DEFAULT_BLOCK_SIZE});
+        struct probe_t {
+            vec2i p;
+            vec2i s;
+            vec2i pos() const { return p; }
+            vec2i size() const { return s; }
+        };
+        _hover = is_mouse_over(probe_t{scr_pos, hit_size}, {0, 0});
+        if (_hover) {
+            ui::set_tooltip(tip);
+        }
     }
 
     invoke_draw_callbacks(flags);

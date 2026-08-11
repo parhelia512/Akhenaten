@@ -239,18 +239,18 @@ top_menu_editor_widget {
 		}
 		{
 			id: "options"
-			text: { group: 2, id: 0 }
+			text: "#top_menu_options"
 			items [
-				{ id: "sound", text: { group: 2, id: 2 }, onclick: top_menu_editor_show_window("sound_options_window") }
-				{ id: "speed", text: { group: 2, id: 3 }, onclick: top_menu_editor_show_window("speed_options_window") }
+				{ id: "sound", text: "#top_menu_sound_settings", onclick: top_menu_editor_show_window("sound_options_window") }
+				{ id: "speed", text: "#top_menu_speed_settings", onclick: top_menu_editor_show_window("speed_options_window") }
 			]
 		}
 		{
 			id: "help"
-			text: { group: 3, id: 0 }
+			text: "#top_menu_help"
 			items [
-				{ id: "help", text: { group: 3, id: 1 }, onclick: top_menu_editor_show_help }
-				{ id: "about", text: { group: 3, id: 7 }, onclick: top_menu_editor_show_about }
+				{ id: "help", text: "#top_menu_help_item", onclick: top_menu_editor_show_help }
+				{ id: "about", text: "#top_menu_about", onclick: top_menu_editor_show_about }
 			]
 		}
 		{
