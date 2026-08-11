@@ -41,6 +41,11 @@ import ui_victory_dialog
 import ui_mission_end_window
 import ui_mission_choice_window
 import ui_trade_opened_window
+import ui_empire_map
+import ui_empire_battle
+import ui_empire_input
+import ui_empire_trade_panel
+import ui_empire_chrome
 import ui_empire_window
 import ui_advisor_education
 import ui_advisor_imperial
