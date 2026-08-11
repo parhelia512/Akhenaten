@@ -1,5 +1,26 @@
 log_info("akhenaten: scenario selection — campaign periods")
 
+function campaign_period_last_scenario_id(period) {
+    var last_sid = -1
+    var i
+    for (i = 0; i < 64; i++) {
+        var sid = __game_campaign_mission_step_scenario_id(period, i)
+        if (sid < 0) {
+            break
+        }
+        last_sid = sid
+    }
+    return last_sid
+}
+
+function campaign_period_is_unlocked(period) {
+    if (period <= 0) {
+        return true
+    }
+    var prev_last = campaign_period_last_scenario_id(period - 1)
+    return prev_last >= 0 && !!__game_mission_scenario_beaten(prev_last)
+}
+
 [es=(window_scenario_selection_campaign, init)]
 function window_scenario_selection_campaign_on_init(ev) {
     window_scenario_selection.campaign_first_mission = -1
@@ -8,6 +29,17 @@ function window_scenario_selection_campaign_on_init(ev) {
 
     if (window_scenario_selection_campaign.period_selected < 0) {
         window_scenario_selection_campaign.period_selected = 0
+    }
+    // Prefer the highest unlocked period so returning players land on current progress.
+    var best = 0
+    var i
+    for (i = 0; i < CAMPAIGN_PERIOD_COUNT; i++) {
+        if (campaign_period_is_unlocked(i)) {
+            best = i
+        }
+    }
+    if (!campaign_period_is_unlocked(window_scenario_selection_campaign.period_selected)) {
+        window_scenario_selection_campaign.period_selected = best
     }
     window_scenario_selection_campaign.period_hover = -1
     window_scenario_selection_campaign.active_tab = CAMPAIGN_TAB_CAMPAIGNS
@@ -61,14 +93,18 @@ function campaign_period_refresh_ui(ev) {
     ev.hdr_cleopatra.enabled = campaigns
     for (var i = 0; i < CAMPAIGN_PERIOD_COUNT; i++) {
         var btn = ev["camp_" + i]
+        var unlocked = campaign_period_is_unlocked(i)
         btn.enabled = campaigns
+        btn.darkened = campaigns && !unlocked ? 1 : 0
         btn.selected = campaigns && (i === selected)
     }
 
     ev.campaign_hover_thumb.enabled = campaigns
     ev.campaign_hover_subtitle.enabled = campaigns
     ev.campaign_hover_body.enabled = campaigns
+    var play_ok = campaigns && campaign_period_is_unlocked(selected)
     ev.btn_play.enabled = campaigns
+    ev.btn_play.darkened = play_ok ? 0 : 1
     ev.lbl_play.enabled = campaigns
 }
 
@@ -89,11 +125,14 @@ function window_scenario_selection_campaign_on_period_changed(ev) {
     }
 
     // Loc group 294 packs each period as title / short blurb / family narrative / locked.
-    // Explore History shows the family narrative (offset +2), matching original Pharaoh.
     var thumb = get_image({ pack:PACK_UNLOADED, id:28, offset:h })
     ev.campaign_hover_thumb.image = thumb ? thumb.tid : -1
     ev.campaign_hover_subtitle.text = __loc(294, h * 4)
-    ev.campaign_hover_body.text = __loc(294, h * 4 + 2)
+    if (campaign_period_is_unlocked(h)) {
+        ev.campaign_hover_body.text = __loc(294, h * 4 + 2)
+    } else {
+        ev.campaign_hover_body.text = __loc(294, h * 4 + 3)
+    }
 }
 
 function campaign_tab_campaigns() {
@@ -113,6 +152,10 @@ function campaign_tab_individual() {
 function campaign_btn_play() {
     var index = window_scenario_selection_campaign.period_selected
     if (index < 0) {
+        return
+    }
+    if (!campaign_period_is_unlocked(index)) {
+        ui.show_ok(__loc(294, index * 4 + 3), __loc(294, index * 4))
         return
     }
     window_scenario_selection.individual_missions = false

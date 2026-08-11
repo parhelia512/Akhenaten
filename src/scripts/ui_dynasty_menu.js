@@ -7,7 +7,8 @@ function dynasty_menu_btn_resume() {
         city.kingdome.campaign_carry_personal_savings = 0
         city.kingdome.personal_savings = 0
         __campaign_carry_clear()
-        __game_load_mission(SCENARIO_NUBT, 1)
+        // Vanilla: Begin Family History opens chronology, not Nubt.
+        dynasty_menu_btn_explore()
         return
     }
 

@@ -2419,7 +2419,8 @@ void ui::egeneric_button::draw(UiFlags gflags) {
     }
     }
 
-    const bool clickable = !darkened && !readonly;
+    // large_button: Darkened is shade-only so locked History periods stay selectable.
+    const bool clickable = !readonly && (mode == 1 || !darkened);
 
     xstring onclick_event = event_name(ONCLICK_EVENT);
     if (clickable && !onclick_event.empty()) {
