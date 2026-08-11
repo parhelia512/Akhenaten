@@ -82,7 +82,14 @@ void figure_storageyard_cart::do_retrieve(int action_done) {
         auto loads = acquire_resource_for_getting_deliveryman(destination(), home());
         base.collecting_item_id = loads.first;
         base.collecting_item_max = loads.second;
-    } 
+    } else if (base.collecting_item_max == 0) {
+        const e_resource res = (e_resource)base.collecting_item_id;
+        int max_amount = dest_storage->amount(res);
+        const int load_cap = game_features::gameplay_change_granaries_get_double ? 400 : 200;
+        max_amount = std::min(max_amount, load_cap);
+        max_amount = std::min<int>(max_amount, home_storage->freespace());
+        base.collecting_item_max = max_amount;
+    }
 
     int home_accepting_quantity = home_storage->accepting_amount((e_resource)base.collecting_item_id);
     int carry_amount_goal_max = std::min<int>(base.collecting_item_max, home_accepting_quantity);
