@@ -59,7 +59,7 @@ empire_window {
         city_want_buy_items  : dummy({pos[0, 0], ondraw_event: "draw_city_want_buy_items"})
         city_want_buy_item   : dummy({size[110, 0], font:FONT_SMALL_PLAIN})
 
-        // After other UI so army travel text paints on top (same as former C++ post-draw call).
+        // Paint-only: army travel multiline text on top of other UI.
         object_info          : dummy({pos[0, 0], size[0, 0], ondraw_event: "draw_object_info"})
     }
 
@@ -376,57 +376,63 @@ function empire_window_clear_city_trade_ui(w) {
     w.city_want_buy_items.enabled = false
 }
 
-function empire_window_draw_object_info_none(ev) {
-    empire_window_clear_city_trade_ui(ev)
-    ev.info_tooltip.text = __loc(47, 9)
+function empire_window_city_is_trading_type(type) {
+    return type == EMPIRE_CITY_PHARAOH_TRADING
+        || type == EMPIRE_CITY_EGYPTIAN_TRADING
+        || type == EMPIRE_CITY_FOREIGN_TRADING
 }
 
-function empire_window_draw_object_info_ornament(ev) {
-    ev.info_tooltip.text = ""
-}
-
-function empire_window_draw_object_info_city(ev) {
-    ev.info_tooltip.text = ""
-    empire_window_clear_city_trade_ui(ev)
+function empire_window_sync_city_info_ui(window) {
     var city = empire.get_city(empire_window.selected_city)
     if (!city) {
         return
     }
-    var t = city.type
+
     var is_open = !!city.is_open
-    switch (t) {
+    switch (city.type) {
     case EMPIRE_CITY_OURS:
-        ev.info_tooltip.text = __loc(47, 1)
+        window.info_tooltip.text = __loc(47, 1)
         break
     case EMPIRE_CITY_PHARAOH:
-        ev.info_tooltip.text = __loc(47, 19)
+        window.info_tooltip.text = __loc(47, 19)
         break
     case EMPIRE_CITY_EGYPTIAN:
-        ev.info_tooltip.text = __loc(47, 13)
+        window.info_tooltip.text = __loc(47, 13)
         break
     case EMPIRE_CITY_FOREIGN:
-        ev.info_tooltip.text = __loc(47, 0)
+        window.info_tooltip.text = __loc(47, 0)
         break
     case EMPIRE_CITY_PHARAOH_TRADING:
     case EMPIRE_CITY_EGYPTIAN_TRADING:
     case EMPIRE_CITY_FOREIGN_TRADING:
-        ev.info_tooltip.text = ""
-        ev.city_sell_title.enabled = is_open
-        ev.city_sell_items.enabled = is_open
-        ev.city_buy_title.enabled = is_open
-        ev.city_buy_items.enabled = is_open
-        ev.city_want_sell_title.enabled = !is_open
-        ev.city_want_sell_items.enabled = !is_open
-        ev.city_want_buy_title.enabled = !is_open
-        ev.city_want_buy_items.enabled = !is_open
-        break
-    default:
+        window.city_sell_title.enabled = is_open
+        window.city_sell_items.enabled = is_open
+        window.city_buy_title.enabled = is_open
+        window.city_buy_items.enabled = is_open
+        window.city_want_sell_title.enabled = !is_open
+        window.city_want_sell_items.enabled = !is_open
+        window.city_want_buy_title.enabled = !is_open
+        window.city_want_buy_items.enabled = !is_open
         break
     }
 }
 
+function empire_window_sync_object_info_ui(window) {
+    empire_window_clear_city_trade_ui(window)
+    window.info_tooltip.text = ""
+
+    var obj = empire_window.selected_object
+    if (!obj) {
+        window.info_tooltip.text = __loc(47, 9)
+        return
+    }
+
+    if (obj.type == EMPIRE_OBJECT_CITY) {
+        empire_window_sync_city_info_ui(window)
+    }
+}
+
 function empire_window_draw_object_info_kingdome_army(ev, obj) {
-    ev.info_tooltip.text = ""
     var battle = empire.active_battle
     if (battle.egyptian_months_to_travel_back > 0) {
         if (battle.egyptian_months_traveled === obj.distant_battle_travel_months) {
@@ -440,7 +446,6 @@ function empire_window_draw_object_info_kingdome_army(ev, obj) {
 }
 
 function empire_window_draw_object_info_enemy_army(ev, obj) {
-    ev.info_tooltip.text = ""
     var battle = empire.active_battle
     if (battle.months_until_battle > 0) {
         // enemy_months_traveled() historically returned egyptian_months_traveled.
@@ -453,32 +458,18 @@ function empire_window_draw_object_info_enemy_army(ev, obj) {
     }
 }
 
-function empire_window_draw_object_info_other(ev) {
-    ev.info_tooltip.text = ""
-}
-
 [es=(empire_window, draw_object_info)]
 function empire_window_draw_object_info(ev) {
     var obj = empire_window.selected_object
     if (!obj) {
-        empire_window_draw_object_info_none(ev)
         return
     }
     switch (obj.type) {
-    case EMPIRE_OBJECT_ORNAMENT:
-        empire_window_draw_object_info_ornament(ev)
-        break
-    case EMPIRE_OBJECT_CITY:
-        empire_window_draw_object_info_city(ev)
-        break
     case EMPIRE_OBJECT_KINGDOME_ARMY:
         empire_window_draw_object_info_kingdome_army(ev, obj)
         break
     case EMPIRE_OBJECT_ENEMY_ARMY:
         empire_window_draw_object_info_enemy_army(ev, obj)
-        break
-    default:
-        empire_window_draw_object_info_other(ev)
         break
     }
 }
@@ -730,12 +721,6 @@ function empire_window_draw_city(ev) {
         ui.label_colored("under siege", { x: text_pos.x, y: text_pos.y + letter_h + 2 }, FONT_SMALL_PLAIN, COLOR_FONT_RED)
     }
 
-    if (city.type != EMPIRE_CITY_OURS
-        && __mouse.x > draw_pos.x && __mouse.y > draw_pos.y
-        && __mouse.x < draw_pos.x + scaled_w && __mouse.y < draw_pos.y + scaled_h) {
-        ui.set_tooltip(name)
-    }
-
     empire_window_draw_map_animation(ev.object_index, img, draw_pos, scale)
 }
 
@@ -818,23 +803,34 @@ function empire_window_trade_route_state(city) {
     return is_selected ? rs.closed_selected : rs.closed
 }
 
-function empire_window_request_city_trade_route(city, draw_offset, force) {
-    if (!city) {
+function empire_window_prepare_deferred_trade_route() {
+    empire_window.deferred_route_city_id = -1
+    var cid = empire_window.selected_city
+    if (!cid) {
         return
     }
-    if (city.type != EMPIRE_CITY_EGYPTIAN_TRADING
-        && city.type != EMPIRE_CITY_FOREIGN_TRADING
-        && city.type != EMPIRE_CITY_PHARAOH_TRADING) {
+    var city = empire.get_city(cid)
+    if (!city || !city.in_use || !empire_window_city_is_trading_type(city.type)) {
+        return
+    }
+    var rs = empire_window.route_state
+    var state = empire_window_trade_route_state(city)
+    if (state == rs.open_selected || state == rs.closed_selected) {
+        empire_window.deferred_route_city_id = cid
+    }
+}
+
+function empire_window_request_city_trade_route(city, draw_offset, force) {
+    if (!city || !empire_window_city_is_trading_type(city.type)) {
+        return
+    }
+
+    if (!force && city.id == empire_window.deferred_route_city_id) {
         return
     }
 
     var rs = empire_window.route_state
     var state = empire_window_trade_route_state(city)
-    if ((state == rs.open_selected || state == rs.closed_selected) && !force) {
-        empire_window.deferred_route_city_id = city.id
-        return
-    }
-
     if (state == rs.closed || empire.trade_route_num_points(city.route_id) <= 0) {
         return
     }
@@ -855,8 +851,6 @@ function empire_window_map_background_image() {
 }
 
 function empire_window_draw_map_begin(ev) {
-    empire_window.deferred_route_city_id = -1
-
     var img = empire_window_map_background_image()
     if (img) {
         ui.image_scaled(img, ev.draw_offset, empire_window_map_scale())
@@ -1080,16 +1074,55 @@ function empire_window_draw_dispatched_army_icon(ev) {
     ui.image(army_icon, army_icon_pos)
 }
 
+function empire_window_city_at_screen_pos(draw_offset, mx, my) {
+    var scale = empire_window_map_scale()
+    for (var i = 0; i < empire.object_slots; i++) {
+        var obj = empire.get_object(i)
+        if (!obj.in_use || obj.type != EMPIRE_OBJECT_CITY) {
+            continue
+        }
+        var city = empire.get_city(obj.city_id)
+        if (!city || !city.in_use || city.type == EMPIRE_CITY_OURS) {
+            continue
+        }
+        var img = empire_window_city_image(city.type)
+        if (!img) {
+            continue
+        }
+        var draw_pos = empire_window_map_point(draw_offset, obj.map_pos)
+        var scaled_w = Math.max(1, Math.round(img.width * scale))
+        var scaled_h = Math.max(1, Math.round(img.height * scale))
+        if (mx > draw_pos.x && my > draw_pos.y
+            && mx < draw_pos.x + scaled_w && my < draw_pos.y + scaled_h) {
+            return city
+        }
+    }
+    return null
+}
+
+function empire_window_update_map_hover_tooltip(draw_offset) {
+    ui.set_tooltip("")
+    if (!empire_window.screen_bounds || empire_window_is_outside_map(__mouse.x, __mouse.y)) {
+        return
+    }
+    var city = empire_window_city_at_screen_pos(draw_offset, __mouse.x, __mouse.y)
+    if (city) {
+        ui.set_tooltip(city.name)
+    }
+}
+
 function empire_window_draw_map(window) {
     var clip = empire_window_map_clip_origin()
     var area = empire_window_map_area_size()
     ui.set_clip_rectangle(clip, area)
     __empire_map_set_viewport(empire_window_map_viewport_size())
-    ui.set_tooltip("")
 
     var draw_offset = empire_window_map_draw_origin()
     empire_window.draw_offset = draw_offset
     var payload = { draw_offset: draw_offset }
+
+    empire_window_prepare_deferred_trade_route()
+    empire_window_update_map_hover_tooltip(draw_offset)
 
     empire_window_draw_map_begin(payload)
     empire_window_draw_map_objects(payload)
@@ -1125,6 +1158,8 @@ function empire_window_update_selection_ui(window) {
         window.button_open_trade.text = __loc("#debens") + " " + city.cost_to_open + " "
             + __loc(47, 6 + (city.is_sea_trade ? 1 : 0))
     }
+
+    empire_window_sync_object_info_ui(window)
 }
 
 function empire_window_draw_paneling(window) {
@@ -1172,8 +1207,8 @@ function empire_window_draw_background(window) {
     var bounds = empire_window_screen_bounds()
     empire_window.screen_bounds = bounds
     empire_window_layout_ui(window)
+    empire_window_update_selection_ui(window)
 
     empire_window_draw_map(window)
-    empire_window_update_selection_ui(window)
     empire_window_draw_paneling(window)
 }
