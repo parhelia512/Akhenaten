@@ -14,7 +14,7 @@ function main_menu_dismiss_update(window) {
 	window.update_panel.enabled = false
 	window.update_game.enabled = false
 	window.new_version.enabled = false
-	window.changelog.enabled = false
+	window.recent_commits.enabled = false
 	window.update_later.enabled = false
 	window.update_status.enabled = false
 }
@@ -65,7 +65,7 @@ window_main_menu {
 				                            })
 				new_version : text({pos[18, 84], text: game.version, font: FONT_SMALL_PLAIN, enabled: false})
 				update_status : text({pos[18, 104], size[280, 20], text:"", font: FONT_SMALL_PLAIN, enabled: false})
-				changelog : text({pos[18, 124], size[280, 280], wrap:px(17), rich:true, text:"Loading changelog...", font: FONT_SMALL_PLAIN, enabled: false, clip_area: true})
+				recent_commits : text({pos[18, 124], size[280, 280], wrap:px(17), rich:true, text:"Loading recent commits...", font: FONT_SMALL_PLAIN, enabled: false, clip_area: true})
 			}
 		})
 	}
@@ -121,15 +121,15 @@ function main_menu_on_init(window) {
     window.continue_game.readonly = !main_menu_can_continue()
 
 	if (!game.is_integral_tests && github_is_active()) {
-		github_download_changelog_async()
+		github_get_recent_commits_async("dalerank", "Akhenaten")
 		github_get_total_commits_async("dalerank", "Akhenaten")
 	}
 }
 
-[es=(window_main_menu, update_changelog)]
-function main_menu_on_update(window) {
-	window.changelog.text = window.change_log
-	window.changelog.enabled = true
+[es=(window_main_menu, update_recent_commits)]
+function main_menu_on_update_recent_commits(window) {
+	window.recent_commits.text = window.commits
+	window.recent_commits.enabled = true
 }
 
 [es=(window_main_menu, update_version)]
@@ -147,16 +147,18 @@ function main_menu_on_update_version(window) {
 	window.update_panel.enabled = true
 	window.new_version.enabled = true
 	window.update_game.enabled = true
-	window.update_later.enabled = true
+	window.recent_commits.enabled = true
 
 	if (update_available) {
 		window.update_game.readonly = false
 		window.update_game.text = "update now"
+		window.update_later.enabled = true
 		window.new_version.text = "New build: " + window.current_commit + " (you have " + local_build + ")"
 		game_features.gameopt_last_game_version = window.current_commit
 	} else {
 		window.update_game.readonly = true
 		window.update_game.text = "Updated"
+		window.update_later.enabled = false
 		window.new_version.text = "Build " + local_build + " (up to date)"
 	}
 }
@@ -166,8 +168,8 @@ function main_menu_download_version(ev) {
 	emit window_main_menu.update_version{ current_commit: ev.current_commit }
 }
 
-[es=event_github_changelog_loaded]
-function main_menu_download_changelog(ev) {
-	log_info("main_menu_download_changelog: " + ev.change_log)
-	emit window_main_menu.update_changelog{ change_log: ev.change_log }
+[es=event_github_recent_commits_loaded]
+function main_menu_download_recent_commits(ev) {
+	log_info("main_menu_download_recent_commits")
+	emit window_main_menu.update_recent_commits{ commits: ev.commits }
 }
