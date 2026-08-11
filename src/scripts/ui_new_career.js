@@ -49,11 +49,21 @@ function new_career_on_double_click_name(entry) {
 }
 
 function new_career_btn_ok() {
-    var name = window_new_career.player_name_value
-    if (!name || name === "") {
+    var name = ""
+    if (window_new_career.player_name) {
+        name = window_new_career.player_name.value || ""
+    }
+    if (!name) {
+        name = window_new_career.player_name_value || ""
+    }
+    while (name.length > 0 && name.charAt(name.length - 1) === " ") {
+        name = name.substring(0, name.length - 1)
+    }
+    if (!name) {
         ui.show_ok("#popup_dialog_no_player_name")
         return
     }
+    window_new_career.player_name_value = name
     game.dynasty_name = name
     __game_player_data_new(name)
     window_go_back()
@@ -63,11 +73,12 @@ function new_career_btn_ok() {
 function new_career_fill_egyptian_names(window) {
     window.name_list.clear()
     var i
-    for (i = 0; i < 125; i++) {
+    for (i = 0; i < 256; i++) {
         var name = __loc(151, i)
-        if (name && name !== "" && name.charAt(0) !== "#") {
-            window.name_list.add_item(name, i)
+        if (!name || name === "" || name.charAt(0) === "#") {
+            break
         }
+        window.name_list.add_item(name, i)
     }
 }
 
@@ -78,7 +89,11 @@ function window_new_career_on_init(window) {
     city.kingdome.personal_savings = 0
     __campaign_carry_clear()
 
-    window.player_name.value = game.dynasty_name || "My Dynasty"
+    var default_name = __loc(9, 5)
+    if (!default_name || default_name === "" || default_name.charAt(0) === "#") {
+        default_name = "Your Name Here"
+    }
+    window.player_name.value = game.dynasty_name || default_name
     window_new_career.player_name_value = window.player_name.value
     new_career_fill_egyptian_names(window)
 }
