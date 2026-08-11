@@ -29,8 +29,10 @@ jobs:
         cd build
         cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
         cd ..
-        cmake --build ./build
+        cmake --build ./build --target akhenaten akhenaten-updater
         cp ./build/akhenaten ./artifacts/akhenaten.linux
+        cp ./build/akhenaten-updater ./artifacts/akhenaten-updater
+        chmod +x ./artifacts/akhenaten-updater
         wget -O windows_build.zip "https://nightly.link/dalerank/Akhenaten/workflows/akhenaten_windows/master/windows_build.zip"
         wget -O macos_build.zip "https://nightly.link/dalerank/Akhenaten/workflows/akhenaten_mac_arm/master/macos_arm_build.zip"
         unzip windows_build.zip -d artifacts
@@ -45,6 +47,7 @@ jobs:
         tar -xzf /tmp/inno-dl/linux.tar.gz -C ./artifacts
         chmod +x ./artifacts/innoextract
         test -f ./artifacts/innoextract
+        test -f ./artifacts/akhenaten-updater
         rm -f linux_build.zip
         zip -r linux_build.zip ./artifacts
         echo "::endgroup::"
@@ -92,13 +95,20 @@ jobs:
           test -s "$z" || { echo "empty: $z"; exit 1; }
           ls -lh "$z"
         done
-        echo "::group::innoextract presence"
+        echo "::group::innoextract / updater presence"
         unzip -l windows_build.zip | grep -E 'innoextract\.exe$'
+        unzip -l windows_build.zip | grep -E 'akhenaten-updater\.exe$'
         unzip -l linux_build.zip | grep -E '(^|/)innoextract$'
+        unzip -l linux_build.zip | grep -E '(^|/)akhenaten-updater$'
         if unzip -l macos_build.zip | grep -E 'innoextract$'; then
           echo "macos: innoextract present"
         else
           echo "::warning::macos package has no innoextract yet"
+        fi
+        if unzip -l macos_build.zip | grep -E 'akhenaten-updater$'; then
+          echo "macos: akhenaten-updater present"
+        else
+          echo "::warning::macos package has no akhenaten-updater yet (needs mac CI artifact with helper)"
         fi
         echo "::endgroup::"
     - uses: actions/upload-artifact@v6
