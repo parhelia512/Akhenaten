@@ -4,6 +4,7 @@
 #include "grid/water.h"
 #include "grid/moisture.h"
 #include "grid/building.h"
+#include "grid/terrain.h"
 #include "game/game_config.h"
 #include "grid/canals.h"
 #include "building/building_well.h"
@@ -44,10 +45,14 @@ void city_buildings_t::update_water_supply_houses() {
     buildings_valid_do([&] (building &b) {
         if (b.type == BUILDING_WELL) {
             wells.push_back(&b);
+            b.has_water_access = map_terrain_exists_tile_in_area_with_type(b.tile, b.size, TERRAIN_GROUNDWATER);
+        } else if (b.type == BUILDING_WATER_SUPPLY) {
+            b.has_water_access = map_terrain_exists_tile_in_area_with_type(b.tile, b.size, TERRAIN_GROUNDWATER);
         } else if (auto house = b.dcast_house(); !!house) {
             b.has_water_access = false;
             b.has_well_access = 0;
-            if (b.dcast_house()->runtime_data().water_supply|| map_terrain_exists_tile_in_area_with_type(b.tile, b.size, TERRAIN_FOUNTAIN_RANGE)) {
+            if (b.dcast_house()->runtime_data().water_supply
+                || map_terrain_exists_tile_in_area_with_type(b.tile, b.size, TERRAIN_FOUNTAIN_RANGE)) {
                 b.has_water_access = true;
             }
         }

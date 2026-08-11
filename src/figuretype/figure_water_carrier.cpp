@@ -9,6 +9,7 @@
 #include "graphics/animation.h"
 #include "building/building_house.h"
 #include "building/building_brewery.h"
+#include "building/building_well.h"
 #include "game/game_config.h"
 #include "js/js_game.h"
 
@@ -99,20 +100,25 @@ sound_key figure_water_carrier::phrase_key() const {
 
 int figure_water_carrier::provide_service() {
     int houses_serviced = figure_provide_service(tile(), &base, [] (building *b, figure *f) {
-        auto house = ((building *)b)->dcast_house();
+        auto house = b->dcast_house();
 
         if (house) {
             auto &housed = house->runtime_data();
             housed.water_supply = MAX_COVERAGE;
         }
-        
-        // Also provide water to breweries if feature is enabled
+
         if (!!game_features::gameplay_brewery_requires_water) {
-            auto brewery = ((building *)b)->dcast_brewery();
+            auto brewery = b->dcast_brewery();
             if (brewery) {
                 constexpr uint8_t MAX_WATER = 100;
-                brewery->set_water_stored(MAX_WATER); // Fill to max when water carrier visits
+                brewery->set_water_stored(MAX_WATER);
             }
+        }
+
+        // Refresh well ornaments immediately when nearby house coverage changes.
+        if (auto well = b->dcast_well()) {
+            well->update_animation();
+            well->update_graphic();
         }
     });
 

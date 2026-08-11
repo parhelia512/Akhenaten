@@ -36,7 +36,7 @@ function building_well_update_graphic(ev) {
         return
     }
 
-    var animkey = well.is_fancy ? "base_work" : "fancy_work"
+    var animkey = well.is_fancy ? "fancy_work" : "base_work"
     well.set_animation(animkey)
 }
 

@@ -815,6 +815,7 @@ void building_house::decay_services() {
     decay_service(housed.dentist);
     decay_service(housed.mortuary);
     decay_service(housed.physician);
+    decay_service(housed.water_supply);
     decay_service(housed.temple_osiris);
     decay_service(housed.temple_ra);
     decay_service(housed.temple_ptah);
