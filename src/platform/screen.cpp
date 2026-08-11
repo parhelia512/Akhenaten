@@ -106,9 +106,15 @@ int platform_screen_t::create(const xstring& title, const xstring& renderer, boo
         SDL_GetDesktopDisplayMode(0, &mode);
         wsize = {mode.w, mode.h};
     } else {
-        wsize = game_features::gameopt_display_size.to_vec2i();
-        wsize.x = std::max<int>(wsize.x, screen_size.x);
-        wsize.y = std::max<int>(wsize.y, screen_size.y);
+        // Prefer cfg/CLI size; std::max with gameopt default blocked lower resolutions.
+        wsize = screen_size;
+        if (wsize.x <= 0 || wsize.y <= 0) {
+            wsize = game_features::gameopt_display_size.to_vec2i();
+        }
+        if (wsize.x <= 0 || wsize.y <= 0) {
+            wsize = {1280, 800};
+        }
+        game_features::gameopt_display_size.set(wsize);
 
         wsize.x = scale_logical_to_pixels(wsize.x);
         wsize.y = scale_logical_to_pixels(wsize.y);

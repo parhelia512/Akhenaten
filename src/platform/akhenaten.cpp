@@ -327,9 +327,11 @@ static void setup() {
                                    && g_args.get_extract_installer().empty()
                                    && !innoextract::installer_pending_bootstrap().empty()
                                    && !innoextract::has_pharaoh_data(g_args.get_data_directory().c_str());
+    bool options_window_shown = false;
     if (support_window_options
         && (g_args.should_show_startup_config_window() || pending_installer)) {
         show_options_window(g_args);
+        options_window_shown = true;
     }
 
     // pre-init engine: assert game directory, pref files, etc.
@@ -376,6 +378,7 @@ static void setup() {
 
         if (support_window_options) {
             show_options_window(g_args);
+            options_window_shown = true;
         }
     }
 
@@ -386,7 +389,19 @@ static void setup() {
         }
     }
 
-    // set up game display
+    if (!options_window_shown) {
+        if (try_load_game_features(g_args.get_data_directory().c_str())) {
+            const vec2i conf_size = game_features::gameopt_display_size.to_vec2i();
+            if (conf_size.x > 0 && conf_size.y > 0) {
+                g_args.set_window_size(conf_size);
+            }
+        } else if (g_args.config_file_exists()) {
+            game_features::gameopt_display_size.set(g_args.get_window_size());
+        }
+    } else {
+        game_features::gameopt_display_size.set(g_args.get_window_size());
+    }
+
     if (!g_platform_screen.create("Akhenaten", g_args.get_renderer(), g_args.is_fullscreen(),
           g_args.get_display_scale_percentage(), g_args.get_window_size())) {
         logs::info("Exiting: SDL create window failed");

@@ -3,6 +3,7 @@
 #include "platform/arguments.h"
 #include "platform/innoextract_util.h"
 #include "platform/platform.h"
+#include "platform/prefs.h"
 #include "core/xvalue.h"
 #include "platform/renderer.h"
 #include "platform/version.hpp"
@@ -143,21 +144,21 @@ bool save_settings_file(pcstr path) {
     return true;
 }
 
-void try_load_game_features(pcstr data_directory) {
+bool try_load_game_features(pcstr data_directory) {
     bstring512 path;
     if (data_directory && *data_directory) {
         path.printf("%s/%s", data_directory, CONF_FILENAME);
         if (load_settings_file(path.c_str())) {
-            return;
+            return true;
         }
     }
 
     path.printf("%s/%s", platform.user_directory(), CONF_FILENAME);
     if (load_settings_file(path.c_str())) {
-        return;
+        return true;
     }
 
-    load_settings_file(CONF_FILENAME);
+    return load_settings_file(CONF_FILENAME);
 }
 
 void try_save_game_features(pcstr data_directory) {
@@ -175,6 +176,14 @@ void try_save_game_features(pcstr data_directory) {
     }
 
     save_settings_file(CONF_FILENAME);
+}
+
+void sync_display_options_from_args(const Arguments &args) {
+    const vec2i size = args.get_window_size();
+    if (size.x > 0 && size.y > 0) {
+        game_features::gameopt_display_size.set(size);
+    }
+    game_features::gameopt_fullscreen.set(args.is_fullscreen());
 }
 
 float parse_positive_float_env(pcstr name) {
@@ -304,7 +313,7 @@ bool feature_matches_filter(const game_features::game_feature *feature, const st
     return contains_ci(feature->text.c_str(), filter);
 }
 
-void draw_game_features_section(std::string &filter, bool &features_changed) {
+void draw_game_features_section(std::string &filter) {
     ImGui::Text("Game features:");
     ImGui::SameLine();
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 80.0f);
@@ -330,7 +339,6 @@ void draw_game_features_section(std::string &filter, bool &features_changed) {
         bool value = feature->to_bool();
         if (ImGui::Checkbox(feature->name.c_str(), &value)) {
             feature->set(value);
-            features_changed = true;
         }
         if (ImGui::IsItemHovered() && !feature->text.empty()) {
             ImGui::SetTooltip("%s", feature->text.c_str());
@@ -408,8 +416,6 @@ void show_options_window(Arguments& args) {
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    bool store_configuration = false;
-    bool features_changed = false;
     std::string features_filter;
 
     try_load_game_features(args.get_data_directory().c_str());
@@ -644,7 +650,19 @@ void show_options_window(Arguments& args) {
             { ImGui::BeginChild("ResolitionSection", ImVec2(size_window.x / 2, 0));
             ImGui::Text("Resolution:");
             static int item_mode_current_idx = 0;
+            static bool resolution_idx_initialized = false;
             auto video_modes = get_video_modes();
+            if (!resolution_idx_initialized) {
+                resolution_idx_initialized = true;
+                const vec2i cur = args.get_window_size();
+                int index = 0;
+                for (auto it = video_modes.begin(); it != video_modes.end(); ++it, ++index) {
+                    if (it->x == cur.x && it->y == cur.y) {
+                        item_mode_current_idx = index;
+                        break;
+                    }
+                }
+            }
             if (ImGui::BeginListBox("##resolution", ImVec2(-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 5.5f))) {
                 int index = 0;
                 for (auto it = video_modes.begin(); it != video_modes.end(); ++it, ++index) {
@@ -652,6 +670,7 @@ void show_options_window(Arguments& args) {
                     if (ImGui::Selectable(it->str.c_str(), is_selected)) {
                         item_mode_current_idx = index;
                         args.set_window_size({it->x, it->y});
+                        game_features::gameopt_display_size.set({it->x, it->y});
                     }
 
                     if (is_selected) {
@@ -664,6 +683,7 @@ void show_options_window(Arguments& args) {
             bool is_window_mode = args.is_window_mode();
             if (ImGui::Checkbox("Window mode", &is_window_mode)) {
                 args.set_window_mode(is_window_mode);
+                game_features::gameopt_fullscreen.set(!is_window_mode);
             }
 
             int display_scale = args.get_display_scale_percentage();
@@ -687,12 +707,6 @@ void show_options_window(Arguments& args) {
             ImGui::TextDisabled("(?)");
             if (ImGui::IsItemHovered()) {
                 ImGui::SetTooltip("Scale of this configuration dialog. Auto-detected from DPI/resolution.");
-            }
-
-            if (ImGui::Checkbox("Store configuration (to skip this dialog for the next time)", &store_configuration)) {
-                if (store_configuration) {
-                    arguments::store(args);
-                }
             }
 
             ImGui::EndChild();} // ResolitionSection
@@ -720,18 +734,16 @@ void show_options_window(Arguments& args) {
             ImGui::EndChild(); // RenderSection
 
             ImGui::BeginChild("FeaturesSection", ImVec2(0, -bottom_bar_h), ImGuiChildFlags_Borders);
-            draw_game_features_section(features_filter, features_changed);
+            draw_game_features_section(features_filter);
             ImGui::EndChild();
 
             {ImGui::BeginChild("StartSection", ImVec2(0, 0));
                 if (ImGui::Button("RUN GAME")) {
                     args.set_data_directory(data_directory.c_str());
-                    if (store_configuration) {
-                        arguments::store(args);
-                    }
-                    if (features_changed || store_configuration) {
-                        try_save_game_features(args.get_data_directory().c_str());
-                    }
+                    sync_display_options_from_args(args);
+                    arguments::store(args);
+                    pref_save_gamepath(args.get_data_directory().c_str());
+                    try_save_game_features(args.get_data_directory().c_str());
                     push_changed_feature_overrides(args, features_snapshot);
                     done = true;
                 }
