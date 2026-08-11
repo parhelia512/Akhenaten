@@ -20,6 +20,9 @@ function main_menu_dismiss_update(window) {
 }
 
 function main_menu_update_now(window) {
+	if (window.update_game.readonly) {
+		return
+	}
 	if (__platform_can_auto_update()) {
 		window.update_status.text = "Downloading update..."
 	} else {
@@ -136,19 +139,26 @@ function main_menu_on_update_version(window) {
 		return
 
 	var local_build = main_menu_local_build_number()
-	if (window.current_commit <= local_build)
-		return
+	var update_available = window.current_commit > local_build
 
-	if (game_features.gameopt_last_game_version == window.current_commit)
+	if (update_available && game_features.gameopt_last_game_version == window.current_commit)
 		return
 
 	window.update_panel.enabled = true
 	window.new_version.enabled = true
 	window.update_game.enabled = true
 	window.update_later.enabled = true
-	window.new_version.text = "New build: " + window.current_commit + " (you have " + local_build + ")"
 
-	game_features.gameopt_last_game_version = window.current_commit
+	if (update_available) {
+		window.update_game.readonly = false
+		window.update_game.text = "update now"
+		window.new_version.text = "New build: " + window.current_commit + " (you have " + local_build + ")"
+		game_features.gameopt_last_game_version = window.current_commit
+	} else {
+		window.update_game.readonly = true
+		window.update_game.text = "Updated"
+		window.new_version.text = "Build " + local_build + " (up to date)"
+	}
 }
 
 [es=event_github_totals_commits_loaded]
