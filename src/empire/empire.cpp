@@ -14,7 +14,7 @@
 #include "trade_route.h"
 #include "empire_object.h"
 #include "io/io_buffer.h"
-#include "io/manager.h"
+#include "io/chunk_serializer.h"
 #include "game/mission.h"
 #include "io/gamefiles/lang.h"
 #include "game/game_config.h"
@@ -496,7 +496,7 @@ bool empire_t::can_import_resource_from_city(int city_id, e_resource resource) {
 
 io_buffer* iob_empire_cities = new io_buffer([](io_buffer* iob, size_t version) {
     // v178+: Cleopatra name ids 61+ need array slots. Older files keep classic 61.
-    const int city_count = (FILEIO.get_file_version() > 177)
+    const int city_count = (g_chunk_io.get_file_version() > 177)
         ? empire_t::MAX_CITIES
         : empire_t::MAX_CITIES_CLASSIC;
     for (int i = 0; i < city_count; i++) {

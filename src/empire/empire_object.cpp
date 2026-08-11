@@ -13,7 +13,7 @@
 #include "io/gamefiles/lang.h"
 #include "io/gamestate/boilerplate.h"
 #include "io/io_buffer.h"
-#include "io/manager.h"
+#include "io/chunk_serializer.h"
 #include "scenario/empire.h"
 #include "game/game.h"
 #include "dev/debug.h"
@@ -536,7 +536,7 @@ static int get_trade_amount_code(int index, int resource) {
     if (!is_trade_city(index))
         return 0;
 
-    if (FILEIO.get_file_version() < 160) {
+    if (g_chunk_io.get_file_version() < 160) {
         int result = 0;
         if (resource < 32) { // only holds data up to 31 (sandstone)
             int resource_flag = 1 << resource;
@@ -876,7 +876,7 @@ io_buffer* iob_empire_map_objects = new io_buffer([](io_buffer* iob, size_t vers
         iob->bind(BIND_SIGNATURE_UINT8, &obj->invasion_years);
 
         // TODO: WRITE
-        if (FILEIO.get_file_version() < 160) {
+        if (g_chunk_io.get_file_version() < 160) {
             iob->bind____skip(2);
             iob->bind(BIND_SIGNATURE_UINT32, &full->trade40);
             iob->bind(BIND_SIGNATURE_UINT32, &full->trade25);

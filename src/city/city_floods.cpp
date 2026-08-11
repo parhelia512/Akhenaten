@@ -8,7 +8,7 @@
 #include "grid/basin.h"
 #include "grid/floodplain.h"
 #include "grid/tiles.h"
-#include "io/manager.h"
+#include "io/chunk_serializer.h"
 #include "city/city.h"
 #include "city_message.h"
 #include "game/game_config.h"

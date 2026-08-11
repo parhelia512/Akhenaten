@@ -24,13 +24,13 @@ struct file_chunk_t {
     void resize(int new_size);
 };
 
-// Robust class system needed for reading/writing savestate files.
+// Chunk schema serialize/unserialize for savegames, maps, and mission packs.
 // - contains an internal collection of file pieces that are format-agnostic
-// - each file piece has a BUFFER, game state is read from/writes into these
-// - file contents differ between formats, so the manager needs a mapping SCHEMA
+// - each file piece has a BUFFER; game state is read from/written into these
+// - file contents differ between formats, so a mapping SCHEMA is required
 // - schemas define the arrangement of data CHUNKS inside the file
 // - schemas can be assigned without reading a file, to prepare for file saving
-// - upon reading a file, the manager will:
+// - upon reading a file, the serializer will:
 //      > open the file handle with the specified offset
 //      > read the file's version header
 //      > detect the proper schema automatically from the header
@@ -41,7 +41,7 @@ struct file_chunk_t {
 //      > close the file handle
 //      > load the GAME STATE into the engine from the chunk cache
 
-class FileIOManager {
+class ChunkSerializer {
 private:
     bool loaded = false;
     vfs::path file_path = "";
@@ -57,6 +57,17 @@ private:
 
     void clear();
     bool io_failure_cleanup(const char* action, const char* reason); // because I'm anal about reusing code...
+
+    bool read_compressed_chunk(vfs::reader reader, buffer* buf, int filepiece_size);
+    bool write_compressed_chunk(FILE* fp, buffer* buf, int bytes_to_write);
+    bool read_section_payload(vfs::reader reader, const svx::section_info& info, buffer* buf, pcstr debug_path);
+    bool load_svx_chunk_payload(vfs::reader reader, file_chunk_t* chunk, const svx::section_info& info, pcstr debug_path);
+    bool build_svx_section_payload(const file_chunk_t* chunk, int index, pcstr debug_path,
+                                   svx::prefixed_payload* out, uint32_t* out_raw_size, uint32_t* out_crc);
+    bool write_svx_section(FILE* fp, const file_chunk_t* chunk, int index, pcstr debug_path);
+    const svx::section_info* find_svx_section(const svx::section_list& sections, pcstr name, int* out_matches);
+    void warn_unknown_svx_sections(const svx::section_list& sections);
+    bool apply_svx_chunk_state(file_chunk_t* chunk);
 
     bool serialize_sectioned(FILE* fp, pcstr debug_path);
     bool unserialize_sectioned(vfs::reader reader, void (*init_schema)(e_file_format _format, const int _version));
@@ -85,4 +96,4 @@ public:
                      void (*init_schema)(e_file_format _format, const int _version));
 };
 
-extern FileIOManager FILEIO;
+extern ChunkSerializer g_chunk_io;

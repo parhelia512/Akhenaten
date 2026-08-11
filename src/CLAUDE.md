@@ -26,8 +26,9 @@
 ## Key Global Singletons
 
 ```cpp
-g_city          // city_t — city simulation aggregate root
+g_city           // city_t — city simulation aggregate root
 g_window_manager // windows_manager_t — modal window stack
+g_chunk_io       // ChunkSerializer — save/map/pak chunk schema I/O
 ```
 
 ## Common Patterns Across the Codebase

@@ -6,7 +6,6 @@
 #include "content/vfs.h"
 #include "io/gamestate/boilerplate.h"
 #include "io/io.h"
-#include "io/manager.h"
 #include "city/city.h"
 #include "game/game.h"
 #include "game/simulation_time.h"
@@ -185,26 +184,8 @@ namespace {
     }
 }
 
-bool player_data_prepare_savegame(const char* filename_short) {
-    vfs::path savefile = fullpath_saves(filename_short);
-    vfs::path folders = vfs::content_path(fullpath_saves("").c_str());
-
-    logs::info("Save player data: writing %s (dir %s)", savefile.c_str(), folders.c_str());
-    vfs::create_folders(folders);
-    // write file (serialize applies content_path internally; do not pass pre-resolved path)
-    bool save_ok = FILEIO.serialize(savefile, 0, FILE_FORMAT_SAVE_FILE, save_data_version(), [] (e_file_format file_format, const int file_version) {
-        FILEIO.push_chunk(4, false, "family_index", 0);
-    });
-    if (save_ok) {
-        logs::info("Save player data: OK %s", savefile.c_str());
-    } else {
-        logs::error("Save player data: FAILED %s", savefile.c_str());
-    }
-    return save_ok;
-}
-
 void player_data_new(const uint8_t* player_name) {
-    player_data_prepare_savegame("family.sav");
+    GamestateIO::write_family_marker("family.sav");
 }
 
 void player_data_delete(const uint8_t* player_name) {

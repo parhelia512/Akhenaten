@@ -1,7 +1,7 @@
 #include "chunks.h"
 
 #include "boilerplate.h"
-#include "io/manager.h"
+#include "io/chunk_serializer.h"
 #include "platform/platform.h"
 
 #include <cstring>
@@ -100,7 +100,7 @@ struct junk10_t {
 
 junk10_t g_junk10;
 io_buffer* iob_junk10a = new io_buffer([](io_buffer* iob, size_t version) {
-    const int r_version = FILEIO.get_file_version();
+    const int r_version = g_chunk_io.get_file_version();
     FILE* debug_file = nullptr;
 #if defined(GAME_PLATFORM_WIN)
     //const char *fs_fpath = dir_get_file("DEV_TESTING/JUNK10.txt", 0);

@@ -1,21 +1,45 @@
 #include "chunk_container.h"
 
 #include "core/log.h"
+#include "core/zip.h"
 
 #include <cstring>
 
-namespace svx {
+namespace {
 
-pcstr scan_result_str(e_scan_result r) {
-    switch (r) {
-    case SCAN_OK: return "ok";
-    case SCAN_NOT_CONTAINER: return "not a container";
-    case SCAN_CORRUPT: return "corrupt";
-    }
-    return "?";
-}
+constexpr uint16_t EPILOG_MARK = 0xFFFF;
+constexpr char MAGIC[8] = {'A', 'K', 'H', 'N', 'S', 'V', 'X', '\0'};
+constexpr size_t MAX_SECTIONS = 256;
 
-bool peek_header(vfs::reader reader, int offset, file_header &out) {
+#pragma pack(push, 1)
+struct file_header {
+    char magic[8];
+    uint32_t container_rev;
+    uint32_t save_data_version;
+    uint32_t section_count;
+    uint16_t section_header_size;
+    uint16_t epilog_size;
+};
+
+struct section_header {
+    char name[svx::NAME_LEN];
+    uint32_t payload_size;
+    uint32_t raw_size;
+    uint32_t crc;
+};
+
+struct section_epilog {
+    uint16_t mark_begin;
+    char name[svx::NAME_LEN];
+    uint16_t mark_end;
+};
+#pragma pack(pop)
+
+static_assert(sizeof(file_header) == 24, "svx file_header must stay 24 bytes on disk");
+static_assert(sizeof(section_header) == 44, "svx section_header must stay 44 bytes on disk");
+static_assert(sizeof(section_epilog) == 36, "svx section_epilog must stay 36 bytes on disk");
+
+bool peek_file_header(vfs::reader reader, int offset, file_header &out) {
     if (!reader || offset < 0) {
         return false;
     }
@@ -30,10 +54,58 @@ bool peek_header(vfs::reader reader, int offset, file_header &out) {
     return memcmp(out.magic, MAGIC, sizeof(MAGIC)) == 0;
 }
 
-e_scan_result scan(vfs::reader reader, int offset, file_header &hdr, section_list &out) {
-    out.clear();
+} // namespace
 
-    if (!peek_header(reader, offset, hdr)) {
+pcstr svx::scan_result_str(e_scan_result r) {
+    switch (r) {
+    case SCAN_OK: return "ok";
+    case SCAN_NOT_CONTAINER: return "not a container";
+    case SCAN_CORRUPT: return "corrupt";
+    }
+    return "?";
+}
+
+bool svx::decompress_prefixed(const void *src, uint32_t compressed_size, void *dst, int expected_raw_size) {
+    if (!src || !dst || expected_raw_size <= 0 || compressed_size == 0
+        || compressed_size == PAYLOAD_UNCOMPRESSED
+        || (int)compressed_size > CODEC_SCRATCH_SIZE) {
+        return false;
+    }
+
+    int out_size = expected_raw_size;
+    const int written = zip_decompress(src, (int)compressed_size, dst, &out_size);
+    return written == expected_raw_size;
+}
+
+void svx::compress_prefixed(const void *raw, uint32_t raw_size, bool try_compress,
+                            void *scratch, int scratch_cap, prefixed_payload *out) {
+    out->prefix = PAYLOAD_UNCOMPRESSED;
+    out->body = raw;
+    out->body_size = raw_size;
+
+    if (!try_compress || !raw || !scratch || scratch_cap <= 0 || raw_size == 0) {
+        return;
+    }
+
+    int compressed_size = scratch_cap;
+    if (zip_compress(raw, (int)raw_size, scratch, &compressed_size)) {
+        out->prefix = (uint32_t)compressed_size;
+        out->body = scratch;
+        out->body_size = (uint32_t)compressed_size;
+    }
+}
+
+bool svx::is_container(vfs::reader reader, int offset) {
+    file_header hdr = {};
+    return peek_file_header(reader, offset, hdr);
+}
+
+svx::e_scan_result svx::scan(vfs::reader reader, int offset, scan_header &hdr_out, section_list &out) {
+    out.clear();
+    hdr_out = {};
+
+    file_header hdr = {};
+    if (!peek_file_header(reader, offset, hdr)) {
         return SCAN_NOT_CONTAINER;
     }
 
@@ -45,6 +117,9 @@ e_scan_result scan(vfs::reader reader, int offset, file_header &hdr, section_lis
                     hdr.section_header_size, hdr.epilog_size);
         return SCAN_CORRUPT;
     }
+
+    hdr_out.container_rev = hdr.container_rev;
+    hdr_out.save_data_version = hdr.save_data_version;
 
     const int64_t file_size = reader->size();
     const int64_t shdr_size = hdr.section_header_size;
@@ -117,4 +192,47 @@ e_scan_result scan(vfs::reader reader, int offset, file_header &hdr, section_lis
     return SCAN_OK;
 }
 
-} // namespace svx
+bool svx::write_file_header(FILE *fp, uint32_t save_data_version, uint32_t section_count, pcstr debug_path) {
+    file_header hdr = {};
+    memcpy(hdr.magic, MAGIC, sizeof(hdr.magic));
+    hdr.container_rev = CONTAINER_REV;
+    hdr.save_data_version = save_data_version;
+    hdr.section_count = section_count;
+    hdr.section_header_size = (uint16_t)sizeof(section_header);
+    hdr.epilog_size = (uint16_t)sizeof(section_epilog);
+
+    if (fwrite(&hdr, sizeof(hdr), 1, fp) != 1) {
+        logs::error("Unable to write file [%s], container header write failed.", debug_path);
+        return false;
+    }
+    return true;
+}
+
+bool svx::write_section(FILE *fp, pcstr name, const prefixed_payload &payload,
+                        uint32_t raw_size, uint32_t crc, int index, pcstr debug_path) {
+    section_header sh = {};
+    const size_t name_len = name ? ::strlen(name) : 0;
+    if (name_len > 0) {
+        memcpy(sh.name, name, (name_len < NAME_LEN) ? name_len : NAME_LEN);
+    }
+    sh.payload_size = (uint32_t)sizeof(payload.prefix) + payload.body_size;
+    sh.raw_size = raw_size;
+    sh.crc = crc;
+
+    section_epilog ep = {};
+    ep.mark_begin = EPILOG_MARK;
+    ep.mark_end = EPILOG_MARK;
+    memcpy(ep.name, sh.name, NAME_LEN);
+
+    const bool ok = (fwrite(&sh, sizeof(sh), 1, fp) == 1)
+                    && (fwrite(&payload.prefix, sizeof(payload.prefix), 1, fp) == 1)
+                    && (payload.body_size == 0 || fwrite(payload.body, 1, payload.body_size, fp) == payload.body_size)
+                    && (fwrite(&ep, sizeof(ep), 1, fp) == 1);
+
+    if (!ok) {
+        logs::error("Unable to write file [%s], write failure at section %d (%s).",
+                    debug_path, index, name ? name : "");
+        return false;
+    }
+    return true;
+}

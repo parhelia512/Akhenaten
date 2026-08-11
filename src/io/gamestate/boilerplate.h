@@ -75,4 +75,7 @@ bool delete_mission(const int scenario_id);
 bool delete_savegame(vfs::path filename_short);
 bool delete_map(const char* filename_short);
 
+// Dynasty folder marker (family.sav stub). Not a city save — no Ironwill gate.
+bool write_family_marker(pcstr filename_short = "family.sav");
+
 } // namespace GamestateIO

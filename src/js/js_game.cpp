@@ -33,7 +33,7 @@
 #include "city/city.h"
 #include "city/city_finance.h"
 #include "io/gamestate/boilerplate.h"
-#include "io/manager.h"
+#include "io/chunk_serializer.h"
 #include "window/autoconfig_window.h"
 #include "window/intro_video.h"
 #include "window/plain_message_dialog.h"
@@ -516,7 +516,7 @@ bool __game_session_active() { return game.session.active; } ANK_FUNCTION(__game
 int __game_session_last_loaded_kind() { return (int)game.session.last_loaded; } ANK_FUNCTION(__game_session_last_loaded_kind)
 xstring __game_session_last_loaded_mission() { return game.session.last_loaded_mission.empty() ? "" : game.session.last_loaded_mission; } ANK_FUNCTION(__game_session_last_loaded_mission)
 xstring __game_version() { return get_version(); } ANK_FUNCTION(__game_version)
-int __game_io_file_schema_version() { return FILEIO.get_file_version(); } ANK_FUNCTION(__game_io_file_schema_version)
+int __game_io_file_schema_version() { return g_chunk_io.get_file_version(); } ANK_FUNCTION(__game_io_file_schema_version)
 bool __game_load_savegame(pcstr filename) { return GamestateIO::load_savegame(filename); } ANK_FUNCTION_1(__game_load_savegame)
 bool __game_write_savegame(pcstr filename_short) { return GamestateIO::write_savegame(filename_short); } ANK_FUNCTION_1(__game_write_savegame)
 bool __game_delete_savegame(pcstr filename_short) { return GamestateIO::delete_savegame(filename_short); } ANK_FUNCTION_1(__game_delete_savegame)
