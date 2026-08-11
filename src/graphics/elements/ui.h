@@ -712,7 +712,8 @@ namespace ui {
 
         xstring _tooltip;
         xstring _format;
-        xstring _draw_caption;
+        // Own buffer: ellipsize must not write into the xstring intern pool.
+        bstring512 _draw_caption;
 
         rich_text_t::margin_t _text_margin;
 
