@@ -208,22 +208,18 @@ static void pre_load() { // do we NEED this...?
 }
 
 static void post_load() {
-    // scenario settings
     city_set_player_name(game_features::gameopt_player_name.to_string());
     mission_id_t missionid(g_scenario.campaign_scenario_id);
 
-    // Clear mission variables when starting a new mission (not when loading from save)
     bool is_new_mission = (game.session.last_loaded == e_session_mission);
     if (is_new_mission) {
         g_scenario.vars.clear();
     }
 
-    // campaign_mission_rank: JS advances on victory; load_mission preserves across transitions.
-    // When loading a save, rank comes from iob_scenario_carry_settings (not legacy campaign.txt).
-
     g_scenario.load_metadata(missionid, is_new_mission);
     js_register_mission_vars(g_scenario.vars);
-    g_empire.load_mission_metadata(missionid);
+
+    g_empire.load_mission_metadata(missionid, /*preserve_runtime=*/!is_new_mission);
     js_register_game_handlers(missionid.value());
 
     // camera
@@ -265,7 +261,10 @@ static void post_load() {
     g_city.religion.ra_no_traders_months_left = std::clamp<int>(g_city.religion.ra_no_traders_months_left, 0, 12);
     g_city.religion.ra_harshly_reduced_trading_months_left = std::clamp<int>(g_city.religion.ra_harshly_reduced_trading_months_left, 0, 12);
 
-    trade_prices_reset();
+    // Save/map chunks already hold prices; reset only for a fresh mission start.
+    if (is_new_mission) {
+        trade_prices_reset();
+    }
 
     // city data special cases
     switch (game.session.last_loaded) {

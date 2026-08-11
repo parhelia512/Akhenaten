@@ -194,11 +194,6 @@ void empire_traders_manager::clear_all() {
 }
 
 void empire_traders_manager::purge_dead() {
-    // Defensive sweep after save load. Three places can hold a stale reference
-    // to a vanished trade ship or caravan: traders[].is_active, dock.trade_ship,
-    // and empire_city.trader_figure_ids. Without this, old saves and crash-recovered
-    // states starve every trade route once the 2-per-route cap is full of ghosts.
-
     std::array<bool, 100> live_handles{};
     figure_valid_do(
       [&](figure& f) {
@@ -220,7 +215,8 @@ void empire_traders_manager::purge_dead() {
 
     int freed_empire = 0;
     for (size_t i = 1; i < traders.size(); ++i) {
-        if (traders[i].is_active && !live_handles[i]) {
+        if (traders[i].is_active && traders[i].state == empire_trader::estate_trading
+            && !live_handles[i]) {
             traders[i].is_active = false;
             ++freed_empire;
         }
@@ -267,11 +263,11 @@ void empire_traders_manager::purge_dead() {
 
 empire_trader* empire_traders_manager::get_free_trader() {
     auto it = std::find_if(traders.begin() + 1, traders.end(), [] (auto &t) { return !t.is_active; });
-    
+
     if (it == traders.end()) {
         return nullptr;
     }
-    
+
     memset(&*it, 0, sizeof(empire_trader));
     it->id = std::distance(traders.begin(), it);
     return &*it;

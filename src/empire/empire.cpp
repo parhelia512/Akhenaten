@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <array>
 
 //empire_t ANK_VARIABLE_N(g_empire, "empire");
 empire_t g_empire;
@@ -87,8 +88,20 @@ declare_console_command_p(save_empire_routes) {
     vfs::file_close(fp);
 }
 
-void empire_t::load_mission_metadata(const mission_id_t &missionid) {
-    g_config_arch.r_section(missionid, [] (archive arch) {
+void empire_t::load_mission_metadata(const mission_id_t &missionid, bool preserve_runtime) {
+    std::array<uint8_t, MAX_CITIES> saved_open{};
+    std::array<bool, MAX_CITIES> had_city{};
+    if (preserve_runtime) {
+        for (int i = 0; i < MAX_CITIES; ++i) {
+            if (!cities[i].in_use) {
+                continue;
+            }
+            had_city[i] = true;
+            saved_open[i] = cities[i].is_open ? 1 : 0;
+        }
+    }
+
+    g_config_arch.r_section(missionid, [preserve_runtime] (archive arch) {
         // When true: ignore all pak cities and show only cities listed in JS (including ours).
         const bool hide_pak_cities = arch.r_bool("hide_pak_cities", false);
         if (hide_pak_cities) {
@@ -100,7 +113,7 @@ void empire_t::load_mission_metadata(const mission_id_t &missionid) {
             }
         }
 
-        g_empire.load_empire_cities(arch);
+        g_empire.load_empire_cities(arch, preserve_runtime);
 
         if (hide_pak_cities) {
             g_empire.hide_unused_city_objects();
@@ -122,6 +135,18 @@ void empire_t::load_mission_metadata(const mission_id_t &missionid) {
         g_empire.load_empire_kingdome_armies(arch);
         g_empire.load_empire_enemy_armies(arch);
     });
+
+    if (preserve_runtime) {
+        for (int i = 0; i < MAX_CITIES; ++i) {
+            if (!cities[i].in_use || !had_city[i]) {
+                continue;
+            }
+            cities[i].is_open = saved_open[i] != 0;
+            if (full_empire_object *full = ref_full_object(cities[i].empire_object_id)) {
+                full->trade_route_open = saved_open[i];
+            }
+        }
+    }
 
     for (auto &city : cities) {
         if (!city.in_use) {

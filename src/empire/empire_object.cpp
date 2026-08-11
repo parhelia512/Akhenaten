@@ -154,7 +154,7 @@ static void sync_city_object_size(full_empire_object *full, e_empire_city city_t
     }
 }
 
-static void apply_scripted_trade_route_limits(empire_city *city, archive entry) {
+static void apply_scripted_trade_route_limits(empire_city *city, archive entry, bool preserve_runtime) {
     if (!city || !city->can_trade()) {
         return;
     }
@@ -178,8 +178,8 @@ static void apply_scripted_trade_route_limits(empire_city *city, archive entry) 
         const int traded = lim.r_int("traded", -1);
         if (traded >= 0) {
             route.set_traded(res, traded);
-        } else if (limit >= 0) {
-            // New limit without traded → start year fresh.
+        } else if (limit >= 0 && !preserve_runtime) {
+            // New limit without traded → start year fresh (new mission only).
             route.set_traded(res, 0);
         }
     });
@@ -199,8 +199,8 @@ static void apply_scripted_trade_route_limits(empire_city *city, archive entry) 
     }
 }
 
-void empire_t::load_empire_cities(archive arch) {
-    arch.r_array("cities", [](archive entry) {
+void empire_t::load_empire_cities(archive arch, bool preserve_runtime) {
+    arch.r_array("cities", [preserve_runtime](archive entry) {
         const int name_id_field = entry.r_int("name_id", -1);
         xstring name = entry.r_string("name");
 
@@ -316,7 +316,7 @@ void empire_t::load_empire_cities(archive arch) {
 
         if (city->can_trade()) {
             g_empire.set_trade_route_type(city->route_id, city->is_sea_trade);
-            apply_scripted_trade_route_limits(city, entry);
+            apply_scripted_trade_route_limits(city, entry, preserve_runtime);
         }
     });
 }

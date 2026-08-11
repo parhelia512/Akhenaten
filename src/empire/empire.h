@@ -37,7 +37,7 @@ public:
     void end_siege(int city_id);
     void end_all_sieges();
 
-    void load_mission_metadata(const mission_id_t &missionid);
+    void load_mission_metadata(const mission_id_t &missionid, bool preserve_runtime = false);
     void update_month();
 
     void hide_non_city_objects();
@@ -114,7 +114,7 @@ public:
     map_route_object &ref_route_object(int id);
 
 private:
-    void load_empire_cities(archive arch);
+    void load_empire_cities(archive arch, bool preserve_runtime);
     void load_empire_routes(archive arch);
     void load_empire_texts(archive arch);
     void load_empire_ornaments(archive arch);
