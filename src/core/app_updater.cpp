@@ -12,6 +12,7 @@
 #include <cstring>
 #include <filesystem>
 #include <string>
+#include <vector>
 
 #if defined(GAME_PLATFORM_WIN)
 #include <windows.h>
@@ -129,10 +130,27 @@ std::string updater_install_dir() {
     return updater_exe_dir();
 }
 
-std::string updater_exe_name() {
-    const std::string path = updater_exe_path();
-    const size_t slash = path.find_last_of('/');
-    return (slash == std::string::npos) ? path : path.substr(slash + 1);
+std::string updater_helper_name() {
+#if defined(GAME_PLATFORM_WIN)
+    return "akhenaten-updater.exe";
+#else
+    return "akhenaten-updater";
+#endif
+}
+
+std::string updater_helper_path() {
+    return updater_exe_dir() + "/" + updater_helper_name();
+}
+
+std::string updater_restart_target() {
+#if defined(GAME_PLATFORM_MACOSX)
+    const std::string exe = updater_exe_path();
+    const size_t app = exe.find(".app/");
+    if (app != std::string::npos) {
+        return exe.substr(0, app + 4); // include ".app"
+    }
+#endif
+    return updater_exe_path();
 }
 
 #if defined(GAME_PLATFORM_WIN)
@@ -225,89 +243,78 @@ bool updater_extract(const std::string &zip_path, const std::string &staging_dir
 }
 
 bool updater_spawn_swap_and_restart(const std::string &work_dir, const std::string &staging_dir, const std::string &zip_path) {
+    const std::string helper_src = updater_helper_path();
+    if (!std::filesystem::exists(helper_src)) {
+        logs::error("[updater] helper not found: %s", helper_src.c_str());
+        return false;
+    }
+
 #if defined(GAME_PLATFORM_WIN)
-    const std::string cmd_path = work_dir + "/apply_update.cmd";
-    const std::string n_staging = updater_to_native(staging_dir);
-    const std::string n_install = updater_to_native(updater_install_dir());
-    const std::string n_exe_path = updater_to_native(updater_exe_path());
-    const std::string n_zip = updater_to_native(zip_path);
-    const std::string n_work = updater_to_native(work_dir);
     const unsigned long pid = GetCurrentProcessId();
-
-    std::string script;
-    script += "@echo off\r\n";
-    script += "setlocal\r\n";
-    script += "set \"PID=" + std::to_string(pid) + "\"\r\n";
-    script += ":wait\r\n";
-    script += "tasklist /FI \"PID eq %PID%\" /NH 2>nul | find /I \"" + updater_exe_name() + "\" >nul\r\n";
-    script += "if not errorlevel 1 (\r\n";
-    script += "  timeout /t 1 /nobreak >nul\r\n";
-    script += "  goto wait\r\n";
-    script += ")\r\n";
-    script += "xcopy /E /Y /I /Q \"" + n_staging + "\\*\" \"" + n_install + "\\\" >nul\r\n";
-    script += "rmdir /S /Q \"" + n_work + "\" >nul 2>&1\r\n";
-    script += "del /Q \"" + n_zip + "\" >nul 2>&1\r\n";
-    script += "start \"\" \"" + n_exe_path + "\"\r\n";
-    script += "(goto) 2>nul & del \"%~f0\"\r\n";
-
-    if (!updater_write_file(cmd_path, script.data(), script.size())) {
-        return false;
-    }
-
-    const std::string n_cmd = updater_to_native(cmd_path);
-    const HINSTANCE result = ShellExecuteA(nullptr, "open", n_cmd.c_str(), nullptr, n_install.c_str(), SW_HIDE);
-    if ((INT_PTR)result <= 32) {
-        logs::error("[updater] failed to launch helper script (code %lld)", (long long)(INT_PTR)result);
-        return false;
-    }
 #else
-    const std::string sh_path = work_dir + "/apply_update.sh";
-    const std::string install_dir = updater_install_dir();
-    const std::string exe_path = updater_exe_path();
-    const int pid = (int)getpid();
-
-    std::string script;
-    script += "#!/bin/sh\n";
-    script += "PID=" + std::to_string(pid) + "\n";
-    script += "STAGING=\"" + staging_dir + "\"\n";
-    script += "INSTALL=\"" + install_dir + "\"\n";
-    script += "EXE=\"" + exe_path + "\"\n";
-    script += "WORK=\"" + work_dir + "\"\n";
-    script += "ZIP=\"" + zip_path + "\"\n";
-    script += "while kill -0 \"$PID\" 2>/dev/null; do sleep 1; done\n";
-    script += "cp -Rf \"$STAGING\"/. \"$INSTALL\"/\n";
-    script += "chmod -R u+rwX \"$INSTALL\" 2>/dev/null || true\n";
-#if defined(GAME_PLATFORM_MACOSX)
-    script += "if [ -d \"$INSTALL/akhenaten.app\" ]; then\n";
-    script += "  chmod +x \"$INSTALL/akhenaten.app/Contents/MacOS\"/* 2>/dev/null || true\n";
-    script += "  open \"$INSTALL/akhenaten.app\"\n";
-    script += "elif [ -x \"$EXE\" ]; then\n";
-    script += "  \"$EXE\" &\n";
-    script += "fi\n";
-#else
-    script += "if [ -x \"$INSTALL/akhenaten.linux\" ]; then\n";
-    script += "  chmod +x \"$INSTALL/akhenaten.linux\" \"$INSTALL/innoextract\" 2>/dev/null || true\n";
-    script += "  \"$INSTALL/akhenaten.linux\" &\n";
-    script += "elif [ -x \"$EXE\" ]; then\n";
-    script += "  chmod +x \"$EXE\" 2>/dev/null || true\n";
-    script += "  \"$EXE\" &\n";
-    script += "fi\n";
+    const unsigned long pid = (unsigned long)getpid();
 #endif
-    script += "rm -rf \"$WORK\" \"$ZIP\"\n";
-    script += "rm -f \"$0\"\n";
 
-    if (!updater_write_file(sh_path, script.data(), script.size())) {
+    // Keep the running helper outside update_tmp so --cleanup can wipe staging safely.
+    std::error_code ec;
+    const std::string helper_dir = (std::filesystem::temp_directory_path(ec) / ("akhenaten-apply-" + std::to_string(pid))).string();
+    const std::string helper_run = helper_dir + "/" + updater_helper_name();
+    std::filesystem::create_directories(helper_dir, ec);
+    std::filesystem::copy_file(helper_src, helper_run, std::filesystem::copy_options::overwrite_existing, ec);
+    if (ec) {
+        logs::error("[updater] cannot stage helper: %s", ec.message().c_str());
         return false;
     }
+#if !defined(GAME_PLATFORM_WIN)
+    std::filesystem::permissions(helper_run,
+        std::filesystem::perms::owner_all | std::filesystem::perms::group_exec | std::filesystem::perms::others_exec,
+        std::filesystem::perm_options::add,
+        ec);
+#endif
 
-    const std::string chmod_cmd = "chmod +x \"" + sh_path + "\"";
-    if (::system(chmod_cmd.c_str()) != 0) {
-        logs::warn("[updater] chmod helper returned non-zero");
+    const std::string install_dir = updater_install_dir();
+    const std::string restart = updater_restart_target();
+
+    // Drop zip before swap; staging stays until helper finishes copy.
+    std::filesystem::remove(zip_path, ec);
+
+#if defined(GAME_PLATFORM_WIN)
+    const std::string n_helper = updater_to_native(helper_run);
+    const std::string n_staging = updater_to_native(staging_dir);
+    const std::string n_install = updater_to_native(install_dir);
+    const std::string n_restart = updater_to_native(restart);
+    const std::string n_cleanup = updater_to_native(work_dir);
+
+    std::string cmd = "\"" + n_helper + "\"";
+    cmd += " --pid " + std::to_string(pid);
+    cmd += " --staging \"" + n_staging + "\"";
+    cmd += " --install \"" + n_install + "\"";
+    cmd += " --restart \"" + n_restart + "\"";
+    cmd += " --cleanup \"" + n_cleanup + "\"";
+
+    STARTUPINFOA si{};
+    si.cb = sizeof(si);
+    PROCESS_INFORMATION pi{};
+    std::vector<char> cmdline(cmd.begin(), cmd.end());
+    cmdline.push_back('\0');
+
+    if (!CreateProcessA(n_helper.c_str(), cmdline.data(), nullptr, nullptr, FALSE,
+            CREATE_NO_WINDOW | DETACHED_PROCESS, nullptr, n_install.c_str(), &si, &pi)) {
+        logs::error("[updater] CreateProcess failed (%lu)", GetLastError());
+        return false;
     }
-
-    const std::string launch_cmd = "\"" + sh_path + "\" >/dev/null 2>&1 &";
-    if (::system(launch_cmd.c_str()) != 0) {
-        logs::error("[updater] failed to launch helper script");
+    CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
+#else
+    const std::string cmd = "\"" + helper_run + "\""
+        + " --pid " + std::to_string(pid)
+        + " --staging \"" + staging_dir + "\""
+        + " --install \"" + install_dir + "\""
+        + " --restart \"" + restart + "\""
+        + " --cleanup \"" + work_dir + "\""
+        + " >/dev/null 2>&1 &";
+    if (::system(cmd.c_str()) != 0) {
+        logs::error("[updater] failed to launch helper");
         return false;
     }
 #endif

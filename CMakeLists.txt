@@ -995,6 +995,22 @@ endif()
 
 add_executable(${GAME} ${SOURCE_FILES})
 
+# Standalone in-place update helper (desktop only). Game downloads/extracts, then
+# launches this binary and exits so files can be overwritten.
+if(NOT PLATFORM_ANDROID AND NOT WIN_EMSCRIPTEN AND NOT EMSCRIPTEN)
+    add_executable(akhenaten-updater "${PROJECT_SOURCE_DIR}/tools/akhenaten-updater/main.cpp")
+    set_target_properties(akhenaten-updater PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        OUTPUT_NAME "akhenaten-updater"
+    )
+    if(MSVC)
+        # No console flash when launched from the game with CREATE_NO_WINDOW.
+        target_compile_definitions(akhenaten-updater PRIVATE _CRT_SECURE_NO_WARNINGS)
+    endif()
+    add_dependencies(${GAME} akhenaten-updater)
+endif()
+
 if(OPTION_ENABLE_INNOEXTRACT)
     include(BuildInnoextract)
     akhenaten_copy_innoextract()
@@ -1150,42 +1166,37 @@ if(APPLE)
     set(MACOS_DIR "${CMAKE_BINARY_DIR}/akhenaten.app/Contents/MacOS")
     set(DATA_SRC_DIR "${CMAKE_SOURCE_DIR}/data")
     set(LAUNCH_SCRIPT_SRC "${CMAKE_SOURCE_DIR}/res/macos/launch.sh")
-    set(UPDATE_SCRIPT_SRC "${CMAKE_SOURCE_DIR}/res/updater.sh")
     set(BUILD_NUMBER_SRC "${CMAKE_BINARY_DIR}/buildnumber.txt")
 
     add_custom_command(TARGET ${GAME} POST_BUILD
-        # Data‑Ordner anlegen
         COMMAND ${CMAKE_COMMAND} -E make_directory "${MACOS_DIR}/Data"
-
-        # Inhalt von data/ in Data/ kopieren
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 "${DATA_SRC_DIR}"
                 "${MACOS_DIR}/Data"
-
-        # launch.sh ins MacOS‑Verzeichnis kopieren und ausführbar machen
         COMMAND ${CMAKE_COMMAND} -E copy
                 "${LAUNCH_SCRIPT_SRC}"
                 "${MACOS_DIR}/launch.sh"
         COMMAND chmod +x "${MACOS_DIR}/launch.sh"
-
-        # updater.sh ins MacOS‑Verzeichnis kopieren und ausführbar machen
-        COMMAND ${CMAKE_COMMAND} -E copy
-                "${UPDATE_SCRIPT_SRC}"
-                "${MACOS_DIR}/updater.sh"
-        COMMAND chmod +x "${MACOS_DIR}/updater.sh"
         VERBATIM
     )
+    if(TARGET akhenaten-updater)
+        add_custom_command(TARGET ${GAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+                    "$<TARGET_FILE:akhenaten-updater>"
+                    "${MACOS_DIR}/akhenaten-updater"
+            COMMAND chmod +x "${MACOS_DIR}/akhenaten-updater"
+            VERBATIM
+        )
+    endif()
 endif()
 
 #
 # Apple specific End
 #
 
-# Copy buildnumber.txt and updater.sh/bat beside binary
+# Copy buildnumber.txt beside binary; ship akhenaten-updater next to the game.
 
 set(BUILD_NUMBER_SRC "${CMAKE_BINARY_DIR}/buildnumber.txt")
-set(UPDATE_SCRIPT_SRC "${CMAKE_SOURCE_DIR}/res/updater.sh")
-set(UPDATE_SCRIPT_WIN "${CMAKE_SOURCE_DIR}/res/updater.bat")
 
 
 if(APPLE)
@@ -1194,9 +1205,6 @@ if(APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy
                 "${BUILD_NUMBER_SRC}"
                 "${MACOS_DIR}/buildnumber.txt"
-        COMMAND ${CMAKE_COMMAND} -E copy
-                "${UPDATE_SCRIPT_SRC}"
-                "${MACOS_DIR}/updater.sh"
     )
 endif()
 
@@ -1206,10 +1214,16 @@ if(UNIX AND NOT APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy
                 "${BUILD_NUMBER_SRC}"
                 "${UNIX_DIR}/buildnumber.txt"
-        COMMAND ${CMAKE_COMMAND} -E copy
-                "${UPDATE_SCRIPT_SRC}"
-                "${UNIX_DIR}/updater.sh"
     )
+    if(TARGET akhenaten-updater)
+        add_custom_command(TARGET ${GAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+                    "$<TARGET_FILE:akhenaten-updater>"
+                    "${UNIX_DIR}/akhenaten-updater"
+            COMMAND chmod +x "${UNIX_DIR}/akhenaten-updater"
+            VERBATIM
+        )
+    endif()
 endif()
 
 if(WIN32)
@@ -1218,10 +1232,14 @@ if(WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy
                 "${BUILD_NUMBER_SRC}"
                 "${WIN32_DIR}/buildnumber.txt"
-        COMMAND ${CMAKE_COMMAND} -E copy
-                "${UPDATE_SCRIPT_WIN}"
-                "${WIN32_DIR}/updater.bat"
     )
+    if(TARGET akhenaten-updater)
+        add_custom_command(TARGET ${GAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+                    "$<TARGET_FILE:akhenaten-updater>"
+                    "$<TARGET_FILE_DIR:${GAME}>/akhenaten-updater.exe"
+        )
+    endif()
 endif()
 
 target_include_directories(${GAME} PRIVATE ${FREETYPE_INCLUDE_DIRS})
@@ -1366,6 +1384,9 @@ endif()
 
 if(NOT APPLE)
     install(TARGETS ${GAME} RUNTIME DESTINATION bin)
+    if(TARGET akhenaten-updater)
+        install(TARGETS akhenaten-updater RUNTIME DESTINATION bin)
+    endif()
 endif()
 
 if(UNIX AND NOT APPLE)
@@ -1389,6 +1410,9 @@ if (MSVC)
         "$<TARGET_PDB_FILE:${GAME}>"
         "${CMAKE_SOURCE_DIR}/ext/bugtrap/BugTrap-x64.dll"
     )
+    if(TARGET akhenaten-updater)
+        list(APPEND BINARY_FILES "$<TARGET_FILE:akhenaten-updater>")
+    endif()
     add_custom_command(
         TARGET ${GAME}
         POST_BUILD
