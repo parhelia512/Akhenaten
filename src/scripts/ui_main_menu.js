@@ -1,8 +1,5 @@
 log_info("akhenaten: main menu started")
 
-var game_updater_windows_url =
-    "https://nightly.link/dalerank/Akhenaten/workflows/akhenaten_windows/master/windows_build.zip"
-
 function main_menu_local_build_number() {
 	var v = game.version
 	var marker = " b"
@@ -11,11 +8,6 @@ function main_menu_local_build_number() {
 		return 0
 	}
 	return parseInt(v.substring(i + marker.length)) || 0
-}
-
-function main_menu_update_panel_pos() {
-	// outer_panel size[20, 27] → 320x432; keep clear of centered menu buttons
-	return [(sw(0) - px(20)) / 2, (sh(0) - px(27)) / 2]
 }
 
 function main_menu_dismiss_update(window) {
@@ -28,13 +20,14 @@ function main_menu_dismiss_update(window) {
 }
 
 function main_menu_update_now(window) {
-	if (__platform_is_windows()) {
+	if (__platform_can_auto_update()) {
 		window.update_status.text = "Downloading update..."
 	} else {
 		window.update_status.text = "Opening download page..."
 	}
 	window.update_status.enabled = true
-	__game_download_latest_version(game_updater_windows_url)
+	// Empty URL → C++ picks the platform nightly artifact (Win/Linux/macOS).
+	__game_download_latest_version("")
 }
 
 [es=window]
@@ -59,7 +52,7 @@ window_main_menu {
 		                             })
 		version_number: text({pos[18, sh(-30)], text: game.version, font: FONT_SMALL_PLAIN, color: 0xffb3b3b3})
 
-		update_panel  : outer_panel({ pos: main_menu_update_panel_pos(), size[20, 27], enabled:false,
+		update_panel  : outer_panel({ size[20, 27], enabled:false,
 			ui {
 				update_game : large_button({ pos[32, 16], size[256, 25], text:"update now", enabled: false
 					                         onclick: function() { main_menu_update_now(window_main_menu) }

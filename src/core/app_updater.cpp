@@ -8,47 +8,134 @@
 #include "content/zipreader.hpp"
 #include "platform/platform.h"
 
-#ifdef GAME_PLATFORM_WIN
-#include <windows.h>
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
 #include <string>
+
+#if defined(GAME_PLATFORM_WIN)
+#include <windows.h>
+#elif defined(GAME_PLATFORM_LINUX) || defined(GAME_PLATFORM_MACOSX)
+#include <cstdlib>
+#include <unistd.h>
+#include <SDL.h>
+#if defined(GAME_PLATFORM_MACOSX)
+#include <mach-o/dyld.h>
+#endif
+#endif
+
+#if defined(GAME_PLATFORM_WIN) || defined(GAME_PLATFORM_LINUX) || defined(GAME_PLATFORM_MACOSX)
+#define GAME_UPDATER_DESKTOP 1
 #endif
 
 struct app_updater_module_t {
     void download_latest_version(pcstr url);
 };
 
-#ifdef GAME_PLATFORM_WIN
 namespace {
 
-// Directory of the running executable (forward slashes, no trailing slash).
-std::string updater_exe_dir() {
-    char exe_path[MAX_PATH] = { 0 };
-    GetModuleFileNameA(nullptr, exe_path, MAX_PATH);
-    std::string path(exe_path);
+pcstr updater_default_url() {
+#if defined(GAME_PLATFORM_WIN)
+    return "https://nightly.link/dalerank/Akhenaten/workflows/akhenaten_windows/master/windows_build.zip";
+#elif defined(GAME_PLATFORM_LINUX)
+    return "https://nightly.link/dalerank/Akhenaten/workflows/akhenaten_linux/master/linux_build.zip";
+#elif defined(GAME_PLATFORM_MACOSX)
+#if defined(__aarch64__) || defined(__arm64__)
+    return "https://nightly.link/dalerank/Akhenaten/workflows/akhenaten_mac_arm/master/macos_arm_build.zip";
+#else
+    return "https://nightly.link/dalerank/Akhenaten/workflows/akhenaten_mac_x64/master/macos_x64_build.zip";
+#endif
+#else
+    return nullptr;
+#endif
+}
+
+#ifdef GAME_UPDATER_DESKTOP
+
+std::string updater_normalize_slashes(std::string path) {
     for (char &c : path) {
         if (c == '\\') {
             c = '/';
         }
     }
+    return path;
+}
+
+std::string updater_exe_path() {
+#if defined(GAME_PLATFORM_WIN)
+    char exe_path[MAX_PATH] = { 0 };
+    GetModuleFileNameA(nullptr, exe_path, MAX_PATH);
+    return updater_normalize_slashes(exe_path);
+#elif defined(GAME_PLATFORM_LINUX)
+    char buf[4096] = { 0 };
+    const ssize_t n = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+    if (n > 0) {
+        buf[n] = 0;
+        return updater_normalize_slashes(buf);
+    }
+    char *base = SDL_GetBasePath();
+    if (!base) {
+        return {};
+    }
+    std::string path = updater_normalize_slashes(base);
+    SDL_free(base);
+    if (!path.empty() && path.back() != '/') {
+        path += '/';
+    }
+    path += "akhenaten.linux";
+    return path;
+#elif defined(GAME_PLATFORM_MACOSX)
+    char buf[4096] = { 0 };
+    uint32_t size = sizeof(buf);
+    if (_NSGetExecutablePath(buf, &size) == 0) {
+        return updater_normalize_slashes(buf);
+    }
+    char *base = SDL_GetBasePath();
+    if (!base) {
+        return {};
+    }
+    std::string path = updater_normalize_slashes(base);
+    SDL_free(base);
+    const size_t resources = path.rfind("/Contents/Resources");
+    if (resources != std::string::npos) {
+        return path.substr(0, resources) + "/Contents/MacOS/akhenaten";
+    }
+    if (!path.empty() && path.back() != '/') {
+        path += '/';
+    }
+    path += "akhenaten";
+    return path;
+#else
+    return {};
+#endif
+}
+
+std::string updater_exe_dir() {
+    const std::string path = updater_exe_path();
     const size_t slash = path.find_last_of('/');
     return (slash == std::string::npos) ? path : path.substr(0, slash);
 }
 
-std::string updater_exe_path() {
-    char exe_path[MAX_PATH] = { 0 };
-    GetModuleFileNameA(nullptr, exe_path, MAX_PATH);
-    return std::string(exe_path);
+// Directory that receives staged files (parent of .app on macOS).
+std::string updater_install_dir() {
+    const std::string exe = updater_exe_path();
+    const size_t app = exe.find(".app/");
+    if (app != std::string::npos) {
+        const size_t slash = exe.rfind('/', app);
+        if (slash != std::string::npos) {
+            return exe.substr(0, slash);
+        }
+    }
+    return updater_exe_dir();
 }
 
 std::string updater_exe_name() {
     const std::string path = updater_exe_path();
-    const size_t slash = path.find_last_of("/\\");
+    const size_t slash = path.find_last_of('/');
     return (slash == std::string::npos) ? path : path.substr(slash + 1);
 }
 
+#if defined(GAME_PLATFORM_WIN)
 std::string updater_to_native(std::string path) {
     for (char &c : path) {
         if (c == '/') {
@@ -57,6 +144,7 @@ std::string updater_to_native(std::string path) {
     }
     return path;
 }
+#endif
 
 bool updater_write_file(const std::string &path, const void *data, size_t size) {
     FILE *f = vfs::file_open_os(path.c_str(), "wb");
@@ -101,12 +189,12 @@ bool updater_extract(const std::string &zip_path, const std::string &staging_dir
     for (unsigned int i = 0; i < entries.size(); ++i) {
         pcstr name = entries[i].c_str();
         if (!name || name[0] == 0) {
-            continue; // placeholder entry produced by central-directory scan
+            continue;
         }
 
         const size_t len = std::strlen(name);
         if (name[len - 1] == '/' || name[len - 1] == '\\') {
-            continue; // directory entry
+            continue;
         }
 
         vfs::reader r = archive.createAndOpenFile(i, "rb");
@@ -136,14 +224,11 @@ bool updater_extract(const std::string &zip_path, const std::string &staging_dir
     return true;
 }
 
-// Generates the minimal external helper that performs the parts that the running
-// process cannot do itself: wait for this exe to exit, copy the staged files over
-// the installation, restart the game and clean up after itself.
 bool updater_spawn_swap_and_restart(const std::string &work_dir, const std::string &staging_dir, const std::string &zip_path) {
+#if defined(GAME_PLATFORM_WIN)
     const std::string cmd_path = work_dir + "/apply_update.cmd";
-
     const std::string n_staging = updater_to_native(staging_dir);
-    const std::string n_exe_dir = updater_to_native(updater_exe_dir());
+    const std::string n_install = updater_to_native(updater_install_dir());
     const std::string n_exe_path = updater_to_native(updater_exe_path());
     const std::string n_zip = updater_to_native(zip_path);
     const std::string n_work = updater_to_native(work_dir);
@@ -159,7 +244,7 @@ bool updater_spawn_swap_and_restart(const std::string &work_dir, const std::stri
     script += "  timeout /t 1 /nobreak >nul\r\n";
     script += "  goto wait\r\n";
     script += ")\r\n";
-    script += "xcopy /E /Y /I /Q \"" + n_staging + "\\*\" \"" + n_exe_dir + "\\\" >nul\r\n";
+    script += "xcopy /E /Y /I /Q \"" + n_staging + "\\*\" \"" + n_install + "\\\" >nul\r\n";
     script += "rmdir /S /Q \"" + n_work + "\" >nul 2>&1\r\n";
     script += "del /Q \"" + n_zip + "\" >nul 2>&1\r\n";
     script += "start \"\" \"" + n_exe_path + "\"\r\n";
@@ -170,72 +255,130 @@ bool updater_spawn_swap_and_restart(const std::string &work_dir, const std::stri
     }
 
     const std::string n_cmd = updater_to_native(cmd_path);
-    const HINSTANCE result = ShellExecuteA(nullptr, "open", n_cmd.c_str(), nullptr, n_exe_dir.c_str(), SW_HIDE);
+    const HINSTANCE result = ShellExecuteA(nullptr, "open", n_cmd.c_str(), nullptr, n_install.c_str(), SW_HIDE);
     if ((INT_PTR)result <= 32) {
         logs::error("[updater] failed to launch helper script (code %lld)", (long long)(INT_PTR)result);
         return false;
     }
+#else
+    const std::string sh_path = work_dir + "/apply_update.sh";
+    const std::string install_dir = updater_install_dir();
+    const std::string exe_path = updater_exe_path();
+    const int pid = (int)getpid();
+
+    std::string script;
+    script += "#!/bin/sh\n";
+    script += "PID=" + std::to_string(pid) + "\n";
+    script += "STAGING=\"" + staging_dir + "\"\n";
+    script += "INSTALL=\"" + install_dir + "\"\n";
+    script += "EXE=\"" + exe_path + "\"\n";
+    script += "WORK=\"" + work_dir + "\"\n";
+    script += "ZIP=\"" + zip_path + "\"\n";
+    script += "while kill -0 \"$PID\" 2>/dev/null; do sleep 1; done\n";
+    script += "cp -Rf \"$STAGING\"/. \"$INSTALL\"/\n";
+    script += "chmod -R u+rwX \"$INSTALL\" 2>/dev/null || true\n";
+#if defined(GAME_PLATFORM_MACOSX)
+    script += "if [ -d \"$INSTALL/akhenaten.app\" ]; then\n";
+    script += "  chmod +x \"$INSTALL/akhenaten.app/Contents/MacOS\"/* 2>/dev/null || true\n";
+    script += "  open \"$INSTALL/akhenaten.app\"\n";
+    script += "elif [ -x \"$EXE\" ]; then\n";
+    script += "  \"$EXE\" &\n";
+    script += "fi\n";
+#else
+    script += "if [ -x \"$INSTALL/akhenaten.linux\" ]; then\n";
+    script += "  chmod +x \"$INSTALL/akhenaten.linux\" \"$INSTALL/innoextract\" 2>/dev/null || true\n";
+    script += "  \"$INSTALL/akhenaten.linux\" &\n";
+    script += "elif [ -x \"$EXE\" ]; then\n";
+    script += "  chmod +x \"$EXE\" 2>/dev/null || true\n";
+    script += "  \"$EXE\" &\n";
+    script += "fi\n";
+#endif
+    script += "rm -rf \"$WORK\" \"$ZIP\"\n";
+    script += "rm -f \"$0\"\n";
+
+    if (!updater_write_file(sh_path, script.data(), script.size())) {
+        return false;
+    }
+
+    const std::string chmod_cmd = "chmod +x \"" + sh_path + "\"";
+    if (::system(chmod_cmd.c_str()) != 0) {
+        logs::warn("[updater] chmod helper returned non-zero");
+    }
+
+    const std::string launch_cmd = "\"" + sh_path + "\" >/dev/null 2>&1 &";
+    if (::system(launch_cmd.c_str()) != 0) {
+        logs::error("[updater] failed to launch helper script");
+        return false;
+    }
+#endif
 
     logs::info("[updater] helper launched, waiting for game to exit");
     return true;
 }
 
+void updater_open_url_fallback(const std::string &url) {
+    game.add_frame_end_event([url]() {
+        platform.open_url(url.c_str(), "");
+    });
+}
+
 void updater_run(const std::string &url) {
-    const std::string work_dir = updater_exe_dir() + "/update_tmp";
+    const std::string work_dir = updater_install_dir() + "/update_tmp";
     const std::string staging_dir = work_dir + "/staging";
-    const std::string zip_path = work_dir + "/windows_build.zip";
+    const std::string zip_path = work_dir + "/update_build.zip";
 
     std::error_code ec;
-    std::filesystem::remove_all(work_dir, ec); // drop leftovers from a previous run
+    std::filesystem::remove_all(work_dir, ec);
     vfs::create_folders(staging_dir.c_str());
 
     if (!updater_download(zip_path, url)) {
-        // nightly.link / network can fail silently — open the download page instead
-        game.add_frame_end_event([url]() {
-            platform.open_url(url.c_str(), "");
-        });
+        updater_open_url_fallback(url);
         return;
     }
 
     if (!updater_extract(zip_path, staging_dir)) {
-        game.add_frame_end_event([url]() {
-            platform.open_url(url.c_str(), "");
-        });
+        updater_open_url_fallback(url);
         return;
     }
 
     if (!updater_spawn_swap_and_restart(work_dir, staging_dir, zip_path)) {
-        game.add_frame_end_event([url]() {
-            platform.open_url(url.c_str(), "");
-        });
+        updater_open_url_fallback(url);
         return;
     }
 
-    // Quit so the helper can replace the now-unlocked executable and restart it.
     game.add_frame_end_event([]() {
         app_post_event(USER_EVENT_QUIT);
     });
 }
 
+#endif // GAME_UPDATER_DESKTOP
+
 } // namespace
-#endif // GAME_PLATFORM_WIN
 
 void app_updater_module_t::download_latest_version(pcstr url) {
-    if (!url || !*url) {
-        logs::error("[updater] update URL is empty");
+    std::string url_str = (url && *url) ? url : (updater_default_url() ? updater_default_url() : "");
+    if (url_str.empty()) {
+        logs::error("[updater] no update URL for this platform");
         return;
     }
 
-#ifdef GAME_PLATFORM_WIN
-    const std::string url_str(url);
+#ifdef GAME_UPDATER_DESKTOP
     game.mt.detach_task([url_str]() {
         updater_run(url_str);
     });
 #else
-    // In-place updater is Windows-only; open the download URL in the browser.
-    platform.open_url(url, "");
+    platform.open_url(url_str.c_str(), "");
 #endif
 }
+
+bool __platform_can_auto_update() {
+#ifdef GAME_UPDATER_DESKTOP
+    return true;
+#else
+    return false;
+#endif
+}
+ANK_FUNCTION(__platform_can_auto_update)
 
 void __game_download_latest_version(pcstr url) {
     static app_updater_module_t mod;
