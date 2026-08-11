@@ -385,11 +385,9 @@ pcstr lang_get_string(int group, int index) {
     }
 
     // Same idea as named keys: missing entry falls back to a visible placeholder.
-    static thread_local bstring64 missing_bufs[8];
-    static thread_local unsigned missing_i = 0;
-    bstring64 &buf = missing_bufs[missing_i++ & 7];
-    buf.printf("#%d.%d", group, index);
-    return buf.c_str();
+    xstring missing;
+    missing.printf("#%d.%d", group, index);
+    return missing.c_str();
 }
 
 const xstring lang_text_dummy("#message_table_of_contents");
