@@ -6,6 +6,7 @@
 #include "net/http_client.h"
 #include "content/vfs.h"
 #include "content/zipreader.hpp"
+#include "platform/platform.h"
 
 #ifdef GAME_PLATFORM_WIN
 #include <windows.h>
@@ -189,14 +190,24 @@ void updater_run(const std::string &url) {
     vfs::create_folders(staging_dir.c_str());
 
     if (!updater_download(zip_path, url)) {
+        // nightly.link / network can fail silently — open the download page instead
+        game.add_frame_end_event([url]() {
+            platform.open_url(url.c_str(), "");
+        });
         return;
     }
 
     if (!updater_extract(zip_path, staging_dir)) {
+        game.add_frame_end_event([url]() {
+            platform.open_url(url.c_str(), "");
+        });
         return;
     }
 
     if (!updater_spawn_swap_and_restart(work_dir, staging_dir, zip_path)) {
+        game.add_frame_end_event([url]() {
+            platform.open_url(url.c_str(), "");
+        });
         return;
     }
 
@@ -210,15 +221,19 @@ void updater_run(const std::string &url) {
 #endif // GAME_PLATFORM_WIN
 
 void app_updater_module_t::download_latest_version(pcstr url) {
-#ifdef GAME_PLATFORM_WIN
     if (!url || !*url) {
         logs::error("[updater] update URL is empty");
         return;
     }
+
+#ifdef GAME_PLATFORM_WIN
     const std::string url_str(url);
     game.mt.detach_task([url_str]() {
         updater_run(url_str);
     });
+#else
+    // In-place updater is Windows-only; open the download URL in the browser.
+    platform.open_url(url, "");
 #endif
 }
 

@@ -3,6 +3,40 @@ log_info("akhenaten: main menu started")
 var game_updater_windows_url =
     "https://nightly.link/dalerank/Akhenaten/workflows/akhenaten_windows/master/windows_build.zip"
 
+function main_menu_local_build_number() {
+	var v = game.version
+	var marker = " b"
+	var i = v.indexOf(marker)
+	if (i < 0) {
+		return 0
+	}
+	return parseInt(v.substring(i + marker.length)) || 0
+}
+
+function main_menu_update_panel_pos() {
+	// outer_panel size[20, 27] → 320x432; keep clear of centered menu buttons
+	return [(sw(0) - px(20)) / 2, (sh(0) - px(27)) / 2]
+}
+
+function main_menu_dismiss_update(window) {
+	window.update_panel.enabled = false
+	window.update_game.enabled = false
+	window.new_version.enabled = false
+	window.changelog.enabled = false
+	window.update_later.enabled = false
+	window.update_status.enabled = false
+}
+
+function main_menu_update_now(window) {
+	if (__platform_is_windows()) {
+		window.update_status.text = "Downloading update..."
+	} else {
+		window.update_status.text = "Opening download page..."
+	}
+	window.update_status.enabled = true
+	__game_download_latest_version(game_updater_windows_url)
+}
+
 [es=window]
 window_main_menu {
 	ui {
@@ -25,13 +59,17 @@ window_main_menu {
 		                             })
 		version_number: text({pos[18, sh(-30)], text: game.version, font: FONT_SMALL_PLAIN, color: 0xffb3b3b3})
 
-		update_panel  : outer_panel({ size[20, 27], enabled:false,
+		update_panel  : outer_panel({ pos: main_menu_update_panel_pos(), size[20, 27], enabled:false,
 			ui {
 				update_game : large_button({ pos[32, 16], size[256, 25], text:"update now", enabled: false
-					                         onclick: function() { __game_download_latest_version(game_updater_windows_url) }
+					                         onclick: function() { main_menu_update_now(window_main_menu) }
 				                           })
-				new_version : text({pos[18, 53], text: game.version, font: FONT_SMALL_PLAIN, enabled: false})
-				changelog : text({pos[18, 73], size[560, 300], wrap:px(18), rich:true, text:"Loading changelog...", font: FONT_SMALL_PLAIN, enabled: false, clip_area: true})
+				update_later : large_button({ pos[32, 48], size[256, 25], text:"later", enabled: false
+					                          onclick: function() { main_menu_dismiss_update(window_main_menu) }
+				                            })
+				new_version : text({pos[18, 84], text: game.version, font: FONT_SMALL_PLAIN, enabled: false})
+				update_status : text({pos[18, 104], size[280, 20], text:"", font: FONT_SMALL_PLAIN, enabled: false})
+				changelog : text({pos[18, 124], size[280, 280], wrap:px(17), rich:true, text:"Loading changelog...", font: FONT_SMALL_PLAIN, enabled: false, clip_area: true})
 			}
 		})
 	}
@@ -104,13 +142,18 @@ function main_menu_on_update_version(window) {
 	if (window.current_commit <= 1)
 		return
 
+	var local_build = main_menu_local_build_number()
+	if (window.current_commit <= local_build)
+		return
+
 	if (game_features.gameopt_last_game_version == window.current_commit)
 		return
 
 	window.update_panel.enabled = true
 	window.new_version.enabled = true
 	window.update_game.enabled = true
-	window.new_version.text = "" + window.current_commit
+	window.update_later.enabled = true
+	window.new_version.text = "New build: " + window.current_commit + " (you have " + local_build + ")"
 
 	game_features.gameopt_last_game_version = window.current_commit
 }
