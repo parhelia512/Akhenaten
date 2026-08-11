@@ -326,8 +326,8 @@
         <span>Only <strong>Vacant Lots</strong>, <strong>Clear Land</strong>, and <strong><a href="../buildings/road.html">Roads</a></strong> are available. The first tutorial message explains road layout and immigrant pathfinding.</span>
       </div>
       <div class="tutorial-step">
-        <span class="step-tag">Pop 120</span>
-        <span>A fire breaks out in a random house. <strong><a href="../buildings/firehouse.html">Firehouse</a></strong> unlocks. Tutorial message explains fire marshals and the fire risk overlay.</span>
+        <span class="step-tag">First fire</span>
+        <span>When accumulated fire risk burns a house, <strong><a href="../buildings/firehouse.html">Firehouse</a></strong> unlocks. Tutorial message explains fire marshals and the fire risk overlay.</span>
       </div>
       <div class="tutorial-step">
         <span class="step-tag">Pop 150</span>
@@ -350,7 +350,7 @@
       <p>Place five or six Vacant Lots anywhere connected to the kingdom road via roads. Immigrants arrive quickly. Leave room around each lot for future service buildings. The population cap is 250 for this mission, so do not worry about over-building.</p>
 
       <h3>Phase 2 — Food and fire</h3>
-      <p>Once population reaches 120, a house will catch fire. The <a href="../buildings/firehouse.html">Firehouse</a> panel appears; build one near your housing cluster. Shortly after, at 150 citizens, the food chain unlocks. The ostriches are positioned at roughly (40, 60) on the map — place two <a href="../buildings/hunting-lodge.html">Hunting Lodges</a> within walking distance, a <a href="../buildings/granary.html">Granary</a> to receive the meat, and a <a href="../buildings/bazaar.html">Bazaar</a> to distribute it to housing. Bazaars reduce nearby desirability, so keep them on the edge of your housing block rather than in the centre.</p>
+      <p>Houses accumulate fire risk naturally; when one burns, the <a href="../buildings/firehouse.html">Firehouse</a> panel appears — build one near your housing cluster. At 150 citizens, the food chain unlocks. The ostriches are positioned at roughly (40, 60) on the map — place two <a href="../buildings/hunting-lodge.html">Hunting Lodges</a> within walking distance, a <a href="../buildings/granary.html">Granary</a> to receive the meat, and a <a href="../buildings/bazaar.html">Bazaar</a> to distribute it to housing. Bazaars reduce nearby desirability, so keep them on the edge of your housing block rather than in the centre.</p>
 
       <h3>Phase 3 — Water and evolution</h3>
       <p>Once the <a href="../buildings/granary.html">Granary</a> holds 400 units of game meat the <a href="../buildings/water-supply.html">Water Supply</a> unlocks. Build one on grassy ground (visible underground water) and it will dispatch water carriers to nearby houses. With food from the <a href="../buildings/bazaar.html">Bazaar</a> and water from the Water Supply in reach, Sturdy Huts will evolve to Meager Shanties — satisfying the housing level objective. Six plots at level 2 or above finishes the mission.</p>
@@ -373,7 +373,7 @@
           </thead>
           <tbody>
             <tr><td>Vacant Lot · Clear Land · <a href="../buildings/road.html">Road</a></td><td>Mission start</td></tr>
-            <tr><td><a href="../buildings/firehouse.html">Firehouse</a></td><td>Fire event (pop ≥ 120)</td></tr>
+            <tr><td><a href="../buildings/firehouse.html">Firehouse</a></td><td>First natural fire</td></tr>
             <tr><td>Hunting Lodge · <a href="../buildings/granary.html">Granary</a> · <a href="../buildings/bazaar.html">Bazaar</a></td><td>Population reaches 150</td></tr>
             <tr><td><a href="../buildings/architect-post.html">Architect's Post</a></td><td>First building collapse</td></tr>
             <tr><td><a href="../buildings/water-supply.html">Water Supply</a></td><td><a href="../buildings/granary.html">Granary</a> holds 400 game meat</td></tr>
@@ -422,10 +422,8 @@
 
   <span class="kw">vars</span> {
     <span class="kw">granary_open_population</span>          : <span class="num">150</span>
-    <span class="kw">population_cap_firstfire</span>         : <span class="num">0</span>
     <span class="kw">granary_meat_stored</span>              : <span class="num">400</span>
     <span class="kw">victory_last_action_delay</span>        : <span class="num">4</span>
-    <span class="kw">population_to_start_fire_event</span>   : <span class="num">120</span>
     <span class="kw">population_cap</span>                   : <span class="num">250</span>
     <span class="cmt">// boolean flags persist across saves (resume mid-tutorial)</span>
     tutorial_fire_handled      : <span class="num">false</span>
@@ -437,7 +435,7 @@
     last_action_time           : <span class="num">0</span>
   }
 }</code></pre>
-            <p>To change difficulty starting money, edit the <code>initial_funds</code> array (index 0 = Very Easy, 4 = Very Hard). To adjust the population thresholds that trigger tutorial steps, edit the corresponding <code>vars</code> entries.</p>
+            <p>To change difficulty starting money, edit the <code>initial_funds</code> array (index 0 = Very Easy, 4 = Very Hard). To adjust the population thresholds that trigger tutorial steps, edit the corresponding <code>vars</code> entries. First fire is not scripted — it comes from natural fire risk; the tutorial only reacts via <code>event_fire_damage</code>.</p>
           </div>
         </details>
 
@@ -448,7 +446,7 @@
             <ul class="event-list">
               <li>
                 <span class="ev-name">event_mission_start</span>
-                <span class="ev-line">line 48</span>
+                <span class="ev-line">line 68</span>
                 <span class="ev-desc">Restores mid-tutorial state on load/restart — re-unlocks any buildings whose tutorial step was already completed, so resuming a save never leaves the player without previously earned buildings.</span>
                 <span class="ev-fn">mission0_on_start</span>
                 <span></span>
@@ -461,57 +459,50 @@
                 <span></span>
               </li>
               <li>
-                <span class="ev-name">event_advance_week</span>
-                <span class="ev-line">line 103</span>
-                <span class="ev-desc">Polls weekly once population ≥ 120. Adds 2 000 fire damage to a random house to trigger the fire tutorial. Runs only once (guard on <code>tutorial_fire_handled</code>).</span>
-                <span class="ev-fn">mission0_handle_fire_event</span>
-                <span></span>
-              </li>
-              <li>
                 <span class="ev-name">event_fire_damage</span>
-                <span class="ev-line">line 125</span>
-                <span class="ev-desc">Responds to the fire; unlocks <code>BUILDING_FIREHOUSE</code> and shows <code>message_fire_in_the_village</code> (ID 252). Sets <code>tutorial_fire_handled = true</code>.</span>
+                <span class="ev-line">line 104</span>
+                <span class="ev-desc">Responds to the first natural fire (accumulated fire risk); unlocks <code>BUILDING_FIREHOUSE</code> and shows <code>message_fire_in_the_village</code> (ID 252). Sets <code>tutorial_fire_handled = true</code>.</span>
                 <span class="ev-fn">mission0_handle_fire</span>
                 <span></span>
               </li>
               <li>
                 <span class="ev-name">event_collase_damage</span>
-                <span class="ev-line">line 138</span>
+                <span class="ev-line">line 117</span>
                 <span class="ev-desc">Unlocks <code>BUILDING_ARCHITECT_POST</code> and shows collapse tutorial message (ID 253) the first time any building collapses. Note: the event name has a typo in the engine (<code>collase</code> not <code>collapse</code>).</span>
                 <span class="ev-fn">mission0_handle_collapse</span>
                 <span></span>
               </li>
               <li>
                 <span class="ev-name">event_population_changed</span>
-                <span class="ev-line">line 151</span>
+                <span class="ev-line">line 130</span>
                 <span class="ev-desc">Triggers at population ≥ 150 (configurable via <code>granary_open_population</code>). Unlocks Hunting Lodge, Granary, and Bazaar; shows food tutorial (message ID 239); makes Population Advisor available.</span>
                 <span class="ev-fn">mission0_handle_population_for_granary</span>
                 <span></span>
               </li>
               <li>
                 <span class="ev-name">event_advance_day · build granary</span>
-                <span class="ev-line">line 171</span>
+                <span class="ev-line">line 150</span>
                 <span class="ev-desc">Watches daily for the first Granary to be placed. When found, enables the Population Advisor panel.</span>
                 <span class="ev-fn">mission0_on_build_granary</span>
                 <span></span>
               </li>
               <li>
                 <span class="ev-name">event_granary_resource_added</span>
-                <span class="ev-line">line 188</span>
+                <span class="ev-line">line 167</span>
                 <span class="ev-desc">Fires when food is added to any Granary. Once game meat in a single granary reaches 400 units (configurable via <code>granary_meat_stored</code>), unlocks <code>BUILDING_WATER_SUPPLY</code> and shows clean water tutorial (message ID 255).</span>
                 <span class="ev-fn">mission0_on_filled_granary</span>
                 <span></span>
               </li>
               <li>
                 <span class="ev-name">event_update_victory_state</span>
-                <span class="ev-line">line 208</span>
+                <span class="ev-line">line 187</span>
                 <span class="ev-desc">Called each tick to compute whether the win conditions are met. All four tutorial flags plus a cooldown since the last tutorial action must be true before victory is granted. Change <code>victory_last_action_delay</code> to shorten or lengthen the delay.</span>
                 <span class="ev-fn">mission0_handle_victory_state</span>
                 <span></span>
               </li>
               <li>
                 <span class="ev-name">event_migration_update</span>
-                <span class="ev-line">line 219</span>
+                <span class="ev-line">line 198</span>
                 <span class="ev-desc">Caps unemployment swing at ±10 percentage points, preventing the early city from stalling on a bad immigration roll.</span>
                 <span class="ev-fn">mission0_handle_population_cap</span>
                 <span></span>

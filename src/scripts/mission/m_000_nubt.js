@@ -41,10 +41,8 @@ mission0 { // Nubt
 
 	vars {
 		granary_open_population : 150
-		population_cap_firstfire : 0
 		granary_meat_stored : 400
 		victory_last_action_delay : 4
-		population_to_start_fire_event : 120
 		population_cap : 250
 
 		tutorial_fire_handled : false
@@ -100,20 +98,6 @@ function mission0_on_build_firehouse(ev) {
 
 	mission.last_action = game.absolute_day
     mission.tutorial_firehouse_built = true
-}
-
-[event=event_advance_week, mission=mission0]
-function mission0_handle_fire_event(ev) {
-	if (mission.tutorial_fire_handled) {
-		return;
-	}
-
-	if (city.population < mission.population_to_start_fire_event) {
-		return;
-	}
-
-	var house = city.get_random_house()
-	house.add_fire_damage(2000)
 }
 
 [event=event_fire_damage, mission=mission0]
