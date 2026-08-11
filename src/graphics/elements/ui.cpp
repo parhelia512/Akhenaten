@@ -819,6 +819,19 @@ const image_t* ui::eimage(int imgid, vec2i pos) {
     return image_get(imgid);
 }
 
+const image_t* ui::eimage(int imgid, vec2i pos, UiFlags flags) {
+    const vec2i offset = g_state.offset();
+    ImgFlags img_flags = ImgFlag_None;
+    if (!!(flags & UiFlags_Grayscale)) {
+        img_flags |= ImgFlag_Grayscale;
+    }
+    if (!!(flags & UiFlags_Mirrored)) {
+        img_flags |= ImgFlag_Mirrored;
+    }
+    push(cmd_t::image, Pos{pos + offset}, ImageId{imgid}, ImgFlagsTag{(ImgFlag_)img_flags});
+    return image_get(imgid);
+}
+
 const image_t* ui::eimage(image_desc imgd, vec2i pos) {
     const vec2i offset = g_state.offset();
     const int tid = imgd.tid();

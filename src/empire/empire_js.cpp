@@ -75,6 +75,14 @@ std::optional<bvariant> __empire_trader_get_property(int index, pcstr property) 
 }
 ANK_FUNCTION_2(__empire_trader_get_property)
 
+bool __empire_trader_faces_left(int index) {
+    if (index < 0 || index >= (int)g_empire_traders.traders.size()) {
+        return false;
+    }
+    return g_empire_traders.traders[index].faces_left();
+}
+ANK_FUNCTION_1(__empire_trader_faces_left)
+
 vec2i __empire_map_adjust_scroll(vec2i pos) {
     return g_empire_map.adjust_scroll(pos);
 }

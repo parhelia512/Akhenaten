@@ -58,6 +58,11 @@ void __ui_draw_image(int imgid, vec2i pos) {
 }
 ANK_FUNCTION_2(__ui_draw_image);
 
+void __ui_draw_image_flags(int imgid, vec2i pos, int flags) {
+    ui::eimage(imgid, pos, (UiFlags)flags);
+}
+ANK_FUNCTION_3(__ui_draw_image_flags);
+
 void __ui_draw_image_scaled(int imgid, vec2i pos, float scale) {
     const image_t* img = image_get(imgid);
     if (!img) {
@@ -795,4 +800,5 @@ void js_register_ui_objects(js_State* J) {
     _R(UiFlags_PanelSmall)
     _R(UiFlags_PanelOuter)
     _R(UiFlags_ThinBorder)
+    _R(UiFlags_Mirrored)
 }

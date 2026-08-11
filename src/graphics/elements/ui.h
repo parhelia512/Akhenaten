@@ -58,6 +58,7 @@ enum UiFlags_ {
     UiFlags_ThinBorder = 1 << 19,
     UiFlags_Composite = 1 << 20,
     UiFlags_AllowRepeat = 1 << 21,
+    UiFlags_Mirrored = 1 << 22,
 };
 using UiFlags = int;
 
@@ -237,6 +238,7 @@ namespace ui {
     int label_colored(textid tx, vec2i pos, e_font font, color color, int box_width = 0);
     int label_colored(pcstr tx, vec2i pos, e_font font, color color, int box_width = 0);
     const image_t* eimage(int imgid, vec2i pos);
+    const image_t* eimage(int imgid, vec2i pos, UiFlags flags);
     const image_t* eimage(image_desc img, vec2i pos);
     void panel(vec2i pos, vec2i size, UiFlags flags);
     void button_border(vec2i pos, vec2i size, bool focused = false);

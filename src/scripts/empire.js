@@ -120,6 +120,7 @@ empire.get_trader = function(index) {
         @id {}
         @trade_route_id {}
         @destination_city_id {}
+        @faces_left { get: function() { return __empire_trader_faces_left(this.trader_index) } }
     }
 }
 

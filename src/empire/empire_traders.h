@@ -32,15 +32,16 @@ struct empire_trader {
     uint16_t sold_amount;
     uint16_t sold_value;
     uint16_t sold_resources[RESOURCES_MAX];
-    
+
     void update();
     bool is_at_destination() const;
     void complete_trade();
+    bool faces_left() const;
 };
 ANK_CONFIG_PROPERTY(empire_trader, current_position, is_ship, is_active, id, trade_route_id, destination_city_id)
 
 class empire_traders_manager {
-public:   
+public:
     void init();
     void update();
     void create_trader(int trade_route_id, int destination_city_id);
@@ -52,7 +53,7 @@ public:
     vec2i ship_movement_delay;
     vec2i land_movement_delay;
 
-private:   
+private:
     empire_trader* get_free_trader();
     vec2i get_position_on_route(int route_id, int point_index);
 };

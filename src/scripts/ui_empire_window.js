@@ -991,7 +991,8 @@ function empire_window_draw_trader(ev) {
         return
     }
 
-    ui.image(img, empire_window_map_point(ev.draw_offset, t.current_position))
+    var flags = (!t.is_ship && t.faces_left) ? UiFlags_Mirrored : UiFlags_None
+    ui.image(img, empire_window_map_point(ev.draw_offset, t.current_position), flags)
 }
 
 function empire_window_draw_traders(ev) {

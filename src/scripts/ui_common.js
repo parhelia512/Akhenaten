@@ -24,12 +24,18 @@ imgui {
     input_text: __imgui_input_text
 }
 
-ui.image = function(image, pos) {
+ui.image = function(image, pos, flags) {
     if (!image || !pos) {
         return
     }
 
-    if (image.tid !== undefined) {
+    if (image.tid === undefined) {
+        return
+    }
+
+    if (flags) {
+        __ui_draw_image_flags(image.tid, pos, flags)
+    } else {
         __ui_draw_image(image.tid, pos)
     }
 }
