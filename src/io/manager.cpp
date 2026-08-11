@@ -28,13 +28,7 @@
 
 FileIOManager FILEIO;
 
-///
-
 void file_chunk_t::resize(int new_size) {
-    // safe_realloc_for_size deletes the old buffer when the size differs, so the
-    // io_buffer must be re-hooked or its cached p_buf dangles. io_buffer objects are
-    // globals shared between schemas, so re-hook even when the size matches: the same
-    // io_buffer may currently point at a different chunk's buffer.
     safe_realloc_for_size(&buf, new_size);
     if (iob != nullptr) {
         iob->hook(buf, new_size, compressed != 0, name);
@@ -57,22 +51,16 @@ void FileIOManager::clear() {
 }
 
 buffer* FileIOManager::push_chunk(int size, bool compressed, const char* name, io_buffer* iob) {
-    // add empty piece onto the stack if we're beyond the current capacity
     if (alloc_index >= file_chunks.size())
         file_chunks.push_back(file_chunk_t());
 
-    // fill info
     file_chunk_t& chunk = file_chunks.at(alloc_index);
     chunk.compressed = compressed;
-    // clear() only walks the previous schema's chunk count, so a shorter schema in
-    // between (a map load between two save loads) leaves stale flags behind here
     chunk.present = false;
     chunk.iob = iob;
     chunk.VALID = (iob != nullptr);
 
     if (::strlen(name) > svx::NAME_LEN) {
-        // the name is the lookup key inside a sectioned file - silently truncating it
-        // would produce two chunks that collide on load
         logs::error("chunk name [%s] is longer than %d chars and will not fit a section header",
                     name, svx::NAME_LEN);
         assert(false);
@@ -81,10 +69,7 @@ buffer* FileIOManager::push_chunk(int size, bool compressed, const char* name, i
 
     chunk.resize(size);
 
-    // advance allocator index
     alloc_index++;
-
-    // return linked buffer pointer so that it can be assigned for read/write access later
     return chunk.buf;
 }
 const int FileIOManager::num_chunks() {
@@ -146,9 +131,6 @@ static bool write_compressed_chunk(FILE* fp, buffer* buf, int bytes_to_write) {
     return true;
 }
 
-// Reads one section payload into the chunk buffer and checks it against the CRC
-// recorded when it was written. The payload always carries the compression prefix,
-// so the schema's compressed flag plays no part here.
 static bool read_section_payload(vfs::reader reader, const svx::section_info& info, buffer* buf, pcstr debug_path) {
     if (info.raw_size > COMPRESS_BUFFER_SIZE || (int)info.raw_size > buf->size()) {
         logs::error("Unable to read file [%s], section [%s] raw size %u does not fit.",
@@ -206,7 +188,6 @@ bool FileIOManager::io_failure_cleanup(const char* action, const char* reason) {
 }
 
 bool FileIOManager::serialize(pcstr filename, int offset, e_file_format format, const int version, void (*init_schema)(e_file_format _format, const int _version)) {
-    // first, clear up the manager data and set the new file info
     clear();
     file_path = filename;
     file_offset = offset;
@@ -219,8 +200,6 @@ bool FileIOManager::serialize(pcstr filename, int offset, e_file_format format, 
         fs_path = file_path;
     }
 
-    // only the expanded save format gets the sectioned container; .sav / .map / .pak
-    // stay byte-compatible with the original game
     file_sectioned = (file_format == FILE_FORMAT_SAVE_FILE_EXT);
 
     const bool atomic_write = (file_offset == 0);
@@ -243,7 +222,6 @@ bool FileIOManager::serialize(pcstr filename, int offset, e_file_format format, 
         clear();
     };
 
-    // init file chunks and buffer collection
     if (init_schema != nullptr) {
         init_schema(file_format, file_version);
     } else {
@@ -252,13 +230,11 @@ bool FileIOManager::serialize(pcstr filename, int offset, e_file_format format, 
         return false;
     }
 
-    // fill chunks with bound data
     for (int i = 0; i < num_chunks(); ++i) {
         if (file_chunks.at(i).VALID)
             file_chunks.at(i).iob->write();
     }
 
-    // serialize chunks to disk
     if (file_sectioned) {
         if (!serialize_sectioned(fp, fs_path.c_str())) {
             abort_write();
@@ -285,10 +261,7 @@ bool FileIOManager::serialize(pcstr filename, int offset, e_file_format format, 
         }
     }
 
-    // close file handle
     vfs::file_close(fp);
-
-    // publish the finished file over the target in one step
     if (atomic_write && !vfs::file_rename(write_path, fs_path)) {
         logs::error("Unable to write file [%s], could not replace it with [%s].",
                     fs_path.c_str(), write_path.c_str());
@@ -306,12 +279,12 @@ bool FileIOManager::serialize(pcstr filename, int offset, e_file_format format, 
     return true;
 }
 
-bool FileIOManager::serialize_sectioned(FILE* fp, pcstr debug_path) {
+static bool write_svx_file_header(FILE* fp, uint32_t save_data_version, uint32_t section_count, pcstr debug_path) {
     svx::file_header hdr = {};
     memcpy(hdr.magic, svx::MAGIC, sizeof(hdr.magic));
     hdr.container_rev = svx::CONTAINER_REV;
-    hdr.save_data_version = (uint32_t)file_version;
-    hdr.section_count = (uint32_t)num_chunks();
+    hdr.save_data_version = save_data_version;
+    hdr.section_count = section_count;
     hdr.section_header_size = (uint16_t)sizeof(svx::section_header);
     hdr.epilog_size = (uint16_t)sizeof(svx::section_epilog);
 
@@ -319,64 +292,165 @@ bool FileIOManager::serialize_sectioned(FILE* fp, pcstr debug_path) {
         logs::error("Unable to write file [%s], container header write failed.", debug_path);
         return false;
     }
+    return true;
+}
+
+static bool build_svx_section_payload(const file_chunk_t* chunk, int index, pcstr debug_path,
+                                      uint32_t* out_prefix, const void** out_body, uint32_t* out_body_size,
+                                      uint32_t* out_raw_size, uint32_t* out_crc) {
+    if (!chunk->VALID) {
+        // a chunk without an io_buffer has no state to write and no name to look
+        // it up by later; the .svx schema never pushes one
+        logs::error("Unable to write file [%s], chunk %d (%s) has no io_buffer.",
+                    debug_path, index, chunk->name);
+        return false;
+    }
+
+    const uint32_t raw_size = (uint32_t)chunk->buf->size();
+    const uint8_t* raw = chunk->buf->get_data();
+
+    if (raw_size > COMPRESS_BUFFER_SIZE) {
+        logs::error("Unable to write file [%s], chunk %d (%s) is %u bytes, over the compress buffer.",
+                    debug_path, index, chunk->name, raw_size);
+        return false;
+    }
+
+    uint32_t prefix = svx::PAYLOAD_UNCOMPRESSED;
+    const void* body = raw;
+    uint32_t body_size = raw_size;
+
+    int compressed_size = COMPRESS_BUFFER_SIZE;
+    if (chunk->compressed && zip_compress(raw, (int)raw_size, compress_buffer, &compressed_size)) {
+        prefix = (uint32_t)compressed_size;
+        body = compress_buffer;
+        body_size = (uint32_t)compressed_size;
+    }
+
+    *out_prefix = prefix;
+    *out_body = body;
+    *out_body_size = body_size;
+    *out_raw_size = raw_size;
+    *out_crc = crc32(raw, raw_size);
+    return true;
+}
+
+static bool write_svx_section(FILE* fp, const file_chunk_t* chunk, int index, pcstr debug_path) {
+    uint32_t prefix = 0;
+    const void* body = nullptr;
+    uint32_t body_size = 0;
+    uint32_t raw_size = 0;
+    uint32_t crc = 0;
+    if (!build_svx_section_payload(chunk, index, debug_path, &prefix, &body, &body_size, &raw_size, &crc)) {
+        return false;
+    }
+
+    svx::section_header sh = {};
+    const size_t name_len = ::strlen(chunk->name);
+    memcpy(sh.name, chunk->name, (name_len < svx::NAME_LEN) ? name_len : svx::NAME_LEN);
+    sh.payload_size = (uint32_t)sizeof(prefix) + body_size;
+    sh.raw_size = raw_size;
+    sh.crc = crc;
+
+    svx::section_epilog ep = {};
+    ep.mark_begin = svx::EPILOG_MARK;
+    ep.mark_end = svx::EPILOG_MARK;
+    memcpy(ep.name, sh.name, svx::NAME_LEN);
+
+    const bool ok = (fwrite(&sh, sizeof(sh), 1, fp) == 1)
+                    && (fwrite(&prefix, sizeof(prefix), 1, fp) == 1)
+                    && (body_size == 0 || fwrite(body, 1, body_size, fp) == body_size)
+                    && (fwrite(&ep, sizeof(ep), 1, fp) == 1);
+
+    if (!ok) {
+        logs::error("Unable to write file [%s], write failure at section %d (%s).",
+                    debug_path, index, chunk->name);
+        return false;
+    }
+    return true;
+}
+
+bool FileIOManager::serialize_sectioned(FILE* fp, pcstr debug_path) {
+    if (!write_svx_file_header(fp, (uint32_t)file_version, (uint32_t)num_chunks(), debug_path)) {
+        return false;
+    }
 
     for (int i = 0; i < num_chunks(); i++) {
-        file_chunk_t* chunk = &file_chunks.at(i);
-
-        if (!chunk->VALID) {
-            // a chunk without an io_buffer has no state to write and no name to look
-            // it up by later; the .svx schema never pushes one
-            logs::error("Unable to write file [%s], chunk %d (%s) has no io_buffer.",
-                        debug_path, i, chunk->name);
-            return false;
-        }
-
-        const uint32_t raw_size = (uint32_t)chunk->buf->size();
-        const uint8_t* raw = chunk->buf->get_data();
-
-        if (raw_size > COMPRESS_BUFFER_SIZE) {
-            logs::error("Unable to write file [%s], chunk %d (%s) is %u bytes, over the compress buffer.",
-                        debug_path, i, chunk->name, raw_size);
-            return false;
-        }
-
-        uint32_t prefix = svx::PAYLOAD_UNCOMPRESSED;
-        const void* body = raw;
-        uint32_t body_size = raw_size;
-
-        int compressed_size = COMPRESS_BUFFER_SIZE;
-        if (chunk->compressed && zip_compress(raw, (int)raw_size, compress_buffer, &compressed_size)) {
-            prefix = (uint32_t)compressed_size;
-            body = compress_buffer;
-            body_size = (uint32_t)compressed_size;
-        }
-
-        svx::section_header sh = {};
-        const size_t name_len = ::strlen(chunk->name);
-        memcpy(sh.name, chunk->name, (name_len < svx::NAME_LEN) ? name_len : svx::NAME_LEN);
-        sh.payload_size = (uint32_t)sizeof(prefix) + body_size;
-        sh.raw_size = raw_size;
-        // crc covers the uncompressed data: that keeps it meaningful across zlib
-        // changes and makes it usable for diffing two saves section by section
-        sh.crc = crc32(raw, raw_size);
-
-        svx::section_epilog ep = {};
-        ep.mark_begin = svx::EPILOG_MARK;
-        ep.mark_end = svx::EPILOG_MARK;
-        memcpy(ep.name, sh.name, svx::NAME_LEN);
-
-        const bool ok = (fwrite(&sh, sizeof(sh), 1, fp) == 1)
-                        && (fwrite(&prefix, sizeof(prefix), 1, fp) == 1)
-                        && (body_size == 0 || fwrite(body, 1, body_size, fp) == body_size)
-                        && (fwrite(&ep, sizeof(ep), 1, fp) == 1);
-
-        if (!ok) {
-            logs::error("Unable to write file [%s], write failure at section %d (%s).",
-                        debug_path, i, chunk->name);
+        if (!write_svx_section(fp, &file_chunks.at(i), i, debug_path)) {
             return false;
         }
     }
+    return true;
+}
 
+// Last match wins if a name appears more than once - odd, but recoverable.
+static const svx::section_info* find_svx_section(const svx::section_list& sections, pcstr name, int* out_matches) {
+    const svx::section_info* found = nullptr;
+    int matches = 0;
+    for (const auto& s : sections) {
+        if (strcmp(s.name, name) == 0) {
+            found = &s;
+            matches++;
+        }
+    }
+    if (out_matches) {
+        *out_matches = matches;
+    }
+    return found;
+}
+
+static bool load_svx_chunk_payload(vfs::reader reader, file_chunk_t* chunk, const svx::section_info& info, pcstr debug_path) {
+    // a chunk that grew since this file was written keeps its schema size and
+    // reads the missing tail as zeroes; one that shrank still needs room for
+    // everything the file holds
+    if ((int)info.raw_size > chunk->buf->size()) {
+        chunk->resize((int)info.raw_size);
+    }
+
+    if (!read_section_payload(reader, info, chunk->buf, debug_path)) {
+        return false;
+    }
+
+    chunk->present = true;
+    return true;
+}
+
+static void warn_unknown_svx_sections(const svx::section_list& sections,
+                                      const file_chunk_t* chunks, int chunk_count, pcstr debug_path) {
+    for (const auto& s : sections) {
+        bool known = false;
+        for (int i = 0; i < chunk_count && !known; i++) {
+            known = (strcmp(s.name, chunks[i].name) == 0);
+        }
+        if (!known) {
+            logs::warn("File [%s] has unknown section [%s] (%u bytes), skipped.",
+                       debug_path, s.name, s.raw_size);
+        }
+    }
+}
+
+// Schema order, not file order: binds may rely on state set by an earlier chunk.
+static bool apply_svx_chunk_state(file_chunk_t* chunk, int file_version, pcstr debug_path) {
+    if (!chunk->VALID) {
+        return true;
+    }
+
+    if (chunk->present) {
+        chunk->iob->read(file_version);
+        return true;
+    }
+
+    // A defaulter is how a chunk declares itself optional: it can be absent
+    // because the save predates it, and it knows how to reset its own state.
+    // A chunk without one is mandatory - its absence means a damaged file, not an
+    // old one, and loading on would silently produce a city missing whole systems.
+    if (!chunk->iob->has_default()) {
+        logs::error("Unable to read file [%s], required chunk [%s] is missing.",
+                    debug_path, chunk->name);
+        return false;
+    }
+
+    logs::info("chunk [%s] missing from [%s], defaults applied", chunk->name, debug_path);
+    chunk->iob->apply_default(file_version);
     return true;
 }
 
@@ -394,25 +468,15 @@ bool FileIOManager::unserialize_sectioned(vfs::reader reader, void (*init_schema
 
     file_version = (int)hdr.save_data_version;
     file_sectioned = true;
-
     init_schema(file_format, file_version);
 
-    // locate every schema chunk by name and read it; section order in the file is
-    // irrelevant, only the names matter
     int missing = 0;
     for (int i = 0; i < num_chunks(); i++) {
         file_chunk_t* chunk = &file_chunks.at(i);
         OZZY_PROFILER_SECTION(_, chunk->name);
 
-        const svx::section_info* found = nullptr;
         int matches = 0;
-        for (const auto& s : sections) {
-            if (strcmp(s.name, chunk->name) == 0) {
-                found = &s; // a duplicated name is odd but the last one wins
-                matches++;
-            }
-        }
-
+        const svx::section_info* found = find_svx_section(sections, chunk->name, &matches);
         if (matches > 1) {
             logs::warn("File [%s] has section [%s] %d times, using the last.",
                        file_path.c_str(), chunk->name, matches);
@@ -424,59 +488,19 @@ bool FileIOManager::unserialize_sectioned(vfs::reader reader, void (*init_schema
             continue;
         }
 
-        // a chunk that grew since this file was written keeps its schema size and
-        // reads the missing tail as zeroes; one that shrank still needs room for
-        // everything the file holds
-        if ((int)found->raw_size > chunk->buf->size()) {
-            chunk->resize((int)found->raw_size);
-        }
-
-        if (!read_section_payload(reader, *found, chunk->buf, file_path.c_str())) {
+        if (!load_svx_chunk_payload(reader, chunk, *found, file_path.c_str())) {
             clear();
             return false;
         }
-
-        chunk->present = true;
     }
 
-    // anything in the file this build does not know about
-    for (const auto& s : sections) {
-        bool known = false;
-        for (int i = 0; i < num_chunks() && !known; i++) {
-            known = (strcmp(s.name, file_chunks.at(i).name) == 0);
-        }
-        if (!known) {
-            logs::warn("File [%s] has unknown section [%s] (%u bytes), skipped.",
-                       file_path.c_str(), s.name, s.raw_size);
-        }
-    }
+    warn_unknown_svx_sections(sections, file_chunks.data(), num_chunks(), file_path.c_str());
 
-    // load GAME STATE from buffers, in schema order - the file order is free, the
-    // order state is applied in is not, since binds may rely on earlier chunks
     for (int i = 0; i < num_chunks(); ++i) {
-        file_chunk_t* chunk = &file_chunks.at(i);
-        if (!chunk->VALID) {
-            continue;
-        }
-
-        if (chunk->present) {
-            chunk->iob->read(file_version);
-            continue;
-        }
-
-        // A defaulter is how a chunk declares itself optional: it can be absent
-        // because the save predates it, and it knows how to reset its own state.
-        // A chunk without one is mandatory - its absence means a damaged file, not an
-        // old one, and loading on would silently produce a city missing whole systems.
-        if (!chunk->iob->has_default()) {
-            logs::error("Unable to read file [%s], required chunk [%s] is missing.",
-                        file_path.c_str(), chunk->name);
+        if (!apply_svx_chunk_state(&file_chunks.at(i), file_version, file_path.c_str())) {
             clear();
             return false;
         }
-
-        logs::info("chunk [%s] missing from [%s], defaults applied", chunk->name, file_path.c_str());
-        chunk->iob->apply_default(file_version);
     }
 
     logs::info("File read successful: %s %i@ --- CONTAINER rev %u, VERSION %i, %u sections (%d missing) ---",
@@ -509,10 +533,6 @@ bool FileIOManager::unserialize(vfs::reader reader, int offset, e_file_format fo
         return false;
     }
 
-    // A container announces itself with its magic, and the reader already holds the
-    // whole file, so the version comes straight from the header. Everything else -
-    // original Pharaoh files and .svx written before this format - goes through the
-    // positional reader, which reopens the file by path to sniff its version.
     svx::file_header probe = {};
     if (svx::peek_header(reader, offset, probe)) {
         return unserialize_sectioned(reader, init_schema);
@@ -524,8 +544,6 @@ bool FileIOManager::unserialize(vfs::reader reader, int offset, e_file_format fo
 bool FileIOManager::unserialize_legacy(vfs::reader reader,
                                        const int (*determine_file_version)(pcstr fnm, int ofst),
                                        void (*init_schema)(e_file_format _format, const int _version)) {
-    // always rewind: this path reads chunk after chunk from wherever the cursor is,
-    // and the container probe upstream has already moved it
     reader->seek(file_offset);
 
     // determine file version based on provided format
@@ -540,10 +558,8 @@ bool FileIOManager::unserialize_legacy(vfs::reader reader,
         }
     }
 
-    // init file chunks and buffer collection
-    init_schema(file_format, file_version);
+     init_schema(file_format, file_version);
 
-    // read file contents into buffers
     for (int i = 0; i < num_chunks(); i++) {
         file_chunk_t* chunk = &file_chunks.at(i);
         OZZY_PROFILER_SECTION(_, chunk->name);
