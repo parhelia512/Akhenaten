@@ -11,6 +11,7 @@ localization_hu = [
   {key:"#TR_INVALID_LANGUAGE_MESSAGE", text:"A kiválasztott mappa nem tartalmaz érvényes nyelvi csomagot. A részletekért ellenőrizd a naplót."}
   {key:"#TR_BUTTON_OK", text:"OK"}
   {key:"#TR_CONFIG_IRONWILL", text:"Ironwill mód — mentés csak a főmenübe lépéskor (Save, Ctrl+S, autosave, quicksave/load tiltva)"}
+  {key:"#TR_CONFIG_UNLOCK_ALL_CAMPAIGNS", text:"Összes kampányidőszak feloldása a Family History-ban"}
   {key:"#ironwill_briefing_label", text:"Ironwill"}
   {key:"#ironwill_save_blocked", text:"Ironwill: mentés csak kilépéskor a menübe"}
   {key:"#ironwill_load_blocked", text:"Ironwill: betöltés csak a főmenüből (Continue)"}

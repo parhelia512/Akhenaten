@@ -12,6 +12,7 @@ localization_en = [
   {key:"#TR_INVALID_LANGUAGE_MESSAGE", text:"The directory you selected does not contain a valid language pack. Please check the log for errors."}
   {key:"#TR_BUTTON_OK", text:"OK"}
   {key:"#TR_CONFIG_IRONWILL", text:"Ironwill mode — save only when exiting to the main menu (blocks Save, Ctrl+S, autosave, quicksave/load)"}
+  {key:"#TR_CONFIG_UNLOCK_ALL_CAMPAIGNS", text:"Unlock all campaign periods in Family History"}
   {key:"#ironwill_briefing_label", text:"Ironwill"}
   {key:"#ironwill_save_blocked", text:"Ironwill: save only on Exit to menu"}
   {key:"#ironwill_load_blocked", text:"Ironwill: load only from the main menu (Continue)"}

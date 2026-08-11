@@ -14,6 +14,9 @@ function campaign_period_last_scenario_id(period) {
 }
 
 function campaign_period_is_unlocked(period) {
+    if (game_features.gameopt_unlock_all_campaigns) {
+        return true
+    }
     if (period <= 0) {
         return true
     }
