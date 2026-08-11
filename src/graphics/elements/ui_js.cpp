@@ -8,18 +8,21 @@
 #include "mujs/jsvalue.h"
 #include "input/input.h"
 #include "widget/widget_sidebar.h"
+#include "widget/sidebar/editor.h"
 #include "city/city.h"
 #include "overlays/city_overlay.h"
 #include "graphics/elements/generic_button.h"
 #include "graphics/window.h"
 #include "window/window_city.h"
 #include "window/editor/window_editor.h"
+#include "window/editor/empire.h"
 #include "window/message_dialog_new.h"
 #include "window/window_advisors.h"
 #include "window/autoconfig_window.h"
 #include "empire/trade_prices.h"
 #include "game/resource.h"
 #include "window/popup_dialog.h"
+#include "window/select_list.h"
 #include "city/city_message.h"
 #include "game/undo.h"
 #include "scenario/scenario.h"
@@ -135,6 +138,11 @@ bool __ui_widget_sidebar_city_handle_mouse() {
     return widget_sidebar_city_handle_mouse(&mouse::ref()) != 0;
 }
 ANK_FUNCTION(__ui_widget_sidebar_city_handle_mouse)
+
+bool __ui_widget_sidebar_editor_handle_mouse() {
+    return widget_sidebar_editor_handle_mouse(&mouse::ref()) != 0;
+}
+ANK_FUNCTION(__ui_widget_sidebar_editor_handle_mouse)
 
 void __ui_window_city_draw() {
     window_city_draw();
@@ -295,6 +303,42 @@ void __ui_window_editor_map_show() {
     window_editor_map_show();
 }
 ANK_FUNCTION(__ui_window_editor_map_show)
+
+void __ui_window_editor_map_draw_all() {
+    window_editor_map_draw_all();
+}
+ANK_FUNCTION(__ui_window_editor_map_draw_all)
+
+void __ui_window_editor_map_draw_panels() {
+    window_editor_map_draw_panels();
+}
+ANK_FUNCTION(__ui_window_editor_map_draw_panels)
+
+void __ui_window_editor_empire_show() {
+    window_editor_empire_show();
+}
+ANK_FUNCTION(__ui_window_editor_empire_show)
+
+void __ui_window_message_dialog_editor(pcstr template_name) {
+    window_message_dialog_show(template_name, -1, window_editor_map_draw_all);
+}
+ANK_FUNCTION_1(__ui_window_message_dialog_editor)
+
+static xstring g_select_list_js_callback;
+
+static void select_list_js_callback(int id) {
+    xstring cb = g_select_list_js_callback;
+    g_select_list_js_callback = xstring();
+    if (!cb.empty()) {
+        js_call_function(cb, id, 0);
+    }
+}
+
+void __ui_window_select_list_show(int x, int y, int group, int count, js_helpers::js_function_ref cb) {
+    g_select_list_js_callback = cb.ref;
+    window_select_list_show(x, y, group, count, select_list_js_callback);
+}
+ANK_FUNCTION_5(__ui_window_select_list_show)
 void __ui_draw_texture(vec2i pos, int img_id) {
     ::painter ctx = game.painter();
     ctx.img_generic(img_id, pos);

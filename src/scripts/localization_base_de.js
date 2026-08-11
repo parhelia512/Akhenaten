@@ -818,18 +818,6 @@ localization_base_de = [
     { group:24, id:13, text: "Woche 14" }
     { group:24, id:14, text: "Woche 15" }
     { group:24, id:15, text: "Woche 16" }
-    { group:25, id:0, text: "Jan" }
-    { group:25, id:1, text: "Feb" }
-    { group:25, id:2, text: "Mär" }
-    { group:25, id:3, text: "Apr" }
-    { group:25, id:4, text: "Mai" }
-    { group:25, id:5, text: "Jun" }
-    { group:25, id:6, text: "Jul" }
-    { group:25, id:7, text: "Aug" }
-    { group:25, id:8, text: "Sep" }
-    { group:25, id:9, text: "Okt" }
-    { group:25, id:10, text: "Nov" }
-    { group:25, id:11, text: "Dez" }
     { group:26, id:0, text: "Leer" }
     { group:26, id:1, text: "Rot" }
     { group:26, id:2, text: "Blau" }

@@ -1634,6 +1634,18 @@ localization_hu = [
   { key: "#top_menu_funds_tooltip", text: "A város jelenlegi pénzkészlete" }
   { key: "#top_menu_population_tooltip", text: "A város jelenlegi lakossága" }
   { key: "#top_menu_date_tooltip", text: "Az aktuális dátum!" }
+  { key: "#month_jan", text: "jan." }
+  { key: "#month_feb", text: "febr." }
+  { key: "#month_mar", text: "márc." }
+  { key: "#month_apr", text: "ápr." }
+  { key: "#month_may", text: "máj." }
+  { key: "#month_jun", text: "jún." }
+  { key: "#month_jul", text: "júl." }
+  { key: "#month_aug", text: "aug." }
+  { key: "#month_sep", text: "szept." }
+  { key: "#month_oct", text: "okt." }
+  { key: "#month_nov", text: "nov." }
+  { key: "#month_dec", text: "dec." }
   { key: "#top_menu_debug", text: "Debug" }
   { key: "#top_menu_debug_render", text: "Render" }
   { key: "#top_menu_cheat_console", text: "Csalókonszol" }

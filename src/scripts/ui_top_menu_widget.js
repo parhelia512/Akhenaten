@@ -8,6 +8,8 @@ top_menu_state = {
 	population_str: ""
 	item_clicked: 0
 	rotate_hover: 0
+	headers_right: 0
+	status_shift: 0
 	header_layout: {}
 	menu_size: {}
 	item_enabled: {}
@@ -127,7 +129,7 @@ function top_menu_header_at_mouse() {
 	var mx = __mouse.x
 	var my = __mouse.y
 	var y0 = top_menu_widget.offset.y
-	var y1 = y0 + 12
+	var y1 = y0 + top_menu_widget.header_hit_height
 	if (my < y0 || my >= y1) {
 		return ""
 	}
@@ -196,9 +198,19 @@ top_menu_widget {
 	submenu_offset {x: 8, y: -8}
 	item_height : 20
 	height : 30
+	header_hit_height : 12
 	background { pack:PACK_GENERAL, id:121, offset:8 }
 	sidebar_offset : 158
 	spacing : 16
+	rotate_x : -170
+	rotate_img { pack:PACK_GENERAL, id:136, offset:72 }
+	status_header_gap : 16
+	status_date { right: -110, w: 117, h: 20 }
+	status_pop { right: -310, w: 117, h: 20 }
+	status_funds { right: -440, w: 117, h: 20 }
+	status_rot_l { right: -174, w: 14, h: 24 }
+	status_rot_m { right: -160, w: 14, h: 24 }
+	status_rot_r { right: -144, w: 14, h: 24 }
 
 	menus [
 		{
@@ -374,7 +386,7 @@ function top_menu_submenu_ui_draw_foreground(window) {
 [es=(top_menu_submenu, ui_handle_mouse)]
 function top_menu_submenu_ui_handle_mouse(window) {
 	if (__input_go_back_requested()) {
-		top_menu_clear_state()
+		top_menu_dismiss()
 		return
 	}
 

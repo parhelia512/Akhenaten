@@ -27,6 +27,7 @@ pcstr lang_text_from_key(pcstr key);
 xstring lang_xtext_from_key(const xstring& key);
 textid loc_text_from_key(pcstr key);
 xstring lang_text_from_message(int id);
+pcstr lang_text_month(int month);
 
 int lang_text_get_width(int group, int number, e_font font);
 int lang_text_get_width(const char* str, e_font font);

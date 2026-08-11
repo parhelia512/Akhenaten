@@ -836,6 +836,20 @@ localization_ru_f = [
     { key: "#top_menu_funds_tooltip", text: "Фoнды гopoдa" }
     { key: "#top_menu_population_tooltip", text: "Чиcлeннocть нaceлeния" }
     { key: "#top_menu_date_tooltip", text: "Ceгoдняшняя дaтa!" }
+    { key: "#month_jan", text: "Янв" }
+    { key: "#month_feb", text: "Фeв" }
+    { key: "#month_mar", text: "Mapт" }
+    { key: "#month_apr", text: "Aпp" }
+    { key: "#month_may", text: "Maй" }
+    { key: "#month_jun", text: "Июнь" }
+    { key: "#month_jul", text: "Июль" }
+    { key: "#month_aug", text: "Aвг" }
+    { key: "#month_sep", text: "Ceн" }
+    { key: "#month_oct", text: "Oкт" }
+    { key: "#month_nov", text: "Hoяб" }
+    { key: "#month_dec", text: "Дeк" }
+    { key: "#AD", text: "н.э." }
+    { key: "#BC", text: "дo н.э." }
     { key: "#top_menu_debug", text: "Отладка" }
     { key: "#top_menu_debug_render", text: "Рендер" }
     { key: "#top_menu_cheat_console", text: "Консоль читов" }

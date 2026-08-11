@@ -1,13 +1,13 @@
 log_info("akhenaten: ui top menu bar started")
 
 function top_menu_format_date(year, month) {
-	var month_str = __loc(25, month)
+	var month_str = month_name(month)
 	if (year >= 0) {
 		return game.locale_year_before_ad
-			? fmt("${month} ${year} AD", { month: month_str, year: year })
-			: fmt("${month} AD ${year}", { month: month_str, year: year })
+			? fmt("${month} ${year} #AD", { month: month_str, year: year })
+			: fmt("${month} #AD ${year}", { month: month_str, year: year })
 	}
-	return fmt("${month} ${year} BC", { month: month_str, year: -year })
+	return fmt("${month} ${year} #BC", { month: month_str, year: -year })
 }
 
 function top_menu_refresh_status_text() {
@@ -19,6 +19,42 @@ function top_menu_refresh_status_text() {
 function top_menu_on_level_post_load(ev) {
 	top_menu_clear_state()
 	top_menu_refresh_status_text()
+}
+
+function top_menu_measure_headers_right() {
+	var menus = top_menu_widget.menus
+	if (!menus || menus.length == 0) {
+		return top_menu_widget.offset.x
+	}
+	var cur_x = top_menu_widget.offset.x
+	var spacing = top_menu_widget.spacing
+	for (var i = 0; i < menus.length; i++) {
+		var text = top_menu_resolve_text(menus[i].text)
+		cur_x += __ui_text_width(text, FONT_NORMAL_BLACK_ON_LIGHT) + spacing
+	}
+	return cur_x - spacing
+}
+
+function top_menu_update_status_shift() {
+	var headers_right = top_menu_measure_headers_right()
+	top_menu_state.headers_right = headers_right
+	var gap = top_menu_widget.status_header_gap
+	if (gap === undefined || gap === null) {
+		gap = 16
+	}
+	var funds = top_menu_widget.status_funds
+	if (!funds) {
+		top_menu_state.status_shift = 0
+		return 0
+	}
+	var funds_x = screen.width + funds.right
+	var need = headers_right + gap
+	if (funds_x >= need) {
+		top_menu_state.status_shift = 0
+		return 0
+	}
+	top_menu_state.status_shift = need - funds_x
+	return top_menu_state.status_shift
 }
 
 function top_menu_draw_background() {
@@ -43,8 +79,15 @@ function top_menu_draw_background() {
 
 	ui.draw_texture({ x: current_sidebar_offset - block_width + want_sidebar_offset, y: 0 }, block_img.tid)
 
-	var rotate_img = get_image({pack:PACK_GENERAL, id:136, offset:72 + top_menu_state.rotate_hover })
-	ui.draw_texture({ x: screen.width - 170, y: 0 }, rotate_img.tid)
+	var rot = top_menu_widget.rotate_img
+	if (!rot) {
+		return
+	}
+	var rotate_img = get_image({ pack: rot.pack, id: rot.id, offset: rot.offset + top_menu_state.rotate_hover })
+	if (!rotate_img) {
+		return
+	}
+	ui.draw_texture({ x: screen.width + top_menu_widget.rotate_x + top_menu_state.status_shift, y: 0 }, rotate_img.tid)
 }
 
 function top_menu_draw_headers() {
@@ -60,7 +103,8 @@ function top_menu_draw_headers() {
 	var mx = __mouse.x
 	var my = __mouse.y
 	var y0 = top_menu_widget.offset.y
-	var in_bar = (my >= y0 && my < y0 + 12)
+	var hit_h = top_menu_widget.header_hit_height
+	var in_bar = (my >= y0 && my < y0 + hit_h)
 	var focus_id = ""
 	if (top_menu_state.open_sub_menu) {
 		focus_id = top_menu_state.open_sub_menu
@@ -94,23 +138,31 @@ function top_menu_draw_headers() {
 		cur_x += width + spacing
 	}
 
+	top_menu_state.headers_right = cur_x - spacing
+
 	if (!top_menu_state.open_sub_menu) {
 		top_menu_state.focus_menu_id = focus_id
 	}
 }
 
-function top_menu_status_rect(right, w, h) {
-	return { x: screen.width + right, y: top_menu_widget.offset.y, w: w, h: h }
+function top_menu_status_rect(cfg) {
+	return {
+		x: screen.width + cfg.right + top_menu_state.status_shift,
+		y: top_menu_widget.offset.y,
+		w: cfg.w,
+		h: cfg.h
+	}
 }
 
 function top_menu_status_rects() {
+	var w = top_menu_widget
 	return {
-		date: top_menu_status_rect(-110, 117, 20),
-		pop: top_menu_status_rect(-310, 117, 20),
-		funds: top_menu_status_rect(-440, 117, 20),
-		rot_l: top_menu_status_rect(-174, 14, 24),
-		rot_m: top_menu_status_rect(-160, 14, 24),
-		rot_r: top_menu_status_rect(-144, 14, 24)
+		date: top_menu_status_rect(w.status_date),
+		pop: top_menu_status_rect(w.status_pop),
+		funds: top_menu_status_rect(w.status_funds),
+		rot_l: top_menu_status_rect(w.status_rot_l),
+		rot_m: top_menu_status_rect(w.status_rot_m),
+		rot_r: top_menu_status_rect(w.status_rot_r)
 	}
 }
 
@@ -190,6 +242,7 @@ function top_menu_draw(ev) {
 	if (top_menu_state.open_sub_menu && !ui.window_is("top_menu_submenu")) {
 		top_menu_clear_state()
 	}
+	top_menu_update_status_shift()
 	top_menu_draw_background()
 	top_menu_draw_headers()
 	top_menu_draw_status()

@@ -821,19 +821,6 @@ localization_base_hu = [
     { group:24, id:14, text: "15. hét" }
     { group:24, id:15, text: "16. hét" }
 
-    { group:25, id:0, text: "jan." }
-    { group:25, id:1, text: "febr." }
-    { group:25, id:2, text: "márc." }
-    { group:25, id:3, text: "ápr." }
-    { group:25, id:4, text: "máj." }
-    { group:25, id:5, text: "jún." }
-    { group:25, id:6, text: "júl." }
-    { group:25, id:7, text: "aug." }
-    { group:25, id:8, text: "szept." }
-    { group:25, id:9, text: "okt." }
-    { group:25, id:10, text: "nov." }
-    { group:25, id:11, text: "dec." }
-
     { group:26, id:0, text: "Üres" }
     { group:26, id:1, text: "Piros" }
     { group:26, id:2, text: "Kék" }

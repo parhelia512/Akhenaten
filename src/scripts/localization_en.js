@@ -1667,6 +1667,18 @@ localization_en = [
   { key: "#top_menu_funds_tooltip", text: "Current city funds" }
   { key: "#top_menu_population_tooltip", text: "Current city population" }
   { key: "#top_menu_date_tooltip", text: "The current date!" }
+  { key: "#month_jan", text: "Jan" }
+  { key: "#month_feb", text: "Feb" }
+  { key: "#month_mar", text: "Mar" }
+  { key: "#month_apr", text: "Apr" }
+  { key: "#month_may", text: "May" }
+  { key: "#month_jun", text: "Jun" }
+  { key: "#month_jul", text: "Jul" }
+  { key: "#month_aug", text: "Aug" }
+  { key: "#month_sep", text: "Sep" }
+  { key: "#month_oct", text: "Oct" }
+  { key: "#month_nov", text: "Nov" }
+  { key: "#month_dec", text: "Dec" }
   { key: "#top_menu_debug", text: "Debug" }
   { key: "#top_menu_debug_render", text: "Render" }
   { key: "#top_menu_cheat_console", text: "Cheat console" }

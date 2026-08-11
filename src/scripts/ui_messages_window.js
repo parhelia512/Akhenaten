@@ -18,7 +18,7 @@ function message_list_window_on_render_item(p) {
     ui.image(msgIcon, [rowX, rowY])
     var month = __city_message_month(idx)
     var year = __city_message_year(idx)
-    ui.label(__loc(25, month), [rowX + 42, rowY], font)
+    ui.label(month_name(month), [rowX + 42, rowY], font)
     ui.label_year(year, [rowX + 76, rowY], font)
     if (__city_message_eventmsg_body_id(idx) != -1) {
         var titleId = __city_message_eventmsg_title_id(idx)

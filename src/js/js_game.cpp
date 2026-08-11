@@ -26,6 +26,7 @@
 #include "game/game_events.h"
 #include "game/player.h"
 #include "scenario/scenario.h"
+#include "scenario/editor_map.h"
 #include "core/encoding.h"
 #include "core/locale.h"
 #include "game/game_environment.h"
@@ -522,9 +523,14 @@ bool __game_delete_savegame(pcstr filename_short) { return GamestateIO::delete_s
 bool __game_delete_map(pcstr filename_short) { return GamestateIO::delete_map(filename_short); } ANK_FUNCTION_1(__game_delete_map)
 bool __game_editor_load_scenario(pcstr path) { return game_file_editor_load_scenario(path) != 0; } ANK_FUNCTION_1(__game_editor_load_scenario)
 bool __game_editor_write_scenario(pcstr path) { return game_file_editor_write_scenario(path) != 0; } ANK_FUNCTION_1(__game_editor_write_scenario)
+void __game_editor_create_scenario(int size) { game_file_editor_create_scenario(size); } ANK_FUNCTION_1(__game_editor_create_scenario)
 bool __game_init_editor() { return game_init_editor(); } ANK_FUNCTION(__game_init_editor)
 void __game_exit_editor() { game_exit_editor(); } ANK_FUNCTION(__game_exit_editor)
 bool __editor_is_active() { return editor_is_active() != 0; } ANK_FUNCTION(__editor_is_active)
+bool __scenario_is_saved() { return g_scenario.is_saved; } ANK_FUNCTION(__scenario_is_saved)
+void __scenario_editor_clear_predator_herd_points() { scenario_editor_clear_predator_herd_points(); } ANK_FUNCTION(__scenario_editor_clear_predator_herd_points)
+void __scenario_editor_clear_fishing_points() { scenario_editor_clear_fishing_points(); } ANK_FUNCTION(__scenario_editor_clear_fishing_points)
+void __scenario_editor_clear_invasion_points() { scenario_editor_clear_invasion_points(); } ANK_FUNCTION(__scenario_editor_clear_invasion_points)
 void __video_stop() { video_stop(); } ANK_FUNCTION(__video_stop)
 void __game_load_mission(int scenario_id, int start_immediately) { GamestateIO::load_mission(scenario_id, !!start_immediately); } ANK_FUNCTION_2(__game_load_mission)
 bool __game_load_map(pcstr filename_short, int start_immediately) { return GamestateIO::load_map(filename_short, true, !!start_immediately); } ANK_FUNCTION_2(__game_load_map)

@@ -144,40 +144,6 @@ bool save_settings_file(pcstr path) {
     return true;
 }
 
-bool try_load_game_features(pcstr data_directory) {
-    bstring512 path;
-    if (data_directory && *data_directory) {
-        path.printf("%s/%s", data_directory, CONF_FILENAME);
-        if (load_settings_file(path.c_str())) {
-            return true;
-        }
-    }
-
-    path.printf("%s/%s", platform.user_directory(), CONF_FILENAME);
-    if (load_settings_file(path.c_str())) {
-        return true;
-    }
-
-    return load_settings_file(CONF_FILENAME);
-}
-
-void try_save_game_features(pcstr data_directory) {
-    bstring512 path;
-    if (data_directory && *data_directory) {
-        path.printf("%s/%s", data_directory, CONF_FILENAME);
-        if (save_settings_file(path.c_str())) {
-            return;
-        }
-    }
-
-    path.printf("%s/%s", platform.user_directory(), CONF_FILENAME);
-    if (save_settings_file(path.c_str())) {
-        return;
-    }
-
-    save_settings_file(CONF_FILENAME);
-}
-
 void sync_display_options_from_args(const Arguments &args) {
     const vec2i size = args.get_window_size();
     if (size.x > 0 && size.y > 0) {
@@ -368,6 +334,40 @@ void push_changed_feature_overrides(Arguments &args,
 }
 
 } // namespace
+
+bool try_load_game_features(pcstr data_directory) {
+    bstring512 path;
+    if (data_directory && *data_directory) {
+        path.printf("%s/%s", data_directory, CONF_FILENAME);
+        if (load_settings_file(path.c_str())) {
+            return true;
+        }
+    }
+
+    path.printf("%s/%s", platform.user_directory(), CONF_FILENAME);
+    if (load_settings_file(path.c_str())) {
+        return true;
+    }
+
+    return load_settings_file(CONF_FILENAME);
+}
+
+void try_save_game_features(pcstr data_directory) {
+    bstring512 path;
+    if (data_directory && *data_directory) {
+        path.printf("%s/%s", data_directory, CONF_FILENAME);
+        if (save_settings_file(path.c_str())) {
+            return;
+        }
+    }
+
+    path.printf("%s/%s", platform.user_directory(), CONF_FILENAME);
+    if (save_settings_file(path.c_str())) {
+        return;
+    }
+
+    save_settings_file(CONF_FILENAME);
+}
 
 void show_options_window(Arguments& args) {
 #if defined(_WIN32)

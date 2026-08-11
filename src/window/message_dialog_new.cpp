@@ -359,7 +359,7 @@ xstring ui::message_dialog_base::resolve_message_body(const lang_message& msg) c
 }
 
 void ui::message_dialog_base::format_city_message_header(bstring1024& out) const {
-    out.printf("%s %d %s %s", ui::str(25, player_msg.month), player_msg.year, ui::str(63, 5), city_player_name());
+    out.printf("%s %d %s %s", lang_text_month(player_msg.month), player_msg.year, ui::str(63, 5), city_player_name());
 }
 
 void ui::message_dialog_base::draw_city_message_text(const lang_message& msg) {

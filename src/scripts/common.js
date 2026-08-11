@@ -89,6 +89,16 @@ function _eformat(message, locals) {
 
 fmt = _eformat
 
+var MONTH_LOC_KEYS = [
+    "#month_jan", "#month_feb", "#month_mar", "#month_apr",
+    "#month_may", "#month_jun", "#month_jul", "#month_aug",
+    "#month_sep", "#month_oct", "#month_nov", "#month_dec"
+]
+
+function month_name(month) {
+    return __loc(MONTH_LOC_KEYS[month] || MONTH_LOC_KEYS[0])
+}
+
 function log_info(message, locals) {
     __log_info_native(_eformat(message, locals));
 }

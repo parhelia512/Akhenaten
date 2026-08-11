@@ -817,18 +817,6 @@ localization_base_ru = [
     { group:24, id:13, text: "Неделя 14" }
     { group:24, id:14, text: "Неделя 15" }
     { group:24, id:15, text: "Неделя 16" }
-    { group:25, id:0, text: "Янв" }
-    { group:25, id:1, text: "Фев" }
-    { group:25, id:2, text: "Мар" }
-    { group:25, id:3, text: "Апр" }
-    { group:25, id:4, text: "Май" }
-    { group:25, id:5, text: "Июн" }
-    { group:25, id:6, text: "Июл" }
-    { group:25, id:7, text: "Авг" }
-    { group:25, id:8, text: "Сен" }
-    { group:25, id:9, text: "Окт" }
-    { group:25, id:10, text: "Ноя" }
-    { group:25, id:11, text: "Дек" }
     { group:26, id:0, text: "Пусто" }
     { group:26, id:1, text: "Красный" }
     { group:26, id:2, text: "Синий" }

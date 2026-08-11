@@ -1573,6 +1573,18 @@ localization_de = [
   { key: "#top_menu_funds_tooltip", text: "Aktuelle Stadtfinanzen" }
   { key: "#top_menu_population_tooltip", text: "Aktuelle Stadtbevölkerung" }
   { key: "#top_menu_date_tooltip", text: "Das aktuelle Datum!" }
+  { key: "#month_jan", text: "Jan" }
+  { key: "#month_feb", text: "Feb" }
+  { key: "#month_mar", text: "Mär" }
+  { key: "#month_apr", text: "Apr" }
+  { key: "#month_may", text: "Mai" }
+  { key: "#month_jun", text: "Jun" }
+  { key: "#month_jul", text: "Jul" }
+  { key: "#month_aug", text: "Aug" }
+  { key: "#month_sep", text: "Sep" }
+  { key: "#month_oct", text: "Okt" }
+  { key: "#month_nov", text: "Nov" }
+  { key: "#month_dec", text: "Dez" }
   { key: "#top_menu_debug", text: "Debug" }
   { key: "#top_menu_debug_render", text: "Render" }
   { key: "#top_menu_cheat_console", text: "Cheat-Konsole" }

@@ -23,6 +23,7 @@ import ui_figure_enemy_window
 import ui_top_menu_actions
 import ui_top_menu_widget
 import ui_top_menu_bar
+import ui_top_menu_editor
 import ui_advisor_religion
 import ui_advisor_finance
 import ui_advisor_health

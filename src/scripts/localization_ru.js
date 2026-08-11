@@ -915,6 +915,20 @@ localization_ru = [
     { key: "#top_menu_funds_tooltip", text: "Текущие средства города" }
     { key: "#top_menu_population_tooltip", text: "Текущее население города" }
     { key: "#top_menu_date_tooltip", text: "Текущая дата!" }
+    { key: "#month_jan", text: "Янв" }
+    { key: "#month_feb", text: "Фев" }
+    { key: "#month_mar", text: "Мар" }
+    { key: "#month_apr", text: "Апр" }
+    { key: "#month_may", text: "Май" }
+    { key: "#month_jun", text: "Июн" }
+    { key: "#month_jul", text: "Июл" }
+    { key: "#month_aug", text: "Авг" }
+    { key: "#month_sep", text: "Сен" }
+    { key: "#month_oct", text: "Окт" }
+    { key: "#month_nov", text: "Ноя" }
+    { key: "#month_dec", text: "Дек" }
+    { key: "#AD", text: "н.э." }
+    { key: "#BC", text: "до н.э." }
     { key: "#top_menu_debug", text: "Отладка" }
     { key: "#top_menu_debug_render", text: "Рендер" }
     { key: "#top_menu_cheat_console", text: "Консоль читов" }

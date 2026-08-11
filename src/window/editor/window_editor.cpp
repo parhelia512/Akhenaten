@@ -12,9 +12,9 @@
 #include "graphics/view/view.h"
 #include "graphics/window.h"
 #include "game/game_config.h"
+#include "js/js.h"
 #include "widget/map_editor.h"
 #include "widget/sidebar/editor.h"
-#include "widget/top_menu_editor.h"
 #include "window/editor/attributes.h"
 #include "window/popup_dialog.h"
 #include "platform/renderer.h"
@@ -24,7 +24,7 @@ static int city_view_dirty;
 static void draw_background(int) {
     g_render.clear_screen();
     widget_sidebar_editor_draw_background();
-    widget_top_menu_editor_draw();
+    js_call_event_handlers("top_menu_editor_draw", {});
 }
 
 static void draw_cancel_construction() {
@@ -61,10 +61,7 @@ static void handle_hotkeys(const hotkeys* h) {
 
 static void handle_input(const mouse* m, const hotkeys* h) {
     handle_hotkeys(h);
-    if (widget_top_menu_editor_handle_input(m, h))
-        return;
-    if (widget_sidebar_editor_handle_mouse(m))
-        return;
+    js_call_event_handlers("top_menu_editor_handle_input", {});
     widget_map_editor_handle_input(m, h);
 }
 

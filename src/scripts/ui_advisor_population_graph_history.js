@@ -140,8 +140,8 @@ function advisor_population_draw_history_graph(elm, title_elm) {
 	var xAxisDxR = (((gh.x_axis_offset.x + gh.x_axis_width) * lw) / HISTORY_REF_W) | 0
 
 	var range = advisor_population_min_max_month_year(max_months)
-	var left = __loc(25, range.start.month) + " " + range.start.year
-	var right = __loc(25, range.end.month) + " " + range.end.year
+	var left = month_name(range.start.month) + " " + range.start.year
+	var right = month_name(range.end.month) + " " + range.end.year
 	ui.label_ex(left, advisor_population_v2_add(elm.pos, xAxisDxL, xAxisDy), FONT_SMALL_PLAIN, 0, 0)
 	ui.label_ex(right, advisor_population_v2_add(elm.pos, xAxisDxR, xAxisDy), FONT_SMALL_PLAIN, 0, 0)
 

@@ -50,10 +50,10 @@ void ui::message_dialog_disaster::init_data(xstring text_id, int message_id, voi
     if (player_msg.param1) {
         if (this->text_id == MESSAGE_DIALOG_THEFT) {
             int amount_offset = (player_msg.param1 == 1 || player_msg.param1 == -1) ? 0 : 1;
-            header.printf("%s %d %s %s %d %s", ui::str(25, player_msg.month), player_msg.year, ui::str(63, 5), city_player_name(),
+            header.printf("%s %d %s %s %d %s", lang_text_month(player_msg.month), player_msg.year, ui::str(63, 5), city_player_name(),
                           player_msg.param1, ui::str(8, amount_offset));
         } else {
-            header.printf("%s %d %s %s %s", ui::str(25, player_msg.month), player_msg.year, ui::str(63, 5), city_player_name(), ui::str(41, player_msg.param1));
+            header.printf("%s %d %s %s %s", lang_text_month(player_msg.month), player_msg.year, ui::str(63, 5), city_player_name(), ui::str(41, player_msg.param1));
         }
     } else {
         format_city_message_header(header);

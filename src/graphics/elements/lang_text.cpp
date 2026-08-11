@@ -438,6 +438,18 @@ pcstr lang_text_from_key(pcstr key) {
     return key;
 }
 
+pcstr lang_text_month(int month) {
+    static const char* keys[] = {
+        "#month_jan", "#month_feb", "#month_mar", "#month_apr",
+        "#month_may", "#month_jun", "#month_jul", "#month_aug",
+        "#month_sep", "#month_oct", "#month_nov", "#month_dec",
+    };
+    if (month < 0 || month > 11) {
+        month = 0;
+    }
+    return lang_text_from_key(keys[month]);
+}
+
 int lang_text_get_width(int group, int number, e_font font) {
     pcstr str = lang_get_string(group, number);
     return text_get_width(str, font) + font_definition_for(font)->space_width;
