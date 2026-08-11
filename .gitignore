@@ -52,6 +52,8 @@ doc
 /tools/*
 !/tools/*.zip
 !/tools/*.7z
+!/tools/akhenaten-updater/
+!/tools/akhenaten-updater/**
 
 /bin_x64
 /ext/include
