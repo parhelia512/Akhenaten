@@ -1,7 +1,5 @@
 # Editor Bridge / Ferry allow flags (UB1 / BR1)
 
-Dump helper: `__test_mission_map_bridge_allow_dump(id, path)`.
-
 | Slot | Lang 67 | Types |
 |------|---------|--------|
 | **28** | Bridge | `{BUILDING_LOW_BRIDGE}` only |
@@ -14,11 +12,10 @@ Engine/load/undo may still know type 83 (C3 leftover); campaign menu and
 Enhanced menu (if ever) = PC2 only — not remake-close.
 
 Merge: **UB-A** (JS `buildings[]` / `use_building` = menu; map editor flags = audit).
-Canary: `tests/114_bridge_editor_allow_dump.js` (skips under `--no-resource`).
 Menu smoke: `tests/115_bridge_menu_smoke.js` (Perwadjyt REMAP + Bridges/Nekhen day-0;
 also asserts type 83 never allowed).
 
-Dump source: campaign `data/maps/m_NNN_*.map` + Cleop `Maps/{Alexandria,Bridges}.map`.
+Source: campaign `data/maps/m_NNN_*.map` + Cleop `Maps/{Alexandria,Bridges}.map`.
 Wiki Dev Ref: Low Bridge listed where JS unlocks it (2026-07-31 BR2); Ship Bridge
 note on buildings index (2026-08-01).
 
@@ -60,5 +57,4 @@ note on buildings index (2026-08-01).
 - Cleo **32–37 / 43–44** — no mission JS yet
 - Custom **130–135** — minimal sandbox `buildings[]` (SKIP)
 - Ferry REMAP cleanup (Abu / Meidum / On / Valley keep JS Ferry despite map OFF)
-- Hermetic CI: canary always skips without Cleop data
 - Ship Bridge in player menu — Enhanced / PC2 only (not OG parity)

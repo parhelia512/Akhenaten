@@ -10,6 +10,8 @@ Chunk-based save/load, mod image loading, and localization strings.
 | `chunk_container.h` | `svx` — sectioned `.svx` container + shared prefixed zip codec |
 | `io_buffer.h` | Typed bind/read/write into chunk buffers; optional defaulters |
 | `gamestate/boilerplate.h` | `GamestateIO` facade, `save_data_version()` |
+| `gamestate/boilerplate_detail.h` | `GamestateLoadDetail` — pre/post load, version probe, raw map load |
+| `gamestate/save_versions.h` | `latest_save_version` changelog |
 | `gamestate/file_schemas.h` | Format schema entry points (`file_schema`, builders) |
 | `gamestate/file_schema_*.cpp` | Per-format `push_chunk` lists (map / sav / svx) |
 | `gamestate/chunks.h` | Global `io_buffer*` declarations for game data chunks |

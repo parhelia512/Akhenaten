@@ -10,7 +10,4 @@ Each campaign mission sets `map_file : "data/maps/m_NNN_….map"`.
 fallback. Custom Cleopatra maps (ids 128+) use Cleop `Maps/` via
 `__game_load_map`, not this folder.
 
-Audit without JS overlay: `__test_mission_map_dump(id, path)` and related
-`__test_mission_map_*_dump` helpers.
-
 Deployed at build time to `<binary>/Data/maps` (MSVC) or `<binary>/data/maps`.
