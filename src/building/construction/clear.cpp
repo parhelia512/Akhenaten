@@ -259,7 +259,9 @@ static int clear_land_confirmed(bool measure_only, clear_confirm_t confirm) {
         if (!!game_features::gameplay_change_immediate_delete) {
             building_update_state();
         }
-
+        if (items_placed > 0) {
+            g_city.buildings.update_counters();
+        }
     }
     return items_placed;
 }
