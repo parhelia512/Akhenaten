@@ -114,8 +114,6 @@
 #include <sys/stat.h>
 #endif
 
-static pcstr MISSION_PACK_FILE = "mission1.pak";
-
 uint32_t save_data_version() {
     return latest_save_version;
 }
@@ -140,13 +138,6 @@ vfs::path fullpath_maps(vfs::path filename) {
 }
 
 static buffer* small_buffer = new buffer(4);
-int GamestateIO::get_campaign_scenario_offset(int scenario_id) {
-    // init 4-byte buffer and read from file header corresponding to scenario index (i.e. mission 20 = offset 20*4 = 80)
-    small_buffer->clear();
-    if (!io_read_file_part_into_buffer(MISSION_PACK_FILE, NOT_LOCALIZED, small_buffer, 4, 4 * scenario_id))
-        return 0;
-    return small_buffer->read_i32();
-}
 const int GamestateIO::read_file_version(const char* filename, int offset) {
     small_buffer->clear();
     if (!io_read_file_part_into_buffer(filename, NOT_LOCALIZED, small_buffer, 4, offset + 4))
@@ -374,49 +365,12 @@ bool GamestateIO::write_map_path(pcstr path) {
     return g_chunk_io.serialize(path, 0, FILE_FORMAT_MAP_FILE, 160, file_schema);
 }
 
-bool GamestateIO::export_mission_map(const int scenario_id, pcstr path) {
-    if (!load_mission_pak_raw(scenario_id)) {
-        return false;
-    }
-    return write_map_path(path);
-}
-
-bool GamestateIO::load_mission_pak_raw(const int scenario_id) {
-    const int offset = get_campaign_scenario_offset(scenario_id);
-    if (offset <= 0) {
-        return false;
-    }
-
-    // mission pack files do not store carry savings / troops / campaign rank; preserve across pre_load().
-    const uint16_t saved_carry = g_city.kingdome.campaign_carry_personal_savings;
-    const int32_t saved_rank = g_scenario.campaign_mission_rank;
-    const campaign_carry_t saved_troops = g_campaign_carry;
-
-    pre_load();
-    vfs::path mission_pak_path = vfs::path(MISSION_PACK_FILE).resolve();
-    auto mission_pak = vfs::file_open(mission_pak_path);
-    if (!g_chunk_io.unserialize(mission_pak, offset, FILE_FORMAT_MISSION_PAK, GamestateIO::read_file_version, file_schema)) {
-        return false;
-    }
-
-    g_city.kingdome.campaign_carry_personal_savings = saved_carry;
-    g_scenario.campaign_mission_rank = saved_rank;
-    g_campaign_carry = saved_troops;
-
-    game.session.last_loaded = e_session_mission;
-    game.session.last_loaded_mission = MISSION_PACK_FILE;
-    g_scenario.campaign_scenario_id = scenario_id;
-
-    g_scenario.scmode = e_scenario_normal;
-    return true;
-}
-
 bool GamestateIO::load_mission_map_raw(const int scenario_id, pcstr map_path) {
     if (!map_path || !map_path[0]) {
         return false;
     }
 
-    // Same carry/rank/troops preservation as load_mission_pak_raw.
+    // Map files do not store carry savings / troops / campaign rank; preserve across pre_load().
     const uint16_t saved_carry = g_city.kingdome.campaign_carry_personal_savings;
     const int32_t saved_rank = g_scenario.campaign_mission_rank;
     const campaign_carry_t saved_troops = g_campaign_carry;
@@ -446,29 +400,28 @@ bool GamestateIO::load_mission(const int scenario_id, bool start_immediately) {
         map_file = arch.r_string("map_file");
     });
 
-    bool loaded = false;
-    bool map_file_missing = false;
-    if (!map_file.empty()) {
-        const vfs::path map_full = vfs::path(map_file.c_str()).resolve();
-        if (!vfs::file_exists(map_full)) {
-            map_file_missing = true;
-            logs::warn("Mission %d: map file missing: %s (falling back to %s)",
-                       scenario_id, map_file.c_str(), MISSION_PACK_FILE);
-        } else {
-            loaded = load_mission_map_raw(scenario_id, map_file.c_str());
-            if (!loaded) {
-                logs::warn("Mission %d: map_file '%s' failed to load, falling back to %s",
-                           scenario_id, map_file.c_str(), MISSION_PACK_FILE);
-            }
-        }
+    if (map_file.empty()) {
+        logs::error("Mission %d: no map_file in mission script", scenario_id);
+        return false;
     }
-    if (!loaded && !load_mission_pak_raw(scenario_id)) {
+
+    const vfs::path map_full = vfs::path(map_file.c_str()).resolve();
+    if (!vfs::file_exists(map_full)) {
+        logs::error("Mission %d: map file missing: %s", scenario_id, map_file.c_str());
+        bstring512 body;
+        body.printf("Map file not found:\n%s", map_file.c_str());
+        popup_dialog::show_ok(lang_text_from_key("#popup_dialog_map_file_missing"), body.c_str());
+        return false;
+    }
+
+    if (!load_mission_map_raw(scenario_id, map_file.c_str())) {
+        logs::error("Mission %d: map_file '%s' failed to load", scenario_id, map_file.c_str());
         return false;
     }
 
     // Scenario selection loads with start_immediately=false, so start_loaded_file()
     // (which also calls init_cities) never runs. post_load() needs EMPIRE_CITY_OURS via
-    // update_allowed_foods() � rebuild cities from empire objects first.
+    // update_allowed_foods() — rebuild cities from empire objects first.
     g_empire.init_cities();
 
     post_load();
@@ -482,13 +435,6 @@ bool GamestateIO::load_mission(const int scenario_id, bool start_immediately) {
         // replay mission autosave file
         bstring256 filename("autosave_replay.", saved_game_data_expanded.extension);
         GamestateIO::write_savegame(filename);
-    }
-
-    if (map_file_missing) {
-        bstring512 body;
-        body.printf("Map file not found:\n%s\n\nFalling back to %s.",
-                    map_file.c_str(), MISSION_PACK_FILE);
-        popup_dialog::show_ok(lang_text_from_key("#popup_dialog_map_file_missing"), body.c_str());
     }
 
     return true;

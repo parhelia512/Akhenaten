@@ -1,6 +1,6 @@
-// Integral-test helpers: dump mission1.pak scenario data WITHOUT JS mission overlays
-// (see GamestateIO::load_mission_pak_raw). Call from ad-hoc tests/99_tmp_*.js via
-// __test_mission_pak_dump(scenario_id); do not keep a permanent dump test.
+// Integral-test helpers: dump campaign .map scenario data WITHOUT JS mission overlays
+// (see GamestateIO::load_mission_map_raw). Prefer __test_mission_map_dump /
+// __test_mission_map_*_dump from tests; do not keep permanent dump tests unless needed.
 
 #include "js_game.h"
 
@@ -88,7 +88,7 @@ static pcstr climate_name(int climate) {
 }
 
 static void dump_scenario_header(int scenario_id) {
-    dump_marker("pak_dump_ok:%d", scenario_id);
+    dump_marker("map_dump_loaded:%d", scenario_id);
     dump_marker("pak_start_year:%d", g_scenario.start_year);
     dump_marker("pak_player_rank:%d", g_scenario.player_rank);
     dump_marker("pak_player_faction:%d|incarnation:%d|pharaoh:%d",
@@ -1022,7 +1022,7 @@ static pcstr editor_allow_slot_label(int slot) {
     }
 }
 
-static void dump_pak_reserved() {
+static void dump_map_reserved() {
     int nonzero = 0;
     for (int i = 0; i < scenario_data_t::SCENARIO_PAK_RESERVED_INT16S; i++) {
         const int16_t v = g_scenario.pak_reserved[i];
@@ -1064,44 +1064,9 @@ static void dump_loaded_scenario(int scenario_id) {
     dump_legacy_tables();
     dump_terrain_stats();
     dump_starting_buildings();
-    dump_pak_reserved();
+    dump_map_reserved();
     dump_allowed_buildings();
 }
-
-// Export mission map grids (terrain/image/elevation/…) as FILE_FORMAT_MAP_FILE.
-// Returns 1 on success.
-static int __test_export_mission_map(int scenario_id, pcstr path) {
-    if (g_args.no_resource()) {
-        dump_marker("pak_export_skipped:no_resource");
-        return 0;
-    }
-    if (!GamestateIO::export_mission_map(scenario_id, path)) {
-        dump_marker("pak_export_fail:%d|%s", scenario_id, path ? path : "-");
-        return 0;
-    }
-    dump_marker("pak_export_ok:%d|%s", scenario_id, path);
-    return 1;
-}
-ANK_FUNCTION_2(__test_export_mission_map);
-
-// Returns 1 on successful dump, 0 if skipped (--no-resource) or load failed.
-static int __test_mission_pak_dump(int scenario_id) {
-    if (g_args.no_resource()) {
-        dump_marker("pak_dump_skipped:no_resource");
-        return 0;
-    }
-
-    if (!GamestateIO::load_mission_pak_raw(scenario_id)) {
-        logs::info("[test] load_mission_pak_raw(%d) failed", scenario_id);
-        dump_marker("pak_dump_fail:%d", scenario_id);
-        return 0;
-    }
-
-    dump_loaded_scenario(scenario_id);
-    dump_marker("pak_dump_done:%d", scenario_id);
-    return 1;
-}
-ANK_FUNCTION_1(__test_mission_pak_dump);
 
 // Dump in-memory scenario events only (B9 smoke under --no-resource).
 static int __test_dump_scenario_events() {
@@ -1168,21 +1133,11 @@ static void dump_herd_points(int scenario_id) {
     dump_marker("herd_dump_fish:id=%d|%s", scenario_id, fish[0] ? fish : "-");
 }
 
-static int __test_mission_herd_dump(int scenario_id) {
+static int __test_mission_map_herd_dump(int scenario_id, pcstr map_path) {
     if (g_args.no_resource()) {
         dump_marker("herd_dump_skipped:no_resource");
         return 0;
     }
-    if (!GamestateIO::load_mission_pak_raw(scenario_id)) {
-        dump_marker("herd_dump_fail:%d", scenario_id);
-        return 0;
-    }
-    dump_herd_points(scenario_id);
-    return 1;
-}
-ANK_FUNCTION_1(__test_mission_herd_dump);
-
-static int __test_mission_map_herd_dump(int scenario_id, pcstr map_path) {
     if (!map_path || !map_path[0] || !GamestateIO::load_mission_map_raw(scenario_id, map_path)) {
         dump_marker("herd_dump_fail:%d", scenario_id);
         return 0;
@@ -1209,21 +1164,6 @@ static void dump_bridge_allow_summary(int scenario_id, pcstr src) {
         allow_on);
 }
 
-// Compact Bridge/Ferry allow dump from mission pak (no full scenario dump).
-static int __test_mission_bridge_allow_dump(int scenario_id) {
-    if (g_args.no_resource()) {
-        dump_marker("bridge_allow_skipped:no_resource");
-        return 0;
-    }
-    if (!GamestateIO::load_mission_pak_raw(scenario_id)) {
-        dump_marker("bridge_allow_fail:%d|pak", scenario_id);
-        return 0;
-    }
-    dump_bridge_allow_summary(scenario_id, "pak");
-    return 1;
-}
-ANK_FUNCTION_1(__test_mission_bridge_allow_dump);
-
 static int __test_mission_map_bridge_allow_dump(int scenario_id, pcstr map_path) {
     if (g_args.no_resource()) {
         dump_marker("bridge_allow_skipped:no_resource");
@@ -1246,7 +1186,7 @@ ANK_FUNCTION_2(__test_mission_map_bridge_allow_dump);
 // scenario_id is only for markers / campaign_scenario_id (e.g. 129 for Bridges.map).
 static int __test_mission_map_dump(int scenario_id, pcstr map_path) {
     if (g_args.no_resource()) {
-        dump_marker("pak_dump_skipped:no_resource");
+        dump_marker("map_dump_skipped:no_resource");
         return 0;
     }
     if (!map_path || !map_path[0]) {

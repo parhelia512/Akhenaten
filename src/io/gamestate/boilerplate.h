@@ -50,7 +50,6 @@ vfs::path fullpath_saves(vfs::path filename);
 vfs::path fullpath_maps(char* full, vfs::path filename);
 
 namespace GamestateIO {
-int get_campaign_scenario_offset(int scenario_id);
 const int read_file_version(const char* filename, int offset);
 
 bool write_mission(const int scenario_id);
@@ -59,12 +58,9 @@ bool write_savegame(pcstr filename_short);
 bool write_map(pcstr filename_short);
 /** Write current in-memory map grids as FILE_FORMAT_MAP_FILE to an absolute/relative path. */
 bool write_map_path(pcstr path);
-/** load_mission_pak_raw(scenario_id) then write_map_path(path). */
-bool export_mission_map(const int scenario_id, pcstr path);
 
 bool load_mission(const int scenario_id, bool start_immediately);
 
-bool load_mission_pak_raw(const int scenario_id);
 bool load_mission_map_raw(const int scenario_id, pcstr map_path);
 bool load_savegame(pcstr filename_short, bool start_immediately = true);
 bool load_map(pcstr filename, bool relative, bool start_immediately);
