@@ -81,6 +81,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `10_work_camp_info_window.js` | Work camp info window |
 | `11_work_camp_map_placement.js` | Work camp placed via `test_building_place` (real `city_planner` path) |
 | `12_road_segment_placement.js` | Road via `build_planner` on a valid segment near map center; all routed tiles have `TERRAIN_ROAD` |
+| `182_floodplain_road_click.js` | #648: single-tile road start on dry floodplain (`map_can_place_initial` allows CITIZEN_2 floodplain) |
 | `13_pottery_workshop_placement.js` | Pottery workshop via `test_building_place` |
 | `14_hotkey_config_window.js` | Hotkey config window (`window_show_by_id`) |
 | `15_victory_dialog_window.js` | `show_victory_dialog` console command → victory dialog |
