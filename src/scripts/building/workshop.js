@@ -147,15 +147,13 @@ building_jewels_workshop = {
 
 building_lamp_workshop {
   animations {
-    _pack { pack:PACK_GENERAL }
-    preview { id:125 }
-    base { id:125 }
-    work { pos [36, -4], id:125, offset:1, max_frames:18 }
-    clay { pos[65, 3], id:207 }
+    preview { pack:PACK_EXPANSION, id:26 }
+    base { pack:PACK_EXPANSION, id:26 }
+    work { pos [10, -14], pack:PACK_EXPANSION, id:26, offset:1, max_frames:10, duration:4 }
   }
   input {
     resource : RESOURCE_OIL
-    resource_second : RESOURCE_TIMBER
+    resource_second : RESOURCE_POTTERY
   }
   output {
     resource : RESOURCE_LAMPS
@@ -178,11 +176,10 @@ building_lamp_workshop {
 
 building_paint_workshop {
   animations {
-    _pack { pack:PACK_GENERAL }
-    preview { id:125 }
-    base { id:125 }
-    work { pos [36, -4], id:125, offset:1, max_frames:18 }
-    henna { pos [65, 3], id:207 }
+    preview { pack:PACK_EXPANSION, id:27 }
+    base { pack:PACK_EXPANSION, id:27 }
+    work { pos [17, -14], pack:PACK_EXPANSION, id:27, offset:1, max_frames:10, duration:4 }
+    henna { pos [65, 3], pack:PACK_GENERAL, id:207 }
   }
 
   input {
