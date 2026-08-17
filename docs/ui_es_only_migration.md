@@ -216,13 +216,12 @@ Approaches used: static slots + window/game state (no anonymous `.onclick =`).
 Not element `onclick_event`. Activation is JS:
 
 ```js
-if (item.onclick) item.onclick(item.parameter)
+if (item.window_id) { /* dismiss + show */ }
+else if (item.onclick) item.onclick(item.parameter)
 ```
 
-- [ ] **H5** Separate design: item `onclick_event` + dispatch from
-      `top_menu_activate_item`, or only remove factories
-      (`top_menu_show_window_by_id("…")`). Do not pretend it is a `ui { }`
-      field rename.
+- [x] **H5** Factories removed via `window_id` on items; named `onclick`
+      kept for toggles/actions. Full ES item model still optional.
 
 ### H6 — Helper defaults + CI
 
@@ -256,7 +255,7 @@ Empire override works anytime without this.
 **After H\* (full cleanup):**
 
 - [ ] CI grep gate
-- [x] Dynamic + advisors strip + campaign (top menu remains H5)
+- [x] Dynamic + advisors strip + campaign + top-menu factories (H5)
 - [ ] No anonymous pull callbacks; draw path policy as decided
 
 ---

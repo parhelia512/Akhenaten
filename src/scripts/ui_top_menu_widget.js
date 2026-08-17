@@ -156,7 +156,10 @@ function top_menu_activate_item(menu, item) {
 		return
 	}
 	top_menu_state.item_clicked = 1
-	if (item.onclick) {
+	if (item.window_id) {
+		top_menu_dismiss()
+		emit event_show_window{ id: item.window_id }
+	} else if (item.onclick) {
 		item.onclick(item.parameter)
 	} else if (menu.onclick) {
 		menu.onclick(item.parameter)
@@ -231,16 +234,16 @@ top_menu_widget {
 			text: "#top_menu_options"
 			tooltip: "#top_menu_options_tooltip"
 			items [
-				{ id: "display_options", text: "#top_menu_display_settings", onclick: top_menu_show_window_by_id("display_options_window") }
-				{ id: "sound_options", text: "#top_menu_sound_settings", onclick: top_menu_show_window_by_id("sound_options_window") }
-				{ id: "speed_options", text: "#top_menu_speed_settings", onclick: top_menu_show_window_by_id("speed_options_window") }
+				{ id: "display_options", text: "#top_menu_display_settings", window_id: "display_options_window" }
+				{ id: "sound_options", text: "#top_menu_sound_settings", window_id: "sound_options_window" }
+				{ id: "speed_options", text: "#top_menu_speed_settings", window_id: "speed_options_window" }
 				{ id: "pyramid_speedup", textfn: top_menu_pyramid_speedup_text, onclick: top_menu_pyramid_speedup_toggle }
-				{ id: "difficulty_options", text: "#top_menu_difficulty", onclick: top_menu_show_window_by_id("difficulty_options_window") }
-				{ id: "popup_messages", text: "#top_menu_popup_messages", onclick: top_menu_show_window_by_id("popup_messages_window") }
+				{ id: "difficulty_options", text: "#top_menu_difficulty", window_id: "difficulty_options_window" }
+				{ id: "popup_messages", text: "#top_menu_popup_messages", window_id: "popup_messages_window" }
 				{ id: "cities_options", textfn: top_menu_cities_old_text, onclick: top_menu_cities_old_toggle }
 				{ id: "autosave_options", textfn: top_menu_autosave_options_text, onclick: top_menu_autosave_options_toggle }
 				{ id: "autosave_slots", textfn: top_menu_autosave_slots_text, onclick: top_menu_autosave_slots_cycle }
-				{ id: "hotkeys_options", text: "#TR_BUTTON_CONFIGURE_HOTKEYS", onclick: top_menu_show_window_by_id("window_hotkey_config") }
+				{ id: "hotkeys_options", text: "#TR_BUTTON_CONFIGURE_HOTKEYS", window_id: "window_hotkey_config" }
 				{ id: "enhanced_options", text: "#TR_CONFIG_TITLE", onclick: top_menu_features }
 			]
 		}

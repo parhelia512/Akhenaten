@@ -103,7 +103,11 @@ function top_menu_editor_activate_item(menu, item) {
 		return
 	}
 	top_menu_editor_state.item_clicked = 1
-	if (item.onclick) {
+	if (item.window_id) {
+		top_menu_editor_dismiss()
+		ui.window_editor_map_show()
+		window_show_by_id(item.window_id)
+	} else if (item.onclick) {
 		item.onclick(item.parameter)
 	}
 }
@@ -135,14 +139,6 @@ function top_menu_editor_calc_menu_size(menu) {
 	top_menu_editor_state.menu_size[menu.id] = {
 		width_blocks: blocks,
 		height_blocks: height_blocks
-	}
-}
-
-function top_menu_editor_show_window(window_id) {
-	return function() {
-		top_menu_editor_dismiss()
-		ui.window_editor_map_show()
-		window_show_by_id(window_id)
 	}
 }
 
@@ -241,8 +237,8 @@ top_menu_editor_widget {
 			id: "options"
 			text: "#top_menu_options"
 			items [
-				{ id: "sound", text: "#top_menu_sound_settings", onclick: top_menu_editor_show_window("sound_options_window") }
-				{ id: "speed", text: "#top_menu_speed_settings", onclick: top_menu_editor_show_window("speed_options_window") }
+				{ id: "sound", text: "#top_menu_sound_settings", window_id: "sound_options_window" }
+				{ id: "speed", text: "#top_menu_speed_settings", window_id: "speed_options_window" }
 			]
 		}
 		{

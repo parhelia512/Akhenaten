@@ -126,13 +126,6 @@ function top_menu_date_explanation(p1, p2) { ui.window_message_dialog_show("mess
 function top_menu_population_explanation(p1, p2) { ui.window_message_dialog_show("message_game_control_population_display", -1) }
 function top_menu_funds_explanation(p1, p2) { ui.window_message_dialog_show("message_game_control_money_display_window", -1) }
 
-function top_menu_show_window_by_id(window_id) {
-	return function() {
-		top_menu_dismiss()
-		emit event_show_window{ id:window_id }
-	}
-}
-
 function top_menu_new_game() {
 	top_menu_dismiss()
 	ui.show_yesno("#popup_dialog_quit",
