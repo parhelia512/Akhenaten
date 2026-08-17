@@ -1,6 +1,7 @@
 log_info("akhenaten: ui garden info started")
 
 terrain_info_garden {
+    help_id           : "message_building_garden_plaze_statue"
     open_sounds       : [ "Wavs/park1.wav" ]
     ui : baseui(terrain_info_window, {
         title   : text({pos: [0, 16], size: [px(29), 13], font : FONT_LARGE_BLACK_ON_LIGHT, align:"center"})
