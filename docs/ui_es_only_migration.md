@@ -158,6 +158,17 @@ building-info `onclick: named` still on helpers. Skip top menu and dynamic windo
 - [x] **D21** `ui_resource_settings_window.js` — trade import/export controls.
 - [x] **D22** `ui_bazaar_window.js` — overlay / mothball.
 - [x] **D23** `ui_advisor_finance.js` — tax arrows.
+- [x] **D24** `ui_advisor_labor.js` — wage arrows.
+- [x] **D25** `ui_advisor_religion.js` — hold festival button.
+- [x] **D26** `ui_tax_collector_window.js` — overlay / mothball.
+- [x] **D27** `ui_workshop_window.js` — advisors / industry / mothball.
+- [x] **D28** `ui_trade_opened_window.js` — close.
+- [x] **D29** `ui_messages_window.js` — close → `go_back`.
+- [x] **D30** food mill / granary / storage yard / shrine / temple / entertainment overlay-mothball.
+- [x] **D31** granary / storage yard / bazaar / dock orders buttons + close.
+- [x] **D32** `ui_hotkey_config_window.js` — cancel.
+- [x] **D33** scenario selection start buttons (campaign + custom).
+- [x] **D34** `ui_window_features.js` — chrome buttons (not dynamic toggles).
 - [ ] **D*** Pick next file with `onclick: named_fn`, wrap in id/`onclick_event` +
       thin `[es=…]`, commit, repeat.
 
