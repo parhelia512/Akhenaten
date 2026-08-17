@@ -868,6 +868,10 @@ localization_ru = [
     { key: "#library_access_high", text: "Мимо этого дома недавно проходил библиотекарь. У него будет доступ к библиотеке надолго" }
     { key: "#library_access_medium", text: "У этого дома есть доступ к библиотеке" }
     { key: "#library_access_low", text: "Если библиотекарь не пройдёт мимо него скоро, этот дом потеряет доступ к библиотеке" }
+    { key: "#library_info", group:87, id:1 }
+    { key: "#library_info_idle", group:87, id:2 }
+    { key: "#library_info_ok", group:87, id:3 }
+    { key: "#sheets_of_papyrus", group:23, id:77 }
 
     // academy overlay
     { key: "#academy_access_none", text: "У этого дома нет доступа к академии" }

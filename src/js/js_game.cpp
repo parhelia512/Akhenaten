@@ -83,7 +83,9 @@ void js_loc_native(js_State *J) {
         return;
     }
 
-    if (J->isobject(1) && !js_isarray(J, 1) && js_gettop(J) < 3) {
+    // __loc is registered with arity 2, so a one-arg call still has gettop==3
+    // (arg2 is undefined). Treat that as the object form, not group/id 0/0.
+    if (J->isobject(1) && !js_isarray(J, 1) && (js_gettop(J) < 3 || js_isundefined(J, 2))) {
         J->getproperty(1, js_intern("key"));
         if (js_isstring(J, -1)) {
             const xstring key_node = js_toxstring(J, -1); js_pop(J, 1);

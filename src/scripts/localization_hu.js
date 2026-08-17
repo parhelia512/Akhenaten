@@ -1589,6 +1589,10 @@ localization_hu = [
   { key: "#library_access_high", text: "Ezt a házat nemrég meglátogatta egy könyvtáros. Sokáig lesz hozzáférése könyvtárhoz" }
   { key: "#library_access_medium", text: "Ennek a háznak van hozzáférése könyvtárhoz" }
   { key: "#library_access_low", text: "Ha hamarosan nem jár erre egy könyvtáros, ez a ház elveszíti a könyvtárhoz való hozzáférést" }
+  { key: "#library_info", group:87, id:1 }
+  { key: "#library_info_idle", group:87, id:2 }
+  { key: "#library_info_ok", group:87, id:3 }
+  { key: "#sheets_of_papyrus", group:23, id:77 }
 
 // academy overlay
   { key: "#academy_access_none", text: "Ennek a háznak nincs hozzáférése akadémiához" }

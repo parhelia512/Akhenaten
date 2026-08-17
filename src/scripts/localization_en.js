@@ -1622,6 +1622,10 @@ localization_en = [
   { key: "#library_access_high", text: "This house was recently passed by a librarian. It will have Library access for a long time" }
   { key: "#library_access_medium", text: "This house has Library access" }
   { key: "#library_access_low", text: "Unless a librarian passes it soon, this house will lose Library access" }
+  { key: "#library_info", group:87, id:1 }
+  { key: "#library_info_idle", group:87, id:2 }
+  { key: "#library_info_ok", group:87, id:3 }
+  { key: "#sheets_of_papyrus", group:23, id:77 }
 
   // academy overlay
   { key: "#academy_access_none", text: "This house has no access to an Academy" }

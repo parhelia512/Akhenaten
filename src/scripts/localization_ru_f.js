@@ -788,6 +788,10 @@ localization_ru_f = [
     { key: "#library_access_high", text: "Этoт дoм нeдaвнo пoceтил библиoтeкapь. Oн бyдeт имeть дocтyп в библиoтeкy в тeчeниe дoлгoгo вpeмeни" }
     { key: "#library_access_medium", text: "Этoт дoм имeeт дocтyп в библиoтeкy" }
     { key: "#library_access_low", text: "Ecли библиoтeкapь нe пpидeт cкopo, этoт дoм пoтepяeт дocтyп в библиoтeкy" }
+    { key: "#library_info", group:87, id:1 }
+    { key: "#library_info_idle", group:87, id:2 }
+    { key: "#library_info_ok", group:87, id:3 }
+    { key: "#sheets_of_papyrus", group:23, id:77 }
 
     // academy overlay
     { key: "#academy_access_none", text: "Этoт дoм нe имeeт никaкoгo дocтyпa к Aкaдeмии" }

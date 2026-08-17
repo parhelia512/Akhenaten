@@ -1528,6 +1528,10 @@ localization_de = [
   { key: "#library_access_high", text: "Dieses Haus wurde kürzlich von einem Bibliothekar besucht. Es wird für lange Zeit Bibliothekszugang haben" }
   { key: "#library_access_medium", text: "Dieses Haus hat Bibliothekszugang" }
   { key: "#library_access_low", text: "Wenn nicht bald ein Bibliothekar vorbeikommt, wird dieses Haus den Bibliothekszugang verlieren" }
+  { key: "#library_info", group:87, id:1 }
+  { key: "#library_info_idle", group:87, id:2 }
+  { key: "#library_info_ok", group:87, id:3 }
+  { key: "#sheets_of_papyrus", group:23, id:77 }
 
   // academy overlay
   { key: "#academy_access_none", text: "Dieses Haus hat keinen Zugang zu einer Akademie" }
