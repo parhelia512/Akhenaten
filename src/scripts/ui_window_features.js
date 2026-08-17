@@ -267,8 +267,8 @@ window_features {
 
         title         : text({pos:[0, 16], size:[px(40), 20], align:"center", font:FONT_LARGE_BLACK_ON_LIGHT})
 
-        btn_prev      : button({margin:{left:20, top:16}, size:[50, 25], text:"Prev",  onclick: window_features_btn_prev})
-        btn_next      : button({margin:{right:-70, top:16}, size:[50, 25], text:"Next", onclick: window_features_btn_next})
+        btn_prev      : button({margin:{left:20, top:16}, size:[50, 25], text:"Prev"})
+        btn_next      : button({margin:{right:-70, top:16}, size:[50, 25], text:"Next"})
 
         bfeature0     : checkbox({pos:wposbtn(0)})
         tfeature0     : text({pos:wpostxt(0)  })
@@ -299,11 +299,41 @@ window_features {
         bfeature13    : checkbox({pos:wposbtn(13)})
         tfeature13    : text({pos:wpostxt(13) })
 
-        btn_defaults  : button({pos:[250, 436], size:[150, 30], text:"#TR_BUTTON_RESET_DEFAULTS",      onclick: window_features_btn_defaults}),
-        btn_hotkeys   : button({pos:[90,  436], size:[150, 30], text:"#TR_BUTTON_CONFIGURE_HOTKEYS",   onclick: window_features_btn_hotkeys}),
-        btn_close     : button({pos:[410, 436], size:[100, 30], text:"#TR_BUTTON_CANCEL",              onclick: window_features_btn_close}),
-        btn_save      : button({pos:[520, 436], size:[100, 30], text:"#TR_BUTTON_OK",                  onclick: window_features_btn_save})
+        btn_defaults  : button({pos:[250, 436], size:[150, 30], text:"#TR_BUTTON_RESET_DEFAULTS"})
+        btn_hotkeys   : button({pos:[90,  436], size:[150, 30], text:"#TR_BUTTON_CONFIGURE_HOTKEYS"})
+        btn_close     : button({pos:[410, 436], size:[100, 30], text:"#TR_BUTTON_CANCEL"})
+        btn_save      : button({pos:[520, 436], size:[100, 30], text:"#TR_BUTTON_OK"})
     }
+}
+
+[es=(window_features, btn_defaults)]
+function window_features_on_btn_defaults(window) {
+    window_features_btn_defaults()
+}
+
+[es=(window_features, btn_hotkeys)]
+function window_features_on_btn_hotkeys(window) {
+    window_features_btn_hotkeys()
+}
+
+[es=(window_features, btn_close)]
+function window_features_on_btn_close(window) {
+    window_features_btn_close()
+}
+
+[es=(window_features, btn_save)]
+function window_features_on_btn_save(window) {
+    window_features_btn_save()
+}
+
+[es=(window_features, btn_prev)]
+function window_features_on_btn_prev(window) {
+    window_features_btn_prev()
+}
+
+[es=(window_features, btn_next)]
+function window_features_on_btn_next(window) {
+    window_features_btn_next()
 }
 
 // ---- Init ----
