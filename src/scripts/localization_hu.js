@@ -1669,6 +1669,16 @@ localization_hu = [
   { key: "#top_menu_buildings_off", text: "Épületek KI" }
   { key: "#top_menu_js_debugger_on", text: "JS debugger BE" }
   { key: "#top_menu_js_debugger_off", text: "JS debugger KI" }
+  { key: "#top_menu_editor_new_map", text: "Új térkép" }
+  { key: "#top_menu_editor_load_map", text: "Térkép betöltése" }
+  { key: "#top_menu_editor_save_map", text: "Térkép mentése" }
+  { key: "#top_menu_editor_exit", text: "Kilépés a szerkesztőből" }
+  { key: "#top_menu_editor_resets", text: "Visszaállítások" }
+  { key: "#top_menu_editor_clear_herds", text: "Gyilkospontok törlése" }
+  { key: "#top_menu_editor_clear_fish", text: "Halak törlése" }
+  { key: "#top_menu_editor_clear_invasions", text: "Inváziók törlése" }
+  { key: "#top_menu_editor_empire", text: "Királyság" }
+  { key: "#top_menu_editor_empire_choose", text: "Királyság szerkesztése" }
 
   { key: "#sidebar_speed_header", text: "Sebesség" }
   { key: "#no_requests", text: "Jelenleg nincs teljesítendő kérés." }

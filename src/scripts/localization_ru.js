@@ -951,6 +951,16 @@ localization_ru = [
     { key: "#top_menu_buildings_off", text: "Здания ВЫКЛ" }
     { key: "#top_menu_js_debugger_on", text: "JS-отладчик ВКЛ" }
     { key: "#top_menu_js_debugger_off", text: "JS-отладчик ВЫКЛ" }
+    { key: "#top_menu_editor_new_map", text: "Новая карта" }
+    { key: "#top_menu_editor_load_map", text: "Загрузить карту" }
+    { key: "#top_menu_editor_save_map", text: "Сохранить карту" }
+    { key: "#top_menu_editor_exit", text: "Выйти из редактора" }
+    { key: "#top_menu_editor_resets", text: "Сброс" }
+    { key: "#top_menu_editor_clear_herds", text: "Очистить точки убийц" }
+    { key: "#top_menu_editor_clear_fish", text: "Очистить рыбу" }
+    { key: "#top_menu_editor_clear_invasions", text: "Очистить вторжения" }
+    { key: "#top_menu_editor_empire", text: "Королевство" }
+    { key: "#top_menu_editor_empire_choose", text: "Редактировать королевство" }
 
     { key: "#sidebar_speed_header", text: "Скорость" }
 

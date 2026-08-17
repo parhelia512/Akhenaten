@@ -1702,6 +1702,16 @@ localization_en = [
   { key: "#top_menu_buildings_off", text: "Buildings OFF" }
   { key: "#top_menu_js_debugger_on", text: "JS debugger ON" }
   { key: "#top_menu_js_debugger_off", text: "JS debugger OFF" }
+  { key: "#top_menu_editor_new_map", text: "New map" }
+  { key: "#top_menu_editor_load_map", text: "Load map" }
+  { key: "#top_menu_editor_save_map", text: "Save map" }
+  { key: "#top_menu_editor_exit", text: "Exit builder" }
+  { key: "#top_menu_editor_resets", text: "Resets" }
+  { key: "#top_menu_editor_clear_herds", text: "Clear Killer Pts." }
+  { key: "#top_menu_editor_clear_fish", text: "Clear fish" }
+  { key: "#top_menu_editor_clear_invasions", text: "Clear invasions" }
+  { key: "#top_menu_editor_empire", text: "Kingdom" }
+  { key: "#top_menu_editor_empire_choose", text: "Edit Kingdom" }
 
   { key: "#sidebar_speed_header", text: "Speed" }
   { key: "#sidebar_flat_buildings", text: "Flat view" }

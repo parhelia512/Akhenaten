@@ -21,7 +21,7 @@ close_button({ pos[0, 0], onclick_event: "close" })
   `onclick: show_window_by_id("…")` in new/migrated UI
 
 **Do not mix into these commits:** `textfn`/`checkedfn`, `memory=frame` draw
-canon, top-menu item model, mass wipe of every `onclick: named`.
+canon, mass wipe of every remaining named helper elsewhere.
 
 Canon also in: `src/js/CLAUDE.md` → «UI callbacks (ES-only)».
 
@@ -123,8 +123,8 @@ Prefer event when touching the file anyway.
 - [x] **C5** `ui_bazaar_window.js` (and similar one-liner orders openers if any).
 - [x] **C6** Other stray `show_window_by_id(` in `ui_*.js` (grep sweep; one
       commit per file or one sweep commit if tiny).
-      Done: `ui_resource_settings_window.js` help. Left for **H5**: top menu
-      (`top_menu_show_window_by_id`). Helper `show_window_by_id` in `ui_common.js` stays.
+      Done: `ui_resource_settings_window.js` help. Top menu opens options
+      via submenu ES (H5). Helper `show_window_by_id` in `ui_common.js` stays.
 
 ### D — Named `onclick:` → event (boring, optional pacing)
 
@@ -176,7 +176,7 @@ building-info `onclick: named` still on helpers. Skip top menu and dynamic windo
 - [x] **D41** campaign selection tabs / exit / play (periods remain H3).
 - [x] **D*** Easy named-`onclick` sweep done. Shared `building_info_window`
       overlay/mothball uses multi-section ES; help/close helpers use
-      `onclick_event` defaults + shared ES (H6b); top menu uses `window_id` (H5).
+      `onclick_event` defaults + shared ES (H6b); top menu uses submenu ES (H5).
 
 ---
 
@@ -213,15 +213,12 @@ Approaches used: static slots + window/game state (no anonymous `.onclick =`).
 
 ### H5 — Top menu (different system)
 
-Not element `onclick_event`. Activation is JS:
+Submenu rows are immediate-mode `ui.button({ onclick_event, param1 })`.
+Click dispatches `[es=(top_menu_submenu|top_menu_editor_submenu, name)]`
+via the same `dispatch_autoconfig_es_event` path as element buttons.
+Event name: `onclick_event` → `menu.onclick_event` → `item.id`.
 
-```js
-if (item.window_id) { /* dismiss + show */ }
-else if (item.onclick) item.onclick(item.parameter)
-```
-
-- [x] **H5** Factories removed via `window_id` on items; named `onclick`
-      kept for toggles/actions. Full ES item model still optional.
+- [x] **H5** Options/actions via submenu ES (`id` fallback). `textfn` remains (H7a).
 
 ### H6 — Helper defaults + CI
 
@@ -245,7 +242,7 @@ Empire override works anytime without this.
 - [x] **H7d** Drop named `onclick`/`onrclick` load + dispatch on button
       elements (`image_button` / `arrow` / `button`); JS proxy `onclick`
       accessor removed. Use `*_event` or element-id ES. Top-menu
-      `menu_item` named `onclick` unchanged (H5 leftover).
+      items use ES via H5 (`ui.button` + `onclick_event`), not named `onclick`.
 - [x] **H7e** Drop named `onhover`/`onunhover` load + dispatch; keep
       `onhover_event` / `onunhover_event` only (campaign already migrated).
 - [x] **H7f** Scroll lists: named `onclick_item` → `onclick_event` + ES
@@ -279,4 +276,4 @@ Empire override works anytime without this.
 - `arrow` / `image_button`: ES click payload includes `param1`/`param2` (H1).
 - `onclick_event` overrides `onclick` — helper default on that element is dead.
 - Naive CI `onclick:\s*function` misses factories — also gate `onclick:\s*\w+\(`.
-- Top menu ≠ element tree. Dynamic lists ≠ static rename.
+- Top menu ≠ element tree (H5: immediate `ui.button` + `onclick_event`). Dynamic lists ≠ static rename.

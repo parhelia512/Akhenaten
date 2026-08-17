@@ -1608,6 +1608,16 @@ localization_de = [
   { key: "#top_menu_buildings_off", text: "Gebäude AUS" }
   { key: "#top_menu_js_debugger_on", text: "JS-Debugger AN" }
   { key: "#top_menu_js_debugger_off", text: "JS-Debugger AUS" }
+  { key: "#top_menu_editor_new_map", text: "Neue Karte" }
+  { key: "#top_menu_editor_load_map", text: "Karte laden" }
+  { key: "#top_menu_editor_save_map", text: "Karte speichern" }
+  { key: "#top_menu_editor_exit", text: "Editor beenden" }
+  { key: "#top_menu_editor_resets", text: "Zurücksetzen" }
+  { key: "#top_menu_editor_clear_herds", text: "Killer-Pkt. löschen" }
+  { key: "#top_menu_editor_clear_fish", text: "Fische löschen" }
+  { key: "#top_menu_editor_clear_invasions", text: "Invasionen löschen" }
+  { key: "#top_menu_editor_empire", text: "Königreich" }
+  { key: "#top_menu_editor_empire_choose", text: "Königreich bearbeiten" }
 
   { key: "#sidebar_speed_header", text: "Geschwindigkeit" }
 

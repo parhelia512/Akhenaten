@@ -871,6 +871,16 @@ localization_ru_f = [
     { key: "#top_menu_buildings_off", text: "Здания ВЫКЛ" }
     { key: "#top_menu_js_debugger_on", text: "JS-отладчик ВКЛ" }
     { key: "#top_menu_js_debugger_off", text: "JS-отладчик ВЫКЛ" }
+    { key: "#top_menu_editor_new_map", text: "Hoвaя кapтa" }
+    { key: "#top_menu_editor_load_map", text: "Зaгpyзить кapтy" }
+    { key: "#top_menu_editor_save_map", text: "Coxpaнить кapтy" }
+    { key: "#top_menu_editor_exit", text: "Bыйти" }
+    { key: "#top_menu_editor_resets", text: "Cбpoc" }
+    { key: "#top_menu_editor_clear_herds", text: "Убpaть тoчки дичи" }
+    { key: "#top_menu_editor_clear_fish", text: "Убpaть pыбy" }
+    { key: "#top_menu_editor_clear_invasions", text: "Убpaть втopжeния" }
+    { key: "#top_menu_editor_empire", text: "Цapcтвo" }
+    { key: "#top_menu_editor_empire_choose", text: "Peдaктиpoвaть" }
 
     { key: "#sidebar_speed_header", text: "Скорость" }
 

@@ -22,16 +22,16 @@ Full migration checklist: `docs/ui_es_only_migration.md`.
   register one `[es=(ParentType, event)]`. Dispatch tries exact
   `section+event` first, then falls back to `ParentType+event`
   (advisor strip, building_info mothball/overlay).
+- Top menu: submenu items use immediate `ui.button` + `onclick_event`
+  (fallback: menu `onclick_event`, then `item.id`; handlers on
+  `top_menu_submenu` / `top_menu_editor_submenu`).
 
 **Do not (new code):**
 
 - `onclick: function(){…}` / other anonymous push callbacks in config
 - `onclick: factory(…)` (e.g. `show_window_by_id("…")`, `show_advisor_window(…)`)
 - `onclick: named_global` / `.onclick = …` on button elements (accessor removed)
-
-**Legacy (OK until migrated; do not add on new buttons):**
-
-- Top-menu item `onclick` (not element `onclick_event` — see migration plan)
+- Top-menu item `onclick: named` (use `onclick_event` on `ui.button`)
 
 Named `onclick` / `onrclick` / `onhover` / `onunhover` on button elements
 and named `onclick_item` / `onrightclick_item` / `ondoubleclick_item` on
