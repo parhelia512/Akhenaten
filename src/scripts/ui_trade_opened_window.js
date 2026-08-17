@@ -30,8 +30,13 @@ trade_opened_window {
                                         tooltip:[68, 41]
                                       })
 
-        button_close   : image_button({pos[442, 188], size[24, 24], pack:PACK_GENERAL, id:134, offset:4, onclick: window_go_back })
+        button_close   : image_button({pos[442, 188], size[24, 24], pack:PACK_GENERAL, id:134, offset:4})
     }
+}
+
+[es=(trade_opened_window, button_close)]
+function trade_opened_window_button_close(window) {
+    window_go_back()
 }
 
 [es=(trade_opened_window, button_advisor)]
