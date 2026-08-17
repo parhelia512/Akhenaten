@@ -503,27 +503,6 @@ building_shipyard = {
   }
 }
 
-building_dentist {
-  animations {
-    preview { pack:PACK_GENERAL, id:67 }
-    base { pack:PACK_GENERAL, id:67 }
-    work { pack:PACK_GENERAL, id:67, offset:1, max_frames:12 }
-  }
-
-  overlay : OVERLAY_DENTIST
-  labor_category : LABOR_CATEGORY_WATER_HEALTH
-  min_houses_coverage : 50
-  max_serve_clients : 1000
-  building_size : 1
-  meta { help_id:65, text_id:84 }
-  info_sound : "Wavs/dentist.wav"
-  cost [ 10, 15, 30, 50, 80 ]
-  desirability { value[2], step[1], step_size[-1], range[2] }
-  laborers[5]
-  fire_risk[4]
-  damage_risk[2]
-}
-
 building_plaza {
   animations {
     preview { pack:PACK_GENERAL, id:168 },
@@ -940,28 +919,6 @@ building_mud_wall = {
     is_wall: true
     is_defense: true
   }
-}
-
-building_physician {
-  animations {
-    _pack { pack:PACK_GENERAL }
-    preview { id:70 }
-    base { id:70 }
-    work { pos [60, -60], id:70, offset:1, max_frames:11 }
-  }
-
-  min_houses_coverage : 50
-  max_serve_clients : 1000
-  overlay: OVERLAY_PHYSICIAN
-  labor_category : LABOR_CATEGORY_WATER_HEALTH,
-  meta { help_id: 64, text_id: 83 }
-  info_sound : "Wavs/physician.wav"
-  building_size : 2
-  cost [ 10, 15, 30, 50, 100 ]
-  desirability { value[2], step[1], step_size[-1], range[2] }
-  laborers [8]
-  fire_risk [3]
-  damage_risk [3]
 }
 
 building_police_station = {
