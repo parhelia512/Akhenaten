@@ -116,11 +116,16 @@ message_list_window {
         empty_text    : text({margin{left:32, centery:-20}, size[16 * 26 - 48, -1], text[63, 1], enabled:false, font:FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:16 * 26 - 48})
 
         btnhelp       : help_button({tooltip:"#message_game_control_messages", onclick_event: "help" })
-        btnclose      : close_button({tooltip:"#exit_this_panel", onclick: window_go_back })
+        btnclose      : close_button({tooltip:"#exit_this_panel", onclick_event: "go_back" })
     }
 }
 
 [es=(message_list_window, help)]
 function message_list_window_on_help(window) {
     window_message_dialog_show("message_dialog_messages")
+}
+
+[es=(message_list_window, go_back)]
+function message_list_window_go_back(window) {
+    window_go_back()
 }
