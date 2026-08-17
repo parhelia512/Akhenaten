@@ -198,6 +198,7 @@ See **IT1** in `REMAKE_TODO.md` / `REMAKE_NOTES.md` §4.
 | `132_nilometer_ui.js` | Enhanced nilometer helpers: flag OFF default, hide/floodplain gates, quality tiers, phase keys, water bar |
 | `169_invasion_warnings_saveload.js` | B3/B4: invasion_warnings saveload + MESSAGE phrase from reasons / fallback |
 | `170_iunet_request_outcomes.js` | B13a: Iunet meat/pottery late→hittite×10 once; ok leaf; limestone refuse→egypt×24 ≠ favour |
+| `184_request_saveload.js` | Pharaoh request `.svx` round-trip: tag/state/months/faction; fulfill after load keeps `event_request_cleared.tag_id` |
 | `176_north_dahshur_henna_raid.js` | B12/B13d: North Dahshur henna refuse/late→Hyksos×12; on-time fulfill no raid |
 
 Farm **placement** tests (34/35) cover `can_place` / terrain rules; **37** covers preview image helpers.

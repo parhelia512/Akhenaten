@@ -799,6 +799,47 @@ static event_ph_t *__test_find_request_by_tag(int tag) {
     return nullptr;
 }
 
+int __test_request_exists(int tag) {
+    return __test_find_request_by_tag(tag) ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_request_exists);
+
+int __test_request_is_active(int tag) {
+    event_ph_t *e = __test_find_request_by_tag(tag);
+    return (e && e->is_active) ? 1 : 0;
+}
+ANK_FUNCTION_1(__test_request_is_active);
+
+int __test_request_months_left(int tag) {
+    event_ph_t *e = __test_find_request_by_tag(tag);
+    return e ? (int)e->quest_months_left : -1;
+}
+ANK_FUNCTION_1(__test_request_months_left);
+
+int __test_request_state(int tag) {
+    event_ph_t *e = __test_find_request_by_tag(tag);
+    return e ? (int)e->event_state : -1;
+}
+ANK_FUNCTION_1(__test_request_state);
+
+int __test_request_resource(int tag) {
+    event_ph_t *e = __test_find_request_by_tag(tag);
+    return e ? (int)e->item.value : -1;
+}
+ANK_FUNCTION_1(__test_request_resource);
+
+int __test_request_amount(int tag) {
+    event_ph_t *e = __test_find_request_by_tag(tag);
+    return e ? (int)e->amount.value : -1;
+}
+ANK_FUNCTION_1(__test_request_amount);
+
+int __test_request_sender_faction(int tag) {
+    event_ph_t *e = __test_find_request_by_tag(tag);
+    return e ? (int)e->sender_faction : -1;
+}
+ANK_FUNCTION_1(__test_request_sender_faction);
+
 // Force overdue grace with months_left months remaining (for late-fulfill tests).
 void __test_request_force_overdue(int tag, int months_left) {
     event_ph_t *e = __test_find_request_by_tag(tag);
