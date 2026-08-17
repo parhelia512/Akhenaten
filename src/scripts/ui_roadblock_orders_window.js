@@ -76,8 +76,13 @@ roadblock_orders_window {
             onclick_item: roadblock_orders_list_on_click_item
         }),
         button_help  : help_button({}),
-        button_close : close_button({ onclick: window_go_back })
+        button_close : close_button({ onclick_event: "go_back" })
     }
+}
+
+[es=(roadblock_orders_window, go_back)]
+function roadblock_orders_window_go_back(window) {
+    window_go_back()
 }
 
 [es=(roadblock_orders_window, init)]
