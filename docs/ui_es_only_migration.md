@@ -262,7 +262,7 @@ Empire override works anytime without this.
 
 ## Risks (keep in mind)
 
-- `arrow` / `image_button`: empty ES payload until H1 — use unique event names.
+- `arrow` / `image_button`: ES click payload includes `param1`/`param2` (H1).
 - `onclick_event` overrides `onclick` — helper default on that element is dead.
 - Naive CI `onclick:\s*function` misses factories — also gate `onclick:\s*\w+\(`.
 - Top menu ≠ element tree. Dynamic lists ≠ static rename.
