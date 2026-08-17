@@ -79,7 +79,7 @@ Do in order. Each checkbox ≈ one small commit (or one tiny PR).
 - [x] **A3** `ui_hold_festival_window.js` — help only
       (`button_help.onclick =` → `onclick_event` / `help_button` + `[es=…]`).
       Gods already ES.
-- [ ] **A4** `ui_mission_end_window.js` —
+- [x] **A4** `ui_mission_end_window.js` —
       `replay_mission.onclick = named` → `onclick_event`.
 
 ### B — One anonymous window at a time
