@@ -56,13 +56,11 @@ mods_window {
         unpack_scripts : large_button({ size[156, 25]
                                         text:"Unpack scripts"
                                         margin{right:-156, top:20}
-                                        onclick: mods_unpack_scripts
                                       })
 
         refresh_mods : large_button({ size[156, 25]
                                       text:"Check on github"
                                       margin{right:-156, top:44}
-                                      onclick: __mods_download_info_async
                                     })
 
         mods         : scrollable_list({pos[16, 75], size[36, 23], view_items:11,
@@ -76,6 +74,16 @@ mods_window {
                              align:"center"
                              margin{bottom:-35}})
     }
+}
+
+[es=(mods_window, unpack_scripts)]
+function mods_window_on_unpack_scripts(window) {
+    mods_unpack_scripts()
+}
+
+[es=(mods_window, refresh_mods)]
+function mods_window_on_refresh_mods(window) {
+    __mods_download_info_async()
 }
 
 [es=(mods_window, ui_draw_foreground)]
