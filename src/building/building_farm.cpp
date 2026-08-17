@@ -88,7 +88,7 @@ int building_farm::get_farm_image(e_building_type type, tile2i tile) {
 }
 
 bool building_farm::force_draw_flat_tile(painter &ctx, tile2i tile, vec2i pixel, color mask) {
-    return base.is_floodplain_farm();
+    return false;
 }
 
 void building_farm::draw_farm_worker(painter &ctx, int direction, int action, vec2i coords, color color_mask) {
