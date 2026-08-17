@@ -9,8 +9,8 @@ Full migration checklist: `docs/ui_es_only_migration.md`.
 
 **Do:**
 
-- Push callbacks via `*_event` fields: `onclick_event`, `ondraw_event`,
-  `onhover_event`, `oninput_event`, `ondoubleclick_event`.
+- Push callbacks via `*_event` fields: `onclick_event`, `onrclick_event`,
+  `ondraw_event`, `onhover_event`, `oninput_event`, `ondoubleclick_event`.
 - Or omit `onclick_event`: click dispatches `[es=(widget_id, element_id)]`
   (element key in `ui { }`). Use explicit `onclick_event` when the event
   name should differ from the element id (shared handlers, helpers).
@@ -32,8 +32,6 @@ Full migration checklist: `docs/ui_es_only_migration.md`.
 - Top-menu item `onclick` (not element `onclick_event` — see migration plan)
 
 **Out of scope for this rule:** anonymous `textfn` / `checkedfn` (pull APIs).
-
-**Not in C++ yet:** `onrclick_event` — keep named `onrclick:` until added.
 
 Reference: `src/scripts/ui_empire_window.js`.
 

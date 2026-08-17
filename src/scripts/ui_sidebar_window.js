@@ -81,7 +81,7 @@ sidebar_window_expanded {
 
         show_overlays     : link({
                                pos[4, 30], size[70, 20], hbody:false, border:false, font_hover:FONT_NORMAL_YELLOW
-                               onrclick: window_city_overlays_right_click
+                               onrclick_event: "overlays_help"
                             })
         toggle_flat       : link({
                                pos[74, 30], size[50, 20], hbody:false, border:false, font_hover:FONT_NORMAL_YELLOW
@@ -252,6 +252,11 @@ function sidebar_window_expanded_show_overlays(window) {
     emit event_show_window{ id: "overlay_menu_widget" }
 }
 
+[es=(sidebar_window_expanded, overlays_help)]
+function sidebar_window_expanded_overlays_help(window) {
+    ui.window_message_dialog_show("message_overlay_selector")
+}
+
 [es=(sidebar_window_expanded, show_messages)]
 function sidebar_window_expanded_show_messages(window) {
     emit event_show_window{ id: "message_list_window" }
@@ -292,10 +297,6 @@ function window_city_show_problem_area() {
 function window_build_menu_build_house() {
     ui.sidebar_set_type(BUILDING_MENU_VACANT_HOUSE)
     ui.window_build_menu_show(BUILDING_MENU_VACANT_HOUSE)
-}
-
-function window_city_overlays_right_click() {
-    ui.window_message_dialog_show("message_overlay_selector")
 }
 
 function window_build_menu_build_road() {

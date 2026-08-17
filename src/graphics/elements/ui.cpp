@@ -50,6 +50,7 @@ void reset_ui_command_queue();
     const xstring element::ONDRAW{"ondraw"};
     const xstring element::ONDRAW_EVENT{"ondraw_event"};
     const xstring element::ONCLICK_EVENT{"onclick_event"};
+    const xstring element::ONRCLICK_EVENT{"onrclick_event"};
     const xstring element::ONDOUBLECLICK_EVENT{"ondoubleclick_event"};
     const xstring element::ONINPUT_EVENT{"oninput_event"};
     const xstring element::ONRENDER_ITEM{"onrender_item"};
@@ -1748,9 +1749,11 @@ void ui::eimage_button::load(archive arch, element* parent, items& elems) {
     offsets.data[3] = arch.r_int("offset_disabled", 3);
     _tooltip = arch.r_string("tooltip");
     set_ref(ONCLICK, arch.r_function("onclick"));
+    set_ref(ONRCLICK, arch.r_function("onrclick"));
     set_ref(ONHOVER, arch.r_function("onhover"));
     set_ref(ONUNHOVER, arch.r_function("onunhover"));
     set_event(ONCLICK_EVENT, arch.r_string(ONCLICK_EVENT.c_str()));
+    set_event(ONRCLICK_EVENT, arch.r_string(ONRCLICK_EVENT.c_str()));
     set_event(ONHOVER_EVENT, arch.r_string(ONHOVER_EVENT.c_str()));
     set_event(ONUNHOVER_EVENT, arch.r_string(ONUNHOVER_EVENT.c_str()));
 
@@ -1862,21 +1865,33 @@ void ui::eimage_button::draw(UiFlags gflags) {
     } else if (!js_ref(ONCLICK).empty()) {
         const xstring js_onclick = js_ref(ONCLICK);
         btn->onclick([js_ref = js_onclick](int, int) { js_call_function(js_ref); });
-    } else if (_func || _sfunc || _rfunc || _srfunc) {
+    } else if (_func || _sfunc) {
         if (_func)
             btn->onclick(_func);
         if (_sfunc)
             btn->onclick(_sfunc);
-        if (_rfunc)
-            btn->onrclick(_rfunc);
-        if (_srfunc)
-            btn->onrclick(_srfunc);
     } else if (!id.empty()) {
         // No onclick_event: dispatch [es=(widget, element_id)].
         btn->onclick([eid = id, p1 = param1, p2 = param2](int, int) {
             dispatch_autoconfig_es_event(get_current_widget(), eid,
                 bvariant_map{{"param1", (int32_t)p1}, {"param2", (int32_t)p2}});
         });
+    }
+
+    xstring onrclick_event = event_name(ONRCLICK_EVENT);
+    if (!onrclick_event.empty()) {
+        btn->onrclick([onrclick_event, p1 = param1, p2 = param2](int, int) {
+            dispatch_autoconfig_es_event(get_current_widget(), onrclick_event,
+                bvariant_map{{"param1", (int32_t)p1}, {"param2", (int32_t)p2}});
+        });
+    } else if (!js_ref(ONRCLICK).empty()) {
+        const xstring js_onrclick = js_ref(ONRCLICK);
+        btn->onrclick([js_ref = js_onrclick](int, int) { js_call_function(js_ref); });
+    } else if (_rfunc || _srfunc) {
+        if (_rfunc)
+            btn->onrclick(_rfunc);
+        if (_srfunc)
+            btn->onrclick(_srfunc);
     }
 
     btn->tooltip(_tooltip);
@@ -2478,14 +2493,17 @@ void ui::egeneric_button::draw(UiFlags gflags) {
         });
     }
 
-    if (clickable && !js_ref(ONRCLICK).empty()) {
+    xstring onrclick_event = event_name(ONRCLICK_EVENT);
+    if (clickable && !onrclick_event.empty()) {
+        btn->onrclick([onrclick_event, p1 = param1, p2 = param2]() {
+            dispatch_autoconfig_es_event(get_current_widget(), onrclick_event,
+                bvariant_map{{"param1", (int32_t)p1}, {"param2", (int32_t)p2}});
+        });
+    } else if (clickable && !js_ref(ONRCLICK).empty()) {
         btn->onrclick([this] { this->js_rcall(); });
-    }
-
-    if (clickable && _rfunc && js_ref(ONRCLICK).empty()) {
+    } else if (clickable && _rfunc) {
         btn->onrclick(_rfunc);
-    }
-    if (clickable && _srfunc && js_ref(ONRCLICK).empty()) {
+    } else if (clickable && _srfunc) {
         btn->onrclick(_srfunc);
     }
 
@@ -2529,6 +2547,7 @@ void ui::egeneric_button::load(archive arch, element* parent, items& elems) {
     set_ref(ONUNHOVER, arch.r_function("onunhover"));
     set_ref(TEXTFN, arch.r_function("textfn"));
     set_event(ONCLICK_EVENT, arch.r_string(ONCLICK_EVENT));
+    set_event(ONRCLICK_EVENT, arch.r_string(ONRCLICK_EVENT));
     set_event(ONHOVER_EVENT, arch.r_string(ONHOVER_EVENT));
     set_event(ONUNHOVER_EVENT, arch.r_string(ONUNHOVER_EVENT));
     param1 = arch.r_int("param1");

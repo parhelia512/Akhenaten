@@ -435,7 +435,7 @@ namespace ui {
 
         /** JS registry refs by name (onclick, textfn, …). Max 6 entries. */
         flat_map<xstring, xstring, 6> _js_refs;
-        flat_map<xstring, xstring, 6> _events;
+        flat_map<xstring, xstring, 8> _events;
 
         virtual ~element();
 
@@ -581,6 +581,7 @@ namespace ui {
         static const xstring ONDRAW;
         static const xstring ONDRAW_EVENT;
         static const xstring ONCLICK_EVENT;
+        static const xstring ONRCLICK_EVENT;
         static const xstring ONHOVER_EVENT;
         static const xstring ONUNHOVER_EVENT;
         static const xstring ONDOUBLECLICK_EVENT;

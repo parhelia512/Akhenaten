@@ -14,13 +14,11 @@ close_button({ pos[0, 0], onclick_event: "close" })
 
 ## Goal (short)
 
-- Push callbacks: `onclick_event` / `ondraw_event` / `onhover_event` /
-  `oninput_event` / `ondoubleclick_event`
+- Push callbacks: `onclick_event` / `onrclick_event` / `ondraw_event` /
+  `onhover_event` / `oninput_event` / `ondoubleclick_event`
 - Logic in `[es=(widget, name)]` only
 - No `.onclick =` in init, no `onclick: function(){…}`, no factory
   `onclick: show_window_by_id("…")` in new/migrated UI
-
-**Not in C++ yet:** `onrclick_event` (use named `onrclick:` until needed).
 
 **Do not mix into these commits:** `textfn`/`checkedfn`, `memory=frame` draw
 canon, top-menu item model, mass wipe of every `onclick: named`.
@@ -240,7 +238,8 @@ Empire override works anytime without this.
 - [ ] **H7a** Ban anonymous `textfn` / `checkedfn`; named OK until
       `text_event` / `checked_event`.
 - [ ] **H7b** Draw canon / `memory=frame` — separate PRs from click migration.
-- [ ] **H7c** Optional: `onrclick_event` in C++ when first needed.
+- [x] **H7c** `onrclick_event` on `image_button` / `button`/`large_button` (link);
+      sidebar overlays help migrated as first user.
 - [ ] **H7d** Optional: deprecate remaining named `onclick:` in C++ log.
 
 ---
