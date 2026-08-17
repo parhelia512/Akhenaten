@@ -38,13 +38,13 @@ window_main_menu {
 	ui {
 		background    : { type:"background", path:"pharaoh_unloaded/title_00001" }
 
-		continue_game : large_button({ pos:mbutton(0), size[256, 25], text[13, 5], onclick: main_menu_continue_game })
+		continue_game : large_button({ pos:mbutton(0), size[256, 25], text[13, 5] })
 		select_player : large_button({ pos:mbutton(1), size[256, 25], text[30, 0] })
 		show_records  : large_button({ pos:mbutton(2), size[256, 25], text[30, 5] })
 		show_config   : large_button({ pos:mbutton(3), size[256, 25], text[2,  0] })
 		show_mods     : large_button({ pos:mbutton(4), size[256, 25], text:"#main_menu_mods" })
-		show_editor   : large_button({ pos:mbutton(5), size[256, 25], text:"#main_menu_editor", onclick: main_menu_start_editor })
-		quit_game     : large_button({ pos:mbutton(6), size[256, 25], text[30, 4], onclick: main_menu_quit_game })
+		show_editor   : large_button({ pos:mbutton(5), size[256, 25], text:"#main_menu_editor" })
+		quit_game     : large_button({ pos:mbutton(6), size[256, 25], text[30, 4] })
 
 		discord 	  : image_button({ pos[sw(-100), sh(-50)], size[48, 48], icon_texture:"!discord", scale:0.75 })
 
@@ -72,7 +72,8 @@ function main_menu_can_continue() {
 	return __game_file_exists(last_save)
 }
 
-function main_menu_continue_game() {
+[es=(window_main_menu, continue_game)]
+function main_menu_continue_game(window) {
 	var last_save = normalize_savegame_path_for_load(game_features.gameopt_last_save_filename)
     var last_player = game_features.gameopt_last_player
     if (last_save && last_player) {
@@ -83,13 +84,15 @@ function main_menu_continue_game() {
     }
 }
 
-function main_menu_quit_game() {
+[es=(window_main_menu, quit_game)]
+function main_menu_quit_game(window) {
     ui.show_yesno("#popup_dialog_quit", function() {
 		emit event_request_exit{ value: true }
 	})
 }
 
-function main_menu_start_editor() {
+[es=(window_main_menu, show_editor)]
+function main_menu_start_editor(window) {
     game.init_editor()
 }
 
