@@ -122,9 +122,11 @@ Prefer event when touching the file anyway.
 - [x] **C2** `ui_sidebar_window.js` — remaining factories (messages, overlay, bug).
 - [x] **C3** `ui_dynasty_menu.js`.
 - [x] **C4** `ui_advisor_imperial.js` / trade / mansion — `show_window_by_id`.
-- [ ] **C5** `ui_bazaar_window.js` (and similar one-liner orders openers if any).
-- [ ] **C6** Other stray `show_window_by_id(` in `ui_*.js` (grep sweep; one
+- [x] **C5** `ui_bazaar_window.js` (and similar one-liner orders openers if any).
+- [x] **C6** Other stray `show_window_by_id(` in `ui_*.js` (grep sweep; one
       commit per file or one sweep commit if tiny).
+      Done: `ui_resource_settings_window.js` help. Left for **H5**: top menu
+      (`top_menu_show_window_by_id`). Helper `show_window_by_id` in `ui_common.js` stays.
 
 ### D — Named `onclick:` → event (boring, optional pacing)
 

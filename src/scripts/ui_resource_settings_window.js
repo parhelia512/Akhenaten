@@ -38,7 +38,7 @@ trade_resource_settings_window {
         stockpile_industry: button({margin{centerx:-200}, pos[-1, 168], size[400, 50], split:true, onclick: resource_settings_toggle_stockpiled})
 
         button_close     : close_button({onclick: window_go_back})
-        button_help      : help_button({onclick: show_window_by_id("message_game_concept_industry")})
+        button_help      : help_button({ onclick_event: "help" })
     }
 }
 
@@ -96,6 +96,11 @@ function resource_settings_production_state_text(resource_id) {
     }
     var not_works = total - active
     return "" + active + " " + __loc(54, 12) + ", " + not_works + " " + __loc(54, 13 + (not_works > 0 ? 1 : 0))
+}
+
+[es=(trade_resource_settings_window, help)]
+function trade_resource_settings_window_on_help(window) {
+    ui.window_message_dialog_show("message_game_concept_industry")
 }
 
 [es=(trade_resource_settings_window, init)]
