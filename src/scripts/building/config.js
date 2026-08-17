@@ -289,7 +289,7 @@ building_festival_square = {
     square : { pos:[0, 0], pack:PACK_GENERAL, id:49 },
   },
   building_size : 5,
-  meta : { help_id: 366, text_id: 188 }
+  meta : { text_id: 188, help_link:"message_building_festival_square" }
   info_sound : "Wavs/prefecture.wav"
   fire_proof : true,
   damage_proof : true,
