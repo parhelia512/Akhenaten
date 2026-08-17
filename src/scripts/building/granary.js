@@ -52,6 +52,7 @@ building_granary {
     flags {
         is_food: true
         keeps_visitor_paths: true
+        perimeter_access: true
     }
 
     cost [ 50, 70, 100, 200, 300 ]
