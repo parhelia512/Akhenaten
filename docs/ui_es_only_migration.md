@@ -102,8 +102,8 @@ alone.
 - [x] **B10** `ui_granary_orders_window.js`.
 - [x] **B11** `ui_storage_yard_orders_window.js`.
 - [x] **B12** `ui_advisor_monuments.js`.
-- [ ] **B13** `ui_trade_opened_window.js`.
-- [ ] **B14** `ui_messages_window.js` — help override.
+- [x] **B13** `ui_trade_opened_window.js`.
+- [x] **B14** `ui_messages_window.js` — help override.
 
 **Done when A+B clear:** no `onclick: function` and no easy `.onclick =` left
 (except mission_choice / features).
@@ -118,7 +118,7 @@ Replace `onclick: show_window_by_id("X")` with either:
 
 Prefer event when touching the file anyway.
 
-- [ ] **C1** `ui_main_menu.js` — remaining `show_window_by_id`.
+- [x] **C1** `ui_main_menu.js` — remaining `show_window_by_id`.
 - [ ] **C2** `ui_sidebar_window.js` — remaining factories (messages, overlay, bug).
 - [ ] **C3** `ui_dynasty_menu.js`.
 - [ ] **C4** `ui_advisor_imperial.js` / trade / mansion — `show_window_by_id`.

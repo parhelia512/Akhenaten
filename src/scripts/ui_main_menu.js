@@ -39,10 +39,10 @@ window_main_menu {
 		background    : { type:"background", path:"pharaoh_unloaded/title_00001" }
 
 		continue_game : large_button({ pos:mbutton(0), size[256, 25], text[13, 5], onclick: main_menu_continue_game })
-		select_player : large_button({ pos:mbutton(1), size[256, 25], text[30, 0], onclick: show_window_by_id("window_player_selection") })
-		show_records  : large_button({ pos:mbutton(2), size[256, 25], text[30, 5], onclick: show_window_by_id("records_window") })
-		show_config   : large_button({ pos:mbutton(3), size[256, 25], text[2,  0], onclick: show_window_by_id("window_features") })
-		show_mods     : large_button({ pos:mbutton(4), size[256, 25], text:"#main_menu_mods", onclick: show_window_by_id("mods_window") })
+		select_player : large_button({ pos:mbutton(1), size[256, 25], text[30, 0] })
+		show_records  : large_button({ pos:mbutton(2), size[256, 25], text[30, 5] })
+		show_config   : large_button({ pos:mbutton(3), size[256, 25], text[2,  0] })
+		show_mods     : large_button({ pos:mbutton(4), size[256, 25], text:"#main_menu_mods" })
 		show_editor   : large_button({ pos:mbutton(5), size[256, 25], text:"#main_menu_editor", onclick: main_menu_start_editor })
 		quit_game     : large_button({ pos:mbutton(6), size[256, 25], text[30, 4], onclick: main_menu_quit_game })
 
@@ -101,6 +101,26 @@ function main_menu_on_show(ev) {
 
     game_mission_options_locked = false
     window_show_by_id("window_main_menu")
+}
+
+[es=(window_main_menu, select_player)]
+function main_menu_on_select_player(window) {
+	emit event_show_window{ id: "window_player_selection" }
+}
+
+[es=(window_main_menu, show_records)]
+function main_menu_on_show_records(window) {
+	emit event_show_window{ id: "records_window" }
+}
+
+[es=(window_main_menu, show_config)]
+function main_menu_on_show_config(window) {
+	emit event_show_window{ id: "window_features" }
+}
+
+[es=(window_main_menu, show_mods)]
+function main_menu_on_show_mods(window) {
+	emit event_show_window{ id: "mods_window" }
 }
 
 [es=(window_main_menu, discord)]
