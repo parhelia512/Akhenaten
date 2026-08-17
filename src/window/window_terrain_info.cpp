@@ -83,14 +83,8 @@ void terrain_info_window::init(object_info &c) {
 
     xstring help = io.r_string("help_id");
     if (!help.empty()) {
-        // Legacy numeric help ids still resolve via lang; prefer named message_* links.
-        if (help[0] >= '0' && help[0] <= '9') {
-            c.help_id = atoi(help.c_str());
-            c.help_link = {};
-        } else {
-            c.help_link = help;
-            c.help_id = 0;
-        }
+        c.help_link = help;
+        c.help_id = 0;
     }
 }
 

@@ -558,7 +558,6 @@ building_sandstone_quarry {
   production_rate : 100,
   building_size : 2,
   meta { text_id:162, help_link:"message_building_stone_quarries" }
-  //help_id:92, type:"sandstone_quarry", text_id:194
   labor_category : LABOR_CATEGORY_INDUSTRY_COMMERCE,
   needs {
     rock : true
@@ -639,7 +638,6 @@ building_granite_quarry {
   building_size : 2,
   meta { text_id:162, help_link:"message_building_stone_quarries" }
   info_sound : "Wavs/marble.wav"
-  //help_id:92, text_id:192
   labor_category : LABOR_CATEGORY_INDUSTRY_COMMERCE,
   needs {
     rock : true
@@ -668,7 +666,6 @@ building_limestone_quarry {
   production_rate : 100,
   building_size : 2,
   meta { text_id:162, help_link:"message_building_stone_quarries" }
-  //help_id:93, text_id:119}
   labor_category : LABOR_CATEGORY_INDUSTRY_COMMERCE,
   needs {
     rock : true

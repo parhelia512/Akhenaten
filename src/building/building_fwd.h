@@ -229,11 +229,10 @@ using building_output = building_input;
 ANK_CONFIG_STRUCT(building_input, resource, resource_second)
 
 struct metainfo {
-    uint16_t help_id;
     uint16_t text_id;
     xstring help_link;
 };
-ANK_CONFIG_STRUCT(metainfo, help_id, text_id, help_link)
+ANK_CONFIG_STRUCT(metainfo, text_id, help_link)
 
 struct building_planner_update_rule {
     bool canals;
