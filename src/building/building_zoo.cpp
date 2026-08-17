@@ -13,9 +13,6 @@
 #include "js/js_game.h"
 #include "window/popup_dialog.h"
 
-#include <algorithm>
-#include <cmath>
-
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_zoo);
 
 int building_zoo::resource_consume_amount() {
@@ -60,34 +57,4 @@ void building_zoo::spawn_figure() {
     // Animals are present once feed is consumed; ACTION_94 roamers never hit update_shows().
     runtime_data().juggler_visited = 32;
     create_roaming_figure(FIGURE_ZOOKEEPER, (e_figure_action)ACTION_94_ENTERTAINER_ROAMING, BUILDING_SLOT_SERVICE);
-}
-
-bool building_zoo::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
-    building_impl::draw_ornaments_and_animations_height(ctx, point, tile, color_mask);
-
-    auto draw_stacks = [&](e_resource resource, const xstring &anim_key) {
-        int amount = (int)ceil((float)base.stored_amount(resource) / 100.0f) - 1;
-        if (amount < 0) {
-            return;
-        }
-
-        const auto &ranim = anim(anim_key);
-        if (!ranim.first_img()) {
-            return;
-        }
-
-        vec2i pos = ranim.pos;
-        const int stacks = std::min(amount, 8);
-        for (int i = 0; i < stacks; ++i) {
-            auto &command = ImageDraw::create_subcommand(ctx, render_command_t::ert_generic);
-            command.image_id = ranim.first_img();
-            command.pixel = point + pos;
-            command.mask = color_mask;
-            pos += {5, -5};
-        }
-    };
-
-    draw_stacks(RESOURCE_GAMEMEAT, animkeys().gamemeat);
-    draw_stacks(RESOURCE_STRAW, animkeys().straw);
-    return true;
 }

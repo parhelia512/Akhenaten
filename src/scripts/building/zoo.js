@@ -7,9 +7,29 @@ building_zoo {
     preview : { pack:PACK_EXPANSION, id:6 },
     base : { pack:PACK_EXPANSION, id:6 },
     work : { pack:PACK_EXPANSION, id:6, offset:1, max_frames:19, can_reverse:true, duration:3 },
+  }
+  overlay_anims {
     // Stack icons near courtyard pots (SE of main building / by water cage)
-    gamemeat : { pos:[90, 70], pack:PACK_GENERAL, id:205 },
-    straw : { pos:[100, 78], pack:PACK_GENERAL, id:206 },
+    gamemeat {
+      pos:[90, 70]
+      pack:PACK_GENERAL
+      id:205
+      resource: RESOURCE_GAMEMEAT
+      stack: true
+      step: [5, -5]
+      max_count: 8
+      default_active: true
+    }
+    straw {
+      pos:[100, 78]
+      pack:PACK_GENERAL
+      id:206
+      resource: RESOURCE_STRAW
+      stack: true
+      step: [5, -5]
+      max_count: 8
+      default_active: true
+    }
   }
   input : {
     resource : RESOURCE_GAMEMEAT
