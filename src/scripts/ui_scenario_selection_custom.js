@@ -31,6 +31,11 @@ function window_scenario_selection_custom_btn_start() {
     __game_start_loaded_file()
 }
 
+[es=(window_scenario_selection_custom, btn_start)]
+function window_scenario_selection_custom_on_btn_start(window) {
+    window_scenario_selection_custom_btn_start()
+}
+
 [es=(window_scenario_selection_custom, mission_changed)]
 function window_scenario_selection_custom_on_mission_changed(ev) {
     ui.invalidate_minimap_preview(ev.scenario_minimap.size)
@@ -98,7 +103,7 @@ window_scenario_selection_custom {
             onclick_item: window_scenario_selection_custom_on_map_list_click
         })
 
-        btn_start              : image_button({ pos[780, 582], size[27, 27], pack:PACK_GENERAL, id:193, offset:4, onclick: window_scenario_selection_custom_btn_start })
+        btn_start              : image_button({ pos[780, 582], size[27, 27], pack:PACK_GENERAL, id:193, offset:4 })
 
         side_mission_title     : text_center({ pos[545, 162], size[265, 36], align:"center", text:"", font:FONT_LARGE_BLACK_ON_DARK, clip_area:true })
         side_subtitle          : text_center({ pos[545, 200], size[265, 20], align:"center", text:"", font:FONT_NORMAL_WHITE_ON_DARK })
