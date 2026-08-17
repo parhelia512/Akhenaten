@@ -134,43 +134,6 @@ building_military_academy_adv = {
   }
 }
 
-building_bazaar {
-  animations {
-    preview {pack:PACK_GENERAL, id:22, }
-    base {pack:PACK_GENERAL, id:22, }
-    base_work { pack:PACK_GENERAL, id:22, offset:0 }
-    fancy { pack:PACK_GENERAL, id:45 }
-    fancy_work { pack:PACK_GENERAL, id:45, offset:0 }
-    minimap {pack:PACK_GENERAL, id:149, offset:160}
-  }
-
-  max_search_distance : 40
-  fancy_treshold_desirability : 30
-  min_houses_coverage : 50
-  overlay : OVERLAY_BAZAAR_ACCESS
-  minimal_pick_food_amount : 100
-
-  pick_food_below [600, 400, 200, 100]
-  pick_good_below [150, 100, 50, 25]
-  max_buyers : 2
-  food_variety_target : 2
-
-  building_size : 2
-  meta { help_id: 2, text_id: 97 }
-  info_sound : "Wavs/MARKET.WAV"
-  cost [ 8, 15, 30, 50, 100 ]
-  desirability { value[-2], step[1], step_size[1], range[6] }
-
-  laborers[5]
-  fire_risk[4]
-  damage_risk[2]
-
-  flags {
-    is_food: true
-    keeps_visitor_paths: true
-  }
-}
-
 building_reed_gatherer {
   animations {
     preview { pos : [0, 0], pack:PACK_GENERAL, id:24 }
@@ -462,7 +425,7 @@ building_shipyard = {
   planner_update_rule : {
     relative_orientation: 1
   }
-  meta : { help_id: 82, text_id: 100 }
+  meta : { text_id: 100, help_link:"message_building_whipwright" }
   info_sound : "Wavs/shipyrd.wav"
   needs : {
     water_access : true

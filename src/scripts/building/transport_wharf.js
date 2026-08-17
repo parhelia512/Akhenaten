@@ -18,7 +18,7 @@ building_transport_wharf = {
   planner_update_rule : {
     relative_orientation: 1
   }
-  meta : { help_id: 85, text_id: 174 }
+  meta : { text_id: 174, help_link:"message_building_transport_wharf" }
   needs : {
     water_access : true,
     shoreline : true
