@@ -5,28 +5,6 @@ var SOUND_CHANNEL_EFFECTS_MAX = 44
 var SOUND_CHANNEL_CITY_MIN = 45
 var SOUND_CHANNEL_CITY_MAX = 148
 
-function sound_options_on_cancel() {
-    var w = sound_options_window
-
-    game_features.gameopt_sound_effects_enabled = !!w.orig_effects_en
-    game_features.gameopt_sound_effects_volume = w.orig_effects_vol;
-    game_features.gameopt_sound_music_enabled = !!w.orig_music_en
-    game_features.gameopt_sound_music_volume = w.orig_music_vol
-    game_features.gameopt_sound_speech_enabled = !!w.orig_speech_en
-    game_features.gameopt_sound_speech_volume = w.orig_speech_vol
-    game_features.gameopt_sound_city_enabled = !!w.orig_city_en
-    game_features.gameopt_sound_city_volume = w.orig_city_vol
-    if (w.orig_music_en) {
-        if ((game_features.gameopt_sound_music_enabled ? 1 : 0) != w.orig_music_en) {
-            __game_sound.music_update(1)
-        }
-    } else {
-        __game_sound.music_stop()
-    }
-
-    window_go_back()
-}
-
 [es=(sound_options_window, init)]
 function sound_options_window_es_init(window) {
     var w = sound_options_window
@@ -95,9 +73,37 @@ sound_options_window {
         btn_city           : button({pos[16, 158], size[224, 20], font: FONT_NORMAL_BLACK_ON_DARK })
         city_pct           : text({pos[326, 162], font: FONT_SMALL_PLAIN})
 
-        btnok              : ok_button({margin{left:px(24)/2 - 40, bottom:-40}, onclick: window_go_back })
-        btncancel          : cancel_button({margin{left:px(24)/2 + 20, bottom:-40}, onclick: sound_options_on_cancel })
+        btnok              : ok_button({margin{left:px(24)/2 - 40, bottom:-40} })
+        btncancel          : cancel_button({margin{left:px(24)/2 + 20, bottom:-40} })
     }
+}
+
+[es=(sound_options_window, btnok)]
+function sound_options_window_btnok(window) {
+    window_go_back()
+}
+
+[es=(sound_options_window, btncancel)]
+function sound_options_window_btncancel(window) {
+    var w = sound_options_window
+
+    game_features.gameopt_sound_effects_enabled = !!w.orig_effects_en
+    game_features.gameopt_sound_effects_volume = w.orig_effects_vol;
+    game_features.gameopt_sound_music_enabled = !!w.orig_music_en
+    game_features.gameopt_sound_music_volume = w.orig_music_vol
+    game_features.gameopt_sound_speech_enabled = !!w.orig_speech_en
+    game_features.gameopt_sound_speech_volume = w.orig_speech_vol
+    game_features.gameopt_sound_city_enabled = !!w.orig_city_en
+    game_features.gameopt_sound_city_volume = w.orig_city_vol
+    if (w.orig_music_en) {
+        if ((game_features.gameopt_sound_music_enabled ? 1 : 0) != w.orig_music_en) {
+            __game_sound.music_update(1)
+        }
+    } else {
+        __game_sound.music_stop()
+    }
+
+    window_go_back()
 }
 
 [es=(sound_options_window, arrow_music_down)]
