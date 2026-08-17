@@ -177,8 +177,8 @@ building-info `onclick: named` still on helpers. Skip top menu and dynamic windo
 - [x] **D40** `ui_sidebar_window.js` — build menu + expanded controls.
 - [x] **D41** campaign selection tabs / exit / play (periods remain H3).
 - [x] **D*** Easy named-`onclick` sweep done. Shared `building_info_window`
-      overlay/mothball uses multi-section ES; help/close helpers remain H6;
-      top menu remains H5.
+      overlay/mothball uses multi-section ES; help/close keep named helper
+      defaults (H6a); top menu uses `window_id` (H5).
 
 ---
 
@@ -227,11 +227,12 @@ else if (item.onclick) item.onclick(item.parameter)
 
 Empire override works anytime without this.
 
-- [ ] **H6a** Decide: C++ fallback for missing `close`/`help` ES, **or** keep
-      JS defaults and only override per window.
+- [x] **H6a** Keep JS defaults on `help_button` / `close_button`
+      (`onclick: window_show_help` / `window_go_back`); override per window
+      with `onclick_event` when needed (empire pattern).
 - [ ] **H6b** Optional mass default change on `help_button` / `close_button`.
-- [ ] **H6c** CI grep: fail `onclick:\s*function`, `\.onclick\s*=`,
-      `onclick:\s*\w+\(` (allowlist H4 leftovers).
+- [x] **H6c** CI: `.github/workflows/akhenaten_ui_es_only.yml` greps
+      `onclick:\s*function`, `\.onclick\s*=`, `onclick:\s*\w+\(`.
 
 ### H7 — Pull APIs + draw (separate project)
 
@@ -247,14 +248,14 @@ Empire override works anytime without this.
 
 **After A–C (click migration MVP):**
 
-- [ ] No `onclick: function` in `src/scripts`
-- [ ] No easy `.onclick =` outside H4 allowlist
-- [ ] No inline factory `onclick: show_window_by_id(` (and kin) in migrated files
+- [x] No `onclick: function` in `src/scripts`
+- [x] No easy `.onclick =` outside H4 allowlist
+- [x] No inline factory `onclick: show_window_by_id(` (and kin) in migrated files
 - [ ] Smoke: main menu → city → advisors → empire → options → one orders window
 
 **After H\* (full cleanup):**
 
-- [ ] CI grep gate
+- [x] CI grep gate
 - [x] Dynamic + advisors strip + campaign + top-menu factories (H5)
 - [ ] No anonymous pull callbacks; draw path policy as decided
 
