@@ -33,8 +33,6 @@ function building_zoo_on_place_checks(ev) {
   var straw_ok = straw.can_produce || straw.can_import || straw.could_import
   var meat_ok = meat.can_produce || meat.can_import || meat.could_import
 
-  // Soft warnings when either supply path exists for both inputs.
-  // C++ removes the building if either input is unavailable (and shows #building_removed_zoo).
   if (straw_ok && meat_ok) {
     city.warnings.show_if_not(straw.yards_stored > 0 || straw.count_active_industry > 0, "#building_needs_straw")
     city.warnings.show_if_not(meat.yards_stored > 0 || meat.count_active_industry > 0, "#building_needs_game_meat")

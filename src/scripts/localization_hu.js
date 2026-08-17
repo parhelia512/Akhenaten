@@ -1531,6 +1531,14 @@ localization_hu = [
   { key: "#zoo_access_medium", group:66, id:170 }
   { key: "#zoo_access_low", group:66, id:171 }
   { key: "#overlay_zoo", text: "Állatkert" }
+  // zoo info window (group 308)
+  { key: "#zoo_info_ok", group:308, id:1 }
+  { key: "#zoo_info_needs_meat", group:308, id:2 }
+  { key: "#zoo_info_needs_straw", group:308, id:3 }
+  { key: "#zoo_info_no_workers", group:308, id:4 }
+  { key: "#zoo_info_empty_cages", group:308, id:5 }
+  { key: "#zoo_info_game_meat", group:308, id:6 }
+  { key: "#zoo_info_straw", group:308, id:7 }
 // pavilion overlay
   { key: "#pavilion_access_none", text: "Ennek a háznak nincs hozzáférése táncszínpadhoz" }
   { key: "#pavilion_access_high", text: "Ezt a házat nemrég meglátogatta egy táncos. Sokáig lesz hozzáférése táncszínpadhoz" }
