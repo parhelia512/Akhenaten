@@ -315,18 +315,26 @@ info_window_entertainment {
         show_overlay  : button({
                                 margin:{right:-64, bottom:-40}, size[23, 23]
                                 textfn:building_info_window_text_overlay
-                                onclick: building_info_window_toggle_overlay
                                })
 
         mothball      : button({
                                  margin:{right:-90, bottom:-40}, size[23, 23]
                                  textfn:building_info_window_text_mothball
-                                 onclick: building_info_window_toggle_mothball
                                })
 
         button_help   : help_button({})
         button_close  : close_button({})
     }
+}
+
+[es=(info_window_entertainment, show_overlay)]
+function info_window_entertainment_on_show_overlay(window) {
+    building_info_window_toggle_overlay()
+}
+
+[es=(info_window_entertainment, mothball)]
+function info_window_entertainment_on_mothball(window) {
+    building_info_window_toggle_mothball()
 }
 
 health_info_window = {
