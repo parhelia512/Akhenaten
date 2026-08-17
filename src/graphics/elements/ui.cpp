@@ -1856,7 +1856,7 @@ void ui::eimage_button::draw(UiFlags gflags) {
     } else if (!js_ref(ONCLICK).empty()) {
         const xstring js_onclick = js_ref(ONCLICK);
         btn->onclick([js_ref = js_onclick](int, int) { js_call_function(js_ref); });
-    } else {
+    } else if (_func || _sfunc || _rfunc || _srfunc) {
         if (_func)
             btn->onclick(_func);
         if (_sfunc)
@@ -1865,6 +1865,12 @@ void ui::eimage_button::draw(UiFlags gflags) {
             btn->onrclick(_rfunc);
         if (_srfunc)
             btn->onrclick(_srfunc);
+    } else if (!id.empty()) {
+        // No onclick_event: dispatch [es=(widget, element_id)].
+        btn->onclick([eid = id](int, int) {
+            bvariant_map::scoped s;
+            dispatch_autoconfig_es_event(get_current_widget(), eid, *s);
+        });
     }
 
     btn->tooltip(_tooltip);
@@ -2390,6 +2396,11 @@ void ui::earrow_button::draw(UiFlags flags) {
     } else if (_func || _sfunc) {
         btn.onclick(_func);
         btn.onclick(_sfunc);
+    } else if (clickable && !id.empty()) {
+        // No onclick_event: dispatch [es=(widget, element_id)].
+        btn.onclick([eid = id] {
+            dispatch_autoconfig_es_event(get_current_widget(), eid, {});
+        });
     }
 
     const bool hover_now = clickable && ((btn.state & 3) != 0);
@@ -2443,18 +2454,25 @@ void ui::egeneric_button::draw(UiFlags gflags) {
         });
     } else if (clickable && !js_ref(ONCLICK).empty()) {
         btn->onclick([this] { this->js_call(); });
+    } else if (clickable && (_func || _sfunc)) {
+        if (_func) {
+            btn->onclick(_func);
+        }
+        if (_sfunc) {
+            btn->onclick(_sfunc);
+        }
+    } else if (clickable && !id.empty()) {
+        // No onclick_event: dispatch [es=(widget, element_id)].
+        btn->onclick([eid = id, p1 = param1, p2 = param2]() {
+            dispatch_autoconfig_es_event(get_current_widget(), eid,
+                bvariant_map{{"param1", (int32_t)p1}, {"param2", (int32_t)p2}});
+        });
     }
 
     if (clickable && !js_ref(ONRCLICK).empty()) {
         btn->onrclick([this] { this->js_rcall(); });
     }
 
-    if (clickable && _func && js_ref(ONCLICK).empty() && onclick_event.empty()) {
-        btn->onclick(_func);
-    }
-    if (clickable && _sfunc && js_ref(ONCLICK).empty() && onclick_event.empty()) {
-        btn->onclick(_sfunc);
-    }
     if (clickable && _rfunc && js_ref(ONRCLICK).empty()) {
         btn->onrclick(_rfunc);
     }

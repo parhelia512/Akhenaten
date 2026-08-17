@@ -11,6 +11,9 @@ Full migration checklist: `docs/ui_es_only_migration.md`.
 
 - Push callbacks via `*_event` fields: `onclick_event`, `ondraw_event`,
   `onhover_event`, `oninput_event`, `ondoubleclick_event`.
+- Or omit `onclick_event`: click dispatches `[es=(widget_id, element_id)]`
+  (element key in `ui { }`). Use explicit `onclick_event` when the event
+  name should differ from the element id (shared handlers, helpers).
 - Put logic in `[es=(widget_id, event_name)]` handlers.
 - Helpers: override like empire —
   `help_button({ onclick_event: "help" })` + `[es=(W, help)]`

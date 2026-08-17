@@ -175,8 +175,8 @@ sidebar_window_expanded {
 
         speed_header      : text({pos[11, 485], text:"#sidebar_speed_header", font:FONT_NORMAL_WHITE_ON_DARK})
         speed_current     : text({pos[65, 480 + 28], font:FONT_NORMAL_WHITE_ON_DARK})
-        dec_speed         : arrowdown({pos[11, 470 + 30], tiny:false, allow_repeat: true, onclick_event: "dec_gamespeed" })
-        inc_speed         : arrowup({pos[35, 470 + 30], tiny:false, allow_repeat: true, onclick_event: "inc_gamespeed" })
+        dec_speed         : arrowdown({pos[11, 470 + 30], tiny:false, allow_repeat: true })
+        inc_speed         : arrowup({pos[35, 470 + 30], tiny:false, allow_repeat: true })
 
         unemp_header      : text({pos[11, 480 + 50], text:[68, 135], font:FONT_NORMAL_WHITE_ON_DARK})
         unemp_current     : text({pos[11, 480 + 70], font:FONT_NORMAL_WHITE_ON_DARK})
@@ -277,13 +277,13 @@ function window_build_menu_on_draw(window) {
     }
 }
 
-[es=(sidebar_window_expanded, dec_gamespeed)]
-function sidebar_window_expanded_dec_gamespeed(window) {
+[es=(sidebar_window_expanded, dec_speed)]
+function sidebar_window_expanded_dec_speed(window) {
     emit event_change_gamespeed{ increase: false }
 }
 
-[es=(sidebar_window_expanded, inc_gamespeed)]
-function sidebar_window_expanded_inc_gamespeed(window) {
+[es=(sidebar_window_expanded, inc_speed)]
+function sidebar_window_expanded_inc_speed(window) {
     emit event_change_gamespeed{ increase: true }
 }
 

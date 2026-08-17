@@ -39,16 +39,16 @@ Canon also in: `src/js/CLAUDE.md` → «UI callbacks (ES-only)».
 Pattern:
 
 ```js
-// before
-arrowup({ onclick: function() { emit event_change_gamespeed{ increase: true } } })
+// element id is the ES event when onclick_event is omitted
+arrow_game_up : arrowup({ pos[216, 60], tiny:false, allow_repeat: true })
 
-// after
-arrowup({ onclick_event: "inc_gamespeed" })
-
-[es=(speed_options_window, inc_gamespeed)]
-function speed_options_inc_gamespeed(window) {
+[es=(speed_options_window, arrow_game_up)]
+function speed_options_arrow_game_up(window) {
     emit event_change_gamespeed{ increase: true }
 }
+
+// explicit onclick_event when the name should differ from the element id
+help_button({ onclick_event: "help" })
 ```
 
 Indexed `button` rows (`param1` already works):
@@ -89,7 +89,7 @@ alone.
 
 - [x] **B1** `ui_sidebar_window.js` — speed arrows only
       (leave `show_window_by_id` factories for later).
-- [ ] **B2** `ui_speed_options_window.js` — arrows + middle-mouse checkbox
+- [x] **B2** `ui_speed_options_window.js` — arrows + middle-mouse checkbox
       *click* (not `checkedfn`).
 - [ ] **B3** `ui_tax_collector_window.js` — tax arrows.
 - [ ] **B4** `ui_palace_window.js` — tax arrows.
