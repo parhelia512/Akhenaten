@@ -44,8 +44,18 @@ set_salary_window {
                                 onclick_item: set_salary_window_list_on_click_item
                             })
         explanation_text : text({pos[16, 304], size[px(22), -1], wrap:px(22), font: FONT_NORMAL_BLACK_ON_LIGHT, multiline:true})
-        btn_cancel       : button({margin{centerx: -80, bottom: -40}, size[160, 20], text[13, 4], font: FONT_NORMAL_BLACK_ON_LIGHT, onclick: window_go_back})
+        btn_cancel       : button({margin{centerx: -80, bottom: -40}, size[160, 20], text[13, 4], font: FONT_NORMAL_BLACK_ON_LIGHT })
     }
+}
+
+[es=(set_salary_window, btn_cancel)]
+function set_salary_window_btn_cancel(window) {
+    window_go_back()
+}
+
+[es=(set_salary_window_mansion, btn_cancel)]
+function set_salary_window_mansion_btn_cancel(window) {
+    window_go_back()
 }
 
 [es=modal_window]
