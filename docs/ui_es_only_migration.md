@@ -246,6 +246,9 @@ Empire override works anytime without this.
       `menu_item` named `onclick` unchanged (H5 leftover).
 - [x] **H7e** Drop named `onhover`/`onunhover` load + dispatch; keep
       `onhover_event` / `onunhover_event` only (campaign already migrated).
+- [x] **H7f** Scroll lists: named `onclick_item` → `onclick_event` + ES
+      (orders, messages, advisors, salary, player/scenario lists). Keep
+      `onrender_item` / `onrightclick_item` / `ondoubleclick_item` for now.
 
 ---
 

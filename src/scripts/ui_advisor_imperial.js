@@ -79,6 +79,7 @@ function scenario_request_handle(rq) {
     })
 }
 
+[es=(advisor_imperial_window, click_item)]
 function imperial_requests_on_click_item(p) {
     if (p.text === "distant") {
         __imperial_dispatch_distant_battle()
@@ -164,7 +165,7 @@ advisor_imperial_window {
                     draw_scrollbar_always: false
                     draw_paneling: false
                     onrender_item: imperial_requests_on_render_item
-                    onclick_item: imperial_requests_on_click_item
+                    onclick_event: "click_item"
                 })
 
                 bottom_panel : inner_panel({pos[64, 324], size[32, 6] })

@@ -40,6 +40,7 @@ function monuments_advisor_on_render_item(p) {
     }
 }
 
+[es=(advisor_monuments_window, click_monument)]
 function monuments_advisor_on_click_item(p) {
     var bid = p.user_data
     city.camera_go_to(__building_tile(bid))
@@ -83,6 +84,7 @@ function burial_provisions_on_render_item(p) {
     }
 }
 
+[es=(advisor_monuments_window, click_burial)]
 function burial_provisions_on_click_item(p) {
     var res = p.user_data
     var remaining = __scenario_burial_provisions_remaining(res)
@@ -179,7 +181,7 @@ advisor_monuments_window {
                     draw_scrollbar_always: false
                     draw_paneling: false
                     onrender_item: monuments_advisor_on_render_item
-                    onclick_item: monuments_advisor_on_click_item
+                    onclick_event: "click_monument"
                 })
                 no_monuments : label({pos[120, 110], text:"${53.69}", font:FONT_NORMAL_WHITE_ON_DARK })
 
@@ -198,7 +200,7 @@ advisor_monuments_window {
                     draw_scrollbar_always: false
                     draw_paneling: false
                     onrender_item: burial_provisions_on_render_item
-                    onclick_item: burial_provisions_on_click_item
+                    onclick_event: "click_burial"
                 })
                 no_burial : label({pos[100, 280], text:"${199.12}", font:FONT_NORMAL_WHITE_ON_DARK })
 

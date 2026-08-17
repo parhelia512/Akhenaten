@@ -30,8 +30,8 @@ Full migration checklist: `docs/ui_es_only_migration.md`.
 - Top-menu item `onclick` (not element `onclick_event` — see migration plan)
 
 Named `onclick` / `onrclick` / `onhover` / `onunhover` on button elements
-and the JS `onclick` accessor are removed (use `*_event` or omit click for
-element-id ES).
+and named `onclick_item` on scroll lists are removed (use `*_event` or omit
+click for element-id ES). JS `onclick` accessor removed.
 
 **Out of scope for this rule:** anonymous `textfn` / `checkedfn` (pull APIs).
 

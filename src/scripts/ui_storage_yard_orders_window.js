@@ -35,6 +35,7 @@ function storage_yard_orders_empty_all_text() {
     return yard.is_empty_all() ? __loc(99, 5) : __loc(99, 4)
 }
 
+[es=(storage_yard_orders_window, click_item)]
 function storage_yard_orders_list_on_click_item(p) {
     var yard = storage_yard_orders_ensure_yard()
     if (!yard) {
@@ -94,7 +95,7 @@ storage_yard_orders_window {
             draw_scrollbar_always: false
             draw_paneling: true
             onrender_item: storage_yard_orders_list_on_render_item
-            onclick_item: storage_yard_orders_list_on_click_item
+            onclick_event: "click_item"
         })
         empty_all    : button({pos[80, -1]
                                size[300, 24]

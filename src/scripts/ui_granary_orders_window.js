@@ -18,6 +18,7 @@ function granary_order_instruction(storage, resource) {
     }
 }
 
+[es=(granary_orders_window, click_item)]
 function granary_orders_list_on_click_item(p) {
     granary_orders_window.granary.cycle_resource_state(p.user_data)
 }
@@ -73,7 +74,7 @@ granary_orders_window {
             draw_scrollbar_always: false
             draw_paneling: true
             onrender_item: granary_orders_list_on_render_item
-            onclick_item: granary_orders_list_on_click_item
+            onclick_event: "click_item"
         })
         empty_all    : button({pos[80, -1]
                                size[300, 24]

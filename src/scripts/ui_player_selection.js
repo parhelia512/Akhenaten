@@ -1,5 +1,6 @@
 log_info("akhenaten: player selection started")
 
+[es=(window_player_selection, click_item)]
 function player_selection_on_click_item(entry) {
     window_player_selection.dynasty_name_changed = entry.text
     game.dynasty_name = entry.text
@@ -59,7 +60,7 @@ window_player_selection {
             use_file_finder:true
             view_items:12
             draw_scrollbar_always:true
-            onclick_item: player_selection_on_click_item
+            onclick_event: "click_item"
             ondoubleclick_item: player_selection_on_double_click
         })
 

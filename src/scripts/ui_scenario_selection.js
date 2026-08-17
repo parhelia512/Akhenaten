@@ -269,6 +269,7 @@ function window_scenario_selection_on_btn_start(window) {
     window_scenario_selection_btn_start()
 }
 
+[es=(window_scenario_selection, click_item)]
 function window_scenario_selection_on_map_list_click(entry) {
     // user_data carries the real scenario id of the clicked step (set in
     // on_init). Load it directly: campaign scenario ids are not necessarily
@@ -306,7 +307,7 @@ window_scenario_selection {
             view_items:14
             scrollbar_margin_x:10
             draw_scrollbar_always:false
-            onclick_item: window_scenario_selection_on_map_list_click
+            onclick_event: "click_item"
         })
 
         btn_scores             : large_button({ pos[550, 542], size[240, 30], text[44, 221], body:2, font:FONT_NORMAL_BLACK_ON_DARK, onclick_event: "show_scores" })

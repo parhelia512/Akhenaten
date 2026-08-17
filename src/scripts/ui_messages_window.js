@@ -43,6 +43,7 @@ function message_list_window_open_entry(index) {
     __ui_window_message_dialog_show_city_message(mmMsg, index, year, month, param1, param2, 0)
 }
 
+[es=(message_list_window, click_item)]
 function message_list_window_on_click_item(p) {
     if (!p) {
         return
@@ -102,7 +103,7 @@ message_list_window {
                                          view_items:15
                                          draw_scrollbar_always:true
                                          onrender_item: message_list_window_on_render_item
-                                         onclick_item: message_list_window_on_click_item
+                                         onclick_event: "click_item"
                                          onrightclick_item: message_list_window_on_rightclick_item })
 
         message_icon  : dummy({pos[0, 0]})

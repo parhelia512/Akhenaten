@@ -21,6 +21,7 @@ function dock_orders_window_accept_all() {
     dock_orders_window.dock.accept_all_goods()
 }
 
+[es=(dock_orders_window, click_item)]
 function dock_orders_list_on_click_item(p) {
     if (!dock_orders_window.dock) {
         return
@@ -68,7 +69,7 @@ dock_orders_window {
             draw_scrollbar_always: false
             draw_paneling: true
             onrender_item: dock_orders_list_on_render_item
-            onclick_item: dock_orders_list_on_click_item
+            onclick_event: "click_item"
         })
         accept_all   : button({pos[16, -1], size[200, 24], text:"#dock_order_accept_all", margin{bottom:-38}})
         accept_none  : button({pos[226, -1], size[200, 24], text:{group:99, id:7}, margin{bottom:-38}})

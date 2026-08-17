@@ -62,6 +62,7 @@ function bazaar_orders_text_min() {
     return __loc("#bazaar_min_variety") + " " + bazaar.min_variety()
 }
 
+[es=(bazaar_orders_window, click_item)]
 function bazaar_orders_list_on_click_item(p) {
     if (!bazaar_orders_good_available(p.user_data)) {
         return
@@ -121,7 +122,7 @@ bazaar_orders_window {
             draw_scrollbar_always: false
             draw_paneling: true
             onrender_item: bazaar_orders_list_on_render_item
-            onclick_item: bazaar_orders_list_on_click_item
+            onclick_event: "click_item"
         })
         desired_btn  : button({pos[16, -1], size[200, 24], textfn: bazaar_orders_text_desired, margin{bottom:-64}})
         min_btn      : button({pos[226, -1], size[200, 24], textfn: bazaar_orders_text_min, margin{bottom:-64}})

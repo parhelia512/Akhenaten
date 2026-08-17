@@ -11,6 +11,7 @@ function window_scenario_selection_custom_on_init(ev) {
     }
 }
 
+[es=(window_scenario_selection_custom, click_item)]
 function window_scenario_selection_custom_on_map_list_click(p) {
     if (!p || p.text === "") {
         return
@@ -100,7 +101,7 @@ window_scenario_selection_custom {
             view_items:14
             scrollbar_margin_x:10
             draw_scrollbar_always:false
-            onclick_item: window_scenario_selection_custom_on_map_list_click
+            onclick_event: "click_item"
         })
 
         btn_start              : image_button({ pos[780, 582], size[27, 27], pack:PACK_GENERAL, id:193, offset:4 })

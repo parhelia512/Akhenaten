@@ -1,5 +1,6 @@
 log_info("akhenaten: ui advisor trade started")
 
+[es=(advisor_trade_window, click_item)]
 function advisor_trade_list_on_click_item(p) {
     if (!p || p.text === undefined || p.text === "") {
         return
@@ -107,7 +108,7 @@ advisor_trade_window {
                     text_padding_y:5
                     draw_scrollbar_always:true
                     onrender_item: advisor_trade_list_on_render_item
-                    onclick_item: advisor_trade_list_on_click_item
+                    onclick_event: "click_item"
                 })
 
                 goto_empire  : button({pos:[48, 396], size:[200, 24], text:"#trade_overseer_goto_empire", tooltip:"#trade_overseer_goto_empire_hint" })
