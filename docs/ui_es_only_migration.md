@@ -91,7 +91,7 @@ alone.
       (leave `show_window_by_id` factories for later).
 - [x] **B2** `ui_speed_options_window.js` — arrows + middle-mouse checkbox
       *click* (not `checkedfn`).
-- [ ] **B3** `ui_tax_collector_window.js` — tax arrows.
+- [x] **B3** `ui_tax_collector_window.js` — tax arrows.
 - [ ] **B4** `ui_palace_window.js` — tax arrows.
 - [ ] **B5** `ui_sound_options_window.js` — ± / toggles.
 - [ ] **B6** `ui_donate_to_city_window.js` — amounts / ±.
