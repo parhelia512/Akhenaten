@@ -63,11 +63,31 @@ window_player_selection {
             ondoubleclick_item: player_selection_on_double_click
         })
 
-        btn_new    : button({margin{left:16, top:266}, size[126, 25], text[292, 0], font:FONT_NORMAL_BLACK_ON_LIGHT, onclick: player_selection_btn_new })
-        btn_delete : button({margin{left:146, top:266}, size[126, 25], text[292, 1], font:FONT_NORMAL_BLACK_ON_LIGHT, onclick: player_selection_btn_delete })
-        btn_proceed: button({margin{left:278, top:266}, size[86, 25], text[292, 2], font:FONT_NORMAL_BLACK_ON_LIGHT, onclick: player_selection_proceed })
-        btn_back   : button({margin{left:64, top:296}, size[256, 25], text[292, 4], font:FONT_NORMAL_BLACK_ON_LIGHT, onclick: player_selection_btn_back })
+        btn_new    : button({margin{left:16, top:266}, size[126, 25], text[292, 0], font:FONT_NORMAL_BLACK_ON_LIGHT })
+        btn_delete : button({margin{left:146, top:266}, size[126, 25], text[292, 1], font:FONT_NORMAL_BLACK_ON_LIGHT })
+        btn_proceed: button({margin{left:278, top:266}, size[86, 25], text[292, 2], font:FONT_NORMAL_BLACK_ON_LIGHT })
+        btn_back   : button({margin{left:64, top:296}, size[256, 25], text[292, 4], font:FONT_NORMAL_BLACK_ON_LIGHT })
     }
+}
+
+[es=(window_player_selection, btn_new)]
+function window_player_selection_btn_new(window) {
+    player_selection_btn_new()
+}
+
+[es=(window_player_selection, btn_delete)]
+function window_player_selection_btn_delete(window) {
+    player_selection_btn_delete()
+}
+
+[es=(window_player_selection, btn_proceed)]
+function window_player_selection_btn_proceed(window) {
+    player_selection_proceed()
+}
+
+[es=(window_player_selection, btn_back)]
+function window_player_selection_btn_back(window) {
+    player_selection_btn_back()
 }
 
 function update_player_list(window) {

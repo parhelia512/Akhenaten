@@ -135,6 +135,8 @@ Examples: dynasty leftovers, victory, player_selection, file-dialog leftovers,
 building-info `onclick: named` still on helpers. Skip top menu and dynamic windows.
 
 - [x] **D1** `ui_dynasty_menu.js` — remaining named `onclick`.
+- [x] **D2** `ui_player_selection.js` — named button `onclick` (list item
+      callbacks left as-is).
 - [ ] **D*** Pick next file with `onclick: named_fn`, wrap in id/`onclick_event` +
       thin `[es=…]`, commit, repeat.
 
