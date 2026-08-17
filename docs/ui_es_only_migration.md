@@ -132,10 +132,11 @@ Prefer event when touching the file anyway.
 
 Only when convenient; not required to finish A–C. One window per commit.
 Examples: dynasty leftovers, victory, player_selection, file-dialog leftovers,
-building-info `onclick: named` still on helpers.
+building-info `onclick: named` still on helpers. Skip top menu and dynamic windows.
 
-- [ ] **D*** Pick next file with `onclick: named_fn`, wrap in `onclick_event` +
-      thin `[es=…]`, commit, repeat. Skip top menu and dynamic windows.
+- [x] **D1** `ui_dynasty_menu.js` — remaining named `onclick`.
+- [ ] **D*** Pick next file with `onclick: named_fn`, wrap in id/`onclick_event` +
+      thin `[es=…]`, commit, repeat.
 
 ---
 
