@@ -2,6 +2,39 @@
 
 Bridge between game C++ and embedded MuJS scripts (`src/scripts/`).
 
+## UI callbacks (ES-only)
+
+Canon for new / migrated UI element trees (`ui { … }` in `src/scripts/ui_*.js`).
+Full migration checklist: `docs/ui_es_only_migration.md`.
+
+**Do:**
+
+- Push callbacks via `*_event` fields: `onclick_event`, `ondraw_event`,
+  `onhover_event`, `oninput_event`, `ondoubleclick_event`.
+- Put logic in `[es=(widget_id, event_name)]` handlers.
+- Helpers: override like empire —
+  `help_button({ onclick_event: "help" })` + `[es=(W, help)]`
+  (`onclick_event` wins over the helper’s default `onclick:`).
+
+**Do not (new code):**
+
+- `onclick: function(){…}` / other anonymous push callbacks in config
+- `onclick: factory(…)` (e.g. `show_window_by_id("…")`, `show_advisor_window(…)`)
+- `.onclick = …` in `init` (or elsewhere at runtime), except unfinished
+  dynamic lists tracked in the migration plan
+
+**Legacy (OK until migrated; do not add on new buttons):**
+
+- `onclick: named_global` (e.g. `window_go_back`)
+- Helper defaults that still use `onclick: window_show_help` / `window_go_back`
+
+**Out of scope for this rule:** anonymous `textfn` / `checkedfn` (pull APIs);
+top-menu item `onclick` (not element `onclick_event` — see migration plan).
+
+**Not in C++ yet:** `onrclick_event` — keep named `onrclick:` until added.
+
+Reference: `src/scripts/ui_empire_window.js`.
+
 ## Placement preview draw APIs
 
 Ghost preview for buildings is increasingly implemented in JS

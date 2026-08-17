@@ -64,7 +64,7 @@ mission_briefing_window {
         })
 
         difficulty_label : label({pos[105, 433], size[80, 14], font : FONT_NORMAL_BLACK_ON_LIGHT, textfn: get_difficulty_label })
-        back             : image_button({pos[26, 428], size[31, 20], pack:PACK_GENERAL, id:90, offset:8, enabled: false})
+        back             : image_button({pos[26, 428], size[31, 20], pack:PACK_GENERAL, id:90, offset:8, enabled: false, onclick_event: "go_back"})
 
         dec_difficulty   : image_button({pos[65, 428], size[17, 17], pack:PACK_GENERAL, id:212, offset:3, onclick: game_decrease_difficulty_if_allowed })
         inc_difficulty   : image_button({pos[65 + 18, 428], size[17, 17], pack:PACK_GENERAL, id:212, offset:0, onclick: game_increase_difficulty_if_allowed })
@@ -89,6 +89,16 @@ function mission_briefing_window_on_start_mission(window) {
     __game_sound.speech_stop()
     __game_sound.music_update(1)
     ui.window_city_show()
+}
+
+[es=(mission_briefing_window, go_back)]
+function mission_briefing_window_on_go_back(window) {
+    var fork_scenario_id = game.mission_choice_open_scenario_id
+    if (!(fork_scenario_id > 0)) {
+        return
+    }
+    __game_sound.speech_stop()
+    game_show_mission_choice(fork_scenario_id)
 }
 
 [es=(mission_briefing_window, init)]
@@ -162,10 +172,4 @@ function mission_briefing_window_on_init(window) {
     var src = get_mission_config(fork_scenario_id)
     var has_choice = !is_review && fork_scenario_id > 0 && !!src && !!src.choice && src.choice.length > 0
     window.back.enabled = has_choice
-    if (has_choice) {
-        window.back.onclick = function() {
-            __game_sound.speech_stop()
-            game_show_mission_choice(fork_scenario_id)
-        }
-    }
 }

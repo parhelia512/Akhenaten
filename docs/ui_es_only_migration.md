@@ -3,90 +3,40 @@
 Migrate UI from runtime closures / `onclick:` function refs to declarative
 `*_event` names plus `[es=(widget, name)]` handlers.
 
-Reference implementation: `src/scripts/ui_empire_window.js` (empire map buttons +
-`ondraw_event`).
+**Reference:** `src/scripts/ui_empire_window.js`
 
-## Goal
+```js
+help_button({ pos[0, 0], onclick_event: "help" })
+close_button({ pos[0, 0], onclick_event: "close" })
+```
 
-Canon for UI trees:
+(`onclick_event` wins over helper default `onclick:` in C++.)
 
-- only `onclick_event` / `ondraw_event` / `onhover_event` / `onrclick_event` (etc.);
-- logic only in `[es=(widget, name)]` functions;
-- no `.onclick = …` in `init`.
+## Goal (short)
 
-Out of scope for the first pass: banning global functions entirely, or rewriting
-`textfn` / `checkedfn` (pull APIs that return values).
+- Push callbacks: `onclick_event` / `ondraw_event` / `onhover_event` /
+  `oninput_event` / `ondoubleclick_event`
+- Logic in `[es=(widget, name)]` only
+- No `.onclick =` in init, no `onclick: function(){…}`, no factory
+  `onclick: show_window_by_id("…")` in new/migrated UI
 
-## What counts as not ES-only
+**Not in C++ yet:** `onrclick_event` (use named `onrclick:` until needed).
 
-| Pattern | Example | Priority |
-|--------|---------|----------|
-| Assign in `init` | `window.btn.onclick = function(){…}` | high |
-| Anonymous in config | `onclick: function(){…}` | high |
-| Named ref | `onclick: window_go_back` | medium (style + one call path) |
-| Helper defaults | `help_button` → `onclick: window_show_help` | medium (one change, many windows) |
-| Runtime dynamics | `btn.onclick = …` in loops | high, separate design |
-| `textfn` / `checkedfn` | pull API with return | low / phase 2 (needs `text_event` / `checked_event` in C++) |
+**Do not mix into these commits:** `textfn`/`checkedfn`, `memory=frame` draw
+canon, top-menu item model, mass wipe of every `onclick: named`.
 
-Rough inventory (at plan time): dozens of files with `onclick:…`, 15+ with
-anonymous `function(){}`, a handful of `.onclick =` in init. ES-only already on
-empire and parts of file dialogs / some windows.
+Canon also in: `src/js/CLAUDE.md` → «UI callbacks (ES-only)».
 
 ---
 
-## Phase 0 — Rules and infrastructure
+## Recipe (every small commit)
 
-1. Short canon in wiki / `src/js/CLAUDE.md`:
-   - new UI: only `*_event`;
-   - no `.onclick =` in init;
-   - `onclick: named_fn` is legacy — do not add.
-2. Per-window migration checklist:
-   - replace fields → add `[es=(window, …)]` → remove init assignments → click/draw smoke.
-3. Optional: debug assert/log if an element has both `onclick` and `onclick_event`
-   (event already wins), or if a draw path invokes a closure ref.
-4. Keep C++ `onclick` dual path for legacy until later phases.
+1. Replace `onclick: …` / `.onclick =` with `onclick_event: "name"`.
+2. Add `[es=(window_id, name)]` handler.
+3. Smoke: open window, click changed buttons, hot-reload if possible.
+4. One window (or one clear theme) per commit.
 
-**Done when:** rule is written; empire remains the reference.
-
----
-
-## Phase 1 — Shared helpers (small diff, wide reach)
-
-Files: `ui_common.js` (`help_button`, `close_button`), maybe `next_button` / advisor.
-
-Problem: ES handlers are bound to a concrete widget id (`empire_window`, not `*`).
-Options:
-
-- Per-window `[es=(that_window, close)]` → `window_go_back` (verbose without codegen);
-- C++ fallback: `onclick_event` with no handler → call a conventional global;
-- Defer helper conversion until enough windows already use `close` / `help` events.
-
-**Recommendation:** do not break all close/help in phase 1. Use phase 1 for the
-rule + checklist; convert helpers in phase 5 (or when a C++ fallback exists).
-
-**Done when:** new windows do not copy `onclick: function`.
-
----
-
-## Phase 2 — Hot path and init assignments (highest value first)
-
-In priority order:
-
-1. Already mostly done: empire (`ondraw_event` + click ES).
-2. `.onclick =` in init (few files — quick wins):
-   - `ui_mission_briefing_window.js`
-   - `ui_hold_festival_window.js`
-   - `ui_mission_end_window.js` (`onclick = named` → event)
-3. Sidebar / speed / tax (frequent clicks, anonymous emit):
-   - `ui_sidebar_window.js` (speed arrows)
-   - `ui_speed_options_window.js`
-   - `ui_tax_collector_window.js`, `ui_palace_window.js`
-4. Options with many ±1 handlers:
-   - `ui_sound_options_window.js`
-   - `ui_donate_to_city_window.js`
-   - `ui_popup_messages_window.js` (`cat_0…11` → one `toggle_cat` + `param1` / payload)
-
-Migration pattern:
+Pattern:
 
 ```js
 // before
@@ -101,123 +51,177 @@ function speed_options_inc_gamespeed(window) {
 }
 ```
 
-For indexed rows, use existing button `param1` / `param2` if
-`dispatch_autoconfig_es_event` forwards them; verify on the first window, extend
-C++ if needed.
+Indexed `button` rows (`param1` already works):
 
-**Done when:** no `.onclick =` in init; no anonymous `onclick: function` in
-sidebar / speed / options listed above.
+```js
+cat_0: button({ …, param1: 0, onclick_event: "toggle_cat" })
 
----
-
-## Phase 3 — Static windows (waves)
-
-Waves of 3–8 files per PR:
-
-| Wave | Area | Examples |
-|------|------|----------|
-| 3a | Menus | `ui_main_menu`, dynasty, player_selection, victory |
-| 3b | Advisors | imperial / trade / finance / … |
-| 3c | Building info / orders | granary, storage, bazaar, dock, workshop |
-| 3d | Top menu / editor | `ui_top_menu_*` |
-| 3e | File dialogs | already partly ES — finish remaining `onclick:` |
-
-Per PR: scripts only (+ tiny C++ if params missing). Smoke: open window, click all
-buttons, hot-reload the file.
-
-Named `onclick: foo`: switch to `onclick_event` + thin `[es=…]` wrapper, or leave
-until phase 5 if `foo` is already a stable global.
-
----
-
-## Phase 4 — Dynamic callbacks (separate design)
-
-Hard cases:
-
-- `ui_mission_choice_window.js` — buttons in a loop, `point_btn.onclick = function(){…}`
-- `ui_window_features.js` — `option.onclick = f.toggle`, many `checkedfn`
-- Any list where the handler depends on a runtime id
-
-Pick one approach per feature:
-
-1. Static slots + `param1 = id` (like popup category buttons).
-2. One ES handler that reads `window.selected_*` / event map payload.
-3. Keep named global `onclick: toggle_feature` with id in `param1` — no anonymous
-   closures, but not pure event-name-on-widget yet.
-
-Do not force a unique ES name per dynamic button without param support in dispatch.
-
-**Done when:** no anonymous closures in dynamic UI; `onclick: global_fn` + param
-allowed until phase 5.
-
----
-
-## Phase 5 — Helpers + wipe remaining `onclick:` (optional)
-
-1. `help_button` / `close_button` → `onclick_event` only.
-2. Mass-add `[es=(W, close/help)]` or C++ fallback to `window_go_back` /
-   `window_show_help`.
-3. CI grep gate in `src/scripts`: fail on `onclick:\s*function` and `\.onclick\s*=`
-   (allowlist for unfinished dynamic windows).
-4. Gradually convert `onclick: named`; when grep is clean, optionally log deprecated
-   `onclick` in C++.
-
----
-
-## Phase 6 — `textfn` / `checkedfn` (separate project)
-
-These are pull APIs: C++ expects a return value. ES events do not support that
-without:
-
-- `text_event` / `checked_event` with a return channel, or
-- allowing **named** `textfn: my_label_fn` (global, not anonymous) as an exception.
-
-Plan: ban only `textfn: function(){…}` / `checkedfn: function(){…}`; allow named
-globals until `*_event` exists.
-
----
-
-## Recommended order
-
-```text
-0   rules
-2   init assignments + sidebar/speed/tax/sound/donate/popup   ← most value
-3a–3e  window waves
-4   dynamic (mission_choice, features)
-1/5 helpers close/help + CI grep
-6   textfn/checkedfn (optional)
+[es=(popup_messages_window, toggle_cat)]
+function popup_messages_toggle_cat_es(window, ev) {
+    popup_messages_toggle_cat(ev.param1)
+}
 ```
 
-Phase 1 helpers intentionally after waves 2–3, to avoid dozens of identical
-`close` handlers before a fallback exists.
+For `arrow` / `image_button`: use **unique event names** (`inc_tax` /
+`dec_tax`) until Step H1. Do not rely on `param1` there yet.
 
 ---
 
-## Acceptance criteria
+## Commit checklist (simple → hard)
 
-- [ ] No `onclick: function` / `ondraw: function` in scripts
-- [ ] No `.onclick =` in init (except temporary allowlist)
-- [ ] Draw path only via `ondraw_event` (+ `memory=frame` where needed)
-- [ ] CI grep for anonymous callbacks
-- [ ] Smoke: main menu → city → advisors → empire → options → one building orders window
+Do in order. Each checkbox ≈ one small commit (or one tiny PR).
+
+### A — Rules + init (easiest)
+
+- [x] **A1** Write short ES-only rule in `src/js/CLAUDE.md` (new UI: `*_event`
+      only; no `.onclick =`; no anonymous/factory `onclick`; helpers like empire).
+- [x] **A2** `ui_mission_briefing_window.js` — remove `window.back.onclick =`.
+- [ ] **A3** `ui_hold_festival_window.js` — help only
+      (`button_help.onclick =` → `onclick_event` / `help_button` + `[es=…]`).
+      Gods already ES.
+- [ ] **A4** `ui_mission_end_window.js` —
+      `replay_mission.onclick = named` → `onclick_event`.
+
+### B — One anonymous window at a time
+
+Unique event names for arrows (no C++ change). Leave anonymous `checkedfn`
+alone.
+
+- [ ] **B1** `ui_sidebar_window.js` — speed arrows only
+      (leave `show_window_by_id` factories for later).
+- [ ] **B2** `ui_speed_options_window.js` — arrows + middle-mouse checkbox
+      *click* (not `checkedfn`).
+- [ ] **B3** `ui_tax_collector_window.js` — tax arrows.
+- [ ] **B4** `ui_palace_window.js` — tax arrows.
+- [ ] **B5** `ui_sound_options_window.js` — ± / toggles.
+- [ ] **B6** `ui_donate_to_city_window.js` — amounts / ±.
+- [ ] **B7** `ui_popup_messages_window.js` — `cat_0…11` → one `toggle_cat` +
+      `param1` (plain `button`).
+- [ ] **B8** `ui_main_menu.js` — Discord / Patreon / update anonymous only.
+- [ ] **B9** `ui_hotkey_editor_window.js`.
+- [ ] **B10** `ui_granary_orders_window.js`.
+- [ ] **B11** `ui_storage_yard_orders_window.js`.
+- [ ] **B12** `ui_advisor_monuments.js`.
+- [ ] **B13** `ui_trade_opened_window.js`.
+- [ ] **B14** `ui_messages_window.js` — help override.
+
+**Done when A+B clear:** no `onclick: function` and no easy `.onclick =` left
+(except mission_choice / features).
+
+### C — Factories → named or event (still small, one file)
+
+Replace `onclick: show_window_by_id("X")` with either:
+
+- `onclick_event: "…"` + ES that `emit event_show_window{ id: "X" }`, or
+- a **named** wrapper `function open_mods_window() { … }` + `onclick: open_mods_window`
+  (legacy OK until section E).
+
+Prefer event when touching the file anyway.
+
+- [ ] **C1** `ui_main_menu.js` — remaining `show_window_by_id`.
+- [ ] **C2** `ui_sidebar_window.js` — remaining factories (messages, overlay, bug).
+- [ ] **C3** `ui_dynasty_menu.js`.
+- [ ] **C4** `ui_advisor_imperial.js` / trade / mansion — `show_window_by_id`.
+- [ ] **C5** `ui_bazaar_window.js` (and similar one-liner orders openers if any).
+- [ ] **C6** Other stray `show_window_by_id(` in `ui_*.js` (grep sweep; one
+      commit per file or one sweep commit if tiny).
+
+### D — Named `onclick:` → event (boring, optional pacing)
+
+Only when convenient; not required to finish A–C. One window per commit.
+Examples: dynasty leftovers, victory, player_selection, file-dialog leftovers,
+building-info `onclick: named` still on helpers.
+
+- [ ] **D*** Pick next file with `onclick: named_fn`, wrap in `onclick_event` +
+      thin `[es=…]`, commit, repeat. Skip top menu and dynamic windows.
 
 ---
 
-## Risks
+## Later (hard / design — do last)
 
-- Duplicated `close` / `help` handlers per window without a C++ fallback.
-- ES param plumbing: confirm `dispatch_autoconfig_es_event` passes `param1`;
-  otherwise popup cats / features block.
-- `onclick_event` overrides `onclick`: do not leave a dead helper default after
-  migration.
-- Do not mix “ES-only” and “all draw on `memory=frame`” in the same PR.
+Keep these at the end. Do not interleave with A–C.
+
+### H1 — C++: forward `param1`/`param2` on `image_button` + `arrow`
+
+Today only `button`/`large_button` put params in the ES payload. Needed before
+shared handlers on advisors / arrows via `param1`.
+
+- [ ] **H1** Patch `ui.cpp` draw paths for image/arrow to match `egeneric_button`.
+
+### H2 — Advisor strip (`show_advisor_window(…)`)
+
+- [ ] **H2** After H1: `ui_advisors_window.js` — one `onclick_event` + `param1`,
+      or unique events per advisor button.
+
+### H3 — Campaign period factories + hover
+
+- [ ] **H3** `ui_scenario_selection_campaign.js` —
+      `campaign_period_select(n)` / `onhover` factories → events + params
+      (needs H1 if on `large_button` params already OK; hover may need
+      `onhover_event`).
+
+### H4 — Dynamic runtime callbacks
+
+- [ ] **H4a** `ui_mission_choice_window.js` — loop `point_btn.onclick = …`.
+- [ ] **H4b** `ui_window_features.js` — `option.onclick = f.toggle` (+ later
+      `checkedfn`).
+
+Approaches: static slots + `param1`; one ES handler reading window state;
+or named global + `param1` (no anonymous).
+
+### H5 — Top menu (different system)
+
+Not element `onclick_event`. Activation is JS:
+
+```js
+if (item.onclick) item.onclick(item.parameter)
+```
+
+- [ ] **H5** Separate design: item `onclick_event` + dispatch from
+      `top_menu_activate_item`, or only remove factories
+      (`top_menu_show_window_by_id("…")`). Do not pretend it is a `ui { }`
+      field rename.
+
+### H6 — Helper defaults + CI
+
+Empire override works anytime without this.
+
+- [ ] **H6a** Decide: C++ fallback for missing `close`/`help` ES, **or** keep
+      JS defaults and only override per window.
+- [ ] **H6b** Optional mass default change on `help_button` / `close_button`.
+- [ ] **H6c** CI grep: fail `onclick:\s*function`, `\.onclick\s*=`,
+      `onclick:\s*\w+\(` (allowlist H4 leftovers).
+
+### H7 — Pull APIs + draw (separate project)
+
+- [ ] **H7a** Ban anonymous `textfn` / `checkedfn`; named OK until
+      `text_event` / `checked_event`.
+- [ ] **H7b** Draw canon / `memory=frame` — separate PRs from click migration.
+- [ ] **H7c** Optional: `onrclick_event` in C++ when first needed.
+- [ ] **H7d** Optional: deprecate remaining named `onclick:` in C++ log.
 
 ---
 
-## Suggested first PR
+## Acceptance
 
-Same size as empire click migration:
+**After A–C (click migration MVP):**
 
-1. Remove all `.onclick =` (briefing, festival, mission_end).
-2. Sidebar + speed arrows → `onclick_event`.
-3. Write the short rule into `src/js/CLAUDE.md` or UI wiki.
+- [ ] No `onclick: function` in `src/scripts`
+- [ ] No easy `.onclick =` outside H4 allowlist
+- [ ] No inline factory `onclick: show_window_by_id(` (and kin) in migrated files
+- [ ] Smoke: main menu → city → advisors → empire → options → one orders window
+
+**After H\* (full cleanup):**
+
+- [ ] CI grep gate
+- [ ] Dynamic + top menu + advisors strip + campaign
+- [ ] No anonymous pull callbacks; draw path policy as decided
+
+---
+
+## Risks (keep in mind)
+
+- `arrow` / `image_button`: empty ES payload until H1 — use unique event names.
+- `onclick_event` overrides `onclick` — helper default on that element is dead.
+- Naive CI `onclick:\s*function` misses factories — also gate `onclick:\s*\w+\(`.
+- Top menu ≠ element tree. Dynamic lists ≠ static rename.
