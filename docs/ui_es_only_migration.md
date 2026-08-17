@@ -94,7 +94,7 @@ alone.
 - [x] **B3** `ui_tax_collector_window.js` — tax arrows.
 - [x] **B4** `ui_palace_window.js` — tax arrows.
 - [x] **B5** `ui_sound_options_window.js` — ± / toggles.
-- [ ] **B6** `ui_donate_to_city_window.js` — amounts / ±.
+- [x] **B6** `ui_donate_to_city_window.js` — amounts / ±.
 - [ ] **B7** `ui_popup_messages_window.js` — `cat_0…11` → one `toggle_cat` +
       `param1` (plain `button`).
 - [ ] **B8** `ui_main_menu.js` — Discord / Patreon / update anonymous only.
