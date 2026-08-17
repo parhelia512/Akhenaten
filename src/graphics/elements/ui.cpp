@@ -83,10 +83,14 @@ void reset_ui_command_queue();
             return;
         }
         ui::widget* w = ui::get_current_widget();
+        bvariant_map::scoped s;
+        if (ui::egeneric_button* btn = el.dcast_generic_button()) {
+            (*s)["param1"] = bvariant((int32_t)btn->param1);
+            (*s)["param2"] = bvariant((int32_t)btn->param2);
+        }
         if (hover_now) {
             const xstring& ev = el.event_name(ui::element::ONHOVER_EVENT);
             if (!ev.empty()) {
-                bvariant_map::scoped s;
                 ui::dispatch_autoconfig_es_event(w, ev, *s);
             } else if (!el.js_ref(ui::element::ONHOVER).empty()) {
                 js_call_function(el.js_ref(ui::element::ONHOVER));
@@ -94,7 +98,6 @@ void reset_ui_command_queue();
         } else {
             const xstring& ev = el.event_name(ui::element::ONUNHOVER_EVENT);
             if (!ev.empty()) {
-                bvariant_map::scoped s;
                 ui::dispatch_autoconfig_es_event(w, ev, *s);
             } else if (!el.js_ref(ui::element::ONUNHOVER).empty()) {
                 js_call_function(el.js_ref(ui::element::ONUNHOVER));

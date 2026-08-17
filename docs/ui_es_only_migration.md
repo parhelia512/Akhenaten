@@ -176,8 +176,8 @@ building-info `onclick: named` still on helpers. Skip top menu and dynamic windo
 - [x] **D39** `ui_mods_window.js` — unpack / refresh.
 - [x] **D40** `ui_sidebar_window.js` — build menu + expanded controls.
 - [x] **D41** campaign selection tabs / exit / play (periods remain H3).
-- [ ] **D*** Pick next file with `onclick: named_fn`, wrap in id/`onclick_event` +
-      thin `[es=…]`, commit, repeat.
+- [x] **D*** Easy named-`onclick` sweep done (shared `building_info_window`
+      chrome helpers + H leftovers remain).
 
 ---
 
@@ -194,15 +194,14 @@ shared handlers on advisors / arrows via `param1`.
 
 ### H2 — Advisor strip (`show_advisor_window(…)`)
 
-- [ ] **H2** After H1: `ui_advisors_window.js` — one `onclick_event` + `param1`,
-      or unique events per advisor button.
+- [x] **H2** `ui_advisors_window.js` — unique events per strip button, each
+      registered on every advisor window section (no H1 / `param1` needed).
 
 ### H3 — Campaign period factories + hover
 
-- [ ] **H3** `ui_scenario_selection_campaign.js` —
-      `campaign_period_select(n)` / `onhover` factories → events + params
-      (needs H1 if on `large_button` params already OK; hover may need
-      `onhover_event`).
+- [x] **H3** `ui_scenario_selection_campaign.js` — `param1` + shared
+      `select_period` / `hover_period` / `unhover_period`; C++ hover payload
+      now forwards `param1`/`param2` for `egeneric_button`.
 
 ### H4 — Dynamic runtime callbacks
 

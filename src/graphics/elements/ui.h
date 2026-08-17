@@ -306,6 +306,7 @@ namespace ui {
 
     struct emenu_header;
     struct eimage_button;
+    struct egeneric_button;
     struct escrollable_list;
     struct escrollbar;
     struct etext;
@@ -502,6 +503,7 @@ namespace ui {
 
         virtual emenu_header* dcast_menu_header() { return nullptr; }
         virtual eimage_button* dcast_image_button() { return nullptr; }
+        virtual egeneric_button* dcast_generic_button() { return nullptr; }
         virtual escrollable_list* dcast_scrollable_list() { return nullptr; }
         virtual escrollbar* dcast_escrollbar() { return nullptr; }
         virtual etext* dcast_etext() { return nullptr; }
@@ -921,6 +923,7 @@ namespace ui {
 
         static const xstring skind() { return "UIButton"; }
         virtual xstring kind() const override { return egeneric_button::skind(); }
+        virtual egeneric_button* dcast_generic_button() override { return this; }
     };
 
     struct echeckbox : public egeneric_button {
