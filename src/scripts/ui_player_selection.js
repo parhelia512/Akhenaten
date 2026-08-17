@@ -6,6 +6,7 @@ function player_selection_on_click_item(entry) {
     game.dynasty_name = entry.text
 }
 
+[es=(window_player_selection, doubleclick_item)]
 function player_selection_on_double_click(entry) {
     player_selection_proceed()
 }
@@ -61,7 +62,7 @@ window_player_selection {
             view_items:12
             draw_scrollbar_always:true
             onclick_event: "click_item"
-            ondoubleclick_item: player_selection_on_double_click
+            ondoubleclick_event: "doubleclick_item"
         })
 
         btn_new    : button({margin{left:16, top:266}, size[126, 25], text[292, 0], font:FONT_NORMAL_BLACK_ON_LIGHT })

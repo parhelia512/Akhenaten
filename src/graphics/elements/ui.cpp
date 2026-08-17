@@ -52,7 +52,6 @@ void reset_ui_command_queue();
     const xstring element::ONDOUBLECLICK_EVENT{"ondoubleclick_event"};
     const xstring element::ONINPUT_EVENT{"oninput_event"};
     const xstring element::ONRENDER_ITEM{"onrender_item"};
-    const xstring element::ONDOUBLECLICK_ITEM{"ondoubleclick_item"};
     const xstring element::ONHOVER_EVENT{"onhover_event"};
     const xstring element::ONUNHOVER_EVENT{"onunhover_event"};
     const xstring element::EMPTY_JS_REF{};
@@ -444,6 +443,36 @@ ui::widget* ui::get_current_widget() {
     return g_state.current_widget_stack.empty() ? nullptr : g_state.current_widget_stack.top();
 }
 
+/** Window config objects may declare [es=ParentType]; used as ES handler fallback. */
+static xstring js_window_es_parent(pcstr section) {
+    if (!section || !*section) {
+        return {};
+    }
+    js_State* J = js_vm_state();
+    if (!J || js_vm_have_error()) {
+        return {};
+    }
+
+    js_getglobal(J, section);
+    if (!js_isobject(J, -1)) {
+        js_pop(J, 1);
+        return {};
+    }
+
+    const js_StringNode key_es = js_intern("es");
+    if (!js_hasobject_modifier(J, -1, key_es)) {
+        js_pop(J, 1);
+        return {};
+    }
+
+    const js_StringNode val = js_getobject_modifier(J, -1, key_es);
+    js_pop(J, 1);
+    if (!val || val == js_intern("true")) {
+        return {};
+    }
+    return xstring(js_strnode_cstr(val));
+}
+
 void ui::dispatch_autoconfig_es_event(widget* root, xstring sub_event, const bvariant_map& payload) {
     if (!root || !sub_event || !*sub_event) {
         return;
@@ -452,8 +481,22 @@ void ui::dispatch_autoconfig_es_event(widget* root, xstring sub_event, const bva
     if (sec.empty()) {
         return;
     }
-    xstring ev = js_helpers::es_hash_str<64>(sec, sub_event).c_str();
-    root->event(ev, payload);
+
+    const xstring ev = js_helpers::es_hash_str<64>(sec, sub_event).c_str();
+    if (js_has_event_handlers(ev)) {
+        root->event(ev, payload);
+        return;
+    }
+
+    const xstring parent = js_window_es_parent(sec.c_str());
+    if (parent.empty() || parent == sec) {
+        return;
+    }
+
+    const xstring parent_ev = js_helpers::es_hash_str<64>(parent, sub_event).c_str();
+    if (js_has_event_handlers(parent_ev)) {
+        root->event(parent_ev, payload);
+    }
 }
 
 bool ui::handle_mouse(const mouse* m) {
@@ -1934,11 +1977,8 @@ void ui::escrollable_list::on_dblclick_item(const scrollable_list::entry_data* e
     if (!ondblclick_event.empty()) {
         bvariant_map::scoped m;
         (*m)["text"] = bvariant(entry->text);
+        (*m)["user_data"] = bvariant((int32_t)entry->user_data);
         dispatch_autoconfig_es_event(get_current_widget(), ondblclick_event.c_str(), *m);
-        return;
-    }
-    if (!js_ref(ONDOUBLECLICK_ITEM).empty()) {
-        js_call_function(js_ref(ONDOUBLECLICK_ITEM), {{"text", entry->text}});
     }
 }
 
@@ -1982,7 +2022,7 @@ void ui::escrollable_list::ensure_panel() {
     }
 
     xstring ondblclick_event = event_name(ONDOUBLECLICK_EVENT);
-    if (_ondoubleclick_item_cb || !js_ref(ONDOUBLECLICK_ITEM).empty() || !ondblclick_event.empty()) {
+    if (_ondoubleclick_item_cb || !ondblclick_event.empty()) {
         panel->set_onclick_dbl_entry([&](const scrollable_list::entry_data* entry) { this->on_dblclick_item(entry); });
     }
 
@@ -2137,7 +2177,6 @@ void ui::escrollable_list::load(archive arch, element* parent, items& elems) {
     assert(type == "scrollable_list");
 
     set_ref(ONRENDER_ITEM, arch.r_function("onrender_item"));
-    set_ref(ONDOUBLECLICK_ITEM, arch.r_function("ondoubleclick_item"));
     set_event(ONCLICK_EVENT, arch.r_string(ONCLICK_EVENT.c_str()));
     set_event(ONRCLICK_EVENT, arch.r_string(ONRCLICK_EVENT.c_str()));
     set_event(ONDOUBLECLICK_EVENT, arch.r_string(ONDOUBLECLICK_EVENT.c_str()));

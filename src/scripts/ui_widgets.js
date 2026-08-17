@@ -81,6 +81,7 @@ figure_carrier_info_window = {
     })
 }
 
+[es=building_info_window]
 info_window_ferry {
     ui : baseui(building_info_window, {
         background  : outer_panel({size: [29, 20]}),
@@ -270,6 +271,7 @@ info_window_pharos_lighthouse = {
     }
 }
 
+[es=building_info_window]
 info_window_fishing_wharf = {
     ui : baseui(building_info_window, {
         resource_img : { type : "resource_icon", pos: [32, 186] },
@@ -297,6 +299,7 @@ info_window_burning_ruin = {
     }
 }
 
+[es=building_info_window]
 info_window_entertainment {
     related_buildings [BUILDING_JUGGLER_SCHOOL, BUILDING_CONSERVATORY, BUILDING_DANCE_SCHOOL]
     ui {
@@ -335,18 +338,21 @@ health_info_window = {
     })
 }
 
+[es=building_info_window]
 info_window_senet_house = {
     ui : baseui(building_info_window, {
         advice        : text({pos: [36, 164], wrap:400, font : FONT_NORMAL_BLACK_ON_DARK, multiline:true }),
     })
 }
 
+[es=building_info_window]
 info_window_bullfight = {
     ui : baseui(building_info_window, {
 
     })
 }
 
+[es=building_info_window]
 info_window_gatehouse = {
     ui : baseui(building_info_window, {
 

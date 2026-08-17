@@ -193,6 +193,8 @@ Keep these at the end. Do not interleave with A–C.
 
 - [x] **H2** `ui_advisors_window.js` — shared `show_advisor` + `param1`
       (advisor id) on every strip button; `close_advisors` for back.
+      Handlers live on `[es=(advisor_window, …)]`; dispatch falls back via
+      window tag `[es=advisor_window]`.
 
 ### H3 — Campaign period factories + hover
 
@@ -249,7 +251,9 @@ Empire override works anytime without this.
 - [x] **H7f** Scroll lists: named `onclick_item` → `onclick_event` + ES
       (orders, messages, advisors, salary, player/scenario lists).
 - [x] **H7g** Scroll lists: named `onrightclick_item` → `onrclick_event` + ES
-      (messages delete). Keep `onrender_item` / `ondoubleclick_item` for now.
+      (messages delete).
+- [x] **H7h** Scroll lists: named `ondoubleclick_item` → `ondoubleclick_event`
+      + ES (player selection, mods). Keep `onrender_item` for now (pull).
 
 ---
 

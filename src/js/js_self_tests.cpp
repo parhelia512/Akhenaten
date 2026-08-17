@@ -2,10 +2,12 @@
 
 #include "core/core.h"
 #include "core/log.h"
+#include "core/variant.h"
 #include "mujs/jsi.h"
 #include "mujs/jsvalue.h"
 #include "mujs/mujs.h"
 #include "js/js.h"
+#include "js/js_game.h"
 #include "regexp.h"
 
 #include <cstring>
@@ -72,6 +74,50 @@ static bool mujs_self_test_js(js_State *J, pcstr id, pcstr source)
     return ok != 0;
 }
 
+/** Multiple [es=(section, name), es=(…)] on one function must register under each hash. */
+static bool mujs_self_test_multi_es_modifiers(js_State *J)
+{
+    static const char *k_probe =
+        "__mujs_multi_es_hits = 0;\n"
+        "[es=(win_b, ping), es=(win_a, ping)]\n"
+        "function __mujs_multi_es_probe(ev) { __mujs_multi_es_hits = (__mujs_multi_es_hits|0) + 1; }\n"
+        "true";
+
+    if (!mujs_self_test_js(J, "multi_es_define", k_probe))
+        return false;
+
+    const bstring64 hash_a = js_helpers::es_hash_str("win_a", "ping");
+    const bstring64 hash_b = js_helpers::es_hash_str("win_b", "ping");
+    verify_no_crash_var(hash_a == "ping+win_a", "multi_es: hash_a");
+    verify_no_crash_var(hash_b == "ping+win_b", "multi_es: hash_b");
+    if (hash_a != "ping+win_a" || hash_b != "ping+win_b")
+        return false;
+
+    js_getglobal(J, "__mujs_multi_es_probe");
+    verify_no_crash_var(J->iscallable(-1), "multi_es: probe is callable");
+    const int has_es = js_hasmodifier(J, -1, js_intern("es"));
+    js_pop(J, 1);
+    verify_no_crash_var(has_es, "multi_es: probe missing es modifier");
+    if (!has_es)
+        return false;
+
+    js_register_game_handlers({});
+    verify_no_crash_var(js_has_event_handlers(xstring(hash_a.c_str())), "multi_es: no handler for %s", hash_a.c_str());
+    verify_no_crash_var(js_has_event_handlers(xstring(hash_b.c_str())), "multi_es: no handler for %s", hash_b.c_str());
+    if (!js_has_event_handlers(xstring(hash_a.c_str())) || !js_has_event_handlers(xstring(hash_b.c_str())))
+        return false;
+
+    bvariant_map empty;
+    js_call_event_handlers(xstring(hash_a.c_str()), empty);
+    js_call_event_handlers(xstring(hash_b.c_str()), empty);
+
+    js_getglobal(J, "__mujs_multi_es_hits");
+    const int hits = js_tointeger(J, -1);
+    js_pop(J, 1);
+    verify_no_crash_var(hits == 2, "multi_es: expected 2 calls, got %d", hits);
+    return hits == 2;
+}
+
 } // namespace
 
 void mujs_run_self_tests(js_State *J)
@@ -87,6 +133,7 @@ void mujs_run_self_tests(js_State *J)
         "(function(){ function two_writes(){ __mujs_self_test_cptr.u8_a = 7; var x = 42; "
         "__mujs_self_test_cptr.u8_b = x; } two_writes(); "
         "return __mujs_self_test_cptr.u8_a === 7 && __mujs_self_test_cptr.u8_b === 42; })()");
+    mujs_self_test_multi_es_modifiers(J);
 
     {
         js_frame_zone zone(J);

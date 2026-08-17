@@ -136,13 +136,13 @@ function on_event_show_advisor_hotkey(ev) {
     }
 }
 
-// Strip handlers: one shared event per advisor window section.
-[es=(advisor_labors_window, show_advisor), es=(advisor_military_window, show_advisor), es=(advisor_imperial_window, show_advisor), es=(advisor_ratings_window, show_advisor), es=(advisor_trade_window, show_advisor), es=(advisor_population_window, show_advisor), es=(advisor_health_window, show_advisor), es=(advisor_education_window, show_advisor), es=(advisor_entertainment_window, show_advisor), es=(advisor_religion_window, show_advisor), es=(advisor_financial_window, show_advisor), es=(advisor_chief_window, show_advisor), es=(advisor_monuments_window, show_advisor), es=(advisor_housing_window, show_advisor)]
-function advisor_strip_on_show_advisor(window, ev) {
+// Windows tagged [es=advisor_window] fall back here when they have no exact handler.
+[es=(advisor_window, show_advisor)]
+function advisor_strip_on_show_advisor(ev) {
     window_advisors_show_advisor(Math.round(ev.param1))
 }
 
-[es=(advisor_labors_window, close_advisors), es=(advisor_military_window, close_advisors), es=(advisor_imperial_window, close_advisors), es=(advisor_ratings_window, close_advisors), es=(advisor_trade_window, close_advisors), es=(advisor_population_window, close_advisors), es=(advisor_health_window, close_advisors), es=(advisor_education_window, close_advisors), es=(advisor_entertainment_window, close_advisors), es=(advisor_religion_window, close_advisors), es=(advisor_financial_window, close_advisors), es=(advisor_chief_window, close_advisors), es=(advisor_monuments_window, close_advisors), es=(advisor_housing_window, close_advisors)]
-function advisor_strip_on_close_advisors(window) {
+[es=(advisor_window, close_advisors)]
+function advisor_strip_on_close_advisors() {
     ui.window_city_show()
 }

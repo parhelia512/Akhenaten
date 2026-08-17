@@ -18,6 +18,10 @@ Full migration checklist: `docs/ui_es_only_migration.md`.
 - Helpers: override like empire —
   `help_button({ onclick_event: "help" })` + `[es=(W, help)]`
   (defaults already use `onclick_event: "help"` / `"go_back"`).
+- Shared chrome across a window family: tag windows `[es=ParentType]` and
+  register one `[es=(ParentType, event)]`. Dispatch tries exact
+  `section+event` first, then falls back to `ParentType+event`
+  (advisor strip, building_info mothball/overlay).
 
 **Do not (new code):**
 
@@ -30,8 +34,9 @@ Full migration checklist: `docs/ui_es_only_migration.md`.
 - Top-menu item `onclick` (not element `onclick_event` — see migration plan)
 
 Named `onclick` / `onrclick` / `onhover` / `onunhover` on button elements
-and named `onclick_item` / `onrightclick_item` on scroll lists are removed
-(use `*_event` or omit click for element-id ES). JS `onclick` accessor removed.
+and named `onclick_item` / `onrightclick_item` / `ondoubleclick_item` on
+scroll lists are removed (use `*_event` or omit click for element-id ES).
+JS `onclick` accessor removed.
 
 **Out of scope for this rule:** anonymous `textfn` / `checkedfn` (pull APIs).
 

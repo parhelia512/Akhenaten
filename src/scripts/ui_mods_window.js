@@ -1,5 +1,6 @@
 log_info("akhenaten: mods window started")
 
+[es=(mods_window, doubleclick_item)]
 function mods_window_on_double_click(p) {
     if (!p || !p.text) return
     var modId = p.text
@@ -66,7 +67,7 @@ mods_window {
         mods         : scrollable_list({pos[16, 75], size[36, 23], view_items:11,
                                         draw_scrollbar_always:true
                                         onrender_item: mods_window_on_render_item
-                                        ondoubleclick_item: mods_window_on_double_click })
+                                        ondoubleclick_event: "doubleclick_item" })
 
         bottom_text  : text({text:"Right click to exit, double click to toggle mod"
                              font:FONT_NORMAL_BLACK_ON_LIGHT, size[px(40), 20]
