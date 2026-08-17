@@ -176,8 +176,9 @@ building-info `onclick: named` still on helpers. Skip top menu and dynamic windo
 - [x] **D39** `ui_mods_window.js` — unpack / refresh.
 - [x] **D40** `ui_sidebar_window.js` — build menu + expanded controls.
 - [x] **D41** campaign selection tabs / exit / play (periods remain H3).
-- [x] **D*** Easy named-`onclick` sweep done (shared `building_info_window`
-      chrome helpers + H leftovers remain).
+- [x] **D*** Easy named-`onclick` sweep done. Shared `building_info_window`
+      overlay/mothball uses multi-section ES; help/close helpers remain H6;
+      top menu remains H5.
 
 ---
 

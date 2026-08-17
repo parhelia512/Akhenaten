@@ -56,25 +56,9 @@ info_window_temple {
     })
 }
 
-[es=(info_window_temple, show_overlay)]
-function info_window_temple_on_show_overlay(window) {
-    building_info_window_toggle_overlay()
-}
 
-[es=(info_window_temple, mothball)]
-function info_window_temple_on_mothball(window) {
-    building_info_window_toggle_mothball()
-}
 
-[es=(info_window_temple_complex, show_overlay)]
-function info_window_temple_complex_on_show_overlay(window) {
-    building_info_window_toggle_overlay()
-}
 
-[es=(info_window_temple_complex, mothball)]
-function info_window_temple_complex_on_mothball(window) {
-    building_info_window_toggle_mothball()
-}
 
 function info_window_temple_common_init(window) {
     var b = city.get_building(window.bid)

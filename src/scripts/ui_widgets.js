@@ -327,15 +327,7 @@ info_window_entertainment {
     }
 }
 
-[es=(info_window_entertainment, show_overlay)]
-function info_window_entertainment_on_show_overlay(window) {
-    building_info_window_toggle_overlay()
-}
 
-[es=(info_window_entertainment, mothball)]
-function info_window_entertainment_on_mothball(window) {
-    building_info_window_toggle_mothball()
-}
 
 health_info_window = {
     ui : baseui(building_info_window, {

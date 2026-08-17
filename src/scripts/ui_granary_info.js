@@ -39,15 +39,7 @@ info_window_granary {
     }
 }
 
-[es=(info_window_granary, show_overlay)]
-function info_window_granary_on_show_overlay(window) {
-    building_info_window_toggle_overlay()
-}
 
-[es=(info_window_granary, mothball)]
-function info_window_granary_on_mothball(window) {
-    building_info_window_toggle_mothball()
-}
 
 [es=(info_window_granary, init)]
 function info_window_granary_on_init(window) {

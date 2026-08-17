@@ -38,15 +38,7 @@ taxcollector_info_window {
     }
 }
 
-[es=(taxcollector_info_window, show_overlay)]
-function taxcollector_info_window_on_show_overlay(window) {
-    building_info_window_toggle_overlay()
-}
 
-[es=(taxcollector_info_window, mothball)]
-function taxcollector_info_window_on_mothball(window) {
-    building_info_window_toggle_mothball()
-}
 
 [es=(taxcollector_info_window, init)]
 function taxcollector_info_window_on_init(window) {

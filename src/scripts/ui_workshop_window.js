@@ -117,10 +117,6 @@ function workshop_info_window_on_industry_button(window) {
     show_trade_resource_settings_window(b.output_resource_id)
 }
 
-[es=(workshop_info_window, mothball)]
-function workshop_info_window_on_mothball(window) {
-    building_info_window_toggle_mothball()
-}
 
 [es=(workshop_info_window, init)]
 function workshop_info_window_on_init(window) {

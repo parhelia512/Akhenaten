@@ -56,10 +56,6 @@ info_window_storageyard {
     }
 }
 
-[es=(info_window_storageyard, mothball)]
-function info_window_storageyard_on_mothball(window) {
-    building_info_window_toggle_mothball()
-}
 
 [es=(info_window_storageyard, init)]
 function info_window_storageyard_on_init(window) {

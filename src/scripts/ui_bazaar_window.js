@@ -56,20 +56,6 @@ bazaar_info_window {
     }
 }
 
-[es=(bazaar_info_window, show_overlay)]
-function bazaar_info_window_on_show_overlay(window) {
-    var b = city.get_building(city.object_info.bid)
-    city.current_overlay = (city.current_overlay == b.overlay) ? OVERLAY_NONE : b.overlay
-}
-
-[es=(bazaar_info_window, mothball)]
-function bazaar_info_window_on_mothball(window) {
-    var b = city.get_building(city.object_info.bid)
-    if (b.max_workers) {
-        b.mothball_toggle()
-    }
-}
-
 [es=(bazaar_info_window, orders)]
 function bazaar_info_window_orders(window) {
     emit event_show_window{ id: "bazaar_orders_window" }

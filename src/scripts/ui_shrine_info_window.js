@@ -16,10 +16,6 @@ shrine_info_window {
     }
 }
 
-[es=(info_window_shrine, show_overlay)]
-function info_window_shrine_on_show_overlay(window) {
-    building_info_window_toggle_overlay()
-}
 
 [es=building_info_window]
 info_window_shrine {
