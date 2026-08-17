@@ -1,11 +1,7 @@
 log_info("akhenaten: building info started")
 
 function get_building_config(name) {
-    try {
-        return eval(name)
-    } catch (e) {
-        return undefined
-    }
+    return __js_global(name)
 }
 
 function get_building_config_by_id(type) {

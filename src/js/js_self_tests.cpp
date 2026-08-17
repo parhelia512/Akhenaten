@@ -56,10 +56,10 @@ static bool mujs_self_test_regexp(pcstr id, pcstr pattern, pcstr subject, int ca
 static bool mujs_self_test_js(js_State *J, pcstr id, pcstr source)
 {
     if (js_try(J)) {
+        // js_throw already popped the try frame — do not js_endtry here.
         xstring msg = js_toxstring(J, -1);
         verify_no_crash_var(false, "mujs_self_test_js %s: exception: %s", id, msg.empty() ? "?" : msg.c_str());
         js_pop(J, 1);
-        js_endtry(J);
         return false;
     }
     js_loadeval(J, "[mujs_self_tests]", source);
@@ -87,4 +87,28 @@ void mujs_run_self_tests(js_State *J)
         "(function(){ function two_writes(){ __mujs_self_test_cptr.u8_a = 7; var x = 42; "
         "__mujs_self_test_cptr.u8_b = x; } two_writes(); "
         "return __mujs_self_test_cptr.u8_a === 7 && __mujs_self_test_cptr.u8_b === 42; })()");
+
+    {
+        js_frame_zone zone(J);
+        js_newobject(J);
+        js_Object *ephem = J->toobject(-1);
+        verify_no_crash_var(ephem && ephem->ephemeral, "frame_zone_ephemeral_flag");
+        js_pop(J, 1);
+    }
+
+    {
+        js_frame_zone zone(J);
+        const unsigned before = js_frame_escape_count(J);
+        if (js_try(J)) {
+            // js_throw already popped the try frame — do not js_endtry here.
+            js_pop(J, 1);
+            verify_no_crash_var(js_frame_escape_count(J) > before,
+                "frame_zone_escape_hard: expected escape count bump");
+        } else {
+            js_newobject(J);
+            js_setglobal(J, "__mujs_frame_zone_escape_probe");
+            js_endtry(J);
+            verify_no_crash_var(false, "frame_zone_escape_hard: expected js_error on heap store");
+        }
+    }
 }

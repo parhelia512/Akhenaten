@@ -451,7 +451,7 @@ void ui::dispatch_autoconfig_es_event(widget* root, xstring sub_event, const bva
     if (!root || !sub_event || !*sub_event) {
         return;
     }
-    const xstring& sec = root->get_section();
+    const xstring sec = root->get_section();
     if (sec.empty()) {
         return;
     }
