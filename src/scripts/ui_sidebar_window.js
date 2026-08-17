@@ -242,7 +242,7 @@ function sidebar_window_draw_background(window) {
     window.build_security.selected = (BUILDING_MENU_SECURITY == window.opened_menu)
 }
 
-[es=(sidebar_window_expanded, ui_draw_foreground)]
+[es=(sidebar_window_expanded, ui_draw_foreground), memory=frame]
 function window_build_menu_on_draw(window) {
     sidebar_window_draw_background(window)
 
