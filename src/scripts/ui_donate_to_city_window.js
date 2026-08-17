@@ -1,14 +1,5 @@
 log_info("akhenaten: ui donate to city window started")
 
-function donate_to_city_do_donate() {
-    city.kingdome.donate_savings_to_city()
-    window_advisors_show()
-}
-
-function donate_to_city_cancel() {
-    window_advisors_show()
-}
-
 [es=(donate_to_city_window, init)]
 function donate_to_city_window_init(window) {
     city.kingdome.set_donation_amount(city.kingdome.donate_amount)
@@ -42,11 +33,20 @@ donate_to_city_window {
         amount_value     : label({pos[256, 88], font: FONT_NORMAL_WHITE_ON_DARK
                                   textfn: function() { return String(city.kingdome.donate_amount) }})
 
-        btn_donate       : button({pos[80, 123], size[160, 20], text[52, 18], font: FONT_NORMAL_BLACK_ON_LIGHT
-                                    onclick: donate_to_city_do_donate})
-        btn_cancel       : button({pos[272, 123], size[160, 20], text[13, 4], font: FONT_NORMAL_BLACK_ON_LIGHT
-                                    onclick: donate_to_city_cancel})
+        btn_donate       : button({pos[80, 123], size[160, 20], text[52, 18], font: FONT_NORMAL_BLACK_ON_LIGHT })
+        btn_cancel       : button({pos[272, 123], size[160, 20], text[13, 4], font: FONT_NORMAL_BLACK_ON_LIGHT })
     }
+}
+
+[es=(donate_to_city_window, btn_donate)]
+function donate_to_city_btn_donate(window) {
+    city.kingdome.donate_savings_to_city()
+    window_advisors_show()
+}
+
+[es=(donate_to_city_window, btn_cancel)]
+function donate_to_city_btn_cancel(window) {
+    window_advisors_show()
 }
 
 [es=(donate_to_city_window, btn_0)]

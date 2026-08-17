@@ -144,6 +144,12 @@ building-info `onclick: named` still on helpers. Skip top menu and dynamic windo
 - [x] **D7** `ui_industry_office_window.js` — mothball / unmothball.
 - [x] **D8** `ui_invasion_quick_battle_window.js` — resolve / bribe / wait.
 - [x] **D9** `ui_difficulty_options_window.js` — difficulty arrows.
+- [x] **D10** `ui_donate_to_city_window.js` — donate / cancel.
+- [x] **D11** `ui_display_options_window.js` — cancel → `go_back`.
+- [x] **D12** `ui_main_menu.js` — continue / editor / quit.
+- [x] **D13** `ui_popup_messages_window.js` — ok / cancel.
+- [x] **D14** `ui_advisor_monuments.js` — burial dispatch buttons.
+- [x] **D15** `ui_mission_briefing_window.js` — difficulty arrows + ironwill.
 - [ ] **D*** Pick next file with `onclick: named_fn`, wrap in id/`onclick_event` +
       thin `[es=…]`, commit, repeat.
 
