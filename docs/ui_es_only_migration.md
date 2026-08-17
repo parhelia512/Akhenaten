@@ -139,6 +139,11 @@ building-info `onclick: named` still on helpers. Skip top menu and dynamic windo
       callbacks left as-is).
 - [x] **D3** `ui_victory_dialog.js` — named button `onclick`.
 - [x] **D4** `ui_festival_square_window.js` — hold festival button.
+- [x] **D5** `ui_new_career.js` — back button.
+- [x] **D6** file-dialog cancel → `onclick_event: "go_back"` (chrome + per-dialog ES).
+- [x] **D7** `ui_industry_office_window.js` — mothball / unmothball.
+- [x] **D8** `ui_invasion_quick_battle_window.js` — resolve / bribe / wait.
+- [x] **D9** `ui_difficulty_options_window.js` — difficulty arrows.
 - [ ] **D*** Pick next file with `onclick: named_fn`, wrap in id/`onclick_event` +
       thin `[es=…]`, commit, repeat.
 
