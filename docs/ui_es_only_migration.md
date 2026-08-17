@@ -169,6 +169,13 @@ building-info `onclick: named` still on helpers. Skip top menu and dynamic windo
 - [x] **D32** `ui_hotkey_config_window.js` — cancel.
 - [x] **D33** scenario selection start buttons (campaign + custom).
 - [x] **D34** `ui_window_features.js` — chrome buttons (not dynamic toggles).
+- [x] **D35** `ui_advisor_population.js` — housing / graph buttons.
+- [x] **D36** `ui_advisor_housing.js` — graphs button.
+- [x] **D37** `ui_roadblock_orders_window.js` — close.
+- [x] **D38** `ui_send_gift_window.js` — cancel.
+- [x] **D39** `ui_mods_window.js` — unpack / refresh.
+- [x] **D40** `ui_sidebar_window.js` — build menu + expanded controls.
+- [x] **D41** campaign selection tabs / exit / play (periods remain H3).
 - [ ] **D*** Pick next file with `onclick: named_fn`, wrap in id/`onclick_event` +
       thin `[es=…]`, commit, repeat.
 
