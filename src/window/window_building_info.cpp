@@ -225,21 +225,21 @@ void building_info_window::init(object_info &c) {
     ui.event(building_info_window_init{ pos, c.bid });
     ui.end_widget();
 
-    xstring correct_help_id = help_id;
+    // Prefer string help_link over numeric help_id (window override → meta.help_link → meta.help_id).
+    xstring correct_help = help_id;
     const auto &meta = b->params().meta;
-    if (!correct_help_id) {
-        correct_help_id = meta.help_link;
+    if (!correct_help) {
+        correct_help = meta.help_link;
+    }
+    if (!correct_help && meta.help_id) {
+        correct_help = lang_get_message_id(meta.help_id);
+    }
+    if (!correct_help) {
+        correct_help = "message_table_of_contents";
     }
 
-    if (!correct_help_id && meta.help_id) {
-        correct_help_id = lang_get_message_id(meta.help_id);
-    }
-
-    if (!correct_help_id) {
-        correct_help_id = "message_table_of_contents";
-    }
-
-    window_message_setup_help_id(correct_help_id);
+    window_message_setup_help_id(correct_help);
+    c.help_link = correct_help;
 
     c.go_to_advisor = {ADVISOR_NONE, ADVISOR_NONE, ADVISOR_NONE};
     if (first_advisor != ADVISOR_NONE) {
@@ -274,7 +274,8 @@ void building_info_window::init(object_info &c) {
     c.bid = b->main()->id;
 
     const auto &params = b->dcast()->current_params();
-    c.help_id = params.meta.help_id;
+    // Resolved string is already in c.help_link; do not overwrite with numeric meta.help_id.
+    c.help_id = 0;
     c.group_id = params.meta.text_id;
 }
 

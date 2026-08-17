@@ -108,6 +108,8 @@ void object_info::reset(tile2i tile) {
     bid = map_building_at(tile);
     terrain_type = terrain_info_empty;
     nfigure.drawn = 0;
+    help_id = 0;
+    help_link = {};
 }
 
 figure *object_info::figure_get() {
@@ -319,10 +321,12 @@ object_info &common_info_window::get_object_info() {
 void common_info_window::update_buttons(object_info &c) {
     vec2i bgsize = ui["background"].pxsize();
     ui["button_help"].onclick([&c] {
-        logs::info("window_info button_help invoked, help_id=%d", c.help_id);
-        if (c.help_id > 0) {
-            const xstring help_id = lang_get_message_id(c.help_id);
-            window_message_dialog_show(help_id, -1, window_city_draw_all);
+        logs::info("window_info button_help invoked, help_link='%s' help_id=%d",
+          c.help_link.empty() ? "<none>" : c.help_link.c_str(), c.help_id);
+        if (!c.help_link.empty()) {
+            window_message_dialog_show(c.help_link, -1, window_city_draw_all);
+        } else if (c.help_id > 0) {
+            window_message_dialog_show(lang_get_message_id(c.help_id), -1, window_city_draw_all);
         } else {
             window_message_dialog_show("message_dialog_help", -1, window_city_draw_all);
         }
