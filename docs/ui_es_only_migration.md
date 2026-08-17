@@ -137,6 +137,7 @@ building-info `onclick: named` still on helpers. Skip top menu and dynamic windo
 - [x] **D1** `ui_dynasty_menu.js` — remaining named `onclick`.
 - [x] **D2** `ui_player_selection.js` — named button `onclick` (list item
       callbacks left as-is).
+- [x] **D3** `ui_victory_dialog.js` — named button `onclick`.
 - [ ] **D*** Pick next file with `onclick: named_fn`, wrap in id/`onclick_event` +
       thin `[es=…]`, commit, repeat.
 
