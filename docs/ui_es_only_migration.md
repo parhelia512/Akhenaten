@@ -92,7 +92,7 @@ alone.
 - [x] **B2** `ui_speed_options_window.js` — arrows + middle-mouse checkbox
       *click* (not `checkedfn`).
 - [x] **B3** `ui_tax_collector_window.js` — tax arrows.
-- [ ] **B4** `ui_palace_window.js` — tax arrows.
+- [x] **B4** `ui_palace_window.js` — tax arrows.
 - [ ] **B5** `ui_sound_options_window.js` — ± / toggles.
 - [ ] **B6** `ui_donate_to_city_window.js` — amounts / ±.
 - [ ] **B7** `ui_popup_messages_window.js` — `cat_0…11` → one `toggle_cat` +
