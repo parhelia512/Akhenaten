@@ -18,13 +18,14 @@ function popup_messages_refresh_row_fonts(window) {
     }
 }
 
-function popup_messages_on_ok() {
-    var w = popup_messages_window
-    game_features.gameopt_popup_messages = Math.round(w.pending_mask)
+[es=(popup_messages_window, btnok)]
+function popup_messages_on_ok(window) {
+    game_features.gameopt_popup_messages = Math.round(window.pending_mask)
     window_go_back()
 }
 
-function popup_messages_on_cancel() {
+[es=(popup_messages_window, btncancel)]
+function popup_messages_on_cancel(window) {
     // Discard pending; live gameopt unchanged.
     window_go_back()
 }
@@ -84,7 +85,7 @@ popup_messages_window {
         cat_11 : button({pos[48, 312], size[288, 22], text[310, 13], hbody:false, border:false, font: FONT_NORMAL_BLACK_ON_LIGHT, param1: 11, onclick_event: "toggle_cat" })
 
         // OG group 310 id 14/15 — text Ok/Cancel (not image check/X used by other options).
-        btnok     : button({margin{left:px(24)/2 - 60, bottom:-36}, size[100, 25], text[310, 14], onclick: popup_messages_on_ok })
-        btncancel : button({margin{left:px(24)/2 + 20, bottom:-36}, size[100, 25], text[310, 15], onclick: popup_messages_on_cancel })
+        btnok     : button({margin{left:px(24)/2 - 60, bottom:-36}, size[100, 25], text[310, 14] })
+        btncancel : button({margin{left:px(24)/2 + 20, bottom:-36}, size[100, 25], text[310, 15] })
     }
 }
