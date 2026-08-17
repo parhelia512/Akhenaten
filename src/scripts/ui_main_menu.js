@@ -46,23 +46,15 @@ window_main_menu {
 		show_editor   : large_button({ pos:mbutton(5), size[256, 25], text:"#main_menu_editor", onclick: main_menu_start_editor })
 		quit_game     : large_button({ pos:mbutton(6), size[256, 25], text[30, 4], onclick: main_menu_quit_game })
 
-		discord 	  : image_button({ pos[sw(-100), sh(-50)], size[48, 48], icon_texture:"!discord", scale:0.75
-							           	onclick: function() { __platform_open_url("https://discord.gg/HS4njmBvpb") }
-		 							 })
+		discord 	  : image_button({ pos[sw(-100), sh(-50)], size[48, 48], icon_texture:"!discord", scale:0.75 })
 
-		patreon 	  : image_button({ pos[sw(-50), sh(-50)], size[48, 48], icon_texture:":patreon_48.png", scale:0.75
-			                            onclick: function() { __platform_open_url("https://www.patreon.com/imspinner") }
-		                             })
+		patreon 	  : image_button({ pos[sw(-50), sh(-50)], size[48, 48], icon_texture:":patreon_48.png", scale:0.75 })
 		version_number: text({pos[18, sh(-30)], text: game.version, font: FONT_SMALL_PLAIN, color: 0xffb3b3b3})
 
 		update_panel  : outer_panel({ size[20, 27], enabled:false,
 			ui {
-				update_game : large_button({ pos[32, 16], size[256, 25], text:"update now", enabled: false
-					                         onclick: function() { main_menu_update_now(window_main_menu) }
-				                           })
-				update_later : large_button({ pos[32, 48], size[256, 25], text:"later", enabled: false
-					                          onclick: function() { main_menu_dismiss_update(window_main_menu) }
-				                            })
+				update_game : large_button({ pos[32, 16], size[256, 25], text:"update now", enabled: false })
+				update_later : large_button({ pos[32, 48], size[256, 25], text:"later", enabled: false })
 				new_version : text({pos[18, 84], text: game.version, font: FONT_SMALL_PLAIN, enabled: false})
 				update_status : text({pos[18, 104], size[280, 20], text:"", font: FONT_SMALL_PLAIN, enabled: false})
 				recent_commits : text({pos[18, 124], size[280, 280], wrap:px(17), rich:true, text:"Loading recent commits...", font: FONT_SMALL_PLAIN, enabled: false, clip_area: true})
@@ -109,6 +101,26 @@ function main_menu_on_show(ev) {
 
     game_mission_options_locked = false
     window_show_by_id("window_main_menu")
+}
+
+[es=(window_main_menu, discord)]
+function main_menu_on_discord(window) {
+	__platform_open_url("https://discord.gg/HS4njmBvpb")
+}
+
+[es=(window_main_menu, patreon)]
+function main_menu_on_patreon(window) {
+	__platform_open_url("https://www.patreon.com/imspinner")
+}
+
+[es=(window_main_menu, update_game)]
+function main_menu_on_update_game(window) {
+	main_menu_update_now(window_main_menu)
+}
+
+[es=(window_main_menu, update_later)]
+function main_menu_on_update_later(window) {
+	main_menu_dismiss_update(window_main_menu)
 }
 
 [es=(window_main_menu, init)]
