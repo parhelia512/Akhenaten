@@ -433,7 +433,7 @@ namespace ui {
         bool fill_height = false;
         bool _hover = false;
 
-        /** JS registry refs by name (onclick, textfn, …). Max 6 entries. */
+        /** JS registry refs by name (textfn, checkedfn, …). Max 6 entries. */
         flat_map<xstring, xstring, 6> _js_refs;
         flat_map<xstring, xstring, 8> _events;
 
@@ -571,10 +571,6 @@ namespace ui {
             text(formated_text);
         }
 
-        static const xstring ONCLICK;
-        static const xstring ONHOVER;
-        static const xstring ONUNHOVER;
-        static const xstring ONRCLICK;
         static const xstring TEXTFN;
         static const xstring CHECKEDFN;
         static const xstring ONINPUT;
@@ -902,9 +898,6 @@ namespace ui {
         virtual void tooltip(const xstring& t) override { _tooltip = t; }
         virtual void select(bool v) override { _selected = v; }
 
-        void js_call();
-        void js_rcall();
-
         virtual element& onclick(button_onclick_cb func) override {
             _func = func;
             return *this;
@@ -964,8 +957,6 @@ namespace ui {
             _sfunc = func;
             return *this;
         }
-
-        void js_call();
     };
 
     struct eimage_button : public element {

@@ -240,7 +240,12 @@ Empire override works anytime without this.
 - [ ] **H7b** Draw canon / `memory=frame` — separate PRs from click migration.
 - [x] **H7c** `onrclick_event` on `image_button` / `button`/`large_button` (link);
       sidebar overlays help migrated as first user.
-- [ ] **H7d** Optional: deprecate remaining named `onclick:` in C++ log.
+- [x] **H7d** Drop named `onclick`/`onrclick` load + dispatch on button
+      elements (`image_button` / `arrow` / `button`); JS proxy `onclick`
+      accessor removed. Use `*_event` or element-id ES. Top-menu
+      `menu_item` named `onclick` unchanged (H5 leftover).
+- [x] **H7e** Drop named `onhover`/`onunhover` load + dispatch; keep
+      `onhover_event` / `onunhover_event` only (campaign already migrated).
 
 ---
 

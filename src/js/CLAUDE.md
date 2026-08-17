@@ -23,13 +23,15 @@ Full migration checklist: `docs/ui_es_only_migration.md`.
 
 - `onclick: function(){…}` / other anonymous push callbacks in config
 - `onclick: factory(…)` (e.g. `show_window_by_id("…")`, `show_advisor_window(…)`)
-- `.onclick = …` in `init` (or elsewhere at runtime), except unfinished
-  dynamic lists tracked in the migration plan
+- `onclick: named_global` / `.onclick = …` on button elements (accessor removed)
 
 **Legacy (OK until migrated; do not add on new buttons):**
 
-- `onclick: named_global` (e.g. rare non-helper leftovers)
 - Top-menu item `onclick` (not element `onclick_event` — see migration plan)
+
+Named `onclick` / `onrclick` / `onhover` / `onunhover` on button elements
+and the JS `onclick` accessor are removed (use `*_event` or omit click for
+element-id ES).
 
 **Out of scope for this rule:** anonymous `textfn` / `checkedfn` (pull APIs).
 

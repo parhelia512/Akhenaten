@@ -592,29 +592,6 @@ void ui::proxy_set_tooltip(js_State* J) {
     J->pushundefined();
 }
 
-void ui::proxy_set_onclick(js_State* J) {
-    auto elem = GET_ELEM(J);
-    if (!elem) {
-        J->pushundefined();
-        return;
-    }
-
-    if (js_isnull(J, 1) || js_isundefined(J, 1)) {
-        elem->set_ref(ui::element::ONCLICK, "");
-        J->pushundefined();
-        return;
-    }
-
-    if (!J->iscallable(1)) {
-        elem->set_ref(ui::element::ONCLICK, "");
-        J->pushundefined();
-        return;
-    }
-
-    js_copy(J, 1);
-    elem->set_ref(ui::element::ONCLICK, js_xref(J));
-    J->pushundefined();
-}
 void ui::proxy_set_ondraw(js_State* J) {
     auto elem = GET_ELEM(J);
     if (!elem) {
