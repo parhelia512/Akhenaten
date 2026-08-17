@@ -76,7 +76,7 @@ Do in order. Each checkbox ≈ one small commit (or one tiny PR).
 - [x] **A1** Write short ES-only rule in `src/js/CLAUDE.md` (new UI: `*_event`
       only; no `.onclick =`; no anonymous/factory `onclick`; helpers like empire).
 - [x] **A2** `ui_mission_briefing_window.js` — remove `window.back.onclick =`.
-- [ ] **A3** `ui_hold_festival_window.js` — help only
+- [x] **A3** `ui_hold_festival_window.js` — help only
       (`button_help.onclick =` → `onclick_event` / `help_button` + `[es=…]`).
       Gods already ES.
 - [ ] **A4** `ui_mission_end_window.js` —

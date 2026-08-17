@@ -26,7 +26,7 @@ hold_festival_window {
         button_cancel   : image_button({margin{centerx:70, bottom:-40 }, size[39, 26], pack:PACK_GENERAL, id:96, offset:4, onclick: window_go_back })
         festival_type   : text({margin{centerx:-115, bottom:-35 }, size[544, -1] })
 
-        button_help     : image_button({margin{left:14, bottom:-40}, size[27, 27], pack:PACK_GENERAL, id:134, offset:0 })
+        button_help     : help_button({ onclick_event: "help" })
     }
 }
 
@@ -53,7 +53,6 @@ function hold_festival_window_init(window) {
 
     window.large_festival.text = __loc(58, 32) + " " + city.festival.grand_cost + " @I" + deben_tid + " " + city.festival.grand_alcohol + "  @I" + beer_tid
     window.large_festival.darkened = is_out_of_money || city.festival.not_enough_alcohol
-    window.button_help.onclick = function() { ui.window_message_dialog_show("message_overseer_temples") }
 
     window.needs_sync = true
 }
@@ -74,6 +73,11 @@ function hold_festival_window_setup_god_buttons(window) {
     if (first_known_god >= 0 && city.festival.selected_god == GOD_UNKNOWN) {
         city.festival.selected_god = first_known_god
     }
+}
+
+[es=(hold_festival_window, help)]
+function hold_festival_window_on_help(window) {
+    ui.window_message_dialog_show("message_overseer_temples")
 }
 
 [es=(hold_festival_window, festival_schedule_ok)]
