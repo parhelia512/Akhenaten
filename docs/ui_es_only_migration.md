@@ -157,6 +157,7 @@ building-info `onclick: named` still on helpers. Skip top menu and dynamic windo
 - [x] **D20** `ui_set_salary_window.js` — cancel (incl. mansion).
 - [x] **D21** `ui_resource_settings_window.js` — trade import/export controls.
 - [x] **D22** `ui_bazaar_window.js` — overlay / mothball.
+- [x] **D23** `ui_advisor_finance.js` — tax arrows.
 - [ ] **D*** Pick next file with `onclick: named_fn`, wrap in id/`onclick_event` +
       thin `[es=…]`, commit, repeat.
 
