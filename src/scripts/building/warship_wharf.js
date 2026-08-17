@@ -15,7 +15,7 @@ building_warship_wharf = {
   },
   building_size : 3,
   meta : { help_id: 84, text_id: 175 }
-  planer_update_rule : {
+  planner_update_rule : {
     relative_orientation: 1
   }
 

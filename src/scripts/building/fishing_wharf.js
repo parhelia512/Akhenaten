@@ -18,7 +18,7 @@ building_fishing_wharf {
     resource : RESOURCE_FISH
   }
   building_size : 2
-  planer_update_rule {
+  planner_update_rule {
     relative_orientation: 1
   }
   meta { help_id: 84, text_id: 102 }

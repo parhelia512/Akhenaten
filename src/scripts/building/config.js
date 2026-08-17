@@ -537,7 +537,7 @@ building_shipyard = {
     resource : RESOURCE_TIMBER
   }
   building_size : 3
-  planer_update_rule : {
+  planner_update_rule : {
     relative_orientation: 1
   }
   meta : { help_id: 82, text_id: 100 }
