@@ -1,4 +1,4 @@
-log_info("akhenaten: ui send gift window started")
+log_info("akhenaten: ui terrain info started")
 
 terrain_info_window = {
     ui : {
@@ -11,6 +11,13 @@ terrain_info_window = {
     }
 }
 
+[es=terrain_info_window]
+terrain_info_empty {
+    ui : baseui(terrain_info_window, {
+    })
+}
+
+[es=terrain_info_window]
 terrain_info_road {
     help_id           : "message_game_concept_roads"
 	ui : baseui(terrain_info_window, {
@@ -24,6 +31,7 @@ function terrain_info_road_on_init(window) {
 
 }
 
+[es=terrain_info_window]
 terrain_info_wall = {
     help_id           : "message_building_defensive_structures"
     open_sounds       : [ "Wavs/wall.wav" ]
@@ -38,6 +46,7 @@ function terrain_info_wall_on_init(window) {
 
 }
 
+[es=terrain_info_window]
 terrain_info_mud_wall = {
     help_id           : "message_building_defensive_structures"
     open_sounds       : [ "Wavs/wall.wav" ]
@@ -52,6 +61,7 @@ function terrain_info_mud_wall_on_init(window) {
 
 }
 
+[es=terrain_info_window]
 terrain_info_brick_wall = {
     help_id           : "message_building_defensive_structures"
     open_sounds       : [ "Wavs/wall.wav" ]
@@ -66,6 +76,7 @@ function terrain_info_brick_wall_on_init(window) {
 
 }
 
+[es=terrain_info_window]
 terrain_info_plaza = {
     help_id           : "message_building_garden_plaze_statue"
     open_sounds       : [ ]
@@ -80,6 +91,7 @@ function terrain_info_plaza_on_init(window) {
 
 }
 
+[es=terrain_info_window]
 terrain_info_ore_rock = {
     help_id           : "message_history_gold_and_gold_mining"
     open_sounds       : [  "wavs/rock1.wav", "wavs/rock2.wav", "wavs/rock3.wav", "wavs/rock4.wav", "wavs/rock5.wav" ]
@@ -94,6 +106,7 @@ function terrain_info_ore_rock_on_init(window) {
 
 }
 
+[es=terrain_info_window]
 terrain_info_rock = {
     help_id           : "message_history_gold_and_gold_mining"
     open_sounds       : [ "wavs/rock1.wav", "wavs/rock2.wav", "wavs/rock3.wav", "wavs/rock4.wav", "wavs/rock5.wav" ]
@@ -108,6 +121,7 @@ function terrain_info_rock_on_init(window) {
 
 }
 
+[es=terrain_info_window]
 terrain_info_floodplain {
     help_id           : "message_tutorial_food_and_farming"
     ui : baseui(terrain_info_window, {
@@ -135,6 +149,7 @@ function terrain_info_floodplain_on_init(window) {
 }
 
 // Same UI/init as dry floodplain — used while the tile is under water.
+[es=terrain_info_window]
 terrain_info_floodplain_submerged {
     help_id           : "message_tutorial_food_and_farming"
     ui : baseui(terrain_info_window, {
@@ -151,6 +166,7 @@ function terrain_info_floodplain_submerged_on_init(window) {
     window.describe.text = __loc(177, 4)
 }
 
+[es=terrain_info_window]
 terrain_info_water = {
     help_id           : "message_tutorial_food_and_farming"
     open_sounds       : [ "Wavs/WATER1.WAV" ]
@@ -165,6 +181,7 @@ function terrain_info_water_on_init(window) {
 
 }
 
+[es=terrain_info_window]
 terrain_info_bridge {
     help_id           : "message_game_concept_water_crossings"
     open_sounds       : [ "Wavs/empty_land.wav" ]
@@ -179,6 +196,7 @@ function terrain_info_bridge_on_init(window) {
 
 }
 
+[es=terrain_info_window]
 terrain_info_tree = {
     help_id           : "message_drinking_water"
     open_sounds       : [ ]
@@ -193,6 +211,7 @@ function terrain_info_tree_on_init(window) {
 
 }
 
+[es=terrain_info_window]
 terrain_info_rubble {
     open_sounds [ "wavs/fire.wav" ]
     ui : baseui(terrain_info_window, {
@@ -208,6 +227,7 @@ function terrain_info_rubble_on_init(window) {
     window.warning_text.text = __loc(41, rubble_type)
 }
 
+[es=terrain_info_window]
 terrain_info_canal {
     help_id           : "message_game_concept_irrigation"
     open_sounds       : [ "Wavs/aquaduct.wav" ]
@@ -225,6 +245,7 @@ function terrain_info_canal_on_init(window) {
     window.describe.text = __loc(141, has_water ? 1 : 2)
 }
 
+[es=terrain_info_window]
 terrain_info_dike {
     help_id           : "message_game_concept_irrigation"
     open_sounds       : [ ]

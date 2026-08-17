@@ -7,6 +7,7 @@
 #include "grid/wall_material.h"
 #include "sound/sound.h"
 #include "window/building/common.h"
+#include "window/message_dialog.h"
 #include "city/city.h"
 
 void terrain_info_window::window_info_background(object_info &c) {
@@ -86,7 +87,12 @@ void terrain_info_window::init(object_info &c) {
     if (!help.empty()) {
         c.help_link = help;
         c.help_id = 0;
+    } else {
+        c.help_link = {};
+        c.help_id = 0;
+        help = "message_dialog_help";
     }
+    window_message_setup_help_id(help);
 }
 
 bool terrain_info_window::check(object_info &c) {

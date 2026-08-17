@@ -1083,8 +1083,8 @@ namespace ui {
             }
         }
 
-        /** Script/autoconfig window id; nullptr if this root widget is not a named window. */
-        virtual xstring get_section() const { return {}; }
+        /** Script/autoconfig window id; empty if this root widget was never load()'d. */
+        virtual xstring get_section() const { return io.name; }
     };
 
     widget* get_current_widget();

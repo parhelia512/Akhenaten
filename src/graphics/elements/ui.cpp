@@ -444,6 +444,9 @@ ui::widget* ui::get_current_widget() {
 }
 
 /** Window config objects may declare [es=ParentType]; used as ES handler fallback. */
+const js_StringNode key_es = js_intern("es");
+const js_StringNode key_true = js_intern("true");
+
 static xstring js_window_es_parent(pcstr section) {
     if (!section || !*section) {
         return {};
@@ -459,7 +462,6 @@ static xstring js_window_es_parent(pcstr section) {
         return {};
     }
 
-    const js_StringNode key_es = js_intern("es");
     if (!js_hasobject_modifier(J, -1, key_es)) {
         js_pop(J, 1);
         return {};
@@ -467,7 +469,7 @@ static xstring js_window_es_parent(pcstr section) {
 
     const js_StringNode val = js_getobject_modifier(J, -1, key_es);
     js_pop(J, 1);
-    if (!val || val == js_intern("true")) {
+    if (!val || val == key_true) {
         return {};
     }
     return xstring(js_strnode_cstr(val));
