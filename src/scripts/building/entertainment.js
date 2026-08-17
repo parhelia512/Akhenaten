@@ -36,7 +36,7 @@ building_juggler_school {
   spawn_delay_50_percent : 30   // 1 жонглер в месяц
   spawn_delay_25_percent : 60   // 1 жонглер за 2 месяца
   spawn_delay_default : 90      // 1 жонглер за 3 месяца (для 1-24% работников)
-  meta { text_id:77, help_link:"message_building_booth" }
+  meta { text_id:77, help_link:"message_building_trading_centers" }
   info_sound : "Wavs/juggler_school.wav"
 
   building_size : 2
@@ -62,7 +62,7 @@ building_dancer_school {
   overlay : OVERLAY_ENTERTAINMENT
   min_houses_coverage : 50
   building_size : 4
-  meta { help_id:75, text_id:76 }
+  meta { text_id:76, help_link:"message_building_trading_centers" }
   info_sound : "Wavs/dance_school.wav"
   cost [ 30, 50, 100, 150, 200 ]
   desirability { value[-3], step[1], step_size[1], range[3] }
@@ -169,7 +169,7 @@ building_pavilion = {
   ]}
 
   min_houses_coverage : 100
-  meta { help_id: 73, text_id: 74 }
+  meta { text_id: 74, help_link:"message_building_pavilion" }
   building_size : 4
   cost [ 100, 200, 300, 500, 800 ]
   desirability { value[6], step[1], step_size[-1], range[6] }
@@ -201,7 +201,7 @@ building_bandstand {
   labor_category : LABOR_CATEGORY_ENTERTAINMENT
   min_houses_coverage : 100
   fire_proof: true
-  meta { help_id:72, text_id:71 }
+  meta { text_id:71, help_link:"message_building_bandstand" }
   info_sound : "Wavs/music_r.wav"
   building_size : 3
   cost [ 30, 50, 100, 150, 200 ]
@@ -221,7 +221,7 @@ building_senet_house = {
   input : {
     resource : RESOURCE_BEER
   }
-  meta : { help_id:74, text_id:73 }
+  meta : { text_id:73, help_link:"message_building_senet_house" }
   building_size : 4
   labor_category : LABOR_CATEGORY_ENTERTAINMENT
   cost : [ 300, 400, 500, 700, 1000 ]
@@ -252,7 +252,7 @@ building_bullfight_school = {
     preview : { pack:PACK_CUSTOM, id:0 },
     base : { pack:PACK_CUSTOM, id:0 },
   }
-  meta : { help_id:75, text_id:78 }
+  meta : { text_id:78, help_link:"message_building_trading_centers" }
   info_sound : "Wavs/bullfight_school.wav"
   building_size : 2
   cost: [ 50, 80, 100, 150, 200 ]
