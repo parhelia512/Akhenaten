@@ -47,7 +47,7 @@ building_stonemason_guild = {
 
   labor_category : LABOR_CATEGORY_INFRASTRUCTURE
   building_size: 2
-  meta : { help_id: 363, text_id: 173 }
+  meta : { text_id: 173, help_link:"message_construction_guilds" }
   cost: [ 30, 50, 80, 100, 150 ]
   desirability : { value:[-6], step:[1], step_size:[1], range: [4] }
   laborers:[12], fire_risk:[0], damage_risk: [1]
@@ -70,7 +70,7 @@ building_bricklayers_guild = {
     resource : RESOURCE_BRICKS
   }
   min_houses_coverage : 100
-  meta : { help_id:92, text_id:172 }
+  meta : { text_id:172, help_link:"message_construction_guilds" }
   building_size : 2
   cost: [ 20, 40, 80, 120, 200 ]
   desirability : { value:[-6], step:[1], step_size:[1], range: [4] }
@@ -91,6 +91,7 @@ building_carpenters_guild = {
   }
   labor_category : LABOR_CATEGORY_INFRASTRUCTURE
   building_size : 2
+  meta : { help_link:"message_construction_guilds" }
   cost : [ 10, 15, 30, 50, 100 ]
   desirability : { value:[-6], step:[1], step_size:[1], range: [4] }
   laborers:[8], fire_risk:[4], damage_risk: [2]
@@ -208,7 +209,7 @@ building_artisans_guild = {
     resource_second : RESOURCE_CLAY
   }
   min_houses_coverage : 100
-  meta : { help_id: 363, text_id: 312 }
+  meta : { text_id: 312, help_link:"message_construction_guilds" }
   building_size: 2
   cost: [ 30, 50, 80, 100, 150 ]
   desirability : { value:[-6], step:[1], step_size:[1], range: [4] }
@@ -312,7 +313,7 @@ building_roadblock = {
   building_size : 1,
   fire_proof : true,
   damage_proof : true,
-  meta : { help_id: 358, text_id: 155 }
+  meta : { text_id: 155, help_link:"message_building_roadblock" }
   labor_category : LABOR_CATEGORY_GOVERNMENT,
   cost : [1, 2, 5, 10, 20 ]
   flags {
@@ -329,6 +330,7 @@ building_brick_tower = {
   fire_proof : true,
   labor_category : LABOR_CATEGORY_MILITARY,
   min_houses_coverage : 50
+  meta : { help_link:"message_building_defensive_structures" }
   cost : [ 50, 100, 150, 300, 500 ]
   desirability : { value:[16], step:[2], step_size:[-3], range: [5] }
   laborers:[20], fire_risk:[0], damage_risk: [4]
@@ -347,6 +349,7 @@ building_clay_tower = {
   fire_proof : true,
   labor_category : LABOR_CATEGORY_MILITARY,
   min_houses_coverage : 50
+  meta : { help_link:"message_building_defensive_structures" }
   cost : [ 50, 80, 100, 150, 300 ]
   desirability : { value:[-6], step:[1], step_size:[1], range: [6] }
   laborers:[20], fire_risk:[4], damage_risk: [4]
@@ -363,7 +366,7 @@ building_mud_tower = {
   }
   building_size : 2
   fire_proof : true
-  meta : { help_id: 85, text_id: 159 }
+  meta : { text_id: 159, help_link:"message_building_defensive_structures" }
   labor_category : LABOR_CATEGORY_MILITARY
   min_houses_coverage : 50
   cost: [ 30, 50, 100, 150, 200 ]
@@ -397,7 +400,7 @@ building_ferry {
     is_infrastructure: true
   }
   fire_proof : true,
-  meta { help_id: 85, text_id: 91 }
+  meta { text_id: 91, help_link:"message_game_concept_water_crossings" }
   labor_category : LABOR_CATEGORY_GOVERNMENT
   cost [8, 15, 30, 50, 100 ]
   desirability { value[-5], step[2], step_size[2], range[4] }
@@ -452,7 +455,7 @@ building_plaza {
 
   fire_proof : true
   damage_proof : true
-  meta { help_id : 80, text_id : 137 }
+  meta { text_id : 137, help_link:"message_building_garden_plaze_statue" }
   info_sound : "Wavs/FANFARE1.wav"
   building_size : 1
   cost [ 3, 5, 10, 15, 20 ]
@@ -491,7 +494,7 @@ building_garden {
 
   fire_proof : true
   damage_proof : true
-  meta { help_id:80, text_id:79 }
+  meta { text_id:79, help_link:"message_building_garden_plaze_statue" }
   info_sound : "Wavs/park1.wav"
   building_size : 1
   cost [ 3, 5, 10, 15, 20 ]
@@ -554,7 +557,7 @@ building_sandstone_quarry {
   progress_max : 200,
   production_rate : 100,
   building_size : 2,
-  meta { help_id:93, text_id:162 }
+  meta { text_id:162, help_link:"message_building_stone_quarries" }
   //help_id:92, type:"sandstone_quarry", text_id:194
   labor_category : LABOR_CATEGORY_INDUSTRY_COMMERCE,
   needs {
@@ -577,7 +580,7 @@ building_marble_quarry {
     base { pack:PACK_GENERAL, id:197 },
     work { pos : [54, 15], pack:PACK_SPR_AMBIENT, id:49, max_frames: 16 }
   }
-  meta { help_id:95, text_id:118 }
+  meta { text_id:118, help_link:"message_building_stone_quarries" }
   labor_category : LABOR_CATEGORY_INDUSTRY_COMMERCE,
   cost[ 15, 30, 50, 80, 150 ]
   desirability { value[-6], step[1], step_size[1], range[6] }
@@ -604,7 +607,7 @@ building_stone_quarry {
   progress_max : 200,
   production_rate : 100,
   building_size : 2,
-  meta { help_id:93, text_id:118 }
+  meta { text_id:118, help_link:"message_building_stone_quarries" }
   labor_category : LABOR_CATEGORY_INDUSTRY_COMMERCE,
   needs {
     rock : true
@@ -634,7 +637,7 @@ building_granite_quarry {
   progress_max : 200,
   production_rate : 100,
   building_size : 2,
-  meta { help_id:93, text_id:162 }
+  meta { text_id:162, help_link:"message_building_stone_quarries" }
   info_sound : "Wavs/marble.wav"
   //help_id:92, text_id:192
   labor_category : LABOR_CATEGORY_INDUSTRY_COMMERCE,
@@ -664,7 +667,7 @@ building_limestone_quarry {
   progress_max : 200,
   production_rate : 100,
   building_size : 2,
-  meta { help_id:93, text_id:162 }
+  meta { text_id:162, help_link:"message_building_stone_quarries" }
   //help_id:93, text_id:119}
   labor_category : LABOR_CATEGORY_INDUSTRY_COMMERCE,
   needs {
@@ -700,7 +703,7 @@ building_clay_gatehouse = {
   }
 
   building_size : 1
-  meta : { help_id:85, text_id:90 }
+  meta : { text_id:90, help_link:"message_building_defensive_structures" }
   cost : [ 60, 90, 150, 250, 300 ]
   desirability : { value:[-5], step:[1], step_size:[1], range: [5] }
   laborers:[9], fire_risk:[0], damage_risk: [2]
@@ -728,7 +731,7 @@ building_brick_gatehouse = {
   }
 
   building_size : 1
-  meta : { help_id:85, text_id:90 }
+  meta : { text_id:90, help_link:"message_building_defensive_structures" }
   cost : [ 60, 90, 150, 250, 300 ]
   desirability : { value:[-7], step:[1], step_size:[1], range: [6] }
   laborers:[9], fire_risk:[0], damage_risk: [2]
@@ -751,7 +754,7 @@ building_tower_gatehouse = {
 
   info_title_id:"#tower_gatehouse"
   building_size : 2
-  meta : { help_id:85, text_id:90 }
+  meta : { text_id:90, help_link:"message_building_defensive_structures" }
   cost : [ 200, 300, 400, 500, 600 ]
   desirability : { value:[4], step:[1], step_size:[1], range: [3] }
   laborers:[6], fire_risk:[0], damage_risk: [2]
@@ -779,7 +782,7 @@ building_mud_gatehouse = {
   }
 
   building_size : 1
-  meta : { help_id:85, text_id:90 }
+  meta : { text_id:90, help_link:"message_building_defensive_structures" }
   cost : [ 50, 70, 100, 150, 200 ]
   desirability : { value:[-6], step:[1], step_size:[2], range: [6] }
   laborers:[3], fire_risk:[0], damage_risk: [3]
@@ -806,7 +809,7 @@ building_decorative_gatehouse = {
   }
 
   building_size : 5
-  meta : { help_id:85, text_id:90 }
+  meta : { text_id:90, help_link:"message_building_defensive_structures" }
   cost : [ 100, 150, 200, 300, 400 ]
   desirability : { value:[-6], step:[1], step_size:[2], range: [6] }
   laborers:[3], fire_risk:[0], damage_risk: [3]
