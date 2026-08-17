@@ -454,7 +454,7 @@ static xstring js_window_es_parent(pcstr section) {
     }
 
     js_getglobal(J, section);
-    if (!js_isobject(J, -1)) {
+    if (!J->isobject(-1)) {
         js_pop(J, 1);
         return {};
     }

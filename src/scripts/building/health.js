@@ -54,6 +54,7 @@ building_physician {
   max_serve_clients : 1000
   overlay: OVERLAY_PHYSICIAN
   labor_category : LABOR_CATEGORY_WATER_HEALTH,
+  sound_channel : SOUND_CHANNEL_CITY_PHYSICIAN
   meta { text_id: 83, help_link:"message_building_physician" }
   info_sound : "Wavs/physician.wav"
   building_size : 2
