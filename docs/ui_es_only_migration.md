@@ -98,7 +98,7 @@ alone.
 - [x] **B7** `ui_popup_messages_window.js` — `cat_0…11` → one `toggle_cat` +
       `param1` (plain `button`).
 - [x] **B8** `ui_main_menu.js` — Discord / Patreon / update anonymous only.
-- [ ] **B9** `ui_hotkey_editor_window.js`.
+- [x] **B9** `ui_hotkey_editor_window.js`.
 - [ ] **B10** `ui_granary_orders_window.js`.
 - [ ] **B11** `ui_storage_yard_orders_window.js`.
 - [ ] **B12** `ui_advisor_monuments.js`.
