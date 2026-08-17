@@ -1191,7 +1191,9 @@ void js_State::restorescope() {
 }
 
 void js_State::callwfunction(int n, js_Function *F, js_Environment *scope) {
-    OZZY_PROFILER_FUNCTION();
+    const char *js_fn = js_strnode_cstr(F->name);
+    const char *js_file = js_strnode_cstr(F->filename);
+    OZZY_PROFILER_FUNCTION_NAME(js_fn[0] ? js_fn : "(anonymous)", js_file[0] ? js_file : "js", F->line);
 
     js_Value v;
     int i;
@@ -1303,9 +1305,29 @@ void js_State::pushtrace(const char *name, const char *file, int line) {
     trace[tracetop].line = line;
 }
 
-void js_State::call(int n) {
-    OZZY_PROFILER_FUNCTION();
+static void jsR_profiler_callable(js_Object *obj, const char **name, const char **file, int *line) {
+    if (obj->type == JS_CFUNCTION || obj->type == JS_CSCRIPT) {
+        *name = js_strnode_cstr(obj->u.f.function->name);
+        *file = js_strnode_cstr(obj->u.f.function->filename);
+        *line = obj->u.f.function->line;
+    } else if (obj->type == JS_CCFUNCTION) {
+        *name = js_strnode_cstr(obj->u.c.name);
+        *file = "native";
+        *line = 0;
+    } else {
+        *name = "(callable)";
+        *file = "js";
+        *line = 0;
+    }
+    if (!(*name)[0]) {
+        *name = "(anonymous)";
+    }
+    if (!(*file)[0]) {
+        *file = "js";
+    }
+}
 
+void js_State::call(int n) {
     js_Object *obj;
     int savebot;
 
@@ -1315,6 +1337,12 @@ void js_State::call(int n) {
     }
 
     obj = toobject(-n - 2);
+
+    const char *js_fn;
+    const char *js_file;
+    int js_line;
+    jsR_profiler_callable(obj, &js_fn, &js_file, &js_line);
+    OZZY_PROFILER_FUNCTION_NAME(js_fn, js_file, js_line);
 
     savebot = bot;
     bot = top - n - 1;
@@ -1415,7 +1443,13 @@ int js_pconstruct(js_State *J, int n) {
 }
 
 int js_State::pcall(int n) {
-    OZZY_PROFILER_FUNCTION();
+    const char *js_fn = "(callable)";
+    const char *js_file = "js";
+    int js_line = 0;
+    if (iscallable(-n - 2)) {
+        jsR_profiler_callable(toobject(-n - 2), &js_fn, &js_file, &js_line);
+    }
+    OZZY_PROFILER_FUNCTION_NAME(js_fn, js_file, js_line);
 
     int savetop = top - n - 2;
     if (js_try(this)) {
@@ -1530,7 +1564,9 @@ void js_trap(js_State *J, int pc) {
 }
 
 void js_State::r_run(js_Function *F) {
-    OZZY_PROFILER_FUNCTION();
+    const char *js_fn = js_strnode_cstr(F->name);
+    const char *js_file = js_strnode_cstr(F->filename);
+    OZZY_PROFILER_FUNCTION_NAME(js_fn[0] ? js_fn : "(anonymous)", js_file[0] ? js_file : "js", F->line);
 
     js_Function **FT = F->funtab;
     double *NT = F->numtab;
