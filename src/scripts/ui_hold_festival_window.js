@@ -23,7 +23,7 @@ hold_festival_window {
         middle_festival : button({margin{centerx:-215, bottom:-110 }, size[430, 26], rich:true, onclick_event: "festival_select_middle"})
         large_festival  : button({margin{centerx:-215, bottom:-80 }, size[430, 26], rich:true, onclick_event: "festival_select_grand"})
         button_ok       : image_button({margin{centerx:20, bottom:-40 }, size[39, 26], pack:PACK_GENERAL, id:96, offset:0, onclick_event: "festival_schedule_ok"})
-        button_cancel   : image_button({margin{centerx:70, bottom:-40 }, size[39, 26], pack:PACK_GENERAL, id:96, offset:4, onclick: window_go_back })
+        button_cancel   : image_button({margin{centerx:70, bottom:-40 }, size[39, 26], pack:PACK_GENERAL, id:96, offset:4 })
         festival_type   : text({margin{centerx:-115, bottom:-35 }, size[544, -1] })
 
         button_help     : help_button({ onclick_event: "help" })
@@ -33,6 +33,11 @@ hold_festival_window {
 hold_festival_window.show = function(with_background, on_close_cb) {
     hold_festival_window.on_close_cb = on_close_cb
     emit event_show_window{ id:"hold_festival_window" }
+}
+
+[es=(hold_festival_window, button_cancel)]
+function hold_festival_window_button_cancel(window) {
+    window_go_back()
 }
 
 [es=(hold_festival_window, init)]
