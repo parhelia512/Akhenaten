@@ -70,6 +70,7 @@ void terrain_info_window::init(object_info &c) {
     case terrain_info_rubble:
     case terrain_info_bridge:
     case terrain_info_canal:
+    case terrain_info_tree:
         break;
     }
 

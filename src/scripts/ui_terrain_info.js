@@ -220,7 +220,8 @@ terrain_info_canal {
 [es=terrain_info_canal_init]
 function terrain_info_canal_on_init(window) {
     var tile = __map_tile_at_grid_offset(window.grid_offset)
-    var has_water = __map_canal_at(tile) && ((__map_image_at(tile) - terrain.canal_image_begin()) < 15)
+    // Dry canal images are begin+IMAGE_FULL_OFFSET(48)+…; wet are begin+0..47.
+    var has_water = __map_canal_at(tile) && ((__map_image_at(tile) - terrain.canal_image_begin()) < 48)
     window.describe.text = __loc(141, has_water ? 1 : 2)
 }
 
