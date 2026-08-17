@@ -187,15 +187,13 @@ Keep these at the end. Do not interleave with A–C.
 
 ### H1 — C++: forward `param1`/`param2` on `image_button` + `arrow`
 
-Today only `button`/`large_button` put params in the ES payload. Needed before
-shared handlers on advisors / arrows via `param1`.
-
-- [ ] **H1** Patch `ui.cpp` draw paths for image/arrow to match `egeneric_button`.
+- [x] **H1** `image_button` / `arrow` ES click payloads include `param1`/`param2`
+      (match `egeneric_button`); hover payload also forwards image-button params.
 
 ### H2 — Advisor strip (`show_advisor_window(…)`)
 
-- [x] **H2** `ui_advisors_window.js` — unique events per strip button, each
-      registered on every advisor window section (no H1 / `param1` needed).
+- [x] **H2** `ui_advisors_window.js` — shared `show_advisor` + `param1`
+      (advisor id) on every strip button; `close_advisors` for back.
 
 ### H3 — Campaign period factories + hover
 
@@ -205,12 +203,12 @@ shared handlers on advisors / arrows via `param1`.
 
 ### H4 — Dynamic runtime callbacks
 
-- [ ] **H4a** `ui_mission_choice_window.js` — loop `point_btn.onclick = …`.
-- [ ] **H4b** `ui_window_features.js` — `option.onclick = f.toggle` (+ later
-      `checkedfn`).
+- [x] **H4a** `ui_mission_choice_window.js` — store choice ids on
+      `game.mission_choice_point_ids`; static `point0`…`point3` ES handlers.
+- [x] **H4b** `ui_window_features.js` — static `bfeature0`…`13` ES handlers
+      call `window_features_toggle_slot` (`checkedfn` still runtime; see H7).
 
-Approaches: static slots + `param1`; one ES handler reading window state;
-or named global + `param1` (no anonymous).
+Approaches used: static slots + window/game state (no anonymous `.onclick =`).
 
 ### H5 — Top menu (different system)
 
@@ -257,7 +255,7 @@ Empire override works anytime without this.
 **After H\* (full cleanup):**
 
 - [ ] CI grep gate
-- [ ] Dynamic + top menu + advisors strip + campaign
+- [x] Dynamic + advisors strip + campaign (top menu remains H5)
 - [ ] No anonymous pull callbacks; draw path policy as decided
 
 ---

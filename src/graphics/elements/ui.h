@@ -946,6 +946,8 @@ namespace ui {
         bool allow_repeat = true;
         /// Step index for hold-to-repeat; passed to arw_button (survives between frames).
         int repeats = 0;
+        int param1 = 0;
+        int param2 = 0;
         bool _hover_prev = false;
 
         button_onclick_cb _func;

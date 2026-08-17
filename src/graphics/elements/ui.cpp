@@ -87,6 +87,9 @@ void reset_ui_command_queue();
         if (ui::egeneric_button* btn = el.dcast_generic_button()) {
             (*s)["param1"] = bvariant((int32_t)btn->param1);
             (*s)["param2"] = bvariant((int32_t)btn->param2);
+        } else if (ui::eimage_button* img = el.dcast_image_button()) {
+            (*s)["param1"] = bvariant((int32_t)img->param1);
+            (*s)["param2"] = bvariant((int32_t)img->param2);
         }
         if (hover_now) {
             const xstring& ev = el.event_name(ui::element::ONHOVER_EVENT);
@@ -1852,9 +1855,9 @@ void ui::eimage_button::draw(UiFlags gflags) {
 
     xstring onclick_event = event_name(ONCLICK_EVENT);
     if (!onclick_event.empty()) {
-        btn->onclick([onclick_event](int, int) {
-            bvariant_map::scoped s;
-            dispatch_autoconfig_es_event(get_current_widget(), onclick_event, *s);
+        btn->onclick([onclick_event, p1 = param1, p2 = param2](int, int) {
+            dispatch_autoconfig_es_event(get_current_widget(), onclick_event,
+                bvariant_map{{"param1", (int32_t)p1}, {"param2", (int32_t)p2}});
         });
     } else if (!js_ref(ONCLICK).empty()) {
         const xstring js_onclick = js_ref(ONCLICK);
@@ -1870,9 +1873,9 @@ void ui::eimage_button::draw(UiFlags gflags) {
             btn->onrclick(_srfunc);
     } else if (!id.empty()) {
         // No onclick_event: dispatch [es=(widget, element_id)].
-        btn->onclick([eid = id](int, int) {
-            bvariant_map::scoped s;
-            dispatch_autoconfig_es_event(get_current_widget(), eid, *s);
+        btn->onclick([eid = id, p1 = param1, p2 = param2](int, int) {
+            dispatch_autoconfig_es_event(get_current_widget(), eid,
+                bvariant_map{{"param1", (int32_t)p1}, {"param2", (int32_t)p2}});
         });
     }
 
@@ -2369,6 +2372,8 @@ void ui::earrow_button::load(archive arch, element* parent, items& elems) {
     tiny = arch.r_bool("tiny");
     down = arch.r_bool("down");
     allow_repeat = arch.r_bool("allow_repeat", true);
+    param1 = arch.r_int("param1");
+    param2 = arch.r_int("param2");
     set_ref(ONCLICK, arch.r_function("onclick"));
     set_ref(ONHOVER, arch.r_function("onhover"));
     set_ref(ONUNHOVER, arch.r_function("onunhover"));
@@ -2390,9 +2395,9 @@ void ui::earrow_button::draw(UiFlags flags) {
     const bool clickable = !darkened && !readonly;
     xstring onclick_event = event_name(ONCLICK_EVENT);
     if (clickable && !onclick_event.empty()) {
-        btn.onclick([onclick_event] {
-            auto* w = get_current_widget();
-            dispatch_autoconfig_es_event(w, onclick_event, {});
+        btn.onclick([onclick_event, p1 = param1, p2 = param2] {
+            dispatch_autoconfig_es_event(get_current_widget(), onclick_event,
+                bvariant_map{{"param1", (int32_t)p1}, {"param2", (int32_t)p2}});
         });
     } else if (clickable && !js_ref(ONCLICK).empty()) {
         btn.onclick([this] { this->js_call(); });
@@ -2401,8 +2406,9 @@ void ui::earrow_button::draw(UiFlags flags) {
         btn.onclick(_sfunc);
     } else if (clickable && !id.empty()) {
         // No onclick_event: dispatch [es=(widget, element_id)].
-        btn.onclick([eid = id] {
-            dispatch_autoconfig_es_event(get_current_widget(), eid, {});
+        btn.onclick([eid = id, p1 = param1, p2 = param2] {
+            dispatch_autoconfig_es_event(get_current_widget(), eid,
+                bvariant_map{{"param1", (int32_t)p1}, {"param2", (int32_t)p2}});
         });
     }
 
