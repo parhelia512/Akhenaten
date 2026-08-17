@@ -100,24 +100,32 @@ storage_yard_orders_window {
                                size[300, 24]
                                margin{bottom:-64}
                                textfn: storage_yard_orders_empty_all_text
-                               onclick: function() {
-                                   var yard = storage_yard_orders_ensure_yard()
-                                   if (yard) { yard.toggle_empty_all() }
-                               }
                               })
 
         accept_none  : button({pos[80, -1]
                                size[300, 24]
                                margin{bottom:-38}
                                text:{group:99, id:7}
-                               onclick: function() {
-                                   var yard = storage_yard_orders_ensure_yard()
-                                   if (yard) { yard.accept_none() }
-                               }
                               })
 
         button_help   : help_button({})
         button_close  : close_button({ onclick: window_go_back })
+    }
+}
+
+[es=(storage_yard_orders_window, empty_all)]
+function storage_yard_orders_window_empty_all(window) {
+    var yard = storage_yard_orders_ensure_yard()
+    if (yard) {
+        yard.toggle_empty_all()
+    }
+}
+
+[es=(storage_yard_orders_window, accept_none)]
+function storage_yard_orders_window_accept_none(window) {
+    var yard = storage_yard_orders_ensure_yard()
+    if (yard) {
+        yard.accept_none()
     }
 }
 

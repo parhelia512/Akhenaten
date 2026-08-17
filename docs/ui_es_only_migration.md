@@ -100,7 +100,7 @@ alone.
 - [x] **B8** `ui_main_menu.js` — Discord / Patreon / update anonymous only.
 - [x] **B9** `ui_hotkey_editor_window.js`.
 - [x] **B10** `ui_granary_orders_window.js`.
-- [ ] **B11** `ui_storage_yard_orders_window.js`.
+- [x] **B11** `ui_storage_yard_orders_window.js`.
 - [ ] **B12** `ui_advisor_monuments.js`.
 - [ ] **B13** `ui_trade_opened_window.js`.
 - [ ] **B14** `ui_messages_window.js` — help override.
