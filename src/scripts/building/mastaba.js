@@ -16,7 +16,7 @@ building_small_mastaba {
     info_title_id[198, 18]
     fire_proof :  true
     damage_proof : true
-    meta { help_id:4, text_id:178 }
+    meta { text_id:178, help_link:"message_building_mastaba" }
     info_sound : "Wavs/rock3.wav"
     init_tiles [10, 4]
 
@@ -81,7 +81,7 @@ building_small_mastaba {
     info_title_id [198, 19]
     fire_proof :  true
     damage_proof : true
-    meta { help_id:4, text_id:178 }
+    meta { text_id:178, help_link:"message_building_mastaba" }
     info_sound : "Wavs/rock3.wav"
     init_tiles [14, 6]
 
@@ -152,7 +152,7 @@ building_small_mastaba {
     info_title_id [198, 20]
     fire_proof :  true
     damage_proof : true
-    meta { help_id:4, text_id:178 }
+    meta { text_id:178, help_link:"message_building_mastaba" }
     info_sound : "Wavs/rock3.wav"
     init_tiles [18, 8]
 
