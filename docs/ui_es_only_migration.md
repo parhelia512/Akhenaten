@@ -87,7 +87,7 @@ Do in order. Each checkbox ≈ one small commit (or one tiny PR).
 Unique event names for arrows (no C++ change). Leave anonymous `checkedfn`
 alone.
 
-- [ ] **B1** `ui_sidebar_window.js` — speed arrows only
+- [x] **B1** `ui_sidebar_window.js` — speed arrows only
       (leave `show_window_by_id` factories for later).
 - [ ] **B2** `ui_speed_options_window.js` — arrows + middle-mouse checkbox
       *click* (not `checkedfn`).
