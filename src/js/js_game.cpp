@@ -586,6 +586,20 @@ void js_unref_function(xstring onclick_ref) {
     }
 }
 
+static pcstr js_error_message(js_State *J, int idx) {
+    // Error objects are not JS strings; js_toxstring would yield empty/(null) in logs.
+    static js_StringNode property_message = js_intern("message");
+    if (J->isobject(idx) && J->hasproperty(idx, property_message)) {
+        J->getproperty(idx, property_message);
+        pcstr msg = js_strnode_cstr(js_tostring(J, -1));
+        js_pop(J, 1);
+        if (msg && msg[0]) {
+            return msg;
+        }
+    }
+    return js_strnode_cstr(js_tostring(J, idx));
+}
+
 void js_call_function(xstring js_ref) {
     if (js_ref.empty()) {
         return;
@@ -600,7 +614,7 @@ void js_call_function(xstring js_ref) {
         js_pushnull(J);  // 'this' context
         int result = J->pcall(0);
         if (result != 0) {
-            logs::error("JS onclick callback error: %s", js_toxstring(J, -1).c_str());
+            logs::error("JS onclick callback error: %s", js_error_message(J, -1));
         }
         js_pop(J, 1); // result or error
     } else {
@@ -623,7 +637,7 @@ void js_call_function_bool(xstring js_ref, bool param) {
         js_pushboolean(J, param);
         int result = J->pcall(1);
         if (result != 0) {
-            logs::error("JS dialog callback error: %s", js_toxstring(J, -1).c_str());
+            logs::error("JS dialog callback error: %s", js_error_message(J, -1));
         }
         js_pop(J, 1); // result or error
     } else {
@@ -647,7 +661,7 @@ bvariant js_call_function(xstring js_ref, int param1, int param2) {
         js_pushnumber(J, (double)param2);
         int result = J->pcall(2);
         if (result != 0) {
-            logs::error("JS textfn callback error: %s", js_toxstring(J, -1).c_str());
+            logs::error("JS textfn callback error: %s", js_error_message(J, -1));
             js_pop(J, 1);
             return bvariant();
         }
@@ -680,7 +694,7 @@ bvariant js_call_function(xstring js_ref, const bvariant_map &params) {
         js_push_bvariant_map_object(J, params);
         int result = J->pcall(1);
         if (result != 0) {
-            logs::error("JS callback error (bvariant_map): %s", js_toxstring(J, -1).c_str());
+            logs::error("JS callback error (bvariant_map): %s", js_error_message(J, -1));
             js_pop(J, 1);
             return bvariant();
         }
