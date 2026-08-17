@@ -116,11 +116,6 @@ function burial_dispatch_clamp_amount() {
     }
 }
 
-function burial_dispatch_change(delta) {
-    burial_dispatch_amount += delta
-    burial_dispatch_clamp_amount()
-}
-
 function burial_dispatch_set_all() {
     burial_dispatch_amount = burial_dispatch_max_allowed()
 }
@@ -271,10 +266,8 @@ burial_dispatch_window {
         })
 
         hint_label       : text({pos[48, 100], text[199, 3], font: FONT_NORMAL_WHITE_ON_DARK})
-        arrow_down       : arrowdown({pos[160, 96], tiny: false, allow_repeat: true
-                                      onclick: function() { burial_dispatch_change(-1) }})
-        arrow_up         : arrowup({pos[184, 96], tiny: false, allow_repeat: true
-                                    onclick: function() { burial_dispatch_change(1) }})
+        arrow_down       : arrowdown({pos[160, 96], tiny: false, allow_repeat: true })
+        arrow_up         : arrowup({pos[184, 96], tiny: false, allow_repeat: true })
         amount_value     : label({pos[220, 100], font: FONT_NORMAL_WHITE_ON_DARK
                                   textfn: burial_dispatch_amount_text})
 
@@ -283,6 +276,18 @@ burial_dispatch_window {
         btn_cancel       : button({pos[240, 140], size[160, 24], text[199, 7], font: FONT_NORMAL_BLACK_ON_LIGHT
                                     onclick: burial_dispatch_cancel})
     }
+}
+
+[es=(burial_dispatch_window, arrow_down)]
+function burial_dispatch_window_arrow_down(window) {
+    burial_dispatch_amount -= 1
+    burial_dispatch_clamp_amount()
+}
+
+[es=(burial_dispatch_window, arrow_up)]
+function burial_dispatch_window_arrow_up(window) {
+    burial_dispatch_amount += 1
+    burial_dispatch_clamp_amount()
 }
 
 [es=(burial_dispatch_window, init)]
