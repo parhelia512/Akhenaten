@@ -167,6 +167,7 @@ building_lamp_workshop {
   laborers [12]
   fire_risk [4]
   damage_risk [3]
+  meta { help_id: 473, text_id: 314 }
   info_advisors [ADVISOR_LABOR]
   flags {
     is_workshop: true
