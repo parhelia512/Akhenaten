@@ -229,7 +229,7 @@ building_tax_collector = {
     work : { pos : [60, -45], pack:PACK_GENERAL, id:63, offset:1, max_frames:11 },
   }
   labor_category : LABOR_CATEGORY_GOVERNMENT
-  meta : { help_id:76, text_id:106 }
+  meta : { text_id:106, help_link:"message_building_tax_collector" }
   info_sound : "Wavs/taxfarm.wav"
   building_size : 2
   min_houses_coverage : 50
@@ -249,7 +249,7 @@ building_tax_collector_up = {
     work : { pos : [10, 10], pack:PACK_GENERAL, id:64, offset:1, max_frames:11 }
   },
   labor_category : LABOR_CATEGORY_GOVERNMENT,
-  meta : { help_id:76, text_id:120 }
+  meta : { text_id:120, help_link:"message_building_tax_collector" }
   info_sound : "Wavs/taxfarm.wav"
   building_size : 2
   cost: [ 15, 24, 40, 80, 100 ]
