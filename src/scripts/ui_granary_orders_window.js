@@ -79,19 +79,27 @@ granary_orders_window {
                                size[300, 24]
                                margin{bottom:-64}
                                textfn: function() { return granary_orders_window.granary.is_empty_all() ? __loc(98, 8) : __loc(98, 7) }
-                               onclick: function() { granary_orders_window.granary.toggle_empty_all() }
                               })
 
         accept_none  : button({pos[80, -1]
                                size[300, 24]
                                margin{bottom:-38}
                                text:{group:99, id:7}
-                               onclick: function() { granary_orders_window.granary.accept_none() }
                               })
 
         button_help   : help_button({})
         button_close  : close_button({ onclick: window_go_back })
     }
+}
+
+[es=(granary_orders_window, empty_all)]
+function granary_orders_window_empty_all(window) {
+    granary_orders_window.granary.toggle_empty_all()
+}
+
+[es=(granary_orders_window, accept_none)]
+function granary_orders_window_accept_none(window) {
+    granary_orders_window.granary.accept_none()
 }
 
 [es=(granary_orders_window, init)]
