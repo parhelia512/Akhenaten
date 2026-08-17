@@ -74,7 +74,7 @@ dock_orders_window {
         accept_none  : button({pos[226, -1], size[200, 24], text:{group:99, id:7}, margin{bottom:-38}})
 
         button_help   : help_button({})
-        button_close  : close_button({ onclick_event: "go_back" })
+        button_close  : close_button({})
     }
 }
 
@@ -88,10 +88,6 @@ function dock_orders_window_on_accept_none(window) {
     dock_orders_window_accept_none()
 }
 
-[es=(dock_orders_window, go_back)]
-function dock_orders_window_go_back(window) {
-    window_go_back()
-}
 
 [es=(dock_orders_window, init)]
 function dock_orders_window_init(window) {

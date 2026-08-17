@@ -128,7 +128,7 @@ bazaar_orders_window {
         accept_none  : button({pos[80, -1], size[300, 24], text:{group:99, id:7}, margin{bottom:-38}})
 
         button_help   : help_button({})
-        button_close  : close_button({ onclick_event: "go_back" })
+        button_close  : close_button({})
     }
 }
 
@@ -147,10 +147,6 @@ function bazaar_orders_window_on_accept_none(window) {
     bazaar_orders_window_accept_none()
 }
 
-[es=(bazaar_orders_window, go_back)]
-function bazaar_orders_window_go_back(window) {
-    window_go_back()
-}
 
 [es=(bazaar_orders_window, init)]
 function bazaar_orders_window_init(window) {

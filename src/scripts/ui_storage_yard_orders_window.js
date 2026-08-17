@@ -109,14 +109,10 @@ storage_yard_orders_window {
                               })
 
         button_help   : help_button({})
-        button_close  : close_button({ onclick_event: "go_back" })
+        button_close  : close_button({})
     }
 }
 
-[es=(storage_yard_orders_window, go_back)]
-function storage_yard_orders_window_go_back(window) {
-    window_go_back()
-}
 
 [es=(storage_yard_orders_window, empty_all)]
 function storage_yard_orders_window_empty_all(window) {

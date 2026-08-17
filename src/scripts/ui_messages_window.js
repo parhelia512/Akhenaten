@@ -125,7 +125,3 @@ function message_list_window_on_help(window) {
     window_message_dialog_show("message_dialog_messages")
 }
 
-[es=(message_list_window, go_back)]
-function message_list_window_go_back(window) {
-    window_go_back()
-}

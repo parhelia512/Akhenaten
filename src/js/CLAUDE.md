@@ -17,7 +17,7 @@ Full migration checklist: `docs/ui_es_only_migration.md`.
 - Put logic in `[es=(widget_id, event_name)]` handlers.
 - Helpers: override like empire —
   `help_button({ onclick_event: "help" })` + `[es=(W, help)]`
-  (`onclick_event` wins over the helper’s default `onclick:`).
+  (defaults already use `onclick_event: "help"` / `"go_back"`).
 
 **Do not (new code):**
 
@@ -28,11 +28,10 @@ Full migration checklist: `docs/ui_es_only_migration.md`.
 
 **Legacy (OK until migrated; do not add on new buttons):**
 
-- `onclick: named_global` (e.g. `window_go_back`)
-- Helper defaults that still use `onclick: window_show_help` / `window_go_back`
+- `onclick: named_global` (e.g. rare non-helper leftovers)
+- Top-menu item `onclick` (not element `onclick_event` — see migration plan)
 
-**Out of scope for this rule:** anonymous `textfn` / `checkedfn` (pull APIs);
-top-menu item `onclick` (not element `onclick_event` — see migration plan).
+**Out of scope for this rule:** anonymous `textfn` / `checkedfn` (pull APIs).
 
 **Not in C++ yet:** `onrclick_event` — keep named `onrclick:` until added.
 

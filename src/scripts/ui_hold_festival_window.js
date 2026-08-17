@@ -26,7 +26,7 @@ hold_festival_window {
         button_cancel   : image_button({margin{centerx:70, bottom:-40 }, size[39, 26], pack:PACK_GENERAL, id:96, offset:4 })
         festival_type   : text({margin{centerx:-115, bottom:-35 }, size[544, -1] })
 
-        button_help     : help_button({ onclick_event: "help" })
+        button_help     : help_button({})
     }
 }
 

@@ -35,8 +35,8 @@ trade_resource_settings_window {
         toggle_industry  : button({margin{centerx:-200}, pos[-1, 130], size[400, 30]})
         stockpile_industry: button({margin{centerx:-200}, pos[-1, 168], size[400, 50], split:true})
 
-        button_close     : close_button({onclick_event: "go_back"})
-        button_help      : help_button({ onclick_event: "help" })
+        button_close     : close_button({})
+        button_help      : help_button({})
     }
 }
 
@@ -69,10 +69,6 @@ function trade_resource_settings_window_on_help(window) {
     ui.window_message_dialog_show("message_game_concept_industry")
 }
 
-[es=(trade_resource_settings_window, go_back)]
-function trade_resource_settings_window_go_back(window) {
-    window_go_back()
-}
 
 [es=(trade_resource_settings_window, import_status)]
 function trade_resource_settings_window_import_status(window) {

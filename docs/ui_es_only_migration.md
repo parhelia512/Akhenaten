@@ -10,7 +10,7 @@ help_button({ pos[0, 0], onclick_event: "help" })
 close_button({ pos[0, 0], onclick_event: "close" })
 ```
 
-(`onclick_event` wins over helper default `onclick:` in C++.)
+(`onclick_event` on the call site overrides helper defaults.)
 
 ## Goal (short)
 
@@ -177,8 +177,8 @@ building-info `onclick: named` still on helpers. Skip top menu and dynamic windo
 - [x] **D40** `ui_sidebar_window.js` — build menu + expanded controls.
 - [x] **D41** campaign selection tabs / exit / play (periods remain H3).
 - [x] **D*** Easy named-`onclick` sweep done. Shared `building_info_window`
-      overlay/mothball uses multi-section ES; help/close keep named helper
-      defaults (H6a); top menu uses `window_id` (H5).
+      overlay/mothball uses multi-section ES; help/close helpers use
+      `onclick_event` defaults + shared ES (H6b); top menu uses `window_id` (H5).
 
 ---
 
@@ -227,10 +227,11 @@ else if (item.onclick) item.onclick(item.parameter)
 
 Empire override works anytime without this.
 
-- [x] **H6a** Keep JS defaults on `help_button` / `close_button`
-      (`onclick: window_show_help` / `window_go_back`); override per window
-      with `onclick_event` when needed (empire pattern).
-- [ ] **H6b** Optional mass default change on `help_button` / `close_button`.
+- [x] **H6a** Initially kept named JS defaults; superseded by H6b.
+- [x] **H6b** `help_button` / `close_button` default to `onclick_event: "help"` /
+      `"go_back"`; shared multi-section ES in `ui_common.js` calls
+      `window_show_help` / `window_go_back`. Custom windows keep own handlers
+      (empire `close`/`help`, messages help, resource settings help, festival help).
 - [x] **H6c** CI: `.github/workflows/akhenaten_ui_es_only.yml` greps
       `onclick:\s*function`, `\.onclick\s*=`, `onclick:\s*\w+\(`.
 
