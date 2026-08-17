@@ -38,31 +38,6 @@ building_burning_ruin = {
   desirability : { value:[-3], step:[1], step_size:[1], range: [3] }
 }
 
-building_courthouse {
-  animations {
-    preview { pack:PACK_GENERAL, id:62, }
-    base { pack:PACK_GENERAL, id:62, }
-    work { pos[80, -80], pack:PACK_GENERAL, id:62, offset:1, max_frames:11 }
-  }
-
-  labor_category : LABOR_CATEGORY_INFRASTRUCTURE
-  overlay : OVERLAY_COUTHOUSE
-  min_houses_coverage : 50
-  building_size : 3
-  meta { help_id:75, text_id:176 }
-  info_sound : "Wavs/forum.WAV"
-  cost [ 30, 50, 100, 200, 400 ]
-  desirability { value[8], step[2], step_size[-2], range[3] }
-  crime { value[-5], step[1], step_size[-1], range[4] }
-  laborers[10]
-  fire_risk[0]
-  damage_risk[1]
-
-  flags {
-    is_administration: true
-  }
-}
-
 building_stonemason_guild = {
   animations : {
     preview : { pack:PACK_GENERAL, id:88 },
@@ -132,7 +107,7 @@ building_military_academy = {
     base : { pos : [0, 0], pack:PACK_GENERAL, id:173 },
     work : { pos : [33, -38], pack:PACK_GENERAL, id:173, offset:1, max_frames:12 }
   },
-  meta : { help_id: 88, text_id: 135 }
+  meta : { text_id: 135, help_link:"message_building_recruiter_academy" }
   building_size : 4,
   min_houses_coverage : 50
   cost : [ 240, 300, 500, 1000, 1500 ]
@@ -149,7 +124,7 @@ building_military_academy_adv = {
     base : { pos : [0, 0], pack:PACK_GENERAL, id:173 },
     work : { pos : [33, -38], pack:PACK_GENERAL, id:173, offset:1, max_frames:12 }
   },
-  meta : { help_id: 88, text_id: 135 }
+  meta : { text_id: 135, help_link:"message_building_recruiter_academy" }
   building_size : 4,
   cost : [ 300, 500, 1000, 1500, 2000 ]
   desirability : { value:[8], step:[2], step_size:[-2], range: [6] }
@@ -331,7 +306,7 @@ building_recruiter = {
   }
   labor_category : LABOR_CATEGORY_MILITARY
   min_houses_coverage : 100
-  meta : { help_id:37, text_id:136 }
+  meta : { text_id:136, help_link:"message_building_recruiter_academy" }
   info_sound : "Wavs/barracks.WAV"
   building_size : 3
   planner_update_rule : {
@@ -931,7 +906,7 @@ building_police_station = {
 
   labor_category : LABOR_CATEGORY_INFRASTRUCTURE
   min_houses_coverage : 50
-  meta : { help_id: 86, text_id: 88 }
+  meta : { text_id: 88, help_link:"message_building_police_station" }
   building_size : 1
   cost [ 6, 12, 25, 40, 60 ]
   desirability { value[-2], step[1], step_size[1], range[2] }
