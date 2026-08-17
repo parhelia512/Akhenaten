@@ -182,8 +182,8 @@ window_scenario_selection_campaign {
         campaign_hover_thumb : image_queue({ pos[270, 200], size[256, 152], fit:true, fade_ms:280, pack:PACK_UNLOADED, id:28, offset:0 })
 
         // Button block below portrait (thumb bottom ~352), with clear gap under the frame.
-        tab_individual : large_button({ pos[210, 370], size[144, 24], text[294, 38], font:FONT_NORMAL_BLACK_ON_LIGHT, onclick: campaign_tab_individual })
-        tab_campaigns  : large_button({ pos[362, 370], size[144, 24], text[294, 39], font:FONT_NORMAL_BLACK_ON_LIGHT, onclick: campaign_tab_campaigns })
+        tab_individual : large_button({ pos[210, 370], size[144, 24], text[294, 38], font:FONT_NORMAL_BLACK_ON_LIGHT })
+        tab_campaigns  : large_button({ pos[362, 370], size[144, 24], text[294, 39], font:FONT_NORMAL_BLACK_ON_LIGHT })
 
         // Original Explore History: Pharaoh section (2-col), then Cleopatra section (2-col) below.
         hdr_pharaoh : text({ pos[210, 420], size[144, 18], text[294, 41], font:FONT_NORMAL_BLACK_ON_LIGHT })
@@ -203,11 +203,36 @@ window_scenario_selection_campaign {
         campaign_hover_body : text({ pos[545, 250], size[265, 200], wrap:px(16), font:FONT_NORMAL_BLACK_ON_DARK, multiline:true, clip_area:true })
 
         // Exit / Play along the bottom edge of the dialog.
-        btn_exit : image_button({ pos[215, 590], size[31, 20], pack:PACK_GENERAL, id:90, offset:8, onclick: window_go_back })
+        btn_exit : image_button({ pos[215, 590], size[31, 20], pack:PACK_GENERAL, id:90, offset:8 })
         lbl_exit : text({ pos[250, 592], text[44, 217], font:FONT_NORMAL_BLACK_ON_LIGHT })
-        btn_exit_hit : button({ pos[215, 605], size[110, 30], text:"", hbody:false, border:false, onclick: window_go_back })
+        btn_exit_hit : button({ pos[215, 605], size[110, 30], text:"", hbody:false, border:false })
 
         lbl_play : text({ pos[735, 590], text[294, 37], font:FONT_NORMAL_BLACK_ON_LIGHT })
-        btn_play : image_button({ pos[780, 585], size[27, 27], pack:PACK_GENERAL, id:193, offset:4, onclick: campaign_btn_play })
+        btn_play : image_button({ pos[780, 585], size[27, 27], pack:PACK_GENERAL, id:193, offset:4 })
     }
+}
+
+[es=(window_scenario_selection_campaign, tab_individual)]
+function window_scenario_selection_campaign_on_tab_individual(window) {
+    campaign_tab_individual()
+}
+
+[es=(window_scenario_selection_campaign, tab_campaigns)]
+function window_scenario_selection_campaign_on_tab_campaigns(window) {
+    campaign_tab_campaigns()
+}
+
+[es=(window_scenario_selection_campaign, btn_exit)]
+function window_scenario_selection_campaign_on_btn_exit(window) {
+    window_go_back()
+}
+
+[es=(window_scenario_selection_campaign, btn_exit_hit)]
+function window_scenario_selection_campaign_on_btn_exit_hit(window) {
+    window_go_back()
+}
+
+[es=(window_scenario_selection_campaign, btn_play)]
+function window_scenario_selection_campaign_on_btn_play(window) {
+    campaign_btn_play()
 }
