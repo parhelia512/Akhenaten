@@ -52,7 +52,6 @@ void reset_ui_command_queue();
     const xstring element::ONDOUBLECLICK_EVENT{"ondoubleclick_event"};
     const xstring element::ONINPUT_EVENT{"oninput_event"};
     const xstring element::ONRENDER_ITEM{"onrender_item"};
-    const xstring element::ONRIGHTCLICK_ITEM{"onrightclick_item"};
     const xstring element::ONDOUBLECLICK_ITEM{"ondoubleclick_item"};
     const xstring element::ONHOVER_EVENT{"onhover_event"};
     const xstring element::ONUNHOVER_EVENT{"onunhover_event"};
@@ -2006,13 +2005,16 @@ void ui::escrollable_list::ensure_panel() {
         });
     }
 
-    if (!js_ref(ONRIGHTCLICK_ITEM).empty()) {
-        panel->set_onrightclick_entry([this](scrollable_list::entry_data* e) {
+    xstring onrclick_event = event_name(ONRCLICK_EVENT);
+    if (!onrclick_event.empty()) {
+        panel->set_onrightclick_entry([onrclick_event](scrollable_list::entry_data* e) {
             if (!e) {
                 return;
             }
-            js_call_function(js_ref(ONRIGHTCLICK_ITEM),
-                {{"text", e->text}, {"user_data", (int32_t)e->user_data}});
+            bvariant_map::scoped m;
+            (*m)["text"] = bvariant(e->text);
+            (*m)["user_data"] = bvariant((int32_t)e->user_data);
+            dispatch_autoconfig_es_event(get_current_widget(), onrclick_event.c_str(), *m);
         });
     }
 }
@@ -2135,9 +2137,9 @@ void ui::escrollable_list::load(archive arch, element* parent, items& elems) {
     assert(type == "scrollable_list");
 
     set_ref(ONRENDER_ITEM, arch.r_function("onrender_item"));
-    set_ref(ONRIGHTCLICK_ITEM, arch.r_function("onrightclick_item"));
     set_ref(ONDOUBLECLICK_ITEM, arch.r_function("ondoubleclick_item"));
     set_event(ONCLICK_EVENT, arch.r_string(ONCLICK_EVENT.c_str()));
+    set_event(ONRCLICK_EVENT, arch.r_string(ONRCLICK_EVENT.c_str()));
     set_event(ONDOUBLECLICK_EVENT, arch.r_string(ONDOUBLECLICK_EVENT.c_str()));
 
     params.files_dir = arch.r_string("dir");

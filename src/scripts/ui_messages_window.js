@@ -70,6 +70,7 @@ function message_list_window_delete_at(message_index) {
     __city_message_delete(message_index)
 }
 
+[es=(message_list_window, rightclick_item)]
 function message_list_window_on_rightclick_item(p) {
     if (!p) {
         return
@@ -104,7 +105,7 @@ message_list_window {
                                          draw_scrollbar_always:true
                                          onrender_item: message_list_window_on_render_item
                                          onclick_event: "click_item"
-                                         onrightclick_item: message_list_window_on_rightclick_item })
+                                         onrclick_event: "rightclick_item" })
 
         message_icon  : dummy({pos[0, 0]})
         message_row   : dummy({pos[0, 0], size[px(13), 20]})

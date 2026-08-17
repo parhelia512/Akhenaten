@@ -583,7 +583,6 @@ namespace ui {
         static const xstring ONDOUBLECLICK_EVENT;
         static const xstring ONINPUT_EVENT;
         static const xstring ONRENDER_ITEM;
-        static const xstring ONRIGHTCLICK_ITEM;
         static const xstring ONDOUBLECLICK_ITEM;
         static const xstring EMPTY_JS_REF;
     };
