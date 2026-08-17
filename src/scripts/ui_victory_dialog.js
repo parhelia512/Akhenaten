@@ -1,20 +1,5 @@
 log_info("akhenaten: ui victory dialog started")
 
-function victory_dialog_continue(months) {
-    city.victory.continue_governing(months)
-    ui.window_city_show()
-    __city_victory_reset()
-    __game_sound.music_update(1)
-}
-
-function victory_dialog_continue_2() {
-    victory_dialog_continue(24)
-}
-
-function victory_dialog_continue_5() {
-    victory_dialog_continue(60)
-}
-
 [es=(window_victory_dialog, init)]
 function window_victory_dialog_on_init(window) {
     __log_marker("window_show:window_victory_dialog")
@@ -74,12 +59,18 @@ function window_victory_dialog_btn_accept(window) {
 
 [es=(window_victory_dialog, btn_continue_2)]
 function window_victory_dialog_btn_continue_2(window) {
-    victory_dialog_continue_2()
+    city.victory.continue_governing(24)
+    ui.window_city_show()
+    __city_victory_reset()
+    __game_sound.music_update(1)
 }
 
 [es=(window_victory_dialog, btn_continue_5)]
 function window_victory_dialog_btn_continue_5(window) {
-    victory_dialog_continue_5()
+    city.victory.continue_governing(60)
+    ui.window_city_show()
+    __city_victory_reset()
+    __game_sound.music_update(1)
 }
 
 [es=(window_victory_dialog, btn_lost)]
