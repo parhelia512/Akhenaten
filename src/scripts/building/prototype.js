@@ -35,6 +35,7 @@ Building.property.num_workers = { }
 Building.property.max_workers = { }
 Building.property.type = { }
 Building.property.orientation = { }
+Building.property.size = { }
 Building.property.prev_part_building_id = { }
 Building.property.next_part_building_id = { }
 Building.property.structure_damage = { }

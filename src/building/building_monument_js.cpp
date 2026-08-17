@@ -91,3 +91,17 @@ bool __monument_need_stonemason(int bid) {
     return m && m->need_stonemason();
 }
 ANK_FUNCTION_1(__monument_need_stonemason)
+
+int __map_monuments_get_progress(tile2i tile) {
+    return (int)map_monuments_get_progress(tile);
+}
+ANK_FUNCTION_1(__map_monuments_get_progress)
+
+void __monument_set_tile_progress(int bid, tile2i tile, int progress) {
+    building_monument *m = monument_from_building(bid);
+    if (!m) {
+        return;
+    }
+    m->set_tile_progress(tile, progress);
+}
+ANK_FUNCTION_3(__monument_set_tile_progress)

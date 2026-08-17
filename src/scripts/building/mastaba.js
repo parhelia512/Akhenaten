@@ -258,3 +258,80 @@ building_small_mastaba {
   building_large_mastaba_part_side { building_size: 2, show_in_debug: false }
   building_large_mastaba_part_wall { building_size: 2, show_in_debug: false }
   building_large_mastaba_part_entrance { building_size: 2, show_in_debug: false }
+
+function building_mastaba_preview_footprint(init_tiles) {
+  var orient = Math.floor(__camera.orientation / 2)
+  if (orient == 0 || orient == 2) {
+    return { x: init_tiles[1], y: init_tiles[0] }
+  }
+  return { x: init_tiles[0], y: init_tiles[1] }
+}
+
+function building_mastaba_setup_preview_graphics(ev) {
+  var cfg = get_building_config_by_id(city_planner.build_type)
+  var footprint = building_mastaba_preview_footprint(cfg.init_tiles)
+  city_planner.init_tiles(footprint.x, footprint.y)
+}
+
+function building_mastaba_preview_image_id(image_id, tile, start, size) {
+  if (tile.x == start.x && tile.y == start.y) {
+    return image_id
+  }
+  if (tile.x == start.x && tile.y == start.y + size.y - 1) {
+    return image_id - 2
+  }
+  if (tile.x == start.x + size.x - 1 && tile.y == start.y + size.y - 1) {
+    return image_id - 4
+  }
+  if (tile.x == start.x + size.x - 1 && tile.y == start.y) {
+    return image_id - 6
+  }
+  if (tile.x == start.x) {
+    return image_id - 1
+  }
+  if (tile.x == start.x + size.x - 1) {
+    return image_id - 5
+  }
+  if (tile.y == start.y) {
+    return image_id - 7
+  }
+  if (tile.y == start.y + size.y - 1) {
+    return image_id - 3
+  }
+  return image_id + 5 + ((tile.x + tile.y) % 7)
+}
+
+function building_mastaba_ghost_preview(ev) {
+  var params = city.get_building_params_by_type(city_planner.build_type)
+  var cfg = get_building_config_by_id(city_planner.build_type)
+  var size = building_mastaba_preview_footprint(cfg.init_tiles)
+  var image_id = params.first_img("base")
+  var pixel = ev.pixel
+  var end = ev.end
+
+  for (var i = 0; i < size.x; i++) {
+    for (var j = 0; j < size.y; j++) {
+      var p = { x: pixel.x + 30 * i - 30 * j, y: pixel.y + 15 * i + 15 * j }
+      var tile = { x: end.x + i, y: end.y + j }
+      city_planner.draw_ghost(p, building_mastaba_preview_image_id(image_id, tile, end, size))
+    }
+  }
+}
+
+[es=(building_small_mastaba, setup_preview_graphics), es=(building_medium_mastaba, setup_preview_graphics), es=(building_large_mastaba, setup_preview_graphics)]
+function building_mastaba_setup_preview_graphics_es(ev) {
+  building_mastaba_setup_preview_graphics(ev)
+}
+
+[es=(building_small_mastaba, ghost_preview), es=(building_medium_mastaba, ghost_preview), es=(building_large_mastaba, ghost_preview)]
+function building_mastaba_ghost_preview_es(ev) {
+  building_mastaba_ghost_preview(ev)
+}
+
+[es=(building_small_mastaba, on_place_checks), es=(building_medium_mastaba, on_place_checks), es=(building_large_mastaba, on_place_checks)]
+function building_mastaba_on_place_checks_es(ev) {
+  var b = city.get_building(ev.bid)
+  var size = b.params.building_size
+  var has_groundwater = terrain.exists_in_area(b.tile, size, TERRAIN_GROUNDWATER)
+  city.warnings.show_if_not(has_groundwater, "#needs_groundwater")
+}

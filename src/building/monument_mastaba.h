@@ -25,7 +25,6 @@ public:
 
     virtual void on_create(int orientation) override;
     virtual void on_place(int orientation, int variant) override;
-    virtual void on_place_checks() override;
     virtual void update_count() const override;
     virtual void update_month() override;
     virtual void update_map_orientation(int map_orientation) override;
@@ -33,11 +32,6 @@ public:
     virtual void bind_dynamic(io_buffer *iob, size_t version) override;
     virtual bool get_route_citizen_land_type(int grid_offset, int &land_result) const override;
     virtual bool target_route_tile_blocked(int grid_offset) const override;
-
-    struct preview : building_planer_renderer {
-        virtual void setup_preview_graphics(build_planner &planer) const override;
-        virtual void ghost_preview(build_planner &planer, painter &ctx, tile2i tile, tile2i end, vec2i pixel) const override;
-    };
 
     struct base_params {
         // Large mastaba = 4×9 parts (36); keep headroom above medium's 21.

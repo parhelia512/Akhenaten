@@ -30,6 +30,35 @@ function console_command_farm_grow(args) {
 	}
 }
 
+// Completes unfinished monument tile progress (to 200). Optional arg = max tiles
+// to bump (0 / omitted = all).
+[console_command=monument_up]
+function console_command_monument_up(args) {
+	var amount = parseInt((args && args[0]) || "0", 10)
+	if (!(amount > 0)) {
+		amount = 0
+	}
+
+	var remaining = amount
+	for (var i = 1; i <= MAX_BUILDINGS; i++) {
+		var m = city.get_monument(i)
+		if (!m || m.prev_part_building_id) {
+			continue
+		}
+		if (m.phase() === -1) {
+			continue
+		}
+
+		var bumped = m.boost_incomplete_tiles(amount > 0 ? remaining : 0)
+		if (amount > 0) {
+			remaining -= bumped
+			if (remaining <= 0) {
+				break
+			}
+		}
+	}
+}
+
 [console_command=add_pottery]
 function console_command_add_pottery(args) {
 	var amount = parseInt((args && args[0]) || "100", 10)

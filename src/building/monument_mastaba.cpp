@@ -8,7 +8,6 @@
 #include "widget/city/tile_draw.h"
 #include "widget/city/flat_draw.h"
 #include "window/building/common.h"
-#include "city/city_warnings.h"
 #include "city/city_buildings.h"
 #include "city/city_figures.h"
 #include "figure/figure.h"
@@ -29,10 +28,8 @@
 #include "graphics/elements/panel.h"
 #include "graphics/elements/lang_text.h"
 #include "figuretype/figure_worker.h"
-#include "construction/build_planner.h"
 #include "grid/routing/routing_grids.h"
 #include "widget/widget_city.h"
-#include "dev/debug.h"
 #include "js/js_game.h"
 
 #include <numeric>
@@ -53,53 +50,6 @@ REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_mastaba);
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_mastaba_part_side);
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_mastaba_part_wall);
 REPLICATE_STATIC_PARAMS_FROM_CONFIG(building_large_mastaba_part_entrance);
-
-declare_console_command_p(monument_up) {
-    std::string args; is >> args;
-    int amount = atoi(args.empty() ? (pcstr)"0" : args.c_str());
-
-    hvector<building_monument *, 64> monuments;
-    buildings_valid_do([&] (building &b) {
-        if (!b.is_monument()) {
-            return;
-        }
-
-        auto m = b.dcast_monument();
-        if (!m->is_unfinished()) {
-            return;
-        }
-
-        monuments.push_back(m);
-    });
-
-    struct monument_area {
-        building_monument *m;
-        grid_area area;
-    };
-    hvector<monument_area, 64> areas;
-    for (auto m : monuments) {
-        building *part = &(m->base);
-        while (part) {
-            grid_area area = map_grid_get_area(part->tile, part->size, 0);
-            areas.push_back({ m, area });
-
-            part = (part->next_part_building_id > 0) ? building_get(part->next_part_building_id) : nullptr;
-        };
-    }
-
-    int m = 0;
-    for (auto &item : areas) {
-        if (amount > 0 && m > amount) {
-            break;
-        }
-        map_grid_area_foreach(item.area, [&] (tile2i tile) {
-            if (amount > 0 && map_monuments_get_progress(tile) < 200) {
-                ++m;
-            }
-            item.m->set_tile_progress(tile, 200);
-        });
-    }
-}
 
 void building_mastaba::base_params::finalize_construction(e_building_type type) {
     construction.btype = type;
@@ -169,77 +119,6 @@ static e_building_type mastaba_side_type(e_building_type main_type) {
 static tile2i mastaba_footprint_end(building *main) {
     const auto &bp = get_mastaba_params(main->type);
     return main->tile.shifted(bp.init_tiles.y - 1, bp.init_tiles.x - 1);
-}
-
-void building_mastaba::preview::setup_preview_graphics(build_planner &planer) const {
-    const auto &params = building_static_params::get(planer.build_type);
-    const auto &base_params = get_mastaba_params(planer.build_type);
-
-    const vec2i init_tiles = base_params.init_tiles;
-
-    switch (g_camera.orientation / 2) {
-    case 0: planer.init_tiles(init_tiles.y, init_tiles.x); break;
-    case 1: planer.init_tiles(init_tiles.x, init_tiles.y); break;
-    case 2: planer.init_tiles(init_tiles.y, init_tiles.x); break;
-    case 3: planer.init_tiles(init_tiles.x, init_tiles.y); break;
-    }
-}
-
-void building_mastaba::preview::ghost_preview(build_planner &planer, painter &ctx, tile2i start, tile2i end, vec2i pixel) const {
-    const auto &params = building_static_params::get(planer.build_type);
-    const auto &base_params = get_mastaba_params(planer.build_type);
-
-    int image_id = params.base_img();
-    auto get_image = [image_id] (tile2i tile, tile2i start, vec2i size) {
-        if (tile == start) {
-            return image_id;
-        }
-
-        if (tile == start.shifted(size.x - 1, 0)) {
-            return image_id - 2;
-        }
-
-        if (tile == start.shifted(size.x - 1, size.y - 1)) {
-            return image_id - 4;
-        }
-
-        if (tile == start.shifted(0, size.y - 1)) {
-            return image_id - 6;
-        }
-
-        if (tile.y() == start.y()) { return image_id - 1; }
-        if (tile.y() == start.y() + size.y - 1) { return image_id - 5; }
-        if (tile.x() == start.x()) { return image_id - 7; }
-        if (tile.x() == start.x() + size.x - 1) { return image_id - 3; }
-
-        return (image_id + 5 + (tile.x() + tile.y()) % 7);
-    };
-
-    vec2i size{ 1, 1 };
-    vec2i size_b = base_params.init_tiles;
-    // Must match setup_preview_graphics: orientation 0/2 uses (y,x), 1/3 uses (x,y).
-    // The opposite swap makes the green preview 10×4 while collision stays 4×10.
-    switch (g_camera.orientation / 2) {
-    case 0: size = { size_b.y, size_b.x }; break;
-    case 1: size = { size_b.x, size_b.y }; break;
-    case 2: size = { size_b.y, size_b.x }; break;
-    case 3: size = { size_b.x, size_b.y }; break;
-    }
-
-    // Match build_planner::update_coord_caches: +mapX → (+30,+15), +mapY → (-30,+15).
-    // Swapped deltas draw the long axis on the wrong iso diagonal (preview T-B vs place L-R).
-    for (int i = 0; i < size.x; ++i) {
-        for (int j = 0; j < size.y; ++j) {
-            vec2i p = pixel + (vec2i(30, 15) * i) + (vec2i(-30, 15) * j);
-            int image_id = get_image(end.shifted(i, j), end, size);
-
-            auto& command = ImageDraw::create_command(ctx, render_command_t::ert_drawtile_full);
-            command.image_id = image_id;
-            command.pixel = p;
-            command.mask = COLOR_MASK_GREEN;
-            command.location = SOURCE_LOCATION;
-        }
-    }
 }
 
 void map_mastaba_tiles_add(int building_id, tile2i tile, int size, int image_id, int terrain) {
@@ -424,7 +303,7 @@ int building_small_mastabe_get_bricks_image(int orientation, e_building_type typ
         result = (image_id + 1);
     } else {
         result = random;
-    } 
+    }
 
     if (result < random) {
         int offset = result - image_id;
@@ -494,8 +373,10 @@ bool building_mastaba::draw_ornaments_and_animations_flat_impl(painter &ctx, vec
         return false;
     }
 
-    int clear_land_id = first_img(animkeys().clear_land);
-    int image_grounded = first_img(animkeys().base_grounded);
+    // Wall/side/entrance parts have empty animations — art lives on the main mastaba type.
+    const auto &mastaba_anims = building_static_params::get(mastaba_main_type(type()));
+    int clear_land_id = mastaba_anims.first_img(animkeys().clear_land);
+    int image_grounded = mastaba_anims.first_img(animkeys().base_grounded);
     building *main = base.main();
     color_mask = (color_mask ? color_mask : 0xffffffff);
 
@@ -525,7 +406,7 @@ bool building_mastaba::draw_ornaments_and_animations_flat_impl(painter &ctx, vec
             }
         }
 
-        int image_stick = current_params().first_img(animkeys().image_stick);
+        int image_stick = mastaba_anims.first_img(animkeys().image_stick);
         const image_t *img = image_get(image_stick);
         tile2i left_top = base.tile.shifted(0, 0);
         if (left_top == main->tile && map_monuments_get_progress(left_top) == 0) {
@@ -548,7 +429,7 @@ bool building_mastaba::draw_ornaments_and_animations_flat_impl(painter &ctx, vec
             command.use_sort_pixel = true;
             command.sort_pixel = offset + vec2i(0, 1);
             command.location = SOURCE_LOCATION;
-        }        
+        }
         tile2i left_bottom = base.tile.shifted(0, 1);
         if (left_bottom == main->tile.shifted(0, tiles_size.x - 1) && map_monuments_get_progress(left_bottom) == 0) {
             vec2i offset = g_camera.lookup_tile_to_pixel(left_bottom);
@@ -559,7 +440,7 @@ bool building_mastaba::draw_ornaments_and_animations_flat_impl(painter &ctx, vec
             command.use_sort_pixel = true;
             command.sort_pixel = offset + vec2i(0, 1);
             command.location = SOURCE_LOCATION;
-        }        
+        }
         tile2i right_bottom = base.tile.shifted(1, 1);
         if (right_bottom == main->tile.shifted(tiles_size.y - 1, tiles_size.x - 1) && map_monuments_get_progress(right_bottom) == 0) {
             vec2i offset = g_camera.lookup_tile_to_pixel(right_bottom);
@@ -617,7 +498,8 @@ bool building_mastaba::draw_ornaments_and_animations_flat_impl(painter &ctx, vec
 }
 
 bool building_mastaba::draw_ornaments_and_animations_hight_impl(painter &ctx, vec2i point, tile2i tile, color color_mask, const vec2i tiles_size) {
-    int image_grounded = current_params().base_img() + 5;
+    // Parts have empty static params — base_img lives on the main mastaba type.
+    int image_grounded = building_static_params::get(mastaba_main_type(type())).base_img() + 5;
     color_mask = (color_mask ? color_mask : 0xffffffff);
     building *main = base.main();
 
@@ -768,17 +650,6 @@ void building_mastaba::update_day(const vec2i tiles_size) {
             }
         }
     }
-}
-
-void building_mastaba::on_place_checks() {
-    const tile2i tiles_to_check[] = { tile(), tile().shifted(1, 0), tile().shifted(0, 1), tile().shifted(1, 1) };
-    bool has_water = false;
-    for (const auto &t : tiles_to_check) {
-        has_water |= map_terrain_is(t, TERRAIN_GROUNDWATER);
-    }
-
-    construction_warnings warnings;
-    warnings.add_if(!has_water, "#needs_groundwater");
 }
 
 void building_mastaba::update_count() const {
