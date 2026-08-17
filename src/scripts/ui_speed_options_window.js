@@ -1,16 +1,5 @@
 log_info("akhenaten: ui speed options window started")
 
-function speed_options_on_cancel() {
-    var w = speed_options_window
-    game_features.gameopt_game_speed = w.original_game_speed
-    emit event_update_game_tick_timer{ reserved: 0 }
-    game_features.gameopt_scroll_speed = w.original_scroll_speed
-    game_features.gameopt_clouds_speed = w.original_clouds_speed
-    game_features.gameopt_middle_mouse_camera_pan = w.original_middle_mouse_camera_pan
-    game_features.gameopt_middle_mouse_pan_speed = w.original_middle_mouse_pan_speed
-    window_go_back()
-}
-
 [es=(speed_options_window, init)]
 function speed_options_window_es_init(window) {
     var w = speed_options_window
@@ -71,9 +60,26 @@ speed_options_window {
         middle_mouse_label : text({text[45, 6], pos[32, 210], font: FONT_SMALL_PLAIN})
         middle_mouse_pan   : checkbox({ pos[248, 204], checkedfn: function () { return game_features.gameopt_middle_mouse_camera_pan === true } })
 
-        btnok              : ok_button({margin{left:px(20)/2 - 40, bottom:-40}, onclick: window_go_back })
-        btncancel          : cancel_button({margin{left:px(20)/2 + 20, bottom:-40}, onclick: speed_options_on_cancel })
+        btnok              : ok_button({margin{left:px(20)/2 - 40, bottom:-40} })
+        btncancel          : cancel_button({margin{left:px(20)/2 + 20, bottom:-40} })
     }
+}
+
+[es=(speed_options_window, btnok)]
+function speed_options_window_btnok(window) {
+    window_go_back()
+}
+
+[es=(speed_options_window, btncancel)]
+function speed_options_window_btncancel(window) {
+    var w = speed_options_window
+    game_features.gameopt_game_speed = w.original_game_speed
+    emit event_update_game_tick_timer{ reserved: 0 }
+    game_features.gameopt_scroll_speed = w.original_scroll_speed
+    game_features.gameopt_clouds_speed = w.original_clouds_speed
+    game_features.gameopt_middle_mouse_camera_pan = w.original_middle_mouse_camera_pan
+    game_features.gameopt_middle_mouse_pan_speed = w.original_middle_mouse_pan_speed
+    window_go_back()
 }
 
 [es=(speed_options_window, arrow_game_down)]
