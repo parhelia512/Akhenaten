@@ -119,7 +119,7 @@ Replace `onclick: show_window_by_id("X")` with either:
 Prefer event when touching the file anyway.
 
 - [x] **C1** `ui_main_menu.js` — remaining `show_window_by_id`.
-- [ ] **C2** `ui_sidebar_window.js` — remaining factories (messages, overlay, bug).
+- [x] **C2** `ui_sidebar_window.js` — remaining factories (messages, overlay, bug).
 - [ ] **C3** `ui_dynasty_menu.js`.
 - [ ] **C4** `ui_advisor_imperial.js` / trade / mansion — `show_window_by_id`.
 - [ ] **C5** `ui_bazaar_window.js` (and similar one-liner orders openers if any).

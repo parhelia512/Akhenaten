@@ -93,7 +93,6 @@ sidebar_window_expanded {
 
         show_overlays     : link({
                                pos[4, 30], size[70, 20], hbody:false, border:false, font_hover:FONT_NORMAL_YELLOW
-                               onclick: show_window_by_id("overlay_menu_widget")
                                onrclick: window_city_overlays_right_click
                             })
         toggle_flat       : link({
@@ -159,7 +158,7 @@ sidebar_window_expanded {
                                onclick: window_build_menu_build_security
                             })
 
-        show_messages     : image_button({pos[46, 434], pack:PACK_GENERAL, id:136, offset:52, tooltip:[68,33], onclick: show_window_by_id("message_list_window")})
+        show_messages     : image_button({pos[46, 434], pack:PACK_GENERAL, id:136, offset:52, tooltip:[68,33]})
         goto_problem      : image_button({
                                pos[86, 434], pack:PACK_GENERAL, id:136, offset:56, tooltip:[68,34]
                                onclick: window_city_show_problem_area
@@ -196,7 +195,7 @@ sidebar_window_expanded {
         kingdom_header    : text({pos[11, 480 + 250], font:FONT_NORMAL_WHITE_ON_DARK})
         kingdom_current   : text({pos[11, 480 + 270]})
 
-        report_bug        : image_button({pos[114, 480 + 258], path:"pharaoh_general/interface_00086", tooltip:"Report bug", border:3, onclick: show_window_by_id("report_bug_window")})
+        report_bug        : image_button({pos[114, 480 + 258], path:"pharaoh_general/interface_00086", tooltip:"Report bug", border:3})
     }
 }
 
@@ -275,6 +274,21 @@ function window_build_menu_on_draw(window) {
             ? "#sidebar_flat_buildings_on"
             : "#sidebar_flat_buildings"
     }
+}
+
+[es=(sidebar_window_expanded, show_overlays)]
+function sidebar_window_expanded_show_overlays(window) {
+    emit event_show_window{ id: "overlay_menu_widget" }
+}
+
+[es=(sidebar_window_expanded, show_messages)]
+function sidebar_window_expanded_show_messages(window) {
+    emit event_show_window{ id: "message_list_window" }
+}
+
+[es=(sidebar_window_expanded, report_bug)]
+function sidebar_window_expanded_report_bug(window) {
+    emit event_show_window{ id: "report_bug_window" }
 }
 
 [es=(sidebar_window_expanded, dec_speed)]
