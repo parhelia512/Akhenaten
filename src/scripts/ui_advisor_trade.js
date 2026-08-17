@@ -110,13 +110,23 @@ advisor_trade_window {
                     onclick_item: advisor_trade_list_on_click_item
                 })
 
-                goto_empire  : button({pos:[48, 396], size:[200, 24], text:"#trade_overseer_goto_empire", tooltip:"#trade_overseer_goto_empire_hint", onclick: show_window_by_id("empire_window") })
-                show_prices  : button({pos:[368, 396], size:[200, 24], text:"#trade_overseer_prices", tooltip:"#trade_overseer_prices_hint", onclick: show_window_by_id("trade_prices_window") })
+                goto_empire  : button({pos:[48, 396], size:[200, 24], text:"#trade_overseer_goto_empire", tooltip:"#trade_overseer_goto_empire_hint" })
+                show_prices  : button({pos:[368, 396], size:[200, 24], text:"#trade_overseer_prices", tooltip:"#trade_overseer_prices_hint" })
 
                 button_help   : help_button({})
             }
         })
     })
+}
+
+[es=(advisor_trade_window, goto_empire)]
+function advisor_trade_window_goto_empire(window) {
+    emit event_show_window{ id: "empire_window" }
+}
+
+[es=(advisor_trade_window, show_prices)]
+function advisor_trade_window_show_prices(window) {
+    emit event_show_window{ id: "trade_prices_window" }
 }
 
 [es=(advisor_trade_window, init)]
