@@ -260,8 +260,7 @@ burial_dispatch_window {
 
         amounts_panel    : inner_panel({pos[32, 56], size[24, 4]
             ui {
-                btn_all   : button({pos[16, 12], size[80, 24], text[199, 5], font: FONT_NORMAL_WHITE_ON_DARK
-                                    onclick: burial_dispatch_set_all})
+                btn_all   : button({pos[16, 12], size[80, 24], text[199, 5], font: FONT_NORMAL_WHITE_ON_DARK})
             }
         })
 
@@ -271,11 +270,24 @@ burial_dispatch_window {
         amount_value     : label({pos[220, 100], font: FONT_NORMAL_WHITE_ON_DARK
                                   textfn: burial_dispatch_amount_text})
 
-        btn_dispatch     : button({pos[48, 140], size[160, 24], text[199, 6], font: FONT_NORMAL_BLACK_ON_LIGHT
-                                    onclick: burial_dispatch_do_dispatch})
-        btn_cancel       : button({pos[240, 140], size[160, 24], text[199, 7], font: FONT_NORMAL_BLACK_ON_LIGHT
-                                    onclick: burial_dispatch_cancel})
+        btn_dispatch     : button({pos[48, 140], size[160, 24], text[199, 6], font: FONT_NORMAL_BLACK_ON_LIGHT})
+        btn_cancel       : button({pos[240, 140], size[160, 24], text[199, 7], font: FONT_NORMAL_BLACK_ON_LIGHT})
     }
+}
+
+[es=(burial_dispatch_window, btn_all)]
+function burial_dispatch_window_btn_all(window) {
+    burial_dispatch_set_all()
+}
+
+[es=(burial_dispatch_window, btn_dispatch)]
+function burial_dispatch_window_btn_dispatch(window) {
+    burial_dispatch_do_dispatch()
+}
+
+[es=(burial_dispatch_window, btn_cancel)]
+function burial_dispatch_window_btn_cancel(window) {
+    burial_dispatch_cancel()
 }
 
 [es=(burial_dispatch_window, arrow_down)]
