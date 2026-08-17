@@ -1,11 +1,5 @@
 log_info("akhenaten: ui bazaar window started")
 
-function bazaar_info_window_toggle_overlay() {
-    log_info("building_info_window_toggle_overlay")
-    var b = city.get_building(city.object_info.bid)
-    city.current_overlay = (city.current_overlay == b.overlay) ? OVERLAY_NONE : b.overlay
-}
-
 function bazaar_info_window_text_overlay(window) {
     var b = city.get_building(city.object_info.bid)
     return (city.current_overlay == b.overlay ? "V" : "v")
@@ -14,13 +8,6 @@ function bazaar_info_window_text_overlay(window) {
 function bazaar_info_window_text_mothball() {
     var b = city.get_building(city.object_info.bid)
     return (b.state == 1 ? "x" : "")
-}
-
-function bazaar_info_window_toggle_mothball() {
-    var b = city.get_building(city.object_info.bid)
-    if (b.max_workers) {
-        b.mothball_toggle()
-    }
 }
 
 [es=building_info_window]
@@ -57,17 +44,29 @@ bazaar_info_window {
         show_overlay : button({
                                margin{right:-64, bottom:-40}, size[23, 23]
                                textfn: bazaar_info_window_text_overlay
-                               onclick: bazaar_info_window_toggle_overlay
                               })
 
         mothball     : button({
                                margin{right:-90, bottom:-40}, size[23, 23]
                                textfn: bazaar_info_window_text_mothball
-                               onclick: bazaar_info_window_toggle_mothball
                               })
 
         button_help  : help_button({})
         button_close : close_button({})
+    }
+}
+
+[es=(bazaar_info_window, show_overlay)]
+function bazaar_info_window_on_show_overlay(window) {
+    var b = city.get_building(city.object_info.bid)
+    city.current_overlay = (city.current_overlay == b.overlay) ? OVERLAY_NONE : b.overlay
+}
+
+[es=(bazaar_info_window, mothball)]
+function bazaar_info_window_on_mothball(window) {
+    var b = city.get_building(city.object_info.bid)
+    if (b.max_workers) {
+        b.mothball_toggle()
     }
 }
 
