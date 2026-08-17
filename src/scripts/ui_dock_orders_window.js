@@ -70,12 +70,27 @@ dock_orders_window {
             onrender_item: dock_orders_list_on_render_item
             onclick_item: dock_orders_list_on_click_item
         })
-        accept_all   : button({pos[16, -1], size[200, 24], text:"#dock_order_accept_all", margin{bottom:-38}, onclick: dock_orders_window_accept_all })
-        accept_none  : button({pos[226, -1], size[200, 24], text:{group:99, id:7}, margin{bottom:-38}, onclick: dock_orders_window_accept_none })
+        accept_all   : button({pos[16, -1], size[200, 24], text:"#dock_order_accept_all", margin{bottom:-38}})
+        accept_none  : button({pos[226, -1], size[200, 24], text:{group:99, id:7}, margin{bottom:-38}})
 
         button_help   : help_button({})
-        button_close  : close_button({ onclick: window_go_back })
+        button_close  : close_button({ onclick_event: "go_back" })
     }
+}
+
+[es=(dock_orders_window, accept_all)]
+function dock_orders_window_on_accept_all(window) {
+    dock_orders_window_accept_all()
+}
+
+[es=(dock_orders_window, accept_none)]
+function dock_orders_window_on_accept_none(window) {
+    dock_orders_window_accept_none()
+}
+
+[es=(dock_orders_window, go_back)]
+function dock_orders_window_go_back(window) {
+    window_go_back()
 }
 
 [es=(dock_orders_window, init)]
