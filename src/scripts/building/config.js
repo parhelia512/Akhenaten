@@ -20,35 +20,6 @@ build_planner_clear_land {
   }
 }
 
-building_cattle_ranch {
-  animations {
-    preview { pack:PACK_GENERAL, id:105, },
-    base { pack:PACK_GENERAL, id:105, offset:0 },
-    work {  pack:PACK_GENERAL, id:105, offset:1, max_frames:12 },
-    minimap { pack:PACK_GENERAL, id:149, offset:160 },
-  }
-  min_houses_coverage : 100
-  input {
-    resource : RESOURCE_STRAW
-  }
-  output {
-    resource : RESOURCE_MEAT
-  }
-  building_size : 3
-  meta { help_id:1, text_id:117 }
-  info_sound : "Wavs/cowfarm_r.wav"
-  labor_category : LABOR_CATEGORY_FOOD_PRODUCTION
-  cost [ 15, 20, 30, 50, 80 ]
-  desirability { value:[-4], step:[1], step_size:[1], range: [4] }
-  laborers[12]
-  fire_risk[1]
-  damage_risk[2]
-  info_advisors [ADVISOR_LABOR]
-  flags {
-    is_food: true
-  }
-}
-
 building_burning_ruin = {
   animations : {
     base0 : { pack:PACK_TERRAIN, id:36, offset:0 },

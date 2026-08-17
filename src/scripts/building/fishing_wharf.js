@@ -21,7 +21,7 @@ building_fishing_wharf {
   planner_update_rule {
     relative_orientation: 1
   }
-  meta { help_id: 84, text_id: 102 }
+  meta { text_id: 102, help_link:"message_building_fishing_wharf" }
   info_sound : "Wavs/shipyrd_r.wav"
   needs {
     water_access : true
