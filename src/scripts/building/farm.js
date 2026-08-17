@@ -90,7 +90,7 @@ building_meadow_farm_tile_offsets = [
     month_harvest: [MONTH_JANUARY, MONTH_MAY]
     fire_proof : true
     damage_proof : true
-    meta { help_id:90, text_id:112 }
+    meta { text_id:112, help_link:"message_building_grain_farm" }
     progress_max: 2000
     labor_category : LABOR_CATEGORY_FOOD_PRODUCTION
 
@@ -135,7 +135,7 @@ building_meadow_farm_tile_offsets = [
     month_harvest: [MONTH_JANUARY, MONTH_MAY]
     fire_proof : true
     damage_proof : true
-    meta { help_id:90, text_id:112 }
+    meta { text_id:112, help_link:"message_building_grain_farm" }
     info_sound : "Wavs/farm1.wav"
     sound_channel : SOUND_CHANNEL_CITY_CHICKFARM
     progress_max: 2000
@@ -185,7 +185,7 @@ building_meadow_farm_tile_offsets = [
     month_harvest: [MONTH_APRIL]
     fire_proof : true
     damage_proof : true
-    meta { help_id:90, text_id:112 }
+    meta { text_id:112, help_link:"message_building_fruit_vegetables_farm" }
     progress_max: 2000
     labor_category : LABOR_CATEGORY_FOOD_PRODUCTION
 
@@ -225,7 +225,7 @@ building_meadow_farm_tile_offsets = [
     fire_proof : true
     month_harvest: [MONTH_APRIL]
     damage_proof : true
-    meta { help_id:90, text_id:182 }
+    meta { text_id:182, help_link:"message_building_fruit_vegetables_farm" }
     info_sound : "Wavs/chickfarm.wav"
     sound_channel : SOUND_CHANNEL_CITY_CHICKFARM
     progress_max: 2000
@@ -274,7 +274,7 @@ building_meadow_farm_tile_offsets = [
     month_harvest: [MONTH_APRIL]
     fire_proof : true
     damage_proof : true
-    meta { help_id:90, text_id:112 }
+    meta { text_id:112, help_link:"message_building_fruit_vegetables_farm" }
     progress_max: 2000
     labor_category : LABOR_CATEGORY_FOOD_PRODUCTION
 
@@ -323,7 +323,7 @@ building_meadow_farm_tile_offsets = [
     month_harvest: [MONTH_APRIL]
     fire_proof : true
     damage_proof : true
-    meta { help_id:91, text_id:113 }
+    meta { text_id:113, help_link:"message_building_fruit_vegetables_farm" }
     info_sound : "Wavs/lettucefarm.wav"
     sound_channel : SOUND_CHANNEL_CITY_CHICKFARM
     progress_max: 2000
@@ -367,7 +367,7 @@ building_meadow_farm_tile_offsets = [
     month_harvest: [MONTH_JUNE, MONTH_NOVEMBER]
     fire_proof : true
     damage_proof : true
-    meta { help_id:90, text_id:112 }
+    meta { text_id:112, help_link:"message_building_fruit_vegetables_farm" }
     progress_max: 2000
     labor_category : LABOR_CATEGORY_FOOD_PRODUCTION
 
@@ -417,7 +417,7 @@ building_meadow_farm_tile_offsets = [
     month_harvest: [MONTH_JUNE, MONTH_NOVEMBER]
     fire_proof : true
     damage_proof : true
-    meta { help_id:91, text_id:114 }
+    meta { text_id:114, help_link:"message_building_fruit_vegetables_farm" }
     info_sound : "Wavs/pomfarm.wav"
     sound_channel : SOUND_CHANNEL_CITY_CHICKFARM
     progress_max: 2000
@@ -460,7 +460,7 @@ building_meadow_farm_tile_offsets = [
     month_harvest: [MONTH_FEBRUARY, MONTH_AUGUST]
     fire_proof : true
     damage_proof : true
-    meta { help_id:90, text_id:112 }
+    meta { text_id:112, help_link:"message_building_barley_flax_henna_farm" }
     progress_max: 2000
     labor_category : LABOR_CATEGORY_FOOD_PRODUCTION
 
@@ -504,7 +504,7 @@ building_meadow_farm_tile_offsets = [
     fire_proof : true
     month_harvest [MONTH_FEBRUARY, MONTH_AUGUST]
     damage_proof : true
-    meta { help_id:89, text_id:181 }
+    meta { text_id:181, help_link:"message_building_barley_flax_henna_farm" }
     info_sound : "Wavs/barleyfarm.wav"
     sound_channel : SOUND_CHANNEL_CITY_CHICKFARM
     progress_max: 2000
@@ -558,7 +558,7 @@ building_meadow_farm_tile_offsets = [
     month_harvest: [MONTH_DECEMBER]
     fire_proof : true
     damage_proof : true
-    meta { help_id:90, text_id:112 }
+    meta { text_id:112, help_link:"message_building_barley_flax_henna_farm" }
     progress_max: 2000
     labor_category : LABOR_CATEGORY_FOOD_PRODUCTION
 
@@ -597,7 +597,7 @@ building_meadow_farm_tile_offsets = [
     fire_proof : true
     damage_proof : true
     month_harvest: [MONTH_DECEMBER]
-    meta { help_id: 90, text_id: 115 }
+    meta { text_id:115, help_link:"message_building_barley_flax_henna_farm" }
     info_sound : "Wavs/flaxfarm.wav"
     sound_channel : SOUND_CHANNEL_CITY_CHICKFARM
     progress_max: 2000
@@ -649,7 +649,7 @@ building_meadow_farm_tile_offsets = [
     month_harvest: [MONTH_DECEMBER]
     fire_proof : true
     damage_proof : true
-    meta { help_id:90, text_id:112 }
+    meta { text_id:112, help_link:"message_building_barley_flax_henna_farm" }
     progress_max: 2000
     labor_category : LABOR_CATEGORY_FOOD_PRODUCTION
 
@@ -688,7 +688,7 @@ building_meadow_farm_tile_offsets = [
     fire_proof : true
     damage_proof : true
     month_harvest[MONTH_DECEMBER]
-    meta { help_id:90, text_id:306 }
+    meta { text_id:306, help_link:"message_building_barley_flax_henna_farm" }
     info_sound : "Wavs/farm2.wav"
     sound_channel : SOUND_CHANNEL_CITY_CHICKFARM
     progress_max: 2000
@@ -735,7 +735,7 @@ building_meadow_farm_figs {
   month_harvest: [MONTH_SEPTEMBER]
   fire_proof : true
   damage_proof : true
-  meta { help_id:90, text_id:112 }
+  meta { text_id:112, help_link:"message_building_fruit_vegetables_farm" }
   progress_max: 2000
   labor_category : LABOR_CATEGORY_FOOD_PRODUCTION
 
@@ -779,7 +779,7 @@ building_farm_figs {
   fire_proof : true
   month_harvest: [MONTH_SEPTEMBER]
   damage_proof : true
-  meta { help_id:90, text_id:183 }
+  meta { text_id:183, help_link:"message_building_fruit_vegetables_farm" }
   info_sound : "Wavs/figs_farm.wav"
     sound_channel : SOUND_CHANNEL_CITY_CHICKFARM
   progress_max: 2000

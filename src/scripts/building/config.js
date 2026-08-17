@@ -272,7 +272,7 @@ building_reed_gatherer {
     is_industry: true
   }
   building_size : 2
-  meta { help_id : 92, text_id : 116 }
+  meta { text_id : 116, help_link:"message_building_woodcutter_and_reed_gatherer" }
   info_sound : "Wavs/reedfarm.wav"
   labor_category : LABOR_CATEGORY_INDUSTRY_COMMERCE
   min_houses_coverage : 100
@@ -308,7 +308,7 @@ building_wood_cutter {
     is_industry: true
   }
   building_size : 2
-  meta { help_id:94, text_id:120 }
+  meta { text_id:120, help_link:"message_building_woodcutter_and_reed_gatherer" }
   info_sound : "Wavs/lumber.wav"
   labor_category : LABOR_CATEGORY_INDUSTRY_COMMERCE
   min_houses_coverage : 100
@@ -686,69 +686,6 @@ building_irrigation_ditch {
   }
 }
 
-building_mine_copper {
-  animations {
-    preview { pack:PACK_GENERAL, id:196 },
-    base { pack:PACK_GENERAL, id:196 },
-    work { pos : [54, 15], pack:PACK_SPR_AMBIENT, id:48, max_frames: 16, duration:2, internal_offset:true }
-  },
-  output {
-    resource : RESOURCE_COPPER
-  }
-  progress_max : 200,
-  production_rate : 100,
-  meta { help_id:93, text_id:193 }
-  info_sound : "Wavs/gold.wav"
-  building_size : 2,
-  labor_category : LABOR_CATEGORY_INDUSTRY_COMMERCE,
-  needs {
-    rock : true
-    ore : true
-  }
-  flags {
-    is_extractor: true
-    is_industry: true
-    keeps_visitor_paths: true
-  }
-  cost [ 50, 75, 100, 150, 300 ]
-  desirability { value[-12], step[2], step_size[2], range[6] }
-  laborers[10]
-  fire_risk[0]
-  damage_risk[2]
-}
-
-building_mine_gems {
-  animations {
-    preview { pack:PACK_GENERAL, id:188 },
-    base { pack:PACK_GENERAL, id:188 },
-    work { pos [54, 15], pack:PACK_SPR_AMBIENT, id:48, max_frames: 16, duration:2, internal_offset:true },
-    gems { pos : [93, 0], pack:PACK_GENERAL, id:203 }
-  }
-
-  output {
-    resource : RESOURCE_GEMS
-  }
-  progress_max : 200,
-  production_rate : 100,
-  production_divider : 3,
-  building_size : 2,
-  meta { help_id:93, text_id:163 }
-  labor_category : LABOR_CATEGORY_INDUSTRY_COMMERCE,
-  needs {
-    rock : true
-  }
-  flags {
-    is_extractor: true
-    is_industry: true
-    keeps_visitor_paths: true
-  }
-  cost [ 50, 75, 100, 150, 300 ]
-  desirability { value[-12], step[2], step_size[2], range[6] }
-  laborers[8]
-  fire_risk[0]
-  damage_risk[2]
-}
-
 building_sandstone_quarry {
   animations {
     preview { pack:PACK_GENERAL, id:197 },
@@ -887,39 +824,6 @@ building_limestone_quarry {
     is_extractor: true
     is_industry: true
   }
-}
-
-building_mine_gold {
-  animations {
-    _pack { pack:PACK_GENERAL }
-    preview { id:185 }
-    base { id:185 }
-    work { pos [54, 15], pack:PACK_SPR_AMBIENT, internal_offset:true, id:48, max_frames: 16, duration:2 }
-  }
-  output {
-    resource : RESOURCE_GOLD
-  }
-  building_size : 2
-  meta { help_id:93, text_id:162 }
-  info_sound : "Wavs/gold.wav"
-  labor_category : LABOR_CATEGORY_INDUSTRY_COMMERCE
-  needs {
-    rock : true
-    ore : true
-  }
-  flags {
-    is_extractor: true
-    is_industry: true
-    keeps_visitor_paths: true
-  }
-  cost [ 50, 100, 150, 250, 400 ]
-  desirability { value[-16], step[2], step_size[3], range[6] }
-  laborers [12]
-  fire_risk [0]
-  damage_risk [2]
-  progress_max : 200
-  production_rate : 100
-  production_divider : 10
 }
 
 building_clay_gatehouse = {

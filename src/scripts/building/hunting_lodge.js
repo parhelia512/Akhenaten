@@ -24,7 +24,7 @@ building_hunting_lodge {
         resource : RESOURCE_GAMEMEAT
     }
 
-    meta { help_id:90, text_id:154 }
+    meta { text_id:154, help_link:"message_building_hunting_lodge" }
     info_sound : "Wavs/lo_hunt.wav"
     building_size : 2
     min_houses_coverage : 100
