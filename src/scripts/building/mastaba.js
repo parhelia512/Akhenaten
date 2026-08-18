@@ -318,6 +318,7 @@ function building_mastaba_ghost_preview(ev) {
   }
 }
 
+
 [es=(building_small_mastaba, setup_preview_graphics), es=(building_medium_mastaba, setup_preview_graphics), es=(building_large_mastaba, setup_preview_graphics)]
 function building_mastaba_setup_preview_graphics_es(ev) {
   building_mastaba_setup_preview_graphics(ev)
@@ -334,4 +335,10 @@ function building_mastaba_on_place_checks_es(ev) {
   var size = b.params.building_size
   var has_groundwater = terrain.exists_in_area(b.tile, size, TERRAIN_GROUNDWATER)
   city.warnings.show_if_not(has_groundwater, "#needs_groundwater")
+}
+
+[es=(building_small_mastaba, complete_construction), es=(building_medium_mastaba, complete_construction), es=(building_large_mastaba, complete_construction)]
+function building_mastaba_complete_construction(ev) {
+  var b = city.get_building(ev.bid)
+  __city_message_post_with_popup_delay(MESSAGE_CAT_MONUMENTS, true, "message_history_mastaba", b.type, __map_grid_offset(b.tile), true)
 }

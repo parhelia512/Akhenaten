@@ -18,6 +18,14 @@ struct mastaba_part {
 ANK_CONFIG_STRUCT(mastaba_part,
     type, offset, base)
 
+// Matches construction.phases ids in mastaba.js (0..8). Values are stored in monument runtime.
+enum e_mastaba_phase : int8_t {
+    MASTABA_PHASE_SITE = 0,        // sticks + grounded fade
+    MASTABA_PHASE_FOUNDATION = 1,  // grounded + structure fade
+    MASTABA_PHASE_BRICKS = 2,      // brick layers / height ornaments
+    MASTABA_PHASE_COMPLETE = 8,    // schedule done → finalize to MONUMENT_FINISHED
+};
+
 class building_mastaba : public building_monument {
 public:
     building_mastaba(building &b) : building_monument(b) {}
@@ -48,7 +56,7 @@ public:
         hvector<mastaba_part, 40> config_south;
         hvector<mastaba_part, 40> config_west;
         vec2i init_tiles;
-        // Construction phases live here (parts resolve to main type via get_mastaba_params).
+        // Construction phases live here (parts resolve to main type via get_params).
         monument construction;
 
         void finalize_construction(e_building_type btype);
@@ -61,6 +69,7 @@ public:
     static void update_images(building *b, int curr_phase, const vec2i size_b);
     static void finalize(building *b, const vec2i size_b);
     static int get_image(int orientation, tile2i tile, tile2i start, tile2i end);
+    static const base_params &get_params(e_building_type type);
 
     virtual void remove_worker(figure_id fid) override;
     virtual void add_workers(figure_id fid) override;
@@ -69,9 +78,18 @@ protected:
     bool draw_ornaments_and_animations_flat_impl(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
     bool draw_ornaments_and_animations_hight_impl(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
     void update_construction_day(const vec2i tiles_size);
-};
+    void complete_construction(const vec2i tiles_size);
 
-const building_mastaba::base_params &get_mastaba_params(e_building_type type);
+    void draw_flat_phase_site(painter &ctx, color color_mask, const vec2i tiles_size, int image_grounded, int image_stick);
+    void draw_flat_phase_foundation(painter &ctx, color color_mask, const vec2i tiles_size, int image_grounded);
+    void draw_flat_phase_bricks(painter &ctx, color color_mask, const vec2i tiles_size);
+
+    using height_tiles = svector<tile2i, 21>;
+    void draw_height_phase_bricks(painter &ctx, color color_mask, const vec2i tiles_size, const vec2i city_offset, const height_tiles &tiles2draw);
+    void draw_height_phase_layers(painter &ctx, color color_mask, const vec2i tiles_size, const vec2i city_offset, const height_tiles &tiles2draw);
+    void draw_height_phase_complete(painter &ctx, color color_mask, const vec2i tiles_size, const vec2i city_offset, const height_tiles &tiles2draw);
+    void draw_height_side_figures(painter &ctx);
+};
 
 class building_small_mastaba : public building_mastaba {
 public:

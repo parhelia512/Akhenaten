@@ -1,4 +1,4 @@
-#include "building/construction_blessing.h"
+﻿#include "building/construction_blessing.h"
 
 #include "building/monument_mastaba.h"
 #include "city/city_buildings.h"
@@ -96,7 +96,7 @@ bool is_construction_blessing_monument(building &b) {
         return false;
     }
 
-    // Cannot bump without calling set_phase(phases()) → FINISHED.
+    // Cannot bump without calling set_phase(phases()) â†’ FINISHED.
     return phase + 1 < monument->phases();
 }
 
@@ -120,7 +120,7 @@ building_monument *find_construction_blessing_target() {
 }
 
 void clear_deliveries_for_chain(building_monument &main) {
-    // Heap-backed after stack fill — safe for medium/large mastaba chains.
+    // Heap-backed after stack fill â€” safe for medium/large mastaba chains.
     hvector<int, 64> part_ids;
     building *part = &main.base;
     while (part) {
@@ -166,7 +166,7 @@ bool apply_construction_blessing(building_monument &main, int budget) {
 
     sync_parts_to_main_phase(main);
 
-    const vec2i init_tiles = get_mastaba_params(BUILDING_SMALL_MASTABA).init_tiles;
+    const vec2i init_tiles = building_mastaba::get_params(BUILDING_SMALL_MASTABA).init_tiles;
     bool worked = false;
 
     while (budget > 0 && phase < cap) {
@@ -178,7 +178,7 @@ bool apply_construction_blessing(building_monument &main, int budget) {
         const bool was_site_prep = phase < CONSTRUCTION_BLESSING_FIRST_MASONRY_PHASE;
         const int old_phase = phase;
 
-        // Clear only once a bump is guaranteed (invariant: false ⇒ deliveries intact).
+        // Clear only once a bump is guaranteed (invariant: false â‡’ deliveries intact).
         if (!worked) {
             clear_deliveries_for_chain(main);
         }
