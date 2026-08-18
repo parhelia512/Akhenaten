@@ -207,37 +207,34 @@ void building_mastaba::finalize(building *b, const vec2i size_b) {
     }
 }
 
-void building_small_mastaba::update_day() {
+void building_mastaba::update_day() {
     building_impl::update_day();
 
     if (is_finished()) {
         return;
     }
 
-    building_mastaba::update_day(current_params().init_tiles);
+    // south/west placement can retarget base.type to *_SIDE (no init_tiles on part params).
+    update_construction_day(get_mastaba_params(type()).init_tiles);
 }
 
-bool building_small_mastaba::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
-    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, get_mastaba_params(BUILDING_SMALL_MASTABA).init_tiles);
+bool building_mastaba::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
+    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, get_mastaba_params(type()).init_tiles);
 }
 
 void building_mastaba::remove_worker(figure_id fid) {
-    auto &d = runtime_data();
-    for (auto &wid : d.workers) {
-        if (wid == fid) {
-            wid = 0;
-            return;
-        }
+    auto &w = runtime_data().workers;
+    auto it = std::find(w.begin(), w.end(), fid);
+    if (it != w.end()) {
+        *it = 0;
     }
 }
 
 void building_mastaba::add_workers(figure_id fid) {
-    auto &d = runtime_data();
-    for (auto &wid : d.workers) {
-        if (wid == 0) {
-            wid = fid;
-            return;
-        }
+    auto &w = runtime_data().workers;
+    auto it = std::find(w.begin(), w.end(), 0);
+    if (it != w.end()) {
+        *it = fid;
     }
 }
 
@@ -278,14 +275,7 @@ int building_mastaba::get_image(int orientation, tile2i tile, tile2i start, tile
 int building_small_mastabe_get_bricks_image(int orientation, e_building_type type, tile2i tile, tile2i start, tile2i end, int layer) {
     // Part types (wall/side/entrance) have no animations of their own — bricks live on the
     // main mastaba static params.
-    e_building_type bricks_type = type;
-    if (building_type_any_of(type, {BUILDING_SMALL_MASTABA_SIDE, BUILDING_SMALL_MASTABA_WALL, BUILDING_SMALL_MASTABA_ENTRANCE})) {
-        bricks_type = BUILDING_SMALL_MASTABA;
-    } else if (building_type_any_of(type, {BUILDING_MEDIUM_MASTABA_SIDE, BUILDING_MEDIUM_MASTABA_WALL, BUILDING_MEDIUM_MASTABA_ENTRANCE})) {
-        bricks_type = BUILDING_MEDIUM_MASTABA;
-    } else if (building_type_any_of(type, {BUILDING_LARGE_MASTABA_SIDE, BUILDING_LARGE_MASTABA_WALL, BUILDING_LARGE_MASTABA_ENTRANCE})) {
-        bricks_type = BUILDING_LARGE_MASTABA;
-    }
+    const e_building_type bricks_type = mastaba_main_type(type);
     int image_base_bricks = building_static_params::get(bricks_type).first_img("base_bricks");
 
     int image_id = image_base_bricks + (layer - 1) * 8 + 4;
@@ -596,7 +586,7 @@ bool building_mastaba::draw_ornaments_and_animations_hight_impl(painter &ctx, ve
     return true;
 }
 
-void building_mastaba::update_day(const vec2i tiles_size) {
+void building_mastaba::update_construction_day(const vec2i tiles_size) {
     auto &monumentd = runtime_data();
     if (monumentd.phase >= 8) {
         finalize(&base, tiles_size);
@@ -735,9 +725,9 @@ bool building_mastaba::target_route_tile_blocked(int grid_offset) const {
     return is_finished();
 }
 
-int building_small_mastaba::building_image_get() const {
+int building_mastaba::building_image_get() const {
     // Wall/side/entrance static params have no animations — art lives on the main type.
-    const int base = building_static_params::get(BUILDING_SMALL_MASTABA).base_img();
+    const int base = building_static_params::get(mastaba_main_type(type())).base_img();
     switch (runtime_data().phase) {
     case MONUMENT_START:
         return base;
@@ -746,14 +736,12 @@ int building_small_mastaba::building_image_get() const {
     }
 }
 
-grid_area building_small_mastaba::get_area() const {
-    tile2i main = tile();
-    tile2i end = main.shifted(3, 9);
-
-    return { main, end };
+grid_area building_mastaba::get_area() const {
+    building *m = base.main();
+    return { m->tile, mastaba_footprint_end(m) };
 }
 
-bool building_small_mastaba::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
+bool building_mastaba::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
     if (is_finished()) {
         return false;
     }
@@ -763,138 +751,19 @@ bool building_small_mastaba::draw_ornaments_and_animations_height(painter &ctx, 
         return false;
     }
 
-    auto &monumentd = runtime_data();
-    if (monumentd.phase < 2) {
+    if (runtime_data().phase < 2) {
         return false;
     }
 
-    // Parts have empty static params — always use the main mastaba footprint.
-    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, get_mastaba_params(BUILDING_SMALL_MASTABA).init_tiles);
+    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, get_mastaba_params(type()).init_tiles);
 }
 
-tile2i building_small_mastaba::center_point() const {
-    tile2i main = tile();
-    tile2i end = main.shifted(3, 9);
-    return main.add(end).div(2);
+tile2i building_mastaba::center_point() const {
+    grid_area area = get_area();
+    return area.tmin().add(area.tmax()).div(2);
 }
 
-tile2i building_small_mastaba::access_point() const {
-    return main()->tile().shifted(0, 10);
-}
-
-tile2i building_medium_mastaba::center_point() const {
-    tile2i main = tile();
-    tile2i end = main.shifted(5, 13);
-    return main.add(end).div(2);
-}
-
-int building_medium_mastaba::building_image_get() const {
-    const int base = building_static_params::get(BUILDING_MEDIUM_MASTABA).base_img();
-    switch (runtime_data().phase) {
-    case MONUMENT_START:
-        return base;
-    default:
-        return base + 1;
-    }
-    return 0;
-}
-
-grid_area building_medium_mastaba::get_area() const {
-    tile2i main = tile();
-    tile2i end =  main.shifted(5, 13);
-
-    return { main, end };
-}
-
-tile2i building_medium_mastaba::access_point() const {
-    return main()->tile().shifted(0, 14);
-}
-
-bool building_medium_mastaba::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
-    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, get_mastaba_params(BUILDING_MEDIUM_MASTABA).init_tiles);
-}
-
-bool building_medium_mastaba::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
-    if (is_finished()) {
-        return false;
-    }
-
-    if (city_flat_should_flatten_building(base)) {
-        return false;
-    }
-
-    auto &monumentd = runtime_data();
-    if (monumentd.phase < 2) {
-        return false;
-    }
-
-    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, get_mastaba_params(BUILDING_MEDIUM_MASTABA).init_tiles);
-}
-
-void building_medium_mastaba::update_day() {
-    building_impl::update_day();
-
-    if (is_finished()) {
-        return;
-    }
-
-    building_mastaba::update_day(current_params().init_tiles);
-}
-
-tile2i building_large_mastaba::center_point() const {
-    tile2i main = tile();
-    tile2i end = main.shifted(7, 17);
-    return main.add(end).div(2);
-}
-
-int building_large_mastaba::building_image_get() const {
-    const int base = building_static_params::get(BUILDING_LARGE_MASTABA).base_img();
-    switch (runtime_data().phase) {
-    case MONUMENT_START:
-        return base;
-    default:
-        return base + 1;
-    }
-}
-
-grid_area building_large_mastaba::get_area() const {
-    tile2i main = tile();
-    tile2i end = main.shifted(7, 17);
-
-    return { main, end };
-}
-
-tile2i building_large_mastaba::access_point() const {
-    return main()->tile().shifted(0, 18);
-}
-
-bool building_large_mastaba::draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) {
-    return draw_ornaments_and_animations_flat_impl(ctx, point, tile, mask, get_mastaba_params(BUILDING_LARGE_MASTABA).init_tiles);
-}
-
-bool building_large_mastaba::draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color color_mask) {
-    if (is_finished()) {
-        return false;
-    }
-
-    if (city_flat_should_flatten_building(base)) {
-        return false;
-    }
-
-    auto &monumentd = runtime_data();
-    if (monumentd.phase < 2) {
-        return false;
-    }
-
-    return draw_ornaments_and_animations_hight_impl(ctx, point, tile, color_mask, get_mastaba_params(BUILDING_LARGE_MASTABA).init_tiles);
-}
-
-void building_large_mastaba::update_day() {
-    building_impl::update_day();
-
-    if (is_finished()) {
-        return;
-    }
-
-    building_mastaba::update_day(current_params().init_tiles);
+tile2i building_mastaba::access_point() const {
+    // init_tiles is [height, width]; workers approach along the long axis from the NW origin.
+    return base.main()->tile.shifted(0, get_mastaba_params(type()).init_tiles.x);
 }

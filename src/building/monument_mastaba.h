@@ -25,6 +25,7 @@ public:
 
     virtual void on_create(int orientation) override;
     virtual void on_place(int orientation, int variant) override;
+    virtual void update_day() override;
     virtual void update_count() const override;
     virtual void update_month() override;
     virtual void update_map_orientation(int map_orientation) override;
@@ -32,6 +33,13 @@ public:
     virtual void bind_dynamic(io_buffer *iob, size_t version) override;
     virtual bool get_route_citizen_land_type(int grid_offset, int &land_result) const override;
     virtual bool target_route_tile_blocked(int grid_offset) const override;
+
+    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
+    virtual int building_image_get() const override;
+    virtual grid_area get_area() const override;
+    virtual tile2i center_point() const override;
+    virtual tile2i access_point() const override;
 
     struct base_params {
         // Large mastaba = 4×9 parts (36); keep headroom above medium's 21.
@@ -48,10 +56,6 @@ public:
 
     virtual const monument &config() const override;
 
-    bool draw_ornaments_and_animations_flat_impl(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
-    bool draw_ornaments_and_animations_hight_impl(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
-
-    void update_day(const vec2i tiles_size);
     virtual bool need_workers() const override;
 
     static void update_images(building *b, int curr_phase, const vec2i size_b);
@@ -60,6 +64,11 @@ public:
 
     virtual void remove_worker(figure_id fid) override;
     virtual void add_workers(figure_id fid) override;
+
+protected:
+    bool draw_ornaments_and_animations_flat_impl(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
+    bool draw_ornaments_and_animations_hight_impl(painter &ctx, vec2i point, tile2i tile, color mask, const vec2i tiles_size);
+    void update_construction_day(const vec2i tiles_size);
 };
 
 const building_mastaba::base_params &get_mastaba_params(e_building_type type);
@@ -72,16 +81,6 @@ public:
     struct static_params : public base_params, public building_static_params {
         void archive_load(archive arch);
     } BUILDING_STATIC_DATA_T;
-
-    virtual void update_day() override;
-    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
-    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
-    virtual int building_image_get() const override;
-    virtual grid_area get_area() const override;
-
-    virtual tile2i center_point() const override;
-    virtual tile2i access_point() const override;
-
 };
 ANK_CONFIG_STRUCT(building_small_mastaba::static_params,
     init_tiles, config_north, config_east, config_south, config_west, construction);
@@ -104,22 +103,11 @@ public:
 class building_medium_mastaba : public building_mastaba {
 public:
     BUILDING_METAINFO(BUILDING_MEDIUM_MASTABA, building_medium_mastaba, building_mastaba)
-
     virtual building_medium_mastaba *dcast_medium_mastaba() override { return this; }
 
     struct static_params : public base_params, public building_static_params {
         void archive_load(archive arch);
     } BUILDING_STATIC_DATA_T;
-
-    virtual void update_day() override;
-    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
-    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
-    virtual int building_image_get() const override;
-    virtual grid_area get_area() const override;
-
-    virtual tile2i center_point() const override;
-    virtual tile2i access_point() const override;
-
 };
 ANK_CONFIG_STRUCT(building_medium_mastaba::static_params,
     init_tiles, config_north, config_east, config_south, config_west, construction);
@@ -142,22 +130,11 @@ public:
 class building_large_mastaba : public building_mastaba {
 public:
     BUILDING_METAINFO(BUILDING_LARGE_MASTABA, building_large_mastaba, building_mastaba)
-
     virtual building_large_mastaba *dcast_large_mastaba() override { return this; }
 
     struct static_params : public base_params, public building_static_params {
         void archive_load(archive arch);
     } BUILDING_STATIC_DATA_T;
-
-    virtual void update_day() override;
-    virtual bool draw_ornaments_and_animations_flat(painter &ctx, vec2i point, tile2i tile, color mask) override;
-    virtual bool draw_ornaments_and_animations_height(painter &ctx, vec2i point, tile2i tile, color mask) override;
-    virtual int building_image_get() const override;
-    virtual grid_area get_area() const override;
-
-    virtual tile2i center_point() const override;
-    virtual tile2i access_point() const override;
-
 };
 ANK_CONFIG_STRUCT(building_large_mastaba::static_params,
     init_tiles, config_north, config_east, config_south, config_west, construction);
