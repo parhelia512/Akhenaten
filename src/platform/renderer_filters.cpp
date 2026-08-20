@@ -154,7 +154,14 @@ void platform_render_init_filters() {
 
     gpupixel::GPUPixelContext::initOpengl();
 
-    data.sourceImage = gpupixel::SourceImage::create_from_memory(0, 0, 4, nullptr);
+    // Create the source image with a non-zero size (1x1). A 0x0 source image
+    // would create a degenerate 0x0 framebuffer texture on startup, which Mesa
+    // rejects with GL_INVALID_VALUE (glTexImage2D/glFramebufferTexture2D) and
+    // left a stale error behind that gpupixel's CHECK_GL later misreported as
+    // its own "GL ERROR ... framebuffer.cc:41". The real dimensions are set
+    // later in platform_render_proceed_filter() -> sourceImage->init(w,h,...),
+    // so this placeholder only needs to be a valid texture.
+    data.sourceImage = gpupixel::SourceImage::create_from_memory(1, 1, 4, nullptr);
     if (!data.sourceImage) {
         logs::warn("GPU filters disabled: failed to initialize GPUPixel shaders");
         data.render_support_filters = false;
@@ -204,6 +211,51 @@ void platform_render_init_filters() {
     }
 
     data.sourceImage->addTarget(data.outputImage);
+}
+
+void platform_render_shutdown_filters() {
+    auto &data = g_renderer_filter;
+
+    if (!data.render_support_filters) {
+        return;
+    }
+
+    glGetError();
+
+    data.outputImage.reset();
+    data.sourceImage.reset();
+
+    data.bilaterial.reset();
+    data.grayscale.reset();
+    data.brightness.reset();
+    data.contrast.reset();
+    data.saturation.reset();
+    data.exposure.reset();
+    data.hue.reset();
+    data.colorInvert.reset();
+    data.posterize.reset();
+    data.gaussianBlur.reset();
+    data.boxBlur.reset();
+    data.beautyFace.reset();
+    data.blusher.reset();
+    data.boxDifference.reset();
+    data.boxMonoBlur.reset();
+    data.cannyEdgeDetection.reset();
+    data.crosshatch.reset();
+    data.emboss.reset();
+    data.faceReshape.reset();
+    data.glassSphere.reset();
+    data.halftone.reset();
+    data.lipstick.reset();
+    data.nonMaximumSuppression.reset();
+    data.pixellation.reset();
+    data.rgb.reset();
+    data.smoothToon.reset();
+    data.toon.reset();
+    data.weakPixelInclusion.reset();
+    data.whiteBalance.reset();
+
+    data.render_support_filters = false;
 }
 
 void game_debug_show_filter_property_float(gpupixel::FilterPtr filter, const char *name, const float step = 1.f) {
@@ -980,6 +1032,12 @@ bool platform_render_whiteBalance_options() {
 void platform_render_proceed_filter(int w, int h, int format, const std::vector<uint8_t>&pixels, std::vector<uint8_t> &output_pixels) {
     auto &data = g_renderer_filter;
 
+    // GPUPixel shares the SDL OpenGL context. SDL renderer calls (rendercopy,
+    // readpixels, ...) may leave an unread GL error behind; gpupixel's CHECK_GL
+    // would then misattribute that stale error to itself and spam bogus
+    // "GL ERROR" log lines. Clear the error state before gpupixel does any GL.
+    glGetError();
+
     data.sourceImage->init(w, h, SDL_BYTESPERPIXEL(format), (uint8_t *)pixels.data());
     data.sourceImage->proceed();
 
@@ -1145,6 +1203,7 @@ void config_load_filter_properties(bool header) {
 #else
 
 void platform_render_init_filters() {}
+void platform_render_shutdown_filters() {}
 bool platform_render_support_filters() { return false; }
 bool platform_render_any_filter_active() { return false; }
 void platform_render_proceed_filter(int w, int h, int format, const std::vector<uint8_t> &pixels, std::vector<uint8_t> &output_pixels) {}
