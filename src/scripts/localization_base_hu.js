@@ -163,7 +163,7 @@ localization_base_hu = [
     { group:8, id:2, text: "Személy" }
     { group:8, id:3, text: "Személyek" }
     { group:8, id:4, text: "Hónap" }
-    { group:8, id:5, text: "Hónapok" }
+    { group:8, id:5, text: "hónap" }
     { group:8, id:6, text: "Magtár" }
     { group:8, id:7, text: "Magtárak" }
     { group:8, id:8, text: "Év" }
@@ -2368,13 +2368,13 @@ localization_base_hu = [
 
     { group:59, id:0, text: "Templomok felügyelője" }
     { group:59, id:1, text: "Templomok" }
-    { group:59, id:2, text: "Templomkomplexumok" }
+    { group:59, id:2, text: "komplexumok" }
     { group:59, id:3, text: "Megbékítés" }
     { group:59, id:4, text: "N/A" }
     { group:59, id:5, text: "Templom" }
-    { group:59, id:6, text: "Hónapok" }
-    { group:59, id:7, text: "Fesztivál" }
-    { group:59, id:8, text: "óta" }
+    { group:59, id:6, text: "Fesztivál óta" }
+    { group:59, id:7, text: "hónapok" }
+    { group:59, id:8, text: "eltelt" }
     { group:59, id:9, text: "A lakosok kezdenek spirituális igényeket támasztani. A közeli imahelyek hiánya visszafogja a város fejlődését." }
     { group:59, id:10, text: "Egyre többen tartanak attól, hogy ha legalább egy imahely nincs a környékükön, az istenek megsértve érzik magukat." }
     { group:59, id:11, text: "A kifinomultabb lakosok egy másik vallás közeli elérhetőségét szeretnék. A vallási sokszínűség hiánya korlátozza a város fejlődését bizonyos területeken." }
@@ -2646,11 +2646,11 @@ localization_base_hu = [
     { group:62, id:8, text: "Gratulálunk!" }
     { group:62, id:9, text: "nem használt 2636 (demóüzenet)" }
     { group:62, id:10, text: "Célkitűzések" }
-    { group:62, id:11, text: "Népesség:" }
-    { group:62, id:12, text: "Kultúra értékelése:" }
-    { group:62, id:13, text: "Jólét értékelése:" }
-    { group:62, id:14, text: "Emlékmű értékelése:" }
-    { group:62, id:15, text: "Királyság értékelése:" }
+    { group:62, id:11, text: "Népesség" }
+    { group:62, id:12, text: "Kultúra értékelése" }
+    { group:62, id:13, text: "Jólét értékelése" }
+    { group:62, id:14, text: "Emlékmű értékelése" }
+    { group:62, id:15, text: "Királyság értékelése" }
     { group:62, id:16, text: "Milyen sötét véget ért egy ilyen fényes kezdet! Kudarccal gyalázatot hoztál Egyiptomra és őseidre, és beszennyezted még meg nem született utódaid nevét is. Csatlakozhattál volna azokhoz a kiválasztottakhoz, akik halhatatlanságot nyernek a Nádföldeken. Ehelyett siratatlanul a homályba távozol. Mások lépnek majd elő, hogy elfogadják a fáraó kihívását..." }
     { group:62, id:17, text: "Építs tűzoltóállomásokat" }
     { group:62, id:18, text: "Építs építészirodákat" }
@@ -3083,6 +3083,7 @@ localization_base_hu = [
     { group:68, id:132, text: "Kattints ide, hogy a problémás helyre ugorj" }
     { group:68, id:133, text: "Ajándék küldése Egyiptomnak" }
     { group:68, id:134, text: "Kattints ide a vállalat alapításának módosításához" }
+    { group:68, id:135, text: "Munkanélküliség" }
     { group:68, id:140, text: "Kattints ide a szállítóhajó parancsainak kiadásához" }
     { group:68, id:141, text: "Kattints ide a hadihajó parancsainak kiadásához" }
     { group:68, id:142, text: "Adókulcs" }
