@@ -30,8 +30,8 @@ figure_trader_info_window {
     }
 }
 
-[es=(figure_trader_info_window, draw_background)]
-function figure_trader_info_window_draw_background(window) {
+[es=(figure_trader_info_window, window_info_background)]
+function figure_trader_info_window_window_info_background(window) {
     var f = city.get_figure(__object_info_figure_id())
 
     window.name.text = f.name

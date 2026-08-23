@@ -28,6 +28,8 @@
 #include "game/game.h"
 #include "input/input.h"
 #include "window/window_advisors.h"
+#include "window/autoconfig_window.h"
+#include "graphics/elements/ui_js.h"
 #include "window/building/common.h"
 #include "window/building/figures.h"
 #include "window/building/terrain.h"
@@ -293,12 +295,17 @@ void window_figure_register_handler(common_info_window *handler) {
 }
 
 vec2i common_info_window::bgsize() const {
-    vec2i bgsize = ui["background"].pxsize() / 16; 
+    vec2i bgsize = ui["background"].pxsize() / 16;
     return bgsize;
 }
 
+void common_info_window::window_info_background(object_info &c) {
+    update_buttons(c);
+    ui.event(window_info{c.offset}, get_section(), __func__);
+}
+
 void common_info_window::window_info_foreground(object_info &c) {
-    ui.draw(); 
+    ui.draw();
 }
 
 void common_info_window::register_handlers() {

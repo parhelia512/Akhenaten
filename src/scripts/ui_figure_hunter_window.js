@@ -35,8 +35,8 @@ function figure_hunter_info_window_init(window) {
     window.items.text = figure_hunter_carrying_line_text(fid)
 }
 
-[es=(figure_hunter_info_window, draw_background)]
-function figure_hunter_info_window_draw_background(window) {
+[es=(figure_hunter_info_window, window_info_background)]
+function figure_hunter_info_window_window_info_background(window) {
     var f = city.get_figure(__object_info_figure_id())
 
     window.name.text = f.name

@@ -37,13 +37,6 @@ void figure_info_window::archive_load(archive arch) {
     arch.r("related_figures", related_figures);
 }
 
-void figure_info_window::window_info_background(object_info &c) {
-    common_info_window::window_info_background(c);
-
-    bvariant_map::scoped payload;
-    ui::dispatch_autoconfig_es_event(&ui, xstring("draw_background"), *payload);
-}
-
 void figure_info_window::init(object_info &c) {
     g_figure_info_thumbnails.clear();
     for (size_t i = 0; i < c.figure_ids.size(); ++i) {

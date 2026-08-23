@@ -12,7 +12,6 @@ struct figure_info_window : public common_info_window {
     using widget::archive_load;
     virtual void archive_load(archive arch) override;
 
-    virtual void window_info_background(object_info &c) override;
     virtual void window_info_foreground(object_info &c) override;
 
     virtual void init(object_info &c) override;

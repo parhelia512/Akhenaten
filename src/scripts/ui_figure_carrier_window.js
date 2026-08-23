@@ -97,8 +97,8 @@ function figure_carrier_info_window_init(window) {
     window.debug_stuck.text = figure_carrier_stuck_debug_text(fid)
 }
 
-[es=(figure_carrier_info_window, draw_background)]
-function figure_carrier_info_window_draw_background(window) {
+[es=(figure_carrier_info_window, window_info_background)]
+function figure_carrier_info_window_window_info_background(window) {
     var f = city.get_figure(__object_info_figure_id())
 
     window.name.text = f.name

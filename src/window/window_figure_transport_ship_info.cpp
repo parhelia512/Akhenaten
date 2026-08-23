@@ -55,7 +55,7 @@ void figure_transport_ship_info_window::init(object_info &c) {
 }
 
 void figure_transport_ship_info_window::window_info_background(object_info &c) {
-    figure_info_window::window_info_background(c);
+    common_info_window::window_info_background(c);
 
     figure_transport_ship *ship = c.figure_get<figure_transport_ship>();
     if (!ship) {

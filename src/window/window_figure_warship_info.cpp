@@ -75,7 +75,7 @@ void figure_warship_info_window::init(object_info &c) {
 }
 
 void figure_warship_info_window::window_info_background(object_info &c) {
-    figure_info_window::window_info_background(c);
+    common_info_window::window_info_background(c);
 
     figure_warship *f = c.figure_get<figure_warship>();
     if (!f) {

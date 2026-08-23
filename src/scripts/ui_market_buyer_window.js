@@ -43,8 +43,8 @@ function figure_market_buyer_window_on_select_figure(ev) {
     __object_info_select_figure(ev.param1)
 }
 
-[es=(figure_market_buyer_window, draw_background)]
-function figure_market_buyer_window_draw_background(window) {
+[es=(figure_market_buyer_window, window_info_background)]
+function figure_market_buyer_window_window_info_background(window) {
     var f = city.get_figure(__object_info_figure_id())
 
     window.name.text = f.name
