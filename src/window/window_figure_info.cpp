@@ -3,10 +3,8 @@
 #include "figure/figure.h"
 #include "graphics/window.h"
 #include "grid/figure.h"
-#include "game/game.h"
 #include "dev/debug.h"
 #include "window/building/figures.h"
-#include "widget/widget_figure_follow.h"
 #include "js/js_game.h"
 #include "js/js_struct.h"
 #include "graphics/elements/ui_js.h"
@@ -42,27 +40,8 @@ void figure_info_window::archive_load(archive arch) {
 void figure_info_window::window_info_background(object_info &c) {
     common_info_window::window_info_background(c);
 
-    figure *f = c.figure_get();
-
-    ui.format_all(f->dcast());
-
-    ui.check_errors = false;
-    ui["show_path"] = ( !!(f->draw_mode & e_figure_draw_routing) ? "P" : "p");
-
-    if (ui.contains("show_follow")) {
-        ui["show_follow"] = (figure_follow_enabled() && figure_follow_figure_id() == f->id) ? "F" : "f";
-    }
-
     bvariant_map::scoped payload;
     ui::dispatch_autoconfig_es_event(&ui, xstring("draw_background"), *payload);
-
-    e_overlay foverlay = f->dcast()->get_overlay();
-    ui["show_overlay"].enabled = (foverlay != OVERLAY_NONE);
-    ui["show_overlay"] = (g_city.overlay_is(foverlay) ? "V" : "v");
-}
-
-int figure_info_window::window_info_handle_mouse(const mouse *m, object_info &c) {
-    return 0;
 }
 
 void figure_info_window::init(object_info &c) {

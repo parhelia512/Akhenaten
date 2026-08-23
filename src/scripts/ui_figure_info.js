@@ -14,6 +14,38 @@ function figure_info_window_sync_tab_selection(window) {
     }
 }
 
+function figure_info_window_format_labels(window, f, opts) {
+    if (!f.valid) {
+        return
+    }
+
+    opts = opts || {}
+    window.name.text = f.name
+
+    if (opts.typename_with_home) {
+        window.typename.text = f.class_name + " ( @Y" + f.home + "& )"
+    } else if (opts.typename_with_city) {
+        window.typename.text = f.class_name + " @Y" + f.city_name + "&"
+    } else {
+        window.typename.text = f.class_name
+    }
+    window.action.text = "(" + f.action_tip + ")"
+    window.resource_text.text = f.action_tip
+}
+
+function figure_info_window_update_toolbar(window, f) {
+    if (!f.valid) {
+        return
+    }
+
+    window.show_path.text = (f.draw_mode & e_figure_draw_routing) ? "P" : "p"
+    var following = __figure_follow_enabled() && __figure_follow_figure_id() == f.id
+    window.show_follow.text = following ? "F" : "f"
+    var overlay = f.overlay
+    window.show_overlay.enabled = (overlay != OVERLAY_NONE)
+    window.show_overlay.text = (city.current_overlay == overlay) ? "V" : "v"
+}
+
 function figure_info_window_setup_tabs(window) {
     figure_info_window_sync_tab_selection(window)
     for (var i = 0; i < __object_info_figure_count(); i++) {
@@ -43,7 +75,11 @@ function figure_info_window_setup(window, figure_id) {
 }
 
 function figure_info_window_toggle_overlay(figure_id) {
-    var overlay = __figure_get_overlay(figure_id)
+    var f = city.get_figure(figure_id)
+    if (!f.valid) {
+        return
+    }
+    var overlay = f.overlay
     if (overlay == OVERLAY_NONE) {
         return
     }
@@ -85,6 +121,13 @@ function figure_info_window_on_init(window) {
 
 [es=(figure_info_window, draw_background)]
 function figure_info_window_on_draw_background(window) {
+    figure_info_window_draw_background(window)
+}
+
+function figure_info_window_draw_background(window, format_opts) {
+    var f = city.get_figure(__object_info_figure_id())
+    figure_info_window_format_labels(window, f, format_opts)
+    figure_info_window_update_toolbar(window, f)
     figure_info_window_sync_tab_selection(window)
 }
 
