@@ -334,7 +334,7 @@ public:
     int figure_spawn_timer();
     void check_labor_problem();
     void common_spawn_labor_seeker(int min_houses);
-    figure* common_spawn_goods_output_cartpusher(int min_carry = 100, int max_carry = 800);
+    figure* common_spawn_goods_output_cartpusher(int min_carry = 100, int max_carry = 100);
     bool workshop_has_resources();
 
     void force_damage(e_damage_type type, int16_t value);
