@@ -520,6 +520,14 @@ city.get_building_params_by_type = function(type) {
     return BuildingParams.for_type(type)
 }
 
+city.get_figure_params = function(figure_id) {
+    return FigureParams.for_type(__figure_get_type(figure_id))
+}
+
+city.get_figure_params_by_type = function(type) {
+    return FigureParams.for_type(type)
+}
+
 city.get_building = function(building_id) {
     return new Building(building_id)
 }

@@ -214,12 +214,6 @@ void __figure_info_set_help(int fid) {
 }
 ANK_FUNCTION_1(__figure_info_set_help)
 
-int __figure_get_overlay(int fid) {
-    figure *f = figure_get(fid);
-    return (f && f->is_valid()) ? (int)f->dcast()->get_overlay() : (int)OVERLAY_NONE;
-}
-ANK_FUNCTION_1(__figure_get_overlay)
-
 static js_Object *g_figure_proto = nullptr;
 
 static int figure_this_id(js_State *J) {
@@ -274,6 +268,12 @@ static void figure_proto___anim_key(js_State *J) {
     js_helpers::js_push_value(J, __figure_get_anim_key(figure_this_id(J)));
 }
 
+static void figure_proto___overlay(js_State *J) {
+    const int fid = figure_this_id(J);
+    figure *f = figure_get(fid);
+    js_helpers::js_push_value(J, f && f->is_valid() ? (int)f->dcast()->get_overlay() : (int)OVERLAY_NONE);
+}
+
 static void figure_proto_toString(js_State *J) {
     const int id = figure_this_id(J);
     figure *f = figure_get(id);
@@ -308,6 +308,7 @@ void js_register_figure(js_State *J) {
     jsB_propf(J, js_intern("Figure.prototype.__valid"), figure_proto___valid, 0);
     jsB_propf(J, js_intern("Figure.prototype.__is_on_previous_tile"), figure_proto___is_on_previous_tile, 0);
     jsB_propf(J, js_intern("Figure.prototype.__anim_key"), figure_proto___anim_key, 0);
+    jsB_propf(J, js_intern("Figure.prototype.__overlay"), figure_proto___overlay, 0);
     jsB_propf(J, js_intern("Figure.prototype.toString"), figure_proto_toString, 0);
 
     js_newcconstructor(J, jsB_new_Figure, jsB_new_Figure, js_intern("Figure"), 1);

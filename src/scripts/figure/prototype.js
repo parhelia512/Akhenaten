@@ -13,3 +13,5 @@ Figure.property.destination_id = { get: function() { return this.destination_bui
 Figure.property.destination = { get: function() { return city.get_building(this.destination_building_id) } }
 Figure.property.home = { get: function() { return city.get_building(this.home_building_id) } }
 Figure.property.anim_key = { get: function() { return this.__anim_key() } }
+Figure.property.overlay = { get: function() { return this.__overlay() } }
+Figure.property.params = { get: function() { return city.get_figure_params_by_type(this.type) } }
