@@ -118,6 +118,7 @@ localization_hu = [
   {key:"#bazaar_min_variety", text:"Min. malom-változatosság:"}
   {key:"#bazaar_waiting_mill_variety", text:"Várakozás a malom ételváltozatosságára."}
   {key:"#TR_CONFIG_ENHANCED_NILOMETER", text:"Enhanced: nilométer HUD (áradás minősége, fázis, ártér info)"}
+  {key:"#TR_CONFIG_ENHANCED_SHRINE_INFO", text:"Enhanced: szentély leíró szöveg az vizsgáló ablakban"}
   {key:"#flood_phase_imminent", text:"Áradás közelít"}
   {key:"#flood_phase_flooding", text:"Áradás"}
   {key:"#flood_phase_inundated", text:"Elárasztva"}

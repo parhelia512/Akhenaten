@@ -108,6 +108,7 @@ localization_de = [
   {key:"#bazaar_min_variety", text:"Min. Mühlenvielfalt:"}
   {key:"#bazaar_waiting_mill_variety", text:"Warte auf Nahrungssorten in der Mühle."}
   {key:"#TR_CONFIG_ENHANCED_NILOMETER", text:"Enhanced: Nilometer-HUD (Flutqualität, Phase, Auen-Info)"}
+  {key:"#TR_CONFIG_ENHANCED_SHRINE_INFO", text:"Enhanced: Schrein-Beschreibungstext im Untersuchungsfenster"}
   {key:"#flood_phase_imminent", text:"Flut steht bevor"}
   {key:"#flood_phase_flooding", text:"Hochwasser"}
   {key:"#flood_phase_inundated", text:"Überflutet"}

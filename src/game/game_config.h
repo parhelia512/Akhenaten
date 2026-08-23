@@ -167,6 +167,7 @@ namespace game_features {
     extern game_feature gameui_disable_nilometer_popups;
     extern game_feature gameui_enhanced_nilometer;
     extern game_feature gameui_building_mothball_button;
+    extern game_feature gameui_enhanced_shrine_info;
     extern game_feature gameui_prompt_save_on_exit;
     extern game_feature gameplay_pause_sim_while_building;
     extern game_feature gameplay_change_disaster_events_use_amount;

@@ -222,6 +222,7 @@ localization_en = [
   {key:"#TR_CONFIG_PREVENT_DELETE_NEAR_BURNING_RUINS", text:"Prevent deleting buildings near burning ruins"}
   {key:"#TR_CONFIG_DISABLE_NILOMETER_POPUPS", text:"Disable nilometer flood prediction pop-ups"}
   {key:"#TR_CONFIG_ENHANCED_NILOMETER", text:"Enhanced: nilometer HUD (flood quality, phase, floodplain info)"}
+  {key:"#TR_CONFIG_ENHANCED_SHRINE_INFO", text:"Enhanced: show shrine description text in examine window"}
   {key:"#flood_phase_imminent", text:"Flood imminent"}
   {key:"#flood_phase_flooding", text:"Flooding"}
   {key:"#flood_phase_inundated", text:"Inundated"}

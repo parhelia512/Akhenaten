@@ -95,6 +95,7 @@ game_features {
     @gameopt_game_speed {}
     @gameui_sidebar_info {}
     @gameui_building_mothball_button {}
+    @gameui_enhanced_shrine_info {}
     @gameui_prompt_save_on_exit {}
     @gameui_road_preview_in_map_order {}
     @gameui_enhanced_nilometer {}

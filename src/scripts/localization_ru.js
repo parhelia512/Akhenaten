@@ -120,6 +120,7 @@ localization_ru = [
     { key:"#bazaar_waiting_mill_variety", text:"Ждём разнообразия еды на мельнице."}
 
     { key:"#TR_CONFIG_ENHANCED_NILOMETER", text:"Enhanced: нилометр HUD (качество разлива, фаза, инфо поймы)"}
+    { key:"#TR_CONFIG_ENHANCED_SHRINE_INFO", text:"Enhanced: текст описания святилища в окне осмотра"}
     { key:"#flood_phase_imminent", text:"Разлив скоро"}
     { key:"#flood_phase_flooding", text:"Разлив"}
     { key:"#flood_phase_inundated", text:"Затоплено"}

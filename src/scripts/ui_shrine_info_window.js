@@ -44,8 +44,13 @@ function info_window_shrine_common_init(window) {
         window.god_image.image = img_id.tid
     }
 
-    window.title.text = __loc(161, title_id)
-    window.warning_text.text = __loc(161, text_id)
+    var show_text = game_features.gameui_enhanced_shrine_info
+    window.title.enabled = show_text
+    window.warning_text.enabled = show_text
+    if (show_text) {
+        window.title.text = __loc(161, title_id)
+        window.warning_text.text = __loc(161, text_id)
+    }
 }
 
 [es=(info_window_shrine, init)]
