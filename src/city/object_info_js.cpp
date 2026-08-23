@@ -10,7 +10,10 @@ ANK_GLOBAL_OBJECT(common_info_window::get_object_info(), __object_info,
     group_id,
     grid_offset,
     offset,
-    figure_selected_index);
+    figure_selected_index,
+    go_to_advisor_first,
+    go_to_advisor_left_a,
+    go_to_advisor_left_b);
 
 int __object_info_figure_count() {
     return (int)common_info_window::get_object_info().figure_ids.size();

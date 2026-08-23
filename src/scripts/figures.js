@@ -916,7 +916,7 @@ figure_embalmer {
 		embalmer_city_is_ok : {sound:"embalmer_g09.WAV"}
 		embalmer_city_is_the_best : {sound:"embalmer_g10.WAV"}
 	}
-	
+
 	category: figure_category_citizen
 	max_damage : 10
 	terrain_usage : TERRAIN_USAGE_ROADS

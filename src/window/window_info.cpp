@@ -103,7 +103,9 @@ void object_info::reset(tile2i tile) {
     grid_offset = tile.grid_offset();
     can_play_sound = true;
     storage_show_special_orders = 0;
-    go_to_advisor = {ADVISOR_NONE, ADVISOR_NONE, ADVISOR_NONE};
+    go_to_advisor_first = ADVISOR_NONE;
+    go_to_advisor_left_a = ADVISOR_NONE;
+    go_to_advisor_left_b = ADVISOR_NONE;
     bid = map_building_at(tile);
     terrain_type = terrain_info_empty;
     figure_drawn = 0;
@@ -323,7 +325,6 @@ object_info &common_info_window::get_object_info() {
 }
 
 void common_info_window::update_buttons(object_info &c) {
-    vec2i bgsize = ui["background"].pxsize();
     ui["button_help"].onclick([&c] {
         logs::info("window_info button_help invoked, help_link='%s' help_id=%d",
           c.help_link.empty() ? "<none>" : c.help_link.c_str(), c.help_id);
@@ -344,48 +345,6 @@ void common_info_window::update_buttons(object_info &c) {
             window_city_show();
         }
     });
-
-    if (!ui.contains("first_advisor")) {
-        return;
-    }
-
-    auto first_advisor = ui["first_advisor"].dcast_image_button();
-    if (first_advisor) {
-        first_advisor->enabled = c.go_to_advisor.first && g_city.is_advisor_available(c.go_to_advisor.first);
-        first_advisor->image((c.go_to_advisor.first - 1) * 3);
-        first_advisor->pos.y = bgsize.y - 40;
-        first_advisor->onclick([&c] {
-            events::emit(event_show_advisor{(e_advisor)c.go_to_advisor.first});
-        });
-    }
-
-    if (!ui.contains("second_advisor")) {
-        return;
-    }
-
-    auto second_advisor = ui["second_advisor"].dcast_image_button();
-    if (second_advisor) {
-        second_advisor->enabled = c.go_to_advisor.left_a && g_city.is_advisor_available(c.go_to_advisor.left_a);
-        second_advisor->image((c.go_to_advisor.left_a - 1) * 3);
-        second_advisor->pos.y = bgsize.y - 40;
-        second_advisor->onclick([&c] {
-            events::emit(event_show_advisor{(e_advisor)c.go_to_advisor.left_a});
-        });
-    }
-
-    if (!ui.contains("third_advisor")) {
-        return;
-    }
-
-    auto third_advisor = ui["third_advisor"].dcast_image_button();
-    if (third_advisor) {
-        third_advisor->enabled = c.go_to_advisor.left_b && g_city.is_advisor_available(c.go_to_advisor.left_b);
-        third_advisor->image((c.go_to_advisor.left_b - 1) * 3);
-        third_advisor->pos.y = bgsize.y - 40;
-        third_advisor->onclick([&c] {
-            events::emit(event_show_advisor{(e_advisor)c.go_to_advisor.left_b});
-        });
-    }
 }
 
 void common_info_window::archive_load(archive arch) {

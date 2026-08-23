@@ -22,7 +22,7 @@ taxcollector_info_window {
         workers_img   : image({pack:PACK_GENERAL, id:134, offset:14, pos:[30, 146] }),
         workers_text  : text({pos: [55, 150], text:"${building.num_workers} ${8.12} (${model.laborers} ${69.0}", font: FONT_NORMAL_BLACK_ON_DARK }),
         workers_desc  : text({pos: [55, 165], font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(24) }),
-        first_advisor : image_button({pos:[42, -1], size:[28, 28], pack:PACK_GENERAL, id:106 }),
+        first_advisor : image_button({pos:[42, -1], size:[28, 28], pack:PACK_GENERAL, id:106, param1:0, onclick_event:"show_advisor" }),
         show_overlay  : button({
                                 margin:{right:-64, bottom:-40}, size:[23, 23]
                                 textfn: building_info_window_text_overlay

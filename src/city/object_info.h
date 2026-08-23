@@ -62,11 +62,9 @@ struct object_info {
     common_info_window *ui = nullptr;
     terrain_info_type terrain_type;
 
-    struct {
-        e_advisor first = ADVISOR_NONE;
-        e_advisor left_a = ADVISOR_NONE;
-        e_advisor left_b = ADVISOR_NONE;
-    } go_to_advisor;
+    e_advisor go_to_advisor_first = ADVISOR_NONE;
+    e_advisor go_to_advisor_left_a = ADVISOR_NONE;
+    e_advisor go_to_advisor_left_b = ADVISOR_NONE;
 
     int storage_show_special_orders;
     uint8_t figure_selected_index = 0;

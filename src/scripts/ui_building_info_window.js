@@ -22,6 +22,34 @@ function building_info_window_toggle_mothball() {
     }
 }
 
+function building_info_window_advisors() {
+    var oi = city.object_info
+    return [oi.go_to_advisor_first, oi.go_to_advisor_left_a, oi.go_to_advisor_left_b]
+}
+
+function building_info_window_show_advisor(slot) {
+    var advisor = building_info_window_advisors()[slot]
+    if (advisor && city.is_advisor_available(advisor)) {
+        window_advisors_show_advisor(advisor)
+    }
+}
+
+function building_info_window_setup_advisors(window) {
+    var advisors = building_info_window_advisors()
+    var slots = ["first_advisor", "second_advisor", "third_advisor"]
+    for (var i = 0; i < slots.length; i++) {
+        var btn = window[slots[i]]
+        if (!btn) {
+            break
+        }
+        var advisor = advisors[i]
+        var show = advisor && city.is_advisor_available(advisor)
+        btn.enabled = !!show
+        var img = get_image({pack:PACK_GENERAL, id:106, offset: show ? (advisor - 1) * 3 : 0})
+        btn.image = img ? img.tid : 0
+    }
+}
+
 building_info_window {
     ui {
         background     : outer_panel({size: [29, 17]})
@@ -35,9 +63,9 @@ building_info_window {
                                             workers_desc : text({pos[50, 16 + 16], font: FONT_NORMAL_BLACK_ON_DARK,  multiline:true, wrap:px(24) })
                                         }
                                     })
-        first_advisor  : image_button({ pos[40, -1], size[28, 28], pack:PACK_GENERAL, id:106 })
-        second_advisor : image_button({ pos[65, -1], size[28, 28], pack:PACK_GENERAL, id:106 })
-        third_advisor  : image_button({ pos[96, -1], size[28, 28], pack:PACK_GENERAL, id:106 })
+        first_advisor  : image_button({ margin:{left:40, bottom:-40}, size[28, 28], pack:PACK_GENERAL, id:106, param1:0, onclick_event:"show_advisor" })
+        second_advisor : image_button({ margin:{left:65, bottom:-40}, size[28, 28], pack:PACK_GENERAL, id:106, param1:1, onclick_event:"show_advisor" })
+        third_advisor  : image_button({ margin:{left:96, bottom:-40}, size[28, 28], pack:PACK_GENERAL, id:106, param1:2, onclick_event:"show_advisor" })
 
         show_overlay   : button({
                                   margin{right:-64, bottom:-40}, size[23, 23]
@@ -55,6 +83,16 @@ building_info_window {
 
 
 // Child windows tagged [es=building_info_window] fall back to these handlers.
+[es=(building_info_window, window_info_background)]
+function building_info_window_on_window_info_background(window) {
+    building_info_window_setup_advisors(window)
+}
+
+[es=(building_info_window, show_advisor)]
+function building_info_window_on_show_advisor(ev) {
+    building_info_window_show_advisor(ev.param1)
+}
+
 [es=(building_info_window, show_overlay)]
 function building_info_window_on_show_overlay(window) {
     building_info_window_toggle_overlay()

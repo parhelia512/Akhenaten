@@ -309,9 +309,9 @@ info_window_entertainment {
         workers_img   : image({ pack:PACK_GENERAL, id:134, offset:14, pos[40, 126] })
         workers_text  : text({ pos[70, 124], text:"${building.num_workers} ${8.12} (${model.laborers} ${69.0}", font: FONT_NORMAL_BLACK_ON_DARK, multiline:true, wrap:px(24) }),
         workers_desc  : text({ pos[70, 124 + 20], font: FONT_NORMAL_BLACK_ON_DARK, wrap:px(24), multiline:true })
-        first_advisor : image_button({ pos[42, -1], size[28, 28], pack:PACK_GENERAL, id:106 })
-        second_advisor: image_button({ pos[64, -1], size[28, 28], pack:PACK_GENERAL, id:106 })
-        third_advisor : image_button({ pos[96, -1], size[28, 28], pack:PACK_GENERAL, id:106 })
+        first_advisor : image_button({ margin:{left:42, bottom:-40}, size[28, 28], pack:PACK_GENERAL, id:106, param1:0, onclick_event:"show_advisor" })
+        second_advisor: image_button({ margin:{left:64, bottom:-40}, size[28, 28], pack:PACK_GENERAL, id:106, param1:1, onclick_event:"show_advisor" })
+        third_advisor : image_button({ margin:{left:96, bottom:-40}, size[28, 28], pack:PACK_GENERAL, id:106, param1:2, onclick_event:"show_advisor" })
 
         show_overlay  : button({
                                 margin:{right:-64, bottom:-40}, size[23, 23]

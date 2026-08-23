@@ -52,7 +52,7 @@ info_window_storageyard {
         button_close  : close_button({}),
         mothball      : button({margin:{right:-90, bottom:-40}, size:[23, 23], textfn:building_info_window_text_mothball}),
 
-        first_advisor : image_button({margin:{left:40, bottom:-40}, size:[28, 28], pack:PACK_GENERAL, id:106 }),
+        first_advisor : image_button({margin:{left:40, bottom:-40}, size:[28, 28], pack:PACK_GENERAL, id:106, param1:0, onclick_event:"show_advisor" }),
     }
 }
 

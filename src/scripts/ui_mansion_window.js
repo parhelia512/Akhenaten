@@ -15,7 +15,7 @@ info_window_mansion {
         warning_text  : text({pos[32, 106], text:"${text.1}", wrap:px(27), font: FONT_NORMAL_BLACK_ON_LIGHT, multiline:true }),
         salary_info   : text({pos[32, 150], text:"${text.5}", font: FONT_NORMAL_BLACK_ON_LIGHT, wrap:px(25), multiline:true }),
 
-        first_advisor : image_button({pos[40, -1], size[28, 28], pack:PACK_GENERAL, id:106 }),
+        first_advisor : image_button({pos[40, -1], size[28, 28], pack:PACK_GENERAL, id:106, param1:0, onclick_event:"show_advisor" }),
 
         button_help   : help_button({})
         button_close  : close_button({})

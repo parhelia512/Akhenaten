@@ -205,16 +205,9 @@ void building_info_window::init(object_info &c) {
     window_message_setup_help_id(correct_help);
     c.help_link = correct_help;
 
-    c.go_to_advisor = {ADVISOR_NONE, ADVISOR_NONE, ADVISOR_NONE};
-    if (first_advisor != ADVISOR_NONE) {
-        c.go_to_advisor.first = first_advisor;
-    }
-    if (second_advisor != ADVISOR_NONE) {
-        c.go_to_advisor.left_a = second_advisor;
-    }
-    if (third_advisor != ADVISOR_NONE) {
-        c.go_to_advisor.left_b = third_advisor;
-    }
+    c.go_to_advisor_first = first_advisor;
+    c.go_to_advisor_left_a = second_advisor;
+    c.go_to_advisor_left_b = third_advisor;
 
     if (c.can_play_sound) {
         g_sound.speech_play_file(b->get_sound(), 255);
