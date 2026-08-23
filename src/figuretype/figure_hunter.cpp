@@ -9,6 +9,7 @@
 #include "city/city_figures.h"
 #include "city/city_recorded_paths.h"
 #include "core/random.h"
+#include "building/building_storage.h"
 #include "game/resource.h"
 #include "js/js_game.h"
 
@@ -221,6 +222,9 @@ void figure_hunter::figure_action() {
 
         base.target_figure_id = 0;
         if (animation().finished()) {
+            base.resource_id = RESOURCE_GAMEMEAT;
+            base.resource_amount_full = UNITS_PER_LOAD;
+            base.phrase_key = "";
             advance_action(ACTION_12_OSTRICH_HUNTER_MOVE_PACKED);
         }
         break;
@@ -259,7 +263,9 @@ void figure_hunter::figure_action() {
         if (animation().finished()) {
             building *h = home();
             if (h) {
-                h->store_resource(RESOURCE_GAMEMEAT, 100);
+                h->store_resource(RESOURCE_GAMEMEAT, UNITS_PER_LOAD);
+                base.resource_id = RESOURCE_NONE;
+                base.resource_amount_full = 0;
                 if (h->params().flags.keeps_visitor_paths) {
                     building *main = h->main();
                     if (main) {

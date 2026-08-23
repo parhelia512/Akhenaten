@@ -3,6 +3,8 @@
 #include "figuretype/figure_cartpusher.h"
 #include "figuretype/figure_storageyard_cart.h"
 #include "figuretype/figure_docker.h"
+#include "figure/figure_type.h"
+#include "game/resource.h"
 #include "window/building/figures.h"
 #include "graphics/image.h"
 #include "graphics/graphics.h"
@@ -13,8 +15,14 @@ struct figure_carrier_info_window : public figure_info_window_t<figure_carrier_i
     virtual void init(object_info &c) override;
     virtual bool check(object_info &c) override {
         figure *f = c.figure_get();
-        if (!f) return false;
-        return f->type == FIGURE_CART_PUSHER || f->type == FIGURE_STORAGEYARD_CART || f->type == FIGURE_DOCKER;
+        if (!f) {
+            return false;
+        }
+        if (f->type == FIGURE_CART_PUSHER || f->type == FIGURE_STORAGEYARD_CART || f->type == FIGURE_DOCKER) {
+            return true;
+        }
+        return (f->type == FIGURE_OSTRICH_HUNTER || f->type == FIGURE_ANTELOPE_HUNTER || f->type == FIGURE_BIRDS_HUNTER)
+            && f->resource_id == RESOURCE_GAMEMEAT && f->resource_amount_full > 0;
     }
 };
 
@@ -38,7 +46,7 @@ void figure_carrier_info_window::init(object_info &c) {
     if (f->base.movement_ticks_watchdog > 0 || f->base.direction == DIR_FIGURE_CAN_NOT_REACH) {
         pcstr stuck_reason = "";
         pcstr action_name = "";
-        
+
         // Determine stuck reason
         if (f->base.direction == DIR_FIGURE_REROUTE) {
             stuck_reason = "Rerouting...";
@@ -49,7 +57,7 @@ void figure_carrier_info_window::init(object_info &c) {
         } else if (f->base.tile == f->base.previous_tile) {
             stuck_reason = "Blocked - no movement";
         }
-        
+
         // Determine current action
         switch (f->action_state()) {
             case ACTION_8_RECALCULATE: action_name = "Recalculating route"; break;
@@ -67,8 +75,8 @@ void figure_carrier_info_window::init(object_info &c) {
             case ACTION_57_CARTPUSHER_GETTING_RESOURCE: action_name = "Getting resource"; break;
             default: action_name = "Unknown action"; break;
         }
-        
-        ui["debug_stuck"].text_var("STUCK: Watchdog=%u | %s | %s", 
+
+        ui["debug_stuck"].text_var("STUCK: Watchdog=%u | %s | %s",
             f->base.movement_ticks_watchdog, action_name, stuck_reason);
     }
 
