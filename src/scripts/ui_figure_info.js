@@ -7,7 +7,27 @@ def_object_info {
                            ]
 }
 
+function figure_info_window_sync_tab_selection(window) {
+    for (var i = 0; i < __object_info_figure_count(); i++) {
+        var btn = window["button_figure" + i]
+        btn.selected = (i == city.object_info.figure_selected_index)
+    }
+}
+
+function figure_info_window_setup_tabs(window) {
+    figure_info_window_sync_tab_selection(window)
+    for (var i = 0; i < __object_info_figure_count(); i++) {
+        var btn = window["button_figure" + i]
+        if (!btn) {
+            break
+        }
+        btn.texture_id = __figure_info_tab_texture(i)
+    }
+}
+
 function figure_info_window_setup(window, figure_id) {
+    figure_info_window_setup_tabs(window)
+
     var f = city.get_figure(figure_id)
     if (!f.valid) {
         return
@@ -41,13 +61,13 @@ figure_info_window {
         typename       : text({pos [92, 139], text:"${figure.class_name}", font : FONT_NORMAL_BLACK_ON_DARK })
         phrase         : text({pos [90, 160], font : FONT_NORMAL_BLACK_ON_DARK, wrap:px(21), multiline:true })
 
-        button_figure0 : image_button({pos[60 * 0 + 27, 45], size[52, 52], border:true })
-        button_figure1 : image_button({pos[60 * 1 + 27, 45], size[52, 52], border:true })
-        button_figure2 : image_button({pos[60 * 2 + 27, 45], size[52, 52], border:true })
-        button_figure3 : image_button({pos[60 * 3 + 27, 45], size[52, 52], border:true })
-        button_figure4 : image_button({pos[60 * 4 + 27, 45], size[52, 52], border:true })
-        button_figure5 : image_button({pos[60 * 5 + 27, 45], size[52, 52], border:true })
-        button_figure6 : image_button({pos[60 * 6 + 27, 45], size[52, 52], border:true })
+        button_figure0 : image_button({pos[60 * 0 + 27, 45], size[52, 52], border:true, param1:0, onclick_event:"select_figure" })
+        button_figure1 : image_button({pos[60 * 1 + 27, 45], size[52, 52], border:true, param1:1, onclick_event:"select_figure" })
+        button_figure2 : image_button({pos[60 * 2 + 27, 45], size[52, 52], border:true, param1:2, onclick_event:"select_figure" })
+        button_figure3 : image_button({pos[60 * 3 + 27, 45], size[52, 52], border:true, param1:3, onclick_event:"select_figure" })
+        button_figure4 : image_button({pos[60 * 4 + 27, 45], size[52, 52], border:true, param1:4, onclick_event:"select_figure" })
+        button_figure5 : image_button({pos[60 * 5 + 27, 45], size[52, 52], border:true, param1:5, onclick_event:"select_figure" })
+        button_figure6 : image_button({pos[60 * 6 + 27, 45], size[52, 52], border:true, param1:6, onclick_event:"select_figure" })
 
         button_help    : help_button({})
         button_close   : close_button({})
@@ -63,9 +83,19 @@ function figure_info_window_on_init(window) {
     figure_info_window_setup(window, window.figure_id)
 }
 
+[es=(figure_info_window, draw_background)]
+function figure_info_window_on_draw_background(window) {
+    figure_info_window_sync_tab_selection(window)
+}
+
+[es=(figure_info_window, select_figure)]
+function figure_info_window_on_select_figure(ev) {
+    __object_info_select_figure(ev.param1)
+}
+
 [es=(figure_info_window, show_path)]
 function figure_info_window_on_show_path(window) {
-    var f = city.get_figure(__city_object_info_figure_id())
+    var f = city.get_figure(__object_info_figure_id())
     if (!f.valid) {
         return
     }
@@ -74,10 +104,10 @@ function figure_info_window_on_show_path(window) {
 
 [es=(figure_info_window, show_overlay)]
 function figure_info_window_on_show_overlay(window) {
-    figure_info_window_toggle_overlay(__city_object_info_figure_id())
+    figure_info_window_toggle_overlay(__object_info_figure_id())
 }
 
 [es=(figure_info_window, show_follow)]
 function figure_info_window_on_show_follow(window) {
-    __figure_follow_start(__city_object_info_figure_id())
+    __figure_follow_start(__object_info_figure_id())
 }

@@ -573,6 +573,20 @@ void ui::proxy_set_image_tid(js_State* J) {
     J->pushundefined();
 }
 
+void ui::proxy_get_texture_id(js_State* J) {
+    auto elem = GET_ELEM(J);
+    auto btn = elem ? elem->dcast_image_button() : nullptr;
+    js_pushnumber(J, btn ? btn->texture_id : -1);
+}
+
+void ui::proxy_set_texture_id(js_State* J) {
+    auto elem = GET_ELEM(J);
+    if (auto btn = elem ? elem->dcast_image_button() : nullptr) {
+        btn->texture_id = (int)js_tonumber(J, 1);
+    }
+    J->pushundefined();
+}
+
 void ui::proxy_get_selected(js_State* J) {
     auto elem = GET_ELEM(J);
     js_pushboolean(J, elem ? elem->selected() : false);

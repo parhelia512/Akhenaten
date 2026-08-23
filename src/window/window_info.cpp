@@ -104,13 +104,13 @@ void object_info::reset(tile2i tile) {
     go_to_advisor = {ADVISOR_NONE, ADVISOR_NONE, ADVISOR_NONE};
     bid = map_building_at(tile);
     terrain_type = terrain_info_empty;
-    nfigure.drawn = 0;
+    figure_drawn = 0;
     help_id = 0;
     help_link = {};
 }
 
 figure *object_info::figure_get() {
-    int figure_id = nfigure.ids[nfigure.selected_index];
+    int figure_id = figure_ids[figure_selected_index];
     return ::figure_get(figure_id);
 }
 
@@ -137,11 +137,11 @@ void window_info_update(bool avoid_mouse) {
 
     // Own company figures (standard / soldiers) open battalion orders, not the
     // generic figure panel — must run before figure handlers claim the tile.
-    if (!context.nfigure.ids.empty() && batalion_infow.check(context)) {
+    if (!context.figure_ids.empty() && batalion_infow.check(context)) {
         context.ui = &batalion_infow;
     }
 
-    if (!context.nfigure.ids.empty()) {
+    if (!context.figure_ids.empty()) {
         find_handler(*g_window_figure_handlers, context);
         if (!context.ui) {
             context.ui = &figure_common_window;

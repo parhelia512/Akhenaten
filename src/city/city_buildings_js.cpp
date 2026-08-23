@@ -201,12 +201,6 @@ bvariant __map_grid_get_area(tile2i tile, int size, int radius) {
 }
 ANK_FUNCTION_3(__map_grid_get_area)
 
-std::optional<bvariant> __city_get_object_info_property(pcstr property) {
-    const object_info& o = common_info_window::get_object_info();
-    return archive_helper::get(o, property, true);
-}
-ANK_FUNCTION_1(__city_get_object_info_property)
-
 int __city_get_random_building_id_by_type(int type) { return building_id_random((e_building_type)type); }
 ANK_FUNCTION_1(__city_get_random_building_id_by_type)
 

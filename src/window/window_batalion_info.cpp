@@ -242,7 +242,7 @@ bool batalion_info_window::check(object_info &c) {
     // Fort buildings use info_window_fort. Company orders open when the player
     // right-clicks the standard bearer or any soldier in an own battalion
     // (same routing as Julius BUILDING_INFO_LEGION).
-    if (c.nfigure.ids.empty()) {
+    if (c.figure_ids.empty()) {
         return false;
     }
 

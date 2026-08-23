@@ -85,7 +85,7 @@ function info_window_storageyard_on_init(window) {
 
 [es=(info_window_storageyard, init)]
 function storage_yard_info_on_init_workers_info(window) {
-    var grp = city.object_info.group
+    var grp = city.object_info.group_id
     var b = city.get_building(window.bid)
     var fig = b.get_figure(BUILDING_SLOT_SERVICE)
 

@@ -10,6 +10,8 @@ city {
     @num_enemy_formations { get: __enemy_army_total_enemy_formations }
     @current_overlay { get: __city_get_current_overlay, set: __city_set_current_overlay }
 
+    object_info: __object_info
+
     enemy_army_achieved_destroy_goal : __enemy_army_achieved_destroy_goal
 
     figures {
@@ -121,14 +123,6 @@ city {
         @newcomers { }
         @percentage { }
         @no_immigration_cause { }
-    }
-
-    object_info {
-        __property_getter: __city_get_object_info_property
-        @building_id { }
-        @bid { }
-        @group { }
-        @offset { }
     }
 
     warnings {

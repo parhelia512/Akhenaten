@@ -19,8 +19,6 @@ struct figure_info_window : public common_info_window {
     virtual void init(object_info &c) override;
     virtual bool check(object_info &c) override;
     figure *figure_get(object_info &c);
-
-    void prepare_figures(object_info &c);
 };
 
 template<typename T>

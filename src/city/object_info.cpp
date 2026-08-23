@@ -8,14 +8,9 @@ declare_console_var_int(fill_figure_radius, 30);
 
 const terrain_info_type_tokens_t terrain_info_type_tokens;
 
-figure *object_info::nfigure_t::get() const {
-    const figure_id fid = ids[selected_index];
-    return ::figure_get(fid);
-}
-
 void object_info::fill_figures_info(tile2i center) {
-    nfigure.selected_index = 0;
-    nfigure.ids.clear();
+    figure_selected_index = 0;
+    figure_ids.clear();
     vec2i center_pos = g_camera.lookup_tile_to_pixel(center) + vec2i{ HALF_TILE_WIDTH_PIXELS, HALF_TILE_HEIGHT_PIXELS };
 
     grid_tiles tiles = map_grid_get_tiles(center.shifted(-1, -1), center.shifted(1, 1));
@@ -44,7 +39,7 @@ void object_info::fill_figures_info(tile2i center) {
         return lhsa_sq < rhsa_sq;
     });
 
-    for (int i = 0, size = std::min<int>(nfigure.ids.capacity(), possible_figures.size()); i < size;  ++i) {
-        nfigure.ids.push_back(possible_figures[i]->id);
+    for (int i = 0, size = std::min<int>(figure_ids.capacity(), possible_figures.size()); i < size;  ++i) {
+        figure_ids.push_back(possible_figures[i]->id);
     }
 }

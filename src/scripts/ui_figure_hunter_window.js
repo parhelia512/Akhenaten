@@ -30,7 +30,7 @@ figure_hunter_info_window {
 
 [es=(figure_hunter_info_window, init)]
 function figure_hunter_info_window_init(window) {
-    var fid = __city_object_info_figure_id()
+    var fid = __object_info_figure_id()
     figure_info_window_setup(window, fid)
     window.items.text = figure_hunter_carrying_line_text(fid)
 }

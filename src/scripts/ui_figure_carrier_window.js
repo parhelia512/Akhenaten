@@ -91,7 +91,7 @@ figure_carrier_info_window {
 
 [es=(figure_carrier_info_window, init)]
 function figure_carrier_info_window_init(window) {
-    var fid = __city_object_info_figure_id()
+    var fid = __object_info_figure_id()
     figure_info_window_setup(window, fid)
     window.items.text = figure_carrier_carrying_line_text(fid)
     window.debug_stuck.text = figure_carrier_stuck_debug_text(fid)

@@ -115,11 +115,6 @@ int __figure_get_resource_amount(int fid) {
 }
 ANK_FUNCTION_1(__figure_get_resource_amount)
 
-int __city_object_info_figure_id() {
-    return common_info_window::get_object_info().figure_get_id();
-}
-ANK_FUNCTION(__city_object_info_figure_id)
-
 int __figure_get_direction(int fid) {
     if (!fid) {
         return 0;

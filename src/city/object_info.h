@@ -52,8 +52,6 @@ class building;
 struct object_info {
     vec2i offset;
     vec2i bgsize;
-    inline vec2i bgsize_px() const { return bgsize * 16; }
-    inline int bgwidth_px() const { return bgsize.x * 16; }
     svector<e_figure_type, 16> forbidden_figure_types;
     int grid_offset = 0;
     int help_id;
@@ -71,18 +69,14 @@ struct object_info {
     } go_to_advisor;
 
     int storage_show_special_orders;
-    struct nfigure_t {
-        uint8_t selected_index;
-        bool drawn;
-        svector<figure_id, 7> ids;
-        figure *get() const;
-    } nfigure;
+    uint8_t figure_selected_index = 0;
+    bool figure_drawn = false;
+    svector<figure_id, 7> figure_ids;
 
     void reset(tile2i tile);
     void fill_figures_info(tile2i tile);
     figure *figure_get();
-    int figure_get_id() const { return nfigure.ids.empty() ? 0 : nfigure.ids[nfigure.selected_index]; }
-    //bool figure_phrase_valid() const { return nfigure.phrase.valid(); }
+    int figure_get_id() const { return figure_ids.empty() ? 0 : figure_ids[figure_selected_index]; }
     building *building_get();
 
     template<typename T>
