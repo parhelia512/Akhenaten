@@ -193,12 +193,12 @@ window_scenario_selection_campaign {
 }
 
 [es=(window_scenario_selection_campaign, select_period)]
-function window_scenario_selection_campaign_on_select_period(window, ev) {
+function window_scenario_selection_campaign_on_select_period(ev) {
     campaign_period_set_selected(Math.round(ev.param1))
 }
 
 [es=(window_scenario_selection_campaign, hover_period)]
-function window_scenario_selection_campaign_on_hover_period(window, ev) {
+function window_scenario_selection_campaign_on_hover_period(ev) {
     window_scenario_selection_campaign.period_hover = Math.round(ev.param1)
     emit window_scenario_selection_campaign.period_changed { index: Math.round(ev.param1) }
 }
