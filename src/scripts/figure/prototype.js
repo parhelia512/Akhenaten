@@ -5,6 +5,10 @@ log_info("akhenaten: figure_prototype.js loaded")
    resource_id, resource_amount_full, draw_mode: native CPTROFF (js_register_figure). */
 
 Figure.property.valid = { get: function() { return this.__valid() } }
+Figure.property.name = { }
+Figure.property.class_name = { }
+Figure.property.city_name = { }
+Figure.property.action_tip = { }
 Figure.property.resource = { get: function() { return this.resource_id } }
 Figure.property.resource_amount = { get: function() { return this.resource_amount_full } }
 Figure.property.movement_watchdog = { get: function() { return this.movement_ticks_watchdog } }

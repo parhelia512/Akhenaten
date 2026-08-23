@@ -10,8 +10,19 @@ def_object_info {
 function figure_info_window_sync_tab_selection(window) {
     for (var i = 0; i < __object_info_figure_count(); i++) {
         var btn = window["button_figure" + i]
+        if (!btn) {
+            break
+        }
         btn.selected = (i == city.object_info.figure_selected_index)
     }
+}
+
+function figure_info_home_label(f) {
+    var b = city.get_building(f.home_building_id)
+    if (!b || !b.valid) {
+        return ""
+    }
+    return __loc(41, b.type)
 }
 
 function figure_info_window_format_labels(window, f, opts) {
@@ -20,17 +31,24 @@ function figure_info_window_format_labels(window, f, opts) {
     }
 
     opts = opts || {}
-    window.name.text = f.name
-
-    if (opts.typename_with_home) {
-        window.typename.text = f.class_name + " ( @Y" + f.home + "& )"
-    } else if (opts.typename_with_city) {
-        window.typename.text = f.class_name + " @Y" + f.city_name + "&"
-    } else {
-        window.typename.text = f.class_name
+    if (window.name) {
+        window.name.text = f.name
     }
-    window.action.text = "(" + f.action_tip + ")"
-    window.resource_text.text = f.action_tip
+    if (window.typename) {
+        if (opts.typename_with_home) {
+            window.typename.text = f.class_name + " ( @Y" + figure_info_home_label(f) + "& )"
+        } else if (opts.typename_with_city) {
+            window.typename.text = f.class_name + " @Y" + f.city_name + "&"
+        } else {
+            window.typename.text = f.class_name
+        }
+    }
+    if (window.action) {
+        window.action.text = "(" + f.action_tip + ")"
+    }
+    if (window.resource_text) {
+        window.resource_text.text = f.action_tip
+    }
 }
 
 function figure_info_window_update_toolbar(window, f) {
@@ -38,12 +56,18 @@ function figure_info_window_update_toolbar(window, f) {
         return
     }
 
-    window.show_path.text = (f.draw_mode & e_figure_draw_routing) ? "P" : "p"
-    var following = __figure_follow_enabled() && __figure_follow_figure_id() == f.id
-    window.show_follow.text = following ? "F" : "f"
-    var overlay = f.overlay
-    window.show_overlay.enabled = (overlay != OVERLAY_NONE)
-    window.show_overlay.text = (city.current_overlay == overlay) ? "V" : "v"
+    if (window.show_path) {
+        window.show_path.text = (f.draw_mode & e_figure_draw_routing) ? "P" : "p"
+    }
+    if (window.show_follow) {
+        var following = __figure_follow_enabled() && __figure_follow_figure_id() == f.id
+        window.show_follow.text = following ? "F" : "f"
+    }
+    if (window.show_overlay) {
+        var overlay = f.overlay
+        window.show_overlay.enabled = (overlay != OVERLAY_NONE)
+        window.show_overlay.text = (city.current_overlay == overlay) ? "V" : "v"
+    }
 }
 
 function figure_info_window_setup_tabs(window) {
