@@ -36,7 +36,9 @@ public:
 class figure_cartpusher : public figure_carrier {
 public:
     FIGURE_METAINFO(FIGURE_CART_PUSHER, figure_cartpusher)
-    figure_cartpusher(figure *f) : figure_carrier(f) {}
+    figure_cartpusher(figure *f) : figure_carrier(f) {
+        runtime_data().movement_check_progress = 255;
+    }
 
     virtual figure_cartpusher *dcast_cartpusher() override { return this; }
 
@@ -44,8 +46,13 @@ public:
         uint8_t wait_on_calculate_destination;
     } FIGURE_STATIC_DATA_T;
 
+    struct runtime_data_t {
+        uint8_t movement_check_progress;
+    } FIGURE_RUNTIME_DATA_T;
+
     virtual void figure_before_action() override;
     virtual void figure_action() override;
+    virtual void update_animation() override;
     virtual sound_key phrase_key() const override;
     virtual bool can_move_by_water() const override;
 

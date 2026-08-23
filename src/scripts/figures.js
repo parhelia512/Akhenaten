@@ -1125,6 +1125,7 @@ figure_cartpusher {
 	animations {
 		_pack { pack:PACK_SPR_MAIN }
 		walk { id:43, max_frames:12 }
+		idle { id:43, max_frames:1, loop:false }
 		death { id:44, max_frames:8, loop:false }
 		swim { id:138, max_frames:4, duration:4 }
 		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_CART_PUSHER }
@@ -1239,6 +1240,7 @@ figure_tomb_artisan {
 figure_storageyard_cart = {
 	animations : {
 		walk : { pack: PACK_SPR_MAIN, id:43, max_frames:12 }
+		idle : { pack: PACK_SPR_MAIN, id:43, max_frames:1, loop:false }
 		death : { pack: PACK_SPR_MAIN, id:44, max_frames:8, loop:false }
 		swim : { pack:PACK_SPR_MAIN, id:138, max_frames:4, duration:4 }
 		big_image : { pack:PACK_UNLOADED, id:25, offset:FIGURE_STORAGEYARD_CART }

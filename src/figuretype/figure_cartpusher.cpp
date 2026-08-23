@@ -582,6 +582,30 @@ bool figure_cartpusher::can_move_by_water() const {
     return map_terrain_is(tile(), TERRAIN_FERRY_ROUTE);
 }
 
+void figure_cartpusher::update_animation() {
+    if (action_state() == FIGURE_ACTION_149_CORPSE) {
+        image_set_animation(animkeys().death);
+        return;
+    }
+
+    auto &d = runtime_data();
+    const bool first_tick = d.movement_check_progress == 255;
+    const bool moved = !first_tick && base.progress_on_tile != d.movement_check_progress;
+    const bool on_water = map_terrain_is(tile(), TERRAIN_WATER);
+
+    xstring animkey;
+    if (!moved) {
+        animkey = animkeys().idle;
+    } else if (on_water) {
+        animkey = animkeys().swim;
+    } else {
+        animkey = animkeys().walk;
+    }
+
+    image_set_animation(animkey);
+    d.movement_check_progress = base.progress_on_tile;
+}
+
 sound_key figure_cartpusher::phrase_key() const {
     if (action_state(ACTION_8_RECALCULATE)) {
         return "cartpusher_no_found_destination";
