@@ -50,6 +50,7 @@ enemy_attack_rules = {
 // Generic enemy transport (FIGURE_ENEMY_TRANSPORT = 92). Fallback when a nation
 // has no dedicated transport enum / console spawn.
 figure_enemy_transport_generic = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_HITTITE, id:7, max_frames:4 }
         death : { pack:PACK_ENEMY_HITTITE, id:8, max_frames:11, loop:false }
@@ -69,6 +70,7 @@ figure_enemy_transport_generic = {
 // Generic enemy warship (FIGURE_ENEMY_WARSHIP = 93). Fallback for barbarian /
 // console spawn when a nation has no dedicated warship enum.
 figure_enemy_warship_generic = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_HITTITE, id:10, max_frames:4 }
         death : { pack:PACK_ENEMY_HITTITE, id:11, max_frames:11, loop:false }
@@ -87,6 +89,7 @@ figure_enemy_warship_generic = {
 
 // barbarian
 figure_barbarian_archer = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_BARBARIAN, id:0, max_frames:12 }
         death : { pack:PACK_ENEMY_BARBARIAN, id:1, max_frames:8, loop:false }
@@ -109,6 +112,7 @@ figure_barbarian_archer = {
 }
 
 figure_barbarian_sword = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_BARBARIAN, id:3, max_frames:12 }
         death : { pack:PACK_ENEMY_BARBARIAN, id:4, max_frames:8, loop:false }
@@ -129,6 +133,7 @@ figure_barbarian_sword = {
 
 // Barbarian pack has no ship sprites — Hittite transport fallback (E3b).
 figure_barbarian_transport_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_HITTITE, id:7, max_frames:4 }
         death : { pack:PACK_ENEMY_HITTITE, id:8, max_frames:11, loop:false }
@@ -156,6 +161,7 @@ enemy_barbarian = {
 
 // assyrian
 figure_assyrian_archer = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_ASSYRIAN, id:0, max_frames:12 }
         death : { pack:PACK_ENEMY_ASSYRIAN, id:1, max_frames:8, loop:false }
@@ -179,6 +185,7 @@ figure_assyrian_archer = {
 }
 
 figure_assyrian_sword = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_ASSYRIAN, id:4, max_frames:12 }
         death : { pack:PACK_ENEMY_ASSYRIAN, id:5, max_frames:8, loop:false }
@@ -197,6 +204,7 @@ figure_assyrian_sword = {
 }
 
 figure_assyrian_transport_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_ASSYRIAN, id:7, max_frames:4 }
         death : { pack:PACK_ENEMY_ASSYRIAN, id:8, max_frames:11, loop:false }
@@ -214,6 +222,7 @@ figure_assyrian_transport_ship = {
 }
 
 figure_assyrian_war_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_ASSYRIAN, id:10, max_frames:4 }
         death : { pack:PACK_ENEMY_ASSYRIAN, id:11, max_frames:11, loop:false }
@@ -231,6 +240,7 @@ figure_assyrian_war_ship = {
 }
 
 figure_assyrian_chariot = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_ASSYRIAN, id:13, max_frames:12 }
         death : { pack:PACK_ENEMY_ASSYRIAN, id:14, max_frames:12, loop:false }
@@ -260,6 +270,7 @@ enemy_assyrian = {
 
 // canaanite
 figure_canaanite_archer = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_CANAANITE, id:0, max_frames:12 }
         death : { pack:PACK_ENEMY_CANAANITE, id:1, max_frames:8, loop:false }
@@ -283,6 +294,7 @@ figure_canaanite_archer = {
 }
 
 figure_canaanite_sword = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_CANAANITE, id:4, max_frames:12 }
         death : { pack:PACK_ENEMY_CANAANITE, id:5, max_frames:8, loop:false }
@@ -301,6 +313,7 @@ figure_canaanite_sword = {
 }
 
 figure_canaanite_transport_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_CANAANITE, id:0, max_frames:4 }
         death : { pack:PACK_ENEMY_CANAANITE, id:1, max_frames:11, loop:false }
@@ -318,6 +331,7 @@ figure_canaanite_transport_ship = {
 }
 
 figure_canaanite_war_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_CANAANITE, id:10, max_frames:4 }
         death : { pack:PACK_ENEMY_CANAANITE, id:11, max_frames:11, loop:false }
@@ -335,6 +349,7 @@ figure_canaanite_war_ship = {
 }
 
 figure_canaanite_chariot = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_CANAANITE, id:13, max_frames:12 }
         death : { pack:PACK_ENEMY_CANAANITE, id:14, max_frames:12, loop:false }
@@ -366,6 +381,7 @@ enemy_canaanite = {
 // Egyptian transport (FIGURE_ENEMY_EGYPTIAN_TRANSPORT_SHIP = 51). No dedicated
 // transport strip in the pack — reuse galera hull frames for E3b.
 figure_egyptian_transport_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_EGYPTIAN, id:0, max_frames:4 }
         death : { pack:PACK_ENEMY_EGYPTIAN, id:1, max_frames:11, loop:false }
@@ -383,6 +399,7 @@ figure_egyptian_transport_ship = {
 }
 
 figure_egyptian_galera = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_EGYPTIAN, id:0, max_frames:4 }
         death : { pack:PACK_ENEMY_EGYPTIAN, id:1, max_frames:11, loop:false }
@@ -401,6 +418,7 @@ figure_egyptian_galera = {
 }
 
 figure_egyptian_war_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_EGYPTIAN, id:4, max_frames:4 }
         death : { pack:PACK_ENEMY_EGYPTIAN, id:5, max_frames:11, loop:false }
@@ -418,6 +436,7 @@ figure_egyptian_war_ship = {
 }
 
 figure_egyptian_archer = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_EGYPTIAN, id:7, max_frames:12 }
         death : { pack:PACK_ENEMY_EGYPTIAN, id:8, max_frames:8, loop:false }
@@ -441,6 +460,7 @@ figure_egyptian_archer = {
 }
 
 figure_egyptian_spearman = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_EGYPTIAN, id:11, max_frames:12 }
         death : { pack:PACK_ENEMY_EGYPTIAN, id:12, max_frames:8, loop:false }
@@ -463,6 +483,7 @@ figure_egyptian_spearman = {
 }
 
 figure_egyptian_chariot = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_EGYPTIAN, id:14, max_frames:12 }
         death : { pack:PACK_ENEMY_EGYPTIAN, id:14, max_frames:12, loop:false }
@@ -484,6 +505,7 @@ figure_egyptian_chariot = {
 // until PACK_ENEMY_EGYPTIAN dump maps real sword/axe groups (ids ≥16). Do not put
 // these in enemy_egyptian.figure_types[] without OG percentage confirmation.
 figure_egyptian_fast_sword = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         // TEMP art: spearman walk/death/attack
         walk : { pack:PACK_ENEMY_EGYPTIAN, id:11, max_frames:12 }
@@ -504,6 +526,7 @@ figure_egyptian_fast_sword = {
 }
 
 figure_egyptian_sword = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         // TEMP art: spearman walk/death/attack
         walk : { pack:PACK_ENEMY_EGYPTIAN, id:11, max_frames:12 }
@@ -524,6 +547,7 @@ figure_egyptian_sword = {
 }
 
 figure_egyptian_heavy_sword = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         // TEMP art: spearman walk/death/attack
         walk : { pack:PACK_ENEMY_EGYPTIAN, id:11, max_frames:12 }
@@ -544,6 +568,7 @@ figure_egyptian_heavy_sword = {
 }
 
 figure_egyptian_axe = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         // TEMP art: spearman walk/death/attack
         walk : { pack:PACK_ENEMY_EGYPTIAN, id:11, max_frames:12 }
@@ -566,6 +591,7 @@ figure_egyptian_axe = {
 // Camel + mounted archer. TEMP art until PACK_ENEMY_EGYPTIAN dump (ids ≥16).
 // Not in enemy_egyptian.figure_types[] without OG percentage confirmation.
 figure_egyptian_camel = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         // TEMP art: chariot walk/attack as mount stand-in
         walk : { pack:PACK_ENEMY_EGYPTIAN, id:14, max_frames:12 }
@@ -586,6 +612,7 @@ figure_egyptian_camel = {
 }
 
 figure_egyptian_mounted_archer = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         // TEMP art: foot archer strips + horse sound from type branch
         walk : { pack:PACK_ENEMY_EGYPTIAN, id:7, max_frames:12 }
@@ -610,6 +637,7 @@ figure_egyptian_mounted_archer = {
 }
 
 figure_egyptian_elephant = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         // TEMP art: chariot as large-mount stand-in
         walk : { pack:PACK_ENEMY_EGYPTIAN, id:14, max_frames:12 }
@@ -632,6 +660,7 @@ figure_egyptian_elephant = {
 // Kingdom favour-army (55–57). TEMP art = egyptian strips. Spawned when
 // invasion kind is KINGDOME (remap of egyptian % slots → javelin/infantry/mounted).
 figure_kingdome_javelin = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         // TEMP art: egyptian spearman
         walk : { pack:PACK_ENEMY_EGYPTIAN, id:11, max_frames:12 }
@@ -655,6 +684,7 @@ figure_kingdome_javelin = {
 }
 
 figure_kingdome_infantry = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         // TEMP art: egyptian spearman melee stand-in
         walk : { pack:PACK_ENEMY_EGYPTIAN, id:11, max_frames:12 }
@@ -675,6 +705,7 @@ figure_kingdome_infantry = {
 }
 
 figure_kingdome_mounted = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         // TEMP art: egyptian chariot
         walk : { pack:PACK_ENEMY_EGYPTIAN, id:14, max_frames:12 }
@@ -704,6 +735,7 @@ enemy_egyptian = {
 
 // hittite
 figure_hittite_archer = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_HITTITE, id:0, max_frames:12 }
         death : { pack:PACK_ENEMY_HITTITE, id:1, max_frames:8, loop:false }
@@ -727,6 +759,7 @@ figure_hittite_archer = {
 }
 
 figure_hittite_spearman = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_HITTITE, id:4, max_frames:12 }
         death : { pack:PACK_ENEMY_HITTITE, id:5, max_frames:8, loop:false }
@@ -748,6 +781,7 @@ figure_hittite_spearman = {
 }
 
 figure_hittite_transport_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_HITTITE, id:7, max_frames:4 }
         death : { pack:PACK_ENEMY_HITTITE, id:8, max_frames:11, loop:false }
@@ -766,6 +800,7 @@ figure_hittite_transport_ship = {
 }
 
 figure_hittite_war_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_HITTITE, id:10, max_frames:4 }
         death : { pack:PACK_ENEMY_HITTITE, id:11, max_frames:11, loop:false }
@@ -783,6 +818,7 @@ figure_hittite_war_ship = {
 }
 
 figure_hittite_chariot = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_HITTITE, id:13, max_frames:12 }
         death : { pack:PACK_ENEMY_HITTITE, id:14, max_frames:12, loop:false }
@@ -811,6 +847,7 @@ enemy_hittite = {
 
 // hyksos
 figure_hyksos_archer = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_HYKSOS, id:0, max_frames:12 }
         death : { pack:PACK_ENEMY_HYKSOS, id:1, max_frames:8, loop:false }
@@ -834,6 +871,7 @@ figure_hyksos_archer = {
 }
 
 figure_hyksos_sword = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_HYKSOS, id:4, max_frames:12 }
         death : { pack:PACK_ENEMY_HYKSOS, id:5, max_frames:8, loop:false }
@@ -852,6 +890,7 @@ figure_hyksos_sword = {
 }
 
 figure_hyksos_transport_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_HYKSOS, id:7, max_frames:4 }
         death : { pack:PACK_ENEMY_HYKSOS, id:8, max_frames:11, loop:false }
@@ -868,6 +907,7 @@ figure_hyksos_transport_ship = {
 }
 
 figure_hyksos_war_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_HYKSOS, id:10, max_frames:4 }
         death : { pack:PACK_ENEMY_HYKSOS, id:11, max_frames:11, loop:false }
@@ -884,6 +924,7 @@ figure_hyksos_war_ship = {
 }
 
 figure_hyksos_chariot = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_HYKSOS, id:13, max_frames:12 }
         death : { pack:PACK_ENEMY_HYKSOS, id:14, max_frames:12, loop:false }
@@ -912,6 +953,7 @@ enemy_hyksos = {
 
 // kushite
 figure_kushite_spearman = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_KUSHITE, id:0, max_frames:12 }
         death : { pack:PACK_ENEMY_KUSHITE, id:1, max_frames:8, loop:false }
@@ -935,6 +977,7 @@ figure_kushite_spearman = {
 }
 
 figure_kushite_axeman = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_KUSHITE, id:4, max_frames:12 }
         death : { pack:PACK_ENEMY_KUSHITE, id:5, max_frames:8, loop:false }
@@ -953,6 +996,7 @@ figure_kushite_axeman = {
 }
 
 figure_kushite_transport_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_KUSHITE, id:7, max_frames:4 }
         death : { pack:PACK_ENEMY_KUSHITE, id:8, max_frames:11, loop:false }
@@ -969,6 +1013,7 @@ figure_kushite_transport_ship = {
 }
 
 figure_kushite_war_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_KUSHITE, id:10, max_frames:4 }
         death : { pack:PACK_ENEMY_KUSHITE, id:11, max_frames:11, loop:false }
@@ -985,6 +1030,7 @@ figure_kushite_war_ship = {
 }
 
 figure_kushite_chariot = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_KUSHITE, id:13, max_frames:12 }
         death : { pack:PACK_ENEMY_KUSHITE, id:14, max_frames:12, loop:false }
@@ -1018,6 +1064,7 @@ enemy_kushite = {
 
 // libian
 figure_libian_archer = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_LIBIAN, id:0, max_frames:12 }
         death : { pack:PACK_ENEMY_LIBIAN, id:1, max_frames:8, loop:false }
@@ -1041,6 +1088,7 @@ figure_libian_archer = {
 }
 
 figure_libian_sword = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_LIBIAN, id:4, max_frames:12 }
         death : { pack:PACK_ENEMY_LIBIAN, id:5, max_frames:8, loop:false }
@@ -1059,6 +1107,7 @@ figure_libian_sword = {
 }
 
 figure_libian_transport_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_LIBIAN, id:7, max_frames:4 }
         death : { pack:PACK_ENEMY_LIBIAN, id:8, max_frames:11, loop:false }
@@ -1075,6 +1124,7 @@ figure_libian_transport_ship = {
 }
 
 figure_libian_war_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_LIBIAN, id:10, max_frames:4 }
         death : { pack:PACK_ENEMY_LIBIAN, id:11, max_frames:11, loop:false }
@@ -1091,6 +1141,7 @@ figure_libian_war_ship = {
 }
 
 figure_libian_chariot = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_LIBIAN, id:13, max_frames:12 }
         death : { pack:PACK_ENEMY_LIBIAN, id:14, max_frames:12, loop:false }
@@ -1120,6 +1171,7 @@ enemy_libian = {
 
 // nubian
 figure_nubian_archer = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_NUBIAN, id:0, max_frames:12 }
         death : { pack:PACK_ENEMY_NUBIAN, id:1, max_frames:8, loop:false }
@@ -1143,6 +1195,7 @@ figure_nubian_archer = {
 }
 
 figure_nubian_axeman = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_NUBIAN, id:4, max_frames:12 }
         death : { pack:PACK_ENEMY_NUBIAN, id:5, max_frames:8, loop:false }
@@ -1161,6 +1214,7 @@ figure_nubian_axeman = {
 }
 
 figure_nubian_transport_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_NUBIAN, id:7, max_frames:4 }
         death : { pack:PACK_ENEMY_NUBIAN, id:8, max_frames:11, loop:false }
@@ -1178,6 +1232,7 @@ figure_nubian_transport_ship = {
 }
 
 figure_nubian_war_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_NUBIAN, id:10, max_frames:4 }
         death : { pack:PACK_ENEMY_NUBIAN, id:11, max_frames:11, loop:false }
@@ -1194,6 +1249,7 @@ figure_nubian_war_ship = {
 }
 
 figure_nubian_chariot = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_NUBIAN, id:13, max_frames:12 }
         death : { pack:PACK_ENEMY_NUBIAN, id:14, max_frames:12, loop:false }
@@ -1228,6 +1284,7 @@ enemy_nubian = {
 
 // persian
 figure_persian_archer = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_PERSIAN, id:0, max_frames:12 }
         death : { pack:PACK_ENEMY_PERSIAN, id:1, max_frames:8, loop:false }
@@ -1251,6 +1308,7 @@ figure_persian_archer = {
 }
 
 figure_persian_spearman = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_PERSIAN, id:4, max_frames:12 }
         death : { pack:PACK_ENEMY_PERSIAN, id:5, max_frames:8, loop:false }
@@ -1269,6 +1327,7 @@ figure_persian_spearman = {
 }
 
 figure_persian_transport_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_PERSIAN, id:7, max_frames:4 }
         death : { pack:PACK_ENEMY_PERSIAN, id:8, max_frames:11, loop:false }
@@ -1286,6 +1345,7 @@ figure_persian_transport_ship = {
 }
 
 figure_persian_war_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_PERSIAN, id:10, max_frames:4 }
         death : { pack:PACK_ENEMY_PERSIAN, id:11, max_frames:11, loop:false }
@@ -1303,6 +1363,7 @@ figure_persian_war_ship = {
 }
 
 figure_persian_chariot = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_PERSIAN, id:13, max_frames:12 }
         death : { pack:PACK_ENEMY_PERSIAN, id:14, max_frames:12, loop:false }
@@ -1331,6 +1392,7 @@ enemy_persian = {
 
 // phoenician
 figure_phoenician_spearman = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_PHOENICIAN, id:0, max_frames:12 }
         death : { pack:PACK_ENEMY_PHOENICIAN, id:1, max_frames:8, loop:false }
@@ -1354,6 +1416,7 @@ figure_phoenician_spearman = {
 }
 
 figure_phoenician_swordman = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_PHOENICIAN, id:4, max_frames:12 }
         death : { pack:PACK_ENEMY_PHOENICIAN, id:5, max_frames:8, loop:false }
@@ -1365,6 +1428,7 @@ figure_phoenician_swordman = {
 }
 
 figure_phoenician_transport_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_PHOENICIAN, id:7, max_frames:4 }
         death : { pack:PACK_ENEMY_PHOENICIAN, id:8, max_frames:11, loop:false }
@@ -1382,6 +1446,7 @@ figure_phoenician_transport_ship = {
 }
 
 figure_phoenician_war_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_PHOENICIAN, id:10, max_frames:4 }
         death : { pack:PACK_ENEMY_PHOENICIAN, id:11, max_frames:11, loop:false }
@@ -1399,6 +1464,7 @@ figure_phoenician_war_ship = {
 }
 
 figure_phoenician_chariot = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_PHOENICIAN, id:13, max_frames:12 }
         death : { pack:PACK_ENEMY_PHOENICIAN, id:14, max_frames:12, loop:false }
@@ -1432,6 +1498,7 @@ enemy_phoenician = {
 
 // roman
 figure_roman_archer = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_ROMAN, id:0, max_frames:12 }
         death : { pack:PACK_ENEMY_ROMAN, id:1, max_frames:8, loop:false }
@@ -1455,6 +1522,7 @@ figure_roman_archer = {
 }
 
 figure_roman_legioner = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_ROMAN, id:4, max_frames:12 }
         death : { pack:PACK_ENEMY_ROMAN, id:5, max_frames:8, loop:false }
@@ -1473,6 +1541,7 @@ figure_roman_legioner = {
 }
 
 figure_roman_transport_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_ROMAN, id:7, max_frames:4 }
         death : { pack:PACK_ENEMY_ROMAN, id:8, max_frames:11, loop:false }
@@ -1489,6 +1558,7 @@ figure_roman_transport_ship = {
 }
 
 figure_roman_war_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_ROMAN, id:10, max_frames:4 }
         death : { pack:PACK_ENEMY_ROMAN, id:11, max_frames:11, loop:false }
@@ -1505,6 +1575,7 @@ figure_roman_war_ship = {
 }
 
 figure_roman_chariot = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_ROMAN, id:13, max_frames:12 }
         death : { pack:PACK_ENEMY_ROMAN, id:14, max_frames:12, loop:false }
@@ -1534,6 +1605,7 @@ enemy_roman = {
 
 // seapeople
 figure_seapeople_archer = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_SEAPEOPLE, id:0, max_frames:12 }
         death : { pack:PACK_ENEMY_SEAPEOPLE, id:1, max_frames:8, loop:false }
@@ -1557,6 +1629,7 @@ figure_seapeople_archer = {
 }
 
 figure_seapeople_axeman = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_SEAPEOPLE, id:4, max_frames:12 }
         death : { pack:PACK_ENEMY_SEAPEOPLE, id:5, max_frames:8, loop:false }
@@ -1575,6 +1648,7 @@ figure_seapeople_axeman = {
 }
 
 figure_seapeople_transport_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_SEAPEOPLE, id:7, max_frames:4 }
         death : { pack:PACK_ENEMY_SEAPEOPLE, id:8, max_frames:11, loop:false }
@@ -1591,6 +1665,7 @@ figure_seapeople_transport_ship = {
 }
 
 figure_seapeople_war_ship = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         swim : { pack:PACK_ENEMY_SEAPEOPLE, id:10, max_frames:4 }
         death : { pack:PACK_ENEMY_SEAPEOPLE, id:11, max_frames:11, loop:false }
@@ -1607,6 +1682,7 @@ figure_seapeople_war_ship = {
 }
 
 figure_seapeople_chariot = {
+  overlay : OVERLAY_ENEMIES
     animations : {
         walk : { pack:PACK_ENEMY_SEAPEOPLE, id:13, max_frames:12 }
         death : { pack:PACK_ENEMY_SEAPEOPLE, id:14, max_frames:12, loop:false }

@@ -1,8 +1,10 @@
 log_info("akhenaten: figures info started")
 
 import figure.prototype
+import figure.figure_params
 
 figure_fireman {
+  overlay : OVERLAY_WATER
 	animations {
 		_pack { pack:PACK_SPR_MAIN }
 	  walk { id:6, max_frames:12 }
@@ -37,6 +39,7 @@ figure_fireman {
 }
 
 figure_water_carrier {
+  overlay : OVERLAY_WATER
 	animations {
 		walk {  pack:PACK_SPR_MAIN, id:59, max_frames:12 }
 		death {  pack:PACK_SPR_MAIN, id:60, max_frames:8, loop:false }
@@ -62,6 +65,7 @@ figure_water_carrier {
 }
 
 figure_protestor = {
+  overlay : OVERLAY_CRIME
 	animations : {
 		walk : { pack:PACK_SPR_MAIN, id:32, max_frames:12 }
 		death : { pack:PACK_SPR_MAIN, id:33, max_frames:8, loop:false }
@@ -75,6 +79,7 @@ figure_protestor = {
 }
 
 figure_robber = {
+  overlay : OVERLAY_CRIME
 	animations : {
 		walk : { pack:PACK_SPR_MAIN, id:32, max_frames:12 }
 		death : { pack:PACK_SPR_MAIN, id:33, max_frames:8, loop:false }
@@ -95,6 +100,7 @@ figure_robber = {
 }
 
 figure_tomb_robber {
+  overlay : OVERLAY_CRIME
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:32, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:33, max_frames:8, loop:false }
@@ -114,6 +120,7 @@ figure_tomb_robber {
 }
 
 figure_rioter {
+  overlay : OVERLAY_CRIME
 	animations {
 		walk  { pack:PACK_SPR_MAIN, id:32, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:33, max_frames:8, loop:false }
@@ -132,6 +139,7 @@ figure_rioter {
 }
 
 figure_festival_guy {
+  overlay : OVERLAY_RELIGION
 	animations {
 		juggler_walk { pack:PACK_SPR_MAIN, id:130, max_frames:12 }
 		musician_walk { pack:PACK_SPR_MAIN, id:191, max_frames:12 }
@@ -152,6 +160,7 @@ figure_festival_guy {
 }
 
 figure_tower_sentry {
+  overlay : OVERLAY_CRIME
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:54, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:55, max_frames:8, loop:false }
@@ -739,6 +748,7 @@ figure_native_trader = {
 }
 
 figure_magistrate {
+  overlay : OVERLAY_COUTHOUSE
 	animations {
 		walk { pack: PACK_SPR_MAIN, id: 212, max_frames:12 }
 		death { pack: PACK_SPR_MAIN, id: 213, max_frames:8, loop:false }
@@ -803,6 +813,7 @@ figure_flotsam = {
 }
 
 figure_academy_scriber {
+  overlay : OVERLAY_SCRIBAL_SCHOOL
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:199, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:200, max_frames:8, loop:false }
@@ -830,6 +841,7 @@ figure_academy_scriber {
 }
 
 figure_scriber {
+  overlay : OVERLAY_SCRIBAL_SCHOOL
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:199, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:200, max_frames:8, loop:false }
@@ -884,6 +896,7 @@ figure_dentist {
 }
 
 figure_embalmer {
+  overlay : OVERLAY_MORTUARY
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:195, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:196, max_frames:8, loop:false }
@@ -912,6 +925,7 @@ figure_embalmer {
 }
 
 figure_worker {
+  overlay : OVERLAY_LABOR
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:116, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:117, max_frames:8, loop:false }
@@ -939,6 +953,7 @@ figure_worker {
 }
 
 figure_physician {
+  overlay : OVERLAY_PHYSICIAN
 	animations {
 		walk {  pack:PACK_SPR_MAIN, id:71, max_frames:12 }
 		death {  pack:PACK_SPR_MAIN, id:72, max_frames:8, loop:false }
@@ -968,6 +983,7 @@ figure_physician {
 }
 
 figure_architector {
+  overlay : OVERLAY_DAMAGE
 	animations {
 		_pack { pack:PACK_SPR_MAIN }
 		walk { id:4, max_frames:12 }
@@ -1004,6 +1020,7 @@ figure_architector {
 }
 
 figure_market_buyer {
+  overlay : OVERLAY_BAZAAR_ACCESS
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:16, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:17, max_frames:8, loop:false }
@@ -1032,6 +1049,7 @@ figure_market_buyer {
 }
 
 figure_delivery_boy {
+  overlay : OVERLAY_BAZAAR_ACCESS
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:9, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:10, max_frames:8, loop:false }
@@ -1130,6 +1148,7 @@ figure_cartpusher {
 }
 
 figure_zookeeper {
+  overlay : OVERLAY_ZOO
 	animations {
 		// Cleopatra SprMain2: bmp "zookeeper", group 35 starts at entry 1616 (SprMain2_01616).
 		walk { pack:PACK_EXPANSION_SPR, id:35, max_frames:12 }
@@ -1526,6 +1545,7 @@ figure_drunkard {
 }
 
 figure_teacher {
+  overlay : OVERLAY_SCRIBAL_SCHOOL
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:201, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:202, max_frames:8, loop:false }
@@ -1554,6 +1574,7 @@ figure_teacher {
 }
 
 figure_librarian {
+  overlay : OVERLAY_LIBRARY
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:57, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:58, max_frames:8, loop:false }
@@ -1582,6 +1603,7 @@ figure_librarian {
 }
 
 figure_constable {
+  overlay : OVERLAY_CRIME
 	animations {
 		_pack { pack:PACK_SPR_MAIN }
 		walk { id:20, max_frames:12 }
@@ -1620,6 +1642,7 @@ figure_constable {
 }
 
 figure_herbalist {
+  overlay : OVERLAY_APOTHECARY
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:180, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:181, max_frames:8, loop:false }
@@ -1639,6 +1662,7 @@ figure_herbalist {
 }
 
 figure_dancer {
+  overlay : OVERLAY_PAVILION
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:128, max_frames:12 }
 		death { pospack:PACK_SPR_MAIN, id:129, max_frames:8, loop:false }
@@ -1667,6 +1691,7 @@ figure_dancer {
 }
 
 figure_musician = {
+  overlay : OVERLAY_BANDSTAND
 	animations : {
 		walk : { pack:PACK_SPR_MAIN, id:191, max_frames:12 },
 		death : { pack:PACK_SPR_MAIN, id:192, max_frames:8, loop:false },
@@ -1695,6 +1720,7 @@ figure_musician = {
 }
 
 figure_soldier_infantry {
+  overlay : OVERLAY_PAVILION
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:64, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:65, max_frames:8, loop:false }
@@ -1820,6 +1846,7 @@ figure_transport_ship = {
 }
 
 figure_soldier_archer {
+  overlay : OVERLAY_PAVILION
 	animations {
 		walk {pack:PACK_SPR_MAIN, id:61, max_frames:12 }
 		death {pack:PACK_SPR_MAIN, id:62, max_frames:8, loop:false }
@@ -1837,6 +1864,7 @@ figure_soldier_archer {
 }
 
 figure_soldier_charioteer {
+  overlay : OVERLAY_PAVILION
 	animations {
 		walk {pack:PACK_SPR_MAIN, id:67, max_frames:12 }
 		death {pack:PACK_SPR_MAIN, id:68, max_frames:8, loop:false }
@@ -1852,6 +1880,7 @@ figure_soldier_charioteer {
 }
 
 figure_juggler {
+  overlay : OVERLAY_BOOTH
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:130, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:131, max_frames:8, loop:false }
@@ -1880,6 +1909,7 @@ figure_juggler {
 }
 
 figure_senet_player {
+  overlay : OVERLAY_SENET_HOUSE
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:132, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:133, max_frames:8, loop:false }
@@ -1907,6 +1937,7 @@ figure_senet_player {
 }
 
 figure_market_trader = {
+  overlay : OVERLAY_BAZAAR_ACCESS
 	animations {
 		walk {  pack:PACK_SPR_MAIN, id:18, max_frames:12 }
 		death {  pack:PACK_SPR_MAIN, id:19, max_frames:8, loop:false }
@@ -1927,6 +1958,7 @@ figure_market_trader = {
 }
 
 figure_labor_seeker {
+  overlay : OVERLAY_DAMAGE
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:206, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:207, max_frames:8, loop:false }
@@ -1996,6 +2028,7 @@ figure_map_flag = {
 }
 
 figure_tax_collector {
+  overlay : OVERLAY_TAX_INCOME
 	animations {
 		walk { pack:PACK_SPR_MAIN, id:41, max_frames:12 }
 		death { pack:PACK_SPR_MAIN, id:42, max_frames:8, loop:false }
