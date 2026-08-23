@@ -454,6 +454,12 @@ void figure_cartpusher::determine_storageyard_cart_destination() {
     // priority 8: resource to other warehouse
     tile2i dest;
     int warehouse_id = building_storage_yard_for_storing(tile(), base.resource_id, warehouse->distance_from_entry, road_network_id, 0, dest);
+    if (warehouse_id) {
+        building *dest_building = building_get(warehouse_id);
+        if (dest_building->main()->id == warehouse->id) {
+            warehouse_id = 0;
+        }
+    }
     set_destination(warehouse_id);
     if (has_destination()) {
         return advance_action(ACTION_51_CARTPUSHER_DELIVERING_RESOURCE);

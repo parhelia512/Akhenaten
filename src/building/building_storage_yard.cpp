@@ -222,15 +222,10 @@ bool building_storage_yard::is_accepting(e_resource resource) {
 
 bool building_storage_yard::is_getting(e_resource resource) {
     const storage_t* s = storage();
-    int amount = this->amount(resource);
-    if ((s->resource_state[resource] == STORAGE_STATE_GET && s->resource_max_get[resource] == FULL_WAREHOUSE)
-        || (s->resource_state[resource] == STORAGE_STATE_GET && s->resource_max_get[resource] >= THREEQ_WAREHOUSE && amount < THREEQ_WAREHOUSE / 100)
-        || (s->resource_state[resource] == STORAGE_STATE_GET && s->resource_max_get[resource] >= HALF_WAREHOUSE && amount < HALF_WAREHOUSE / 100)
-        || (s->resource_state[resource] == STORAGE_STATE_GET && s->resource_max_get[resource] >= QUARTER_WAREHOUSE && amount < QUARTER_WAREHOUSE / 100)) {
-        return true;
-    } else {
+    if (s->resource_state[resource] != STORAGE_STATE_GET) {
         return false;
     }
+    return amount(resource) < s->resource_max_get[resource];
 }
 
 bool building_storage_yard::is_not_accepting(e_resource resource) {
@@ -305,7 +300,7 @@ int building_storage_yard::for_getting(e_resource resource, tile2i* dst) {
             continue;
         }
 
-        if (i == id()) {
+        if (other_warehouse->id() == id()) {
             continue;
         }
 
