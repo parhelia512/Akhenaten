@@ -484,17 +484,7 @@ city.get_random_building = function() {
 }
 
 city.get_figure = function(figure_id) {
-    return {
-        id: figure_id
-        @type { get: function() { return __figure_get_type(this.id) } }
-        @valid { get: function() { return __figure_is_valid(this.id) } }
-        @action_state { get: function() { return __figure_get_action_state(this.id) } }
-        @state { get: function() { return __figure_get_state(this.id) } }
-        @resource { get: function() { return __figure_get_resource(this.id) } }
-        @destination_id { get: function() { return __figure_get_destination_building_id(this.id) } }
-        @destination { get: function() { return city.get_building(__figure_get_destination_building_id(this.id)) } }
-        @home { get: function() { return city.get_building(__figure_get_home_building_id(this.id)) } }
-    }
+    return new Figure(figure_id)
 }
 
 city.get_random_building_by_type = function(type) {

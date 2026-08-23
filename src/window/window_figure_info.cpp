@@ -15,6 +15,9 @@
 #include "sound/sound.h"
 #include "widget/widget_city.h"
 #include "widget/widget_figure_follow.h"
+#include "js/js_game.h"
+#include "js/js_struct.h"
+#include "graphics/elements/ui_js.h"
 
 declare_console_var_int(figure_small_image_x, -32)
 declare_console_var_int(figure_small_image_y, -48)
@@ -48,6 +51,9 @@ struct figures_data_t {
 };
 
 figures_data_t g_figures_data;
+
+struct figure_info_window_init { int figure_id; };
+ANK_REGISTER_STRUCT_WRITER(figure_info_window_init, figure_id);
 
 void figure_info_window::prepare_figures(object_info &c) {
     if (c.nfigure.ids.size() <= 0) {
@@ -186,6 +192,8 @@ void figure_info_window::init(object_info &c) {
             figure_follow_start(fid);
         });
     }
+
+    ui.event(figure_info_window_init{ figure_id }, section(), __func__);
 }
 
 bool figure_info_window::check(object_info &c) {

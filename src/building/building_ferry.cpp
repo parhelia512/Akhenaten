@@ -126,13 +126,13 @@ void info_window_ferry::init(object_info &c) {
 
 void building_ferry::spawn_figure() {
     check_labor_problem();
-    
+
     if (!has_road_access()) {
         return;
     }
-    
+
     common_spawn_labor_seeker(current_params().min_houses_coverage);
-    
+
     int boat_id = base.get_figure_id(BUILDING_SLOT_BOAT);
     if (boat_id > 0) {
         return;
@@ -145,11 +145,11 @@ void building_ferry::spawn_figure() {
     if (num_workers() <= 0) {
         return;
     }
-    
+
     auto &d = runtime_data();
     if (d.dock_tiles[0] > 0) {
         tile2i dock_tile(d.dock_tiles[0]);
-        
+
         if (map_terrain_is(dock_tile.grid_offset(), TERRAIN_WATER)) {
             figure* f = figure_create(FIGURE_FERRY_BOAT, dock_tile, DIR_4_BOTTOM_LEFT);
             if (f) {

@@ -67,17 +67,6 @@ figure_transport_ship_info_window = {
     }
 }
 
-[es=ui_window]
-figure_carrier_info_window = {
-    ui : baseui(figure_info_window, {
-        typename         : text({pos: [92, 139], text:"${figure.class_name} ( @Y${figure.home}& )", font : FONT_NORMAL_BLACK_ON_DARK, rich:true, scroll:false }),
-        items            : text({pos: [102, 158], size:[px(29), 20], font : FONT_NORMAL_BLACK_ON_DARK, rich:true, scroll:false }),
-        phrase           : text({pos: [90, 180], font : FONT_NORMAL_BLACK_ON_DARK, wrap:px(22), multiline:true }),
-
-        debug_stuck      : text({pos: [120, 260], font : FONT_NORMAL_BLACK_ON_DARK, wrap:px(22), multiline:true }),
-    })
-}
-
 [es=building_info_window]
 info_window_ferry {
     ui : baseui(building_info_window, {

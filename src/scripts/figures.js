@@ -1,5 +1,7 @@
 log_info("akhenaten: figures info started")
 
+import figure.prototype
+
 figure_fireman {
 	animations {
 		_pack { pack:PACK_SPR_MAIN }

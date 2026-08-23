@@ -33,8 +33,15 @@ void bind_offset_field(js_State *J, js_StringNode name, size_t byte_offset) {
                          std::is_same_v<T, uint32_t>) {
         js_register_bound_int_offset_property(J, name, byte_offset);
     } else if constexpr (std::is_enum_v<T>) {
-        static_assert(sizeof(T) == sizeof(int), "js_bound_offset: enum field must be int-sized for JS_PTR_INT binding");
-        js_register_bound_int_offset_property(J, name, byte_offset);
+        if constexpr (sizeof(T) == sizeof(uint8_t)) {
+            js_register_bound_uint8_offset_property(J, name, byte_offset);
+        } else if constexpr (sizeof(T) == sizeof(uint16_t)) {
+            js_register_bound_uint16_offset_property(J, name, byte_offset);
+        } else if constexpr (sizeof(T) == sizeof(int)) {
+            js_register_bound_int_offset_property(J, name, byte_offset);
+        } else {
+            static_assert(sizeof(T) == 0, "js_bound_offset: enum field must be 1, 2, or 4 bytes for JS binding");
+        }
     } else if constexpr (std::is_same_v<T, xstring>) {
         js_register_bound_xstring_offset_property(J, name, byte_offset);
     } else {
