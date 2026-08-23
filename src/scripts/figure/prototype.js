@@ -2,7 +2,7 @@ log_info("akhenaten: figure_prototype.js loaded")
 
 /* type, action_state, state, wait_ticks, direction, target_figure_id,
    destination_building_id, home_building_id, movement_ticks_watchdog,
-   resource_id, resource_amount_full: native CPTROFF (js_register_figure). */
+   resource_id, resource_amount_full, draw_mode: native CPTROFF (js_register_figure). */
 
 Figure.property.valid = { get: function() { return this.__valid() } }
 Figure.property.resource = { get: function() { return this.resource_id } }

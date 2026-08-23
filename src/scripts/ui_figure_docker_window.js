@@ -37,6 +37,7 @@ figure_docker_info_window {
 [es=(figure_docker_info_window, init)]
 function figure_docker_info_window_init(window) {
     var fid = __city_object_info_figure_id()
+    figure_info_window_setup(window, fid)
     window.items.text = figure_docker_carrying_line_text(fid)
     window.debug_stuck.text = figure_carrier_stuck_debug_text(fid)
 }

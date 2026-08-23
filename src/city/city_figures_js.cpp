@@ -1,9 +1,13 @@
 #include "city/city.h"
 
 #include "figure/figure.h"
+#include "figure/figure_static_params.h"
 #include "game/resource.h"
 #include "core/direction.h"
 #include "window/window_info.h"
+#include "city/city.h"
+#include "io/gamefiles/lang.h"
+#include "game/game.h"
 
 #include "js/js_game.h"
 #include "js/js.h"
@@ -170,6 +174,57 @@ xstring __figure_get_anim_key(int fid) {
 }
 ANK_FUNCTION_1(__figure_get_anim_key)
 
+xstring __figure_phrase_text(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_valid()) {
+        return {};
+    }
+
+    const auto sound_reaction = f->dcast()->get_sound_reaction(f->phrase_key);
+    if (!sound_reaction.text.empty()) {
+        return sound_reaction.text;
+    }
+    pcstr localized = lang_get_string(sound_reaction.group, sound_reaction.id);
+    if (localized && *localized) {
+        return xstring(localized);
+    }
+    bstring64 fallback;
+    fallback.printf("#%s", sound_reaction.key.c_str());
+    return xstring(fallback.c_str());
+}
+ANK_FUNCTION_1(__figure_phrase_text)
+
+void __figure_info_play_phrase(int fid) {
+    object_info &c = common_info_window::get_object_info();
+    figure *f = figure_get(fid);
+    if (!f || !f->is_valid() || !c.can_play_sound) {
+        return;
+    }
+    f->figure_phrase_determine();
+    f->figure_play_phrase_file();
+    c.can_play_sound = false;
+}
+ANK_FUNCTION_1(__figure_info_play_phrase)
+
+void __figure_info_set_help(int fid) {
+    figure *f = figure_get(fid);
+    if (!f || !f->is_valid()) {
+        return;
+    }
+    object_info &c = common_info_window::get_object_info();
+    const auto &meta = figure_static_params::get(f->type).meta;
+    c.help_link = meta.help_link;
+    c.help_id = 0;
+    c.group_id = meta.text_id;
+}
+ANK_FUNCTION_1(__figure_info_set_help)
+
+int __figure_get_overlay(int fid) {
+    figure *f = figure_get(fid);
+    return (f && f->is_valid()) ? (int)f->dcast()->get_overlay() : (int)OVERLAY_NONE;
+}
+ANK_FUNCTION_1(__figure_get_overlay)
+
 static js_Object *g_figure_proto = nullptr;
 
 static int figure_this_id(js_State *J) {
@@ -252,6 +307,7 @@ void js_register_figure(js_State *J) {
     JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, figure, movement_ticks_watchdog);
     JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, figure, resource_id);
     JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, figure, resource_amount_full);
+    JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, figure, draw_mode);
 
     jsB_propf(J, js_intern("Figure.prototype.__property_getter"), figure_proto___property_getter, 1);
     jsB_propf(J, js_intern("Figure.prototype.__valid"), figure_proto___valid, 0);

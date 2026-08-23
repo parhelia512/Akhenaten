@@ -179,6 +179,14 @@ void js_register_game_constants(js_State* J) {
     _R(MAX_BUILDINGS)
     _R(BUILDING_MAX)
 
+    _R(e_figure_draw_none)
+    _R(e_figure_draw_overlay)
+    _R(e_figure_draw_routing)
+    _R(e_figure_draw_carry)
+    _R(e_figure_draw_building)
+    _R(e_figure_draw_festival)
+    _R(e_figure_cross_country_move)
+
     for (config::EnumIterator* s = config::EnumIterator::tail; s; s = s->next) {
         s->func({});
     }

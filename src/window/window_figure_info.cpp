@@ -9,10 +9,8 @@
 #include "dev/debug.h"
 #include "window/message_dialog.h"
 #include "window/building/figures.h"
-#include "io/gamefiles/lang.h"
 #include "window/window_city.h"
 #include "game/game.h"
-#include "sound/sound.h"
 #include "widget/widget_city.h"
 #include "widget/widget_figure_follow.h"
 #include "js/js_game.h"
@@ -124,24 +122,14 @@ int figure_info_window::window_info_handle_mouse(const mouse *m, object_info &c)
 }
 
 void figure_info_window::init(object_info &c) {
-    common_info_window::init(c);
-
-    int figure_id = c.nfigure.ids[c.nfigure.selected_index];
-    figure *f = ::figure_get(figure_id);
+    const int figure_id = c.nfigure.ids[c.nfigure.selected_index];
 
     prepare_figures(c);
 
-    if (c.can_play_sound) {
-        f->figure_phrase_determine();
-        f->figure_play_phrase_file();
-        c.can_play_sound = false;
-    }
-
     ui.check_errors = false;
-    ui["bigimage"].image(f->type);
-
     for (int i = 0; i < c.nfigure.ids.size(); i++) {
-        xstring btn_id; btn_id.printf("button_figure%d", i);
+        xstring btn_id;
+        btn_id.printf("button_figure%d", i);
         if (!ui.contains(btn_id)) {
             break;
         }
@@ -159,41 +147,7 @@ void figure_info_window::init(object_info &c) {
         }
     }
 
-    const auto &meta = figure_static_params::get(f->type).meta;
-    c.help_link = meta.help_link;
-    c.help_id = 0;
-    c.group_id = meta.text_id;
-
-    auto sound_reaction = f->dcast()->get_sound_reaction(f->phrase_key);
-    xstring phrase_text = sound_reaction.text;
-    if (!phrase_text) {
-        phrase_text = lang_get_string(sound_reaction.group, sound_reaction.id);
-    }
-    if (!phrase_text) {
-        phrase_text.printf("#%s", sound_reaction.key.c_str());
-    }
-    ui["phrase"] = phrase_text;
-
-    e_overlay foverlay = f->dcast()->get_overlay();
-    ui["show_overlay"].onclick([foverlay] {
-        if (g_city.overlay_is(foverlay)) {
-            g_city.set_overlay((e_overlay)foverlay);
-        } else {
-            g_city.reset_overlay();
-        }
-    });
-
-    ui["show_path"].onclick([f] {
-        f->draw_mode ^= e_figure_draw_routing;
-    });
-
-    if (ui.contains("show_follow")) {
-        ui["show_follow"].onclick([fid = figure_id] {
-            figure_follow_start(fid);
-        });
-    }
-
-    ui.event(figure_info_window_init{ figure_id }, section(), __func__);
+    ui.event(figure_info_window_init{ figure_id }, get_section(), __func__);
 }
 
 bool figure_info_window::check(object_info &c) {
