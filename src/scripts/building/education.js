@@ -4,7 +4,7 @@ building_library {
   animations {
     preview { pos[0, 0], pack:PACK_GENERAL, id:43 }
     base { pos[0, 0], pack:PACK_GENERAL, id:43 }
-    work { pos[33, -38], pack:PACK_GENERAL, id:43, offset:1, max_frames:12 }
+    work { pos[48, -20], pack:PACK_GENERAL, id:43, offset:1, max_frames:12, duration:8 }
   }
 
   min_houses_coverage : 50
