@@ -21,7 +21,6 @@ public:
     virtual void figure_action() override;
     virtual void before_poof() override;
     virtual void update_animation() override;
-    virtual e_overlay get_overlay() const override { return OVERLAY_RELIGION; }
 
     virtual sound_key phrase_key() const override;
 };

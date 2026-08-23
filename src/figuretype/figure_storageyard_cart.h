@@ -26,7 +26,6 @@ public:
 
     virtual void figure_before_action() override;
     virtual void figure_action() override;
-    virtual e_overlay get_overlay() const override { return OVERLAY_NONE; }
 
     void do_retrieve(int action_done);
 };

@@ -21,7 +21,6 @@ public:
     virtual void on_post_load() override;
     virtual sound_key phrase_key() const override;
     virtual int provide_service() override;
-    virtual e_overlay get_overlay() const override { return OVERLAY_LIBRARY; }
     //virtual figure_sound_t get_sound_reaction(pcstr key) const override;
 
     building_ids_set_pool_t &get_building_ids_set_pool();

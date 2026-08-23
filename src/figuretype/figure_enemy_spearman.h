@@ -38,7 +38,6 @@ public:
     virtual e_figure_type missile_type() const override { return current_params().missile_type; }
 
     //virtual sound_key phrase_key() const override;
-    virtual e_overlay get_overlay() const override { return OVERLAY_ENEMIES; }
     //virtual figure_sound_t get_sound_reaction(pcstr key) const override;
 
     //bool fight_enemy(int category, int max_distance);

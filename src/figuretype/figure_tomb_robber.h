@@ -27,7 +27,6 @@ public:
     virtual void figure_action() override;
     virtual void update_animation() override;
     virtual sound_key phrase_key() const override;
-    virtual e_overlay get_overlay() const override { return OVERLAY_CRIME; }
 
     // Apply steal / preexisting threat at tomb. Returns true if kingdom/provisions changed.
     bool commit_plunder();

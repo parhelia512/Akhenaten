@@ -37,7 +37,6 @@ public:
     virtual void formation_reset_to_initial(const formation *m) override;
 
     //virtual sound_key phrase_key() const override;
-    virtual e_overlay get_overlay() const override { return OVERLAY_ENEMIES; }
     //virtual figure_sound_t get_sound_reaction(pcstr key) const override;
 
     virtual void enemy_initial(formation *m);

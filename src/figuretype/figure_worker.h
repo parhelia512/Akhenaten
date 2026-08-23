@@ -25,7 +25,6 @@ public:
     virtual void update_animation() override;
     virtual void poof() override;
     virtual sound_key phrase_key() const override;
-    virtual e_overlay get_overlay() const override { return OVERLAY_LABOR; }
     virtual figure_sound_t get_sound_reaction(pcstr key) const;
 
     tile2i monumen_tile4work(building *b);

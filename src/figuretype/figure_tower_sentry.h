@@ -28,7 +28,6 @@ public:
     virtual void figure_before_action() override;
     virtual void figure_action() override;
     virtual sound_key phrase_key() const override;
-    virtual e_overlay get_overlay() const override { return OVERLAY_CRIME; }
     virtual void update_animation() override;
     virtual void poof() override;
     //virtual figure_sound_t get_sound_reaction(pcstr key) const override;

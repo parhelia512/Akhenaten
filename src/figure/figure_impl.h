@@ -35,7 +35,7 @@ public:
     virtual void draw_main_sprite(painter &ctx, vec2i pixel, int highlight);
     virtual void before_poof();
     virtual void poof();
-    virtual e_overlay get_overlay() const { return OVERLAY_NONE; }
+    virtual e_overlay get_overlay() const { return current_params().overlay; }
     virtual figure_sound_t get_sound_reaction(xstring key) const;
     virtual sound_key phrase_key() const { return "empty"; }
     virtual sound_key default_phrase_key() const;

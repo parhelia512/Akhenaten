@@ -27,7 +27,6 @@ public:
     virtual figure_soldier *dcast_soldier() override { return this; }
 
     //virtual bool play_die_sound() override;
-    virtual e_overlay get_overlay() const override { return OVERLAY_PAVILION; }
     virtual void before_poof() override;
     virtual void update_image(const formation *m, int &dir);
     virtual e_minimap_figure_color minimap_color() const override { return FIGURE_COLOR_SOLDIER; }

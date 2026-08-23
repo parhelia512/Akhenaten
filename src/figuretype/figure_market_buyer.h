@@ -18,7 +18,6 @@ public:
 
     virtual void figure_before_action() override;
     virtual void figure_action() override;
-    virtual e_overlay get_overlay() const override { return OVERLAY_BAZAAR_ACCESS; }
     virtual sound_key phrase_key() const override;
     virtual int provide_service() override;
     virtual bvariant get_property(const xstring &domain, const xstring &name) const override;
