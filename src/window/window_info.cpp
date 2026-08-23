@@ -75,8 +75,8 @@ void ANK_REGISTER_CONFIG_ITERATOR(config_load_info_window) {
 
     auto load_configs = [] (auto &handlers) {
         for (auto &handler : *handlers) {
-            pcstr section = handler->section();
-            if (section && *section) {
+            const xstring section = handler->section();
+            if (!section.empty()) {
                 handler->load(section);
             }
         }

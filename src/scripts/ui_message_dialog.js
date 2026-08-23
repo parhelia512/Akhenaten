@@ -1,6 +1,7 @@
 log_info("akhenaten: message dialog window started")
 
 // General message dialog (MESSAGE_TYPE_GENERAL, TYPE_MANUAL, TYPE_ABOUT, TYPE_MISSION)
+[es=ui_window]
 message_dialog_window_general {
     pos: [(sw(0) - px(30))/2, (sh(0) - px(20))/2]
     help_id: ""
@@ -28,6 +29,7 @@ message_dialog_window_general {
 }
 
 // Disaster message dialog (MESSAGE_TYPE_DISASTER)
+[es=ui_window]
 message_dialog_window_disaster {
     pos: [(sw(0) - px(30))/2, (sh(0) - px(20))/2]
     help_id: ""
@@ -42,6 +44,7 @@ message_dialog_window_disaster {
 }
 
 // Imperial message dialog (MESSAGE_TYPE_IMPERIAL)
+[es=ui_window]
 message_dialog_window_imperial {
     pos: [(sw(0) - px(30))/2, (sh(0) - px(20))/2]
     help_id: ""
@@ -53,6 +56,7 @@ message_dialog_window_imperial {
 }
 
 // Emigration message dialog (MESSAGE_TYPE_EMIGRATION)
+[es=ui_window]
 message_dialog_window_emigration {
     pos: [(sw(0) - px(30))/2, (sh(0) - px(20))/2]
     help_id: ""
@@ -63,6 +67,7 @@ message_dialog_window_emigration {
 }
 
 // Tutorial message dialog (MESSAGE_TYPE_TUTORIAL)
+[es=ui_window]
 message_dialog_window_tutorial {
     pos: [(sw(0) - px(30))/2, (sh(0) - px(20))/2]
     help_id: ""
@@ -73,6 +78,7 @@ message_dialog_window_tutorial {
 }
 
 // Trade change message dialog (MESSAGE_TYPE_TRADE_CHANGE)
+[es=ui_window]
 message_dialog_window_trade_change {
     pos: [(sw(0) - px(30))/2, (sh(0) - px(20))/2]
     help_id: ""
@@ -83,6 +89,7 @@ message_dialog_window_trade_change {
 }
 
 // Price change message dialog (MESSAGE_TYPE_PRICE_CHANGE)
+[es=ui_window]
 message_dialog_window_price_change {
     pos: [(sw(0) - px(30))/2, (sh(0) - px(20))/2]
     help_id: ""
@@ -93,6 +100,7 @@ message_dialog_window_price_change {
 }
 
 // Invasion message dialog (MESSAGE_TYPE_INVASION)
+[es=ui_window]
 message_dialog_window_invasion {
     pos: [(sw(0) - px(30))/2, (sh(0) - px(20))/2]
     help_id: ""
@@ -103,6 +111,7 @@ message_dialog_window_invasion {
 }
 
 // God message dialog (messages from gods)
+[es=ui_window]
 message_dialog_window_god {
     pos: [(sw(0) - px(30))/2, (sh(0) - px(28))/2]
     help_id: ""
@@ -124,6 +133,7 @@ message_dialog_window_god {
     })
 }
 
+[es=ui_window]
 message_dialog_window_image {
     pos: [(sw(0) - px(30))/2, (sh(0) - px(20))/2]
     help_id: ""
@@ -133,6 +143,7 @@ message_dialog_window_image {
     })
 }
 
+[es=ui_window]
 message_dialog_window_troop_request {
     pos: [(sw(0) - px(30))/2, (sh(0) - px(32))/2]
     help_id: ""

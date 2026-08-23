@@ -1,5 +1,6 @@
 log_info("akhenaten: ui batalion info window started")
 
+[es=ui_window]
 batalion_info_window {
     ui {
         background    : outer_panel({size [34, 24]}),

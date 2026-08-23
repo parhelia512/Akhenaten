@@ -1,5 +1,6 @@
 log_info("akhenaten: ui trader info window started")
 
+[es=ui_window]
 figure_trader_info_window {
     related_figures [FIGURE_TRADE_SHIP, FIGURE_TRADE_CARAVAN, FIGURE_TRADE_CARAVAN_DONKEY]
     ui {

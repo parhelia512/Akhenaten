@@ -226,8 +226,11 @@ Empire override works anytime without this.
 
 - [x] **H6a** Initially kept named JS defaults; superseded by H6b.
 - [x] **H6b** `help_button` / `close_button` default to `onclick_event: "help"` /
-      `"go_back"`; shared multi-section ES in `ui_common.js` calls
-      `window_show_help` / `window_go_back`. Custom windows keep own handlers
+      `"go_back"`; shared parent ES in `ui_common.js`
+      (`building_info_window` / `advisor_window` / `modal_window` / `window` /
+      `terrain_info_window` / `figure_info_window` / `ui_window`) calls `window_show_help` /
+      `window_go_back`. Tag new windows with one of those parents instead of
+      extending per-section lists. Custom windows keep own handlers
       (empire `close`/`help`, messages help, resource settings help, festival help).
 - [x] **H6c** CI: `.github/workflows/akhenaten_ui_es_only.yml` greps
       `onclick:\s*function`, `\.onclick\s*=`, `onclick:\s*\w+\(`.

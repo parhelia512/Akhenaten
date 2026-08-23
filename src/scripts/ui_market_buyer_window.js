@@ -1,5 +1,6 @@
 log_info("akhenaten: ui market buyer window started")
 
+[es=ui_window]
 figure_market_buyer_window {
     related_figures [FIGURE_MARKET_BUYER]
     ui {

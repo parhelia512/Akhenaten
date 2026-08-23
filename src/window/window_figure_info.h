@@ -15,7 +15,7 @@ struct figure_info_window : public common_info_window {
     virtual void window_info_background(object_info &c) override;
     virtual void window_info_foreground(object_info &c) override;
     virtual int window_info_handle_mouse(const mouse *m, object_info &c) override;
-    
+
     virtual void init(object_info &c) override;
     virtual bool check(object_info &c) override;
     figure *figure_get(object_info &c);
@@ -25,9 +25,9 @@ struct figure_info_window : public common_info_window {
 
 template<typename T>
 struct figure_info_window_t : public figure_info_window {
-    virtual pcstr section() const override {
+    virtual xstring section() const override {
         static type_name_holder<T> _impl;
-        static pcstr _section = type_simplified_name(_impl.value.data());
+        static xstring _section = type_simplified_name(_impl.value.data());
         return _section;
     }
 };

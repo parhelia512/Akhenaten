@@ -33,9 +33,9 @@ struct building_info_window : public common_info_window {
 
 template<typename T>
 struct building_info_window_t : public building_info_window {
-    virtual pcstr section() const override {
+    virtual xstring section() const override {
         static type_name_holder<T> _impl;
-        static pcstr _section = type_simplified_name(_impl.value.data());
+        static xstring _section = type_simplified_name(_impl.value.data());
         return _section;
     }
 };

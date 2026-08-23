@@ -12,7 +12,11 @@ struct event_show_tile_info { tile2i tile; bool avoid_mouse; pcstr source_locati
 struct event_update_tile_info { bool avoid_mouse; };
 
 struct common_info_window : public ui::widget {
-    virtual pcstr section() const { return ""; }
+    virtual xstring section() const { return {}; }
+    virtual xstring get_section() const override {
+        const xstring s = section();
+        return !s.empty() ? s : io.name;
+    }
     virtual bool check(object_info& c) { return false; }
     virtual vec2i bgsize() const;
     virtual void window_info_background(object_info& c) { update_buttons(c); }

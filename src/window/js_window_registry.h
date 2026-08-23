@@ -1,6 +1,7 @@
 #pragma once
 
 #include "window_building_info.h"
+#include "window/window_figure_info.h"
 #include "window/window_advisors.h"
 #include "window/autoconfig_window.h"
 #include "city/constants.h"
@@ -13,9 +14,14 @@
 struct js_building_info_window : public building_info_window {
     xstring window_name;
 
-    virtual pcstr section() const override { return window_name.c_str(); }
-    virtual xstring get_section() const override { return window_name.c_str(); }
+    virtual xstring section() const override { return window_name; }
     virtual void init(object_info &c) override;
+};
+
+struct js_figure_info_window : public figure_info_window {
+    xstring window_name;
+
+    virtual xstring section() const override { return window_name; }
 };
 
 struct mouse;
@@ -25,7 +31,7 @@ struct js_advisor_window : public advisor_window {
     xstring window_name;
 
     js_advisor_window(xstring name) : advisor_window(name), window_name(name) {}
-    virtual xstring get_section() const override { return window_name; }
+    virtual xstring section() const override { return window_name; }
     virtual int handle_mouse(const mouse *m) override { return 0; }
     virtual int get_tooltip_text() override { return 0; }
     virtual void draw_foreground(UiFlags flags) override {}
@@ -36,7 +42,7 @@ struct js_common_window : public autoconfig_window {
     xstring section_name;
 
     js_common_window(pcstr name) : autoconfig_window(name), section_name(name) {}
-    virtual xstring get_section() const override { return section_name; }
+    virtual xstring section() const override { return section_name; }
     virtual int handle_mouse(const mouse *m) override { return 0; }
     virtual int get_tooltip_text() override { return 0; }
     virtual void draw_foreground(UiFlags flags) override {}

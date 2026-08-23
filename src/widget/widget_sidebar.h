@@ -45,7 +45,7 @@ struct sidebar_window_expanded_t : public autoconfig_window {
     virtual void ui_draw_foreground(UiFlags flags) override;
     virtual void ui_draw_extra(UiFlags flags);
     virtual void ui_draw_relief(UiFlags flags);
-    virtual xstring get_section() const override { return "sidebar_window_expanded"; }
+    virtual xstring section() const override { return "sidebar_window_expanded"; }
 
     virtual void archive_load(archive arch) override;
     virtual void init() override;
@@ -77,7 +77,7 @@ struct sidebar_window_collapsed_t : public autoconfig_window {
     virtual void draw_foreground(UiFlags flags) override {}
     virtual int draw_background(UiFlags flags) override { return 0; }
     virtual void ui_draw_foreground(UiFlags flags) override;
-    virtual xstring get_section() const override { return "sidebar_window_collapsed"; }
+    virtual xstring section() const override { return "sidebar_window_collapsed"; }
 
     virtual void archive_load(archive arch) override;
     virtual void init() override;
@@ -94,11 +94,11 @@ struct sidebar_window {
 
 } // namespace ui
 
-ANK_CONFIG_STRUCT(ui::slide_driver, 
+ANK_CONFIG_STRUCT(ui::slide_driver,
     deceleration_offset_x, slide_acceleration_millis, slide_speed_x)
 
-ANK_CONFIG_STRUCT(ui::sidebar_window_expanded_t, 
-    extra_block, relief_block, 
+ANK_CONFIG_STRUCT(ui::sidebar_window_expanded_t,
+    extra_block, relief_block,
     extra_block_x, expanded_offset_x,
     def_image, slider)
 

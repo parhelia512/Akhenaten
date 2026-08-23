@@ -7,6 +7,7 @@ def_object_info {
                            ]
 }
 
+[es=ui_window]
 figure_info_window {
     ui {
         background     : outer_panel({size [29, 22]})

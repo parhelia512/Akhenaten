@@ -10,6 +10,7 @@
 #include <cstring>
 
 hvector<std::unique_ptr<js_building_info_window>, 32> building_windows;
+hvector<std::unique_ptr<js_figure_info_window>, 32> figure_windows;
 hvector<std::unique_ptr<js_advisor_window>, ADVISOR_MAX> advisor_windows;
 hvector<std::unique_ptr<js_common_window>, 32> common_windows;
 hvector<std::unique_ptr<js_common_modal_window>, 32> modal_windows;
@@ -28,6 +29,21 @@ void register_es_building_info_window(pcstr name) {
     window_building_register_handler(window);
 }
 ANK_REGISTER_ES_ITERATOR(building_info_window, register_es_building_info_window, clear_es_builing_window);
+
+void clear_es_figure_info_window() {
+    logs::info("JS Window Registry: Clearing %d registered figure windows", (int)figure_windows.size());
+    figure_windows.clear();
+}
+
+void register_es_figure_info_window(pcstr name) {
+    logs::info("JS Window Registry: Registering figure window '%s'", name);
+
+    auto window = new js_figure_info_window();
+    window->window_name = name;
+
+    window_figure_register_handler(window);
+}
+ANK_REGISTER_ES_ITERATOR(figure_info_window, register_es_figure_info_window, clear_es_figure_info_window);
 
 void register_es_advisor_window(pcstr name) {
     e_advisor adv = ADVISOR_NONE;

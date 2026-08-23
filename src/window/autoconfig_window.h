@@ -19,7 +19,6 @@ struct autoconfig_window : public ui::widget {
     virtual void ui_draw_foreground(UiFlags flags);
     virtual int get_tooltip_text() = 0;
     virtual void init();
-    virtual xstring get_section() const override { verify_no_crash(false); return "non_exist_window"; };
     virtual void on_mission_start() {}
     virtual void on_restore();
     virtual bool is_modal() const { return false; }
@@ -51,7 +50,7 @@ struct autoconfig_window : public ui::widget {
 
 template<typename T>
 struct autoconfig_window_t : public autoconfig_window {
-    inline xstring section() const {
+    virtual xstring section() const override {
         static type_name_holder<T> _impl;
         static xstring _section = type_simplified_name(_impl.value.data());
         return _section;
@@ -59,6 +58,4 @@ struct autoconfig_window_t : public autoconfig_window {
 
     inline autoconfig_window_t() : autoconfig_window(section()) {
     }
-
-    virtual xstring get_section() const override { return section(); }
 };

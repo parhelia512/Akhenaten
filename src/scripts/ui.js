@@ -7,6 +7,7 @@ import ui_logo_screen
 import ui_advisors_window
 import ui_terrain_info
 import ui_figure_info
+import ui_figure_animal_window
 import ui_hold_festival_window
 import ui_festival_square_window
 import ui_advisor_entertainment

@@ -15,12 +15,7 @@ empty_info_window = {
     }
 }
 
-info_window_figure_animal = {
-    ui : baseui(figure_info_window, {
-
-    })
-}
-
+[es=ui_window]
 figure_warship_info_window = {
     ui : {
         background       : outer_panel({size: [29, 23]}),
@@ -49,6 +44,7 @@ figure_warship_info_window = {
     }
 }
 
+[es=ui_window]
 figure_transport_ship_info_window = {
     ui : {
         background       : outer_panel({size: [29, 23]}),
@@ -71,6 +67,7 @@ figure_transport_ship_info_window = {
     }
 }
 
+[es=ui_window]
 figure_carrier_info_window = {
     ui : baseui(figure_info_window, {
         typename         : text({pos: [92, 139], text:"${figure.class_name} ( @Y${figure.home}& )", font : FONT_NORMAL_BLACK_ON_DARK, rich:true, scroll:false }),
@@ -88,6 +85,7 @@ info_window_ferry {
     })
 }
 
+[es=ui_window]
 info_window_hunting_lodge {
     ui : baseui(building_info_window, {
         background   : outer_panel({size: [29, 20]}),
@@ -96,6 +94,7 @@ info_window_hunting_lodge {
     })
 }
 
+[es=ui_window]
 info_window_mastaba = {
     ui : {
         background    : outer_panel({size: [29, 18]}),
@@ -112,6 +111,7 @@ info_window_mastaba = {
     }
 }
 
+[es=ui_window]
 info_window_pyramid = {
     ui : {
         background    : outer_panel({size: [29, 18]}),
@@ -132,6 +132,7 @@ info_window_pyramid = {
     }
 }
 
+[es=ui_window]
 info_window_sphinx = {
     ui : {
         background    : outer_panel({size: [29, 18]}),
@@ -152,6 +153,7 @@ info_window_sphinx = {
     }
 }
 
+[es=ui_window]
 info_window_obelisk = {
     ui : {
         background    : outer_panel({size: [29, 16]}),
@@ -168,6 +170,7 @@ info_window_obelisk = {
     }
 }
 
+[es=ui_window]
 info_window_sun_temple = {
     ui : {
         background    : outer_panel({size: [29, 16]}),
@@ -184,6 +187,7 @@ info_window_sun_temple = {
     }
 }
 
+[es=ui_window]
 info_window_mausoleum = {
     ui : {
         background    : outer_panel({size: [29, 16]}),
@@ -201,6 +205,7 @@ info_window_mausoleum = {
     }
 }
 
+[es=ui_window]
 info_window_abu_simbel = {
     ui : {
         background    : outer_panel({size: [29, 16]}),
@@ -216,6 +221,7 @@ info_window_abu_simbel = {
     }
 }
 
+[es=ui_window]
 info_window_caesareum = {
     ui : {
         background    : outer_panel({size: [29, 18]}),
@@ -235,6 +241,7 @@ info_window_caesareum = {
     }
 }
 
+[es=ui_window]
 info_window_alexandria_library = {
     ui : {
         background    : outer_panel({size: [29, 18]}),
@@ -254,6 +261,7 @@ info_window_alexandria_library = {
     }
 }
 
+[es=ui_window]
 info_window_pharos_lighthouse = {
     ui : {
         background    : outer_panel({size: [29, 16]}),
@@ -289,6 +297,7 @@ ruin_info_window {
     }
 }
 
+[es=ui_window]
 info_window_burning_ruin = {
     open_sounds : [ "wavs/fire.wav" ],
     ui : {

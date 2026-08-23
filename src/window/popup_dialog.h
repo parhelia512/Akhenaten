@@ -88,7 +88,7 @@ struct popup_dialog : public autoconfig_window {
     virtual void draw_foreground(UiFlags flags) override {}
     virtual bool is_modal() const override { return true; }
     virtual int ui_handle_mouse(const mouse *m) override;
-    virtual xstring get_section() const override { return section_name; }
+    virtual xstring section() const override { return section_name; }
 
     void prepare(xstring header, xstring body, window_popup_dialog_callback close_cb, e_popup_dialog_btns buttons);
 
