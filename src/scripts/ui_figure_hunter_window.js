@@ -37,5 +37,12 @@ function figure_hunter_info_window_init(window) {
 
 [es=(figure_hunter_info_window, draw_background)]
 function figure_hunter_info_window_draw_background(window) {
-    figure_info_window_draw_background(window, { typename_with_home: true })
+    var f = city.get_figure(__object_info_figure_id())
+
+    window.name.text = f.name
+    window.typename.text = f.class_name + " ( @Y" + f.home + "& )"
+    window.items.text = figure_hunter_carrying_line_text(fid)
+
+    figure_info_window_update_toolbar(window, f)
+    figure_info_window_sync_tab_selection(window)
 }

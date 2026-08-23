@@ -17,7 +17,7 @@ struct figure_market_buyer_window : public figure_info_window_t<figure_market_bu
         }
 
         const uint16_t big_image = buyer->anim(animkeys().big_image).first_img();
-        ui["big_image"].image(big_image);
+        ui["bigimage"].image(big_image);
 
         const uint16_t res_image = image_id_resource_icon(buyer->base.collecting_item_id);
         ui["resource_image"].image(res_image);

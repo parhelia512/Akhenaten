@@ -99,5 +99,13 @@ function figure_carrier_info_window_init(window) {
 
 [es=(figure_carrier_info_window, draw_background)]
 function figure_carrier_info_window_draw_background(window) {
-    figure_info_window_draw_background(window, { typename_with_home: true })
+    var f = city.get_figure(__object_info_figure_id())
+
+    window.name.text = f.name
+    window.typename.text = f.class_name + " ( @Y" + f.home + "& )"
+    window.items.text = figure_carrier_carrying_line_text(fid)
+    window.debug_stuck.text = figure_carrier_stuck_debug_text(fid)
+
+    figure_info_window_update_toolbar(window, f)
+    figure_info_window_sync_tab_selection(window)
 }

@@ -32,5 +32,12 @@ figure_trader_info_window {
 
 [es=(figure_trader_info_window, draw_background)]
 function figure_trader_info_window_draw_background(window) {
-    figure_info_window_draw_background(window, { typename_with_city: true })
+    var f = city.get_figure(__object_info_figure_id())
+
+    window.name.text = f.name
+    window.typename.text = f.class_name + " @Y" + f.city_name + "&"
+    window.action.text = "(" + f.action_tip + ")"
+
+    figure_info_window_update_toolbar(window, f)
+    figure_info_window_sync_tab_selection(window)
 }
