@@ -32,3 +32,8 @@ figure_market_buyer_window {
         show_follow    : button({margin{right:-116, bottom:-40}, size[23, 23], text:"F", tooltip:"#follow_walker"})
     }
 }
+
+[es=(figure_market_buyer_window, draw_background)]
+function figure_market_buyer_window_draw_background(window) {
+    figure_info_window_draw_background(window)
+}

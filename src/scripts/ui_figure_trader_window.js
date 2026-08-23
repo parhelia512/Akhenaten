@@ -29,3 +29,8 @@ figure_trader_info_window {
         show_follow: button({ margin{right: -90, bottom: -40}, size[23, 23], text:"F", tooltip:"#follow_walker" })
     }
 }
+
+[es=(figure_trader_info_window, draw_background)]
+function figure_trader_info_window_draw_background(window) {
+    figure_info_window_draw_background(window, { typename_with_city: true })
+}

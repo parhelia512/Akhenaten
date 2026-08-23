@@ -41,3 +41,8 @@ function figure_docker_info_window_init(window) {
     window.items.text = figure_docker_carrying_line_text(fid)
     window.debug_stuck.text = figure_carrier_stuck_debug_text(fid)
 }
+
+[es=(figure_docker_info_window, draw_background)]
+function figure_docker_info_window_draw_background(window) {
+    figure_info_window_draw_background(window, { typename_with_home: true })
+}
