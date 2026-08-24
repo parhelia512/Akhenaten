@@ -32,4 +32,5 @@ function warshipwharf_info_window_on_init(window) {
 
     window.warning_text.text = __loc(reason)
     window.storage_desc.text = _format("Stored weapons {0}", b.stored_resource(RESOURCE_TIMBER))
+    building_info_window_setup_advisors(window)
 }

@@ -37,4 +37,5 @@ function info_window_education_on_init(window) {
         reason = "#library_info_idle"
     }
     window.workers_desc.text = reason
+    building_info_window_setup_advisors(window)
 }

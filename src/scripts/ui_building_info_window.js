@@ -22,31 +22,44 @@ function building_info_window_toggle_mothball() {
     }
 }
 
-function building_info_window_advisors() {
-    var oi = city.object_info
-    return [oi.go_to_advisor_first, oi.go_to_advisor_left_a, oi.go_to_advisor_left_b]
-}
-
-function building_info_window_show_advisor(slot) {
-    var advisor = building_info_window_advisors()[slot]
-    if (advisor && city.is_advisor_available(advisor)) {
-        window_advisors_show_advisor(advisor)
+function building_info_window_set_advisor_button(btn, advisor, show) {
+    if (!btn) {
+        return
     }
+    btn.enabled = !!show
+    if (!show) {
+        return
+    }
+    var frame = (advisor - 1) * 3
+    if (frame <= 0) {
+        return
+    }
+    var portrait = get_image({pack:PACK_GENERAL, id:106, offset:frame})
+    btn.image = portrait.tid
 }
 
 function building_info_window_setup_advisors(window) {
-    var advisors = building_info_window_advisors()
+    var oi = city.object_info
+    var advisors = [oi.go_to_advisor_first, oi.go_to_advisor_left_a, oi.go_to_advisor_left_b]
     var slots = ["first_advisor", "second_advisor", "third_advisor"]
+
     for (var i = 0; i < slots.length; i++) {
         var btn = window[slots[i]]
         if (!btn) {
-            break
+            continue
         }
         var advisor = advisors[i]
         var show = advisor && city.is_advisor_available(advisor)
-        btn.enabled = !!show
-        var img = get_image({pack:PACK_GENERAL, id:106, offset: show ? (advisor - 1) * 3 : 0})
-        btn.image = img ? img.tid : 0
+        building_info_window_set_advisor_button(btn, advisor, show)
+    }
+}
+
+function building_info_window_show_advisor(slot) {
+    var oi = city.object_info
+    var advisors = [oi.go_to_advisor_first, oi.go_to_advisor_left_a, oi.go_to_advisor_left_b]
+    var advisor = advisors[slot]
+    if (advisor && city.is_advisor_available(advisor)) {
+        window_advisors_show_advisor(advisor)
     }
 }
 
@@ -83,8 +96,8 @@ building_info_window {
 
 
 // Child windows tagged [es=building_info_window] fall back to these handlers.
-[es=(building_info_window, window_info_background)]
-function building_info_window_on_window_info_background(window) {
+[es=(building_info_window, init)]
+function building_info_window_on_init(window) {
     building_info_window_setup_advisors(window)
 }
 

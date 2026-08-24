@@ -24,4 +24,5 @@ function health_info_window_on_init(window) {
 
     var worker_desc = b.worker_percentage > 0 ? 3 : 2
     window.workers_desc.text = __loc(b.meta_text_id, worker_desc)
+    building_info_window_setup_advisors(window)
 }

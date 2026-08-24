@@ -33,10 +33,19 @@ function workshop_info_window_setup_advisors(window, building_type) {
             continue
         }
         var advisor = (i < advisors.length) ? advisors[i] : ADVISOR_NONE
-        var show = advisor && city.is_advisor_available(advisor)
+        var show = (city.is_advisor_available(advisor) > 0)
         btn.enabled = !!show
-        var img = get_image({pack:PACK_GENERAL, id:106, offset:(!!show ? (advisor - 1) * 3 : 0)})
-        btn.image = img ? img.tid : 0
+        if (!show) {
+            continue
+        }
+        var frame = (advisor - 1) * 3
+        if (frame <= 0) {
+            continue
+        }
+        var img = get_image({pack:PACK_GENERAL, id:106, offset:frame})
+        if (img) {
+            btn.image = img.tid
+        }
     }
 }
 

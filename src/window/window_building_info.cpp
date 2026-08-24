@@ -15,6 +15,7 @@
 #include "js/js_struct.h"
 #include "core/profiler.h"
 #include "graphics/elements/ui_js.h"
+#include "window/autoconfig_window.h"
 #include "js/js_game.h"
 #include "platform/arguments.h"
 
@@ -167,6 +168,7 @@ void building_info_window::window_info_background(object_info &c) {
     }
 
     update_buttons(c);
+    ui.event(window_info{c.offset}, get_section(), __func__);
     ui.event(building_info_window_draw{ pos, c.bid });
 }
 
@@ -187,6 +189,10 @@ void building_info_window::init(object_info &c) {
     building *b = building_get(c);
     set_debug_building_id(b->id);
 
+    c.go_to_advisor_first = first_advisor;
+    c.go_to_advisor_left_a = second_advisor;
+    c.go_to_advisor_left_b = third_advisor;
+
     ui.begin_widget(pos);
     ui.event(building_info_window_init{ pos, c.bid }, section(), __func__);
     ui.event(building_info_window_init{ pos, c.bid });
@@ -204,10 +210,6 @@ void building_info_window::init(object_info &c) {
 
     window_message_setup_help_id(correct_help);
     c.help_link = correct_help;
-
-    c.go_to_advisor_first = first_advisor;
-    c.go_to_advisor_left_a = second_advisor;
-    c.go_to_advisor_left_b = third_advisor;
 
     if (c.can_play_sound) {
         g_sound.speech_play_file(b->get_sound(), 255);

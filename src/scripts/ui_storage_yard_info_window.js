@@ -81,6 +81,8 @@ function info_window_storageyard_on_init(window) {
             }
         }
     }
+
+    building_info_window_setup_advisors(window)
 }
 
 [es=(info_window_storageyard, init)]

@@ -52,6 +52,7 @@ function taxcollector_info_window_on_init(window) {
 
     var wid = Math.approximate_value(b.worker_percentage / 100.0, [10, 9, 8, 7, 6, 5])
     window.workers_desc.text = __loc(g, wid)
+    building_info_window_setup_advisors(window)
 }
 
 [es=(taxcollector_info_window, dec_tax)]

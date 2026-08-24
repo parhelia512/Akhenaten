@@ -76,6 +76,8 @@ function palace_info_window_init(window) {
 
     var emp = palace_employment_text(palace)
     window.workers_desc.text = emp ? __loc(emp) : ""
+
+    building_info_window_setup_advisors(window)
 }
 
 [es=(info_window_palace, dec_tax)]

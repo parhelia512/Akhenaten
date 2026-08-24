@@ -42,4 +42,5 @@ function info_window_mansion_on_init(window) {
     //write window.protection_info.text = b.is_protected_by_police ? __loc("#mansion_protected_by_police") : __loc("#mansion_not_protected_theft")
     window.change_salary.readonly = scenario.has_won
     window.savings_hold.text = __loc(b.meta_text_id, 2) + " " + b.tax_income_or_storage + " Db"
+    building_info_window_setup_advisors(window)
 }
