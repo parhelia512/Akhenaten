@@ -326,14 +326,12 @@ object_info &common_info_window::get_object_info() {
 
 void common_info_window::update_buttons(object_info &c) {
     ui["button_help"].onclick([&c] {
-        logs::info("window_info button_help invoked, help_link='%s' help_id=%d",
-          c.help_link.empty() ? "<none>" : c.help_link.c_str(), c.help_id);
         if (!c.help_link.empty()) {
             window_message_dialog_show(c.help_link, -1, window_city_draw_all);
         } else if (c.help_id > 0) {
             window_message_dialog_show(lang_get_message_id(c.help_id), -1, window_city_draw_all);
         } else {
-            window_message_dialog_show("message_dialog_help", -1, window_city_draw_all);
+            window_message_dialog_show("message_table_of_contents", -1, window_city_draw_all);
         }
     });
 

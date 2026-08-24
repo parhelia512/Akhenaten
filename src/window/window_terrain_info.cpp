@@ -90,7 +90,7 @@ void terrain_info_window::init(object_info &c) {
     } else {
         c.help_link = {};
         c.help_id = 0;
-        help = "message_dialog_help";
+        help = "message_table_of_contents";
     }
     window_message_setup_help_id(help);
 }

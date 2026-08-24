@@ -258,7 +258,7 @@ function top_menu_enhanced_options(ev) { top_menu_open_window("window_features")
 [es=(top_menu_submenu, help)]
 function top_menu_show_help(ev) {
 	top_menu_dismiss()
-	ui.window_message_dialog("message_dialog_help")
+	ui.window_message_dialog("message_table_of_contents")
 }
 
 [es=(top_menu_submenu, about)]

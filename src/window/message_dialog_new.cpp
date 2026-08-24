@@ -49,6 +49,8 @@
 
 static ui::message_dialog_base* g_message_dialog_instance = nullptr;
 
+static constexpr pcstr MESSAGE_HELP_FALLBACK = "message_table_of_contents";
+
 void ANK_REGISTER_CONFIG_ITERATOR(config_load_message_dialog) {
     if (g_message_dialog_instance) {
         g_message_dialog_instance->init_data(
@@ -83,7 +85,13 @@ xstring ui::message_dialog_base::section() const {
 }
 
 void ui::message_dialog_base::init() {
-    autoconfig_window::init();
+    ui.begin_widget(pos);
+    ui.event(window_info{pos}, get_section(), __func__);
+    if (!autoconfig_window::help_id.empty()) {
+        window_message_setup_help_id(autoconfig_window::help_id);
+    }
+    _is_inited = true;
+    ui.end_widget();
 }
 
 void ui::message_dialog_base::init_data(xstring text_id, int message_id, void (*background_callback)(void)) {
@@ -143,6 +151,20 @@ void ui::message_dialog_base::init_data(xstring text_id, int message_id, void (*
     ui["title"].enabled = true;
 
     ui["button_close"].enabled = true;
+
+    xstring help_target;
+    if (message_id != -1) {
+        const city_message& city_msg = city_message_get(message_id);
+        if (city_msg.help_text_id > 0) {
+            help_target = lang_get_message_id(city_msg.help_text_id);
+        }
+    }
+    if (help_target.empty() && !msg.help_link.empty()) {
+        help_target = msg.help_link;
+    }
+    if (!help_target.empty()) {
+        setup_help_id(help_target);
+    }
 
     // Reset scroll position for content_text when opening a new dialog
     auto* content_text_element = ui["content_text"].dcast_etext();
@@ -503,12 +525,11 @@ void ui::message_dialog_base::button_close() {
 }
 
 void ui::message_dialog_base::button_help() {
-    logs::info("message_dialog_base::button_help invoked, help_id='%s'", help_id.empty() ? "<empty>" : help_id.c_str());
     button_close();
     if (!help_id.empty()) {
         g_message_dialog_instance->show(help_id, -1, background_callback);
     } else {
-        g_message_dialog_instance->show("message_dialog_help", -1, background_callback);
+        g_message_dialog_instance->show(MESSAGE_HELP_FALLBACK, -1, background_callback);
     }
 }
 
@@ -634,14 +655,19 @@ void window_message_setup_help_id(xstring helpid) {
 }
 
 void window_show_help() {
-    logs::info("window_show_help invoked, help_id='%s'",
-        (g_message_dialog_instance && !g_message_dialog_instance->help_id.empty())
-            ? g_message_dialog_instance->help_id.c_str()
-            : "<none>");
-    auto &data = g_window_manager;
-    auto &current_window = data.window_queue[data.queue_index];
-    if (g_message_dialog_instance && !g_message_dialog_instance->help_id.empty()) {
-        window_message_dialog_show(g_message_dialog_instance->help_id.c_str(), -1, nullptr);
+    if (!g_message_dialog_instance) {
+        return;
+    }
+
+    const xstring help_target = !g_message_dialog_instance->help_id.empty()
+        ? g_message_dialog_instance->help_id
+        : MESSAGE_HELP_FALLBACK;
+    window_message_dialog_show(help_target, -1, nullptr);
+}
+
+void window_message_dialog_help() {
+    if (g_message_dialog_instance) {
+        g_message_dialog_instance->button_help();
     }
 }
 

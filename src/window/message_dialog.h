@@ -33,6 +33,7 @@ enum e_message_dialog_type {
 
 // Forward declarations - functions are now in message_dialog_new.h
 void window_show_help();
+void window_message_dialog_help();
 void text_fill_in_tags(pcstr src, pstr dst, text_tag_substitution* tag_templates, int num_tags);
 void window_message_setup_help_id(xstring helpid);
 void window_message_dialog_show(xstring text_id, int message_id, void (*background_callback)(void));
