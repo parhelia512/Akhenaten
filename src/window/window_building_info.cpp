@@ -167,20 +167,8 @@ void building_info_window::window_info_background(object_info &c) {
         set_workers_tooltip();
     }
 
-    update_buttons(c);
     ui.event(window_info{c.offset}, get_section(), __func__);
     ui.event(building_info_window_draw{ pos, c.bid });
-}
-
-textid building_info_window::get_tooltip(object_info &c) {
-    common_info_window::init(c);
-
-    if (!c.storage_show_special_orders) {
-        return {0, 0};
-    }
-
-    building *b = building_get(c);
-    return b->dcast()->get_tooltip();
 }
 
 void building_info_window::init(object_info &c) {
@@ -222,10 +210,6 @@ void building_info_window::init(object_info &c) {
     const auto &params = b->dcast()->current_params();
     c.help_id = 0;
     c.group_id = params.meta.text_id;
-}
-
-void building_info_window::update_buttons(object_info &c) {
-    common_info_window::update_buttons(c);
 }
 
 building *building_info_window::building_get(object_info &c) {

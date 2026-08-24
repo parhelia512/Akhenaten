@@ -1,7 +1,6 @@
 ﻿#include "window_info.h"
 
 #include "building/building.h"
-#include "building/building_storage.h"
 #include "city/city.h"
 #include "city/city_resource.h"
 #include "overlays/city_overlay.h"
@@ -38,7 +37,6 @@
 #include "window/window_figure_info.h"
 #include "window/window_batalion_info.h"
 #include "window/window_city.h"
-#include "window/message_dialog.h"
 #include "widget/widget_sidebar.h"
 #include "io/gamefiles/lang.h"
 #include "core/log.h"
@@ -102,7 +100,6 @@ static int center_in_city(int element_width_pixels) {
 void object_info::reset(tile2i tile) {
     grid_offset = tile.grid_offset();
     can_play_sound = true;
-    storage_show_special_orders = 0;
     go_to_advisor_first = ADVISOR_NONE;
     go_to_advisor_left_a = ADVISOR_NONE;
     go_to_advisor_left_b = ADVISOR_NONE;
@@ -224,11 +221,7 @@ static void window_info_handle_input(const mouse* m, const hotkeys* h) {
 
     if (!button_id && input_go_back_requested(m, h)) {
         context.reset(tile2i::invalid);
-        if (context.storage_show_special_orders) {
-            storage_settings_backup_check();
-        } else {
-            window_city_show();
-        }
+        window_city_show();
     }
 }
 
@@ -269,11 +262,6 @@ int window_building_info_get_type() {
     return building_get(context.bid)->type;
 }
 
-void window_building_info_show_storage_orders() {
-    auto &context = def_object_info;
-    context.storage_show_special_orders = 1;
-}
-
 template<typename T>
 void window_info_register_handler_t(T &ptr, common_info_window *handler) {
     if (!ptr) {
@@ -302,7 +290,6 @@ vec2i common_info_window::bgsize() const {
 }
 
 void common_info_window::window_info_background(object_info &c) {
-    update_buttons(c);
     ui.event(window_info{c.offset}, get_section(), __func__);
 }
 
@@ -322,27 +309,6 @@ void common_info_window::register_handlers() {
 
 object_info &common_info_window::get_object_info() {
     return def_object_info;
-}
-
-void common_info_window::update_buttons(object_info &c) {
-    ui["button_help"].onclick([&c] {
-        if (!c.help_link.empty()) {
-            window_message_dialog_show(c.help_link, -1, window_city_draw_all);
-        } else if (c.help_id > 0) {
-            window_message_dialog_show(lang_get_message_id(c.help_id), -1, window_city_draw_all);
-        } else {
-            window_message_dialog_show("message_table_of_contents", -1, window_city_draw_all);
-        }
-    });
-
-    ui["button_close"].onclick([&c] {
-        if (c.storage_show_special_orders) {
-            c.storage_show_special_orders = 0;
-            storage_settings_backup_reset();
-        } else {
-            window_city_show();
-        }
-    });
 }
 
 void common_info_window::archive_load(archive arch) {

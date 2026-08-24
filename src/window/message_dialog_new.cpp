@@ -33,6 +33,7 @@
 #include "input/mouse.h"
 #include "input/scroll.h"
 #include "graphics/elements/ui.h"
+#include "graphics/elements/ui_js.h"
 #include "io/gamefiles/lang.h"
 #include "scenario/scenario.h"
 #include "scenario/scenario_event_manager.h"

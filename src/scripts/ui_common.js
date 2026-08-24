@@ -221,12 +221,29 @@ function next_button(config) { var i = image_button({size[27, 27], pack:PACK_GEN
 function advisor_button(config) { var i = image_button({pack:PACK_GENERAL, id:106, offset:12, tooltip[68, 41]}); return ui_extend(i, config) }
 
 
-[es=(building_info_window, help), es=(advisor_window, help), es=(modal_window, help), es=(window, help), es=(terrain_info_window, help), es=(figure_info_window, help), es=(ui_window, help)]
+[es=(building_info_window, help), es=(terrain_info_window, help), es=(figure_info_window, help)]
+function info_window_help_button_on_help(window) {
+    var oi = city.object_info
+    if (oi.help_link) {
+        ui.window_message_dialog(oi.help_link)
+    } else if (oi.help_id > 0) {
+        ui.window_message_dialog(__lang_get_message_id(oi.help_id))
+    } else {
+        ui.window_message_dialog("message_table_of_contents")
+    }
+}
+
+[es=(advisor_window, help), es=(modal_window, help), es=(window, help), es=(ui_window, help)]
 function ui_help_button_on_help(window) {
     window_show_help()
 }
 
-[es=(building_info_window, go_back), es=(modal_window, go_back), es=(window, go_back), es=(terrain_info_window, go_back), es=(figure_info_window, go_back), es=(ui_window, go_back)]
+[es=(building_info_window, go_back), es=(terrain_info_window, go_back), es=(figure_info_window, go_back)]
+function info_window_close_button_on_go_back(window) {
+    ui.window_city_show()
+}
+
+[es=(modal_window, go_back), es=(window, go_back), es=(ui_window, go_back)]
 function ui_close_button_on_go_back(window) {
     window_go_back()
 }

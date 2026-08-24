@@ -23,8 +23,6 @@ struct common_info_window : public ui::widget {
     virtual void window_info_foreground(object_info& c);
     virtual int window_info_handle_mouse(const mouse *m, object_info &c) { return 0; }
     virtual textid get_tooltip(object_info &c) { return {0, 0}; }
-    virtual void update_buttons(object_info &c);
-
     using widget::load;
     virtual void archive_load(archive arch) override;
     virtual void init(object_info &c);
@@ -39,7 +37,6 @@ struct common_info_window : public ui::widget {
 };
 
 int window_building_info_get_type();
-void window_building_info_show_storage_orders();
 
 void window_building_register_handler(common_info_window *handler);
 void window_figure_register_handler(common_info_window *handler);

@@ -21,9 +21,7 @@ struct building_info_window : public common_info_window {
     virtual void window_info_foreground(object_info &c) override;
     virtual void window_info_background(object_info &c) override;
     virtual void ui_draw_foreground(object_info& c);
-    virtual textid get_tooltip(object_info &c) override;
     virtual void init(object_info &c) override;
-    virtual void update_buttons(object_info &c) override;
     virtual bool check(object_info &c) override;
 
     building *building_get(object_info &c);

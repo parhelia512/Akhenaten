@@ -66,13 +66,8 @@ int building_storage_create(int building_type);
 
 int building_storage_restore(int storage_id);
 void building_storage_delete(int storage_id);
-bool building_storage_has_unsaved_changes();
 
 const storage_t* building_storage_get(int storage_id);
-
-void backup_storage_settings(int storage_id);
-void storage_settings_backup_check();
-void storage_settings_backup_reset();
 
 void building_storage_cycle_resource_state(int storage_id, int resource_id, bool backwards);
 

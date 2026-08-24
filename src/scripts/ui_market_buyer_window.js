@@ -1,6 +1,14 @@
 log_info("akhenaten: ui market buyer window started")
 
-[es=ui_window]
+function figure_market_buyer_collecting_item(fid) {
+    var f = city.get_figure(fid)
+    if (!f.valid) {
+        return RESOURCE_NONE
+    }
+    return f.__property_getter("resource")
+}
+
+[es=figure_info_window]
 figure_market_buyer_window {
     related_figures [FIGURE_MARKET_BUYER]
     ui {
@@ -36,6 +44,7 @@ figure_market_buyer_window {
 [es=(figure_market_buyer_window, init)]
 function figure_market_buyer_window_init(window) {
     figure_info_window_setup(window, window.figure_id)
+    window.resource_image.image = figure_market_buyer_collecting_item(window.figure_id)
 }
 
 [es=(figure_market_buyer_window, select_figure)]

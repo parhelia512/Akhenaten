@@ -66,7 +66,6 @@ struct object_info {
     e_advisor go_to_advisor_left_a = ADVISOR_NONE;
     e_advisor go_to_advisor_left_b = ADVISOR_NONE;
 
-    int storage_show_special_orders;
     uint8_t figure_selected_index = 0;
     bool figure_drawn = false;
     svector<figure_id, 7> figure_ids;

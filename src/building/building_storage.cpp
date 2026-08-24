@@ -6,8 +6,6 @@
 #include "city/city.h"
 
 #include "io/io_buffer.h"
-#include "window/window_city.h"
-#include "window/popup_dialog.h"
 
 #include <cstring>
 
@@ -119,46 +117,6 @@ int building_storage_restore(int storage_id) {
 
 void building_storage_delete(int storage_id) {
     g_storages[storage_id].in_use = 0;
-}
-
-storage_t backup_settings;
-static int backup_storage_id = -1;
-
-void backup_storage_settings(int storage_id) {
-    if (backup_storage_id != -1)
-        return;
-
-    backup_storage_id = storage_id;
-    backup_settings = g_storages[storage_id].storage;
-}
-
-bool building_storage_has_unsaved_changes() {
-    return memcmp(&backup_settings, &g_storages[backup_storage_id].storage, sizeof(backup_settings)) != 0;
- }
-
-void storage_settings_backup_check() {
-    if (building_storage_has_unsaved_changes()) {
-        popup_dialog::show_yesno("#exit_without_saving", [] (bool do_forget_changes) {
-            if (!do_forget_changes) {
-                return;
-            }
-
-            if (backup_storage_id == -1) {
-                return;
-            }
-
-            g_storages[backup_storage_id].storage = backup_settings;
-            storage_settings_backup_reset();
-            window_city_show();
-        });
-    } else {
-        storage_settings_backup_reset();
-        window_city_show();
-    }
-}
-
-void storage_settings_backup_reset() {
-    backup_storage_id = -1;
 }
 
 const storage_t* building_storage_get(int storage_id) {

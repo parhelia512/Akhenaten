@@ -11,8 +11,6 @@
 #include "city/city.h"
 
 void terrain_info_window::window_info_background(object_info &c) {
-    update_buttons(c);
-
     ui_scope_property holder;
     ui.format_all(&holder);
 }
