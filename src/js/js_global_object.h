@@ -42,7 +42,16 @@ inline void ank_global_obj_bind_field(js_State *J, js_StringNode name, xstring *
 template<typename T>
 inline typename std::enable_if<std::is_enum<T>::value, void>::type
 ank_global_obj_bind_field(js_State *J, js_StringNode name, T *ptr) {
-    js_register_bound_int_property(J, name, reinterpret_cast<int *>(ptr));
+    using U = std::underlying_type_t<T>;
+    if constexpr (sizeof(T) == sizeof(uint8_t)) {
+        js_register_bound_uint8_property(J, name, reinterpret_cast<uint8_t *>(ptr));
+    } else if constexpr (sizeof(T) == sizeof(uint16_t)) {
+        js_register_bound_uint16_property(J, name, reinterpret_cast<uint16_t *>(ptr));
+    } else if constexpr (sizeof(T) == sizeof(int)) {
+        js_register_bound_int_property(J, name, reinterpret_cast<int *>(ptr));
+    } else {
+        static_assert(sizeof(T) == 0, "ank_global_obj_bind_field: enum must be 1, 2, or 4 bytes");
+    }
 }
 
 template<typename T>
