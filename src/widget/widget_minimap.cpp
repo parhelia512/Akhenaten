@@ -81,6 +81,8 @@ void minimap_window::init() {
 }
 
 void minimap_window::on_mission_start() {
+    set_bounds(draw_size);
+
     events::subscribe([] (event_rotate_map ev) {
         widget_minimap_invalidate();
     });
@@ -99,6 +101,8 @@ vec2i minimap_window::get_mouse_relative_pos(const mouse *m, float &xx, float &y
 }
 
 int minimap_window::handle_mouse(const mouse *m) {
+    set_bounds(draw_size);
+
     if (!is_in_minimap(m) || m->left.went_up || m->right.went_up) {
         mouse_last_coords = { -1, -1 };
         return false;
@@ -143,10 +147,14 @@ bool minimap_window::is_in_minimap(const mouse *m) {
 void minimap_window::draw_foreground(UiFlags flags) {
     OZZY_PROFILER_FUNCTION();
 
+    const tile2i prev_absolute = absolute_tile;
+    set_bounds(draw_size);
+    const bool view_shifted = absolute_tile != prev_absolute;
+
     painter ctx = game.painter();
     graphics_set_clip_rectangle(screen_offset, size);
 
-    if (refresh_requested || g_scroll.in_progress() || draw_force) {
+    if (refresh_requested || view_shifted || g_scroll.in_progress() || draw_force) {
         draw_uncached(screen_offset);
         refresh_requested = 0;
     } else {
@@ -169,7 +177,8 @@ void widget_minimap_invalidate() {
 
 void minimap_window::set_bounds(vec2i ds) {
     draw_size = ds;
-    size = {2 * ds.x, ds.y};
+    // Pharaoh sidebar inner frame is 1px narrower than 2*tile columns (see inset border at +153).
+    size = {2 * ds.x - 1, ds.y};
     absolute_tile = tile2i((GRID_LENGTH - ds.x) / 2 + 1, ((2 * GRID_LENGTH) + 1 - ds.y) / 2);
 
     //    int camera_x, camera_y;
@@ -349,7 +358,7 @@ void minimap_window::draw_viewport_rectangle(painter &ctx) {
     int x_offset = screen_offset.x + 2 * (camera_tile.x() - absolute_tile.x()) - 2 + camera_pixels.x / 30;
     x_offset = std::max(x_offset, screen_offset.x);
 
-    if (x_offset + 2 * view_size_tiles.x + 4 > screen_offset.x + draw_size.x) {
+    if (x_offset + 2 * view_size_tiles.x + 4 > screen_offset.x + size.x) {
         x_offset -= 2;
     }
 
@@ -383,6 +392,17 @@ void widget_minimap_draw(vec2i offset, int force) {
     g_minimap_window.screen_offset = offset;
     g_minimap_window.draw_force = force;
     g_minimap_window.draw_foreground(0);
+}
+
+void widget_minimap_draw_border(int sidebar_x_offset) {
+    const int left = sidebar_x_offset + MINIMAP_X_OFFSET - 1;
+    const int top = MINIMAP_Y_OFFSET - 1;
+    const int right = sidebar_x_offset + MINIMAP_X_OFFSET + g_minimap_window.size.x - 1;
+    const int bottom = MINIMAP_Y_OFFSET + g_minimap_window.draw_size.y;
+
+    graphics_draw_line(vec2i{left + 1, top}, vec2i{right, top}, COLOR_MINIMAP_DARK);
+    graphics_draw_line(vec2i{left, top + 1}, vec2i{left, bottom}, COLOR_MINIMAP_DARK);
+    graphics_draw_line(vec2i{right, top + 1}, vec2i{right, bottom}, COLOR_MINIMAP_LIGHT);
 }
 
 bool widget_minimap_handle_mouse(const mouse* m) {

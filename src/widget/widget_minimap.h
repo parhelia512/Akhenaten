@@ -4,6 +4,9 @@
 #include "graphics/animation.h"
 #include "window/autoconfig_window.h"
 
+constexpr int MINIMAP_X_OFFSET = 8;
+constexpr int MINIMAP_Y_OFFSET = 59;
+
 struct minimap_window : public autoconfig_window_t<minimap_window> {
     tile2i absolute_tile;
     vec2i draw_size;
@@ -61,6 +64,7 @@ struct minimap_window : public autoconfig_window_t<minimap_window> {
 void widget_minimap_init();
 void widget_minimap_invalidate();
 void widget_minimap_draw(vec2i offset, int force);
+void widget_minimap_draw_border(int sidebar_x_offset);
 bool widget_minimap_handle_mouse(const mouse* m);
 
 void widget_minimap_invalidate_preview();

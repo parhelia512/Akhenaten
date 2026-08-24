@@ -22,8 +22,6 @@
 #include "js/js_struct.h"
 #include "graphics/elements/ui_js.h"
 
-#define MINIMAP_Y_OFFSET 59
-
 struct sidebar_window_draw { vec2i pos; int opened_menu; };
 ANK_REGISTER_STRUCT_WRITER(sidebar_window_draw, pos, opened_menu);
 
@@ -44,6 +42,7 @@ void ui::sidebar_window_expanded_t::init() {
     const image_t *img = image_get(extra_block);
     extra_block_size = img ? img->size() : vec2i{0, 0};
 
+    widget_minimap_init();
     subscribe_events();
 }
 
@@ -118,9 +117,10 @@ void ui::sidebar_window_expanded_t::ui_draw_foreground(UiFlags flags) {
     const UiFlags wflags = is_disabled ? UiFlags_Readonly : UiFlags_None;
 
     ui.begin_widget(pos);
-    widget_minimap_draw({ x_offset + 12, MINIMAP_Y_OFFSET }, 0);
+    widget_minimap_draw({ x_offset + MINIMAP_X_OFFSET, MINIMAP_Y_OFFSET }, 0);
 
     ui.draw(wflags);
+    widget_minimap_draw_border(x_offset);
 
     ui.end_widget();
 
@@ -264,7 +264,8 @@ void widget_sidebar_city_draw_foreground() {
 
 void widget_sidebar_city_draw_foreground_military() {
     widget_sidebar_city_draw_foreground();
-    widget_minimap_draw({screen_width() - sidebar_window_expanded.expanded_offset_x + 8, MINIMAP_Y_OFFSET}, 1);
+    widget_minimap_draw({screen_width() - sidebar_window_expanded.expanded_offset_x + MINIMAP_X_OFFSET, MINIMAP_Y_OFFSET}, 1);
+    widget_minimap_draw_border(screen_width() - sidebar_window_expanded.expanded_offset_x);
 }
 
 int widget_sidebar_city_handle_mouse(const mouse* m) {
