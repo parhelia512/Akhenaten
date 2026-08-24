@@ -37,7 +37,8 @@ function figure_hunter_info_window_init(window) {
 
 [es=(figure_hunter_info_window, window_info_background)]
 function figure_hunter_info_window_window_info_background(window) {
-    var f = city.get_figure(__object_info_figure_id())
+    var fid = __object_info_figure_id()
+    var f = city.get_figure(fid)
 
     window.name.text = f.name
     window.typename.text = f.class_name + " ( @Y" + f.home + "& )"
