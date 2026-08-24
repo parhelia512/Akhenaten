@@ -340,5 +340,5 @@ function building_mastaba_on_place_checks_es(ev) {
 [es=(building_small_mastaba, complete_construction), es=(building_medium_mastaba, complete_construction), es=(building_large_mastaba, complete_construction)]
 function building_mastaba_complete_construction(ev) {
   var b = city.get_building(ev.bid)
-  __city_message_post_with_popup_delay(MESSAGE_CAT_MONUMENTS, true, "message_history_mastaba", b.type, __map_grid_offset(b.tile), true)
+  __city_message_post_with_popup_delay(MESSAGE_CAT_MONUMENTS, true, "message_history_mastaba", b.type, __map_grid_offset(b.tile), true, "message_building_mastaba")
 }

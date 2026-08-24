@@ -140,6 +140,7 @@ struct city_message {
     int unk_11a_i8;
     uint8_t god;
     uint16_t background_img;
+    uint16_t help_text_id;
     pcstr src_location = nullptr;
 };
 

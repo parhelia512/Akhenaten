@@ -4573,7 +4573,7 @@ game_messages_de {
     }
     message_history_festivals {
         id: 393,
-        
+
         size [30, 20]
         image {
             id: 126,
@@ -4592,7 +4592,7 @@ game_messages_de {
     }
     message_history_mastaba {
         id: 394,
-        
+
         size [30, 20]
         image {
             id: 127,
@@ -4611,7 +4611,7 @@ game_messages_de {
     }
     message_history_burial_provisions {
         id: 395,
-        
+
         size [30, 20]
         image {
             id: 26,

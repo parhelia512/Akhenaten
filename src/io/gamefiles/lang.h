@@ -56,6 +56,7 @@ struct lang_message {
     vec2i pos;
     e_message_arch type;
     e_message_category message_type;
+    xstring help_link;
     uint16_t id;
     bool urgent;
     enum {
@@ -65,7 +66,7 @@ struct lang_message {
 ANK_CONFIG_STRUCT(lang_message::limage, pos, pack, id, offset)
 ANK_CONFIG_STRUCT(lang_message::ltext, text, pos)
 ANK_CONFIG_STRUCT(lang_message, title, subtitle, video, content, image,
-    advisor, size, key, pos, type, message_type, id, urgent)
+    advisor, size, key, pos, type, message_type, help_link, id, urgent)
 
 template<>
 struct stable_array_max_elements<lang_message> {
