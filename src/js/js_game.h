@@ -933,6 +933,8 @@ void js_register_invasion_warning_proto(js_State* J);
 void js_register_mission_objects(js_State *J);
 void js_register_city_objects(js_State *J);
 void js_register_figure(js_State *J);
+void js_register_figure_trade_proto(js_State *J);
+void js_register_figure_transport_ship_proto(js_State *J);
 void js_register_figure_params(js_State *J);
 void js_register_building(js_State *J);
 void js_register_building_params(js_State *J);

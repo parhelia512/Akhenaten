@@ -481,6 +481,14 @@ city.get_figure = function(figure_id) {
     return new Figure(figure_id)
 }
 
+city.get_figure_trade = function(figure_id) {
+    return new FigureTrade(figure_id)
+}
+
+city.get_transport_ship = function(figure_id) {
+    return new FigureTransportShip(figure_id)
+}
+
 city.get_random_building_by_type = function(type) {
     var building_id = __city_get_random_building_id_by_type(type)
     return city.get_building(building_id)

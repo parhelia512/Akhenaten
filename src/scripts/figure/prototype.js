@@ -19,3 +19,18 @@ Figure.property.home = { get: function() { return city.get_building(this.home_bu
 Figure.property.anim_key = { get: function() { return this.__anim_key() } }
 Figure.property.overlay = { get: function() { return this.__overlay() } }
 Figure.property.params = { get: function() { return city.get_figure_params_by_type(this.type) } }
+Figure.property.trade = { get: function() { return city.get_figure_trade(this.id) } }
+Figure.property.transport_ship = { get: function() { return city.get_transport_ship(this.id) } }
+
+FigureTrade.property.valid = { get: function() { return this.__valid() } }
+FigureTrade.property.capacity = { get: function() { return this.__capacity() } }
+FigureTrade.property.per_good = { get: function() { return this.__per_good() } }
+FigureTrade.property.empire_city_id = { get: function() { return this.__empire_city_id() } }
+FigureTrade.property.has_traded = { get: function() { return this.__has_traded() } }
+FigureTrade.property.city = { get: function() { return empire.get_city(this.empire_city_id) } }
+
+FigureTransportShip.property.valid = { get: function() { return this.__valid() } }
+FigureTransportShip.property.has_troops = { get: function() { return this.__has_troops() } }
+FigureTransportShip.property.can_embark = { get: function() { return this.__can_embark() } }
+FigureTransportShip.property.transported_formation = { get: function() { return this.__transported_formation() } }
+FigureTransportShip.property.phase = { get: function() { return this.__phase() } }

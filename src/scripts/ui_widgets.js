@@ -44,29 +44,6 @@ figure_warship_info_window = {
     }
 }
 
-[es=ui_window]
-figure_transport_ship_info_window = {
-    ui : {
-        background       : outer_panel({size: [29, 23]}),
-        name             : text_center({pos: [16, 16], size: [px(27), 20], text:"${figure.class_name}", font : FONT_LARGE_BLACK_ON_DARK }),
-        onboard          : text({pos: [102, 58], text:"", font : FONT_NORMAL_BLACK_ON_DARK }),
-
-        embark           : button({pos:[48, 134], size:[160, 25], text:"${184.23}" }),
-        disembark        : button({pos:[248, 134], size:[160, 25], text:"${184.25}" }),
-
-        inner_panel      : inner_panel({pos : [16, 220], size: [27, 6],
-            ui : {
-                action_header: text({pos: [10, 10], font : FONT_NORMAL_WHITE_ON_DARK }),
-                action_text : text({pos: [10, 30], font : FONT_NORMAL_BLACK_ON_DARK, wrap:px(21), multiline:true }),
-            }
-        }),
-
-        button_help      : help_button({}),
-        button_close     : close_button({}),
-        show_follow      : button({margin:{right:-64, bottom:-40}, size:[23, 23], text:"F", tooltip:"#follow_walker"}),
-    }
-}
-
 [es=building_info_window]
 info_window_ferry {
     ui : baseui(building_info_window, {

@@ -38,6 +38,8 @@ struct figure_static_params {
     static figure_static_params &ref(e_figure_type);
 
     void initialize();
+
+    inline int first_img(const xstring &anim_key) const { return animations[anim_key].first_img(); }
 };
 ANK_CONFIG_STRUCT(figure_static_params, terrain_usage,  animations, sounds,
     max_roam_length, speed_mult, meta, permission, is_enemy, is_soldier, use_cart,

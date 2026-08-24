@@ -49,6 +49,20 @@ static void figure_params_proto___property_getter(js_State *J) {
     js_helpers::js_push_value<std::optional<bvariant>>(J, opt);
 }
 
+int figure_static_first_img_for_type(int type, xstring anim_key) {
+    const figure_static_params *params = figure_params_for_type(type);
+    if (!params) {
+        return 0;
+    }
+    return params->first_img(anim_key);
+}
+
+static void figure_params_proto_first_img(js_State *J) {
+    const int type = figure_params_this_type(J);
+    const xstring anim_key = js_toxstring(J, 1);
+    js_helpers::js_push_value(J, figure_static_first_img_for_type(type, anim_key));
+}
+
 static void figure_params_proto_toString(js_State *J) {
     char buf[64];
     snprintf(buf, sizeof buf, "FigureParams(type=%d)", figure_params_this_type(J));
@@ -67,6 +81,7 @@ void js_register_figure_params(js_State *J) {
     js_pushobject(J, g_figure_params_proto);
 
     jsB_propf(J, js_intern("FigureParams.prototype.__property_getter"), figure_params_proto___property_getter, 1);
+    jsB_propf(J, js_intern("FigureParams.prototype.first_img"), figure_params_proto_first_img, 1);
     jsB_propf(J, js_intern("FigureParams.prototype.toString"), figure_params_proto_toString, 0);
 
     js_newcconstructor(J, jsB_FigureParams_for_type, jsB_FigureParams_for_type, js_intern("FigureParams"), 1);

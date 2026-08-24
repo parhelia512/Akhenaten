@@ -12,6 +12,8 @@
 static int selected_transport_figure_id;
 static e_transport_pick_mode selected_transport_pick_mode;
 
+const e_transport_pick_mode_tokens_t ANK_CONFIG_ENUM(e_transport_pick_mode_tokens);
+
 static void draw_foreground_transport(int) {
     js_call_event_handlers("top_menu_draw", {});
     window_city_draw();
@@ -41,3 +43,8 @@ void window_city_transport_show(int transport_figure_id, e_transport_pick_mode m
 e_transport_pick_mode window_city_transport_pick_mode() {
     return selected_transport_pick_mode;
 }
+
+void __window_city_transport_show(int transport_figure_id, int mode) {
+    window_city_transport_show(transport_figure_id, (e_transport_pick_mode)mode);
+}
+ANK_FUNCTION_2(__window_city_transport_show)

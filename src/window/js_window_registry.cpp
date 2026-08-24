@@ -45,6 +45,11 @@ void register_es_figure_info_window(pcstr name) {
 }
 ANK_REGISTER_ES_ITERATOR(figure_info_window, register_es_figure_info_window, clear_es_figure_info_window);
 
+void register_es_figure_enemy_info_window(pcstr name) {
+    register_es_figure_info_window(name);
+}
+ANK_REGISTER_ES_ITERATOR(figure_enemy_info_window, register_es_figure_enemy_info_window, clear_es_figure_info_window);
+
 void register_es_advisor_window(pcstr name) {
     e_advisor adv = ADVISOR_NONE;
     g_config_arch.r_section(name, [&] (archive arch) {
