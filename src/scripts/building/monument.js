@@ -33,6 +33,14 @@ Monument.prototype.need_stonemason = function() {
     return __monument_need_stonemason(this.id)
 }
 
+Monument.prototype.needs_resource = function(resource) {
+    return __monument_needs_resource(this.id, resource)
+}
+
+Monument.prototype.resource_pct = function(resource) {
+    return __monument_resource_pct(this.id, resource)
+}
+
 Monument.prototype.tile_progress = function(tile) {
     return __map_monuments_get_progress(tile)
 }

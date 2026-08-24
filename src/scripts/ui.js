@@ -83,6 +83,7 @@ import ui_file_dialog_save_scenario
 import ui_overlay_menu
 import ui_build_menu
 import ui_market_buyer_window
+import ui_abu_simbel_info_window
 import ui_storage_yard_info_window
 import ui_storage_yard_orders_window
 import ui_dock_info_window

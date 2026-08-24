@@ -92,6 +92,24 @@ bool __monument_need_stonemason(int bid) {
 }
 ANK_FUNCTION_1(__monument_need_stonemason)
 
+int __monument_needs_resource(int bid, int resource) {
+    building_monument *m = monument_from_building(bid);
+    if (!m) {
+        return 0;
+    }
+    return m->needs_resource((e_resource)resource);
+}
+ANK_FUNCTION_2(__monument_needs_resource)
+
+int __monument_resource_pct(int bid, int resource) {
+    building_monument *m = monument_from_building(bid);
+    if (!m) {
+        return 0;
+    }
+    return (int)m->runtime_data().resources_pct[(e_resource)resource];
+}
+ANK_FUNCTION_2(__monument_resource_pct)
+
 int __map_monuments_get_progress(tile2i tile) {
     return (int)map_monuments_get_progress(tile);
 }
