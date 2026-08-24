@@ -1302,6 +1302,17 @@ localization_hu = [
   { key: "#mission4_goal_build_mastaba", text: "4/4 Építs kőművescéhet és helyezz el egy kis masztabát" }
   { key: "#mission4_goal_export_papyrus", text: "Nyisd meg Nekhent (550 db), exportálj papiruszt, majd a célok (1500 / 15 / 20 / 9 / 40)" }
 
+  { key: "#mission5_goal_food", text: "1/6 Építs vadászházat, magtárat és bazárt — étel vadászatból és importból" }
+  { key: "#mission5_goal_water", text: "1/6 Adj vízellátást, tűzoltóságot, építészeti irodát és rendőrséget" }
+  { key: "#mission5_goal_mines", text: "2/6 Építs réz- és drágakőbányát és raktárudvart" }
+  { key: "#mission5_goal_stock_copper", text: "2/6 Tárolj 5 rezet a raktárban — a fáraó a 0. év 8. hónapjáig kéri" }
+  { key: "#mission5_goal_military_industry", text: "3/6 Építs fegyvermívet és toborzót — a líbiai rajtaütések előtt, 2. évben" }
+  { key: "#mission5_goal_fort", text: "3/6 Építs gyalogos vagy íjász erődöt — rajtaütések a 2. év 7. hónapjától (9, majd 16, majd 24)" }
+  { key: "#mission5_goal_gems_trade", text: "4/6 Nyisd meg Nubtot (850 db) vagy Thinist (800 db) ételért; 15 drágakő a 2. év 4. hónapjáig" }
+  { key: "#mission5_goal_deben", text: "5/6 Tarts 885 debent a kincstárban — a fáraó a 2. év 8. hónapjáig kéri" }
+  { key: "#mission5_goal_weapons", text: "5/6 Gyárts fegyvert — a fáraó 11-et kér a 7. év 3. hónapjáig" }
+  { key: "#mission5_goal_win", text: "6/6 Érd el a célokat: 2000 lakos, 15 jólét, 70 királyság; fejleszd a házakat szórakoztatással" }
+
   { key: "#none", text: "Semmi" }
   { key: "#grain", text: "Gabona" }
   { key: "#meat", text: "Hús" }

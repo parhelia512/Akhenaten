@@ -1272,6 +1272,17 @@ localization_de = [
   { key: "#mission4_goal_build_mastaba", text: "4/4 Baut eine Zunft der Maurer und platziert eine kleine Mastaba" }
   { key: "#mission4_goal_export_papyrus", text: "Nekhen öffnen (550 db), Papyrus exportieren, dann Wertungen (1500 / 15 / 20 / 9 / 40)" }
 
+  { key: "#mission5_goal_food", text: "1/6 Jagdhütte, Kornspeicher und Basar bauen — Nahrung aus Wild und Import" }
+  { key: "#mission5_goal_water", text: "1/6 Wasserversorgung, Feuerwehr, Architektenbüro und Polizei hinzufügen" }
+  { key: "#mission5_goal_mines", text: "2/6 Kupfer- und Edelsteinminen sowie einen Lagerhof bauen" }
+  { key: "#mission5_goal_stock_copper", text: "2/6 5 Kupfer im Lagerhorten — Pharao fordert bis Monat 8 Jahr 0" }
+  { key: "#mission5_goal_military_industry", text: "3/6 Waffenschmied und Rekrutierer bauen — vor libyschen Überfällen in Jahr 2" }
+  { key: "#mission5_goal_fort", text: "3/6 Infanterie- oder Bogenschützenfestung bauen — Überfälle ab Jahr 2 Monat 7 (9, dann 16, dann 24)" }
+  { key: "#mission5_goal_gems_trade", text: "4/6 Nubt (850 db) oder Thinis (800 db) für Nahrung öffnen; 15 Edelsteine bis Jahr 2 Monat 4" }
+  { key: "#mission5_goal_deben", text: "5/6 885 Deben in der Staatskasse halten — Pharao fordert bis Jahr 2 Monat 8" }
+  { key: "#mission5_goal_weapons", text: "5/6 Waffen produzieren — Pharao fordert 11 bis Jahr 7 Monat 3" }
+  { key: "#mission5_goal_win", text: "6/6 Ziele erreichen: 2000 Einwohner, 15 Wohlstand, 70 Königreich; Wohnungen mit Unterhaltung entwickeln" }
+
   { key: "#none", text: "Nichts" }
   { key: "#grain", text: "Getreide" }
   { key: "#meat", text: "Fleisch" }

@@ -300,6 +300,52 @@ mission5 { // Timna
 		pharaoh_favour_invasion_done : false
 		start_message_shown : false
 	}
+
+	goal_tooltip: function() {
+		if (city.count_total_buildings(BUILDING_HUNTING_LODGE) < 1
+			|| city.count_total_buildings(BUILDING_GRANARY) < 1
+			|| city.count_total_buildings(BUILDING_BAZAAR) < 1) {
+			return "#mission5_goal_food"
+		}
+
+		if (city.count_total_buildings(BUILDING_WATER_SUPPLY) < 1) {
+			return "#mission5_goal_water"
+		}
+
+		if (city.count_total_buildings(BUILDING_COPPER_MINE) < 1
+			|| city.count_total_buildings(BUILDING_GEMSTONE_MINE) < 1
+			|| city.count_total_buildings(BUILDING_STORAGE_YARD) < 1) {
+			return "#mission5_goal_mines"
+		}
+
+		if (!mission.pharaoh_requested_copper && city.yards_stored(RESOURCE_COPPER) < 5) {
+			return "#mission5_goal_stock_copper"
+		}
+
+		if (city.count_total_buildings(BUILDING_WEAPONSMITH) < 1
+			|| city.count_total_buildings(BUILDING_RECRUITER) < 1) {
+			return "#mission5_goal_military_industry"
+		}
+
+		if (city.count_total_buildings(BUILDING_FORT_INFANTRY) < 1
+			&& city.count_total_buildings(BUILDING_FORT_ARCHERS) < 1) {
+			return "#mission5_goal_fort"
+		}
+
+		if (!mission.pharaoh_requested_gems && city.yards_stored(RESOURCE_GEMS) < 15) {
+			return "#mission5_goal_gems_trade"
+		}
+
+		if (!mission.pharaoh_requested_deben && city.finance.treasury < 885) {
+			return "#mission5_goal_deben"
+		}
+
+		if (!mission.pharaoh_requested_weapons && city.yards_stored(RESOURCE_WEAPONS) < 11) {
+			return "#mission5_goal_weapons"
+		}
+
+		return "#mission5_goal_win"
+	}
 }
 
 function mission5_fire_request(tag, resource, amount, months, ok_tag, fail_tag, late_tag, ok_amt, fail_amt, late_amt) {

@@ -1333,6 +1333,17 @@ localization_en = [
   { key: "#mission4_goal_build_mastaba", text: "4/4 Build a Bricklayers' Guild and place a Small Mastaba" }
   { key: "#mission4_goal_export_papyrus", text: "Open Nekhen (550 db), export papyrus, then hit ratings (1500 / 15 / 20 / 9 / 40)" }
 
+  { key: "#mission5_goal_food", text: "1/6 Build a Hunting Lodge, Granary and Bazaar — food comes from game meat and imports" }
+  { key: "#mission5_goal_water", text: "1/6 Add a Water Supply plus Firehouse, Architect's Post and Police Station" }
+  { key: "#mission5_goal_mines", text: "2/6 Build Copper and Gemstone Mines and a Storage Yard" }
+  { key: "#mission5_goal_stock_copper", text: "2/6 Stock 5 copper in a Yard — Pharaoh requests it by month 8 of year 0" }
+  { key: "#mission5_goal_military_industry", text: "3/6 Build a Weaponsmith and Recruiter before Libyan raids in year 2" }
+  { key: "#mission5_goal_fort", text: "3/6 Build an Infantry or Archers Fort — raids start year 2 month 7 (9, then 16, then 24)" }
+  { key: "#mission5_goal_gems_trade", text: "4/6 Open Nubt (850 db) or Thinis (800 db) for food; stock 15 gems by year 2 month 4" }
+  { key: "#mission5_goal_deben", text: "5/6 Keep 885 deben in the treasury — Pharaoh requests it by year 2 month 8" }
+  { key: "#mission5_goal_weapons", text: "5/6 Produce weapons — Pharaoh requests 11 by year 7 month 3" }
+  { key: "#mission5_goal_win", text: "6/6 Hit goals: 2000 population, 15 prosperity, 70 kingdom; evolve housing with entertainment" }
+
   { key: "#none", text: "Nothing" }
   { key: "#grain", text: "Grain" }
   { key: "#meat", text: "Meat" }
