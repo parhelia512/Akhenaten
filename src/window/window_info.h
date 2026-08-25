@@ -40,3 +40,4 @@ int window_building_info_get_type();
 
 void window_building_register_handler(common_info_window *handler);
 void window_figure_register_handler(common_info_window *handler);
+void window_terrain_register_handler(common_info_window *handler);

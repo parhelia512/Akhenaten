@@ -2,6 +2,7 @@
 
 #include "window_building_info.h"
 #include "window/window_figure_info.h"
+#include "window/window_terrain_info.h"
 #include "window/window_advisors.h"
 #include "window/autoconfig_window.h"
 #include "city/constants.h"
@@ -19,6 +20,12 @@ struct js_building_info_window : public building_info_window {
 };
 
 struct js_figure_info_window : public figure_info_window {
+    xstring window_name;
+
+    virtual xstring section() const override { return window_name; }
+};
+
+struct js_terrain_info_window : public terrain_info_window {
     xstring window_name;
 
     virtual xstring section() const override { return window_name; }

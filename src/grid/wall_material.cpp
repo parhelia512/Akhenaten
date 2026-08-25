@@ -4,6 +4,9 @@
 #include "grid/terrain.h"
 #include "io/io_buffer.h"
 #include "scenario/map.h"
+#include "js/js_game.h"
+
+const e_wall_material_tokens_t ANK_CONFIG_ENUM(e_wall_material_tokens);
 
 grid_xx g_wall_material_grid(FS_UINT8);
 grid_xx g_wall_material_grid_backup(FS_UINT8);

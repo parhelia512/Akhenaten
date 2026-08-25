@@ -2,6 +2,7 @@ log_info("akhenaten: ui garden info started")
 
 [es=terrain_info_window]
 terrain_info_garden {
+    related_terrain [terrain_info_garden]
     help_id           : "message_building_garden_plaze_statue"
     open_sounds       : [ "Wavs/park1.wav" ]
     ui : baseui(terrain_info_window, {

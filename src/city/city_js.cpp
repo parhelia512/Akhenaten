@@ -335,6 +335,16 @@ ANK_FUNCTION(__city_workers_diff)
 
 tile2i __city_message_next_problem_area_grid_offset() { return tile2i(city_message_next_problem_area_grid_offset()); } ANK_FUNCTION(__city_message_next_problem_area_grid_offset)
 
+int __city_map_entry_flag_offset() {
+    return g_city.map.entry_flag.grid_offset();
+}
+ANK_FUNCTION(__city_map_entry_flag_offset)
+
+int __city_map_exit_flag_offset() {
+    return g_city.map.exit_flag.grid_offset();
+}
+ANK_FUNCTION(__city_map_exit_flag_offset)
+
 void __city_message_sort_and_compact() { city_message_sort_and_compact(); }
 ANK_FUNCTION(__city_message_sort_and_compact)
 

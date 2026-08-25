@@ -3,13 +3,18 @@
 #include <cstdint>
 
 #include "building/building_type.h"
+#include "core/tokenum.h"
 #include "grid/point.h"
 
 enum e_wall_material : uint8_t {
     WALL_MATERIAL_NONE = 0,
     WALL_MATERIAL_MUD = 1,
     WALL_MATERIAL_BRICK = 2,
+
+    WALL_MATERIAL_COUNT
 };
+using e_wall_material_tokens_t = token_holder<e_wall_material, WALL_MATERIAL_NONE, WALL_MATERIAL_COUNT>;
+extern const e_wall_material_tokens_t e_wall_material_tokens;
 
 e_wall_material map_wall_material_at(int grid_offset);
 inline e_wall_material map_wall_material_at(tile2i tile) { return map_wall_material_at(tile.grid_offset()); }

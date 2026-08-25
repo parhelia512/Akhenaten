@@ -3,10 +3,11 @@
 
 #include "graphics/view/lookup.h"
 #include "dev/debug.h"
+#include "js/js_game.h"
 
 declare_console_var_int(fill_figure_radius, 30);
 
-const terrain_info_type_tokens_t terrain_info_type_tokens;
+const terrain_info_type_tokens_t ANK_CONFIG_ENUM(terrain_info_type_tokens);
 
 void object_info::fill_figures_info(tile2i center) {
     figure_selected_index = 0;

@@ -11,6 +11,7 @@
 
 hvector<std::unique_ptr<js_building_info_window>, 32> building_windows;
 hvector<std::unique_ptr<js_figure_info_window>, 32> figure_windows;
+hvector<std::unique_ptr<js_terrain_info_window>, 32> terrain_windows;
 hvector<std::unique_ptr<js_advisor_window>, ADVISOR_MAX> advisor_windows;
 hvector<std::unique_ptr<js_common_window>, 32> common_windows;
 hvector<std::unique_ptr<js_common_modal_window>, 32> modal_windows;
@@ -49,6 +50,21 @@ void register_es_figure_enemy_info_window(pcstr name) {
     register_es_figure_info_window(name);
 }
 ANK_REGISTER_ES_ITERATOR(figure_enemy_info_window, register_es_figure_enemy_info_window, clear_es_figure_info_window);
+
+void clear_es_terrain_info_window() {
+    logs::info("JS Window Registry: Clearing %d registered terrain windows", (int)terrain_windows.size());
+    terrain_windows.clear();
+}
+
+void register_es_terrain_info_window(pcstr name) {
+    logs::info("JS Window Registry: Registering terrain window '%s'", name);
+
+    auto window = new js_terrain_info_window();
+    window->window_name = name;
+
+    window_terrain_register_handler(window);
+}
+ANK_REGISTER_ES_ITERATOR(terrain_info_window, register_es_terrain_info_window, clear_es_terrain_info_window);
 
 void register_es_advisor_window(pcstr name) {
     e_advisor adv = ADVISOR_NONE;

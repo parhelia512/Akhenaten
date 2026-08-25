@@ -33,7 +33,6 @@
 #include "window/building/figures.h"
 #include "window/building/terrain.h"
 #include "window/window_building_info.h"
-#include "window/window_terrain_info.h"
 #include "window/window_figure_info.h"
 #include "window/window_batalion_info.h"
 #include "window/window_city.h"
@@ -52,6 +51,7 @@
 object_info ANK_VARIABLE(def_object_info)
 std::vector<common_info_window *> *g_window_building_handlers = nullptr;
 std::vector<common_info_window *> *g_window_figure_handlers = nullptr;
+std::vector<common_info_window *> *g_window_terrain_handlers = nullptr;
 
 struct empty_info_window : public common_info_window {
     virtual void window_info_background(object_info &c) override {
@@ -60,7 +60,6 @@ struct empty_info_window : public common_info_window {
     }
 };
 
-terrain_info_window g_terrain_info_window;
 figure_info_window figure_common_window;
 building_info_window g_building_common_window;
 empty_info_window g_empty_info_window;
@@ -71,9 +70,11 @@ void ANK_REGISTER_CONFIG_ITERATOR(config_load_info_window) {
     g_building_common_window.load("building_info_window");
     g_empty_info_window.load("empty_info_window");
     figure_common_window.load("figure_info_window");
-    g_terrain_info_window.load("terrain_info_window");
 
     auto load_configs = [] (auto &handlers) {
+        if (!handlers) {
+            return;
+        }
         for (auto &handler : *handlers) {
             const xstring section = handler->section();
             if (!section.empty()) {
@@ -84,17 +85,11 @@ void ANK_REGISTER_CONFIG_ITERATOR(config_load_info_window) {
 
     load_configs(g_window_building_handlers);
     load_configs(g_window_figure_handlers);
+    load_configs(g_window_terrain_handlers);
 
     if (def_object_info.ui) {
         window_info_show(tile2i(def_object_info.grid_offset), true);
     }
-}
-
-static int center_in_city(int element_width_pixels) {
-    vec2i view_pos = g_camera.offset;
-    vec2i view_size = g_camera.size_pixels;
-    int margin = (view_size.x - element_width_pixels) / 2;
-    return view_pos.x + margin;
 }
 
 void object_info::reset(tile2i tile) {
@@ -104,7 +99,7 @@ void object_info::reset(tile2i tile) {
     go_to_advisor_left_a = ADVISOR_NONE;
     go_to_advisor_left_b = ADVISOR_NONE;
     bid = map_building_at(tile);
-    terrain_type = terrain_info_empty;
+    terrain_type = terrain_info_none;
     figure_drawn = 0;
     help_id = 0;
     help_link = {};
@@ -148,6 +143,7 @@ void window_info_update(bool avoid_mouse) {
             context.ui = &figure_common_window;
         }
     }
+    verify_no_crash(g_window_building_handlers);
     find_handler(*g_window_building_handlers, context);
 
     int building_id = map_building_at(context.grid_offset);
@@ -156,8 +152,9 @@ void window_info_update(bool avoid_mouse) {
         context.bid = building_id;
     }
 
-    if (!context.ui && g_terrain_info_window.check(context)) {
-        context.ui = &g_terrain_info_window;
+    verify_no_crash(g_window_terrain_handlers);
+    if (!context.ui) {
+        find_handler(*g_window_terrain_handlers, context);
     }
 
     if (!context.ui) {
@@ -282,6 +279,10 @@ void window_building_register_handler(common_info_window *handler) {
 
 void window_figure_register_handler(common_info_window *handler) {
     window_info_register_handler_t(g_window_figure_handlers, handler);
+}
+
+void window_terrain_register_handler(common_info_window *handler) {
+    window_info_register_handler_t(g_window_terrain_handlers, handler);
 }
 
 vec2i common_info_window::bgsize() const {
