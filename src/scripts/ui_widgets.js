@@ -200,14 +200,6 @@ info_window_pharos_lighthouse = {
     }
 }
 
-[es=building_info_window]
-info_window_fishing_wharf = {
-    ui : baseui(building_info_window, {
-        resource_img : { type : "resource_icon", pos: [32, 186] },
-        storage_desc : { type : "text", pos: [62, 186 + 2], font: FONT_NORMAL_BLACK_ON_LIGHT },
-    })
-}
-
 ruin_info_window {
     open_sounds [ "wavs/fire.wav" ]
     ui {
