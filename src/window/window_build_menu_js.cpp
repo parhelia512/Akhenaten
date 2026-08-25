@@ -10,20 +10,10 @@
 #include "widget/widget_city.h"
 #include "game/game_config.h"
 
-bool __ui_screen_city_capture_input() {
-    return g_screen_city.capture_input;
-}
-ANK_FUNCTION(__ui_screen_city_capture_input)
-
-void __ui_screen_city_clear_current_tile() {
-    g_screen_city.clear_current_tile();
-}
-ANK_FUNCTION(__ui_screen_city_clear_current_tile)
-
-tile2i __ui_screen_city_current_tile() {
-    return g_screen_city.current_tile;
-}
-ANK_FUNCTION(__ui_screen_city_current_tile)
+ANK_GLOBAL_OBJECT(g_screen_city, __screen_city,
+    capture_input,
+    current_tile,
+    selected_tile);
 
 void __ui_city_planner_reset() {
     g_city_planner.reset();

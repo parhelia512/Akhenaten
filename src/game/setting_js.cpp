@@ -18,6 +18,9 @@ void ank_global_obj_bind_field(js_State *J, js_StringNode name, tile2i *ptr) {
     js_newobject(J);
     ank_global_obj_bind_field(J, js_intern("x"), ptr->private_access(_X));
     ank_global_obj_bind_field(J, js_intern("y"), ptr->private_access(_Y));
+    ank_global_obj_bind_field(J, js_intern("grid_offset"), ptr->private_access(_GRID_OFFSET));
+    ank_global_obj_bind_field(J, js_intern("abs_x"), ptr->private_access(_ABS_X));
+    ank_global_obj_bind_field(J, js_intern("abs_y"), ptr->private_access(_ABS_Y));
     js_setproperty(J, -2, name);
 }
 

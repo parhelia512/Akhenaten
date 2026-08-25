@@ -249,7 +249,7 @@ function top_menu_draw(ev) {
 }
 
 function top_menu_handle_input() {
-	if (__ui_screen_city_capture_input()) {
+	if (__screen_city.capture_input) {
 		return 0
 	}
 

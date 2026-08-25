@@ -171,7 +171,7 @@ function window_city_copy_build_type_from_tile(tile) {
 
 [es=event_copy_build_from_cursor]
 function window_city_on_copy_build_from_cursor(ev) {
-    var type = window_city_copy_build_type_from_tile(__ui_screen_city_current_tile())
+    var type = window_city_copy_build_type_from_tile(__screen_city.current_tile)
     if (type != BUILDING_NONE) {
         emit event_city_building_mode{ value: type }
     }

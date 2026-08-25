@@ -114,8 +114,17 @@ build_menu_widget.item_label = function(type) {
     return __loc(28, type)
 }
 
+function screen_city_invalidate_tile(tile) {
+    tile.x = -1
+    tile.y = -1
+    tile.grid_offset = -1
+    tile.abs_x = -1
+    tile.abs_y = -1
+}
+
 build_menu_widget.button_menu_item = function(item) {
-    __ui_screen_city_clear_current_tile()
+    screen_city_invalidate_tile(__screen_city.current_tile)
+    screen_city_invalidate_tile(__screen_city.selected_tile)
     var submenu = build_menu_widget.selected_submenu
     var type = building_menu_ctrl.item_type(submenu, item)
     if (building_is_unique_built(type)) {
