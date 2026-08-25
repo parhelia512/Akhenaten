@@ -128,6 +128,7 @@ import ui_hunting_lodge_window
 import ui_pavilion_window
 import ui_bandstand_window
 import ui_booth_window
+import ui_senet_house_info_window
 import ui_farm_info_window
 import ui_courthouse_window
 import ui_statue_window

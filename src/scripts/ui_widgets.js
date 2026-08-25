@@ -261,13 +261,6 @@ health_info_window = {
 }
 
 [es=building_info_window]
-info_window_senet_house = {
-    ui : baseui(building_info_window, {
-        advice        : text({pos: [36, 164], wrap:400, font : FONT_NORMAL_BLACK_ON_DARK, multiline:true }),
-    })
-}
-
-[es=building_info_window]
 info_window_bullfight = {
     ui : baseui(building_info_window, {
 
