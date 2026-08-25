@@ -250,13 +250,6 @@ info_window_bullfight = {
     })
 }
 
-[es=building_info_window]
-info_window_gatehouse = {
-    ui : baseui(building_info_window, {
-
-    })
-}
-
 minimap_window {
     draw_size [73, 111]
 
