@@ -4,10 +4,8 @@
 #include "city/city.h"
 #include "city/city_buildings.h"
 #include "city/city_industry.h"
-#include "city/city_message.h"
 #include "city/city_warnings.h"
 #include "core/random.h"
-#include "dev/debug.h"
 #include "game/game_events.h"
 #include "graphics/image.h"
 #include "grid/terrain.h"
@@ -258,8 +256,7 @@ void figure_locust::apply_plague(int swarm_count) {
     events::emit(event_sound_track{ "plague_locusts" });
 }
 
-declare_console_command_p(crop_busters) {
+void __locust_apply_plague() {
     figure_locust::apply_plague();
-    messages::popup("message_plague_of_locusts", 0, 0);
-    events::emit(event_city_warning{ "Crop Busters" });
 }
+ANK_FUNCTION(__locust_apply_plague)

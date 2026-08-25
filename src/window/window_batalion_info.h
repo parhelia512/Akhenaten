@@ -3,6 +3,8 @@
 #include "window/window_building_info.h"
 
 struct batalion_info_window : public building_info_window_t<batalion_info_window> {
+    batalion_info_window();
+
     virtual void init(object_info &c) override;
     virtual void window_info_background(object_info &c) override;
     virtual void window_info_foreground(object_info &c) override;

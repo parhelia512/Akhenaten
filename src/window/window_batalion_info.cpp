@@ -19,6 +19,10 @@
 
 batalion_info_window batalion_infow;
 
+batalion_info_window::batalion_info_window() {
+    window_batalion_register_handler(this);
+}
+
 static pcstr buttons[] = { "formation_1", "formation_2", "formation_3", "formation_4", "formation_5" };
 
 struct military_data_t {

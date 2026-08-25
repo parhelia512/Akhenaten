@@ -32,6 +32,7 @@
 #include "game/game_environment.h"
 #include "city/city.h"
 #include "city/city_finance.h"
+#include "city/city_warnings.h"
 #include "io/gamestate/boilerplate.h"
 #include "io/chunk_serializer.h"
 #include "window/autoconfig_window.h"
@@ -53,6 +54,7 @@
 #include <vector>
 #include <sstream>
 #include <string>
+#include <iostream>
 
 using event_handlers = hvector<xstring, 16>;
 std::unordered_map<xstring, event_handlers> event_type_handlers;
@@ -563,6 +565,13 @@ void __game_player_data_new(pcstr name_utf8) {
     encoding_from_utf8(name_utf8 ? name_utf8 : "", internal, MAX_PLAYER_NAME);
     player_data_new(internal);
 } ANK_FUNCTION_1(__game_player_data_new)
+
+void __debug_crash() {
+    events::emit(event_city_warning{ "Trying to crash the game" });
+    const int *p = nullptr;
+    std::cout << *p;
+}
+ANK_FUNCTION(__debug_crash)
 
 void js_register_game_functions(js_State *J) {
     REGISTER_GLOBAL_FUNCTION(J, js_log_info_native, "__log_info_native", 1);

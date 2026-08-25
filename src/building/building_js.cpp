@@ -46,6 +46,15 @@ bool __building_is_valid(int bid) {
 }
 ANK_FUNCTION_1(__building_is_valid)
 
+void __building_create_roaming_figure(int bid, int type, int action, int slot) {
+    building *b = building_get(bid);
+    if (!b || !b->is_valid()) {
+        return;
+    }
+    b->create_roaming_figure((e_figure_type)type, (e_figure_action)action, (e_building_slot)slot);
+}
+ANK_FUNCTION_4(__building_create_roaming_figure)
+
 bool __building_is_bazaar(int bid) {
     building *b = building_get(bid);
     return b && b->is_valid() && b->dcast_bazaar();

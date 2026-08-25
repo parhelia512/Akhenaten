@@ -20,7 +20,6 @@
 #include "core/calc.h"
 #include "core/string.h"
 #include "figure/formation_batalion.h"
-#include "game/cheats.h"
 #include "game/game_events.h"
 #include "graphics/text.h"
 #include "graphics/window.h"

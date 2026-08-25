@@ -6,7 +6,7 @@
 #include "core/string.h"
 #include "core/log.h"
 #include "core/profiler.h"
-#include "game/cheats.h"
+#include "widget/debug_console.h"
 #include "graphics/graphics.h"
 #include "building/construction/build_planner.h"
 #include "graphics/elements/image_button.h"
@@ -77,7 +77,7 @@ static void send_command(int param1, int param2) {
     button_back(0, 0);
     logs::info("Command received: %s", command_copy.c_str());
     events::emit(event_city_warning{ command_copy });
-    game_cheat_parse_command(command_copy.c_str());
+    run_debug_command(command_copy.c_str());
 }
 
 void window_console_show() {
@@ -92,15 +92,9 @@ void window_console_show() {
     window_show(&window);
 }
 
-void window_show_cheat_console(bool force) {
-    if (force) {
-        game_cheat_force_activate();
-    }
-
-    if (game_cheat_is_active()) {
-        g_city_planner.reset();
-        window_city_show();
-        window_console_show();
-    }
+void window_show_cheat_console(bool) {
+    g_city_planner.reset();
+    window_city_show();
+    window_console_show();
 }
 ANK_FUNCTION_1(window_show_cheat_console)

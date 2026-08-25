@@ -6,7 +6,6 @@
 #include "overlays/city_overlay.h"
 #include "core/calc.h"
 #include "figure/figure.h"
-#include "figure/formation_batalion.h"
 #include "figure/figure_phrase.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -34,7 +33,6 @@
 #include "window/building/terrain.h"
 #include "window/window_building_info.h"
 #include "window/window_figure_info.h"
-#include "window/window_batalion_info.h"
 #include "window/window_city.h"
 #include "widget/widget_sidebar.h"
 #include "io/gamefiles/lang.h"
@@ -50,6 +48,7 @@
 
 object_info ANK_VARIABLE(def_object_info)
 std::vector<common_info_window *> *g_window_building_handlers = nullptr;
+std::vector<common_info_window *> *g_window_batalion_handlers = nullptr;
 std::vector<common_info_window *> *g_window_figure_handlers = nullptr;
 std::vector<common_info_window *> *g_window_terrain_handlers = nullptr;
 
@@ -84,6 +83,7 @@ void ANK_REGISTER_CONFIG_ITERATOR(config_load_info_window) {
     };
 
     load_configs(g_window_building_handlers);
+    load_configs(g_window_batalion_handlers);
     load_configs(g_window_figure_handlers);
     load_configs(g_window_terrain_handlers);
 
@@ -131,13 +131,12 @@ void window_info_update(bool avoid_mouse) {
         }
     };
 
-    // Own company figures (standard / soldiers) open battalion orders, not the
-    // generic figure panel — must run before figure handlers claim the tile.
-    if (!context.figure_ids.empty() && batalion_infow.check(context)) {
-        context.ui = &batalion_infow;
+    if (!context.figure_ids.empty()) {
+        verify_no_crash(g_window_batalion_handlers);
+        find_handler(*g_window_batalion_handlers, context);
     }
 
-    if (!context.figure_ids.empty()) {
+    if (!context.ui && !context.figure_ids.empty()) {
         find_handler(*g_window_figure_handlers, context);
         if (!context.ui) {
             context.ui = &figure_common_window;
@@ -254,11 +253,6 @@ void window_info_show(const tile2i& point, bool avoid_mouse) {
     window_show(&window);
 }
 
-int window_building_info_get_type() {
-    auto &context = def_object_info;
-    return building_get(context.bid)->type;
-}
-
 template<typename T>
 void window_info_register_handler_t(T &ptr, common_info_window *handler) {
     if (!ptr) {
@@ -275,6 +269,10 @@ void window_info_register_handler_t(T &ptr, common_info_window *handler) {
 
 void window_building_register_handler(common_info_window *handler) {
     window_info_register_handler_t(g_window_building_handlers, handler);
+}
+
+void window_batalion_register_handler(common_info_window *handler) {
+    window_info_register_handler_t(g_window_batalion_handlers, handler);
 }
 
 void window_figure_register_handler(common_info_window *handler) {

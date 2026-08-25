@@ -5,6 +5,43 @@ function console_command_hello(args) {
 	log_info("Hello, " + ((args && args[0]) || "World") + "!");
 }
 
+[console_command=noble_spawn]
+function console_command_spawnnobles(args) {
+	var count = parseInt((args && args[0]) || "10", 10)
+	if (count <= 0) {
+		count = 10
+	}
+
+	var houses = []
+	for (var bid = 1; bid < MAX_BUILDINGS; bid++) {
+		var house = city.get_house(bid)
+		if (house && house.valid && !house.is_vacant_lot && house.population > 0) {
+			houses.push(house)
+		}
+	}
+
+	var step = Math.max(1, Math.floor(houses.length / count))
+	for (var i = 0; i < houses.length; i += step) {
+		var house = houses[i]
+		if (!house.has_road_access) {
+			continue
+		}
+		__building_create_roaming_figure(house.id, FIGURE_NOBLES, ACTION_125_ROAMER_ROAMING, BUILDING_SLOT_SERVICE)
+	}
+}
+
+[console_command=monument_clearprogress]
+function console_command_clearprogress(args) {
+	__map_monuments_clear()
+}
+
+[console_command=locust_apply_plague]
+function console_command_cropbusters(args) {
+	__locust_apply_plague()
+	ui.popup_message("message_plague_of_locusts")
+	city.warnings.show("Crop Busters")
+}
+
 [console_command=add_grain]
 function console_command_add_grain(args) {
 	var amount = parseInt((args && args[0]) || "100", 10)

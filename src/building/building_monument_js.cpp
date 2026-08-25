@@ -123,3 +123,8 @@ void __monument_set_tile_progress(int bid, tile2i tile, int progress) {
     m->set_tile_progress(tile, progress);
 }
 ANK_FUNCTION_3(__monument_set_tile_progress)
+
+void __map_monuments_clear() {
+    map_monuments_clear();
+}
+ANK_FUNCTION(__map_monuments_clear)
