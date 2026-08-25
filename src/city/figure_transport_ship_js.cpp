@@ -1,5 +1,7 @@
+#include "city/city_figures.h"
 #include "figure/figure.h"
 #include "figuretype/figure_transport_ship.h"
+#include "grid/point.h"
 #include "js/js.h"
 #include "js/js_game.h"
 #include "mujs/jsbuiltin.h"

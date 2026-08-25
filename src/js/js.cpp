@@ -1019,6 +1019,7 @@ void js_reset_vm_state() {
     js_register_figure(vm.J);
     js_register_figure_trade_proto(vm.J);
     js_register_figure_transport_ship_proto(vm.J);
+    js_register_figure_warship_proto(vm.J);
     js_register_figure_params(vm.J);
     js_register_imperial_visible_request(vm.J);
     js_register_house(vm.J);

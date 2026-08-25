@@ -24,6 +24,7 @@ import ui_send_gift_window
 import ui_advisor_trade
 import ui_figure_trader_window
 import ui_figure_transport_ship_window
+import ui_figure_warship_window
 import ui_figure_enemy_window
 import ui_top_menu_actions
 import ui_top_menu_widget

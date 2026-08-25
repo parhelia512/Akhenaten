@@ -489,6 +489,10 @@ city.get_transport_ship = function(figure_id) {
     return new FigureTransportShip(figure_id)
 }
 
+city.get_warship = function(figure_id) {
+    return new FigureWarship(figure_id)
+}
+
 city.get_random_building_by_type = function(type) {
     var building_id = __city_get_random_building_id_by_type(type)
     return city.get_building(building_id)

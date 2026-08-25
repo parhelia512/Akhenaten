@@ -21,6 +21,7 @@ Figure.property.overlay = { get: function() { return this.__overlay() } }
 Figure.property.params = { get: function() { return city.get_figure_params_by_type(this.type) } }
 Figure.property.trade = { get: function() { return city.get_figure_trade(this.id) } }
 Figure.property.transport_ship = { get: function() { return city.get_transport_ship(this.id) } }
+Figure.property.warship = { get: function() { return city.get_warship(this.id) } }
 
 FigureTrade.property.valid = { get: function() { return this.__valid() } }
 FigureTrade.property.capacity = { get: function() { return this.__capacity() } }
@@ -34,3 +35,9 @@ FigureTransportShip.property.has_troops = { get: function() { return this.__has_
 FigureTransportShip.property.can_embark = { get: function() { return this.__can_embark() } }
 FigureTransportShip.property.transported_formation = { get: function() { return this.__transported_formation() } }
 FigureTransportShip.property.phase = { get: function() { return this.__phase() } }
+
+FigureWarship.property.valid = { get: function() { return this.__valid() } }
+FigureWarship.property.active_order = { get: function() { return this.__active_order() } }
+FigureWarship.property.crew_fatigue = { get: function() { return this.__crew_fatigue() } }
+FigureWarship.property.damage = { get: function() { return this.__damage() } }
+FigureWarship.property.max_damage = { get: function() { return this.__max_damage() } }
