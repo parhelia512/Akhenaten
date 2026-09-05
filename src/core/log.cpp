@@ -179,7 +179,9 @@ void flush() {
 #endif
 }
 
-void critical(pcstr format, ...) {
+namespace detail {
+
+void critical_v(pcstr format, ...) {
     if (!format) {
         format = "empty";
     }
@@ -189,7 +191,7 @@ void critical(pcstr format, ...) {
     va_end(args);
 }
 
-void error(pcstr format, ...) {
+void error_v(pcstr format, ...) {
     if (!format) {
         format = "empty";
     }
@@ -199,7 +201,7 @@ void error(pcstr format, ...) {
     va_end(args);
 }
 
-void warn(pcstr format, ...) {
+void warn_v(pcstr format, ...) {
     if (!format) {
         format = "empty";
     }
@@ -209,7 +211,7 @@ void warn(pcstr format, ...) {
     va_end(args);
 }
 
-void info(pcstr format, ...) {
+void info_v(pcstr format, ...) {
     if (!format) {
         format = "empty";
     }
@@ -219,7 +221,7 @@ void info(pcstr format, ...) {
     va_end(args);
 }
 
-void debug(pcstr format, ...) {
+void debug_v(pcstr format, ...) {
     if (!format) {
         format = "empty";
     }
@@ -229,7 +231,7 @@ void debug(pcstr format, ...) {
     va_end(args);
 }
 
-void verbose(pcstr format, ...) {
+void verbose_v(pcstr format, ...) {
     if (!format) {
         format = "empty";
     }
@@ -238,6 +240,8 @@ void verbose(pcstr format, ...) {
     log_v(SDL_LOG_PRIORITY_VERBOSE, format, args);
     va_end(args);
 }
+
+} // namespace detail
 
 Logger::Logger() {
 #if !defined(GAME_PLATFORM_ANDROID)

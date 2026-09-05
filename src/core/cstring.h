@@ -88,14 +88,11 @@ public:
         return *this;
     }
 
-    template<size_t N = 1024>
-    cstring &printf(const char *format, ...) {
+    template<size_t N = 1024, typename... Args>
+    cstring &printf(const char *format, const Args&... args) {
         char buf[N] = { 0 };
-        va_list p;
-        va_start(p, format);
-        int vs_sz = vsnprintf(buf, sizeof(buf) - 1, format, p);
+        int vs_sz = snprintf(buf, sizeof(buf) - 1, format, fmt_arg(args)...);
         buf[sizeof(buf) - 1] = 0;
-        va_end(p);
         if (vs_sz) {
             _str = buf;
         }

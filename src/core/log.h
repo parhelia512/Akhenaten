@@ -10,11 +10,33 @@ void switch_output(pcstr folder);
 pcstr output_path();
 void flush();
 
-void critical(pcstr format, ...);
-void error(pcstr format, ...);
-void warn(pcstr format, ...);
-void info(pcstr format, ...);
-void debug(pcstr format, ...);
-void verbose(pcstr format, ...);
+namespace detail {
+
+void critical_v(pcstr format, ...);
+void error_v(pcstr format, ...);
+void warn_v(pcstr format, ...);
+void info_v(pcstr format, ...);
+void debug_v(pcstr format, ...);
+void verbose_v(pcstr format, ...);
+
+} // namespace detail
+
+template <typename... Args>
+inline void critical(pcstr format, const Args&... args) { detail::critical_v(format, fmt_arg(args)...); }
+
+template <typename... Args>
+inline void error(pcstr format, const Args&... args) { detail::error_v(format, fmt_arg(args)...); }
+
+template <typename... Args>
+inline void warn(pcstr format, const Args&... args) { detail::warn_v(format, fmt_arg(args)...); }
+
+template <typename... Args>
+inline void info(pcstr format, const Args&... args) { detail::info_v(format, fmt_arg(args)...); }
+
+template <typename... Args>
+inline void debug(pcstr format, const Args&... args) { detail::debug_v(format, fmt_arg(args)...); }
+
+template <typename... Args>
+inline void verbose(pcstr format, const Args&... args) { detail::verbose_v(format, fmt_arg(args)...); }
 
 } // namespace logs

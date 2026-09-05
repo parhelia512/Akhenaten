@@ -128,13 +128,11 @@ public:
         return strcmp(_p ? c_str() : "", rhs ? rhs : "") == 0;
     }
 
-    xstring& printf(const char* format, ...) {
+    template <typename... Args>
+    xstring& printf(pcstr format, const Args&... args) {
         bstring<4096> buf;
-        va_list p;
-        va_start(p, format);
-        int vs_sz = vsnprintf(buf, sizeof(buf) - 1, format, p);
+        int vs_sz = snprintf(buf, sizeof(buf) - 1, format, fmt_arg(args)...);
         buf[sizeof(buf) - 1] = 0;
-        va_end(p);
         if (vs_sz) {
             _set(buf);
         }

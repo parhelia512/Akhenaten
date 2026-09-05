@@ -7,11 +7,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <type_traits>
 
 #include "core/core.h"
 
 using pcstr = const char *;
 using pstr = char *;
+
+namespace fmt_detail {
+
+template <typename T, typename = void>
+struct arg {
+    using type = std::decay_t<const T &>;
+    static constexpr type get(const T &v) noexcept { return v; }
+};
+
+template <typename T>
+struct arg<T, std::void_t<decltype(static_cast<pcstr>(std::declval<const T &>().c_str()))>> {
+    using type = pcstr;
+    static type get(const T &v) noexcept {
+        pcstr s = v.c_str();
+        return s ? s : "";
+    }
+};
+
+} // namespace fmt_detail
+
+template <typename T>
+inline typename fmt_detail::arg<T>::type fmt_arg(const T &v) noexcept {
+    return fmt_detail::arg<T>::get(v);
+}
 
 template <size_t _size>
 class bstring {
@@ -104,12 +129,12 @@ public:
     inline bool operator!() const { return empty(); }
 
     template <typename... Args>
-    inline ref append_fmt(pcstr fmt, Args&&... args) {
+    inline ref append_fmt(pcstr fmt, const Args&... args) {
         size_t size = this->len();
         char* dest = _data + size;
         size_t remain = _size - size;
         if (remain > 0) {
-            snprintf(dest, remain, fmt, std::forward<Args>(args)...);
+            snprintf(dest, remain, fmt, fmt_arg(args)...);
         }
         return *this;
     }
@@ -142,8 +167,8 @@ public:
     inline int64_t atoi64() { return ::strtoll(_data); }
 
     template <typename... Args>
-    inline ref printf(pcstr fmt, Args&&... args) {
-        snprintf(_data, _size - 1, fmt, std::forward<Args>(args)...);
+    inline ref printf(pcstr fmt, const Args&... args) {
+        snprintf(_data, _size - 1, fmt, fmt_arg(args)...);
         _data[_size - 1] = 0;
         return *this;
     }
