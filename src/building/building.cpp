@@ -402,16 +402,14 @@ building* building::main() {
 }
 
 building* building::top_xy() {
-    building* b = main();
-    int x = b->tile.x();
-    int y = b->tile.y();
-    building* top = b;
-    while (b->next_part_building_id <= 0) {
-        b = next();
-        if (b->tile.x() < x)
+    building* top = main();
+    building* b = top;
+    for (int guard = 0; guard < (int)MAX_BUILDINGS && b; guard++) {
+        if (b->tile.x() < top->tile.x()
+            || (b->tile.x() == top->tile.x() && b->tile.y() < top->tile.y())) {
             top = b;
-        if (b->tile.y() < y)
-            top = b;
+        }
+        b = b->has_next() ? b->next() : nullptr;
     }
     return top;
 }
