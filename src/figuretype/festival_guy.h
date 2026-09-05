@@ -21,6 +21,4 @@ public:
     virtual void figure_action() override;
     virtual void before_poof() override;
     virtual void update_animation() override;
-
-    virtual sound_key phrase_key() const override;
 };

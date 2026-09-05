@@ -57,10 +57,6 @@ void figure_festival_guy::update_animation() {
     image_set_animation(animkey);
 }
 
-sound_key figure_festival_guy::phrase_key() const {
-    return sound_key();
-}
-
 void figure_festival_guy::figure_action() {
     switch (action_state()) {
     case ACTION_10_FESTIVAL_GUY_CREATED:

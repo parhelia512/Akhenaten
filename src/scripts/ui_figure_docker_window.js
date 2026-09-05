@@ -44,12 +44,15 @@ function figure_docker_info_window_init(window) {
 
 [es=(figure_docker_info_window, window_info_background)]
 function figure_docker_info_window_window_info_background(window) {
-    var f = city.get_figure(__object_info_figure_id())
+    var fid = __object_info_figure_id()
+    var f = city.get_figure(fid)
 
     window.name.text = f.name
     window.typename.text = figure_info_typename_with_home(f)
-    window.resource_text.text = f.action_tip
+    window.items.text = figure_docker_carrying_line_text(fid)
+    window.debug_stuck.text = figure_carrier_stuck_debug_text(fid)
 
     figure_info_window_update_toolbar(window, f)
     figure_info_window_sync_tab_selection(window)
+    figure_info_check_phrase(window)
 }

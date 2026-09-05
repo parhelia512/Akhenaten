@@ -13,11 +13,31 @@
 #include "core/object_property.h"
 #include "core/profiler.h"
 #include "scenario/invasion_auto_resolve.h"
+#include "js/js_game.h"
+#include "js/js_struct.h"
 
 #include "dev/debug.h"
 
+struct figure_es_ev { int fid; };
+ANK_REGISTER_STRUCT_WRITER(figure_es_ev, fid)
+
 std::array<vec2i, 8> ANK_VARIABLE(cartpusher_sled_offsets);
 std::array<vec2i, 8> ANK_VARIABLE(cartpusher_cart_offsets);
+
+template<typename T>
+void figure_impl::es_t(const T &ev, pcstr func) const {
+    js_event(ev, params().name, func);
+}
+
+void figure_impl::es(pcstr es_name) const {
+    es_t(figure_es_ev{ base.id }, es_name);
+}
+
+void figure_impl::setup_phrase() {
+    base.phrase_key = "waiting_for_phrase";
+    base.phrase_sound = {};
+    es(__func__);
+}
 
 static int cart_image_offset_from_amount(int amount) {
     return ((amount > 100) & 1) + ((amount > 200) & 1);
@@ -317,6 +337,7 @@ static const fproperty fproperties[] = {
     { tags().figure, tags().city_name, [] (figure &f, const xstring &) { return bvariant(f.dcast()->empire_city().name()); }},
     { tags().figure, tags().action_tip, [] (figure &f, const xstring &) { return bvariant(lang_text_from_key(f.action_tip().c_str())); }},
     { tags().figure, tags().home, [] (figure &f, const xstring &) { return bvariant(ui::str(41, f.home()->type)); }},
+    { tags().figure, tags().cls, [] (figure &f, const xstring &) { return bvariant(f.params().name); }},
 };
 
 bvariant figure_impl::get_property(const xstring &domain, const xstring &name) const {

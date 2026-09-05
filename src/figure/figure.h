@@ -170,6 +170,7 @@ public:
     uint8_t target_height;
     uint8_t collecting_item_id; // NOT a resource ID for cartpushers! IS a resource ID for warehousemen
     xstring phrase_key;
+    xstring phrase_sound;
     figure_id target_figure_id;
     short targeted_by_figure_id;
     uint8_t num_attackers;
@@ -405,11 +406,6 @@ public:
     // sound.c
     void play_die_sound();
     void play_hit_sound();
-
-    // phrase.c
-    void figure_phrase_determine();
-    int figure_play_phrase_file();
-    void figure_synthesize_phrase_file(const xstring& path);
 
     // service.c
     int figure_service_provide_coverage();

@@ -225,6 +225,7 @@ void figure_hunter::figure_action() {
             base.resource_id = RESOURCE_GAMEMEAT;
             base.resource_amount_full = UNITS_PER_LOAD;
             base.phrase_key = "";
+            base.phrase_sound = "";
             advance_action(ACTION_12_OSTRICH_HUNTER_MOVE_PACKED);
         }
         break;

@@ -116,4 +116,5 @@ function figure_trader_info_window_window_info_background(window) {
     window.action.text = "(" + f.action_tip + ")"
 
     figure_trader_info_window_update_toolbar(window, f)
+    figure_info_check_phrase(window)
 }

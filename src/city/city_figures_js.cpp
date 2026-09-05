@@ -189,18 +189,6 @@ xstring __figure_phrase_text(int fid) {
 }
 ANK_FUNCTION_1(__figure_phrase_text)
 
-void __figure_info_play_phrase(int fid) {
-    object_info &c = common_info_window::get_object_info();
-    figure *f = figure_get(fid);
-    if (!f || !f->is_valid() || !c.can_play_sound) {
-        return;
-    }
-    f->figure_phrase_determine();
-    f->figure_play_phrase_file();
-    c.can_play_sound = false;
-}
-ANK_FUNCTION_1(__figure_info_play_phrase)
-
 void __figure_info_set_help(int fid) {
     figure *f = figure_get(fid);
     if (!f || !f->is_valid()) {
@@ -274,6 +262,20 @@ static void figure_proto___overlay(js_State *J) {
     js_helpers::js_push_value(J, f && f->is_valid() ? (int)f->dcast()->get_overlay() : (int)OVERLAY_NONE);
 }
 
+static void figure_proto_setup_phrase(js_State *J) {
+    figure *f = figure_get(figure_this_id(J));
+    if (f && f->is_valid()) {
+        f->dcast()->setup_phrase();
+    }
+    J->pushundefined();
+}
+
+static void figure_proto_sound_path(js_State *J) {
+    figure *f = figure_get(figure_this_id(J));
+    xstring prop = js_toxstring(J, 1);
+    js_helpers::js_push_value(J, f && f->is_valid() ? f->dcast()->get_sound_reaction(prop).sound : xstring());
+}
+
 static void figure_proto_toString(js_State *J) {
     const int id = figure_this_id(J);
     figure *f = figure_get(id);
@@ -303,12 +305,16 @@ void js_register_figure(js_State *J) {
     JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, figure, resource_id);
     JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, figure, resource_amount_full);
     JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, figure, draw_mode);
+    JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, figure, phrase_key);
+    JS_REGISTER_BOUND_OFFSET_MEMBER_LIT(J, figure, phrase_sound);
 
     jsB_propf(J, js_intern("Figure.prototype.__property_getter"), figure_proto___property_getter, 1);
     jsB_propf(J, js_intern("Figure.prototype.__valid"), figure_proto___valid, 0);
     jsB_propf(J, js_intern("Figure.prototype.__is_on_previous_tile"), figure_proto___is_on_previous_tile, 0);
     jsB_propf(J, js_intern("Figure.prototype.__anim_key"), figure_proto___anim_key, 0);
     jsB_propf(J, js_intern("Figure.prototype.__overlay"), figure_proto___overlay, 0);
+    jsB_propf(J, js_intern("Figure.prototype.setup_phrase"), figure_proto_setup_phrase, 0);
+    jsB_propf(J, js_intern("Figure.prototype.sound_path"), figure_proto_sound_path, 1);
     jsB_propf(J, js_intern("Figure.prototype.toString"), figure_proto_toString, 0);
 
     js_newcconstructor(J, jsB_new_Figure, jsB_new_Figure, js_intern("Figure"), 1);

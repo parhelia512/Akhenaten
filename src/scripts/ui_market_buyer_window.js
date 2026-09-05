@@ -62,4 +62,5 @@ function figure_market_buyer_window_window_info_background(window) {
 
     figure_info_window_update_toolbar(window, f)
     figure_info_window_sync_tab_selection(window)
+    figure_info_check_phrase(window)
 }

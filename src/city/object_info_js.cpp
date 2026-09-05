@@ -14,6 +14,7 @@ ANK_GLOBAL_OBJECT(common_info_window::get_object_info(), __object_info,
     figure_selected_index,
     help_id,
     help_link,
+    can_play_sound,
     go_to_advisor_first,
     go_to_advisor_left_a,
     go_to_advisor_left_b);

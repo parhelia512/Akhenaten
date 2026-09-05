@@ -2,6 +2,9 @@ log_info("akhenaten: figures info started")
 
 import figure.prototype
 import figure.figure_params
+import figure.phrase
+import figure.festival_guy
+import figure.ostrich_hunter
 
 figure_fireman {
   overlay : OVERLAY_WATER
@@ -150,6 +153,17 @@ figure_festival_guy {
 		priest_seth_walk {pack:PACK_SPR_MAIN, id:193, max_frames:12}
 		priest_bast_walk {pack:PACK_SPR_MAIN, id:208, max_frames:12}
 		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_FESTIVAL_GUY }
+	}
+
+	sounds {
+		osiris_god_love_festival { sound:"priest_osiris_e01.wav", group:230, text:0 }
+		ra_god_love_festival { sound:"priest_ra_e01.wav", group:231, text:0 }
+		ptah_god_love_festival { sound:"priest_ptah_e01.wav", group:232, text:0 }
+		seth_god_love_festival { sound:"priest_seth_e01.wav", group:233, text:0 }
+		bast_god_love_festival { sound:"bast_e01.wav", group:234, text:0 }
+		juggler_i_like_festivals { sound:"juggler_e01.wav" }
+		musician_i_like_festivals { sound:"musician_e01.wav" }
+		dancer_i_like_festivals { sound:"dancer_e01.wav" }
 	}
 
 	category: figure_category_citizen

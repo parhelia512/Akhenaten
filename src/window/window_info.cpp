@@ -6,7 +6,6 @@
 #include "overlays/city_overlay.h"
 #include "core/calc.h"
 #include "figure/figure.h"
-#include "figure/figure_phrase.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/screen.h"

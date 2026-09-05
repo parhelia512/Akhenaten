@@ -12,7 +12,6 @@ public:
 
     virtual e_figure_type prey_type() const override { return FIGURE_OSTRICH; }
     virtual e_figure_type missile_type() const override { return FIGURE_HUNTER_ARROW; }
-    virtual sound_key phrase_key() const override;
 };
 
 ANK_CONFIG_STRUCT(figure_ostrich_hunter::static_params,

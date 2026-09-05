@@ -9,9 +9,10 @@ function figure_enemy_info_window_setup(window, fid) {
     }
 
     window.bigimage.image = f.params.first_img("big_image")
-    __figure_info_play_phrase(fid)
+    window.phrase.text = ""
+    f.setup_phrase()
+
     __figure_info_set_help(fid)
-    window.phrase.text = __figure_phrase_text(fid)
 }
 
 function figure_enemy_info_window_background(window) {
@@ -22,6 +23,7 @@ function figure_enemy_info_window_background(window) {
 
     figure_info_window_update_toolbar(window, f)
     figure_info_window_sync_tab_selection(window)
+    figure_info_check_phrase(window)
 }
 
 [es=figure_enemy_info_window]

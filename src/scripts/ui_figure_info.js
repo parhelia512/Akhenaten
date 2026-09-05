@@ -35,6 +35,7 @@ function figure_info_window_on_window_info_background(window) {
 
     figure_info_window_update_toolbar(window, f)
     figure_info_window_sync_tab_selection(window)
+    figure_info_check_phrase(window)
 }
 
 function figure_info_window_update_toolbar(window, f) {
@@ -72,11 +73,9 @@ function figure_info_window_setup(window, figure_id) {
 
     var img = get_image({ pack: PACK_UNLOADED, id: 25, offset: f.type })
     window.bigimage.image = img ? img.tid : 0
-
-    __figure_info_play_phrase(figure_id)
+    window.phrase.text = ""
+    f.setup_phrase()
     __figure_info_set_help(figure_id)
-
-    window.phrase.text = __figure_phrase_text(figure_id)
 }
 
 function figure_info_window_toggle_overlay(figure_id) {

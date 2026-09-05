@@ -2,12 +2,14 @@ log_info("akhenaten: figure_prototype.js loaded")
 
 /* type, action_state, state, wait_ticks, direction, target_figure_id,
    destination_building_id, home_building_id, movement_ticks_watchdog,
-   resource_id, resource_amount_full, draw_mode: native CPTROFF (js_register_figure). */
+   resource_id, resource_amount_full, draw_mode, phrase_key, phrase_sound:
+   native CPTROFF (js_register_figure). */
 
 Figure.property.valid = { get: function() { return this.__valid() } }
 Figure.property.name = { }
 Figure.property.class_name = { }
 Figure.property.city_name = { }
+Figure.property.cls = { }
 Figure.property.action_tip = { }
 Figure.property.resource = { get: function() { return this.resource_id } }
 Figure.property.resource_amount = { get: function() { return this.resource_amount_full } }
