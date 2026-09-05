@@ -249,8 +249,9 @@ void city_t::update_tick(int simtick) {
         break;
     case 9:
         house_decay_services();
+        break;
     case 10:
-        g_desirability.update();    
+        g_desirability.update();
         break;
     case 12:
         house_service_decay_houses_covered();
