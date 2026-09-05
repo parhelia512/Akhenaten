@@ -30,7 +30,6 @@
 #include "graphics/elements/ui_js.h"
 #include "window/building/common.h"
 #include "window/building/figures.h"
-#include "window/building/terrain.h"
 #include "window/window_building_info.h"
 #include "window/window_figure_info.h"
 #include "window/window_city.h"
@@ -223,21 +222,15 @@ static void window_info_handle_input(const mouse* m, const hotkeys* h) {
 
 void window_info_show(const tile2i& point, bool avoid_mouse) {
     auto get_tooltip = [] (tooltip_context* c) {
-        auto &context = def_object_info;
-        if (!context.ui) {
-            return;
+        if (def_object_info.ui) {
+            def_object_info.ui->draw_tooltip(c);
         }
-
-        context.ui->draw_tooltip(c);
     };
 
     auto draw_refresh = [] () {
-        auto &context = def_object_info;
-        if (!context.ui) {
-            return;
+        if (def_object_info.ui) {
+            def_object_info.ui->window_info_background(def_object_info);
         }
-
-        context.ui->window_info_background(context);
     };
 
     static window_type window = {
