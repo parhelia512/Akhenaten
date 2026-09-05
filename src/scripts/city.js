@@ -255,6 +255,7 @@ function city_resource_view(resource_id) {
         @count_total_industry { get: function() { return __city_count_industry_total(resource_id) } }
         @mothballed { get: function() { return __city_resource_is_mothballed(resource_id) } }
         @is_stockpiled { get: function() { return __city_resource_is_stockpiled(resource_id) } }
+        @ready_for_using { get: function() { return __city_resource_ready_for_using(resource_id) } }
         @price_buy { get: function() { return __trade_price_buy(resource_id) } }
         @price_sell { get: function() { return __trade_price_sell(resource_id) } }
         stack_proper_quantity: function(value) { return __city_resource_stack_proper_quantity(resource_id, value) }
@@ -519,6 +520,10 @@ city.find_farms = function(tile, radius) {
 
 city.find_monuments = function(tile, radius) {
     return __city_find_monuments(tile, radius)
+}
+
+city.find_buildings = function(type, tile, radius) {
+    return __city_find_buildings(type, tile, radius)
 }
 
 city.get_building_params = function(building_id) {

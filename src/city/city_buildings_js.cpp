@@ -219,6 +219,17 @@ hvector<building_id, 16> __city_find_monuments(tile2i center, int radius) {
 }
 ANK_FUNCTION_2(__city_find_monuments)
 
+hvector<building_id, 64> __city_find_buildings(int btype, tile2i center, int radius) {
+    hvector<building_id, 64> result;
+    buildings_valid_do([&] (building &b) {
+        if (b.tile.dist(center) < radius) {
+            result.push_back(b.id);
+        }
+    }, (e_building_type)btype);
+    return result;
+}
+ANK_FUNCTION_3(__city_find_buildings)
+
 hvector<building_id, 64> __city_find_manageable_industry(tile2i tile, int size, int radius) {
     return buildings_find_manageable_industry_in_radius(tile, size, radius);
 }

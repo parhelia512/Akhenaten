@@ -99,6 +99,11 @@ bool __city_resource_is_stockpiled(int resource) {
 }
 ANK_FUNCTION_1(__city_resource_is_stockpiled)
 
+int __city_resource_ready_for_using(int resource) {
+    return city_resource_ready_for_using((e_resource)resource);
+}
+ANK_FUNCTION_1(__city_resource_ready_for_using)
+
 int __city_resource_stack_proper_quantity(int resource, int value) {
     city_resource_handle h{ (e_resource)resource };
     return h.stack_proper_quantity(value);
