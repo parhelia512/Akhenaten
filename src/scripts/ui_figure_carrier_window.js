@@ -103,7 +103,7 @@ function figure_carrier_info_window_window_info_background(window) {
     var f = city.get_figure(fid)
 
     window.name.text = f.name
-    window.typename.text = f.class_name + " ( @Y" + f.home + "& )"
+    window.typename.text = figure_info_typename_with_home(f)
     window.items.text = figure_carrier_carrying_line_text(fid)
     window.debug_stuck.text = figure_carrier_stuck_debug_text(fid)
 

@@ -47,7 +47,7 @@ function figure_docker_info_window_window_info_background(window) {
     var f = city.get_figure(__object_info_figure_id())
 
     window.name.text = f.name
-    window.typename.text = f.class_name + " ( @Y" + f.home + "& )"
+    window.typename.text = figure_info_typename_with_home(f)
     window.resource_text.text = f.action_tip
 
     figure_info_window_update_toolbar(window, f)

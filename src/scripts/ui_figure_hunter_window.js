@@ -41,7 +41,7 @@ function figure_hunter_info_window_window_info_background(window) {
     var f = city.get_figure(fid)
 
     window.name.text = f.name
-    window.typename.text = f.class_name + " ( @Y" + f.home + "& )"
+    window.typename.text = figure_info_typename_with_home(f)
     window.items.text = figure_hunter_carrying_line_text(fid)
 
     figure_info_window_update_toolbar(window, f)

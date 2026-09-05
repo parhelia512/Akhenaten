@@ -17,6 +17,15 @@ function figure_info_window_sync_tab_selection(window) {
     }
 }
 
+function figure_info_typename_with_home(f) {
+    var home = f.home
+    var home_name = (home && home.valid) ? home.name : ""
+    if (!home_name) {
+        return f.class_name
+    }
+    return f.class_name + " ( @Y" + home_name + "& )"
+}
+
 [es=(figure_info_window, window_info_background)]
 function figure_info_window_on_window_info_background(window) {
     var f = city.get_figure(__object_info_figure_id())
