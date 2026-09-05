@@ -510,9 +510,6 @@ city.get_farm = function(building_id) {
 }
 
 city.get_monument = function(building_id) {
-    if (!__building_is_monument(building_id)) {
-        return null
-    }
     return new Monument(building_id)
 }
 

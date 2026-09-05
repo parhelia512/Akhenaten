@@ -75,6 +75,11 @@ public:
     virtual void add_delivery(int figure_id, int resource_id, int num_loads);
     virtual bool requires_resource(e_resource resource) const;
     virtual span_const<uint16_t> active_workers() const;
+    int workers_assigned() const;
+    int workers_slots() const;
+    int workers_onsite(e_figure_type figure_type) const;
+    int resource_pct(e_resource resource) const;
+    int material_pct_min() const;
     virtual int building_image_get() const { return 0; }
     virtual void set_tile_progress(tile2i tile, int v);
 

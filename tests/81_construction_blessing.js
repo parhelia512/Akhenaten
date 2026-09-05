@@ -22,7 +22,8 @@ function test81_mastaba_phase(bid) {
 function test81_cap(bid) {
     var cap = __test_construction_blessing_cap(bid)
     if (cap < 0) {
-        var phases = __monument_phases_total(bid)
+        var m = city.get_monument(bid)
+        var phases = m ? m.phases_total() : 0
         return Math.max(2, ((phases * 3) / 4) | 0)
     }
     return cap

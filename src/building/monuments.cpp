@@ -483,6 +483,51 @@ span_const<uint16_t> building_monument::active_workers() const {
     return span_const<uint16_t>(d.workers);
 }
 
+int building_monument::workers_assigned() const {
+    int workers_num = 0;
+    for (auto wid : runtime_data().workers) {
+        workers_num += wid > 0 ? 1 : 0;
+    }
+    return workers_num;
+}
+
+int building_monument::workers_slots() const {
+    return (int)runtime_data().workers.size();
+}
+
+int building_monument::workers_onsite(e_figure_type figure_type) const {
+    return building_monument_workers_onsite(&base, figure_type);
+}
+
+int building_monument::resource_pct(e_resource resource) const {
+    if (resource < RESOURCES_MIN || resource >= RESOURCES_MAX) {
+        return 0;
+    }
+    return (int)runtime_data().resources_pct[resource];
+}
+
+int building_monument::material_pct_min() const {
+    if (runtime_data().phase == MONUMENT_FINISHED) {
+        return 100;
+    }
+
+    const auto &d = runtime_data();
+    int min_pct = 100;
+    bool any = false;
+    for (int ri = (int)RESOURCES_MIN; ri < (int)RESOURCES_MAX; ++ri) {
+        const auto r = (e_resource)ri;
+        if (needs_resource(r) <= 0) {
+            continue;
+        }
+        any = true;
+        const int pct = (int)d.resources_pct[r];
+        if (pct < min_pct) {
+            min_pct = pct;
+        }
+    }
+    return any ? min_pct : 100;
+}
+
 void building_monument::set_tile_progress(tile2i tile, int v) {
     map_monuments_set_progress(tile, v);
 }
