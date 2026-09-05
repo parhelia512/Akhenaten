@@ -101,7 +101,7 @@ bstring32 figure_name_get(int type) {
         !figure_name.middles.empty() && 
         !figure_name.postfixes.empty()) {
         
-        bstring32 generated_name = figure_name_generator.get_name(figure_name.prefixes, figure_name.prefixes, figure_name.postfixes);
+        bstring32 generated_name = figure_name_generator.get_name(figure_name.prefixes, figure_name.middles, figure_name.postfixes);
         
         return generated_name;
     }
