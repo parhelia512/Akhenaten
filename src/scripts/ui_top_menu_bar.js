@@ -172,8 +172,7 @@ function top_menu_point_in(mx, my, r) {
 
 function top_menu_draw_status() {
 	var treasury = city.finance.treasury
-	var funds_font = treasury >= 0 ? FONT_NORMAL_BLACK_ON_LIGHT : FONT_NORMAL_BLUE
-	var funds_color = treasury < 0 ? COLOR_FONT_RED : COLOR_WHITE
+	var funds_font = treasury >= 0 ? FONT_NORMAL_BLACK_ON_LIGHT : FONT_NORMAL_YELLOW
 	var funds_text = fmt("#top_menu_funds ${treasury}", { treasury: treasury })
 	var r = top_menu_status_rects()
 	var mx = __mouse.x
@@ -198,11 +197,7 @@ function top_menu_draw_status() {
 
 	ui.label(top_menu_state.date_str, { x: r.date.x, y: r.date.y }, FONT_NORMAL_BLACK_ON_LIGHT)
 	ui.label(top_menu_state.population_str, { x: r.pop.x, y: r.pop.y }, FONT_NORMAL_BLACK_ON_LIGHT)
-	if (treasury < 0) {
-		ui.label_colored(funds_text, { x: r.funds.x, y: r.funds.y }, funds_font, funds_color)
-	} else {
-		ui.label(funds_text, { x: r.funds.x, y: r.funds.y }, funds_font)
-	}
+	ui.label(funds_text, { x: r.funds.x, y: r.funds.y }, funds_font)
 }
 
 function top_menu_handle_status() {
