@@ -23,11 +23,11 @@ namespace vfs {
 
 /**
  * Wrapper for fopen converting filename to path in current working directory
- * @param filename Filename
+ * @param filename Path to open
  * @param mode Mode to open the file (e.g. "wb").
  * @return FILE
  */
-FILE *file_open_os(pcstr filename, pcstr mode);
+FILE *file_open_os(path filename, pcstr mode);
 reader file_open(path path, pcstr mode = "rb");
 
 
@@ -40,21 +40,11 @@ int file_close_os(FILE *stream);
 
 /**
  * Check if file exists
- * @param filename Filename to check
- * @param localizable Whether the file may be localized (see core/dir.h)
+ * @param filename Path or relative path to check
  * @return boolean true if the file exists, false otherwise
  */
-
-namespace detail {
-    bool file_exists(pcstr filename);
-    inline pcstr to_path_str(pcstr filename) { return filename; }
-    inline pcstr to_path_str(const xstring &filename) { return filename.c_str(); }
-}
-
-template<typename T>
-bool file_exists(const T& filename) {
-    return detail::file_exists(detail::to_path_str(filename));
-}
+bool file_exists(const path &filename);
+bool file_exists(std::string_view filename);
 
 /**
  * Remove a file

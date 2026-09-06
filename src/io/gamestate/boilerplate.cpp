@@ -245,7 +245,7 @@ bool GamestateIO::load_savegame(pcstr filename_short, bool start_immediately) {
     // concatenate string
     bstring256 full = fullpath_saves(filename_short).resolve();
 
-    if (!vfs::file_exists(full.c_str())) {
+    if (!vfs::file_exists(full)) {
         logs::error("Load game: file not found %s", full.c_str());
         return false;
     }

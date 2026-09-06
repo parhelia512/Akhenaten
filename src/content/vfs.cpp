@@ -13,6 +13,7 @@
 #include <fstream>
 #include <sstream>
 #include <memory>
+#include <string>
 
 #if defined(GAME_PLATFORM_ANDROID)
 #include "platform/android/android.h"
@@ -90,29 +91,35 @@ void log_io(pcstr fmt, Args ... args) {
     logs::info(fmt, args...);
 }
 
-namespace detail {
-    bool file_exists(pcstr filename) {
-        path fspath = path(filename).resolve();
-        if (fspath.empty()) {
-            return false;
-        }
+bool file_exists(const path &filename) {
+    path fspath = filename;
+    fspath = fspath.resolve();
+    if (fspath.empty()) {
+        return false;
+    }
 
 #if defined(GAME_PLATFORM_ANDROID)
-        if (std::filesystem::exists(fspath.c_str())) {
-            return true;
-        }
-
-        FILE *fp = file_open_os(fspath.c_str(), "rb");
-        if (!fp) {
-            return false;
-        }
-
-        fclose(fp);
+    if (std::filesystem::exists(fspath.c_str())) {
         return true;
-#else
-        return std::filesystem::exists(fspath.c_str());
-#endif
     }
+
+    FILE *fp = file_open_os(fspath, "rb");
+    if (!fp) {
+        return false;
+    }
+
+    fclose(fp);
+    return true;
+#else
+    return std::filesystem::exists(fspath.c_str());
+#endif
+}
+
+bool file_exists(std::string_view filename) {
+    if (filename.empty()) {
+        return false;
+    }
+    return file_exists(path(std::string(filename).c_str()));
 }
 
 vfs::path extract_pack_path(const vfs::path &path) {
@@ -185,7 +192,7 @@ reader file_open(path path, pcstr mode) {
 
     if (is_text_file) { // text mode
 #if defined(GAME_PLATFORM_ANDROID)
-        FILE *f = file_open_os(path.c_str(), mode);
+        FILE *f = file_open_os(path, mode);
         if (f) {
             log_io("[text] loaded from %s", path.c_str());
             return read_file_stream(path, f, true);
@@ -209,7 +216,7 @@ reader file_open(path path, pcstr mode) {
 #endif
     }
 
-    FILE *f = file_open_os(path.c_str(), mode);
+    FILE *f = file_open_os(path, mode);
     if (f) {
         log_io("[binr] file_open %s", path.c_str());
 #if defined(GAME_PLATFORM_ANDROID)

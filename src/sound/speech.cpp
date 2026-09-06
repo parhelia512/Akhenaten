@@ -37,7 +37,7 @@ bool sound_manager_t::speech_try_rel(pcstr rel, vfs::path &fs_path) {
     }
 
     fs_path = vfs::path::resolve(with_audio);
-    return !fs_path.empty() && vfs::file_exists(fs_path.c_str());
+    return !fs_path.empty() && vfs::file_exists(fs_path);
 }
 
 bool sound_manager_t::speech_file_exist(xstring filename, vfs::path &fs_path) {

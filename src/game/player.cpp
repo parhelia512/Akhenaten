@@ -172,13 +172,13 @@ namespace {
         }
 
         const vfs::path autosave_svx("Save/", player_name, "/autosave_replay.svx");
-        if (vfs::file_exists(autosave_svx.c_str())) {
+        if (vfs::file_exists(autosave_svx)) {
             data.last_autosave_path = autosave_svx.c_str();
             return;
         }
 
         const vfs::path autosave_sav("Save/", player_name, "/autosave_replay.sav");
-        if (vfs::file_exists(autosave_sav.c_str())) {
+        if (vfs::file_exists(autosave_sav)) {
             data.last_autosave_path = autosave_sav.c_str();
         }
     }

@@ -124,7 +124,7 @@ bstring256 autosave_module_t::next_monthly_filename(pcstr extension) {
     for (int i = 0; i < slots; ++i) {
         bstring256 short_name = format_monthly_filename(slots, i + 1, extension);
         vfs::path full = fullpath_saves(short_name.c_str()).resolve();
-        exists[i] = vfs::file_exists(full.c_str());
+        exists[i] = vfs::file_exists(full);
         mtime[i] = exists[i] ? file_mtime_or_max(full.c_str()) : UINT64_MAX;
         if (exists[i]) {
             ++existing;

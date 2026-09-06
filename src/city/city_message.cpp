@@ -265,7 +265,7 @@ static void fill_from_event(city_message &msg, const event_ph_t *event, int pare
 
 static bool has_video(const lang_message& template_id) {
     bstring256 path = ui::message_dialog_base::resolve_message_video_path(template_id);
-    return !path.empty() && vfs::file_exists(path.c_str());
+    return !path.empty() && vfs::file_exists(path);
 }
 
 static void enqueue_message(int sequence) {

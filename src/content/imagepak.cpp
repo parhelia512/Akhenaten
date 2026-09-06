@@ -1179,7 +1179,7 @@ int imagepak::get_entries_num(xstring pak_name, bool load_system_sprites, bool c
         filename_sgx = filename_sgx.resolve();
     }
 
-    if (!filename_sgx.empty() && vfs::file_exists(filename_sgx.c_str())) {
+    if (!filename_sgx.empty() && vfs::file_exists(filename_sgx)) {
         return io_read_sgx_entries_num(filename_sgx);
     }
 
