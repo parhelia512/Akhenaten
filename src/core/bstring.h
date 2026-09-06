@@ -70,12 +70,11 @@ public:
 
     inline bstring(pcstr s1) { concat(s1); }
     inline bstring(pcstr s1, int v, pcstr fmt = nullptr) { snprintf(_data, _size, fmt ? fmt : "%s%d", s1, v); }
-    inline bstring(pcstr s1, pcstr s2) { concat(s1, s2); }
-    inline bstring(pcstr s1, pcstr s2, pcstr s3) { concat(s1, s2, s3); }
-    inline bstring(pcstr s1, pcstr s2, pcstr s3, pcstr s4) { concat(s1, s2, s3, s4); }
-    inline bstring(pcstr s1, pcstr s2, pcstr s3, pcstr s4, pcstr s5) { concat(s1, s2, s3, s4, s5); }
-    inline bstring(pcstr s1, pcstr s2, pcstr s3, pcstr s4, pcstr s5, pcstr s6) { concat(s1, s2, s3, s4, s5, s6); }
-    inline bstring(pcstr s1, pcstr s2, pcstr s3, pcstr s4, pcstr s5, pcstr s6, pcstr s7) { concat(s1, s2, s3, s4, s5, s6, s7); }
+
+    template <typename A0, typename A1, typename... Rest>
+    inline bstring(const A0 &a0, const A1 &a1, const Rest &... rest) {
+        concat(fmt_arg(a0), fmt_arg(a1), fmt_arg(rest)...);
+    }
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -89,6 +88,11 @@ public:
     inline ref concat(pcstr s1, pcstr s2, pcstr s3, pcstr s4, pcstr s5) { snprintf(_data, _size-1, "%s%s%s%s%s", s1, s2, s3, s4, s5); return *this; }
     inline ref concat(pcstr s1, pcstr s2, pcstr s3, pcstr s4, pcstr s5, pcstr s6) { snprintf(_data, _size-1, "%s%s%s%s%s%s", s1, s2, s3, s4, s5, s6); return *this; }
     inline ref concat(pcstr s1, pcstr s2, pcstr s3, pcstr s4, pcstr s5, pcstr s6, pcstr s7) { snprintf(_data, _size-1, "%s%s%s%s%s%s%s", s1, s2, s3, s4, s5, s6, s7); return *this; }
+
+    template <typename A0, typename A1, typename... Rest>
+    inline ref concat(const A0 &a0, const A1 &a1, const Rest &... rest) {
+        return concat(fmt_arg(a0), fmt_arg(a1), fmt_arg(rest)...);
+    }
 
 #ifdef __clang__
 #pragma clang diagnostic pop

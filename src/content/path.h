@@ -45,7 +45,7 @@ struct path : public bstring256 {
     }
 
     template <typename... Args>
-    path(Args&&... args) : bstring256(std::forward<Args>(args)...) {
+    path(Args&&... args) : bstring256(fmt_arg(args)...) {
         unify();
     }
 

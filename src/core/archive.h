@@ -226,14 +226,14 @@ struct archive {
     }
 
     template<typename T>
-    inline void r_array(pcstr name, T read_func) {
+    inline void r_array(std::string_view name, T read_func) {
         getproperty(-1, name);
         r_array_impl(read_func);
         pop(1);
     }
 
     template<typename T, typename F>
-    inline void r_array(pcstr name, T &arr, F read_func) {
+    inline void r_array(std::string_view name, T &arr, F read_func) {
         getproperty(-1, name);
         r_array_impl(arr, read_func);
         pop(1);
@@ -416,7 +416,7 @@ protected:
 
 struct g_archive : public archive {
     template<typename T>
-    inline bool r_array(pcstr name, T read_func) {
+    inline bool r_array(std::string_view name, T read_func) {
         if (!state) {
             return false;
         }
@@ -428,7 +428,7 @@ struct g_archive : public archive {
     }
 
     template<typename T, typename F>
-    inline bool r_array(pcstr name, T &arr, F read_func) {
+    inline bool r_array(std::string_view name, T &arr, F read_func) {
         if (!state) {
             return false;
         }

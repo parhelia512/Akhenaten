@@ -373,13 +373,13 @@ imagepak::imagepak(uint8_t ipack, xstring pak_name, int starting_index, bool sys
 
     if (g_args.is_log_resources()) {
         logs::info("VFS: Starting to load pack '%s' (id=%d, index=%d, custom=%d)", 
-                   pak_name.c_str(), ipack, starting_index, custom ? 1 : 0);
+                   pak_name, ipack, starting_index, custom ? 1 : 0);
     }
 
     if (custom) {
-        if (!load_zip_pak(pak_name.c_str(), starting_index)) {
+        if (!load_zip_pak(pak_name, starting_index)) {
             if (g_args.is_log_resources()) {
-                logs::warn("VFS: Failed to load zip pack '%s'", pak_name.c_str());
+                logs::warn("VFS: Failed to load zip pack '%s'", pak_name);
             }
             cleanup_and_destroy();
         }
@@ -388,11 +388,11 @@ imagepak::imagepak(uint8_t ipack, xstring pak_name, int starting_index, bool sys
 
     useridx_update(ipack);
 
-    if (!load_pak(pak_name.c_str(), starting_index)) {
+    if (!load_pak(pak_name, starting_index)) {
         logs::warn("imagepak: failed to load pack '%s' (id=%d, index=%d) - file may be missing or corrupted", 
-                    pak_name.c_str(), ipack, starting_index);
+                    pak_name, ipack, starting_index);
         if (g_args.is_log_resources()) {
-            logs::warn("VFS: Failed to load pack '%s' (id=%d, index=%d)", pak_name.c_str(), ipack, starting_index);
+            logs::warn("VFS: Failed to load pack '%s' (id=%d, index=%d)", pak_name, ipack, starting_index);
         }
         cleanup_and_destroy();
     }
@@ -432,7 +432,7 @@ struct offset_ids {
     int id;
 };
 
-bool imagepak::load_zip_pak(pcstr pak, int starting_index) {
+bool imagepak::load_zip_pak(vfs::path pak, int starting_index) {
     OZZY_PROFILER_FUNCTION();
     name = pak;
     has_system_bmp = false;
@@ -719,7 +719,7 @@ bool imagepak::load_zip_pak(pcstr pak, int starting_index) {
 
 buffer* pak_buf = new buffer(MAX_FILE_SCRATCH_SIZE);
 std::mutex pak_buf_mutex;
-bool imagepak::load_pak(pcstr pak_name, int starting_index) {
+bool imagepak::load_pak(vfs::path pak_name, int starting_index) {
     OZZY_PROFILER_FUNCTION();
 
     std::scoped_lock lock(pak_buf_mutex);
@@ -1173,7 +1173,7 @@ void imagepak::update_max_imgid(uint16_t imgid) {
 }
 
 int imagepak::get_entries_num(xstring pak_name, bool load_system_sprites, bool compact_system) {
-    vfs::path filename_sgx(pak_name.c_str());
+    vfs::path filename_sgx(pak_name);
     if (!vfs::file_has_extension(filename_sgx, "sgx")) {
         filename_sgx.append(".sgx");
         filename_sgx = filename_sgx.resolve();
@@ -1183,7 +1183,7 @@ int imagepak::get_entries_num(xstring pak_name, bool load_system_sprites, bool c
         return io_read_sgx_entries_num(filename_sgx);
     }
 
-    vfs::path filename_full("Data/", pak_name.c_str());
+    vfs::path filename_full("Data/", pak_name);
     vfs::path filename_sg3(filename_full, ".sg3");
     int entries = io_read_sg3_entries_num(filename_sg3);
     // Match load_pak: only compact:true packs drop the 201 SYSTEM.BMP index slots.

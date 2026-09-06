@@ -280,7 +280,7 @@ void mods_remount() {
         }
 
         if (it.second.enabled) {
-            vfs::mount_pack(it.second.path.c_str());
+            vfs::mount_pack(it.second.path);
 
             auto& modpack = g_image_data->pak_list[it.second.useridx];
             if (!modpack.handle) {
@@ -298,7 +298,7 @@ void mods_remount() {
                 js_vm_reload_file(s.c_str());
             }
         } else {
-            vfs::umount_pack(it.second.path.c_str());
+            vfs::umount_pack(it.second.path);
 
             auto& modpack = g_image_data->pak_list[it.second.useridx];
             if (modpack.handle) {
@@ -390,7 +390,7 @@ vfs::path mods_exist_audio(pcstr wav_path) {
 
         vfs::path exact(it.second.path.c_str(), "/", wav_path);
         vfs::path resolved;
-        if (vfs::mounted_entry_resolve(exact.c_str(), resolved)) {
+        if (vfs::mounted_entry_resolve(exact, resolved)) {
             found = resolved;
         }
     }

@@ -40,8 +40,8 @@ private:
     bool should_convert_fonts;
     bool should_compact_system;
 
-    bool load_pak(pcstr pak_name, int starting_index);
-    bool load_zip_pak(pcstr folder, int starting_index);
+    bool load_pak(vfs::path pak_name, int starting_index);
+    bool load_zip_pak(vfs::path pak_name, int starting_index);
 
 public:
     xstring name;
