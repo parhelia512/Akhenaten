@@ -23,10 +23,10 @@ figure_antelope_hunter {
 		hunter_disease_risk : {sound:"hunter_antelope_disease_risk.wav", text: "#hunter_antelope_disease_risk"}
 		hunter_no_food_in_city : {sound:"hunter_antelope_no_food_in_city.wav", text: "#hunter_antelope_no_food_in_city"}
 		hunter_city_have_no_army : {sound:"hunter_antelope_city_have_no_army.wav", text: "#hunter_antelope_city_have_no_army"}
-		hunter_need_workers : {sound:"hunter_antelope_need_workers.wav", text: "#hunter_antelope_need_workers"}
+		hunter_need_workers : {sound:"hunter_ostrich_need_workers.wav", text: "#hunter_ostrich_need_workers"}
 		hunter_gods_are_angry : {sound:"hunter_antelope_gods_are_angry.wav", text: "#hunter_antelope_gods_are_angry"}
-		hunter_city_is_bad : {sound:"hunter_antelope_city_is_bad.wav", text: "#hunter_antelope_city_is_bad"}
-		hunter_much_unemployment : {sound:"hunter_antelope_much_unemployment.wav", text: "#hunter_antelope_much_unemployment"}
+		hunter_city_is_bad : {sound:"hunter_ostrich_city_is_bad.wav", text: "#hunter_ostrich_city_is_bad"}
+		hunter_much_unemployment : {sound:"hunter_ostrich_much_unemployment.wav", text: "#hunter_ostrich_much_unemployment"}
 		hunter_low_entertainment : {sound:"hunter_antelope_low_entertainment.wav", text: "#hunter_antelope_low_entertainment"}
 		hunter_city_is_good : {sound:"hunter_antelope_city_is_good.wav", text: "#hunter_antelope_city_is_good"}
 		hunter_city_is_amazing : {sound:"hunter_antelope_city_is_amazing.wav", text: "#hunter_antelope_city_is_amazing"}

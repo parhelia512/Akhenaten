@@ -28,10 +28,8 @@ public:
 
     virtual void figure_action() override;
     virtual void figure_before_action() override;
-    virtual sound_key phrase_key() const override;
     virtual int provide_service() override;
     virtual void on_action_changed(int saved_action) override;
-    virtual figure_sound_t get_sound_reaction(xstring key) const override;
 
     bool seek_damaged_building();
     building_id find_most_damaged_building();

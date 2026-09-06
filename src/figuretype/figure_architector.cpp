@@ -175,44 +175,10 @@ void figure_architector::figure_before_action() {
     }
 }
 
-sound_key figure_architector::phrase_key() const {
-    int houses_damage_risk = 0;
-    int hoeses_damage_high = 0;
-    buildings_valid_do([&] (building &b) {
-        houses_damage_risk += (b.collapse_risk > 70) ? 1 : 0;
-        hoeses_damage_high += (b.collapse_risk > 50) ? 1 : 0;
-    });
-
-    const int sentiment = g_city.sentiment.value;
-    svector<sound_key_state, 16> keys = {
-        {"extreme_damage_level", houses_damage_risk > 0},
-        {"city_not_safety", formation_get_num_forts() < 0},
-        {"high_damage_level", hoeses_damage_high > 0},
-        {"no_food_in_city", g_city.sentiment.low_mood_cause == LOW_MOOD_NO_FOOD},
-        {"need_more_workers", g_city.labor.workers_needed >= 20},
-        {"gods_are_angry", g_city.religion.least_mood() <= GOD_MOOD_INDIFIRENT},
-        {"city_has_bad_reputation", sentiment < 30},
-        {"city_is_good", sentiment > 50},
-        {"city_is_bad", sentiment >= 30},
-        {"low_entertainment", g_city.festival.entertainment_is_low()},
-        {"city_is_amazing", sentiment > 90},
-        {"i_am_works", true}
-    };
-
-    std::erase_if(keys, [] (auto &it) { return !it.valid; });
-
-    int index = rand() % keys.size();
-    return xstring().printf("engineer_%s", keys[index].prefix.c_str());
-}
-
 void figure_architector::on_action_changed(int saved_action) {
     if (action_state() == ACTION_8_RECALCULATE) {
         logs::info("test");
     }
-}
-
-figure_sound_t figure_architector::get_sound_reaction(xstring key) const {
-    return current_params().sounds[key];
 }
 
 int figure_architector::provide_service() {

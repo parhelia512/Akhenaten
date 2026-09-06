@@ -265,8 +265,12 @@ bool file_rename_os(path from, path to) {
     return res;
 }
 
-void umount_pack(pcstr filename) {
-    const auto it = std::find_if(g_mounted_archives.begin(), g_mounted_archives.end(), [filename] (const ZipArchive *arch) {
+void umount_pack(path filename) {
+    if (filename.empty()) {
+        return;
+    }
+
+    const auto it = std::find_if(g_mounted_archives.begin(), g_mounted_archives.end(), [&filename] (const ZipArchive *arch) {
         return arch->filepath() == filename;
     });
 
@@ -280,23 +284,20 @@ void umount_pack(pcstr filename) {
     delete pack_to_umount;
 }
 
-#pragma optimize("", off)
-bool mounted_entry_resolve(pcstr path, vfs::path &out_path) {
-    if (!path || !*path) {
+bool mounted_entry_resolve(path in_path, path &out_path) {
+    if (in_path.empty()) {
         return false;
     }
 
-    vfs::path normalized = path;
-
-    vfs::path want = normalized.split(".zip/");
+    path want = in_path.split(".zip/");
     if (want.empty()) {
-        want = normalized.split(".sgx/");
+        want = in_path.split(".sgx/");
     }
     if (want.empty()) {
         return false;
     }
 
-    const vfs::path pack_name = extract_pack_name(normalized);
+    const path pack_name = extract_pack_name(in_path);
     if (pack_name.empty()) {
         return false;
     }
@@ -318,24 +319,24 @@ bool mounted_entry_resolve(pcstr path, vfs::path &out_path) {
         }
 
         // Rebuild URI with the pack path used at mount time + archive entry casing.
-        out_path = vfs::path((*it)->filepath().c_str(), "/", entry.c_str());
+        out_path = path((*it)->filepath().c_str(), "/", entry.c_str());
         return true;
     }
 
     return false;
 }
 
-bool mounted_entry_exists(pcstr path) {
-    vfs::path resolved;
-    return mounted_entry_resolve(path, resolved);
+bool mounted_entry_exists(path in_path) {
+    path resolved;
+    return mounted_entry_resolve(in_path, resolved);
 }
 
-bool mount_pack(pcstr filename) {
-    if (!file_exists(filename)) {
+bool mount_pack(path filename) {
+    if (filename.empty() || !file_exists(filename)) {
         return false;
     }
 
-    const auto it = std::find_if(g_mounted_archives.begin(), g_mounted_archives.end(), [filename] (const ZipArchive *arch) {
+    const auto it = std::find_if(g_mounted_archives.begin(), g_mounted_archives.end(), [&filename] (const ZipArchive *arch) {
         return arch->filepath() == filename;
     });
 
@@ -354,15 +355,15 @@ bool mount_pack(pcstr filename) {
     return true;
 }
 
-void create_folders(pcstr path) {
+void create_folders(path folder_path) {
 #if defined(GAME_PLATFORM_ANDROID)
-    if (path && *path) {
-        ::android_create_directories(path);
+    if (!folder_path.empty()) {
+        ::android_create_directories(folder_path.c_str());
     }
     return;
 #else
     std::error_code err;
-    if (!std::filesystem::create_directories(path, err) && !std::filesystem::exists(path)) {
+    if (!std::filesystem::create_directories(folder_path.c_str(), err) && !std::filesystem::exists(folder_path.c_str())) {
         logs::info(err.message().c_str());
     }
 #endif

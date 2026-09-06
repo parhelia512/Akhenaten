@@ -62,18 +62,18 @@ bool file_remove(path filename);
  */
 bool file_rename_os(path from, path to);
 
-bool mount_pack(pcstr filename);
-void umount_pack(pcstr filename);
+bool mount_pack(path filename);
+void umount_pack(path filename);
 
-bool mounted_entry_exists(pcstr path);
-bool mounted_entry_resolve(pcstr path, vfs::path &out_path);
+bool mounted_entry_exists(path in_path);
+bool mounted_entry_resolve(path in_path, path &out_path);
 
 /**
 * Create folders if not exists
 * Throw exception if path not exists and can not be created
-* @param path to be created
+* @param folder_path to be created
 */
-void create_folders(pcstr path);
+void create_folders(path folder_path);
 void remove_folder(path folder_path);
 
 void sync_em_fs();

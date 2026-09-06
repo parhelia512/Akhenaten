@@ -6,6 +6,7 @@ import figure.phrase
 import figure.festival_guy
 import figure.ostrich_hunter
 import figure.antelope_hunter
+import figure.architector
 
 figure_fireman {
   overlay : OVERLAY_WATER
@@ -930,43 +931,6 @@ figure_physician {
 	max_roam_length : 384
 	permission : epermission_medicine
 	health_heal_amount : 1
-}
-
-figure_architector {
-  overlay : OVERLAY_DAMAGE
-	animations {
-		_pack { pack:PACK_SPR_MAIN }
-		walk { id:4, max_frames:12 }
-		death { id:5, max_frames:8, loop:false }
-    	work_ground { id:49, max_frames:6 }
-    	work_stand { id:50, max_frames:6 }
-    	big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_ARCHITECT }
-	}
-
-	sounds {
-		engineer_extreme_damage_level {sound:"engineer_e01.wav"}
-		engineer_i_am_works {sound:"engineer_e02.wav"}
-		engineer_high_damage_level {sound:"engineer_g01.wav"}
-		engineer_no_food_in_city {sound:"engineer_g02.wav"}
-		engineer_city_not_safety {sound:"engineer_g03.wav"}
-		engineer_need_more_workers {sound:"engineer_g04.wav"}
-		engineer_gods_are_angry {sound:"engineer_g05.wav"}
-		engineer_city_has_bad_reputation {sound:"engineer_g06.wav"}
-		engineer_city_is_good {sound:"engineer_g07.wav"}
-		engineer_low_entertainment {sound:"engineer_g08.wav"}
-		engineer_city_is_bad {sound:"engineer_g09.wav"}
-		engineer_city_is_amazing {sound:"engineer_g10.wav"}
-	}
-
-    category: figure_category_citizen
-	max_damage : 20
-	terrain_usage : TERRAIN_USAGE_ROADS
-	max_service_buildings : 100
-	max_roam_length : 640
-	permission : epermission_maintenance
-	effect_radius : 2
-	risk_reduction_strength : 100
-	record_path : true
 }
 
 figure_market_buyer {

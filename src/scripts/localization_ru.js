@@ -461,17 +461,28 @@ localization_ru = [
     { key: "#marketboy_one_day_ill_run_the_bazaar", text: "Может быть, я сейчас просто ношу корзины, но однажды я буду управлять базаром." }
 
     { key: "#engineer_extreme_damage_level", text: "Многие люди в гораздо худшем состоянии, чем здания. Надеюсь, всё не станет хуже." }
+    { key: "#engineer_i_am_works", text: "Эти стены не рухнут на моей смене." }
     { key: "#engineer_starvation_might_not_affect_strength", text: "Голодание может не влиять на прочность этих зданий, но оно точно влияет на мою!" }
+    { key: "#engineer_no_food_in_city", text: "Голодание может не влиять на прочность этих зданий, но оно точно влияет на мою!" }
     { key: "#engineer_how_to_defend_ourselves", text: "Как мы должны защищаться? Оборона города смехотворна." }
+    { key: "#engineer_city_not_safety", text: "Как мы должны защищаться? Оборона города смехотворна." }
     { key: "#engineer_why_does_it_matter_if_buildings_collapse", text: "Какая разница, если эти здания рухнут? В них всё равно нет работников." }
+    { key: "#engineer_high_damage_level", text: "Какая разница, если эти здания рухнут? В них всё равно нет работников." }
     { key: "#engineer_if_gods_are_angry", text: "Если боги сердиты, даже лучший архитектор не сможет исправить ущерб, который они причиняют." }
+    { key: "#engineer_gods_are_angry", text: "Если боги сердиты, даже лучший архитектор не сможет исправить ущерб, который они причиняют." }
     { key: "#engineer_our_city_reputation_is_low", text: "Репутация нашего города настолько низка, что боюсь, наши враги нападут." }
+    { key: "#engineer_city_has_bad_reputation", text: "Репутация нашего города настолько низка, что боюсь, наши враги нападут." }
     { key: "#engineer_by_estimation_a_lot_of_people_are_out_of_work", text: "По моим оценкам, много людей без работы." }
+    { key: "#engineer_need_more_workers", text: "По моим оценкам, много людей без работы." }
     { key: "#engineer_ho_hum_even_architects_like_fun", text: "Хо хум. Даже архитекторам нравится немного веселья время от времени." }
+    { key: "#engineer_low_entertainment", text: "Хо хум. Даже архитекторам нравится немного веселья время от времени." }
     { key: "#engineer_life_here_could_be_worse", text: "Жизнь здесь могла быть намного хуже." }
+    { key: "#engineer_city_is_bad", text: "Жизнь здесь могла быть намного хуже." }
     { key: "#engineer_this_city_has_everything", text: "В этом городе есть всё, чего может желать сердце архитектора!" }
+    { key: "#engineer_city_is_good", text: "В этом городе есть всё, чего может желать сердце архитектора!" }
     { key: "#engineer_there_are_so_many_places_in_poor_condition", text: "Здесь так много мест в плохом состоянии, что я едва успеваю." }
     { key: "#engineer_i_hope_i_m_credited_for_great_condition", text: "Надеюсь, меня отметят за отличное состояние этого города." }
+    { key: "#engineer_city_is_amazing", text: "Надеюсь, меня отметят за отличное состояние этого города." }
 
     { key: "#fireman_desease_can_start_at_any_moment", text: "Надеюсь, чума не вспыхнет. Чума может распространяться как лесной пожар." }
     { key: "#fireman_no_food_in_city", text: "Даже когда пожары горят, всё, о чём я могу думать, это насколько я голоден." }
