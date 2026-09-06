@@ -241,23 +241,23 @@ bool file_remove(path filename) {
     return res;
 }
 
-bool file_rename(pcstr from, pcstr to) {
-    if (!from || !*from || !to || !*to) {
+bool file_rename_os(path from, path to) {
+    if (from.empty() || to.empty()) {
         return false;
     }
 
 #if defined(GAME_PLATFORM_ANDROID)
     // POSIX rename() replaces an existing destination atomically
-    const bool res = (::rename(from, to) == 0);
+    const bool res = (::rename(from.c_str(), to.c_str()) == 0);
     if (!res) {
-        logs::error("unable to rename %s -> %s", from, to);
+        logs::error("unable to rename %s -> %s", from.c_str(), to.c_str());
     }
 #else
     std::error_code err;
-    std::filesystem::rename(from, to, err);
+    std::filesystem::rename(from.c_str(), to.c_str(), err);
     const bool res = !err;
     if (!res) {
-        logs::error("unable to rename %s -> %s: %s", from, to, err.message().c_str());
+        logs::error("unable to rename %s -> %s: %s", from.c_str(), to.c_str(), err.message().c_str());
     }
 #endif
 

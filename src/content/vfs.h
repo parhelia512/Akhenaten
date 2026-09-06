@@ -60,7 +60,7 @@ bool file_remove(path filename);
  * @param to Destination, overwritten if present
  * @return boolean true if the rename was successful, false otherwise
  */
-bool file_rename(pcstr from, pcstr to);
+bool file_rename_os(path from, path to);
 
 bool mount_pack(pcstr filename);
 void umount_pack(pcstr filename);
