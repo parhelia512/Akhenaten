@@ -154,7 +154,7 @@ vfs::reader sound_manager_t::load_cached_chunk(vfs::path filename) {
     auto format = get_format_from_file(filename);
     if (format == FILE_FORMAT_MP3) {
         // first check we have converted file on the disk
-        vfs::file_change_extension(converted_wav.data(), "wav");
+        converted_wav.change_extension("wav");
         need_converting = !vfs::file_exists(converted_wav);
     }
 

@@ -232,57 +232,6 @@ int file_close_os(FILE * stream) {
     return fclose(stream);
 }
 
-namespace {
-
-pcstr find_last_dot(pcstr s) {
-    pcstr last = nullptr;
-    for (pcstr p = s; *p; ++p) {
-        if (*p == '.') {
-            last = p;
-        }
-    }
-    return last;
-}
-
-} // namespace
-
-void file_change_extension(char *filename, pcstr new_extension) {
-    if (!filename || !new_extension || !*new_extension) {
-        return;
-    }
-    char *dot = (char *)find_last_dot(filename);
-    if (!dot) {
-        return;
-    }
-    char *w = dot + 1;
-    while (*new_extension) {
-        *w++ = *new_extension++;
-    }
-    *w = 0;
-}
-
-void file_append_extension(char *filename, pcstr extension) {
-    if (!filename || !extension || !*extension) {
-        return;
-    }
-    char *end = filename + ::strlen(filename);
-    *end++ = '.';
-    while (*extension) {
-        *end++ = *extension++;
-    }
-    *end = 0;
-}
-
-void file_remove_extension(char *filename) {
-    if (!filename) {
-        return;
-    }
-    char *dot = (char *)find_last_dot(filename);
-    if (dot) {
-        *dot = 0;
-    }
-}
-
 bool file_remove(pcstr filename) {
     bool res = platform_file_manager_remove_file(filename);
     sync_em_fs();

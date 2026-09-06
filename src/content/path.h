@@ -2,6 +2,8 @@
 
 #include "core/xstring.h"
 
+#include <string_view>
+
 namespace vfs {
 
 /**
@@ -71,10 +73,60 @@ struct path : public bstring256 {
     bool is_extension(pcstr extension) { return file_has_extension(c_str(), extension); }
 
     void remove_extension() {
-        pstr ptr_point = ::strchr(_data, '.');
-        if (ptr_point) {
-            *ptr_point = 0;
+        pstr last_dot = nullptr;
+        for (pstr p = _data; *p; ++p) {
+            if (*p == '.') {
+                last_dot = p;
+            }
         }
+        if (last_dot) {
+            *last_dot = 0;
+        }
+    }
+
+    void append_extension(std::string_view extension) {
+        if (empty() || extension.empty()) {
+            return;
+        }
+
+        const size_t cur_len = len();
+        if (cur_len + 1 + extension.size() >= capacity) {
+            return;
+        }
+
+        pstr end = _data + cur_len;
+        *end++ = '.';
+        for (char c : extension) {
+            *end++ = c;
+        }
+        *end = 0;
+    }
+
+    void change_extension(std::string_view new_extension) {
+        if (empty() || new_extension.empty()) {
+            return;
+        }
+
+        pstr last_dot = nullptr;
+        for (pstr p = _data; *p; ++p) {
+            if (*p == '.') {
+                last_dot = p;
+            }
+        }
+        if (!last_dot) {
+            return;
+        }
+
+        const size_t prefix_len = static_cast<size_t>(last_dot - _data) + 1;
+        if (prefix_len + new_extension.size() >= capacity) {
+            return;
+        }
+
+        pstr w = last_dot + 1;
+        for (char c : new_extension) {
+            *w++ = c;
+        }
+        *w = 0;
     }
 
     path basename() const {

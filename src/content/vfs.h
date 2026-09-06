@@ -39,27 +39,6 @@ reader file_open(path path, pcstr mode = "rb");
 int file_close_os(FILE *stream);
 
 /**
- * Replaces the current extension by the given new extension.
- * Filename is unchanged if there was no extension.
- * @param[in,out] filename Filename to change
- * @param new_extension New extension
- */
-void file_change_extension(char *filename, pcstr new_extension);
-
-/**
- * Appends the extension to the file
- * @param[in,out] filename Filename to change
- * @param extension Extension to append
- */
-void file_append_extension(char *filename, pcstr extension);
-
-/**
- * Removes the extension from the file
- * @param[in,out] filename Filename to change
- */
-void file_remove_extension(char *filename);
-
-/**
  * Check if file exists
  * @param filename Filename to check
  * @param localizable Whether the file may be localized (see core/dir.h)

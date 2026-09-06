@@ -387,7 +387,9 @@ void scrollable_list::draw() {
         if (ui_params.use_file_finder) {
             text_utf8 = file_finder->files[current_index];
             encoding_from_utf8(text_utf8, text, text.capacity);
-            vfs::file_remove_extension(text);
+            vfs::path no_ext(text.c_str());
+            no_ext.remove_extension();
+            text = no_ext.c_str();
         } else {
             if (i < _items_count) {
                 text_utf8 = manual_entry_list[current_index].text.c_str();

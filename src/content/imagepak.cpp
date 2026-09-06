@@ -247,7 +247,7 @@ static buffer* load_external_data(const image_t &img) {
 
     // file path
     vfs::path filename("Data/", img.bmp.name.c_str());
-    vfs::file_change_extension(filename, "555");
+    filename.change_extension("555");
 
     // load external file
     size = io_read_file_part_into_buffer(filename, MAY_BE_LOCALIZED, external_image_buf, img.data_length, img.sgx_data_offset - 1);
