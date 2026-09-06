@@ -44,14 +44,13 @@ int file_close_os(FILE *stream);
  * @return boolean true if the file exists, false otherwise
  */
 bool file_exists(const path &filename);
-bool file_exists(std::string_view filename);
 
 /**
  * Remove a file
- * @param filename Filename to remove
+ * @param filename Path to remove
  * @return boolean true if the file removal was successful, false otherwise
  */
-bool file_remove(pcstr filename);
+bool file_remove(path filename);
 
 /**
  * Rename a file, replacing the destination if it already exists.

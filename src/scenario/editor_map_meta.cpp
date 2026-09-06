@@ -298,7 +298,7 @@ void editor_requests_preserve_end() {
 void editor_map_meta_remove(pcstr map_path) {
     vfs::path meta = editor_map_meta_path(map_path);
     if (vfs::file_exists(meta)) {
-        vfs::file_remove(meta.c_str());
+        vfs::file_remove(meta);
     }
 }
 

@@ -115,13 +115,6 @@ bool file_exists(const path &filename) {
 #endif
 }
 
-bool file_exists(std::string_view filename) {
-    if (filename.empty()) {
-        return false;
-    }
-    return file_exists(path(std::string(filename).c_str()));
-}
-
 vfs::path extract_pack_path(const vfs::path &path) {
     vfs::path result = path;
 
@@ -239,8 +232,11 @@ int file_close_os(FILE * stream) {
     return fclose(stream);
 }
 
-bool file_remove(pcstr filename) {
-    bool res = platform_file_manager_remove_file(filename);
+bool file_remove(path filename) {
+    if (filename.empty()) {
+        return false;
+    }
+    bool res = platform_file_manager_remove_file(filename.c_str());
     sync_em_fs();
     return res;
 }

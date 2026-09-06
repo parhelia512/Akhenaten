@@ -438,7 +438,7 @@ bool GamestateIO::delete_map(const char* filename_short) {
     if (dot) {
         std::snprintf(dot, (size_t)(vfs::path::capacity - (dot - meta.data())), ".meta.js");
         if (vfs::file_exists(meta)) {
-            vfs::file_remove(meta.c_str());
+            vfs::file_remove(meta);
         }
     }
     return vfs::file_remove(full);
