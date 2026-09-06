@@ -535,6 +535,24 @@ localization_ru = [
     { key: "#hunter_ostrich_city_is_good", text: "Этот город классный." }
     { key: "#hunter_ostrich_city_is_amazing", text: "Лучший город, для которого я охотился. Так и держите!" }
 
+    { key: "#hunter_antelope_investigate", text: "Следы копыт в пыли... здесь прошла антилопа." }
+    { key: "#hunter_antelope_chase", text: "Вон она скачет! Быстра как ветер, но мой дротик быстрее." }
+    { key: "#hunter_antelope_hunting", text: "Антилопы нам не соперники! Рога их не спасут." }
+    { key: "#hunter_antelope_back", text: "Сегодня вечером будут стейки для всех." }
+    { key: "#hunter_antelope_reroute_packed", text: "Туша тяжёлая, тропа не та. Найду другую дорогу к хижине." }
+    { key: "#hunter_antelope_look_packed", text: "Нужна свободная тропа домой с этой антилопой на плечах." }
+    { key: "#hunter_antelope_unloading", text: "Свежая антилопа для хижины. Повара будут довольны." }
+    { key: "#hunter_antelope_disease_risk", text: "Тут пахнет болезнью. Даже стада держатся подальше." }
+    { key: "#hunter_antelope_no_food_in_city", text: "Амбары пусты? Тогда мне лучше принести жирную антилопу." }
+    { key: "#hunter_antelope_city_have_no_army", text: "Нет фортов? Один набег — и город обречён, как загнанная газель." }
+    { key: "#hunter_antelope_need_workers", text: "Нужно больше рук. Я один все котлы дичью не наполню." }
+    { key: "#hunter_antelope_gods_are_angry", text: "Боги злятся. И стада беспокойны." }
+    { key: "#hunter_antelope_city_is_bad", text: "Фараон нами недоволен. Добром это не кончится." }
+    { key: "#hunter_antelope_much_unemployment", text: "Слишком много бездельников. Хоть охота кого-то кормит." }
+    { key: "#hunter_antelope_low_entertainment", text: "Праздников давно не было. Пир с антилопой всех бы взбодрил." }
+    { key: "#hunter_antelope_city_is_good", text: "Этот город хороший! Рядом отличные охотничьи угодья." }
+    { key: "#hunter_antelope_city_is_amazing", text: "Лучший город, для которого я охотился. Антилопы сами прыгают в котёл!" }
+
     { key: "#lumberjack_hunting", text: "Я отправляюсь на тяжёлый день лесозаготовок." }
     { key: "#lumberjack_back", text: "Эта древесина будет хорошо использована, я уверен." }
 
@@ -668,9 +686,6 @@ localization_ru = [
     { key: "#seth_low_entertainment_2", text: "Что делать жрице? Здесь так мало отвлечений." }
     { key: "#seth_city_low_mood_2", text: "Бастет даёт мне силу лечить больных, прежде чем они распространят свою болезнь." }
 
-    { key: "#antelope_hunter_hunting", text: "Антилопы нам не соперники!" }
-    { key: "#antelope_hunter_back", text: "Сегодня вечером будут стейки для всех." }    
-    { key: "#antelope_hunter_city_is_good", text: "Этот город - хорошее место для жизни." }
     { key: "#figure_antelope_hunter", text: "Охотник на антилоп" }
     { key: "#figure_antelope_hunter_javelin", text: "Дротик охотника" }
     { key: "#figure_birds_hunter", text: "Охотник на птиц" }

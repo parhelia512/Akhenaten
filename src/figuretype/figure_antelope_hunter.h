@@ -12,7 +12,6 @@ public:
 
     virtual e_figure_type prey_type() const override { return FIGURE_ANTELOPE; }
     virtual e_figure_type missile_type() const override { return FIGURE_ANTELOPE_HUNTER_JAVELIN; }
-    virtual sound_key phrase_key() const override;
 };
 
 ANK_CONFIG_STRUCT(figure_antelope_hunter::static_params,

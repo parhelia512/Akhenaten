@@ -1181,6 +1181,24 @@ localization_en = [
   { key: "#hunter_ostrich_city_is_good", text: "This city is fantastic!" }
   { key: "#hunter_ostrich_city_is_amazing", text: "Best city I've hunted for. Keep it that way!" }
 
+  { key: "#hunter_antelope_investigate", text: "Hoofprints in the dust... an antelope passed this way." }
+  { key: "#hunter_antelope_chase", text: "There it bounds! Fast as the wind, but my javelin is faster." }
+  { key: "#hunter_antelope_hunting", text: "Antelopes are no match for us! Those horns won't save them." }
+  { key: "#hunter_antelope_back", text: "There will be steaks for everyone tonight." }
+  { key: "#hunter_antelope_reroute_packed", text: "Heavy carcass, wrong trail. I'll find another way to the lodge." }
+  { key: "#hunter_antelope_look_packed", text: "Need a clear path home with this antelope on my shoulders." }
+  { key: "#hunter_antelope_unloading", text: "Fresh antelope for the lodge. The cooks will be pleased." }
+  { key: "#hunter_antelope_disease_risk", text: "This place smells like sickness. Even the herds stay away." }
+  { key: "#hunter_antelope_no_food_in_city", text: "Empty granaries? Then I had better bring back a fat antelope." }
+  { key: "#hunter_antelope_city_have_no_army", text: "No forts? One raid and this city is as doomed as a cornered gazelle." }
+  { key: "#hunter_antelope_need_workers", text: "We need more hands. I can't fill every pot with game alone." }
+  { key: "#hunter_antelope_gods_are_angry", text: "The gods look angry. The herds are restless too." }
+  { key: "#hunter_antelope_city_is_bad", text: "Pharaoh is not pleased with us. That never ends well." }
+  { key: "#hunter_antelope_much_unemployment", text: "Too many idle people. At least hunting still feeds someone." }
+  { key: "#hunter_antelope_low_entertainment", text: "No festivals for ages. A feast of antelope would cheer everyone up." }
+  { key: "#hunter_antelope_city_is_good", text: "This city is good! Fine hunting grounds nearby." }
+  { key: "#hunter_antelope_city_is_amazing", text: "Best city I've hunted for. The antelope practically leap into the pot!" }
+
   { key: "#lumberjack_hunting", text: "I am off for a hard day's logging." }
   { key: "#lumberjack_back", text: "This timber will be put to good use, I am sure." }
 
@@ -1313,9 +1331,6 @@ localization_en = [
   { key: "#seth_low_entertainment_2", text: "What's a priestess to do? There is so little diversion here." }
   { key: "#seth_city_low_mood_2", text: "Bast grants me power to heal the sick before they spread their disease." }
 
-  { key: "#antelope_hunter_hunting", text: "Antelopes are no match for us!" }
-  { key: "#antelope_hunter_back", text: "There will be steaks for everyone tonight." }
-  { key: "#antelope_hunter_city_is_good", text: "This city is good!" }
   { key: "#hunt_bird_birds_are_wily", text: "These birds are wily!" }
   { key: "#hunt_bird_birds_ready_for_roasting", text: "These birds are ready for roasting!" }
 

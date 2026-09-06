@@ -1,5 +1,51 @@
 log_info("akhenaten: figure ostrich_hunter started")
 
+figure_ostrich_hunter {
+	animations {
+		_pack { pack:PACK_SPR_MAIN }
+		walk { id:45, max_frames:12 }
+		death { id:46, max_frames:8, loop:false }
+		hunt { id:47, max_frames:12, loop:false }
+		fight { id:48, max_frames:12 }
+		//work_in_field : {  id:49, max_frames:12, loop:false }
+		pack { id:50, max_frames:12, loop:false }
+		unpack { id:50, max_frames:12, loop:false, start_frame:11, reverse:true }
+		move_pack { id:51, max_frames:12 }
+		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_OSTRICH_HUNTER }
+	}
+
+	sounds {
+		hunter_investigate : {sound:"hunter_ostrich_investigate.wav", text: "#hunter_ostrich_investigate"}
+		hunter_chase : {sound:"hunter_ostrich_chase.wav", text: "#hunter_ostrich_chase"}
+		hunter_hunting : {sound:"hunt_ostrich_e01.wav", text: "#hunter_ostrich_hunting"}
+		hunter_back : {sound:"hunt_ostrich_e02.wav", text: "#hunter_ostrich_back"}
+		hunter_reroute_packed : {sound:"hunter_ostrich_reroute_packed.wav", text: "#hunter_ostrich_reroute_packed"}
+		hunter_look_packed : {sound:"hunter_ostrich_look_packed.wav", text: "#hunter_ostrich_look_packed"}
+		hunter_unloading : {sound:"hunter_ostrich_unloading.wav", text: "#hunter_ostrich_unloading"}
+		hunter_disease_risk : {sound:"hunter_ostrich_disease_risk.wav", text: "#hunter_ostrich_disease_risk"}
+		hunter_no_food_in_city : {sound:"hunter_ostrich_no_food_in_city.wav", text: "#hunter_ostrich_no_food_in_city"}
+		hunter_city_have_no_army : {sound:"hunter_ostrich_city_have_no_army.wav", text: "#hunter_ostrich_city_have_no_army"}
+		hunter_need_workers : {sound:"hunter_ostrich_need_workers.wav", text: "#hunter_ostrich_need_workers"}
+		hunter_gods_are_angry : {sound:"hunter_ostrich_gods_are_angry.wav", text: "#hunter_ostrich_gods_are_angry"}
+		hunter_city_is_bad : {sound:"hunter_ostrich_city_is_bad.wav", text: "#hunter_ostrich_city_is_bad"}
+		hunter_much_unemployment : {sound:"hunter_ostrich_much_unemployment.wav", text: "#hunter_ostrich_much_unemployment"}
+		hunter_low_entertainment : {sound:"hunter_ostrich_low_entertainment.wav", text: "#hunter_ostrich_low_entertainment"}
+		hunter_city_is_good : {sound:"hunter_ostrich_city_is_good.wav", text: "#hunter_ostrich_city_is_good"}
+		hunter_city_is_amazing : {sound:"hunter_ostrich_city_is_amazing.wav", text: "#hunter_ostrich_city_is_amazing"}
+	}
+
+	category: figure_category_armed
+	max_damage: 30
+	attack_value: 4
+	missile_attack_value: 4
+	animal_attack_value: 100
+	missile_delay: 25
+	attack_distance: 5
+	terrain_usage : TERRAIN_USAGE_ANIMAL,
+	max_hunting_distance : 15
+	record_path : true
+}
+
 function figure_ostrich_hunter_gods_are_angry() {
     for (var i = 0; i < gods.length; i++) {
         var god = gods[i]
