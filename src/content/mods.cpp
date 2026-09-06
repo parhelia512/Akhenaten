@@ -5,6 +5,7 @@
 #include "content/zipreader.hpp"
 #include "graphics/imagepak_holder.h"
 #include "core/log.h"
+#include "core/string.h"
 #include "js/js.h"
 #include "game/game_config.h"
 #include "core/settings_vars.h"
@@ -16,6 +17,7 @@
 
 #include <regex>
 #include <map>
+#include <cstring>
 #include <fstream>
 #include <filesystem>
 
@@ -372,42 +374,39 @@ vfs::path mods_exist_audio(pcstr wav_path) {
         return {};
     }
 
-    vfs::path name_lower(wav_path);
-    name_lower.tolower();
-    for (const auto& it : g_mods.list) {
-        if (!it.second.enabled) {
-            continue;
+    if (strstr(wav_path, ".sgx/") || strstr(wav_path, ".zip/")) {
+        vfs::path resolved;
+        if (vfs::mounted_entry_resolve(wav_path, resolved)) {
+            return resolved;
         }
-
-        if (!it.second.audio_exist(name_lower.c_str())) {
-            continue;
-        }
-
-        return vfs::path(it.second.path.c_str(), "/", name_lower);
-    }
-
-    return {};
-}
-
-mod_reader mods_find_audio(pcstr wav_path) {
-    if (!wav_path || !*wav_path) {
         return {};
     }
 
-    for (const auto& it : g_mods.list) {
-        if (!it.second.enabled) {
+    vfs::path found;
+    for (const auto &it : g_mods.list) {
+        if (!it.second.enabled || !it.second.downloaded) {
             continue;
         }
 
-        if (!it.second.audio_exist(wav_path)) {
-            continue;
+        vfs::path exact(it.second.path.c_str(), "/", wav_path);
+        vfs::path resolved;
+        if (vfs::mounted_entry_resolve(exact.c_str(), resolved)) {
+            found = resolved;
         }
+    }
 
-        vfs::path mod_audio_path(it.second.path.c_str(), "/", wav_path);
-        vfs::reader reader = vfs::file_open(mod_audio_path, "r");
-        if (reader) {
-            return {mod_audio_path.c_str(), reader};
-        }
+    return found;
+}
+
+mod_reader mods_find_audio(pcstr wav_path) {
+    vfs::path path = mods_exist_audio(wav_path);
+    if (path.empty()) {
+        return {};
+    }
+
+    vfs::reader reader = vfs::file_open(path, "r");
+    if (reader) {
+        return { path.c_str(), reader };
     }
 
     return {};
@@ -639,7 +638,9 @@ void mod_info::fill_entries() {
                 scripts.push_back(entry.tolower());
             }
 
-            if (vfs::file_has_extension(entry.c_str(), "wav")) {
+            if (vfs::file_has_extension(entry.c_str(), "wav")
+                || vfs::file_has_extension(entry.c_str(), "mp3")
+                || vfs::file_has_extension(entry.c_str(), "ogg")) {
                 sounds.push_back(entry.tolower());
             }
         }

@@ -1163,14 +1163,23 @@ localization_en = [
   { key: "#policeman_enemies_are_coming_2", text: "These rascals aren't taking over the city on my watch!" }
   { key: "#policeman_enemies_are_coming", text: "The enemy could soon win if I don't get some help! " }
 
+  { key: "#hunter_ostrich_investigate", text: "Tracks in the sand... an ostrich was here not long ago." }
+  { key: "#hunter_ostrich_chase", text: "There it goes! Those legs are fast, but my arrows are faster." }
   { key: "#hunter_ostrich_hunting", text: "Ostriches are nearly invisible when they put their heads in the sand." }
   { key: "#hunter_ostrich_back", text: "Now, those are some BIG drumsticks!" }
+  { key: "#hunter_ostrich_reroute_packed", text: "Heavy load, wrong path. I'll find another way back." }
+  { key: "#hunter_ostrich_look_packed", text: "Need a clear trail to the lodge with this bird on my back." }
+  { key: "#hunter_ostrich_unloading", text: "Fresh game for the lodge. Smells better than barley already." }
+  { key: "#hunter_ostrich_disease_risk", text: "This place smells like sickness. Bad hunting weather." }
+  { key: "#hunter_ostrich_no_food_in_city", text: "Empty granaries? Then I had better bring back a big bird." }
+  { key: "#hunter_ostrich_city_have_no_army", text: "No forts? One crocodile raid and this city is dinner." }
+  { key: "#hunter_ostrich_need_workers", text: "We need more hands. I can't fill every pot alone." }
+  { key: "#hunter_ostrich_gods_are_angry", text: "The gods look angry. Even the ostriches sense it." }
+  { key: "#hunter_ostrich_city_is_bad", text: "Pharaoh is not pleased with us. That never ends well." }
+  { key: "#hunter_ostrich_much_unemployment", text: "Too many idle people. At least hunting still feeds someone." }
+  { key: "#hunter_ostrich_low_entertainment", text: "No festivals for ages. A feast of ostrich would cheer everyone up." }
   { key: "#hunter_ostrich_city_is_good", text: "This city is fantastic!" }
-  // test phrases
-  { key: "#hunter_ostrich_test_1", text: "This is a test phrase for checking TTS! Number 1." }
-  { key: "#hunter_ostrich_test_2", text: "Hello, player! This is another test phrase. Number 2." }
-  { key: "#hunter_ostrich_test_3", text: "Yet another test phrase. Number 3." }
-
+  { key: "#hunter_ostrich_city_is_amazing", text: "Best city I've hunted for. Keep it that way!" }
 
   { key: "#lumberjack_hunting", text: "I am off for a hard day's logging." }
   { key: "#lumberjack_back", text: "This timber will be put to good use, I am sure." }

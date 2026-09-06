@@ -185,6 +185,23 @@ localization_it = [
      { key: "#antelope_hunter_hunting", text: "Le antilopi non sono alla nostra altezza!" }
      { key: "#antelope_hunter_back", text: "Stasera ci saranno bistecche per tutti." }
      { key: "#antelope_hunter_city_is_good", text: "Questa città è buona!" }
+     { key: "#hunter_ostrich_investigate", text: "Tracce nella sabbia... un struzzo è passato di recente." }
+     { key: "#hunter_ostrich_chase", text: "Eccolo! Le zampe sono veloci, ma le mie frecce di più." }
+     { key: "#hunter_ostrich_hunting", text: "Gli struzzi sono quasi invisibili quando nascondono la testa nella sabbia." }
+     { key: "#hunter_ostrich_back", text: "Queste sì che sono cosce GROSSE!" }
+     { key: "#hunter_ostrich_reroute_packed", text: "Carico pesante, strada sbagliata. Troverò un altro ritorno." }
+     { key: "#hunter_ostrich_look_packed", text: "Mi serve un sentiero libero verso la capanna con questo uccello sulla schiena." }
+     { key: "#hunter_ostrich_unloading", text: "Selvaggina fresca per la capanna. Profuma già meglio dell'orzo." }
+     { key: "#hunter_ostrich_disease_risk", text: "Qui odora di malattia. Brutto tempo per cacciare." }
+     { key: "#hunter_ostrich_no_food_in_city", text: "Granai vuoti? Allora è meglio riportare un grande uccello." }
+     { key: "#hunter_ostrich_city_have_no_army", text: "Niente forti? Un'incursione di coccodrilli e questa città è la cena." }
+     { key: "#hunter_ostrich_need_workers", text: "Servono più braccia. Non posso riempire ogni pentola da solo." }
+     { key: "#hunter_ostrich_gods_are_angry", text: "Gli dei sembrano arrabbiati. Persino gli struzzi lo sentono." }
+     { key: "#hunter_ostrich_city_is_bad", text: "Il faraone non è contento di noi. Non finisce mai bene." }
+     { key: "#hunter_ostrich_much_unemployment", text: "Troppa gente oziosa. Almeno la caccia nutre ancora qualcuno." }
+     { key: "#hunter_ostrich_low_entertainment", text: "Niente feste da un pezzo. Un banchetto di struzzo rallegrerebbe tutti." }
+     { key: "#hunter_ostrich_city_is_good", text: "Questa città è fantastica!" }
+     { key: "#hunter_ostrich_city_is_amazing", text: "La migliore città per cui abbia cacciato. Che resti così!" }
      { key: "#hunt_bird_birds_are_wily", text: "Questi uccelli sono furbi!" }
      { key: "#hunt_bird_birds_ready_for_roasting", text: "Questi uccelli sono pronti per l'arrosto!" }
 ]

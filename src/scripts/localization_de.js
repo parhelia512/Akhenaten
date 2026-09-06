@@ -1105,14 +1105,28 @@ localization_de = [
   { key: "#policeman_no_army_2", text: "Invasoren bekämpfen stand nicht in meiner Stellenbeschreibung!" }
   { key: "#policeman_enemies_are_coming_2", text: "Diese Schurken übernehmen die Stadt nicht während meiner Wache!" }
   { key: "#policeman_enemies_are_coming", text: "Der Feind könnte bald gewinnen, wenn ich keine Hilfe bekomme! " }
-  
+
+  { key: "#hunter_ostrich_investigate", text: "Spuren im Sand... hier war vor Kurzem ein Strauß." }
+  { key: "#hunter_ostrich_chase", text: "Da rennt er! Die Beine sind schnell, aber meine Pfeile sind schneller." }
   { key: "#hunter_ostrich_hunting", text: "Strauße sind fast unsichtbar, wenn sie ihre Köpfe in den Sand stecken." }
   { key: "#hunter_ostrich_back", text: "Das sind mal einige GROSSE Keulen!" }
+  { key: "#hunter_ostrich_reroute_packed", text: "Schwere Last, falscher Weg. Ich finde einen anderen Rückweg." }
+  { key: "#hunter_ostrich_look_packed", text: "Ich brauche einen freien Pfad zur Hütte mit diesem Vogel auf dem Rücken." }
+  { key: "#hunter_ostrich_unloading", text: "Frisches Wild für die Jagdhütte. Riecht schon besser als Gerste." }
+  { key: "#hunter_ostrich_disease_risk", text: "Hier riecht es nach Krankheit. Schlechtes Wetter zum Jagen." }
+  { key: "#hunter_ostrich_no_food_in_city", text: "Leere Kornspeicher? Dann bringe ich besser einen großen Vogel mit." }
+  { key: "#hunter_ostrich_city_have_no_army", text: "Keine Festungen? Ein Krokodilangriff, und diese Stadt ist das Abendessen." }
+  { key: "#hunter_ostrich_need_workers", text: "Wir brauchen mehr Hände. Ich kann nicht allein jeden Topf füllen." }
+  { key: "#hunter_ostrich_gods_are_angry", text: "Die Götter wirken zornig. Sogar die Strauße spüren es." }
+  { key: "#hunter_ostrich_city_is_bad", text: "Der Pharao ist unzufrieden mit uns. Das endet nie gut." }
+  { key: "#hunter_ostrich_much_unemployment", text: "Zu viele Müßiggänger. Wenigstens ernährt die Jagd noch jemanden." }
+  { key: "#hunter_ostrich_low_entertainment", text: "Seit Ewigkeiten keine Feste. Ein Straußenfest würde alle aufheitern." }
   { key: "#hunter_ostrich_city_is_good", text: "Diese Stadt ist fantastisch!" }
-  
+  { key: "#hunter_ostrich_city_is_amazing", text: "Beste Stadt, für die ich je gejagt habe. So bleibt es hoffentlich!" }
+
   { key: "#lumberjack_hunting", text: "Ich bin unterwegs zu einem harten Tag beim Holzfällen." }
   { key: "#lumberjack_back", text: "Dieses Holz wird gut eingesetzt werden, da bin ich sicher." }
-  
+
   { key: "#musician_city_heath_too_low", text: "Wenn sich die Gesundheit in dieser Stadt nicht verbessert, werde ich nur noch Trauerlieder spielen." }
   { key: "#musician_no_food_in_city", text: "Ich würde für mein Abendessen singen, aber diese Stadt hat nicht genug Nahrung." }
   { key: "#musician_city_not_safety_workers_leaving", text: "Vielleicht könnte ich Invasoren mit meinem Sistrum über den Kopf schlagen. Die Stadt ist nicht gut verteidigt." }
@@ -1123,7 +1137,7 @@ localization_de = [
   { key: "#musician_no_entertainment", text: "Sogar ein Unterhalter möchte unterhalten werden! Es gibt hier nicht genug zu tun." }
   { key: "#musician_city_not_bad", text: "Diese Stadt könnte viel schlimmer sein, nehme ich an." }
   { key: "#musician_city_is_good", text: "Ich hoffe, wir machen noch lange schöne Musik in dieser Stadt." }
-  
+
   { key: "#taxman_desease_can_start_at_any_moment", text: "Es scheint, eine Krankheit besteuert die Gesundheit der Menschen. Ich bete, dass keine Seuche zuschlägt." }
   { key: "#taxman_no_food_in_city", text: "Ich wünschte, die Leute könnten ihre Steuern in Nahrung zahlen. Ich bin so hungrig!" }
   { key: "#taxman_city_have_no_army", text: "Unsere Stadt scheint nicht in der Lage zu sein, sich zu verteidigen!" }

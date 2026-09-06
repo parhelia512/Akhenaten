@@ -215,6 +215,23 @@ localization_po = [
  { key: "#antelope_hunter_hunting", text: "Antylopy nam nie dorównają!" }
  { key: "#antelope_hunter_back", text: "Dziś wieczorem będą steki dla wszystkich." }
  { key: "#antelope_hunter_city_is_good", text: "To dobre miasto!" }
+ { key: "#hunter_ostrich_investigate", text: "Ślady na piasku... niedawno był tu struś." }
+ { key: "#hunter_ostrich_chase", text: "Tam ucieka! Nogi ma szybkie, ale moje strzały szybsze." }
+ { key: "#hunter_ostrich_hunting", text: "Strusie prawie znikają, gdy chowają głowę w piasek." }
+ { key: "#hunter_ostrich_back", text: "No, to dopiero WIELKIE udka!" }
+ { key: "#hunter_ostrich_reroute_packed", text: "Ciężki ładunek, zła droga. Znajdę inną drogę powrotną." }
+ { key: "#hunter_ostrich_look_packed", text: "Potrzebuję wolnej ścieżki do chaty z tym ptakiem na plecach." }
+ { key: "#hunter_ostrich_unloading", text: "Świeża zwierzyna do chaty. Już pachnie lepiej niż jęczmień." }
+ { key: "#hunter_ostrich_disease_risk", text: "Tu pachnie chorobą. Zła pogoda na polowanie." }
+ { key: "#hunter_ostrich_no_food_in_city", text: "Puste spichlerze? To lepiej przyniosę dużego ptaka." }
+ { key: "#hunter_ostrich_city_have_no_army", text: "Brak fortów? Jeden rajd krokodyli i to miasto będzie kolacją." }
+ { key: "#hunter_ostrich_need_workers", text: "Trzeba więcej rąk. Sam nie napełnię wszystkich garnków." }
+ { key: "#hunter_ostrich_gods_are_angry", text: "Bogowie wyglądają na gniewnych. Nawet strusie to czują." }
+ { key: "#hunter_ostrich_city_is_bad", text: "Faraon nie jest z nas zadowolony. To nigdy nie kończy się dobrze." }
+ { key: "#hunter_ostrich_much_unemployment", text: "Za dużo bezrobotnych. Przynajmniej polowanie kogoś jeszcze karmi." }
+ { key: "#hunter_ostrich_low_entertainment", text: "Od dawna bez świąt. Uczta ze strusia wszystkich by rozweseliła." }
+ { key: "#hunter_ostrich_city_is_good", text: "To miasto jest fantastyczne!" }
+ { key: "#hunter_ostrich_city_is_amazing", text: "Najlepsze miasto, dla którego polowałem. Oby tak zostało!" }
  { key: "#hunt_bird_birds_are_wily", text: "Te ptaki są przebiegłe!" }
  { key: "#hunt_bird_birds_ready_for_roasting", text: "Te ptaki są gotowe do pieczenia!" }
 ]

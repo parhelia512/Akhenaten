@@ -28,9 +28,8 @@ function figure_info_on_phrase_ready(ev) {
         ev.phrase.text = text
     }
 
-    var path = "Voice/Walker/" + f.phrase_sound
-    if (!__game_sound.speech_play(path)) {
-        emit event_synthesize_figure_phrase{ id: fid, path:path, text:text }
+    if (!__game_sound.speech_play(f.phrase_sound)) {
+        emit event_synthesize_figure_phrase{ id: fid, path:f.phrase_sound, text:text }
     }
 
     oi.can_play_sound = false

@@ -1133,13 +1133,23 @@ localization_hu = [
   { key: "#policeman_enemies_are_coming_2", text: "Ezek a gazfickók nem foglalják el a várost, amíg én itt vagyok!" }
   { key: "#policeman_enemies_are_coming", text: "Az ellenség hamarosan győzhet, ha nem kapok segítséget!" }
 
+  { key: "#hunter_ostrich_investigate", text: "Nyomok a homokban... nemrég strucc járt itt." }
+  { key: "#hunter_ostrich_chase", text: "Ott megy! Gyorsak a lábai, de a nyilaím gyorsabbak." }
   { key: "#hunter_ostrich_hunting", text: "A struccok szinte láthatatlanok, amikor a homokba dugják a fejüket." }
   { key: "#hunter_ostrich_back", text: "Na, ezek aztán hatalmas combok!" }
+  { key: "#hunter_ostrich_reroute_packed", text: "Nehéz a teher, rossz az út. Találok másik visszautat." }
+  { key: "#hunter_ostrich_look_packed", text: "Szabad ösvény kell a kunyhóhoz ezzel a madárral a hátamon." }
+  { key: "#hunter_ostrich_unloading", text: "Friss vad a kunyhónak. Már jobb szaga van, mint az árpának." }
+  { key: "#hunter_ostrich_disease_risk", text: "Betegség szaga van itt. Rossz idő a vadászathoz." }
+  { key: "#hunter_ostrich_no_food_in_city", text: "Üresek a magtárak? Akkor jobb, ha nagy madarat hozok." }
+  { key: "#hunter_ostrich_city_have_no_army", text: "Nincsenek erődök? Egy krokodilrajtaütés, és ez a város vacsora lesz." }
+  { key: "#hunter_ostrich_need_workers", text: "Több kéz kell. Egyedül nem töltök meg minden fazekat." }
+  { key: "#hunter_ostrich_gods_are_angry", text: "Az istenek haragosnak tűnnek. Még a struccok is érzik." }
+  { key: "#hunter_ostrich_city_is_bad", text: "A fáraó nincs megelégedve velünk. Ez sosem végződik jól." }
+  { key: "#hunter_ostrich_much_unemployment", text: "Túl sok a tétlen ember. Legalább a vadászat még valakit etet." }
+  { key: "#hunter_ostrich_low_entertainment", text: "Régen nem volt ünnep. Egy struccos lakoma felvidítana mindenkit." }
   { key: "#hunter_ostrich_city_is_good", text: "Ez a város fantasztikus!" }
-// tesztmondatok
-  { key: "#hunter_ostrich_test_1", text: "Ez egy tesztmondat a TTS ellenőrzésére! Egyes szám." }
-  { key: "#hunter_ostrich_test_2", text: "Üdv, játékos! Ez egy újabb tesztmondat. Kettes szám." }
-  { key: "#hunter_ostrich_test_3", text: "Még egy tesztmondat. Hármas szám." }
+  { key: "#hunter_ostrich_city_is_amazing", text: "A legjobb város, amelynek vadásztam. Remélem, így marad!" }
 
   { key: "#lumberjack_hunting", text: "Indulok egy kemény fakitermelő napra." }
   { key: "#lumberjack_back", text: "Biztos vagyok benne, hogy ennek a fának jó hasznát vesszük." }

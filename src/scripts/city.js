@@ -116,6 +116,7 @@ city {
         __property_getter: __city_get_sentiment_property
         @value { }
         @criminals { }
+        @low_mood_cause { }
     }
 
     migration {

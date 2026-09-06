@@ -97,6 +97,9 @@ bool file_rename(pcstr from, pcstr to);
 bool mount_pack(pcstr filename);
 void umount_pack(pcstr filename);
 
+bool mounted_entry_exists(pcstr path);
+bool mounted_entry_resolve(pcstr path, vfs::path &out_path);
+
 /**
 * Create folders if not exists
 * Throw exception if path not exists and can not be created

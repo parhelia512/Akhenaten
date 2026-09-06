@@ -436,9 +436,23 @@ localization_ru_f = [
     { key: "#policeman_enemies_are_coming_2", text: "Эти негодяи не захватят город на моей смене!" }
     { key: "#policeman_enemies_are_coming", text: "Враг может вскоре победить, если я не получу помощи! " }
 
+    { key: "#hunter_ostrich_investigate", text: "Следы на песке... страус был здесь недавно." }
+    { key: "#hunter_ostrich_chase", text: "Вон он! Ноги быстрые, но мои стрелы быстрее." }
     { key: "#hunter_ostrich_hunting", text: "Страусы почти невидимы, когда прячут голову в песок. // охотник на страусов" }
     { key: "#hunter_ostrich_back", text: "Ну и ну, это БОЛЬШИЕ ножки!" }
+    { key: "#hunter_ostrich_reroute_packed", text: "Груз тяжёлый, путь не тот. Найду другую дорогу назад." }
+    { key: "#hunter_ostrich_look_packed", text: "Нужна свободная тропа к хижине с этой птицей на спине." }
+    { key: "#hunter_ostrich_unloading", text: "Свежая дичь для хижины. Уже пахнет лучше ячменя." }
+    { key: "#hunter_ostrich_disease_risk", text: "Тут пахнет болезнью. Не лучшая погода для охоты." }
+    { key: "#hunter_ostrich_no_food_in_city", text: "Амбары пусты? Тогда мне лучше принести крупную птицу." }
+    { key: "#hunter_ostrich_city_have_no_army", text: "Нет фортов? Один набег крокодилов — и город станет ужином." }
+    { key: "#hunter_ostrich_need_workers", text: "Нужно больше рук. Я один все котлы не наполню." }
+    { key: "#hunter_ostrich_gods_are_angry", text: "Боги злятся. Даже страусы это чувствуют." }
+    { key: "#hunter_ostrich_city_is_bad", text: "Фараон нами недоволен. Добром это не кончится." }
+    { key: "#hunter_ostrich_much_unemployment", text: "Слишком много бездельников. Хоть охота кого-то кормит." }
+    { key: "#hunter_ostrich_low_entertainment", text: "Праздников давно не было. Пир со страусом всех бы взбодрил." }
     { key: "#hunter_ostrich_city_is_good", text: "Этот город классный." }
+    { key: "#hunter_ostrich_city_is_amazing", text: "Лучший город, для которого я охотился. Так и держите!" }
 
     { key: "#lumberjack_hunting", text: "Я отправляюсь на тяжёлый день лесозаготовок." }
     { key: "#lumberjack_back", text: "Эта древесина будет хорошо использована, я уверен." }

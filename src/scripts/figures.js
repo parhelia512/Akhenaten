@@ -577,12 +577,23 @@ figure_ostrich_hunter {
 	}
 
 	sounds {
-		hunter_hunting : {sound:"hunt_ostrich_e01.wav", text: "#hunter_ostrich_hunting" }
-    	hunter_back : {sound:"hunt_ostrich_e02.wav", text: "#hunter_ostrich_back" }
-    	hunter_city_is_good : {sound: "hunt_ostrich_e10.wav", text: "#hunter_ostrich_good_city"}
-		hunter_test_1 : {sound: "hunt_ostrich_e_test1.wav", text: "#hunter_ostrich_test_1"}
-		hunter_test_2 : {sound: "hunt_ostrich_e_test2.wav", text: "#hunter_ostrich_test_2"}
-		hunter_test_3 : {sound: "hunt_ostrich_e_test3.wav", text: "#hunter_ostrich_test_3"}
+		hunter_investigate : {sound:"hunter_ostrich_investigate.wav", text: "#hunter_ostrich_investigate"}
+		hunter_chase : {sound:"hunter_ostrich_chase.wav", text: "#hunter_ostrich_chase"}
+		hunter_hunting : {sound:"hunt_ostrich_e01.wav", text: "#hunter_ostrich_hunting"}
+		hunter_back : {sound:"hunt_ostrich_e02.wav", text: "#hunter_ostrich_back"}
+		hunter_reroute_packed : {sound:"hunter_ostrich_reroute_packed.wav", text: "#hunter_ostrich_reroute_packed"}
+		hunter_look_packed : {sound:"hunter_ostrich_look_packed.wav", text: "#hunter_ostrich_look_packed"}
+		hunter_unloading : {sound:"hunter_ostrich_unloading.wav", text: "#hunter_ostrich_unloading"}
+		hunter_disease_risk : {sound:"hunter_ostrich_disease_risk.wav", text: "#hunter_ostrich_disease_risk"}
+		hunter_no_food_in_city : {sound:"hunter_ostrich_no_food_in_city.wav", text: "#hunter_ostrich_no_food_in_city"}
+		hunter_city_have_no_army : {sound:"hunter_ostrich_city_have_no_army.wav", text: "#hunter_ostrich_city_have_no_army"}
+		hunter_need_workers : {sound:"hunter_ostrich_need_workers.wav", text: "#hunter_ostrich_need_workers"}
+		hunter_gods_are_angry : {sound:"hunter_ostrich_gods_are_angry.wav", text: "#hunter_ostrich_gods_are_angry"}
+		hunter_city_is_bad : {sound:"hunter_ostrich_city_is_bad.wav", text: "#hunter_ostrich_city_is_bad"}
+		hunter_much_unemployment : {sound:"hunter_ostrich_much_unemployment.wav", text: "#hunter_ostrich_much_unemployment"}
+		hunter_low_entertainment : {sound:"hunter_ostrich_low_entertainment.wav", text: "#hunter_ostrich_low_entertainment"}
+		hunter_city_is_good : {sound:"hunter_ostrich_city_is_good.wav", text: "#hunter_ostrich_city_is_good"}
+		hunter_city_is_amazing : {sound:"hunter_ostrich_city_is_amazing.wav", text: "#hunter_ostrich_city_is_amazing"}
 	}
 
 	category: figure_category_armed

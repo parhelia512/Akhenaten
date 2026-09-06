@@ -76,6 +76,7 @@ private:
     int get_custom_audio_stream(uint8_t *dst, int len);
     static void custom_music_callback(void *dummy, uint8_t *stream, int len);
     vfs::path speech_filename(xstring filename);
+    bool speech_try_rel(pcstr rel, vfs::path &fs_path);
     bool load_channel(channel_t *channel);
     void *load_chunk(pcstr filename);
     vfs::reader load_cached_chunk(vfs::path filename);

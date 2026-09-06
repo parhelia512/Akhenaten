@@ -184,6 +184,23 @@ localization_pr = [
      { key: "#antelope_hunter_hunting", text: "Antílopes não são páreo para nós!" }
      { key: "#antelope_hunter_back", text: "Esta noite haverá bifes para todos." }
      { key: "#antelope_hunter_city_is_good", text: "Esta cidade é boa!" }
+     { key: "#hunter_ostrich_investigate", text: "Pegadas na areia... uma avestruz passou há pouco." }
+     { key: "#hunter_ostrich_chase", text: "Lá vai ela! As pernas são rápidas, mas minhas flechas são mais." }
+     { key: "#hunter_ostrich_hunting", text: "Avestruzes quase desaparecem quando enfiam a cabeça na areia." }
+     { key: "#hunter_ostrich_back", text: "Essas sim são coxas ENORMES!" }
+     { key: "#hunter_ostrich_reroute_packed", text: "Carga pesada, caminho errado. Acho outro jeito de voltar." }
+     { key: "#hunter_ostrich_look_packed", text: "Preciso de um trilho livre até a cabana com esta ave nas costas." }
+     { key: "#hunter_ostrich_unloading", text: "Caça fresca para a cabana. Já cheira melhor que cevada." }
+     { key: "#hunter_ostrich_disease_risk", text: "Cheira a doença aqui. Mau tempo para caçar." }
+     { key: "#hunter_ostrich_no_food_in_city", text: "Celeiros vazios? Então é melhor eu trazer uma ave grande." }
+     { key: "#hunter_ostrich_city_have_no_army", text: "Sem fortes? Um ataque de crocodilos e esta cidade vira jantar." }
+     { key: "#hunter_ostrich_need_workers", text: "Precisamos de mais mãos. Não encho todas as panelas sozinho." }
+     { key: "#hunter_ostrich_gods_are_angry", text: "Os deuses parecem zangados. Até as avestruzes sentem." }
+     { key: "#hunter_ostrich_city_is_bad", text: "O faraó não está satisfeito conosco. Isso nunca acaba bem." }
+     { key: "#hunter_ostrich_much_unemployment", text: "Muita gente ociosa. Pelo menos a caça ainda alimenta alguém." }
+     { key: "#hunter_ostrich_low_entertainment", text: "Há tempos sem festas. Um banquete de avestruz animaria todos." }
+     { key: "#hunter_ostrich_city_is_good", text: "Esta cidade é fantástica!" }
+     { key: "#hunter_ostrich_city_is_amazing", text: "A melhor cidade para a qual já cacei. Que continue assim!" }
      { key: "#hunt_bird_birds_are_wily", text: "Estas aves são astutas!" }
      { key: "#hunt_bird_birds_ready_for_roasting", text: "Estas aves estão prontas para assar!" }
 ]

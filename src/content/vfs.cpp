@@ -116,9 +116,7 @@ namespace detail {
 }
 
 vfs::path extract_pack_path(const vfs::path &path) {
-    vfs::path result;
-    result = path;
-    result.replace('\\', '/'); // Normalize slashes
+    vfs::path result = path;
 
     pcstr zip_pos = result.strstr(".zip/");
     pcstr sgx_pos = result.strstr(".sgx/");
@@ -328,6 +326,56 @@ void umount_pack(pcstr filename) {
     g_mounted_archives.erase(it);
 
     delete pack_to_umount;
+}
+
+#pragma optimize("", off)
+bool mounted_entry_resolve(pcstr path, vfs::path &out_path) {
+    if (!path || !*path) {
+        return false;
+    }
+
+    vfs::path normalized = path;
+
+    vfs::path want = normalized.split(".zip/");
+    if (want.empty()) {
+        want = normalized.split(".sgx/");
+    }
+    if (want.empty()) {
+        return false;
+    }
+
+    const vfs::path pack_name = extract_pack_name(normalized);
+    if (pack_name.empty()) {
+        return false;
+    }
+
+    const auto it = std::find_if(g_mounted_archives.begin(), g_mounted_archives.end(), [&pack_name] (const ZipArchive *arch) {
+        return arch->filepath().ends_with(pack_name);
+    });
+    if (it == g_mounted_archives.end()) {
+        return false;
+    }
+
+    const auto &entries = (*it)->entries();
+    for (const auto &entry : entries) {
+        if (entry.empty()) {
+            continue;
+        }
+        if (string_compare_case_insensitive(entry.c_str(), want.c_str()) != 0) {
+            continue;
+        }
+
+        // Rebuild URI with the pack path used at mount time + archive entry casing.
+        out_path = vfs::path((*it)->filepath().c_str(), "/", entry.c_str());
+        return true;
+    }
+
+    return false;
+}
+
+bool mounted_entry_exists(pcstr path) {
+    vfs::path resolved;
+    return mounted_entry_resolve(path, resolved);
 }
 
 bool mount_pack(pcstr filename) {

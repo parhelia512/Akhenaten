@@ -77,6 +77,29 @@ struct path : public bstring256 {
         }
     }
 
+    path basename() const {
+        pcstr slash = _data;
+        for (pcstr p = _data; *p; ++p) {
+            if (*p == '/' || *p == '\\') {
+                slash = p + 1;
+            }
+        }
+        return path(slash);
+    }
+
+    bool contains(pcstr sub) const { return strstr(sub) != nullptr; }
+
+    path split(pcstr delim) const {
+        if (!delim || !*delim) {
+            return {};
+        }
+        pcstr pos = strstr(delim);
+        if (!pos) {
+            return {};
+        }
+        return path(pos + ::strlen(delim));
+    }
+
     /**
      * Get the case sensitive and localized filename of the file
      * @param filepath File path to match to a case-sensitive file on the filesystem
