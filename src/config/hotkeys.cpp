@@ -229,7 +229,7 @@ void game_hotkeys::save() {
         fprintf(fp, "  %s: [\"%s\", \"%s\"],\n", m.name.c_str(), primary, alt);
     }
     fprintf(fp, "}\n");
-    vfs::file_close(fp);
+    vfs::file_close_os(fp);
 }
 
 hotkey_mapping::hotkey_mapping(pcstr n, e_key k, e_key_mode m, e_hotkey_action a, e_key k1, e_key_mode m1) : name(n), action(a) {

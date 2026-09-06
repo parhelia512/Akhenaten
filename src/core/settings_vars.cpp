@@ -397,7 +397,7 @@ void globals_settings_t::sync_global(pcstr filename, pcstr name) {
 	svardata.clear();
 	_variantsDirty = false;
 
-	vfs::file_close(fp);
+	vfs::file_close_os(fp);
 }
 
 const e_setting_variant_type_tokens_t ANK_CONFIG_ENUM(e_setting_variant_type_tokens);

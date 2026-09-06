@@ -187,7 +187,7 @@ bool ChunkSerializer::serialize(pcstr filename, int offset, e_file_format format
     }
 
     auto abort_write = [&] {
-        vfs::file_close(fp);
+        vfs::file_close_os(fp);
         if (atomic_write) {
             vfs::file_remove(write_path);
         }
@@ -233,7 +233,7 @@ bool ChunkSerializer::serialize(pcstr filename, int offset, e_file_format format
         }
     }
 
-    vfs::file_close(fp);
+    vfs::file_close_os(fp);
     if (atomic_write && !vfs::file_rename(write_path, fs_path)) {
         logs::error("Unable to write file [%s], could not replace it with [%s].",
                     fs_path.c_str(), write_path.c_str());

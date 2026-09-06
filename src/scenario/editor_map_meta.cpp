@@ -321,10 +321,10 @@ bool editor_map_meta_write(pcstr map_path) {
     }
 
     vfs::path meta = editor_map_meta_path(map_path);
-    FILE *fp = vfs::file_open_os(meta.c_str(), "wb");
+    FILE *fp = vfs::file_open_os(meta, "wb");
     if (!fp) {
         vfs::create_folders(vfs::MAPS_FOLDER);
-        fp = vfs::file_open_os(meta.c_str(), "wb");
+        fp = vfs::file_open_os(meta, "wb");
     }
     if (!fp) {
         return false;
@@ -459,7 +459,7 @@ bool editor_map_meta_load(pcstr map_path) {
         return false;
     }
 
-    FILE *fp = vfs::file_open_os(meta.c_str(), "rb");
+    FILE *fp = vfs::file_open_os(meta, "rb");
     if (!fp) {
         return false;
     }

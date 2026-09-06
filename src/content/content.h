@@ -4,6 +4,7 @@
 
 #include <utility>
 #include <stdio.h>
+#include <string_view>
 
 namespace vfs {
 
@@ -45,7 +46,7 @@ int platform_file_manager_list_directory_contents(pcstr dir, int type, pcstr ext
  * @param mode The mode to open the file - refer to fopen()
  * @return A pointer to a FILE structure on success, NULL otherwise
  */
-FILE *platform_file_manager_open_file(pcstr filename, pcstr mode);
+FILE *platform_file_manager_open_file(std::string_view filename, pcstr mode);
 
 /**
  * Removes a file
@@ -58,4 +59,4 @@ std::pair<void*, uint32_t> internal_file_open(pcstr path);
 std::pair<void*, uint32_t> internal_resource_open(pcstr path);
 xstring platform_unpack_scripts();
 
-} // vfs
+} // namespace vfs

@@ -36,7 +36,7 @@ reader file_open(path path, pcstr mode = "rb");
  * @return See fclose (If the stream is successfully closed, a zero value is returned.
  *         On failure, EOF is returned.)
  */
-int file_close(FILE *stream);
+int file_close_os(FILE *stream);
 
 /**
  * Replaces the current extension by the given new extension.

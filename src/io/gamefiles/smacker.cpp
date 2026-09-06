@@ -502,7 +502,7 @@ smacker smacker_open(FILE* fp) {
 }
 
 void smacker_close(smacker s) {
-    vfs::file_close(s->fp);
+    vfs::file_close_os(s->fp);
     free(s->frame_offsets);
     free(s->frame_sizes);
     free(s->frame_types);

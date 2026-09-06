@@ -65,7 +65,7 @@ static void image_free() {
     free(screenshot.pixels);
     screenshot.pixels = 0;
     if (screenshot.fp) {
-        vfs::file_close(screenshot.fp);
+        vfs::file_close_os(screenshot.fp);
         screenshot.fp = 0;
     }
     png_destroy_write_struct(&screenshot.png_ptr, &screenshot.info_ptr);

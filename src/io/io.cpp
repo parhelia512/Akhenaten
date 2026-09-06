@@ -26,7 +26,7 @@ int io_read_sg3_entries_num(vfs::path filepath) {
     } sgx_header;
 
     [[maybe_unused]] int bytesRead = fread(&sgx_header, sizeof(sgx_header_t), 1, fp);
-    vfs::file_close(fp);
+    vfs::file_close_os(fp);
 
     sgx_header.entries_num += 1;
 
@@ -46,13 +46,13 @@ bool io_read_sg3_has_system_bmp(vfs::path filepath) {
 
     // Skip PAK_HEADER_INFO_BYTES (80), then read group_image_ids[0].
     if (fseek(fp, 80, SEEK_SET) != 0) {
-        vfs::file_close(fp);
+        vfs::file_close_os(fp);
         return false;
     }
 
     uint16_t first_group = 0xffff;
     const size_t n = fread(&first_group, sizeof(first_group), 1, fp);
-    vfs::file_close(fp);
+    vfs::file_close_os(fp);
     return n == 1 && first_group == 0;
 }
 
@@ -129,7 +129,7 @@ int io_write_buffer_to_file(vfs::path  filepath, buffer* buf, int size) {
     }
 
     int bytes_written = buf->to_file((size_t)size, fp);
-    vfs::file_close(fp);
+    vfs::file_close_os(fp);
     vfs::sync_em_fs();
     return bytes_written;
 }

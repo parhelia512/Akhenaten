@@ -165,7 +165,7 @@ std::string updater_to_native(std::string path) {
 #endif
 
 bool updater_write_file(const std::string &path, const void *data, size_t size) {
-    FILE *f = vfs::file_open_os(path.c_str(), "wb");
+    FILE *f = vfs::file_open_os(path, "wb");
     if (!f) {
         logs::error("[updater] cannot create file %s", path.c_str());
         return false;

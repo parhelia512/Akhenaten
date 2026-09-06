@@ -35,8 +35,8 @@ namespace vfs{
 
 bool g_verbose_log = false;
 
-FILE * file_open_os(pcstr filename, pcstr mode) {
-    return platform_file_manager_open_file(filename, mode);
+FILE * file_open_os(path filename, pcstr mode) {
+    return platform_file_manager_open_file(filename.c_str(), mode);
 }
 
 std::vector<ZipArchive*> g_mounted_archives;
@@ -228,7 +228,7 @@ reader file_open(path path, pcstr mode) {
     return reader();
 }
 
-int file_close(FILE * stream) {
+int file_close_os(FILE * stream) {
     return fclose(stream);
 }
 

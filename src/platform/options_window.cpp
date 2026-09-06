@@ -106,7 +106,7 @@ bool load_settings_file(pcstr path) {
     if (!fp) {
         return false;
     }
-    vfs::file_close(fp);
+    vfs::file_close_os(fp);
 
     js_State *J = create_conf_vm();
     conf_vm_scope scope(J);

@@ -5,14 +5,15 @@
 
 #include "platform/android/android.h"
 
-FILE *vfs::platform_file_manager_open_file(pcstr filename, pcstr mode) {
-    int fd = android_get_file_descriptor(filename, mode);
+#include <string>
+
+FILE *vfs::platform_file_manager_open_file(std::string_view filename, pcstr mode) {
+    const std::string path(filename);
+    int fd = android_get_file_descriptor(path.c_str(), mode);
     if (!fd) {
         return NULL;
     }
     return fdopen(fd, mode);
-
-    //return fopen(filename, mode);
 }
 
 bool vfs::platform_file_manager_remove_file(const char *filename) {

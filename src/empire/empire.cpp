@@ -85,7 +85,7 @@ declare_console_command_p(save_empire_routes) {
     fprintf(fp, "%s", sroutesdata.c_str());
     sroutesdata.clear();
 
-    vfs::file_close(fp);
+    vfs::file_close_os(fp);
 }
 
 void empire_t::load_mission_metadata(const mission_id_t &missionid, bool preserve_runtime) {
