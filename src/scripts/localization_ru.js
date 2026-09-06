@@ -484,6 +484,9 @@ localization_ru = [
     { key: "#engineer_i_hope_i_m_credited_for_great_condition", text: "Надеюсь, меня отметят за отличное состояние этого города." }
     { key: "#engineer_city_is_amazing", text: "Надеюсь, меня отметят за отличное состояние этого города." }
 
+    { key: "#brick_bricklaying_time_at_monument", text: "Пора класть кирпичи на монументе!" }
+    { key: "#brick_monument_will_be_strong", text: "Этот монумент будет крепким!" }
+
     { key: "#fireman_desease_can_start_at_any_moment", text: "Надеюсь, чума не вспыхнет. Чума может распространяться как лесной пожар." }
     { key: "#fireman_no_food_in_city", text: "Даже когда пожары горят, всё, о чём я могу думать, это насколько я голоден." }
     { key: "#fireman_city_not_safety_workers_leaving", text: "Если наши враги вторгнутся, весь город может сгореть дотла." }
@@ -563,6 +566,21 @@ localization_ru = [
     { key: "#hunter_antelope_low_entertainment", text: "Праздников давно не было. Пир с антилопой всех бы взбодрил." }
     { key: "#hunter_antelope_city_is_good", text: "Этот город хороший! Рядом отличные охотничьи угодья." }
     { key: "#hunter_antelope_city_is_amazing", text: "Лучший город, для которого я охотился. Антилопы сами прыгают в котёл!" }
+
+    { key: "#hunter_birds_investigate", text: "Перья в камышах... здесь кормилась стая." }
+    { key: "#hunter_birds_chase", text: "Взлетели! Мои стрелы кое-кого собьют." }
+    { key: "#hunter_birds_hunting", text: "Эти птицы хитрые!" }
+    { key: "#hunter_birds_back", text: "Эти птицы готовы к жарке!" }
+    { key: "#hunter_birds_reroute_packed", text: "Сеть с птицами тяжёлая, путь не тот. Найду другую дорогу назад." }
+    { key: "#hunter_birds_look_packed", text: "Нужна свободная тропа к хижине с этой добычей." }
+    { key: "#hunter_birds_unloading", text: "Свежая птица для хижины. Повара будут заняты." }
+    { key: "#hunter_birds_disease_risk", text: "Тут пахнет болезнью. Даже птицы держатся подальше." }
+    { key: "#hunter_birds_no_food_in_city", text: "Амбары пусты? Тогда мне лучше принести полный мешок птиц." }
+    { key: "#hunter_birds_city_have_no_army", text: "Нет фортов? Один набег — и город беспомощен, как птица на земле." }
+    { key: "#hunter_birds_gods_are_angry", text: "Боги злятся. И стаи беспокойны." }
+    { key: "#hunter_birds_low_entertainment", text: "Праздников давно не было. Пир с жареной птицей всех бы взбодрил." }
+    { key: "#hunter_birds_city_is_good", text: "Этот город хороший! Рядом отличные болота для охоты на птиц." }
+    { key: "#hunter_birds_city_is_amazing", text: "Лучший город, для которого я охотился. Птицы сами летят в котёл!" }
 
     { key: "#lumberjack_hunting", text: "Я отправляюсь на тяжёлый день лесозаготовок." }
     { key: "#lumberjack_back", text: "Эта древесина будет хорошо использована, я уверен." }

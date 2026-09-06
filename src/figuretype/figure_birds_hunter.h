@@ -12,7 +12,6 @@ public:
 
     virtual e_figure_type prey_type() const override { return FIGURE_BIRDS; }
     virtual e_figure_type missile_type() const override { return FIGURE_HUNTER_ARROW; }
-    virtual sound_key phrase_key() const override;
 };
 
 ANK_CONFIG_STRUCT(figure_birds_hunter::static_params,

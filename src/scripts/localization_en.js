@@ -1121,6 +1121,9 @@ localization_en = [
   { key: "#engineer_so_many_places_in_poor_condition", text: "There are so many places in poor condition, I can barely keep up." }
   { key: "#engineer_city_is_amazing", text: "I hope I'm credited for the great condition of this city." }
 
+  { key: "#brick_bricklaying_time_at_monument", text: "It's bricklaying time at the monument!" }
+  { key: "#brick_monument_will_be_strong", text: "This monument will be strong!" }
+
   { key: "#fireman_desease_can_start_at_any_moment", text: "I hope a plague doesn't break out. Plagues can spread like wildfire." }
   { key: "#fireman_no_food_in_city", text: "Even when fires are burning, all I can think about is how hungry I am." }
   { key: "#fireman_city_not_safety_workers_leaving", text: "If our enemies invade, the whole city could go up in flames." }
@@ -1200,6 +1203,21 @@ localization_en = [
   { key: "#hunter_antelope_low_entertainment", text: "No festivals for ages. A feast of antelope would cheer everyone up." }
   { key: "#hunter_antelope_city_is_good", text: "This city is good! Fine hunting grounds nearby." }
   { key: "#hunter_antelope_city_is_amazing", text: "Best city I've hunted for. The antelope practically leap into the pot!" }
+
+  { key: "#hunter_birds_investigate", text: "Feathers in the reeds... a flock was feeding here." }
+  { key: "#hunter_birds_chase", text: "Up they go! My arrows will bring a few down." }
+  { key: "#hunter_birds_hunting", text: "These birds are wily!" }
+  { key: "#hunter_birds_back", text: "These birds are ready for roasting!" }
+  { key: "#hunter_birds_reroute_packed", text: "Heavy net of birds, wrong path. I'll find another way back." }
+  { key: "#hunter_birds_look_packed", text: "Need a clear trail to the lodge with this catch." }
+  { key: "#hunter_birds_unloading", text: "Fresh fowl for the lodge. The cooks will be busy." }
+  { key: "#hunter_birds_disease_risk", text: "This place smells like sickness. Even the birds keep clear." }
+  { key: "#hunter_birds_no_food_in_city", text: "Empty granaries? Then I had better bring back a full bag of birds." }
+  { key: "#hunter_birds_city_have_no_army", text: "No forts? One raid and this city is as helpless as a grounded bird." }
+  { key: "#hunter_birds_gods_are_angry", text: "The gods look angry. The flocks are restless too." }
+  { key: "#hunter_birds_low_entertainment", text: "No festivals for ages. A feast of roast birds would cheer everyone up." }
+  { key: "#hunter_birds_city_is_good", text: "This city is good! Fine marshes for bird hunting nearby." }
+  { key: "#hunter_birds_city_is_amazing", text: "Best city I've hunted for. The birds practically fly into the pot!" }
 
   { key: "#lumberjack_hunting", text: "I am off for a hard day's logging." }
   { key: "#lumberjack_back", text: "This timber will be put to good use, I am sure." }

@@ -121,7 +121,7 @@ void building_bricklayers_guild::spawn_figure() {
     });
 
     if (monument) {
-        auto f = base.create_figure_with_destination(FIGURE_BRICKLAYER, monument, (e_figure_action)ACTION_10_BRICKLAYER_CREATED, BUILDING_SLOT_SERVICE);
+        auto f = base.create_figure_with_destination(FIGURE_BRICKLAYER, monument, (e_figure_action)ACTION_0_BRICKLAYER_CREATED, BUILDING_SLOT_SERVICE);
         auto *mm = monument->dcast_monument();
         f->destination_tile = mm ? mm->access_point() : monument->access_tile();
         f->terrain_usage = TERRAIN_USAGE_PREFER_ROADS;
@@ -155,7 +155,7 @@ void building_bricklayers_guild::spawn_figure() {
     });
 
     if (min_service_statue) {
-        auto f = base.create_figure_with_destination(FIGURE_BRICKLAYER, &min_service_statue->base, (e_figure_action)ACTION_30_BRICKLAYER_CREATED_ROAMING, BUILDING_SLOT_SERVICE);
+        auto f = base.create_figure_with_destination(FIGURE_BRICKLAYER, &min_service_statue->base, (e_figure_action)ACTION_10_BRICKLAYER_CREATED_ROAMING, BUILDING_SLOT_SERVICE);
         min_service_statue->add_workers(f->id);
         f->wait_ticks = random_short() % 30;
         auto bricklayer = smart_cast<figure_bricklayer>(f);

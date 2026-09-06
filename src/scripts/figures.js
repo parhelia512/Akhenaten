@@ -6,7 +6,9 @@ import figure.phrase
 import figure.festival_guy
 import figure.ostrich_hunter
 import figure.antelope_hunter
+import figure.birds_hunter
 import figure.architector
+import figure.bricklayer
 
 figure_fireman {
   overlay : OVERLAY_WATER
@@ -469,35 +471,6 @@ figure_crocodile = {
 	max_hungry : 25
 	max_hunting_distance : 10
 	chase_speed_mult : 2
-}
-
-figure_birds_hunter {
-	animations {
-		walk { pack:PACK_SPR_MAIN, id:184, max_frames:12 }
-		death { pack:PACK_SPR_MAIN, id:185, max_frames:8, loop:false }
-		fight { pack:PACK_SPR_MAIN, id:186, max_frames:12 }
-		hunt { pack:PACK_SPR_MAIN, id:186, max_frames:12, loop:false }
-		pack { pack:PACK_SPR_MAIN, id:186, max_frames:12, loop:false }
-		unpack { pack:PACK_SPR_MAIN, id:186, max_frames:12, loop:false, start_frame:11, reverse:true }
-		move_pack { pack:PACK_SPR_MAIN, id:184, max_frames:12 }
-		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_OSTRICH_HUNTER }
-	}
-
-	sounds {
-		hunt_bird_birds_are_wily { sound:"hunt_bird_e01.wav", text: "#hunt_bird_birds_are_wily" }
-		hunt_bird_birds_ready_for_roasting { sound:"hunt_bird_e02.wav", text: "#hunt_bird_birds_ready_for_roasting" }
-	}
-
-	category: figure_category_armed
-	max_damage: 30
-	attack_value: 4
-	missile_attack_value: 4
-	animal_attack_value: 100
-	missile_delay: 25
-	attack_distance: 5
-	terrain_usage : TERRAIN_USAGE_ANIMAL
-	max_hunting_distance : 15
-	record_path : true
 }
 
 figure_hippo = {
@@ -1107,26 +1080,6 @@ figure_docker {
 	use_cart : true
 	category: figure_category_citizen
 	max_damage : 10
-	terrain_usage : TERRAIN_USAGE_ROADS,
-}
-
-figure_bricklayer {
-	animations {
-		_pack { pack:PACK_SPR_MAIN }
-		walk { id:109, max_frames:12 }
-		death { id:110, max_frames:8, loop:false }
-		work { id:111, max_frames:12, duration:4 }
-		idle { id:112, max_frames:8, duration:2 }
-		big_image { pack:PACK_UNLOADED, id:25, offset:FIGURE_BRICKLAYER }
-	}
-
-	sounds {
-		brick_bricklaying_time_at_monument {sound:"brick_e01.wav" }
-		brick_monument_will_be_strong : {sound:"brick_e02.wav" }
-	}
-
-	category: figure_category_citizen
-	max_damage: 10
 	terrain_usage : TERRAIN_USAGE_ROADS,
 }
 
